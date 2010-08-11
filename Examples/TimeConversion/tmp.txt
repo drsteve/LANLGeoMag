@@ -1,0 +1,18 @@
+Tests TaiSeconds <-> UTC over a Leap Seconds Day boundary
+------------------------------------------------------
+
+    Starting with 20081231 23:59:40 UTC
+	UTC: 20081231  23ʰ 59ᵐ 40ˢ.00000000
+
+    Results of Lgm_UTC_to_TAI
+	TAI: 20090101  00ʰ 00ᵐ 13ˢ.00000000
+
+    Results of Lgm_UTC_to_TaiSeconds
+	TaiSeconds: 1609459213.00000000 Seconds
+
+    Results of Lgm_TaiSeconds_to_TAI
+	TAI: 20090101  00ʰ 00ᵐ 13ˢ.00000000
+
+    Results of Lgm_TaiSeconds_to_UTC
+	UTC: 20081231  23ʰ 59ᵐ 40ˢ.00000000
+

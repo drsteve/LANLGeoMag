@@ -1,0 +1,569 @@
+#!/usr/bin/perl
+use LWP::UserAgent;
+use POSIX;
+
+
+
+{
+
+    #$LGM_EOP_DATA_DIR          = "/usr/local/share/LanlGeoMag/EopData";
+    $LGM_EOP_DATA_DIR          = "CHANGE_ME";
+    $LgmEopDatFile             = "$LGM_EOP_DATA_DIR/LgmEop.dat";
+    $LgmLeapSecondDatesDatFile = "$LGM_EOP_DATA_DIR/Lgm_LeapSecondDates.dat";
+
+
+    # Descriptive versions of the HTTP response codes.
+    %HTTP_CODES = ( 100, "Continue", 101, "Switching Protocols", 200, "OK", 201,
+                "Created", 202, "Accepted", 203, "Non-Authoritative Information", 204, "No
+                Content", 205, "Reset Content", 206, "Partial Content", 300, "Multiple
+                Choices", 301, "Moved Permanently", 302, "Found", 303, "See Other", 304, "Not
+                Modified", 305, "Use Proxy", 306, "(Unused)", 307, "Temporary Redirect", 400,
+                "Bad Request", 401, "Unauthorized", 402, "Payment Required", 403, "Forbidden",
+                404, "Not Found", 405, "Method Not Allowed", 406, "Not Acceptable", 407,
+                "Proxy Authentication Required", 408, "Request Timeout", 409, "Conflict", 410,
+                "Gone", 411, "Length Required", 412, "Precondition Failed", 413, "Request
+                Entity Too Large", 414, "Request-URI Too Long", 415, "Unsupported Media Type",
+                416, "Requested Range Not Satisfiable", 417, "Expectation Failed", 500,
+                "Internal Server Error", 501, "Not Implemented", 502, "Bad Gateway", 503,
+                "Service Unavailable", 504, "Gateway Timeout", 505, "HTTP Version Not
+                Supported");
+
+    $Proxy = $ENV{ "http_proxy" };
+    if ( $Proxy =~ /\w/ ) { print "Using proxy: $Proxy\n"; }
+
+    @WeekDay   = ("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" );
+    @MonthName = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" );
+    %MonthNum  = ("jan", 1, "feb", 2, "mar", 3, "apr", 4, "may", 5, "jun", 6, "jul", 7, "aug", 8, "sep", 9, "oct", 10, "nov", 11, "dec", 12 );
+
+    $nFiles   = 7;
+
+    @SrcDir  = (    'http://maia.usno.navy.mil/ser7/',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/',
+                    'http://maia.usno.navy.mil/ser7/',
+                    'http://maia.usno.navy.mil/ser7/',
+                    'http://maia.usno.navy.mil/ser7/',
+                    'http://maia.usno.navy.mil/ser7/' );
+
+    @SrcFile = (    'http://maia.usno.navy.mil/ser7/tai-utc.dat',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04.62-now',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04_IAU2000.62-now',
+                    'http://maia.usno.navy.mil/ser7/finals.daily',
+                    'http://maia.usno.navy.mil/ser7/finals2000A.daily',
+                    'http://maia.usno.navy.mil/ser7/finals.all',
+                    'http://maia.usno.navy.mil/ser7/finals2000A.all' );
+
+    @DstFile = (    "$LGM_EOP_DATA_DIR/tai-utc.dat",
+                    "$LGM_EOP_DATA_DIR/eopc04.62-now",
+                    "$LGM_EOP_DATA_DIR/eopc04_IAU2000.62-now",
+                    "$LGM_EOP_DATA_DIR/finals.daily",
+                    "$LGM_EOP_DATA_DIR/finals2000A.daily",
+                    "$LGM_EOP_DATA_DIR/finals.all",
+                    "$LGM_EOP_DATA_DIR/finals2000A.all" );
+
+
+    #
+    #  Get header info out of existing LgmEop.dat file (if there is one)
+    #
+    @told = (); $n_told = 0;
+    if ( open( IN, "<$LgmEopDatFile" ) ) {
+        while ( <IN> ) {
+            if ( $_ =~ /Last mod.. (.*)\) \(JD/ ) { $told[$n_told++] = $1; }
+        }
+        close( IN );
+    }
+
+
+    @t = (); @t_JD = (); @t_URL = (); 
+    for ($i=0; $i<$nFiles; $i++ ) {
+        ($t[$i], $t_JD[$i], $t_URL[$i]) = GetFileModTime( $SrcDir[$i], $DstFile[$i] );
+        if ( index( $told[$i], $t[$i] ) < 0) { $Reload[$i] = 1; } else { $Reload[$i] = 0; }
+    }
+
+
+
+
+    
+    for ($i=0; $i<$nFiles; $i++ ){
+        if ( $Reload[$i] || !( -s $DstFile[$i]) ) {
+            print ">>> Downloading $SrcFile[$i] => $DstFile[$i]\n";
+            GetURL( $SrcFile[$i], $DstFile[$i] );
+        } else {
+            print "    Already have latest version of file $SrcFile[$i]\n";
+        }
+
+    }
+
+
+
+    #
+    #  Process the tai-utc.dat file
+    #  The variables we load here will be used by the GET_DAT() subroutine to compute
+    #  DAT for any given MJD
+    #
+    #  Here we also make an array of all dates (from 1972 onward) on which leap
+    #  seconds were introduced.
+    #
+    $nDAT_VALS = 0; @DAT_JD = (); @DAT_MJD = (); @DAT_A = (); @DAT_B = (); @DAT_C = ();
+    $nLeapSecondDates = 0; @LeapSecondDates = (); @LeapSeconds = (); @LeapSecondJDs = ();
+    if ( open( IN, "<$DstFile[0]" ) ){
+        while ( <IN> ) {
+            if ( $_ =~ /(\d{4}) ([A-Z]{3}) (.{2}).*JD (.*)\s*TAI\-UTC\=(.*)S.*MJD \-(.*)\).*X(.*)S/ ){
+                $Year  = $1;
+                $Month = lc($2);
+                $Day   = $3;
+                $DAT_JD[$nDAT_VALS]  = $4;
+                $DAT_MJD[$nDAT_VALS] = $DAT_JD[$nDAT_VALS] - 2400000.5;
+                $DAT_A[$nDAT_VALS]   = $5;
+                $DAT_B[$nDAT_VALS]   = $6;
+                $DAT_C[$nDAT_VALS]   = $7;
+                if ( $Year >= 1972 ) { 
+                    $LeapSeconds[$nLeapSecondDates] = int($DAT_A[$nDAT_VALS]); 
+                    $LeapSecondJDs[$nLeapSecondDates] = $DAT_JD[$nDAT_VALS]; 
+                    $LeapSecondDates[ $nLeapSecondDates++ ] = $Year*10000 + $MonthNum{ $Month }*100 + $Day; 
+                }
+                #print "$1 $2 $3 $DAT_JD[$nDAT_VALS] $DAT_MJD[$nDAT_VALS] $DAT_A[$nDAT_VALS] $DAT_B[$nDAT_VALS] $DAT_C[$nDAT_VALS]\n";
+                ++$nDAT_VALS;
+            }
+        }
+        close( IN );
+    } else {
+        print "Couldnt open file $DstFile[0] for reading\n";
+    }
+
+    #
+    # Dump out LeapSecondDates to a file
+    #
+    if ( open( OUT, ">$LgmLeapSecondDatesDatFile" ) ){
+        ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime;
+        $TimeStamp = sprintf("%3s %3s %02d %4d %02d:%02d:%02d UTC", $WeekDay[$wday], $MonthName[$mon], $mday, $year+1900, $hour, $min, $sec);
+        $cJD = Date_to_JD( $year+1900, $mon+1, $mday, $hour + $min/60.0 + $sec/3600.0);
+        print OUT "#\n";
+        print OUT "#        ****************************************************\n";
+        print OUT "#                  Lgm_LeapSecondDates.dat\n";
+        print OUT "#            File containing the dates (from 1972 onward)\n";
+        print OUT "#            on which leap seconds were introduced\n";
+        print OUT "#            (also contains what the leap seconds were set to)\n";
+        print OUT "#         \n";
+        print OUT "#            FILE CREATED: $TimeStamp\n";
+        print OUT "#            (Julian Date: $cJD )\n";
+        print OUT "#         \n";
+        print OUT "#        ****************************************************\n";
+        print OUT "#\n";
+        print OUT "# Data extracted from the following files with modification times as indicated;\n";
+        print OUT "#\n";
+        for ($i=0; $i<1; $i++){
+            $Age = $cJD - $t_JD[$i];
+            print OUT "#   (Last mod.: $t[$i]) (JD: $t_JD[$i]) (Age: $Age days) $t_URL[$i]\n";
+        }
+        print OUT "#\n";
+        print OUT "#YYYYMMDD Julian Date LeapSeconds\n";
+
+        for ($i=0; $i<$nLeapSecondDates; ++$i ) {
+            print OUT "$LeapSecondDates[ $i ]   $LeapSecondJDs[ $i ]  $LeapSeconds[ $i ]\n";
+        }
+        close( OUT );
+    }
+
+
+    # 
+    # print out header
+    #
+    if ( open( OUT, ">$LgmEopDatFile" ) ) {
+        ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime;
+        $TimeStamp = sprintf("%3s %3s %02d %4d %02d:%02d:%02d UTC", $WeekDay[$wday], $MonthName[$mon], $mday, $year+1900, $hour, $min, $sec);
+        $cJD = Date_to_JD( $year+1900, $mon+1, $mday, $hour + $min/60.0 + $sec/3600.0);
+        print OUT "#\n";
+        print OUT "#                                ************************************************\n";
+        print OUT "#                                 LanlGeoMag Merged Earth Orientation Parameters\n";
+        print OUT "#                                   FILE CREATED: $TimeStamp\n";
+        print OUT "#                                        (Julian Date: $cJD )\n";
+        print OUT "#                                ************************************************\n";
+        print OUT "#\n";
+        print OUT "# Data extracted from the following files with modification times as indicated;\n";
+        print OUT "#\n";
+        for ($i=0; $i<$nFiles; $i++){
+            $Age = $cJD - $t_JD[$i];
+            print OUT "#   (Last mod.: $t[$i]) (JD: $t_JD[$i]) (Age: $Age days) $t_URL[$i]\n";
+        }
+        print OUT "#\n";
+        print OUT "#                   INTERNATIONAL EARTH ROTATION AND REFERENCE SYSTEMS SERVICE\n";
+        print OUT "#                        EARTH ORIENTATION PARAMETERS\n";
+        print OUT "#                          EOP (IERS) 05 C04\n";
+        print OUT "#\n";
+        print OUT "# Date      MJD        xp          yp       UT1-UTC       LOD         dPsi        dEps         dX          dY       DAT\n";
+        print OUT "#(0 UTC)                \"           \"          s           s            \"           \"           \"           \"        s\n";
+    }
+
+
+
+
+
+    #
+    #  Process the eopc04.62-now and eopc04_IAU2000.62-now files
+    #
+    if ( open( IN1, "<$DstFile[1]" ) ) {
+        if ( open( IN2, "<$DstFile[2]" ) ) { $file2_opened = 1; } else { $file2_opened = 0; }
+        while ( $line1 = <IN1> ) {
+            if ( $file2_opened ) { $line2 = <IN2>; }
+            if ( $line1 =~ /^\d{4}/ ) {
+                ($yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps)     = split(" ", $line1);
+                if ( $file2_opened ) { ($yyyy2, $mm2, $dd2, $MJD2, $xp2, $yp2, $DUT12, $LOD2, $dX, $dY) = split(" ", $line2); }
+                $DAT = Get_DAT( $MJD );
+                printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
+            } 
+        }
+        close( IN1 );
+        if ( $file2_opened ) { close( IN2 ); }
+    } else {
+        print "Couldnt open file $DstFile[1] for reading\n";
+    }
+    $LastMJD = $MJD;
+
+
+    #
+    #  Process the 'finals.daily' and 'finals2000A.daily' files to get predicts
+    #
+    #    The format of the finals.data, finals.daily, and finals.all files is:
+    #    
+    #    Col.#    Format  Quantity
+    #    -------  ------  -------------------------------------------------------------
+    #    1-2      I2      year (to get true calendar year, add 1900 for MJD<=51543 or add 2000 for MJD>=51544)
+    #    3-4      I2      month number
+    #    5-6      I2      day of month
+    #    7        X       [blank]
+    #    8-15     F8.2    fractional Modified Julian Date (MJD)
+    #    16       X       [blank]
+    #    17       A1      IERS (I) or Prediction (P) flag for Bull. A polar motion values
+    #    18       X       [blank]
+    #    19-27    F9.6    Bull. A PM-x (sec. of arc)
+    #    28-36    F9.6    error in PM-x (sec. of arc)
+    #    37       X       [blank]
+    #    38-46    F9.6    Bull. A PM-y (sec. of arc)
+    #    47-55    F9.6    error in PM-y (sec. of arc)
+    #    56-57    2X      [blanks]
+    #    58       A1      IERS (I) or Prediction (P) flag for Bull. A UT1-UTC values
+    #    59-68    F10.7   Bull. A UT1-UTC (sec. of time)
+    #    69-78    F10.7   error in UT1-UTC (sec. of time)
+    #    79       X       [blank]
+    #    80-86    F7.4    Bull. A LOD (msec. of time) -- NOT ALWAYS FILLED
+    #    87-93    F7.4    error in LOD (msec. of time) -- NOT ALWAYS FILLED
+    #    94-95    2X      [blanks]
+    #    96       A1      IERS (I) or Prediction (P) flag for Bull. A nutation values
+    #    97       X       [blank]
+    #    98-106   F9.3    Bull. A dPSI (msec. of arc)
+    #    107-115  F9.3    error in dPSI (msec. of arc)
+    #    116      X       [blank]
+    #    117-125  F9.3    Bull. A dEPSILON (msec. of arc)
+    #    126-134  F9.3    error in dEPSILON (msec. of arc)
+    #    135-144  F10.6   Bull. B PM-x (sec. of arc)
+    #    145-154  F10.6   Bull. B PM-y (sec. of arc)
+    #    155-165  F11.7   Bull. B UT1-UTC (sec. of time)
+    #    166-175  F10.3   Bull. B dPSI (msec. of arc)
+    #    176-185  F10.3   Bull. B dEPSILON (msec. of arc)
+    #
+    #    The format of the finals2000A.data, finals2000A.daily, and finals2000A.all files is:
+    #    
+    #    Col.#    Format  Quantity
+    #    -------  ------  -------------------------------------------------------------
+    #    1-2      I2      year (to get true calendar year, add 1900 for MJD<=51543 or add 2000 for MJD>=51544)
+    #    3-4      I2      month number
+    #    5-6      I2      day of month
+    #    7        X       [blank]
+    #    8-15     F8.2    fractional Modified Julian Date (MJD)
+    #    16       X       [blank]
+    #    17       A1      IERS (I) or Prediction (P) flag for Bull. A polar motion values
+    #    18       X       [blank]
+    #    19-27    F9.6    Bull. A PM-x (sec. of arc)
+    #    28-36    F9.6    error in PM-x (sec. of arc)
+    #    37       X       [blank]
+    #    38-46    F9.6    Bull. A PM-y (sec. of arc)
+    #    47-55    F9.6    error in PM-y (sec. of arc)
+    #    56-57    2X      [blanks]
+    #    58       A1      IERS (I) or Prediction (P) flag for Bull. A UT1-UTC values
+    #    59-68    F10.7   Bull. A UT1-UTC (sec. of time)
+    #    69-78    F10.7   error in UT1-UTC (sec. of time)
+    #    79       X       [blank]
+    #    80-86    F7.4    Bull. A LOD (msec. of time) -- NOT ALWAYS FILLED
+    #    87-93    F7.4    error in LOD (msec. of time) -- NOT ALWAYS FILLED
+    #    94-95    2X      [blanks]
+    #    96       A1      IERS (I) or Prediction (P) flag for Bull. A nutation values
+    #    97       X       [blank]
+    #    98-106   F9.3    Bull. A dX wrt IAU2000A Nutation (msec. of arc), Free Core Nutation NOT Removed
+    #    107-115  F9.3    error in dX (msec. of arc)
+    #    116      X       [blank]
+    #    117-125  F9.3    Bull. A dY wrt IAU2000A Nutation (msec. of arc), Free Core Nutation NOT Removed
+    #    126-134  F9.3    error in dY (msec. of arc)
+    #    135-144  F10.6   Bull. B PM-x (sec. of arc)
+    #    145-154  F10.6   Bull. B PM-y (sec. of arc)
+    #    155-165  F11.7   Bull. B UT1-UTC (sec. of time)
+    #    166-175  F10.3   Bull. B dX wrt IAU2000A Nutation (msec. of arc)
+    #    176-185  F10.3   Bull. B dY wrt IAU2000A Nutation (msec. of arc)
+    printf( OUT "# starting predicted values from USNO $DstFile[3] and $DstFile[4] files\n" );
+    if ( open( IN1, "<$DstFile[3]" ) ) {
+        if ( open( IN2, "<$DstFile[4]" ) ) { $file2_opened = 1; } else { $file2_opened = 0; }
+        while ( $line1 = <IN1> ) {
+            if ( $file2_opened ) { $line2 = <IN2>; }
+            $year   = substr( $line1,   0,  2 );
+            $mm     = substr( $line1,   2,  2 );
+            $dd     = substr( $line1,   4,  2 );
+            $MJD    = substr( $line1,   7,  8 );
+            $xp_A   = substr( $line1,  18,  9 );
+            $yp_A   = substr( $line1,  37,  9 );
+            $DUT1_A = substr( $line1,  58, 10 );
+            $LOD    = substr( $line1,  79,  7 );
+            $dPsi_A = substr( $line1,  97,  9 );
+            $dEps_A = substr( $line1, 116,  9 );
+            $xp_B   = substr( $line1, 134, 10 );
+            $yp_B   = substr( $line1, 144, 10 );
+            $DUT1_B = substr( $line1, 154, 11 );
+            $dPsi_B = substr( $line1, 165, 10 );
+            $dEps_B = substr( $line1, 175, 10 );
+            $dX_A   = substr( $line2,  97,  9 );
+            $dY_A   = substr( $line2, 116,  9 );
+            $dX_B   = substr( $line2, 165, 10 );
+            $dY_B   = substr( $line2, 175, 10 );
+
+            if ( $MJD >= 51544 ) { $yyyy = $year + 2000; } else { $yyyy = $year + 1900; }
+
+            if ( $xp_B =~ /\d/ )    { $xp = $xp_B; }       else { $xp = $xp_A };
+            if ( $yp_B =~ /\d/ )    { $yp = $yp_B; }       else { $yp = $yp_A };
+            if ( $dPsi_B =~ /\d/ )  { $dPsi = $dPsi_B; }   else { $dPsi = $dPsi_A };    $dPsi /= 1000.0;
+            if ( $dEps_B =~ /\d/ )  { $dEps = $dEps_B; }   else { $dEps = $dEps_A };    $dEps /= 1000.0;
+            if ( $dX_B =~ /\d/ )    { $dX = $dX_B; }       else { $dX = $dX_A };        $dX /= 1000.0;
+            if ( $dY_B =~ /\d/ )    { $dY = $dY_B; }       else { $dY = $dY_A };        $dY /= 1000.0;
+            if ( $DUT1_B =~ /\d/ )  { $DUT1 = $DUT1_B; }   else { $DUT1 = $DUT1_A };
+
+            if ( $MJD > $LastMJD ) {
+                $DAT = Get_DAT( $MJD );
+                printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
+            } 
+
+        }
+        close( IN1 );
+        if ( $file2_opened ) { close( IN2 ); }
+    } else {
+        print "Couldnt open file $DstFile[3] for reading\n";
+    }
+    $LastMJD = $MJD;
+
+
+
+    #
+    #  Process the 'finals.all' and 'finals2000A.all' files to get long term predicts
+    #
+    printf( OUT "# starting predicted values from USNO $DstFile[5] and $DstFile[6] files\n" );
+    if ( open( IN1, "<$DstFile[5]" ) ) {
+        if ( open( IN2, "<$DstFile[6]" ) ) { $file2_opened = 1; } else { $file2_opened = 0; }
+        while ( $line1 = <IN1> ) {
+            if ( $file2_opened ) { $line2 = <IN2>; }
+            $year   = substr( $line1,   0,  2 );
+            $mm     = substr( $line1,   2,  2 );
+            $dd     = substr( $line1,   4,  2 );
+            $MJD    = substr( $line1,   7,  8 );
+            $xp_A   = substr( $line1,  18,  9 ); if ( $xp_A =~ /\d/ ) { $MoreData = 1; } else { $MoreData = 0; }
+            $yp_A   = substr( $line1,  37,  9 );
+            $DUT1_A = substr( $line1,  58, 10 );
+            $LOD    = substr( $line1,  79,  7 );
+            $dPsi_A = substr( $line1,  97,  9 );
+            $dEps_A = substr( $line1, 116,  9 );
+            $xp_B   = substr( $line1, 134, 10 );
+            $yp_B   = substr( $line1, 144, 10 );
+            $DUT1_B = substr( $line1, 154, 11 );
+            $dPsi_B = substr( $line1, 165, 10 );
+            $dEps_B = substr( $line1, 175, 10 );
+            $dX_A   = substr( $line2,  97,  9 );
+            $dY_A   = substr( $line2, 116,  9 );
+            $dX_B   = substr( $line2, 165, 10 );
+            $dY_B   = substr( $line2, 175, 10 );
+
+            if ( $MJD >= 51544 ) { $yyyy = $year + 2000; } else { $yyyy = $year + 1900; }
+
+            if ( $xp_B =~ /\d/ )    { $xp = $xp_B; }       else { $xp = $xp_A };
+            if ( $yp_B =~ /\d/ )    { $yp = $yp_B; }       else { $yp = $yp_A };
+            if ( $dPsi_B =~ /\d/ )  { $dPsi = $dPsi_B; }   else { $dPsi = $dPsi_A };  $dPsi /= 1000.0;
+            if ( $dEps_B =~ /\d/ )  { $dEps = $dEps_B; }   else { $dEps = $dEps_A };  $dEps /= 1000.0;
+            if ( $dX_B =~ /\d/ )    { $dX = $dX_B; }       else { $dX = $dX_A };      $dX /= 1000.0;
+            if ( $dY_B =~ /\d/ )    { $dY = $dY_B; }       else { $dY = $dY_A };      $dY /= 1000.0;
+            if ( $DUT1_B =~ /\d/ )  { $DUT1 = $DUT1_B; }   else { $DUT1 = $DUT1_A };
+
+            if ( ($MJD > $LastMJD) && $MoreData ) {
+                $DAT = Get_DAT( $MJD );
+                printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
+            } 
+
+        }
+        close( IN1 );
+        if ( $file2_opened ) { close( IN2 ); }
+    } else {
+        print "Couldnt open file $DstFile[3] for reading\n";
+    }
+    $LastMJD = $MJD;
+
+}
+
+
+
+
+
+
+
+
+
+sub Get_DAT {
+    my $MJD = shift;
+    for ($i=$nDAT_VALS-1; $i>=0; $i--){
+        if ( $MJD >= $DAT_MJD[$i] ) {
+            return( $DAT_A[$i] + ($MJD - $DAT_B[$i]) * $DAT_C[$i] );
+        }
+    }
+}
+
+
+sub GetURL {
+
+    my $url  = shift;
+    my $File = shift;
+
+    my $ua = new LWP::UserAgent;
+#    $ua->agent('Mozilla/5.5 (compatible; MSIE 5.5; Windows NT 5.1)');
+    $ua->agent('Firefox/3.5.8');
+    $ua->proxy(['http'], $Proxy);
+    $ua->timeout(15);
+ 
+    my $request = HTTP::Request->new('GET');
+    $request->url($url);
+
+    my $response = $ua->request($request);
+    my $code     = $response->code;
+    my $headers  = $response->headers_as_string;
+    my $body     = $response->content;
+
+    if ( $code == 200 ) {
+        if ( open(OUT, ">$File") ){
+            print OUT $body;
+            close OUT;
+        } else {
+            printf "Couldnt open file $File for writing\n";
+        }
+    } else {
+        print "Retrieval of file $File was UNSUCCESSFUL. Response code: $code ($HTTP_CODES{$code})\n";
+    }
+
+}
+
+
+
+sub GetFileModTime {
+
+    my $dir  = shift;
+    my $File = shift;
+
+    # strip off leading stuff in this routine
+    $File =~ s+.*/++;
+
+    my $ua = new LWP::UserAgent;
+    #$ua->agent('Mozilla/5.5 (compatible; MSIE 5.5; Windows NT 5.1)');
+    $ua->agent('Firefox/3.5.8');
+    $ua->proxy(['http'], $Proxy);
+    $ua->timeout(15);
+ 
+    my $request = HTTP::Request->new('GET');
+    $request->url($dir);
+
+    my $response = $ua->request($request);
+    my $code     = $response->code;
+    my $headers  = $response->headers_as_string;
+    my $body     =  $response->content;
+
+
+    if ( $body =~ /(.*$File.*)/ ) {
+        $line = $1;
+        if ( $line =~ /(\d{2})\-(\w{3})\-(\d{2,4}) (\d{2})\:(\d{2}) / ) {
+            $mday   = $1;
+            $monstr = $2; $lcmonstr = lc($2);
+            $mon    = $MonthNum{ $lcmonstr };
+            $y      = $3; if ( $y < 100 ) { $y += 2000; }
+            $hh     = $4;
+            $mm     = $5;
+            $JD     = Date_to_JD( $y, $mon, $mday, $hh+$mm/60.0 );
+            $tstamp = sprintf("%3s %02d %4d %02d:%02d", $MonthName[$mon-1], $mday, $y, $hh, $mm ); 
+            $URL    = "$dir$File";
+        }
+    }
+    return( $tstamp, $JD, $URL );
+}
+
+
+
+sub Lgm_JDN {
+
+    my $Year  = shift;
+    my $Month = shift;
+    my $Day   = shift;
+
+    my $q = ($Month < 3 ) ? -1 : 0;
+    #Compute integer part of julian date
+    return(  (1461*floor(($Year + 4800 + $q)/4)) + floor((367*($Month - 2 - 12*$q))/12)
+            - floor((3*floor(($Year + 4900 + $q)/100))/4) + $Day - 32075 );
+
+}
+
+
+sub Date_to_JD {
+
+    my $Year  = shift;
+    my $Month = shift;
+    my $Day   = shift;
+    my $Time  = shift;
+
+    # Get JDN
+    $JDN     = Lgm_JDN( $Year, $Month, $Day );
+
+    # Get Fraction of day
+    $FracDay = $Time/24.0;
+
+    # create Julian Date
+    $JD = $JDN - 0.5 + $FracDay;
+
+    return( $JD );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#                                  
+#                                ************************************************
+#                                 LanlGeoMag Merged Earth Orientation Parameters 
+#                                   FILE CREATED: Thu May 28 2009 18:24:59 UTC   
+#                                        (Julian Date: 2454980.09513889 )        
+#                                ************************************************
+#                                                                                
+# Data extracted from the following files with modification times as indicated;  
+#                                                                                
+#   (Last mod.: Jul 07 2008 09:38) (JD: 2454654.901389) (Age: 325.366 days) http://maia.usno.navy.mil/ser7/tai-utc.dat
+#   (Last mod.: May 28 2009 10:47) (JD: 2454979.949306) (Age:   0.318 days) http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04.62-now
+#   (Last mod.: May 28 2009 10:47) (JD: 2454979.949306) (Age:   0.318 days) http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04_IAU2000.62-now
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.all                       
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.daily                     
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.all                  
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.daily                
+#                                                                                                                                           
+#                   INTERNATIONAL EARTH ROTATION AND REFERENCE SYSTEMS SERVICE                                                              
+#                        EARTH ORIENTATION PARAMETERS                                                                                       
+#                          EOP (IERS) 05 C04                                                                                                
+#                                                                                                                                           
+# Date      MJD        xp          yp       UT1-UTC       LOD         dPsi        dEps         dX          dY       DAT                     
+#(0 UTC)                "           "          s           s            "           "           "           "        s                      
+#19620101   37665   -0.012700    0.213000   0.0326338   0.0017230    0.064041    0.006305    0.000000    0.000000 1.845858                   

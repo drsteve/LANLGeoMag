@@ -1,0 +1,67 @@
+% Spacecraft:  RBSPA
+% Field Model:  T89
+% nAlpha:  18;  5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90;   Units: Degrees
+%
+% File Contents    :  L* values and Phase Space Densities at Constant Mu and K
+% File Created at  :  17:08:47 UTC  August 11 2010
+% File Created by  :  mgh
+% File Created on  :  mithril
+% File Fmt Version :  
+%
+% Description of Variables:
+%     nK:             Number, of K values used.
+%
+%     nMu:            Number, of Mu values used.
+%
+%     Date:           The date. In YYYMMDD format.
+%
+%     UTC:            Universal Time (Coordinated). In decimal hours.
+%
+%     Lat:            Geographic latitude of S/C. In units of Deg.
+%
+%     Lon:            Geographic Longitude of S/C. In units of Deg.
+%
+%     Rad:            Geocentric Radial Distance of S/C. In units of km.
+%
+%     Xgsm:           X-compoentent of GSM position vector. In units of Re.
+%
+%     Ygsm:           Y-compoentent of GSM position vector. In units of Re.
+%
+%     Zgsm:           Z-compoentent of GSM position vector. In units of Re.
+%
+%     B_Used:         The Magnetic Field strength that was used for
+%                     computations (it will be either Bmod or Bobs). In units
+%                     of nT.
+%
+%     B_Mod:          Magnetic field strength given by the field model (in nT)
+%                     In units of nT.
+%
+%     B_Obs:          Magnetic field strength observed at the S/C (No Obs if <
+%                     0). In units of nT.
+%
+%     M_Used:         The Magnetic Dipole Moment that was used to convert
+%                     magnetic flux to L*. In units of nT.
+%
+%     M_Ref:          A fixed reference magnetic dipole moment for converting
+%                     magnetic flux to L*. In units of nT.
+%
+%     M_IGRF:         Time-dependant magnetic dipole moment (probably shouldn't
+%                     be used for converting Magnetic Flux to L*, but it
+%                     sometimes is). In units of nT.
+%
+%     L*0-(nK-1):     The nK L* values obtained. (One associated with each of
+%                     the nK K values). L* values are dimensionless quantities.
+%
+%     Bm0-(nK-1):     The nK Bmirror values computed. (One associated with each
+%                     of the nK K values). In units of nT.
+%
+%     I0-(nK-1):      The nK Integral Invariant values computed. (One
+%                     associated with each of the nK K values). In units of Re.
+%
+%     Alpha0-(nK-1):  The nK local pitch angles computed. (One associated with
+%                     each of the nK K values). In degrees.
+% 
+%     fp(Ki,Muj):     The phase space density computed at the ith K and jth Mu
+%                     value. In units of (c/cm/MeV)^3. 
+% Date                  UT          Lat          Lon          Rad         Xgsm         Ygsm         Zgsm       B_Used        B_Mod        B_Obs       M_Used        M_Ref       M_IGRF              L*0          L*1          L*2          L*3          L*4          L*5          L*6          L*7          L*8          L*9         L*10         L*11         L*12         L*13         L*14         L*15         L*16         L*17              Bm0          Bm1          Bm2          Bm3          Bm4          Bm5          Bm6          Bm7          Bm8          Bm9         Bm10         Bm11         Bm12         Bm13         Bm14         Bm15         Bm16         Bm17               I0           I1           I2           I3           I4           I5           I6           I7           I8           I9          I10          I11          I12          I13          I14          I15          I16          I17
+% YYYYMMDD           Hours         Deg.         Deg.           km           Re           Re           Re           nT           nT           nT           nT           nT           nT          dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless      dimless               nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT           nT               Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re           Re

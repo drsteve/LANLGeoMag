@@ -1,0 +1,2 @@
+This directory contains the original (and aweful) FORTRAN AE8/AP8 model along
+with a conversion to C and some utilities that I used to do the conversion.
