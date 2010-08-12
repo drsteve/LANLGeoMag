@@ -1,5 +1,13 @@
 2010-08-12  Mark Galassi  <markgalassi@lanl.gov>
 
+	* libLanlGeoMag/dox: removed this directory from source control
+	since it is auto-generated.
+
+	* configure.ac: added the DX_INIT_DOXYGEN directives for doxygen.
+
+	* Makefile.am, aminclude.am: added including of aminclude.am which
+	has doxygen stuff in it.
+
 	* Makefile.in, */Makefile.in, */*/Makefile.in, configure,
 	config.sub, depcomp, aclocal.m4, autoscan, ltmain.sh, install-sh,
 	configure, config.guess: removed these files because they are

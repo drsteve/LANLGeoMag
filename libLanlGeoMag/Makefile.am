@@ -38,8 +38,3 @@ install-exec-hook:
 	chmod +x EopData/GetEopFiles
 	cp EopData/GetEopFiles $(LGM_EOP_DATA_DIR)/.
 #	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles 
-
-
-
-        
-

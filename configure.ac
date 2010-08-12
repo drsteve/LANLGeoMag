@@ -7,6 +7,7 @@ AC_PREREQ([2.63])
 AC_INIT([LanlGeoMag], [1.5.6], [mghenderson@lanl.gov])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+AC_LANG([C])
 #AC_DEFINE([LGM_EOP_DATA_DIR],["/usr/local/share/LanlGeoMag/EopData"],["Define directory where Eop data can be found"])
 #AH_VERBATIM([PDDH], [#define LGM_EOP_DATA_DIR "@datadir@/LanlGeoMag/EopData"])
 #AC_DEFINE([PDD], ["PDD @prefix@/data"], ["dude"])
@@ -14,6 +15,11 @@ AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
+
+DX_INIT_DOXYGEN($PACKAGE_NAME, libLanlGeoMag/Doxyfile)
+DX_HTML_FEATURE(ON)
+DX_MAN_FEATURE(ON)
+DX_PDF_FEATURE(ON)
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
