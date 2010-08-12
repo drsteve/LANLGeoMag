@@ -1,0 +1,136 @@
+\hypertarget{_lgm___sun_position_8c}{
+\section{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm\_\-SunPosition.c File Reference}
+\label{_lgm___sun_position_8c}\index{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm\_\-SunPosition.c@{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm\_\-SunPosition.c}}
+}
+{\tt \#include $<$stdio.h$>$}\par
+{\tt \#include $<$math.h$>$}\par
+
+
+Include dependency graph for Lgm\_\-SunPosition.c:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=161pt]{_lgm___sun_position_8c__incl}
+\end{center}
+\end{figure}
+\subsection*{Defines}
+\begin{CompactItemize}
+\item 
+\#define \hyperlink{_lgm___sun_position_8c_7737801a4acf448cf8e47064fd3820ab}{INCLUDE\_\-PERTURBATIONS}~1
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+double \hyperlink{_lgm___sun_position_8c_92f2f0f91c99cd6bec1a0e9a3b6443fc}{Frac} (double x)
+\item 
+void \hyperlink{_lgm___sun_position_8c_31f5bd3719a51e5dcac5d5eb3e4f639d}{AddThe} (double c1, double s1, double c2, double s2, double $\ast$c, double $\ast$s)
+\item 
+void \hyperlink{_lgm___sun_position_8c_0fffd38e8b66a549896a0860fac30e2d}{Term} (double T, int i1, int i, int it, double dlc, double dls, double drc, double drs, double dbc, double dbs, double c3\mbox{[}$\,$\mbox{]}, double s3\mbox{[}$\,$\mbox{]}, double c\mbox{[}$\,$\mbox{]}, double s\mbox{[}$\,$\mbox{]}, double $\ast$dl, double $\ast$dr, double $\ast$db)
+\item 
+void \hyperlink{_lgm___sun_position_8c_b400c7fd9bf8cd64e6b77831caca28e4}{Lgm\_\-SunPosition} (double T, double $\ast$l, double $\ast$r, double $\ast$b)
+\end{CompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{_lgm___sun_position_8c_7737801a4acf448cf8e47064fd3820ab}{
+\index{Lgm\_\-SunPosition.c@{Lgm\_\-SunPosition.c}!INCLUDE\_\-PERTURBATIONS@{INCLUDE\_\-PERTURBATIONS}}
+\index{INCLUDE\_\-PERTURBATIONS@{INCLUDE\_\-PERTURBATIONS}!Lgm_SunPosition.c@{Lgm\_\-SunPosition.c}}
+\subsubsection[{INCLUDE\_\-PERTURBATIONS}]{\setlength{\rightskip}{0pt plus 5cm}\#define INCLUDE\_\-PERTURBATIONS~1}}
+\label{_lgm___sun_position_8c_7737801a4acf448cf8e47064fd3820ab}
+
+
+
+
+Definition at line 3 of file Lgm\_\-SunPosition.c.
+
+\subsection{Function Documentation}
+\hypertarget{_lgm___sun_position_8c_92f2f0f91c99cd6bec1a0e9a3b6443fc}{
+\index{Lgm\_\-SunPosition.c@{Lgm\_\-SunPosition.c}!Frac@{Frac}}
+\index{Frac@{Frac}!Lgm_SunPosition.c@{Lgm\_\-SunPosition.c}}
+\subsubsection[{Frac}]{\setlength{\rightskip}{0pt plus 5cm}double Frac (double {\em x})}}
+\label{_lgm___sun_position_8c_92f2f0f91c99cd6bec1a0e9a3b6443fc}
+
+
+
+
+Definition at line 5 of file Lgm\_\-SunPosition.c.
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=298pt]{_lgm___sun_position_8c_92f2f0f91c99cd6bec1a0e9a3b6443fc_icgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___sun_position_8c_31f5bd3719a51e5dcac5d5eb3e4f639d}{
+\index{Lgm\_\-SunPosition.c@{Lgm\_\-SunPosition.c}!AddThe@{AddThe}}
+\index{AddThe@{AddThe}!Lgm_SunPosition.c@{Lgm\_\-SunPosition.c}}
+\subsubsection[{AddThe}]{\setlength{\rightskip}{0pt plus 5cm}void AddThe (double {\em c1}, \/  double {\em s1}, \/  double {\em c2}, \/  double {\em s2}, \/  double $\ast$ {\em c}, \/  double $\ast$ {\em s})}}
+\label{_lgm___sun_position_8c_31f5bd3719a51e5dcac5d5eb3e4f639d}
+
+
+
+
+Definition at line 14 of file Lgm\_\-SunPosition.c.
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=342pt]{_lgm___sun_position_8c_31f5bd3719a51e5dcac5d5eb3e4f639d_icgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___sun_position_8c_0fffd38e8b66a549896a0860fac30e2d}{
+\index{Lgm\_\-SunPosition.c@{Lgm\_\-SunPosition.c}!Term@{Term}}
+\index{Term@{Term}!Lgm_SunPosition.c@{Lgm\_\-SunPosition.c}}
+\subsubsection[{Term}]{\setlength{\rightskip}{0pt plus 5cm}void Term (double {\em T}, \/  int {\em i1}, \/  int {\em i}, \/  int {\em it}, \/  double {\em dlc}, \/  double {\em dls}, \/  double {\em drc}, \/  double {\em drs}, \/  double {\em dbc}, \/  double {\em dbs}, \/  double {\em c3}\mbox{[}$\,$\mbox{]}, \/  double {\em s3}\mbox{[}$\,$\mbox{]}, \/  double {\em c}\mbox{[}$\,$\mbox{]}, \/  double {\em s}\mbox{[}$\,$\mbox{]}, \/  double $\ast$ {\em dl}, \/  double $\ast$ {\em dr}, \/  double $\ast$ {\em db})}}
+\label{_lgm___sun_position_8c_0fffd38e8b66a549896a0860fac30e2d}
+
+
+
+
+Definition at line 19 of file Lgm\_\-SunPosition.c.
+
+Here is the call graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=84pt]{_lgm___sun_position_8c_0fffd38e8b66a549896a0860fac30e2d_cgraph}
+\end{center}
+\end{figure}
+
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=299pt]{_lgm___sun_position_8c_0fffd38e8b66a549896a0860fac30e2d_icgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___sun_position_8c_b400c7fd9bf8cd64e6b77831caca28e4}{
+\index{Lgm\_\-SunPosition.c@{Lgm\_\-SunPosition.c}!Lgm\_\-SunPosition@{Lgm\_\-SunPosition}}
+\index{Lgm\_\-SunPosition@{Lgm\_\-SunPosition}!Lgm_SunPosition.c@{Lgm\_\-SunPosition.c}}
+\subsubsection[{Lgm\_\-SunPosition}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-SunPosition (double {\em T}, \/  double $\ast$ {\em l}, \/  double $\ast$ {\em r}, \/  double $\ast$ {\em b})}}
+\label{_lgm___sun_position_8c_b400c7fd9bf8cd64e6b77831caca28e4}
+
+
+
+
+Definition at line 36 of file Lgm\_\-SunPosition.c.
+
+Here is the call graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=149pt]{_lgm___sun_position_8c_b400c7fd9bf8cd64e6b77831caca28e4_cgraph}
+\end{center}
+\end{figure}
+
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=262pt]{_lgm___sun_position_8c_b400c7fd9bf8cd64e6b77831caca28e4_icgraph}
+\end{center}
+\end{figure}

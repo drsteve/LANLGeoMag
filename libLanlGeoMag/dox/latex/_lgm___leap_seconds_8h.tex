@@ -1,0 +1,186 @@
+\hypertarget{_lgm___leap_seconds_8h}{
+\section{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-LeapSeconds.h File Reference}
+\label{_lgm___leap_seconds_8h}\index{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-LeapSeconds.h@{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-LeapSeconds.h}}
+}
+{\tt \#include $<$stdio.h$>$}\par
+{\tt \#include $<$stdlib.h$>$}\par
+{\tt \#include $<$string.h$>$}\par
+{\tt \#include $<$math.h$>$}\par
+
+
+Include dependency graph for Lgm\_\-LeapSeconds.h:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=175pt]{_lgm___leap_seconds_8h__incl}
+\end{center}
+\end{figure}
+\subsection*{Data Structures}
+\begin{CompactItemize}
+\item 
+struct \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds}
+\end{CompactItemize}
+\subsection*{Defines}
+\begin{CompactItemize}
+\item 
+\#define \hyperlink{_lgm___leap_seconds_8h_6df1d22fb5f09eccc23b9f399670cfd7}{STRINGIFY}(x)~\#x
+\item 
+\#define \hyperlink{_lgm___leap_seconds_8h_e4b532a93c757194ec73b6790a3e6b1f}{EXPAND}(x)~STRINGIFY(x)
+\item 
+\#define \hyperlink{_lgm___leap_seconds_8h_a93f0eb578d23995850d61f7d61c55c1}{FALSE}~0
+\item 
+\#define \hyperlink{_lgm___leap_seconds_8h_a8cecfc5c5c054d2875c03e77b7be15d}{TRUE}~1
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+int \hyperlink{_lgm___leap_seconds_8h_f1aa4bb174630b8d1ffe279c1ea640ba}{Lgm\_\-LoadLeapSeconds} (\hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_da8809ff162835b26da6298e0eae5978}{Lgm\_\-GetLeapSeconds} (double JD, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+int \hyperlink{_lgm___leap_seconds_8h_e9c2973bfa356aa88395433a768d23fc}{Lgm\_\-IsLeapSecondDay} (long int Date, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_5afce05c147c18dca4c7c4dd9abbacc3}{Lgm\_\-UTC\_\-to\_\-TAI} (double JD, double UTC, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_605e83971d658741d880fb04266b6d26}{Lgm\_\-TAI\_\-to\_\-UTC} (double JD, double TAI, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_649ffbf5d58119cdf3351bf914704f78}{Lgm\_\-UTC\_\-to\_\-TT} (double JD, double UTC, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_3c58afd037053831979bb02244ad2815}{Lgm\_\-TT\_\-to\_\-UTC} (double JD, double TT, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_97c941aec1f1964ea91eefe41df533bd}{Lgm\_\-TT\_\-to\_\-TDB} (double JD, double TT, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_1f89f4b7830c0c2fc440093fb596b84d}{Lgm\_\-TDB\_\-to\_\-TT} (double JD, double TDB, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_00f70616dde1283ea79c84d19c9e878c}{Lgm\_\-UTC\_\-to\_\-TDB} (double JD, double UTC, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\item 
+double \hyperlink{_lgm___leap_seconds_8h_dad1e26cab4ddf4ca3e0d5e361f2b803}{Lgm\_\-TDB\_\-to\_\-UTC} (double JD, double TDB, \hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} $\ast$l)
+\end{CompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{_lgm___leap_seconds_8h_6df1d22fb5f09eccc23b9f399670cfd7}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!STRINGIFY@{STRINGIFY}}
+\index{STRINGIFY@{STRINGIFY}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{STRINGIFY}]{\setlength{\rightskip}{0pt plus 5cm}\#define STRINGIFY(x)~\#x}}
+\label{_lgm___leap_seconds_8h_6df1d22fb5f09eccc23b9f399670cfd7}
+
+
+
+
+Definition at line 4 of file Lgm\_\-LeapSeconds.h.\hypertarget{_lgm___leap_seconds_8h_e4b532a93c757194ec73b6790a3e6b1f}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!EXPAND@{EXPAND}}
+\index{EXPAND@{EXPAND}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{EXPAND}]{\setlength{\rightskip}{0pt plus 5cm}\#define EXPAND(x)~STRINGIFY(x)}}
+\label{_lgm___leap_seconds_8h_e4b532a93c757194ec73b6790a3e6b1f}
+
+
+
+
+Definition at line 5 of file Lgm\_\-LeapSeconds.h.\hypertarget{_lgm___leap_seconds_8h_a93f0eb578d23995850d61f7d61c55c1}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!FALSE@{FALSE}}
+\index{FALSE@{FALSE}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{FALSE}]{\setlength{\rightskip}{0pt plus 5cm}\#define FALSE~0}}
+\label{_lgm___leap_seconds_8h_a93f0eb578d23995850d61f7d61c55c1}
+
+
+
+
+Definition at line 13 of file Lgm\_\-LeapSeconds.h.\hypertarget{_lgm___leap_seconds_8h_a8cecfc5c5c054d2875c03e77b7be15d}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!TRUE@{TRUE}}
+\index{TRUE@{TRUE}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{TRUE}]{\setlength{\rightskip}{0pt plus 5cm}\#define TRUE~1}}
+\label{_lgm___leap_seconds_8h_a8cecfc5c5c054d2875c03e77b7be15d}
+
+
+
+
+Definition at line 14 of file Lgm\_\-LeapSeconds.h.
+
+\subsection{Function Documentation}
+\hypertarget{_lgm___leap_seconds_8h_f1aa4bb174630b8d1ffe279c1ea640ba}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-LoadLeapSeconds@{Lgm\_\-LoadLeapSeconds}}
+\index{Lgm\_\-LoadLeapSeconds@{Lgm\_\-LoadLeapSeconds}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-LoadLeapSeconds}]{\setlength{\rightskip}{0pt plus 5cm}int Lgm\_\-LoadLeapSeconds ({\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_f1aa4bb174630b8d1ffe279c1ea640ba}
+
+
+\hypertarget{_lgm___leap_seconds_8h_da8809ff162835b26da6298e0eae5978}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-GetLeapSeconds@{Lgm\_\-GetLeapSeconds}}
+\index{Lgm\_\-GetLeapSeconds@{Lgm\_\-GetLeapSeconds}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-GetLeapSeconds}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-GetLeapSeconds (double {\em JD}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_da8809ff162835b26da6298e0eae5978}
+
+
+\hypertarget{_lgm___leap_seconds_8h_e9c2973bfa356aa88395433a768d23fc}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-IsLeapSecondDay@{Lgm\_\-IsLeapSecondDay}}
+\index{Lgm\_\-IsLeapSecondDay@{Lgm\_\-IsLeapSecondDay}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-IsLeapSecondDay}]{\setlength{\rightskip}{0pt plus 5cm}int Lgm\_\-IsLeapSecondDay (long int {\em Date}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_e9c2973bfa356aa88395433a768d23fc}
+
+
+\hypertarget{_lgm___leap_seconds_8h_5afce05c147c18dca4c7c4dd9abbacc3}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-UTC\_\-to\_\-TAI@{Lgm\_\-UTC\_\-to\_\-TAI}}
+\index{Lgm\_\-UTC\_\-to\_\-TAI@{Lgm\_\-UTC\_\-to\_\-TAI}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-UTC\_\-to\_\-TAI}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-UTC\_\-to\_\-TAI (double {\em JD}, \/  double {\em UTC}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_5afce05c147c18dca4c7c4dd9abbacc3}
+
+
+\hypertarget{_lgm___leap_seconds_8h_605e83971d658741d880fb04266b6d26}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-TAI\_\-to\_\-UTC@{Lgm\_\-TAI\_\-to\_\-UTC}}
+\index{Lgm\_\-TAI\_\-to\_\-UTC@{Lgm\_\-TAI\_\-to\_\-UTC}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-TAI\_\-to\_\-UTC}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-TAI\_\-to\_\-UTC (double {\em JD}, \/  double {\em TAI}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_605e83971d658741d880fb04266b6d26}
+
+
+\hypertarget{_lgm___leap_seconds_8h_649ffbf5d58119cdf3351bf914704f78}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-UTC\_\-to\_\-TT@{Lgm\_\-UTC\_\-to\_\-TT}}
+\index{Lgm\_\-UTC\_\-to\_\-TT@{Lgm\_\-UTC\_\-to\_\-TT}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-UTC\_\-to\_\-TT}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-UTC\_\-to\_\-TT (double {\em JD}, \/  double {\em UTC}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_649ffbf5d58119cdf3351bf914704f78}
+
+
+\hypertarget{_lgm___leap_seconds_8h_3c58afd037053831979bb02244ad2815}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-TT\_\-to\_\-UTC@{Lgm\_\-TT\_\-to\_\-UTC}}
+\index{Lgm\_\-TT\_\-to\_\-UTC@{Lgm\_\-TT\_\-to\_\-UTC}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-TT\_\-to\_\-UTC}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-TT\_\-to\_\-UTC (double {\em JD}, \/  double {\em TT}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_3c58afd037053831979bb02244ad2815}
+
+
+\hypertarget{_lgm___leap_seconds_8h_97c941aec1f1964ea91eefe41df533bd}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-TT\_\-to\_\-TDB@{Lgm\_\-TT\_\-to\_\-TDB}}
+\index{Lgm\_\-TT\_\-to\_\-TDB@{Lgm\_\-TT\_\-to\_\-TDB}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-TT\_\-to\_\-TDB}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-TT\_\-to\_\-TDB (double {\em JD}, \/  double {\em TT}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_97c941aec1f1964ea91eefe41df533bd}
+
+
+\hypertarget{_lgm___leap_seconds_8h_1f89f4b7830c0c2fc440093fb596b84d}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-TDB\_\-to\_\-TT@{Lgm\_\-TDB\_\-to\_\-TT}}
+\index{Lgm\_\-TDB\_\-to\_\-TT@{Lgm\_\-TDB\_\-to\_\-TT}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-TDB\_\-to\_\-TT}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-TDB\_\-to\_\-TT (double {\em JD}, \/  double {\em TDB}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_1f89f4b7830c0c2fc440093fb596b84d}
+
+
+\hypertarget{_lgm___leap_seconds_8h_00f70616dde1283ea79c84d19c9e878c}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-UTC\_\-to\_\-TDB@{Lgm\_\-UTC\_\-to\_\-TDB}}
+\index{Lgm\_\-UTC\_\-to\_\-TDB@{Lgm\_\-UTC\_\-to\_\-TDB}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-UTC\_\-to\_\-TDB}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-UTC\_\-to\_\-TDB (double {\em JD}, \/  double {\em UTC}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_00f70616dde1283ea79c84d19c9e878c}
+
+
+
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=239pt]{_lgm___leap_seconds_8h_00f70616dde1283ea79c84d19c9e878c_icgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___leap_seconds_8h_dad1e26cab4ddf4ca3e0d5e361f2b803}{
+\index{Lgm\_\-LeapSeconds.h@{Lgm\_\-LeapSeconds.h}!Lgm\_\-TDB\_\-to\_\-UTC@{Lgm\_\-TDB\_\-to\_\-UTC}}
+\index{Lgm\_\-TDB\_\-to\_\-UTC@{Lgm\_\-TDB\_\-to\_\-UTC}!Lgm_LeapSeconds.h@{Lgm\_\-LeapSeconds.h}}
+\subsubsection[{Lgm\_\-TDB\_\-to\_\-UTC}]{\setlength{\rightskip}{0pt plus 5cm}double Lgm\_\-TDB\_\-to\_\-UTC (double {\em JD}, \/  double {\em TDB}, \/  {\bf Lgm\_\-LeapSeconds} $\ast$ {\em l})}}
+\label{_lgm___leap_seconds_8h_dad1e26cab4ddf4ca3e0d5e361f2b803}
+
+

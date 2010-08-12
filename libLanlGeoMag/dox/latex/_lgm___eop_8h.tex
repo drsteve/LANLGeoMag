@@ -1,0 +1,173 @@
+\hypertarget{_lgm___eop_8h}{
+\section{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-Eop.h File Reference}
+\label{_lgm___eop_8h}\index{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-Eop.h@{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-Eop.h}}
+}
+{\tt \#include $<$math.h$>$}\par
+{\tt \#include $<$gsl/gsl\_\-errno.h$>$}\par
+{\tt \#include $<$gsl/gsl\_\-spline.h$>$}\par
+
+
+Include dependency graph for Lgm\_\-Eop.h:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=159pt]{_lgm___eop_8h__incl}
+\end{center}
+\end{figure}
+
+
+This graph shows which files directly or indirectly include this file:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=154pt]{_lgm___eop_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Data Structures}
+\begin{CompactItemize}
+\item 
+struct \hyperlink{struct_lgm___nga_eopp}{Lgm\_\-NgaEopp}
+\item 
+struct \hyperlink{struct_lgm___eop}{Lgm\_\-Eop}
+\item 
+struct \hyperlink{struct_lgm___eop_one}{Lgm\_\-EopOne}
+\end{CompactItemize}
+\subsection*{Defines}
+\begin{CompactItemize}
+\item 
+\#define \hyperlink{_lgm___eop_8h_4aa2c43b09c1300c334821f5507d6f71}{M\_\-2PI}~6.283185307179586476925286766559
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+\hyperlink{struct_lgm___eop}{Lgm\_\-Eop} $\ast$ \hyperlink{_lgm___eop_8h_347307f1d5e5e8ddeb1159efb500169e}{Lgm\_\-init\_\-eop} (int Verbose)
+\item 
+void \hyperlink{_lgm___eop_8h_4ca57a301711309dc4125a8199464023}{Lgm\_\-destroy\_\-eop} (\hyperlink{struct_lgm___eop}{Lgm\_\-Eop} $\ast$e)
+\item 
+void \hyperlink{_lgm___eop_8h_33edc795ad625e418df2c3916a792dbc}{Lgm\_\-read\_\-eop} (\hyperlink{struct_lgm___eop}{Lgm\_\-Eop} $\ast$e)
+\item 
+void \hyperlink{_lgm___eop_8h_7e82653f294ddbbfa607501d76d80b0a}{Lgm\_\-NgaEoppPred} (double JD, \hyperlink{struct_lgm___eop_one}{Lgm\_\-EopOne} $\ast$eop, \hyperlink{struct_lgm___nga_eopp}{Lgm\_\-NgaEopp} $\ast$e)
+\item 
+int \hyperlink{_lgm___eop_8h_ee1f67690e1bcf1e64dd4cc659e83d9f}{Lgm\_\-ReadNgaEopp} (\hyperlink{struct_lgm___nga_eopp}{Lgm\_\-NgaEopp} $\ast$e, int Verbosity)
+\item 
+void \hyperlink{_lgm___eop_8h_38e93db62215ec7d0bc56bac97d81a5e}{Lgm\_\-get\_\-eop\_\-at\_\-JD} (double JD, \hyperlink{struct_lgm___eop_one}{Lgm\_\-EopOne} $\ast$eop, \hyperlink{struct_lgm___eop}{Lgm\_\-Eop} $\ast$e)
+\item 
+void \hyperlink{_lgm___eop_8h_a201ccf5570103a405e7ffc52b2a9f04}{Lgm\_\-set\_\-eop} (\hyperlink{struct_lgm___eop_one}{Lgm\_\-EopOne} $\ast$eop, \hyperlink{struct_lgm___c_trans}{Lgm\_\-CTrans} $\ast$c)
+\item 
+void \hyperlink{_lgm___eop_8h_31317fe4c64c6671c60ba6253e22acd4}{Lgm\_\-unset\_\-eop} (\hyperlink{struct_lgm___eop_one}{Lgm\_\-EopOne} $\ast$eop, \hyperlink{struct_lgm___c_trans}{Lgm\_\-CTrans} $\ast$c)
+\end{CompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{_lgm___eop_8h_4aa2c43b09c1300c334821f5507d6f71}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!M\_\-2PI@{M\_\-2PI}}
+\index{M\_\-2PI@{M\_\-2PI}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{M\_\-2PI}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\_\-2PI~6.283185307179586476925286766559}}
+\label{_lgm___eop_8h_4aa2c43b09c1300c334821f5507d6f71}
+
+
+
+
+Definition at line 9 of file Lgm\_\-Eop.h.
+
+\subsection{Function Documentation}
+\hypertarget{_lgm___eop_8h_347307f1d5e5e8ddeb1159efb500169e}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-init\_\-eop@{Lgm\_\-init\_\-eop}}
+\index{Lgm\_\-init\_\-eop@{Lgm\_\-init\_\-eop}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-init\_\-eop}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-Eop}$\ast$ Lgm\_\-init\_\-eop (int {\em Verbose})}}
+\label{_lgm___eop_8h_347307f1d5e5e8ddeb1159efb500169e}
+
+
+
+
+Definition at line 14 of file Lgm\_\-Eop.c.
+
+Here is the call graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=283pt]{_lgm___eop_8h_347307f1d5e5e8ddeb1159efb500169e_cgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___eop_8h_4ca57a301711309dc4125a8199464023}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-destroy\_\-eop@{Lgm\_\-destroy\_\-eop}}
+\index{Lgm\_\-destroy\_\-eop@{Lgm\_\-destroy\_\-eop}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-destroy\_\-eop}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-destroy\_\-eop ({\bf Lgm\_\-Eop} $\ast$ {\em e})}}
+\label{_lgm___eop_8h_4ca57a301711309dc4125a8199464023}
+
+
+
+
+Definition at line 52 of file Lgm\_\-Eop.c.\hypertarget{_lgm___eop_8h_33edc795ad625e418df2c3916a792dbc}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-read\_\-eop@{Lgm\_\-read\_\-eop}}
+\index{Lgm\_\-read\_\-eop@{Lgm\_\-read\_\-eop}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-read\_\-eop}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-read\_\-eop ({\bf Lgm\_\-Eop} $\ast$ {\em e})}}
+\label{_lgm___eop_8h_33edc795ad625e418df2c3916a792dbc}
+
+
+
+
+Definition at line 75 of file Lgm\_\-Eop.c.\hypertarget{_lgm___eop_8h_7e82653f294ddbbfa607501d76d80b0a}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-NgaEoppPred@{Lgm\_\-NgaEoppPred}}
+\index{Lgm\_\-NgaEoppPred@{Lgm\_\-NgaEoppPred}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-NgaEoppPred}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-NgaEoppPred (double {\em JD}, \/  {\bf Lgm\_\-EopOne} $\ast$ {\em eop}, \/  {\bf Lgm\_\-NgaEopp} $\ast$ {\em e})}}
+\label{_lgm___eop_8h_7e82653f294ddbbfa607501d76d80b0a}
+
+
+
+
+Definition at line 283 of file Lgm\_\-Eop.c.\hypertarget{_lgm___eop_8h_ee1f67690e1bcf1e64dd4cc659e83d9f}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-ReadNgaEopp@{Lgm\_\-ReadNgaEopp}}
+\index{Lgm\_\-ReadNgaEopp@{Lgm\_\-ReadNgaEopp}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-ReadNgaEopp}]{\setlength{\rightskip}{0pt plus 5cm}int Lgm\_\-ReadNgaEopp ({\bf Lgm\_\-NgaEopp} $\ast$ {\em e}, \/  int {\em Verbosity})}}
+\label{_lgm___eop_8h_ee1f67690e1bcf1e64dd4cc659e83d9f}
+
+
+
+
+Definition at line 310 of file Lgm\_\-Eop.c.
+
+Here is the call graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=205pt]{_lgm___eop_8h_ee1f67690e1bcf1e64dd4cc659e83d9f_cgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___eop_8h_38e93db62215ec7d0bc56bac97d81a5e}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-get\_\-eop\_\-at\_\-JD@{Lgm\_\-get\_\-eop\_\-at\_\-JD}}
+\index{Lgm\_\-get\_\-eop\_\-at\_\-JD@{Lgm\_\-get\_\-eop\_\-at\_\-JD}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-get\_\-eop\_\-at\_\-JD}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-get\_\-eop\_\-at\_\-JD (double {\em JD}, \/  {\bf Lgm\_\-EopOne} $\ast$ {\em eop}, \/  {\bf Lgm\_\-Eop} $\ast$ {\em e})}}
+\label{_lgm___eop_8h_38e93db62215ec7d0bc56bac97d81a5e}
+
+
+
+
+Definition at line 122 of file Lgm\_\-Eop.c.
+
+Here is the call graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=208pt]{_lgm___eop_8h_38e93db62215ec7d0bc56bac97d81a5e_cgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___eop_8h_a201ccf5570103a405e7ffc52b2a9f04}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-set\_\-eop@{Lgm\_\-set\_\-eop}}
+\index{Lgm\_\-set\_\-eop@{Lgm\_\-set\_\-eop}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-set\_\-eop}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-set\_\-eop ({\bf Lgm\_\-EopOne} $\ast$ {\em eop}, \/  {\bf Lgm\_\-CTrans} $\ast$ {\em c})}}
+\label{_lgm___eop_8h_a201ccf5570103a405e7ffc52b2a9f04}
+
+
+
+
+Definition at line 249 of file Lgm\_\-Eop.c.\hypertarget{_lgm___eop_8h_31317fe4c64c6671c60ba6253e22acd4}{
+\index{Lgm\_\-Eop.h@{Lgm\_\-Eop.h}!Lgm\_\-unset\_\-eop@{Lgm\_\-unset\_\-eop}}
+\index{Lgm\_\-unset\_\-eop@{Lgm\_\-unset\_\-eop}!Lgm_Eop.h@{Lgm\_\-Eop.h}}
+\subsubsection[{Lgm\_\-unset\_\-eop}]{\setlength{\rightskip}{0pt plus 5cm}void Lgm\_\-unset\_\-eop ({\bf Lgm\_\-EopOne} $\ast$ {\em eop}, \/  {\bf Lgm\_\-CTrans} $\ast$ {\em c})}}
+\label{_lgm___eop_8h_31317fe4c64c6671c60ba6253e22acd4}
+
+
+
+
+Definition at line 261 of file Lgm\_\-Eop.c.

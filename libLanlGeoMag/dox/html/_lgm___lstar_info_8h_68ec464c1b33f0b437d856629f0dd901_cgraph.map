@@ -1,0 +1,32 @@
+<area shape="rect" href="$_lgm___c_trans_8h.html#92e5006e2374090772eca4674019310c" title="Lgm_Set_Coord_Transforms" alt="" coords="183,563,369,589">
+<area shape="rect" href="$_lgm___c_trans_8h.html#ae036dfc047b13fb1172aeb39d628f6f" title="Lgm_angle2pi" alt="" coords="445,5,547,32">
+<area shape="rect" href="$_lgm___c_trans_8h.html#07e8163845c62141f0069ad663d7524f" title="Lgm_angle360" alt="" coords="444,56,548,83">
+<area shape="rect" href="$_lgm___c_trans_8h.html#bb565097b3362f61a99072fa6894cd83" title="Lgm_Convert_Coords" alt="" coords="423,107,569,133">
+<area shape="rect" href="$_lgm___vec_8h.html#cb24a26f79bcb5476cb11cf6ae811fb3" title="Lgm_CrossProduct" alt="" coords="431,157,561,184">
+<area shape="rect" href="$_lgm___c_trans_8h.html#38f91ae9f05bbcd134091cea464ee003" title="Lgm_DayOfWeek" alt="" coords="627,208,749,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#104fe1084e885dd5b4e9d7421ee361a2" title="Lgm_Doy" alt="" coords="459,461,533,488">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e6f9029d80696fdffbe753ff07962368" title="Lgm_LeapYear" alt="" coords="635,487,741,513">
+<area shape="rect" href="$_lgm___c_trans_8h.html#de46e5122248c7bf19ce56f2ed4b7e91" title="Lgm_GetLeapSeconds" alt="" coords="420,563,572,589">
+<area shape="rect" href="$_lgm___c_trans_8h.html#661496b1335a95d593265c548f64899f" title="Lgm_hour24" alt="" coords="643,335,733,361">
+<area shape="rect" href="$_lgm___c_trans_8h.html#6cda667f1a74bdd3549eeb54f805755e" title="Lgm_InitIGRF" alt="" coords="445,613,547,640">
+<area shape="rect" href="$_lgm___c_trans_8h.html#73a444d73b7a1119517c60f5a070cc9d" title="Lgm_JD" alt="" coords="653,259,723,285">
+<area shape="rect" href="$_lgm___c_trans_8h.html#4a4b0532bf6fb44bc8d4d9fbbab0d5cf" title="Compute the Julian Day number for the given date." alt="" coords="628,399,748,425">
+<area shape="rect" href="$_lgm___c_trans_8h.html#5d3a253a2974225387a35461c256dda4" title="Lgm_kepler" alt="" coords="452,664,540,691">
+<area shape="rect" href="$_lgm___vec_8h.html#cc29cb583eff692c2df92d9a49f3ce9e" title="Lgm_MatTimesMat" alt="" coords="429,715,563,741">
+<area shape="rect" href="$_lgm___vec_8h.html#67c413d617efaaa97ff1b1e6c98f149f" title="Lgm_NormalizeVector" alt="" coords="423,765,569,792">
+<area shape="rect" href="$_lgm___c_trans_8h.html#1d8f581754ed7f8a1fdba2d60982dcd1" title="Lgm_Nutation" alt="" coords="445,816,547,843">
+<area shape="rect" href="$_lgm___c_trans_8h.html#0f6fd0c4c8d56743de4c9e24039eb1df" title="Lgm_Print_DMSd" alt="" coords="435,867,557,893">
+<area shape="rect" href="$_lgm___c_trans_8h.html#09be79dfd1f30dc8313931e19bfb2b68" title="Lgm_Print_HMSd" alt="" coords="435,968,557,995">
+<area shape="rect" href="$_lgm___c_trans_8h.html#8c54f2ea495708f306d69eb5cbd5407f" title="Lgm_Print_HMSdp" alt="" coords="431,917,561,944">
+<area shape="rect" href="$_lgm___c_trans_8h.html#02b37cb5bba9e0af0e0d88393fb5dc07" title="Converts RA and DEC to unit vector in cartesian coords." alt="" coords="427,1019,565,1045">
+<area shape="rect" href="$_lgm___c_trans_8h.html#b400c7fd9bf8cd64e6b77831caca28e4" title="Lgm_SunPosition" alt="" coords="435,1069,557,1096">
+<area shape="rect" href="$_lgm___vec_8h.html#f287f148b722a2622150934c23fa59d4" title="Lgm_Transpose" alt="" coords="439,1120,553,1147">
+<area shape="rect" href="$_lgm___c_trans_8h.html#22d70f08569629bfb06991502e8a2943" title="Lgm_TT_to_TDB" alt="" coords="436,360,556,387">
+<area shape="rect" href="$_lgm___vec_8h.html#db5066af69d0f56f0880a098655383ff" title="Lgm_MatTimesVec" alt="" coords="621,107,755,133">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e869fd88ef397bce460b886a6a1b840d" title="Lgm_JDN" alt="" coords="844,208,921,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#7d638a5de1c5a2b0176e2c51f4e85427" title="Lgm_IsLeapSecondDay" alt="" coords="803,259,963,285">
+<area shape="rect" href="$_lgm___c_trans_8h.html#0366f317f96ffed4e998ce1551d5c190" title="Lgm_D_to_DMSd" alt="" coords="627,867,749,893">
+<area shape="rect" href="$_lgm___c_trans_8h.html#df736dd325580fae9f0bd5fde0fab40e" title="Lgm_UT_to_HMSd" alt="" coords="623,943,753,969">
+<area shape="rect" href="$_lgm___sun_position_8c.html#31f5bd3719a51e5dcac5d5eb3e4f639d" title="AddThe" alt="" coords="849,1044,916,1071">
+<area shape="rect" href="$_lgm___sun_position_8c.html#92f2f0f91c99cd6bec1a0e9a3b6443fc" title="Frac" alt="" coords="664,1120,712,1147">
+<area shape="rect" href="$_lgm___sun_position_8c.html#0fffd38e8b66a549896a0860fac30e2d" title="Term" alt="" coords="663,1019,713,1045">

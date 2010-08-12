@@ -1,0 +1,241 @@
+\hypertarget{_lgm___field_int_info_8h}{
+\section{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-FieldIntInfo.h File Reference}
+\label{_lgm___field_int_info_8h}\index{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-FieldIntInfo.h@{/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm\_\-FieldIntInfo.h}}
+}
+{\tt \#include $<$math.h$>$}\par
+{\tt \#include \char`\"{}Lgm\_\-QuadPack.h\char`\"{}}\par
+{\tt \#include \char`\"{}gsl/gsl\_\-errno.h\char`\"{}}\par
+{\tt \#include \char`\"{}gsl/gsl\_\-spline.h\char`\"{}}\par
+
+
+Include dependency graph for Lgm\_\-FieldIntInfo.h:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=193pt]{_lgm___field_int_info_8h__incl}
+\end{center}
+\end{figure}
+\subsection*{Data Structures}
+\begin{CompactItemize}
+\item 
+struct \hyperlink{struct_lgm___field_int_info}{Lgm\_\-FieldIntInfo}
+\end{CompactItemize}
+\subsection*{Defines}
+\begin{CompactItemize}
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_1f6f907234204d7207579a18fb0847a4}{ELECTRON\_\-MASS}~(9.10938188e-31)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_e72e484b3bba78248e0f70f47d11cb43}{AMU}~(1.660538e-27)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_b8cacd34cfff7982e36652a0330d8d83}{PROTON\_\-MASS}~(1.00794$\ast$AMU)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_d6cde5694a5a86aafb92eecd7cf439be}{OXYGEN\_\-MASS}~(15.9994$\ast$AMU)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_0600e3f227b6e9a3ae26f4d6e2a0581e}{RE}~(6378.135e3)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_78d126676907aa89a0adbfbef8282585}{CC}~(2.99792458e8)
+\item 
+\#define \hyperlink{_lgm___field_int_info_8h_40069882b1f09d9463acc3acd7b67708}{EE}~(1.6022e-19)
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+double \hyperlink{_lgm___field_int_info_8h_fb1de8265edae4292537da9dc6a70f0d}{Iinv} (\hyperlink{struct_lgm___field_int_info}{Lgm\_\-FieldIntInfo} $\ast$\hyperlink{struct_lgm___field_int_info}{Lgm\_\-FieldIntInfo})
+\item 
+double \hyperlink{_lgm___field_int_info_8h_9378a29574f93271ed37929e9910f6c6}{I\_\-integrand} (double s, \hyperlink{_lgm___quad_pack_8h_01be5a7db8d2fc2ba26ce793d73b6472}{\_\-qpInfo} $\ast$qpInfo)
+\item 
+double \hyperlink{_lgm___field_int_info_8h_b79b56ee9d8655b07c44e06eb7068e53}{SbIntegral} (\hyperlink{struct_lgm___field_int_info}{Lgm\_\-FieldIntInfo} $\ast$\hyperlink{struct_lgm___field_int_info}{Lgm\_\-FieldIntInfo})
+\item 
+double \hyperlink{_lgm___field_int_info_8h_23dd3716fba7aa838e159dbf9f447dd0}{Sb\_\-integrand} (double s, \hyperlink{_lgm___quad_pack_8h_01be5a7db8d2fc2ba26ce793d73b6472}{\_\-qpInfo} $\ast$qpInfo)
+\item 
+void \hyperlink{_lgm___field_int_info_8h_a4b45106bd5072e164b5886359166322}{ratint} (double $\ast$xa, double $\ast$ya, int n, double x, double $\ast$y, double $\ast$dy)
+\item 
+void \hyperlink{_lgm___field_int_info_8h_6b600a2b7549cca974e23521b0412a67}{polint} (double $\ast$xa, double $\ast$ya, int n, double x, double $\ast$y, double $\ast$dy)
+\item 
+void \hyperlink{_lgm___field_int_info_8h_78b06d0a7ba0cb3be1bdf690bf30d21e}{Interp} (double xa\mbox{[}$\,$\mbox{]}, double ya\mbox{[}$\,$\mbox{]}, long int n, double x, double $\ast$y)
+\item 
+void \hyperlink{_lgm___field_int_info_8h_0990e5337b30952cae12aac2bacf44b3}{Interp2} (double xa\mbox{[}$\,$\mbox{]}, double ya\mbox{[}$\,$\mbox{]}, long int n, double x, double $\ast$y)
+\item 
+double \hyperlink{_lgm___field_int_info_8h_ce6dc7c926ea34e07011fb1167c2d5d0}{LFromIBmM\_\-Hilton} (double I, double Bm, double M)
+\item 
+double \hyperlink{_lgm___field_int_info_8h_3daa38ea6b532d0a030fccd7e8f4d79c}{IFromLBmM\_\-Hilton} (double L, double Bm, double M)
+\item 
+double \hyperlink{_lgm___field_int_info_8h_4ee011826916a15076f0efa631ec5e77}{LFromIBmM\_\-McIlwain} (double I, double Bm, double M)
+\item 
+double \hyperlink{_lgm___field_int_info_8h_7a35eef2fbb725aae4d03d56ba905dcc}{IFromLBmM\_\-McIlwain} (double L, double Bm, double M)
+\end{CompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{_lgm___field_int_info_8h_1f6f907234204d7207579a18fb0847a4}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!ELECTRON\_\-MASS@{ELECTRON\_\-MASS}}
+\index{ELECTRON\_\-MASS@{ELECTRON\_\-MASS}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{ELECTRON\_\-MASS}]{\setlength{\rightskip}{0pt plus 5cm}\#define ELECTRON\_\-MASS~(9.10938188e-31)}}
+\label{_lgm___field_int_info_8h_1f6f907234204d7207579a18fb0847a4}
+
+
+
+
+Definition at line 6 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_e72e484b3bba78248e0f70f47d11cb43}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!AMU@{AMU}}
+\index{AMU@{AMU}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{AMU}]{\setlength{\rightskip}{0pt plus 5cm}\#define AMU~(1.660538e-27)}}
+\label{_lgm___field_int_info_8h_e72e484b3bba78248e0f70f47d11cb43}
+
+
+
+
+Definition at line 7 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_b8cacd34cfff7982e36652a0330d8d83}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!PROTON\_\-MASS@{PROTON\_\-MASS}}
+\index{PROTON\_\-MASS@{PROTON\_\-MASS}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{PROTON\_\-MASS}]{\setlength{\rightskip}{0pt plus 5cm}\#define PROTON\_\-MASS~(1.00794$\ast$AMU)}}
+\label{_lgm___field_int_info_8h_b8cacd34cfff7982e36652a0330d8d83}
+
+
+
+
+Definition at line 8 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_d6cde5694a5a86aafb92eecd7cf439be}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!OXYGEN\_\-MASS@{OXYGEN\_\-MASS}}
+\index{OXYGEN\_\-MASS@{OXYGEN\_\-MASS}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{OXYGEN\_\-MASS}]{\setlength{\rightskip}{0pt plus 5cm}\#define OXYGEN\_\-MASS~(15.9994$\ast$AMU)}}
+\label{_lgm___field_int_info_8h_d6cde5694a5a86aafb92eecd7cf439be}
+
+
+
+
+Definition at line 9 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_0600e3f227b6e9a3ae26f4d6e2a0581e}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!RE@{RE}}
+\index{RE@{RE}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{RE}]{\setlength{\rightskip}{0pt plus 5cm}\#define RE~(6378.135e3)}}
+\label{_lgm___field_int_info_8h_0600e3f227b6e9a3ae26f4d6e2a0581e}
+
+
+
+
+Definition at line 10 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_78d126676907aa89a0adbfbef8282585}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!CC@{CC}}
+\index{CC@{CC}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{CC}]{\setlength{\rightskip}{0pt plus 5cm}\#define CC~(2.99792458e8)}}
+\label{_lgm___field_int_info_8h_78d126676907aa89a0adbfbef8282585}
+
+
+
+
+Definition at line 11 of file Lgm\_\-FieldIntInfo.h.\hypertarget{_lgm___field_int_info_8h_40069882b1f09d9463acc3acd7b67708}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!EE@{EE}}
+\index{EE@{EE}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{EE}]{\setlength{\rightskip}{0pt plus 5cm}\#define EE~(1.6022e-19)}}
+\label{_lgm___field_int_info_8h_40069882b1f09d9463acc3acd7b67708}
+
+
+
+
+Definition at line 12 of file Lgm\_\-FieldIntInfo.h.
+
+\subsection{Function Documentation}
+\hypertarget{_lgm___field_int_info_8h_fb1de8265edae4292537da9dc6a70f0d}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!Iinv@{Iinv}}
+\index{Iinv@{Iinv}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{Iinv}]{\setlength{\rightskip}{0pt plus 5cm}double Iinv ({\bf Lgm\_\-FieldIntInfo} $\ast$ {\em Lgm\_\-FieldIntInfo})}}
+\label{_lgm___field_int_info_8h_fb1de8265edae4292537da9dc6a70f0d}
+
+
+\hypertarget{_lgm___field_int_info_8h_9378a29574f93271ed37929e9910f6c6}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!I\_\-integrand@{I\_\-integrand}}
+\index{I\_\-integrand@{I\_\-integrand}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{I\_\-integrand}]{\setlength{\rightskip}{0pt plus 5cm}double I\_\-integrand (double {\em s}, \/  {\bf \_\-qpInfo} $\ast$ {\em qpInfo})}}
+\label{_lgm___field_int_info_8h_9378a29574f93271ed37929e9910f6c6}
+
+
+
+
+Definition at line 217 of file IntegralInvariant.c.\hypertarget{_lgm___field_int_info_8h_b79b56ee9d8655b07c44e06eb7068e53}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!SbIntegral@{SbIntegral}}
+\index{SbIntegral@{SbIntegral}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{SbIntegral}]{\setlength{\rightskip}{0pt plus 5cm}double SbIntegral ({\bf Lgm\_\-FieldIntInfo} $\ast$ {\em Lgm\_\-FieldIntInfo})}}
+\label{_lgm___field_int_info_8h_b79b56ee9d8655b07c44e06eb7068e53}
+
+
+\hypertarget{_lgm___field_int_info_8h_23dd3716fba7aa838e159dbf9f447dd0}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!Sb\_\-integrand@{Sb\_\-integrand}}
+\index{Sb\_\-integrand@{Sb\_\-integrand}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{Sb\_\-integrand}]{\setlength{\rightskip}{0pt plus 5cm}double Sb\_\-integrand (double {\em s}, \/  {\bf \_\-qpInfo} $\ast$ {\em qpInfo})}}
+\label{_lgm___field_int_info_8h_23dd3716fba7aa838e159dbf9f447dd0}
+
+
+
+
+Definition at line 174 of file SbIntegral.c.
+
+Here is the caller graph for this function:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=107pt]{_lgm___field_int_info_8h_23dd3716fba7aa838e159dbf9f447dd0_icgraph}
+\end{center}
+\end{figure}
+\hypertarget{_lgm___field_int_info_8h_a4b45106bd5072e164b5886359166322}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!ratint@{ratint}}
+\index{ratint@{ratint}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{ratint}]{\setlength{\rightskip}{0pt plus 5cm}void ratint (double $\ast$ {\em xa}, \/  double $\ast$ {\em ya}, \/  int {\em n}, \/  double {\em x}, \/  double $\ast$ {\em y}, \/  double $\ast$ {\em dy})}}
+\label{_lgm___field_int_info_8h_a4b45106bd5072e164b5886359166322}
+
+
+\hypertarget{_lgm___field_int_info_8h_6b600a2b7549cca974e23521b0412a67}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!polint@{polint}}
+\index{polint@{polint}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{polint}]{\setlength{\rightskip}{0pt plus 5cm}void polint (double $\ast$ {\em xa}, \/  double $\ast$ {\em ya}, \/  int {\em n}, \/  double {\em x}, \/  double $\ast$ {\em y}, \/  double $\ast$ {\em dy})}}
+\label{_lgm___field_int_info_8h_6b600a2b7549cca974e23521b0412a67}
+
+
+\hypertarget{_lgm___field_int_info_8h_78b06d0a7ba0cb3be1bdf690bf30d21e}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!Interp@{Interp}}
+\index{Interp@{Interp}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{Interp}]{\setlength{\rightskip}{0pt plus 5cm}void Interp (double {\em xa}\mbox{[}$\,$\mbox{]}, \/  double {\em ya}\mbox{[}$\,$\mbox{]}, \/  long int {\em n}, \/  double {\em x}, \/  double $\ast$ {\em y})}}
+\label{_lgm___field_int_info_8h_78b06d0a7ba0cb3be1bdf690bf30d21e}
+
+
+\hypertarget{_lgm___field_int_info_8h_0990e5337b30952cae12aac2bacf44b3}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!Interp2@{Interp2}}
+\index{Interp2@{Interp2}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{Interp2}]{\setlength{\rightskip}{0pt plus 5cm}void Interp2 (double {\em xa}\mbox{[}$\,$\mbox{]}, \/  double {\em ya}\mbox{[}$\,$\mbox{]}, \/  long int {\em n}, \/  double {\em x}, \/  double $\ast$ {\em y})}}
+\label{_lgm___field_int_info_8h_0990e5337b30952cae12aac2bacf44b3}
+
+
+\hypertarget{_lgm___field_int_info_8h_ce6dc7c926ea34e07011fb1167c2d5d0}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!LFromIBmM\_\-Hilton@{LFromIBmM\_\-Hilton}}
+\index{LFromIBmM\_\-Hilton@{LFromIBmM\_\-Hilton}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{LFromIBmM\_\-Hilton}]{\setlength{\rightskip}{0pt plus 5cm}double LFromIBmM\_\-Hilton (double {\em I}, \/  double {\em Bm}, \/  double {\em M})}}
+\label{_lgm___field_int_info_8h_ce6dc7c926ea34e07011fb1167c2d5d0}
+
+
+
+
+Definition at line 13 of file LFromIBmM.c.\hypertarget{_lgm___field_int_info_8h_3daa38ea6b532d0a030fccd7e8f4d79c}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!IFromLBmM\_\-Hilton@{IFromLBmM\_\-Hilton}}
+\index{IFromLBmM\_\-Hilton@{IFromLBmM\_\-Hilton}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{IFromLBmM\_\-Hilton}]{\setlength{\rightskip}{0pt plus 5cm}double IFromLBmM\_\-Hilton (double {\em L}, \/  double {\em Bm}, \/  double {\em M})}}
+\label{_lgm___field_int_info_8h_3daa38ea6b532d0a030fccd7e8f4d79c}
+
+
+
+
+Definition at line 38 of file LFromIBmM.c.\hypertarget{_lgm___field_int_info_8h_4ee011826916a15076f0efa631ec5e77}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!LFromIBmM\_\-McIlwain@{LFromIBmM\_\-McIlwain}}
+\index{LFromIBmM\_\-McIlwain@{LFromIBmM\_\-McIlwain}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{LFromIBmM\_\-McIlwain}]{\setlength{\rightskip}{0pt plus 5cm}double LFromIBmM\_\-McIlwain (double {\em I}, \/  double {\em Bm}, \/  double {\em M})}}
+\label{_lgm___field_int_info_8h_4ee011826916a15076f0efa631ec5e77}
+
+
+
+
+Definition at line 126 of file LFromIBmM.c.\hypertarget{_lgm___field_int_info_8h_7a35eef2fbb725aae4d03d56ba905dcc}{
+\index{Lgm\_\-FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}!IFromLBmM\_\-McIlwain@{IFromLBmM\_\-McIlwain}}
+\index{IFromLBmM\_\-McIlwain@{IFromLBmM\_\-McIlwain}!Lgm_FieldIntInfo.h@{Lgm\_\-FieldIntInfo.h}}
+\subsubsection[{IFromLBmM\_\-McIlwain}]{\setlength{\rightskip}{0pt plus 5cm}double IFromLBmM\_\-McIlwain (double {\em L}, \/  double {\em Bm}, \/  double {\em M})}}
+\label{_lgm___field_int_info_8h_7a35eef2fbb725aae4d03d56ba905dcc}
+
+
+
+
+Definition at line 175 of file LFromIBmM.c.

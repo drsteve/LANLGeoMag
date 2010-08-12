@@ -1,0 +1,36 @@
+<area shape="rect" href="$_lgm___c_trans_8h.html#92e5006e2374090772eca4674019310c" title="Lgm_Set_Coord_Transforms" alt="" coords="284,639,471,665">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#14604bc0932d6a4a99475970ac783697" title="SWIG_AsVal_double" alt="" coords="533,1221,677,1248">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#ca3c78b106b24b292a156d1f2e9d6bf7" title="SWIG_AsVal_long" alt="" coords="313,1247,441,1273">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#695030dbc62bde212c7b7a9169c6eee9" title="SWIG_Py_Void" alt="" coords="321,1297,433,1324">
+<area shape="rect" href="$_lgm___c_trans_8h.html#ae036dfc047b13fb1172aeb39d628f6f" title="Lgm_angle2pi" alt="" coords="555,360,656,387">
+<area shape="rect" href="$_lgm___c_trans_8h.html#07e8163845c62141f0069ad663d7524f" title="Lgm_angle360" alt="" coords="553,411,657,437">
+<area shape="rect" href="$_lgm___c_trans_8h.html#bb565097b3362f61a99072fa6894cd83" title="Lgm_Convert_Coords" alt="" coords="532,157,679,184">
+<area shape="rect" href="$_lgm___vec_8h.html#cb24a26f79bcb5476cb11cf6ae811fb3" title="Lgm_CrossProduct" alt="" coords="540,512,671,539">
+<area shape="rect" href="$_lgm___c_trans_8h.html#38f91ae9f05bbcd134091cea464ee003" title="Lgm_DayOfWeek" alt="" coords="744,335,867,361">
+<area shape="rect" href="$_lgm___c_trans_8h.html#104fe1084e885dd5b4e9d7421ee361a2" title="Lgm_Doy" alt="" coords="568,461,643,488">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e6f9029d80696fdffbe753ff07962368" title="Lgm_LeapYear" alt="" coords="752,512,859,539">
+<area shape="rect" href="$_lgm___c_trans_8h.html#de46e5122248c7bf19ce56f2ed4b7e91" title="Lgm_GetLeapSeconds" alt="" coords="529,917,681,944">
+<area shape="rect" href="$_lgm___c_trans_8h.html#661496b1335a95d593265c548f64899f" title="Lgm_hour24" alt="" coords="760,689,851,716">
+<area shape="rect" href="$_lgm___c_trans_8h.html#6cda667f1a74bdd3549eeb54f805755e" title="Lgm_InitIGRF" alt="" coords="555,968,656,995">
+<area shape="rect" href="$_lgm___c_trans_8h.html#73a444d73b7a1119517c60f5a070cc9d" title="Lgm_JD" alt="" coords="771,613,840,640">
+<area shape="rect" href="$_lgm___c_trans_8h.html#4a4b0532bf6fb44bc8d4d9fbbab0d5cf" title="Compute the Julian Day number for the given date." alt="" coords="745,753,865,780">
+<area shape="rect" href="$_lgm___c_trans_8h.html#5d3a253a2974225387a35461c256dda4" title="Lgm_kepler" alt="" coords="561,1019,649,1045">
+<area shape="rect" href="$_lgm___vec_8h.html#cc29cb583eff692c2df92d9a49f3ce9e" title="Lgm_MatTimesMat" alt="" coords="539,1069,672,1096">
+<area shape="rect" href="$_lgm___vec_8h.html#67c413d617efaaa97ff1b1e6c98f149f" title="Lgm_NormalizeVector" alt="" coords="532,1120,679,1147">
+<area shape="rect" href="$_lgm___c_trans_8h.html#1d8f581754ed7f8a1fdba2d60982dcd1" title="Lgm_Nutation" alt="" coords="555,1171,656,1197">
+<area shape="rect" href="$_lgm___c_trans_8h.html#0f6fd0c4c8d56743de4c9e24039eb1df" title="Lgm_Print_DMSd" alt="" coords="544,31,667,57">
+<area shape="rect" href="$_lgm___c_trans_8h.html#09be79dfd1f30dc8313931e19bfb2b68" title="Lgm_Print_HMSd" alt="" coords="544,816,667,843">
+<area shape="rect" href="$_lgm___c_trans_8h.html#8c54f2ea495708f306d69eb5cbd5407f" title="Lgm_Print_HMSdp" alt="" coords="540,867,671,893">
+<area shape="rect" href="$_lgm___c_trans_8h.html#02b37cb5bba9e0af0e0d88393fb5dc07" title="Converts RA and DEC to unit vector in cartesian coords." alt="" coords="536,208,675,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#b400c7fd9bf8cd64e6b77831caca28e4" title="Lgm_SunPosition" alt="" coords="544,107,667,133">
+<area shape="rect" href="$_lgm___vec_8h.html#f287f148b722a2622150934c23fa59d4" title="Lgm_Transpose" alt="" coords="548,309,663,336">
+<area shape="rect" href="$_lgm___c_trans_8h.html#22d70f08569629bfb06991502e8a2943" title="Lgm_TT_to_TDB" alt="" coords="545,664,665,691">
+<area shape="rect" href="$_lgm___vec_8h.html#db5066af69d0f56f0880a098655383ff" title="Lgm_MatTimesVec" alt="" coords="739,208,872,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e869fd88ef397bce460b886a6a1b840d" title="Lgm_JDN" alt="" coords="961,449,1039,476">
+<area shape="rect" href="$_lgm___c_trans_8h.html#7d638a5de1c5a2b0176e2c51f4e85427" title="Lgm_IsLeapSecondDay" alt="" coords="920,613,1080,640">
+<area shape="rect" href="$_lgm___c_trans_8h.html#0366f317f96ffed4e998ce1551d5c190" title="Lgm_D_to_DMSd" alt="" coords="744,5,867,32">
+<area shape="rect" href="$_lgm___c_trans_8h.html#df736dd325580fae9f0bd5fde0fab40e" title="Lgm_UT_to_HMSd" alt="" coords="740,841,871,868">
+<area shape="rect" href="$_lgm___sun_position_8c.html#31f5bd3719a51e5dcac5d5eb3e4f639d" title="AddThe" alt="" coords="967,107,1033,133">
+<area shape="rect" href="$_lgm___sun_position_8c.html#92f2f0f91c99cd6bec1a0e9a3b6443fc" title="Frac" alt="" coords="781,107,829,133">
+<area shape="rect" href="$_lgm___sun_position_8c.html#0fffd38e8b66a549896a0860fac30e2d" title="Term" alt="" coords="780,157,831,184">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#4101ce628ad9db6a901cca96a6d36ae6" title="SWIG_CanCastAsInteger" alt="" coords="521,1272,689,1299">

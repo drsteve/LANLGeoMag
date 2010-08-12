@@ -1,0 +1,243 @@
+\hypertarget{struct_lgm___date_time}{
+\section{Lgm\_\-DateTime Struct Reference}
+\label{struct_lgm___date_time}\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}}
+}
+{\tt \#include $<$Lgm\_\-CTrans.h$>$}
+
+\subsection*{Data Fields}
+\begin{CompactItemize}
+\item 
+long int \hyperlink{struct_lgm___date_time_8c1b7b17183e48a6fafaf6302e1b1da9}{Date}
+\begin{CompactList}\small\item\em In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_42e645110404fbf4f10235789577fa32}{Year}
+\begin{CompactList}\small\item\em 4-digit year \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_530b376ec91a278ac98531d3ea17f148}{Month}
+\begin{CompactList}\small\item\em \mbox{[}1-12\mbox{]} \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_8f67164de537e3ec2b47e3204ddd3400}{Day}
+\begin{CompactList}\small\item\em Day Of Month \mbox{[}1-31\mbox{]}. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_72a1d4d4121176f8cf34faa09b5b4982}{Doy}
+\begin{CompactList}\small\item\em Day Of Year \mbox{[}1-31\mbox{]}. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_f51ff88ae9c6c4b9907f516c09ebf68f}{Time}
+\begin{CompactList}\small\item\em Decimal value of time in hours. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_9a7e982c278ab66497180395ad975b4b}{Hour}
+\begin{CompactList}\small\item\em Hours \mbox{[}0-23\mbox{]}. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_361937b5d839c9e24d045e2fb21933ad}{Minute}
+\begin{CompactList}\small\item\em Minutes \mbox{[}0-59\mbox{]}. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_660f6df0b5fa2dc75579df0b3980c938}{Second}
+\begin{CompactList}\small\item\em Seconds \mbox{[}0-60\mbox{]} (the 60 accommodates leap seconds). \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_7fde89b8485dba1a7ec38f217d8461da}{Week}
+\begin{CompactList}\small\item\em ISO Week number \mbox{[}1-53\mbox{]}. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_2f05d5502c47709f6d167b3089fe0cb5}{Dow}
+\begin{CompactList}\small\item\em ISO Day Of Week number \mbox{[}1-7\mbox{]}. \item\end{CompactList}\item 
+char \hyperlink{struct_lgm___date_time_a1b057d9abe7b7bf59bc5fed9ce73149}{DowStr} \mbox{[}10\mbox{]}
+\begin{CompactList}\small\item\em ISO Day Of Week number \mbox{[}1-7\mbox{]}. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_808a323a95585d70c244f1e742061ae4}{fYear}
+\begin{CompactList}\small\item\em Decimal year (e.g. 2004.2345). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_fca64005cd84fa9e811dac5219a618ad}{JD}
+\begin{CompactList}\small\item\em Julian Date. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_c94a6e5794c2d7b59588b14025cfba20}{T}
+\begin{CompactList}\small\item\em Julian Centuries since J2000 for this time system. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___date_time_4d93ea1d3c17e97bcb29061f1b349a2d}{DaySeconds}
+\begin{CompactList}\small\item\em Number of seconds in the day. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___date_time_1d23811e336d585ee5dd39f311f13f92}{TimeSystem}
+\begin{CompactList}\small\item\em e.g. LGM\_\-UTC, LGM\_\-UT1, LGM\_\-TAI, LGM\_\-GPS, LGM\_\-TT, LGM\_\-TDB, LGM\_\-TCG, etc.. \item\end{CompactList}\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 434 of file Lgm\_\-CTrans.h.
+
+\subsection{Field Documentation}
+\hypertarget{struct_lgm___date_time_8c1b7b17183e48a6fafaf6302e1b1da9}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Date@{Date}}
+\index{Date@{Date}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Date}]{\setlength{\rightskip}{0pt plus 5cm}long int {\bf Date}}}
+\label{struct_lgm___date_time_8c1b7b17183e48a6fafaf6302e1b1da9}
+
+
+In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int. 
+
+
+
+Definition at line 436 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_42e645110404fbf4f10235789577fa32}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Year@{Year}}
+\index{Year@{Year}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Year}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Year}}}
+\label{struct_lgm___date_time_42e645110404fbf4f10235789577fa32}
+
+
+4-digit year 
+
+
+
+Definition at line 438 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_530b376ec91a278ac98531d3ea17f148}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Month@{Month}}
+\index{Month@{Month}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Month}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Month}}}
+\label{struct_lgm___date_time_530b376ec91a278ac98531d3ea17f148}
+
+
+\mbox{[}1-12\mbox{]} 
+
+
+
+Definition at line 440 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_8f67164de537e3ec2b47e3204ddd3400}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Day@{Day}}
+\index{Day@{Day}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Day}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Day}}}
+\label{struct_lgm___date_time_8f67164de537e3ec2b47e3204ddd3400}
+
+
+Day Of Month \mbox{[}1-31\mbox{]}. 
+
+
+
+Definition at line 442 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_72a1d4d4121176f8cf34faa09b5b4982}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Doy@{Doy}}
+\index{Doy@{Doy}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Doy}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Doy}}}
+\label{struct_lgm___date_time_72a1d4d4121176f8cf34faa09b5b4982}
+
+
+Day Of Year \mbox{[}1-31\mbox{]}. 
+
+
+
+Definition at line 444 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_f51ff88ae9c6c4b9907f516c09ebf68f}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Time@{Time}}
+\index{Time@{Time}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Time}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Time}}}
+\label{struct_lgm___date_time_f51ff88ae9c6c4b9907f516c09ebf68f}
+
+
+Decimal value of time in hours. 
+
+
+
+Definition at line 446 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_9a7e982c278ab66497180395ad975b4b}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Hour@{Hour}}
+\index{Hour@{Hour}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Hour}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Hour}}}
+\label{struct_lgm___date_time_9a7e982c278ab66497180395ad975b4b}
+
+
+Hours \mbox{[}0-23\mbox{]}. 
+
+
+
+Definition at line 448 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_361937b5d839c9e24d045e2fb21933ad}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Minute@{Minute}}
+\index{Minute@{Minute}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Minute}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Minute}}}
+\label{struct_lgm___date_time_361937b5d839c9e24d045e2fb21933ad}
+
+
+Minutes \mbox{[}0-59\mbox{]}. 
+
+
+
+Definition at line 450 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_660f6df0b5fa2dc75579df0b3980c938}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Second@{Second}}
+\index{Second@{Second}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Second}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Second}}}
+\label{struct_lgm___date_time_660f6df0b5fa2dc75579df0b3980c938}
+
+
+Seconds \mbox{[}0-60\mbox{]} (the 60 accommodates leap seconds). 
+
+
+
+Definition at line 452 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_7fde89b8485dba1a7ec38f217d8461da}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Week@{Week}}
+\index{Week@{Week}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Week}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Week}}}
+\label{struct_lgm___date_time_7fde89b8485dba1a7ec38f217d8461da}
+
+
+ISO Week number \mbox{[}1-53\mbox{]}. 
+
+
+
+Definition at line 454 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_2f05d5502c47709f6d167b3089fe0cb5}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!Dow@{Dow}}
+\index{Dow@{Dow}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{Dow}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Dow}}}
+\label{struct_lgm___date_time_2f05d5502c47709f6d167b3089fe0cb5}
+
+
+ISO Day Of Week number \mbox{[}1-7\mbox{]}. 
+
+
+
+Definition at line 456 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_a1b057d9abe7b7bf59bc5fed9ce73149}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!DowStr@{DowStr}}
+\index{DowStr@{DowStr}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{DowStr}]{\setlength{\rightskip}{0pt plus 5cm}char {\bf DowStr}\mbox{[}10\mbox{]}}}
+\label{struct_lgm___date_time_a1b057d9abe7b7bf59bc5fed9ce73149}
+
+
+ISO Day Of Week number \mbox{[}1-7\mbox{]}. 
+
+
+
+Definition at line 458 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_808a323a95585d70c244f1e742061ae4}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!fYear@{fYear}}
+\index{fYear@{fYear}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{fYear}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf fYear}}}
+\label{struct_lgm___date_time_808a323a95585d70c244f1e742061ae4}
+
+
+Decimal year (e.g. 2004.2345). 
+
+
+
+Definition at line 460 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_fca64005cd84fa9e811dac5219a618ad}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!JD@{JD}}
+\index{JD@{JD}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{JD}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf JD}}}
+\label{struct_lgm___date_time_fca64005cd84fa9e811dac5219a618ad}
+
+
+Julian Date. 
+
+
+
+Definition at line 462 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_c94a6e5794c2d7b59588b14025cfba20}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!T@{T}}
+\index{T@{T}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{T}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf T}}}
+\label{struct_lgm___date_time_c94a6e5794c2d7b59588b14025cfba20}
+
+
+Julian Centuries since J2000 for this time system. 
+
+
+
+Definition at line 464 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_4d93ea1d3c17e97bcb29061f1b349a2d}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!DaySeconds@{DaySeconds}}
+\index{DaySeconds@{DaySeconds}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{DaySeconds}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DaySeconds}}}
+\label{struct_lgm___date_time_4d93ea1d3c17e97bcb29061f1b349a2d}
+
+
+Number of seconds in the day. 
+
+
+
+Definition at line 467 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___date_time_1d23811e336d585ee5dd39f311f13f92}{
+\index{Lgm\_\-DateTime@{Lgm\_\-DateTime}!TimeSystem@{TimeSystem}}
+\index{TimeSystem@{TimeSystem}!Lgm_DateTime@{Lgm\_\-DateTime}}
+\subsubsection[{TimeSystem}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf TimeSystem}}}
+\label{struct_lgm___date_time_1d23811e336d585ee5dd39f311f13f92}
+
+
+e.g. LGM\_\-UTC, LGM\_\-UT1, LGM\_\-TAI, LGM\_\-GPS, LGM\_\-TT, LGM\_\-TDB, LGM\_\-TCG, etc.. 
+
+
+
+Definition at line 469 of file Lgm\_\-CTrans.h.
+
+The documentation for this struct was generated from the following file:\begin{CompactItemize}
+\item 
+/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/\hyperlink{_lgm___c_trans_8h}{Lgm\_\-CTrans.h}\end{CompactItemize}

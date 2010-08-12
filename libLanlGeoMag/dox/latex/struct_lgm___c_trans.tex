@@ -1,0 +1,1191 @@
+\hypertarget{struct_lgm___c_trans}{
+\section{Lgm\_\-CTrans Struct Reference}
+\label{struct_lgm___c_trans}\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}}
+}
+{\tt \#include $<$Lgm\_\-CTrans.h$>$}
+
+Collaboration diagram for Lgm\_\-CTrans:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=328pt]{struct_lgm___c_trans__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Data Fields}
+\begin{CompactItemize}
+\item 
+int \hyperlink{struct_lgm___c_trans_95f627d7054b1abbffa2c6ea19bf05db}{Verbose}
+\item 
+\hyperlink{struct_lgm___leap_seconds}{Lgm\_\-LeapSeconds} \hyperlink{struct_lgm___c_trans_0228728c0f932a0af4566cdf20868cd4}{l}
+\begin{CompactList}\small\item\em Structure containing Leap Second Info. \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_962e9f1b4229ffbb70a070090d8a021e}{UT1}
+\begin{CompactList}\small\item\em UT is the mean solar time at Greenwich. \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_ffd6d677453dac5266c9172c6ff2d9b7}{UTC}
+\begin{CompactList}\small\item\em Universal Time Coordinated. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_3711c22856595eb27022ddb8680cec06}{DUT1}
+\begin{CompactList}\small\item\em Difference between UT1 and UTC. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_190ed8b9906021fb489dc2ee35881d8b}{LOD}
+\begin{CompactList}\small\item\em Length Of Day (LOD). \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_c12a11b923b2dd78320f3b222f5b4b7c}{TAI}
+\begin{CompactList}\small\item\em International Atomic Time. \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_ab5a2a9aa455c2df8b4d45a5b06d85c1}{GPS}
+\begin{CompactList}\small\item\em GPS time GPS = TAI - 19s. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_e588c8af37ba03583b88718e40df15f2}{DAT}
+\begin{CompactList}\small\item\em Difference between UTC and TAI. \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_a4afe0bafc4dfef674b987e38ab8d80e}{TT}
+\begin{CompactList}\small\item\em Terestrial Time (TT). \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_3c24ba5a6818123e311c951847bb90c9}{TDB}
+\begin{CompactList}\small\item\em Barycentric Dynamical Time. \item\end{CompactList}\item 
+\hyperlink{struct_lgm___date_time}{Lgm\_\-DateTime} \hyperlink{struct_lgm___c_trans_dcdd22f97d548861fcdd7f6912e39ecf}{TCG}
+\begin{CompactList}\small\item\em Geocentric Coordinate Time. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_ba7b3bce77fb692f5e3119488e703c8c}{gmst}
+\begin{CompactList}\small\item\em Greenwich Mean Sidereal Time units: in radians. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_ada0c250aaba2d37baa06b1363b2adf7}{gast}
+\begin{CompactList}\small\item\em Greenwich Apparent Sidereal Time Units: in radians. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_f649efec4c4f51f4db0ebb935a83d015}{xp}
+\item 
+double \hyperlink{struct_lgm___c_trans_7841edcbdbfea2b400dea7753dcfac9e}{yp}
+\begin{CompactList}\small\item\em Pole wander parameters. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_4904cc82627458fdf6672ccc0b2802c7}{epsilon}
+\begin{CompactList}\small\item\em Mean Obliquity of the Ecliptic (in radians). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_a8bf1178f8d7700b7ba6752dd3a0fe0d}{epsilon\_\-true}
+\begin{CompactList}\small\item\em True Obliquity of the Ecliptic $\epsilon_{true} = \epsilon + dEps$ (in radians). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_4daf524c969da993dc09f2b3c8d56173}{eccentricity}
+\begin{CompactList}\small\item\em Eccentricity of Earth-Sun orbit. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_bfeab9ab1ea1f52c6b33a0794809d62a}{lambda\_\-sun}
+\begin{CompactList}\small\item\em Ecliptic Long. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_25ad562558907e5ad4aad47740092522}{earth\_\-sun\_\-dist}
+\begin{CompactList}\small\item\em Earth-Sun distance (in units of earth radii). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_ebb1769343863f3c66a44cc6f97ea836}{RA\_\-sun}
+\begin{CompactList}\small\item\em Right Ascention of Sun (in degrees). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_b19a9ee35ac020d246368a77d45f24fc}{DEC\_\-sun}
+\begin{CompactList}\small\item\em Declination of Sun (in degrees). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_7ffa9e1f08f4d0cb1e671f68a3e02795}{lambda\_\-sun\_\-ha}
+\begin{CompactList}\small\item\em high accuracy eccliptic coords of sun \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_6a356ec9b9109cc0b9839cd61cffab28}{r\_\-sun\_\-ha}
+\begin{CompactList}\small\item\em high accuracy eccliptic coords of sun \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_68c9bad85ddaa182e024fb793c0cf7a2}{beta\_\-sun\_\-ha}
+\begin{CompactList}\small\item\em high accuracy eccliptic coords of sun \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_82cbad2cb80fd7db9be45cd4c1044587}{RA\_\-sun\_\-ha}
+\begin{CompactList}\small\item\em high accuracy Right Ascention of Sun (in degrees) \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_970dd30b9acfc69613ebe93c102ccdc7}{DEC\_\-sun\_\-ha}
+\begin{CompactList}\small\item\em high accuracy Declination of Sun (in degrees) \item\end{CompactList}\item 
+\hyperlink{struct_lgm___vector}{Lgm\_\-Vector} \hyperlink{struct_lgm___c_trans_ba9ef9d70bc79513848a5fe50faed070}{Sun}
+\begin{CompactList}\small\item\em direction of Sun in GEI system (unit vector) \item\end{CompactList}\item 
+\hyperlink{struct_lgm___vector}{Lgm\_\-Vector} \hyperlink{struct_lgm___c_trans_f0671f5d9fb2088ea9c46adfe6e1b7e5}{EcPole}
+\begin{CompactList}\small\item\em direction of Ecliptic Pole in GEI system (unit vector) \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_8614e82343ef042e83a6021f3a2ccd16}{psi}
+\begin{CompactList}\small\item\em Geodipole tilt angle, $\psi$ (in radians). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_5b35fcda1a15310fa7b7e3e242431de3}{sin\_\-psi}
+\begin{CompactList}\small\item\em $\sin(\psi)$ \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_98e0e08bb8a65f90813e5adb482aeb2c}{cos\_\-psi}
+\begin{CompactList}\small\item\em $\cos(\psi)$ \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_94023304f56c47803d512bd9f0bd1f22}{tan\_\-psi}
+\begin{CompactList}\small\item\em $\tan(\psi)$ \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_15c641f1f3d1a34127f85cef01bb9a75}{RA\_\-moon}
+\begin{CompactList}\small\item\em Right Ascention of Moon (in degrees). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_cda12dde2cd80008120d44f6738b3d64}{DEC\_\-moon}
+\begin{CompactList}\small\item\em Declination of Moon (in degrees). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_830a6cb034c6c685051715f4170252db}{MoonPhase}
+\begin{CompactList}\small\item\em The Phase of the Moon (in days). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_cf0375085710ac389d2bec865d0fe059}{EarthMoonDistance}
+\begin{CompactList}\small\item\em Distance between the Earth and Moon (in earth-radii). \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_f70c8accde2f7cb1977db97dc8f3ad9e}{M\_\-cd}
+\begin{CompactList}\small\item\em centered dipole Magnetic moment. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_2cfdfbacf9fe8b4ab1ad122903c54619}{M\_\-cd\_\-McIllwain}
+\begin{CompactList}\small\item\em magnetic dipole moment used by McIllwain to compute L. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_d1dc347c863f31e708763ed3f8731173}{CD\_\-gcolat}
+\begin{CompactList}\small\item\em Geographic colat of centered dipole axis (deg. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_3ce26131d2fbc511d6d6d5ac0efd5261}{CD\_\-glon}
+\begin{CompactList}\small\item\em Geographic long. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_7adca911ad76a7b1b97969e38e9852ba}{ED\_\-x0}
+\begin{CompactList}\small\item\em x-comp of dipole displacement from center. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_0365c6b352177b9f923ea9f3dedd5163}{ED\_\-y0}
+\begin{CompactList}\small\item\em y-comp of dipole displacement from center. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_2ef284be0af92b46e986d8842790143c}{ED\_\-z0}
+\begin{CompactList}\small\item\em z-comp of dipole displacement from center. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_7e97ac28698cae83ebf4b304dbbae40a}{Zeta}
+\begin{CompactList}\small\item\em Precession angle, $\zeta$. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_1f9ad133d6f1c336ecc4b50959393dde}{Theta}
+\begin{CompactList}\small\item\em Precession angle, $\theta$. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_913357aae0e0cb66e4bae0969b0855c4}{Zee}
+\begin{CompactList}\small\item\em Precession angle, $z$. \item\end{CompactList}\item 
+int \hyperlink{struct_lgm___c_trans_dc45647f0571d420274eddb4f11aa358}{nNutationTerms}
+\begin{CompactList}\small\item\em number of terms to usek in the dPsi/dEps Nutation series. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_bdbb574b7039f3276386228756be3072}{dPsi}
+\item 
+double \hyperlink{struct_lgm___c_trans_da0088f7b27e9da12e8e3bf8e9cf61b7}{dEps}
+\item 
+double \hyperlink{struct_lgm___c_trans_294c5492f2739575636f91a5170f9b19}{dPsiCosEps}
+\item 
+double \hyperlink{struct_lgm___c_trans_693724f063518972e1b52489e9b950b6}{dPsiSinEps}
+\item 
+double \hyperlink{struct_lgm___c_trans_437c2ba595193e711cf05a936202ff7c}{ddPsi}
+\begin{CompactList}\small\item\em radians additional corrections to dPsi -- part of EOP data \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_b89becceff8337966d19fd8009f67e8a}{ddEps}
+\begin{CompactList}\small\item\em radians additional corrections to dEps -- part of EOP data \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_c6f3be420027cbc3b4eb413d913b98d1}{EQ\_\-Eq}
+\begin{CompactList}\small\item\em Equation of the equinoxes. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_7f6ddff92744a285390dfa690098f1a6}{OmegaMoon}
+\begin{CompactList}\small\item\em Ascending node of Moon. \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_5559d17f092df97e1797a76209e0caa0}{dX}
+\begin{CompactList}\small\item\em for IUA-2000A reduction (not used yet) \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_5b69e4344b7089d8a3c6db32a3c38551}{dY}
+\begin{CompactList}\small\item\em for IUA-2000A reduction (not used yet) \item\end{CompactList}\item 
+double \hyperlink{struct_lgm___c_trans_88dca0b548d541262ee03936690683fb}{Agei\_\-to\_\-mod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_79800e94dbb4535121f274facd8b6934}{Amod\_\-to\_\-gei} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_0e3054fe310e108d1ba7eb105157bfe4}{Amod\_\-to\_\-tod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_cc69117b82eb049717039242959205ec}{Atod\_\-to\_\-mod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_8d8bb9c7bf109ce43279c3cc26cf0c1c}{Ateme\_\-to\_\-pef} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_9949aa9d5838e2e3a6b46c94d772dd59}{Apef\_\-to\_\-teme} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_82510707db95aee065a6a529b22f4792}{Apef\_\-to\_\-tod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_1104a01831f9fe60ee88ddc9d7b5c15d}{Atod\_\-to\_\-pef} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_5e570327e8c4ba164727c5831cdda367}{Awgs84\_\-to\_\-pef} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_de0af2bce4c3134f0b09cc1a13b74733}{Apef\_\-to\_\-wgs84} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_88dce682aa4e24179457f6616bb847c8}{Agse\_\-to\_\-mod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_346796db2e332c3bb5a1a565ade74e2e}{Amod\_\-to\_\-gse} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_d060a87c222bb9f364f1196fc89ac03c}{Asm\_\-to\_\-gsm} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_63d0ecd0a47f3ec17a7858304cd1cf99}{Agsm\_\-to\_\-sm} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_35b300d0ecae5fa95f9a161a04a76c68}{Agsm\_\-to\_\-mod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_44ebaf4525593898cbabcea6c05cad3e}{Amod\_\-to\_\-gsm} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_37da7699c286f0a4542396aaab17bb36}{Agsm\_\-to\_\-gse} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_568504cf16f5e31c68e955235b19f883}{Agse\_\-to\_\-gsm} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_3bde4bf5f61bc97b0c2984ea06677989}{Awgs84\_\-to\_\-mod} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_7fb70629ed011b03df0429787e1b9ad4}{Amod\_\-to\_\-wgs84} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_13ae99230c1a3caec0d3b78ad714de4b}{Awgs84\_\-to\_\-gei} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_e70d75fd4a8b4ef9a3271f875183b402}{Agei\_\-to\_\-wgs84} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_6322719ffe580e8f5b206972478e1c41}{Agsm\_\-to\_\-wgs84} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_88eb2b4dca5ab35213cadf57cf09de4c}{Awgs84\_\-to\_\-gsm} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_3c3703af84212fe400ea4de85746f86c}{Awgs84\_\-to\_\-cdmag} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_1f66bf8da027bcc6ac0535710e14027f}{Acdmag\_\-to\_\-wgs84} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+int \hyperlink{struct_lgm___c_trans_4ed10c5333f6674ca1574d00c56ae3da}{Lgm\_\-IGRF\_\-FirstCall}
+\item 
+double \hyperlink{struct_lgm___c_trans_fecd660b4543de5ef4d7313ab481d28c}{Lgm\_\-IGRF\_\-OldYear}
+\item 
+double \hyperlink{struct_lgm___c_trans_2f34dac1bc690a7daee26931f3035a4b}{Lgm\_\-IGRF\_\-g} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_fcef05c35f42f86c066479ae8ebef3a4}{Lgm\_\-IGRF\_\-h} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_62099f52bc9f00a420106275ee55dacb}{Lgm\_\-IGRF\_\-R} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_50a4c2c4f015a684f40fe14a3d4dcc80}{Lgm\_\-IGRF\_\-K} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_6c8cb5804769345f93dc684349e5232f}{Lgm\_\-IGRF\_\-S} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_c6a0474a9ba424b11192a468df4b71bf}{Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_96a1803f9964fff5d9095953e098437f}{Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_447bb9f7fa254244901964f96c0ccf2f}{Lgm\_\-IGRF\_\-SqrtNM1} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\item 
+double \hyperlink{struct_lgm___c_trans_fbdaf18ce038d57df3465a30a2a72b11}{Lgm\_\-IGRF\_\-SqrtNM2} \mbox{[}13\mbox{]}\mbox{[}13\mbox{]}
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 475 of file Lgm\_\-CTrans.h.
+
+\subsection{Field Documentation}
+\hypertarget{struct_lgm___c_trans_95f627d7054b1abbffa2c6ea19bf05db}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Verbose@{Verbose}}
+\index{Verbose@{Verbose}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Verbose}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Verbose}}}
+\label{struct_lgm___c_trans_95f627d7054b1abbffa2c6ea19bf05db}
+
+
+
+
+Definition at line 477 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_0228728c0f932a0af4566cdf20868cd4}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!l@{l}}
+\index{l@{l}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{l}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-LeapSeconds} {\bf l}}}
+\label{struct_lgm___c_trans_0228728c0f932a0af4566cdf20868cd4}
+
+
+Structure containing Leap Second Info. 
+
+
+
+Definition at line 479 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_962e9f1b4229ffbb70a070090d8a021e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!UT1@{UT1}}
+\index{UT1@{UT1}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{UT1}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf UT1}}}
+\label{struct_lgm___c_trans_962e9f1b4229ffbb70a070090d8a021e}
+
+
+UT is the mean solar time at Greenwich. 
+
+UT0 is a version of UT that uses data from many different ground stations. UT1 is a version of UT0 in which corrections for polar motion have been made so that time is independant of observing location. There is also a UT2, but we wont use UT0 or UT2 here. Units: Decimal hours 
+
+Definition at line 483 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ffd6d677453dac5266c9172c6ff2d9b7}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!UTC@{UTC}}
+\index{UTC@{UTC}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{UTC}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf UTC}}}
+\label{struct_lgm___c_trans_ffd6d677453dac5266c9172c6ff2d9b7}
+
+
+Universal Time Coordinated. 
+
+Most commonly used time system. Derived from atomic time. It is maintained to be within +/- 0.9s of UT1 (via addition or subtraction(?) of leap seconds). Units: Decimal hours 
+
+Definition at line 495 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_3711c22856595eb27022ddb8680cec06}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!DUT1@{DUT1}}
+\index{DUT1@{DUT1}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{DUT1}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DUT1}}}
+\label{struct_lgm___c_trans_3711c22856595eb27022ddb8680cec06}
+
+
+Difference between UT1 and UTC. 
+
+DUT1 = UT1 - UTC. This is monitored and reported as part of the Earth Orientation Parameters (EOP). Can be predicted a short time into the future, but definitive values only available retrospectively. We set this value to 0.0 by default. Thus in the absence of EOP data, we assume its initial value. Units: Decimal seconds 
+
+Definition at line 504 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_190ed8b9906021fb489dc2ee35881d8b}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!LOD@{LOD}}
+\index{LOD@{LOD}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{LOD}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf LOD}}}
+\label{struct_lgm___c_trans_190ed8b9906021fb489dc2ee35881d8b}
+
+
+Length Of Day (LOD). 
+
+Its the amount of extra time in seconds that the current day has. Not predictable. Part of EOP values. 
+
+Definition at line 518 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_c12a11b923b2dd78320f3b222f5b4b7c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!TAI@{TAI}}
+\index{TAI@{TAI}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{TAI}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf TAI}}}
+\label{struct_lgm___c_trans_c12a11b923b2dd78320f3b222f5b4b7c}
+
+
+International Atomic Time. 
+
+TAI = UTC + DAT 
+
+Definition at line 524 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ab5a2a9aa455c2df8b4d45a5b06d85c1}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!GPS@{GPS}}
+\index{GPS@{GPS}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{GPS}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf GPS}}}
+\label{struct_lgm___c_trans_ab5a2a9aa455c2df8b4d45a5b06d85c1}
+
+
+GPS time GPS = TAI - 19s. 
+
+
+
+Definition at line 529 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_e588c8af37ba03583b88718e40df15f2}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!DAT@{DAT}}
+\index{DAT@{DAT}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{DAT}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DAT}}}
+\label{struct_lgm___c_trans_e588c8af37ba03583b88718e40df15f2}
+
+
+Difference between UTC and TAI. 
+
+DAT = TAI - UTC DAT is essentially the number of leap seconds and are an integral number of whole seconds. Units: Decimal seconds. 
+
+Definition at line 534 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_a4afe0bafc4dfef674b987e38ab8d80e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!TT@{TT}}
+\index{TT@{TT}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{TT}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf TT}}}
+\label{struct_lgm___c_trans_a4afe0bafc4dfef674b987e38ab8d80e}
+
+
+Terestrial Time (TT). 
+
+Essentially the same thing as \char`\"{}Terrestrial Dynamical Time (TDT) or Ephmeris Time (ET). Its defined to be, TT = TAI + 32.184s Units: Decimal hours. 
+
+Definition at line 542 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_3c24ba5a6818123e311c951847bb90c9}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!TDB@{TDB}}
+\index{TDB@{TDB}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{TDB}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf TDB}}}
+\label{struct_lgm___c_trans_3c24ba5a6818123e311c951847bb90c9}
+
+
+Barycentric Dynamical Time. 
+
+Not used here. Units: Decimal hours 
+
+Definition at line 551 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_dcdd22f97d548861fcdd7f6912e39ecf}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!TCG@{TCG}}
+\index{TCG@{TCG}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{TCG}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-DateTime} {\bf TCG}}}
+\label{struct_lgm___c_trans_dcdd22f97d548861fcdd7f6912e39ecf}
+
+
+Geocentric Coordinate Time. 
+
+Not used here. Units: Decimal hours 
+
+Definition at line 557 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ba7b3bce77fb692f5e3119488e703c8c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!gmst@{gmst}}
+\index{gmst@{gmst}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{gmst}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf gmst}}}
+\label{struct_lgm___c_trans_ba7b3bce77fb692f5e3119488e703c8c}
+
+
+Greenwich Mean Sidereal Time units: in radians. 
+
+
+
+Definition at line 564 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ada0c250aaba2d37baa06b1363b2adf7}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!gast@{gast}}
+\index{gast@{gast}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{gast}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf gast}}}
+\label{struct_lgm___c_trans_ada0c250aaba2d37baa06b1363b2adf7}
+
+
+Greenwich Apparent Sidereal Time Units: in radians. 
+
+
+
+Definition at line 569 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_f649efec4c4f51f4db0ebb935a83d015}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!xp@{xp}}
+\index{xp@{xp}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{xp}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf xp}}}
+\label{struct_lgm___c_trans_f649efec4c4f51f4db0ebb935a83d015}
+
+
+
+
+Definition at line 575 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7841edcbdbfea2b400dea7753dcfac9e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!yp@{yp}}
+\index{yp@{yp}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{yp}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf yp}}}
+\label{struct_lgm___c_trans_7841edcbdbfea2b400dea7753dcfac9e}
+
+
+Pole wander parameters. 
+
+part of EOP data. Units: radians 
+
+Definition at line 575 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_4904cc82627458fdf6672ccc0b2802c7}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!epsilon@{epsilon}}
+\index{epsilon@{epsilon}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{epsilon}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf epsilon}}}
+\label{struct_lgm___c_trans_4904cc82627458fdf6672ccc0b2802c7}
+
+
+Mean Obliquity of the Ecliptic (in radians). 
+
+
+
+Definition at line 581 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_a8bf1178f8d7700b7ba6752dd3a0fe0d}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!epsilon\_\-true@{epsilon\_\-true}}
+\index{epsilon\_\-true@{epsilon\_\-true}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{epsilon\_\-true}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf epsilon\_\-true}}}
+\label{struct_lgm___c_trans_a8bf1178f8d7700b7ba6752dd3a0fe0d}
+
+
+True Obliquity of the Ecliptic $\epsilon_{true} = \epsilon + dEps$ (in radians). 
+
+
+
+Definition at line 586 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_4daf524c969da993dc09f2b3c8d56173}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!eccentricity@{eccentricity}}
+\index{eccentricity@{eccentricity}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{eccentricity}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf eccentricity}}}
+\label{struct_lgm___c_trans_4daf524c969da993dc09f2b3c8d56173}
+
+
+Eccentricity of Earth-Sun orbit. 
+
+
+
+Definition at line 592 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_bfeab9ab1ea1f52c6b33a0794809d62a}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!lambda\_\-sun@{lambda\_\-sun}}
+\index{lambda\_\-sun@{lambda\_\-sun}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{lambda\_\-sun}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf lambda\_\-sun}}}
+\label{struct_lgm___c_trans_bfeab9ab1ea1f52c6b33a0794809d62a}
+
+
+Ecliptic Long. 
+
+of Sun (in radians) 
+
+Definition at line 594 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_25ad562558907e5ad4aad47740092522}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!earth\_\-sun\_\-dist@{earth\_\-sun\_\-dist}}
+\index{earth\_\-sun\_\-dist@{earth\_\-sun\_\-dist}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{earth\_\-sun\_\-dist}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf earth\_\-sun\_\-dist}}}
+\label{struct_lgm___c_trans_25ad562558907e5ad4aad47740092522}
+
+
+Earth-Sun distance (in units of earth radii). 
+
+
+
+Definition at line 595 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ebb1769343863f3c66a44cc6f97ea836}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!RA\_\-sun@{RA\_\-sun}}
+\index{RA\_\-sun@{RA\_\-sun}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{RA\_\-sun}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf RA\_\-sun}}}
+\label{struct_lgm___c_trans_ebb1769343863f3c66a44cc6f97ea836}
+
+
+Right Ascention of Sun (in degrees). 
+
+
+
+Definition at line 596 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_b19a9ee35ac020d246368a77d45f24fc}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!DEC\_\-sun@{DEC\_\-sun}}
+\index{DEC\_\-sun@{DEC\_\-sun}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{DEC\_\-sun}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DEC\_\-sun}}}
+\label{struct_lgm___c_trans_b19a9ee35ac020d246368a77d45f24fc}
+
+
+Declination of Sun (in degrees). 
+
+
+
+Definition at line 597 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7ffa9e1f08f4d0cb1e671f68a3e02795}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!lambda\_\-sun\_\-ha@{lambda\_\-sun\_\-ha}}
+\index{lambda\_\-sun\_\-ha@{lambda\_\-sun\_\-ha}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{lambda\_\-sun\_\-ha}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf lambda\_\-sun\_\-ha}}}
+\label{struct_lgm___c_trans_7ffa9e1f08f4d0cb1e671f68a3e02795}
+
+
+high accuracy eccliptic coords of sun 
+
+
+
+Definition at line 599 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_6a356ec9b9109cc0b9839cd61cffab28}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!r\_\-sun\_\-ha@{r\_\-sun\_\-ha}}
+\index{r\_\-sun\_\-ha@{r\_\-sun\_\-ha}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{r\_\-sun\_\-ha}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf r\_\-sun\_\-ha}}}
+\label{struct_lgm___c_trans_6a356ec9b9109cc0b9839cd61cffab28}
+
+
+high accuracy eccliptic coords of sun 
+
+
+
+Definition at line 600 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_68c9bad85ddaa182e024fb793c0cf7a2}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!beta\_\-sun\_\-ha@{beta\_\-sun\_\-ha}}
+\index{beta\_\-sun\_\-ha@{beta\_\-sun\_\-ha}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{beta\_\-sun\_\-ha}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf beta\_\-sun\_\-ha}}}
+\label{struct_lgm___c_trans_68c9bad85ddaa182e024fb793c0cf7a2}
+
+
+high accuracy eccliptic coords of sun 
+
+
+
+Definition at line 601 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_82cbad2cb80fd7db9be45cd4c1044587}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!RA\_\-sun\_\-ha@{RA\_\-sun\_\-ha}}
+\index{RA\_\-sun\_\-ha@{RA\_\-sun\_\-ha}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{RA\_\-sun\_\-ha}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf RA\_\-sun\_\-ha}}}
+\label{struct_lgm___c_trans_82cbad2cb80fd7db9be45cd4c1044587}
+
+
+high accuracy Right Ascention of Sun (in degrees) 
+
+
+
+Definition at line 602 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_970dd30b9acfc69613ebe93c102ccdc7}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!DEC\_\-sun\_\-ha@{DEC\_\-sun\_\-ha}}
+\index{DEC\_\-sun\_\-ha@{DEC\_\-sun\_\-ha}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{DEC\_\-sun\_\-ha}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DEC\_\-sun\_\-ha}}}
+\label{struct_lgm___c_trans_970dd30b9acfc69613ebe93c102ccdc7}
+
+
+high accuracy Declination of Sun (in degrees) 
+
+
+
+Definition at line 603 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_ba9ef9d70bc79513848a5fe50faed070}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Sun@{Sun}}
+\index{Sun@{Sun}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Sun}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-Vector} {\bf Sun}}}
+\label{struct_lgm___c_trans_ba9ef9d70bc79513848a5fe50faed070}
+
+
+direction of Sun in GEI system (unit vector) 
+
+
+
+Definition at line 605 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_f0671f5d9fb2088ea9c46adfe6e1b7e5}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!EcPole@{EcPole}}
+\index{EcPole@{EcPole}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{EcPole}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lgm\_\-Vector} {\bf EcPole}}}
+\label{struct_lgm___c_trans_f0671f5d9fb2088ea9c46adfe6e1b7e5}
+
+
+direction of Ecliptic Pole in GEI system (unit vector) 
+
+
+
+Definition at line 606 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_8614e82343ef042e83a6021f3a2ccd16}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!psi@{psi}}
+\index{psi@{psi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{psi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf psi}}}
+\label{struct_lgm___c_trans_8614e82343ef042e83a6021f3a2ccd16}
+
+
+Geodipole tilt angle, $\psi$ (in radians). 
+
+
+
+Definition at line 607 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_5b35fcda1a15310fa7b7e3e242431de3}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!sin\_\-psi@{sin\_\-psi}}
+\index{sin\_\-psi@{sin\_\-psi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{sin\_\-psi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf sin\_\-psi}}}
+\label{struct_lgm___c_trans_5b35fcda1a15310fa7b7e3e242431de3}
+
+
+$\sin(\psi)$ 
+
+
+
+Definition at line 608 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_98e0e08bb8a65f90813e5adb482aeb2c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!cos\_\-psi@{cos\_\-psi}}
+\index{cos\_\-psi@{cos\_\-psi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{cos\_\-psi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf cos\_\-psi}}}
+\label{struct_lgm___c_trans_98e0e08bb8a65f90813e5adb482aeb2c}
+
+
+$\cos(\psi)$ 
+
+
+
+Definition at line 609 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_94023304f56c47803d512bd9f0bd1f22}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!tan\_\-psi@{tan\_\-psi}}
+\index{tan\_\-psi@{tan\_\-psi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{tan\_\-psi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf tan\_\-psi}}}
+\label{struct_lgm___c_trans_94023304f56c47803d512bd9f0bd1f22}
+
+
+$\tan(\psi)$ 
+
+
+
+Definition at line 610 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_15c641f1f3d1a34127f85cef01bb9a75}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!RA\_\-moon@{RA\_\-moon}}
+\index{RA\_\-moon@{RA\_\-moon}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{RA\_\-moon}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf RA\_\-moon}}}
+\label{struct_lgm___c_trans_15c641f1f3d1a34127f85cef01bb9a75}
+
+
+Right Ascention of Moon (in degrees). 
+
+
+
+Definition at line 611 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_cda12dde2cd80008120d44f6738b3d64}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!DEC\_\-moon@{DEC\_\-moon}}
+\index{DEC\_\-moon@{DEC\_\-moon}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{DEC\_\-moon}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf DEC\_\-moon}}}
+\label{struct_lgm___c_trans_cda12dde2cd80008120d44f6738b3d64}
+
+
+Declination of Moon (in degrees). 
+
+
+
+Definition at line 612 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_830a6cb034c6c685051715f4170252db}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!MoonPhase@{MoonPhase}}
+\index{MoonPhase@{MoonPhase}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{MoonPhase}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf MoonPhase}}}
+\label{struct_lgm___c_trans_830a6cb034c6c685051715f4170252db}
+
+
+The Phase of the Moon (in days). 
+
+
+
+Definition at line 613 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_cf0375085710ac389d2bec865d0fe059}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!EarthMoonDistance@{EarthMoonDistance}}
+\index{EarthMoonDistance@{EarthMoonDistance}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{EarthMoonDistance}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf EarthMoonDistance}}}
+\label{struct_lgm___c_trans_cf0375085710ac389d2bec865d0fe059}
+
+
+Distance between the Earth and Moon (in earth-radii). 
+
+
+
+Definition at line 614 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_f70c8accde2f7cb1977db97dc8f3ad9e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!M\_\-cd@{M\_\-cd}}
+\index{M\_\-cd@{M\_\-cd}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{M\_\-cd}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf M\_\-cd}}}
+\label{struct_lgm___c_trans_f70c8accde2f7cb1977db97dc8f3ad9e}
+
+
+centered dipole Magnetic moment. 
+
+(nT Re$^\wedge$3) 
+
+Definition at line 622 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_2cfdfbacf9fe8b4ab1ad122903c54619}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!M\_\-cd\_\-McIllwain@{M\_\-cd\_\-McIllwain}}
+\index{M\_\-cd\_\-McIllwain@{M\_\-cd\_\-McIllwain}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{M\_\-cd\_\-McIllwain}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf M\_\-cd\_\-McIllwain}}}
+\label{struct_lgm___c_trans_2cfdfbacf9fe8b4ab1ad122903c54619}
+
+
+magnetic dipole moment used by McIllwain to compute L. 
+
+Sometimes want to use this for consistency? 
+
+Definition at line 623 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_d1dc347c863f31e708763ed3f8731173}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!CD\_\-gcolat@{CD\_\-gcolat}}
+\index{CD\_\-gcolat@{CD\_\-gcolat}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{CD\_\-gcolat}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf CD\_\-gcolat}}}
+\label{struct_lgm___c_trans_d1dc347c863f31e708763ed3f8731173}
+
+
+Geographic colat of centered dipole axis (deg. 
+
+) 
+
+Definition at line 624 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_3ce26131d2fbc511d6d6d5ac0efd5261}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!CD\_\-glon@{CD\_\-glon}}
+\index{CD\_\-glon@{CD\_\-glon}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{CD\_\-glon}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf CD\_\-glon}}}
+\label{struct_lgm___c_trans_3ce26131d2fbc511d6d6d5ac0efd5261}
+
+
+Geographic long. 
+
+of centered dipole axis (deg.) 
+
+Definition at line 625 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7adca911ad76a7b1b97969e38e9852ba}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!ED\_\-x0@{ED\_\-x0}}
+\index{ED\_\-x0@{ED\_\-x0}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{ED\_\-x0}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf ED\_\-x0}}}
+\label{struct_lgm___c_trans_7adca911ad76a7b1b97969e38e9852ba}
+
+
+x-comp of dipole displacement from center. 
+
+Used in eccentric dipole field. 
+
+Definition at line 626 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_0365c6b352177b9f923ea9f3dedd5163}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!ED\_\-y0@{ED\_\-y0}}
+\index{ED\_\-y0@{ED\_\-y0}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{ED\_\-y0}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf ED\_\-y0}}}
+\label{struct_lgm___c_trans_0365c6b352177b9f923ea9f3dedd5163}
+
+
+y-comp of dipole displacement from center. 
+
+Used in eccentric dipole field. 
+
+Definition at line 627 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_2ef284be0af92b46e986d8842790143c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!ED\_\-z0@{ED\_\-z0}}
+\index{ED\_\-z0@{ED\_\-z0}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{ED\_\-z0}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf ED\_\-z0}}}
+\label{struct_lgm___c_trans_2ef284be0af92b46e986d8842790143c}
+
+
+z-comp of dipole displacement from center. 
+
+Used in eccentric dipole field. 
+
+Definition at line 628 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7e97ac28698cae83ebf4b304dbbae40a}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Zeta@{Zeta}}
+\index{Zeta@{Zeta}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Zeta}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Zeta}}}
+\label{struct_lgm___c_trans_7e97ac28698cae83ebf4b304dbbae40a}
+
+
+Precession angle, $\zeta$. 
+
+
+
+Definition at line 634 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_1f9ad133d6f1c336ecc4b50959393dde}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Theta@{Theta}}
+\index{Theta@{Theta}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Theta}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Theta}}}
+\label{struct_lgm___c_trans_1f9ad133d6f1c336ecc4b50959393dde}
+
+
+Precession angle, $\theta$. 
+
+
+
+Definition at line 635 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_913357aae0e0cb66e4bae0969b0855c4}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Zee@{Zee}}
+\index{Zee@{Zee}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Zee}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Zee}}}
+\label{struct_lgm___c_trans_913357aae0e0cb66e4bae0969b0855c4}
+
+
+Precession angle, $z$. 
+
+
+
+Definition at line 636 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_dc45647f0571d420274eddb4f11aa358}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!nNutationTerms@{nNutationTerms}}
+\index{nNutationTerms@{nNutationTerms}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{nNutationTerms}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf nNutationTerms}}}
+\label{struct_lgm___c_trans_dc45647f0571d420274eddb4f11aa358}
+
+
+number of terms to usek in the dPsi/dEps Nutation series. 
+
+
+
+Definition at line 641 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_bdbb574b7039f3276386228756be3072}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dPsi@{dPsi}}
+\index{dPsi@{dPsi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dPsi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dPsi}}}
+\label{struct_lgm___c_trans_bdbb574b7039f3276386228756be3072}
+
+
+
+
+Definition at line 642 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_da0088f7b27e9da12e8e3bf8e9cf61b7}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dEps@{dEps}}
+\index{dEps@{dEps}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dEps}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dEps}}}
+\label{struct_lgm___c_trans_da0088f7b27e9da12e8e3bf8e9cf61b7}
+
+
+
+
+Definition at line 643 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_294c5492f2739575636f91a5170f9b19}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dPsiCosEps@{dPsiCosEps}}
+\index{dPsiCosEps@{dPsiCosEps}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dPsiCosEps}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dPsiCosEps}}}
+\label{struct_lgm___c_trans_294c5492f2739575636f91a5170f9b19}
+
+
+
+
+Definition at line 644 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_693724f063518972e1b52489e9b950b6}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dPsiSinEps@{dPsiSinEps}}
+\index{dPsiSinEps@{dPsiSinEps}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dPsiSinEps}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dPsiSinEps}}}
+\label{struct_lgm___c_trans_693724f063518972e1b52489e9b950b6}
+
+
+
+
+Definition at line 645 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_437c2ba595193e711cf05a936202ff7c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!ddPsi@{ddPsi}}
+\index{ddPsi@{ddPsi}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{ddPsi}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf ddPsi}}}
+\label{struct_lgm___c_trans_437c2ba595193e711cf05a936202ff7c}
+
+
+radians additional corrections to dPsi -- part of EOP data 
+
+
+
+Definition at line 646 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_b89becceff8337966d19fd8009f67e8a}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!ddEps@{ddEps}}
+\index{ddEps@{ddEps}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{ddEps}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf ddEps}}}
+\label{struct_lgm___c_trans_b89becceff8337966d19fd8009f67e8a}
+
+
+radians additional corrections to dEps -- part of EOP data 
+
+
+
+Definition at line 647 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_c6f3be420027cbc3b4eb413d913b98d1}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!EQ\_\-Eq@{EQ\_\-Eq}}
+\index{EQ\_\-Eq@{EQ\_\-Eq}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{EQ\_\-Eq}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf EQ\_\-Eq}}}
+\label{struct_lgm___c_trans_c6f3be420027cbc3b4eb413d913b98d1}
+
+
+Equation of the equinoxes. 
+
+
+
+Definition at line 648 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7f6ddff92744a285390dfa690098f1a6}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!OmegaMoon@{OmegaMoon}}
+\index{OmegaMoon@{OmegaMoon}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{OmegaMoon}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf OmegaMoon}}}
+\label{struct_lgm___c_trans_7f6ddff92744a285390dfa690098f1a6}
+
+
+Ascending node of Moon. 
+
+
+
+Definition at line 649 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_5559d17f092df97e1797a76209e0caa0}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dX@{dX}}
+\index{dX@{dX}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dX}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dX}}}
+\label{struct_lgm___c_trans_5559d17f092df97e1797a76209e0caa0}
+
+
+for IUA-2000A reduction (not used yet) 
+
+
+
+Definition at line 650 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_5b69e4344b7089d8a3c6db32a3c38551}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!dY@{dY}}
+\index{dY@{dY}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{dY}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf dY}}}
+\label{struct_lgm___c_trans_5b69e4344b7089d8a3c6db32a3c38551}
+
+
+for IUA-2000A reduction (not used yet) 
+
+
+
+Definition at line 651 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_88dca0b548d541262ee03936690683fb}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agei\_\-to\_\-mod@{Agei\_\-to\_\-mod}}
+\index{Agei\_\-to\_\-mod@{Agei\_\-to\_\-mod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agei\_\-to\_\-mod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agei\_\-to\_\-mod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_88dca0b548d541262ee03936690683fb}
+
+
+
+
+Definition at line 658 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_79800e94dbb4535121f274facd8b6934}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Amod\_\-to\_\-gei@{Amod\_\-to\_\-gei}}
+\index{Amod\_\-to\_\-gei@{Amod\_\-to\_\-gei}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Amod\_\-to\_\-gei}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Amod\_\-to\_\-gei}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_79800e94dbb4535121f274facd8b6934}
+
+
+
+
+Definition at line 659 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_0e3054fe310e108d1ba7eb105157bfe4}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Amod\_\-to\_\-tod@{Amod\_\-to\_\-tod}}
+\index{Amod\_\-to\_\-tod@{Amod\_\-to\_\-tod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Amod\_\-to\_\-tod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Amod\_\-to\_\-tod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_0e3054fe310e108d1ba7eb105157bfe4}
+
+
+
+
+Definition at line 660 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_cc69117b82eb049717039242959205ec}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Atod\_\-to\_\-mod@{Atod\_\-to\_\-mod}}
+\index{Atod\_\-to\_\-mod@{Atod\_\-to\_\-mod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Atod\_\-to\_\-mod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Atod\_\-to\_\-mod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_cc69117b82eb049717039242959205ec}
+
+
+
+
+Definition at line 661 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_8d8bb9c7bf109ce43279c3cc26cf0c1c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Ateme\_\-to\_\-pef@{Ateme\_\-to\_\-pef}}
+\index{Ateme\_\-to\_\-pef@{Ateme\_\-to\_\-pef}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Ateme\_\-to\_\-pef}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Ateme\_\-to\_\-pef}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_8d8bb9c7bf109ce43279c3cc26cf0c1c}
+
+
+
+
+Definition at line 662 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_9949aa9d5838e2e3a6b46c94d772dd59}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Apef\_\-to\_\-teme@{Apef\_\-to\_\-teme}}
+\index{Apef\_\-to\_\-teme@{Apef\_\-to\_\-teme}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Apef\_\-to\_\-teme}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Apef\_\-to\_\-teme}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_9949aa9d5838e2e3a6b46c94d772dd59}
+
+
+
+
+Definition at line 663 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_82510707db95aee065a6a529b22f4792}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Apef\_\-to\_\-tod@{Apef\_\-to\_\-tod}}
+\index{Apef\_\-to\_\-tod@{Apef\_\-to\_\-tod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Apef\_\-to\_\-tod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Apef\_\-to\_\-tod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_82510707db95aee065a6a529b22f4792}
+
+
+
+
+Definition at line 664 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_1104a01831f9fe60ee88ddc9d7b5c15d}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Atod\_\-to\_\-pef@{Atod\_\-to\_\-pef}}
+\index{Atod\_\-to\_\-pef@{Atod\_\-to\_\-pef}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Atod\_\-to\_\-pef}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Atod\_\-to\_\-pef}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_1104a01831f9fe60ee88ddc9d7b5c15d}
+
+
+
+
+Definition at line 665 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_5e570327e8c4ba164727c5831cdda367}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Awgs84\_\-to\_\-pef@{Awgs84\_\-to\_\-pef}}
+\index{Awgs84\_\-to\_\-pef@{Awgs84\_\-to\_\-pef}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Awgs84\_\-to\_\-pef}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Awgs84\_\-to\_\-pef}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_5e570327e8c4ba164727c5831cdda367}
+
+
+
+
+Definition at line 666 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_de0af2bce4c3134f0b09cc1a13b74733}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Apef\_\-to\_\-wgs84@{Apef\_\-to\_\-wgs84}}
+\index{Apef\_\-to\_\-wgs84@{Apef\_\-to\_\-wgs84}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Apef\_\-to\_\-wgs84}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Apef\_\-to\_\-wgs84}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_de0af2bce4c3134f0b09cc1a13b74733}
+
+
+
+
+Definition at line 667 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_88dce682aa4e24179457f6616bb847c8}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agse\_\-to\_\-mod@{Agse\_\-to\_\-mod}}
+\index{Agse\_\-to\_\-mod@{Agse\_\-to\_\-mod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agse\_\-to\_\-mod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agse\_\-to\_\-mod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_88dce682aa4e24179457f6616bb847c8}
+
+
+
+
+Definition at line 668 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_346796db2e332c3bb5a1a565ade74e2e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Amod\_\-to\_\-gse@{Amod\_\-to\_\-gse}}
+\index{Amod\_\-to\_\-gse@{Amod\_\-to\_\-gse}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Amod\_\-to\_\-gse}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Amod\_\-to\_\-gse}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_346796db2e332c3bb5a1a565ade74e2e}
+
+
+
+
+Definition at line 669 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_d060a87c222bb9f364f1196fc89ac03c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Asm\_\-to\_\-gsm@{Asm\_\-to\_\-gsm}}
+\index{Asm\_\-to\_\-gsm@{Asm\_\-to\_\-gsm}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Asm\_\-to\_\-gsm}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Asm\_\-to\_\-gsm}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_d060a87c222bb9f364f1196fc89ac03c}
+
+
+
+
+Definition at line 670 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_63d0ecd0a47f3ec17a7858304cd1cf99}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agsm\_\-to\_\-sm@{Agsm\_\-to\_\-sm}}
+\index{Agsm\_\-to\_\-sm@{Agsm\_\-to\_\-sm}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agsm\_\-to\_\-sm}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agsm\_\-to\_\-sm}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_63d0ecd0a47f3ec17a7858304cd1cf99}
+
+
+
+
+Definition at line 671 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_35b300d0ecae5fa95f9a161a04a76c68}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agsm\_\-to\_\-mod@{Agsm\_\-to\_\-mod}}
+\index{Agsm\_\-to\_\-mod@{Agsm\_\-to\_\-mod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agsm\_\-to\_\-mod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agsm\_\-to\_\-mod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_35b300d0ecae5fa95f9a161a04a76c68}
+
+
+
+
+Definition at line 672 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_44ebaf4525593898cbabcea6c05cad3e}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Amod\_\-to\_\-gsm@{Amod\_\-to\_\-gsm}}
+\index{Amod\_\-to\_\-gsm@{Amod\_\-to\_\-gsm}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Amod\_\-to\_\-gsm}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Amod\_\-to\_\-gsm}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_44ebaf4525593898cbabcea6c05cad3e}
+
+
+
+
+Definition at line 673 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_37da7699c286f0a4542396aaab17bb36}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agsm\_\-to\_\-gse@{Agsm\_\-to\_\-gse}}
+\index{Agsm\_\-to\_\-gse@{Agsm\_\-to\_\-gse}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agsm\_\-to\_\-gse}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agsm\_\-to\_\-gse}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_37da7699c286f0a4542396aaab17bb36}
+
+
+
+
+Definition at line 674 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_568504cf16f5e31c68e955235b19f883}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agse\_\-to\_\-gsm@{Agse\_\-to\_\-gsm}}
+\index{Agse\_\-to\_\-gsm@{Agse\_\-to\_\-gsm}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agse\_\-to\_\-gsm}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agse\_\-to\_\-gsm}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_568504cf16f5e31c68e955235b19f883}
+
+
+
+
+Definition at line 675 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_3bde4bf5f61bc97b0c2984ea06677989}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Awgs84\_\-to\_\-mod@{Awgs84\_\-to\_\-mod}}
+\index{Awgs84\_\-to\_\-mod@{Awgs84\_\-to\_\-mod}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Awgs84\_\-to\_\-mod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Awgs84\_\-to\_\-mod}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_3bde4bf5f61bc97b0c2984ea06677989}
+
+
+
+
+Definition at line 676 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_7fb70629ed011b03df0429787e1b9ad4}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Amod\_\-to\_\-wgs84@{Amod\_\-to\_\-wgs84}}
+\index{Amod\_\-to\_\-wgs84@{Amod\_\-to\_\-wgs84}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Amod\_\-to\_\-wgs84}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Amod\_\-to\_\-wgs84}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_7fb70629ed011b03df0429787e1b9ad4}
+
+
+
+
+Definition at line 677 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_13ae99230c1a3caec0d3b78ad714de4b}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Awgs84\_\-to\_\-gei@{Awgs84\_\-to\_\-gei}}
+\index{Awgs84\_\-to\_\-gei@{Awgs84\_\-to\_\-gei}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Awgs84\_\-to\_\-gei}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Awgs84\_\-to\_\-gei}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_13ae99230c1a3caec0d3b78ad714de4b}
+
+
+
+
+Definition at line 678 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_e70d75fd4a8b4ef9a3271f875183b402}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agei\_\-to\_\-wgs84@{Agei\_\-to\_\-wgs84}}
+\index{Agei\_\-to\_\-wgs84@{Agei\_\-to\_\-wgs84}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agei\_\-to\_\-wgs84}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agei\_\-to\_\-wgs84}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_e70d75fd4a8b4ef9a3271f875183b402}
+
+
+
+
+Definition at line 679 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_6322719ffe580e8f5b206972478e1c41}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Agsm\_\-to\_\-wgs84@{Agsm\_\-to\_\-wgs84}}
+\index{Agsm\_\-to\_\-wgs84@{Agsm\_\-to\_\-wgs84}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Agsm\_\-to\_\-wgs84}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Agsm\_\-to\_\-wgs84}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_6322719ffe580e8f5b206972478e1c41}
+
+
+
+
+Definition at line 680 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_88eb2b4dca5ab35213cadf57cf09de4c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Awgs84\_\-to\_\-gsm@{Awgs84\_\-to\_\-gsm}}
+\index{Awgs84\_\-to\_\-gsm@{Awgs84\_\-to\_\-gsm}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Awgs84\_\-to\_\-gsm}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Awgs84\_\-to\_\-gsm}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_88eb2b4dca5ab35213cadf57cf09de4c}
+
+
+
+
+Definition at line 681 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_3c3703af84212fe400ea4de85746f86c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Awgs84\_\-to\_\-cdmag@{Awgs84\_\-to\_\-cdmag}}
+\index{Awgs84\_\-to\_\-cdmag@{Awgs84\_\-to\_\-cdmag}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Awgs84\_\-to\_\-cdmag}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Awgs84\_\-to\_\-cdmag}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_3c3703af84212fe400ea4de85746f86c}
+
+
+
+
+Definition at line 682 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_1f66bf8da027bcc6ac0535710e14027f}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Acdmag\_\-to\_\-wgs84@{Acdmag\_\-to\_\-wgs84}}
+\index{Acdmag\_\-to\_\-wgs84@{Acdmag\_\-to\_\-wgs84}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Acdmag\_\-to\_\-wgs84}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Acdmag\_\-to\_\-wgs84}\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}}
+\label{struct_lgm___c_trans_1f66bf8da027bcc6ac0535710e14027f}
+
+
+
+
+Definition at line 683 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_4ed10c5333f6674ca1574d00c56ae3da}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-FirstCall@{Lgm\_\-IGRF\_\-FirstCall}}
+\index{Lgm\_\-IGRF\_\-FirstCall@{Lgm\_\-IGRF\_\-FirstCall}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-FirstCall}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Lgm\_\-IGRF\_\-FirstCall}}}
+\label{struct_lgm___c_trans_4ed10c5333f6674ca1574d00c56ae3da}
+
+
+
+
+Definition at line 690 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_fecd660b4543de5ef4d7313ab481d28c}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-OldYear@{Lgm\_\-IGRF\_\-OldYear}}
+\index{Lgm\_\-IGRF\_\-OldYear@{Lgm\_\-IGRF\_\-OldYear}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-OldYear}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-OldYear}}}
+\label{struct_lgm___c_trans_fecd660b4543de5ef4d7313ab481d28c}
+
+
+
+
+Definition at line 691 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_2f34dac1bc690a7daee26931f3035a4b}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-g@{Lgm\_\-IGRF\_\-g}}
+\index{Lgm\_\-IGRF\_\-g@{Lgm\_\-IGRF\_\-g}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-g}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-g}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_2f34dac1bc690a7daee26931f3035a4b}
+
+
+
+
+Definition at line 692 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_fcef05c35f42f86c066479ae8ebef3a4}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-h@{Lgm\_\-IGRF\_\-h}}
+\index{Lgm\_\-IGRF\_\-h@{Lgm\_\-IGRF\_\-h}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-h}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-h}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_fcef05c35f42f86c066479ae8ebef3a4}
+
+
+
+
+Definition at line 693 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_62099f52bc9f00a420106275ee55dacb}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-R@{Lgm\_\-IGRF\_\-R}}
+\index{Lgm\_\-IGRF\_\-R@{Lgm\_\-IGRF\_\-R}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-R}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-R}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_62099f52bc9f00a420106275ee55dacb}
+
+
+
+
+Definition at line 694 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_50a4c2c4f015a684f40fe14a3d4dcc80}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-K@{Lgm\_\-IGRF\_\-K}}
+\index{Lgm\_\-IGRF\_\-K@{Lgm\_\-IGRF\_\-K}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-K}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-K}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_50a4c2c4f015a684f40fe14a3d4dcc80}
+
+
+
+
+Definition at line 695 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_6c8cb5804769345f93dc684349e5232f}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-S@{Lgm\_\-IGRF\_\-S}}
+\index{Lgm\_\-IGRF\_\-S@{Lgm\_\-IGRF\_\-S}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-S}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-S}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_6c8cb5804769345f93dc684349e5232f}
+
+
+
+
+Definition at line 696 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_c6a0474a9ba424b11192a468df4b71bf}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM@{Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM}}
+\index{Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM@{Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-TwoNm1\_\-Over\_\-NmM}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_c6a0474a9ba424b11192a468df4b71bf}
+
+
+
+
+Definition at line 697 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_96a1803f9964fff5d9095953e098437f}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM@{Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM}}
+\index{Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM@{Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-NpMm1\_\-Over\_\-NmM}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_96a1803f9964fff5d9095953e098437f}
+
+
+
+
+Definition at line 698 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_447bb9f7fa254244901964f96c0ccf2f}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-SqrtNM1@{Lgm\_\-IGRF\_\-SqrtNM1}}
+\index{Lgm\_\-IGRF\_\-SqrtNM1@{Lgm\_\-IGRF\_\-SqrtNM1}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-SqrtNM1}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-SqrtNM1}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_447bb9f7fa254244901964f96c0ccf2f}
+
+
+
+
+Definition at line 699 of file Lgm\_\-CTrans.h.\hypertarget{struct_lgm___c_trans_fbdaf18ce038d57df3465a30a2a72b11}{
+\index{Lgm\_\-CTrans@{Lgm\_\-CTrans}!Lgm\_\-IGRF\_\-SqrtNM2@{Lgm\_\-IGRF\_\-SqrtNM2}}
+\index{Lgm\_\-IGRF\_\-SqrtNM2@{Lgm\_\-IGRF\_\-SqrtNM2}!Lgm_CTrans@{Lgm\_\-CTrans}}
+\subsubsection[{Lgm\_\-IGRF\_\-SqrtNM2}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Lgm\_\-IGRF\_\-SqrtNM2}\mbox{[}13\mbox{]}\mbox{[}13\mbox{]}}}
+\label{struct_lgm___c_trans_fbdaf18ce038d57df3465a30a2a72b11}
+
+
+
+
+Definition at line 700 of file Lgm\_\-CTrans.h.
+
+The documentation for this struct was generated from the following file:\begin{CompactItemize}
+\item 
+/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/\hyperlink{_lgm___c_trans_8h}{Lgm\_\-CTrans.h}\end{CompactItemize}

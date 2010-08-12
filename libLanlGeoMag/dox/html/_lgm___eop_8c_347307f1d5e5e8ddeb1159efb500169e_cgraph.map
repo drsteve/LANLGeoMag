@@ -1,0 +1,8 @@
+<area shape="rect" href="$_lgm___c_trans_8h.html#5434c56ab7ae78cd7186d0c9dc17004c" title="Lgm_free_ctrans" alt="" coords="160,5,277,32">
+<area shape="rect" href="$_lgm___c_trans_8h.html#8282c3981409facddb1146c8a38a6473" title="Lgm_GetCurrentJD" alt="" coords="153,56,284,83">
+<area shape="rect" href="$_lgm___c_trans_8h.html#fcde56b5112b21766bf3569c62d6ab0b" title="Lgm_init_ctrans" alt="" coords="163,107,275,133">
+<area shape="rect" href="$_lgm___c_trans_8h.html#73a444d73b7a1119517c60f5a070cc9d" title="Lgm_JD" alt="" coords="379,56,448,83">
+<area shape="rect" href="$_lgm___c_trans_8h.html#7d638a5de1c5a2b0176e2c51f4e85427" title="Lgm_IsLeapSecondDay" alt="" coords="541,5,701,32">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e869fd88ef397bce460b886a6a1b840d" title="Lgm_JDN" alt="" coords="583,56,660,83">
+<area shape="rect" href="$_lgm___c_trans_8h.html#ffe919b2830c07067e255ca1a454a05a" title="Lgm_LoadLeapSeconds" alt="" coords="333,107,493,133">
+<area shape="rect" href="$_lgm___c_trans_8h.html#4a4b0532bf6fb44bc8d4d9fbbab0d5cf" title="Compute the Julian Day number for the given date." alt="" coords="561,107,681,133">

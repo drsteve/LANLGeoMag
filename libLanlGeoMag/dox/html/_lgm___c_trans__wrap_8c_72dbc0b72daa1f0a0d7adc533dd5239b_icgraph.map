@@ -1,0 +1,16 @@
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#b8b658b39cba58305847beaeceedb77b" title="_wrap_intp_value" alt="" coords="252,5,372,32">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#a7be96d9c7be56249e4fa0017e156c6a" title="_wrap_Lgm_CTrans_day_get" alt="" coords="217,56,407,83">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#a56fd76a257a97fcd1cc20d6bd36db9f" title="_wrap_Lgm_CTrans_dow_get" alt="" coords="216,107,408,133">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#96c7b39a10d734146af192a7de4daaf5" title="_wrap_Lgm_CTrans_doy_get" alt="" coords="217,157,407,184">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#9997068b89d64179fb121f67edd6e7f1" title="_wrap_Lgm_CTrans_Lgm_IGRF_FirstCall_get" alt="" coords="169,208,455,235">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#b25800b1662f8553d51f0652317a6424" title="_wrap_Lgm_CTrans_month_get" alt="" coords="211,259,413,285">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#386a70da3d3bb1c8e0f29b266c8c48eb" title="_wrap_Lgm_CTrans_nNutationTerms_get" alt="" coords="183,309,441,336">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#f5cb7cc69b64efbcb600aaabf4782f8d" title="_wrap_Lgm_CTrans_Verbose_get" alt="" coords="204,360,420,387">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#57d601bd60a4243a7d2a3ebb38189b60" title="_wrap_Lgm_CTrans_year_get" alt="" coords="216,411,408,437">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#c8e752a565c41452b3695d317d275ec7" title="_wrap_Lgm_DayofWeek" alt="" coords="232,461,392,488">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#5d7626d327838ae9b59c75fe1c987c94" title="_wrap_Lgm_DayofYear" alt="" coords="235,512,389,539">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#14e4d63af287de0e7a936b72299a2bf8" title="_wrap_Lgm_Doy" alt="" coords="253,563,371,589">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#a090d6b2a05dca8bd6373c1c057ba2c8" title="_wrap_Lgm_IsValidDate" alt="" coords="232,613,392,640">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#32ff2a64f0979c780678f14a55596652" title="_wrap_Lgm_jd_to_date" alt="" coords="235,664,389,691">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#095149776f3c0241292525421aed9aca" title="_wrap_Lgm_LeapYear" alt="" coords="239,715,385,741">
+<area shape="rect" href="$_lgm___c_trans__wrap_8c.html#2c97d7ac5d594f63f25b263f20acb428" title="SWIG_init" alt="" coords="272,765,352,792">

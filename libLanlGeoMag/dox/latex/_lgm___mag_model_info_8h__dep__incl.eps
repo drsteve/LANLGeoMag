@@ -1,0 +1,1565 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Graphviz version 2.20.2 (Wed Jun  2 16:09:53 UTC 2010)
+%%For: (mgh) Michael G Henderson
+%%Title: G
+%%Pages: (atend)
+%%BoundingBox: (atend)
+%%EndComments
+save
+%%BeginProlog
+/DotDict 200 dict def
+DotDict begin
+
+/setupLatin1 {
+mark
+/EncodingVector 256 array def
+ EncodingVector 0
+
+ISOLatin1Encoding 0 255 getinterval putinterval
+EncodingVector 45 /hyphen put
+
+% Set up ISO Latin 1 character encoding
+/starnetISO {
+        dup dup findfont dup length dict begin
+        { 1 index /FID ne { def }{ pop pop } ifelse
+        } forall
+        /Encoding EncodingVector def
+        currentdict end definefont
+} def
+/Times-Roman starnetISO def
+/Times-Italic starnetISO def
+/Times-Bold starnetISO def
+/Times-BoldItalic starnetISO def
+/Helvetica starnetISO def
+/Helvetica-Oblique starnetISO def
+/Helvetica-Bold starnetISO def
+/Helvetica-BoldOblique starnetISO def
+/Courier starnetISO def
+/Courier-Oblique starnetISO def
+/Courier-Bold starnetISO def
+/Courier-BoldOblique starnetISO def
+cleartomark
+} bind def
+
+%%BeginResource: procset graphviz 0 0
+/coord-font-family /Times-Roman def
+/default-font-family /Times-Roman def
+/coordfont coord-font-family findfont 8 scalefont def
+
+/InvScaleFactor 1.0 def
+/set_scale {
+       dup 1 exch div /InvScaleFactor exch def
+       scale
+} bind def
+
+% styles
+/solid { [] 0 setdash } bind def
+/dashed { [9 InvScaleFactor mul dup ] 0 setdash } bind def
+/dotted { [1 InvScaleFactor mul 6 InvScaleFactor mul] 0 setdash } bind def
+/invis {/fill {newpath} def /stroke {newpath} def /show {pop newpath} def} bind def
+/bold { 2 setlinewidth } bind def
+/filled { } bind def
+/unfilled { } bind def
+/rounded { } bind def
+/diagonals { } bind def
+
+% hooks for setting color 
+/nodecolor { sethsbcolor } bind def
+/edgecolor { sethsbcolor } bind def
+/graphcolor { sethsbcolor } bind def
+/nopcolor {pop pop pop} bind def
+
+/beginpage {	% i j npages
+	/npages exch def
+	/j exch def
+	/i exch def
+	/str 10 string def
+	npages 1 gt {
+		gsave
+			coordfont setfont
+			0 0 moveto
+			(\() show i str cvs show (,) show j str cvs show (\)) show
+		grestore
+	} if
+} bind def
+
+/set_font {
+	findfont exch
+	scalefont setfont
+} def
+
+% draw text fitted to its expected width
+/alignedtext {			% width text
+	/text exch def
+	/width exch def
+	gsave
+		width 0 gt {
+			[] 0 setdash
+			text stringwidth pop width exch sub text length div 0 text ashow
+		} if
+	grestore
+} def
+
+/boxprim {				% xcorner ycorner xsize ysize
+		4 2 roll
+		moveto
+		2 copy
+		exch 0 rlineto
+		0 exch rlineto
+		pop neg 0 rlineto
+		closepath
+} bind def
+
+/ellipse_path {
+	/ry exch def
+	/rx exch def
+	/y exch def
+	/x exch def
+	matrix currentmatrix
+	newpath
+	x y translate
+	rx ry scale
+	0 0 1 0 360 arc
+	setmatrix
+} bind def
+
+/endpage { showpage } bind def
+/showpage { } def
+
+/layercolorseq
+	[	% layer color sequence - darkest to lightest
+		[0 0 0]
+		[.2 .8 .8]
+		[.4 .8 .8]
+		[.6 .8 .8]
+		[.8 .8 .8]
+	]
+def
+
+/layerlen layercolorseq length def
+
+/setlayer {/maxlayer exch def /curlayer exch def
+	layercolorseq curlayer 1 sub layerlen mod get
+	aload pop sethsbcolor
+	/nodecolor {nopcolor} def
+	/edgecolor {nopcolor} def
+	/graphcolor {nopcolor} def
+} bind def
+
+/onlayer { curlayer ne {invis} if } def
+
+/onlayers {
+	/myupper exch def
+	/mylower exch def
+	curlayer mylower lt
+	curlayer myupper gt
+	or
+	{invis} if
+} def
+
+/curlayer 0 def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+14 default-font-family set_font
+1 setmiterlimit
+% /arrowlength 10 def
+% /arrowwidth 5 def
+
+% make sure pdfmark is harmless for PS-interpreters other than Distiller
+/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse
+% make '<<' and '>>' safe on PS Level 1 devices
+/languagelevel where {pop languagelevel}{1} ifelse
+2 lt {
+    userdict (<<) cvn ([) cvn load put
+    userdict (>>) cvn ([) cvn load put
+} if
+
+%%EndSetup
+setupLatin1
+%%Page: 1 1
+%%PageBoundingBox: 36 36 6734 232
+%%PageOrientation: Portrait
+0 0 1 beginpage
+gsave
+36 36 6698 196 boxprim clip newpath
+1 1 set_scale 0 rotate 40 40 translate
+% Node1
+gsave
+0.000 0.000 0.749 nodecolor
+newpath 2957 168 moveto
+2957 188 lineto
+3266 188 lineto
+3266 168 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 2957 168 moveto
+2957 188 lineto
+3266 188 lineto
+3266 168 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+2964.5 175 moveto 293 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm_MagModelInfo.h) alignedtext
+grestore
+% Node2
+gsave
+[ /Rect [ 0 56 244 76 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_alpha_of_k_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 0 56 moveto
+0 76 lineto
+244 76 lineto
+244 56 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 0 56 moveto
+0 76 lineto
+244 76 lineto
+244 56 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+8 63 moveto 228 (/home/mgh/LanlGeoMag/libLanlGeoMag/AlphaOfK.c) alignedtext
+grestore
+% Node1->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 178 moveto
+2394 176 621 168 366 132 curveto
+286 121 196 92 150 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 181.5 moveto
+2957 178 lineto
+2947 174.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 181.5 moveto
+2957 178 lineto
+2947 174.5 lineto
+closepath stroke
+grestore
+% Node3
+gsave
+[ /Rect [ 384 112 668 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___lstar_info_8h.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 384 112 moveto
+384 132 lineto
+669 132 lineto
+669 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 384 112 moveto
+384 132 lineto
+669 132 lineto
+669 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+391.5 119 moveto 269 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm_LstarInfo.h) alignedtext
+grestore
+% Node1->Node3
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 177 moveto
+2554 175 1534 167 682 132 curveto
+678 132 674 132 669 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath stroke
+grestore
+% Node4
+gsave
+[ /Rect [ 262 56 522 76 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_compute_lstar_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 262 56 moveto
+262 76 lineto
+523 76 lineto
+523 56 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 262 56 moveto
+262 76 lineto
+523 76 lineto
+523 56 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+269.5 63 moveto 245 (/home/mgh/LanlGeoMag/libLanlGeoMag/ComputeLstar.c) alignedtext
+grestore
+% Node1->Node4
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 177 moveto
+2359 172 398 155 375 132 curveto
+360 117 374 91 384 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath stroke
+grestore
+% Node5
+gsave
+[ /Rect [ 540 56 780 76 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_drift_shell_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 540 56 moveto
+540 76 lineto
+781 76 lineto
+781 56 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 540 56 moveto
+540 76 lineto
+781 76 lineto
+781 56 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+547.5 63 moveto 225 (/home/mgh/LanlGeoMag/libLanlGeoMag/DriftShell.c) alignedtext
+grestore
+% Node1->Node5
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 178 moveto
+2428 176 850 168 746 132 curveto
+714 121 684 92 669 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 181.5 moveto
+2957 178 lineto
+2947 174.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 181.5 moveto
+2957 178 lineto
+2947 174.5 lineto
+closepath stroke
+grestore
+% Node6
+gsave
+[ /Rect [ 798 56 1110 76 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___mag_ephem_info_8h.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 798 56 moveto
+798 76 lineto
+1111 76 lineto
+1111 56 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 798 56 moveto
+798 76 lineto
+1111 76 lineto
+1111 56 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+805.5 63 moveto 297 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm/Lgm_MagEphemInfo.h) alignedtext
+grestore
+% Node1->Node6
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 176 moveto
+2415 171 772 151 753 132 curveto
+747 125 748 118 753 112 curveto
+767 94 815 83 861 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 179.5 moveto
+2957 176 lineto
+2947 172.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 179.5 moveto
+2957 176 lineto
+2947 172.5 lineto
+closepath stroke
+grestore
+% Node8
+gsave
+[ /Rect [ 762 112 1060 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_b___from_scattered_data_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 762 112 moveto
+762 132 lineto
+1060 132 lineto
+1060 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 762 112 moveto
+762 132 lineto
+1060 132 lineto
+1060 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+770 119 moveto 282 (/home/mgh/LanlGeoMag/libLanlGeoMag/B_FromScatteredData.c) alignedtext
+grestore
+% Node1->Node8
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 177 moveto
+2600 173 1766 162 1069 132 curveto
+1066 132 1063 132 1060 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 180.5 moveto
+2957 177 lineto
+2947 173.5 lineto
+closepath stroke
+grestore
+% Node9
+gsave
+[ /Rect [ 1078 112 1348 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_integral_invariant_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1078 112 moveto
+1078 132 lineto
+1349 132 lineto
+1349 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1078 112 moveto
+1078 132 lineto
+1349 132 lineto
+1349 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1085.5 119 moveto 255 (/home/mgh/LanlGeoMag/libLanlGeoMag/IntegralInvariant.c) alignedtext
+grestore
+% Node1->Node9
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 176 moveto
+2635 172 1940 160 1357 132 curveto
+1354 132 1352 132 1349 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 179.5 moveto
+2957 176 lineto
+2947 172.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 179.5 moveto
+2957 176 lineto
+2947 172.5 lineto
+closepath stroke
+grestore
+% Node10
+gsave
+[ /Rect [ 1366 112 1634 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___a_e8___a_p8_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1366 112 moveto
+1366 132 lineto
+1634 132 lineto
+1634 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1366 112 moveto
+1366 132 lineto
+1634 132 lineto
+1634 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1374 119 moveto 252 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_AE8_AP8.c) alignedtext
+grestore
+% Node1->Node10
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 175 moveto
+2675 169 2115 156 1643 132 curveto
+1640 132 1637 132 1634 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 178.5 moveto
+2957 175 lineto
+2947 171.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 178.5 moveto
+2957 175 lineto
+2947 171.5 lineto
+closepath stroke
+grestore
+% Node11
+gsave
+[ /Rect [ 1652 112 1920 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___b__internal_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1652 112 moveto
+1652 132 lineto
+1921 132 lineto
+1921 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1652 112 moveto
+1652 132 lineto
+1921 132 lineto
+1921 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1659.5 119 moveto 253 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_B_internal.c) alignedtext
+grestore
+% Node1->Node11
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 173 moveto
+2718 166 2292 152 1929 132 curveto
+1926 132 1924 132 1921 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2947 176.5 moveto
+2957 173 lineto
+2947 169.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 176.5 moveto
+2957 173 lineto
+2947 169.5 lineto
+closepath stroke
+grestore
+% Node12
+gsave
+[ /Rect [ 1938 112 2212 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___init_mag_info_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1938 112 moveto
+1938 132 lineto
+2212 132 lineto
+2212 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1938 112 moveto
+1938 132 lineto
+2212 132 lineto
+2212 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1946 119 moveto 258 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_InitMagInfo.c) alignedtext
+grestore
+% Node1->Node12
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2947 170 moveto
+2768 161 2474 147 2221 132 curveto
+2218 132 2215 132 2212 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2946.7 173.49 moveto
+2957 171 lineto
+2947.4 166.52 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2946.7 173.49 moveto
+2957 171 lineto
+2947.4 166.52 lineto
+closepath stroke
+grestore
+% Node13
+gsave
+[ /Rect [ 2230 112 2522 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___simplified_mead_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 2230 112 moveto
+2230 132 lineto
+2522 132 lineto
+2522 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 2230 112 moveto
+2230 132 lineto
+2522 132 lineto
+2522 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+2238 119 moveto 276 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_SimplifiedMead.c) alignedtext
+grestore
+% Node1->Node13
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2970 167 moveto
+2836 157 2637 142 2507 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 2969.7 170.49 moveto
+2980 168 lineto
+2970.4 163.52 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 2969.7 170.49 moveto
+2980 168 lineto
+2970.4 163.52 lineto
+closepath stroke
+grestore
+% Node14
+gsave
+[ /Rect [ 2540 112 2790 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___trace_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 2540 112 moveto
+2540 132 lineto
+2791 132 lineto
+2791 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 2540 112 moveto
+2540 132 lineto
+2791 132 lineto
+2791 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+2547.5 119 moveto 235 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_Trace.c) alignedtext
+grestore
+% Node1->Node14
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3021 167 moveto
+2940 157 2822 142 2744 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3020.7 170.49 moveto
+3031 168 lineto
+3021.4 163.52 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3020.7 170.49 moveto
+3031 168 lineto
+3021.4 163.52 lineto
+closepath stroke
+grestore
+% Node15
+gsave
+[ /Rect [ 2808 112 3092 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___trace_to_earth_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 2808 112 moveto
+2808 132 lineto
+3092 132 lineto
+3092 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 2808 112 moveto
+2808 132 lineto
+3092 132 lineto
+3092 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+2816 119 moveto 268 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_TraceToEarth.c) alignedtext
+grestore
+% Node1->Node15
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3072 165 moveto
+3044 155 3005 141 2979 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3071.42 168.48 moveto
+3082 168 lineto
+3073.43 161.77 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3071.42 168.48 moveto
+3082 168 lineto
+3073.43 161.77 lineto
+closepath stroke
+grestore
+% Node16
+gsave
+[ /Rect [ 3110 112 3434 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___trace_to_spherical_earth_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 3110 112 moveto
+3110 132 lineto
+3434 132 lineto
+3434 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 3110 112 moveto
+3110 132 lineto
+3434 132 lineto
+3434 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+3118 119 moveto 308 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_TraceToSphericalEarth.c) alignedtext
+grestore
+% Node1->Node16
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3150 165 moveto
+3178 155 3217 141 3243 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3148.57 161.77 moveto
+3140 168 lineto
+3150.58 168.48 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3148.57 161.77 moveto
+3140 168 lineto
+3150.58 168.48 lineto
+closepath stroke
+grestore
+% Node17
+gsave
+[ /Rect [ 3452 112 3692 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_mag_step_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 3452 112 moveto
+3452 132 lineto
+3692 132 lineto
+3692 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 3452 112 moveto
+3452 132 lineto
+3692 132 lineto
+3692 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+3460 119 moveto 224 (/home/mgh/LanlGeoMag/libLanlGeoMag/MagStep.c) alignedtext
+grestore
+% Node1->Node17
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3203 167 moveto
+3287 157 3409 142 3490 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3202.6 163.52 moveto
+3193 168 lineto
+3203.3 170.49 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3202.6 163.52 moveto
+3193 168 lineto
+3203.3 170.49 lineto
+closepath stroke
+grestore
+% Node18
+gsave
+[ /Rect [ 3710 112 3956 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_sb_integral_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 3710 112 moveto
+3710 132 lineto
+3956 132 lineto
+3956 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 3710 112 moveto
+3710 132 lineto
+3956 132 lineto
+3956 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+3718 119 moveto 230 (/home/mgh/LanlGeoMag/libLanlGeoMag/SbIntegral.c) alignedtext
+grestore
+% Node1->Node18
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3250 167 moveto
+3383 157 3582 142 3710 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3249.6 163.52 moveto
+3240 168 lineto
+3250.3 170.49 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3249.6 163.52 moveto
+3240 168 lineto
+3250.3 170.49 lineto
+closepath stroke
+grestore
+% Node19
+gsave
+[ /Rect [ 3974 112 4192 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_t87_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 3974 112 moveto
+3974 132 lineto
+4192 132 lineto
+4192 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 3974 112 moveto
+3974 132 lineto
+4192 132 lineto
+4192 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+3982 119 moveto 202 (/home/mgh/LanlGeoMag/libLanlGeoMag/T87.c) alignedtext
+grestore
+% Node1->Node19
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 171 moveto
+3448 162 3726 149 3965 132 curveto
+3968 132 3971 132 3974 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 167.5 moveto
+3266 171 lineto
+3276 174.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 167.5 moveto
+3266 171 lineto
+3276 174.5 lineto
+closepath stroke
+grestore
+% Node20
+gsave
+[ /Rect [ 4210 112 4428 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_t89_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 4210 112 moveto
+4210 132 lineto
+4428 132 lineto
+4428 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 4210 112 moveto
+4210 132 lineto
+4428 132 lineto
+4428 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+4218 119 moveto 202 (/home/mgh/LanlGeoMag/libLanlGeoMag/T89.c) alignedtext
+grestore
+% Node1->Node20
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 173 moveto
+3490 167 3873 153 4201 132 curveto
+4204 132 4207 132 4210 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 169.5 moveto
+3266 173 lineto
+3276 176.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 169.5 moveto
+3266 173 lineto
+3276 176.5 lineto
+closepath stroke
+grestore
+% Node21
+gsave
+[ /Rect [ 4446 112 4718 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_t96___m_o_d___m_g_h_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 4446 112 moveto
+4446 132 lineto
+4719 132 lineto
+4719 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 4446 112 moveto
+4446 132 lineto
+4719 132 lineto
+4719 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+4453.5 119 moveto 257 (/home/mgh/LanlGeoMag/libLanlGeoMag/T96_MOD_MGH.c) alignedtext
+grestore
+% Node1->Node21
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 174 moveto
+3528 168 4020 154 4437 132 curveto
+4440 132 4443 132 4446 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 170.5 moveto
+3266 174 lineto
+3276 177.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 170.5 moveto
+3266 174 lineto
+3276 177.5 lineto
+closepath stroke
+grestore
+% Node22
+gsave
+[ /Rect [ 4736 112 4980 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_line_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 4736 112 moveto
+4736 132 lineto
+4981 132 lineto
+4981 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 4736 112 moveto
+4736 132 lineto
+4981 132 lineto
+4981 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+4743.5 119 moveto 229 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceLine.c) alignedtext
+grestore
+% Node1->Node22
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 176 moveto
+3569 172 4197 160 4727 132 curveto
+4730 132 4733 132 4736 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath stroke
+grestore
+% Node23
+gsave
+[ /Rect [ 4998 112 5258 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_to_earth_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 4998 112 moveto
+4998 132 lineto
+5258 132 lineto
+5258 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 4998 112 moveto
+4998 132 lineto
+5258 132 lineto
+5258 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+5006 119 moveto 244 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceToEarth.c) alignedtext
+grestore
+% Node1->Node23
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 177 moveto
+3604 173 4357 163 4989 132 curveto
+4992 132 4995 132 4998 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath stroke
+grestore
+% Node24
+gsave
+[ /Rect [ 5276 112 5552 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_to_min_b_surf_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 5276 112 moveto
+5276 132 lineto
+5553 132 lineto
+5553 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 5276 112 moveto
+5276 132 lineto
+5553 132 lineto
+5553 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+5283.5 119 moveto 261 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceToMinBSurf.c) alignedtext
+grestore
+% Node1->Node24
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 177 moveto
+3638 174 4524 165 5267 132 curveto
+5270 132 5273 132 5276 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath stroke
+grestore
+% Node25
+gsave
+[ /Rect [ 5570 112 5848 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_to_min_rdot_b_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 5570 112 moveto
+5570 132 lineto
+5849 132 lineto
+5849 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 5570 112 moveto
+5570 132 lineto
+5849 132 lineto
+5849 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+5577.5 119 moveto 263 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceToMinRdotB.c) alignedtext
+grestore
+% Node1->Node25
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 176 moveto
+3750 170 5114 151 5561 132 curveto
+5564 132 5567 132 5570 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath stroke
+grestore
+% Node26
+gsave
+[ /Rect [ 5866 112 6154 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_to_mirror_point2_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 5866 112 moveto
+5866 132 lineto
+6155 132 lineto
+6155 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 5866 112 moveto
+5866 132 lineto
+6155 132 lineto
+6155 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+5873.5 119 moveto 273 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceToMirrorPoint2.c) alignedtext
+grestore
+% Node1->Node26
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 176 moveto
+3790 171 5350 153 5857 132 curveto
+5860 132 5863 132 5866 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 172.5 moveto
+3266 176 lineto
+3276 179.5 lineto
+closepath stroke
+grestore
+% Node27
+gsave
+[ /Rect [ 6172 112 6448 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_trace_to_s_m_equat_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 6172 112 moveto
+6172 132 lineto
+6449 132 lineto
+6449 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 6172 112 moveto
+6172 132 lineto
+6449 132 lineto
+6449 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+6179.5 119 moveto 261 (/home/mgh/LanlGeoMag/libLanlGeoMag/TraceToSMEquat.c) alignedtext
+grestore
+% Node1->Node27
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 177 moveto
+3827 172 5594 156 6163 132 curveto
+6166 132 6169 132 6172 132 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath stroke
+grestore
+% Node28
+gsave
+[ /Rect [ 6466 112 6690 132 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_t_s04_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 6466 112 moveto
+6466 132 lineto
+6691 132 lineto
+6691 112 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 6466 112 moveto
+6466 132 lineto
+6691 132 lineto
+6691 112 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+6473.5 119 moveto 209 (/home/mgh/LanlGeoMag/libLanlGeoMag/TS04.c) alignedtext
+grestore
+% Node1->Node28
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 177 moveto
+3860 174 5827 162 6457 132 curveto
+6460 132 6463 132 6466 131 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 3276 173.5 moveto
+3266 177 lineto
+3276 180.5 lineto
+closepath stroke
+grestore
+% Node3->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 444 111 moveto
+371 101 264 86 194 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 443.7 114.49 moveto
+454 112 lineto
+444.4 107.52 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 443.7 114.49 moveto
+454 112 lineto
+444.4 107.52 lineto
+closepath stroke
+grestore
+% Node3->Node4
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 493 108 moveto
+469 98 438 85 416 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 491.44 111.14 moveto
+502 112 lineto
+494.28 104.74 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 491.44 111.14 moveto
+502 112 lineto
+494.28 104.74 lineto
+closepath stroke
+grestore
+% Node3->Node5
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 559 108 moveto
+583 98 614 85 636 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 557.72 104.74 moveto
+550 112 lineto
+560.56 111.14 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 557.72 104.74 moveto
+550 112 lineto
+560.56 111.14 lineto
+closepath stroke
+grestore
+% Node3->Node6
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 613 111 moveto
+691 101 803 86 878 76 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 612.6 107.52 moveto
+603 112 lineto
+613.3 114.49 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 612.6 107.52 moveto
+603 112 lineto
+613.3 114.49 lineto
+closepath stroke
+grestore
+% Node7
+gsave
+[ /Rect [ 802 0 1106 20 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___init_mag_ephem_info_8c.html) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 802 0 moveto
+802 20 lineto
+1107 20 lineto
+1107 0 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 802 0 moveto
+802 20 lineto
+1107 20 lineto
+1107 0 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+809.5 7 moveto 289 (/home/mgh/LanlGeoMag/libLanlGeoMag/Lgm_InitMagEphemInfo.c) alignedtext
+grestore
+% Node6->Node7
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 954 46 moveto
+954 37 954 28 954 20 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 950.5 46 moveto
+954 56 lineto
+957.5 46 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 950.5 46 moveto
+954 56 lineto
+957.5 46 lineto
+closepath stroke
+grestore
+endpage
+showpage
+grestore
+%%PageTrailer
+%%EndPage: 1
+%%Trailer
+%%Pages: 1
+%%BoundingBox: 36 36 6734 232
+end
+restore
+%%EOF

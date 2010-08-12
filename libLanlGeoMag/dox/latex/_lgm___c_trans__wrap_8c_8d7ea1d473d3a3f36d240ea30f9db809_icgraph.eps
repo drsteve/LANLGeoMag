@@ -1,0 +1,994 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Graphviz version 2.20.2 (Wed Jun  2 16:09:53 UTC 2010)
+%%For: (mgh) Michael G Henderson
+%%Title: G
+%%Pages: (atend)
+%%BoundingBox: (atend)
+%%EndComments
+save
+%%BeginProlog
+/DotDict 200 dict def
+DotDict begin
+
+/setupLatin1 {
+mark
+/EncodingVector 256 array def
+ EncodingVector 0
+
+ISOLatin1Encoding 0 255 getinterval putinterval
+EncodingVector 45 /hyphen put
+
+% Set up ISO Latin 1 character encoding
+/starnetISO {
+        dup dup findfont dup length dict begin
+        { 1 index /FID ne { def }{ pop pop } ifelse
+        } forall
+        /Encoding EncodingVector def
+        currentdict end definefont
+} def
+/Times-Roman starnetISO def
+/Times-Italic starnetISO def
+/Times-Bold starnetISO def
+/Times-BoldItalic starnetISO def
+/Helvetica starnetISO def
+/Helvetica-Oblique starnetISO def
+/Helvetica-Bold starnetISO def
+/Helvetica-BoldOblique starnetISO def
+/Courier starnetISO def
+/Courier-Oblique starnetISO def
+/Courier-Bold starnetISO def
+/Courier-BoldOblique starnetISO def
+cleartomark
+} bind def
+
+%%BeginResource: procset graphviz 0 0
+/coord-font-family /Times-Roman def
+/default-font-family /Times-Roman def
+/coordfont coord-font-family findfont 8 scalefont def
+
+/InvScaleFactor 1.0 def
+/set_scale {
+       dup 1 exch div /InvScaleFactor exch def
+       scale
+} bind def
+
+% styles
+/solid { [] 0 setdash } bind def
+/dashed { [9 InvScaleFactor mul dup ] 0 setdash } bind def
+/dotted { [1 InvScaleFactor mul 6 InvScaleFactor mul] 0 setdash } bind def
+/invis {/fill {newpath} def /stroke {newpath} def /show {pop newpath} def} bind def
+/bold { 2 setlinewidth } bind def
+/filled { } bind def
+/unfilled { } bind def
+/rounded { } bind def
+/diagonals { } bind def
+
+% hooks for setting color 
+/nodecolor { sethsbcolor } bind def
+/edgecolor { sethsbcolor } bind def
+/graphcolor { sethsbcolor } bind def
+/nopcolor {pop pop pop} bind def
+
+/beginpage {	% i j npages
+	/npages exch def
+	/j exch def
+	/i exch def
+	/str 10 string def
+	npages 1 gt {
+		gsave
+			coordfont setfont
+			0 0 moveto
+			(\() show i str cvs show (,) show j str cvs show (\)) show
+		grestore
+	} if
+} bind def
+
+/set_font {
+	findfont exch
+	scalefont setfont
+} def
+
+% draw text fitted to its expected width
+/alignedtext {			% width text
+	/text exch def
+	/width exch def
+	gsave
+		width 0 gt {
+			[] 0 setdash
+			text stringwidth pop width exch sub text length div 0 text ashow
+		} if
+	grestore
+} def
+
+/boxprim {				% xcorner ycorner xsize ysize
+		4 2 roll
+		moveto
+		2 copy
+		exch 0 rlineto
+		0 exch rlineto
+		pop neg 0 rlineto
+		closepath
+} bind def
+
+/ellipse_path {
+	/ry exch def
+	/rx exch def
+	/y exch def
+	/x exch def
+	matrix currentmatrix
+	newpath
+	x y translate
+	rx ry scale
+	0 0 1 0 360 arc
+	setmatrix
+} bind def
+
+/endpage { showpage } bind def
+/showpage { } def
+
+/layercolorseq
+	[	% layer color sequence - darkest to lightest
+		[0 0 0]
+		[.2 .8 .8]
+		[.4 .8 .8]
+		[.6 .8 .8]
+		[.8 .8 .8]
+	]
+def
+
+/layerlen layercolorseq length def
+
+/setlayer {/maxlayer exch def /curlayer exch def
+	layercolorseq curlayer 1 sub layerlen mod get
+	aload pop sethsbcolor
+	/nodecolor {nopcolor} def
+	/edgecolor {nopcolor} def
+	/graphcolor {nopcolor} def
+} bind def
+
+/onlayer { curlayer ne {invis} if } def
+
+/onlayers {
+	/myupper exch def
+	/mylower exch def
+	curlayer mylower lt
+	curlayer myupper gt
+	or
+	{invis} if
+} def
+
+/curlayer 0 def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+14 default-font-family set_font
+1 setmiterlimit
+% /arrowlength 10 def
+% /arrowwidth 5 def
+
+% make sure pdfmark is harmless for PS-interpreters other than Distiller
+/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse
+% make '<<' and '>>' safe on PS Level 1 devices
+/languagelevel where {pop languagelevel}{1} ifelse
+2 lt {
+    userdict (<<) cvn ([) cvn load put
+    userdict (>>) cvn ([) cvn load put
+} if
+
+%%EndSetup
+setupLatin1
+%%Page: 1 1
+%%PageBoundingBox: 36 36 1238 235
+%%PageOrientation: Portrait
+0 0 1 beginpage
+gsave
+36 36 1202 199 boxprim clip newpath
+1 1 set_scale 0 rotate 40 40 translate
+% Node1
+gsave
+0.000 0.000 0.749 nodecolor
+newpath 1 57 moveto
+1 77 lineto
+100 77 lineto
+100 57 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1 57 moveto
+1 77 lineto
+100 77 lineto
+100 57 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+8.5 64 moveto 83 (PySwigObject_hex) alignedtext
+grestore
+% Node2
+gsave
+[ /Rect [ 411 38 517 58 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#d4e80a848188575ad62806768b84c2af) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 411 38 moveto
+411 58 lineto
+518 58 lineto
+518 38 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 411 38 moveto
+411 58 lineto
+518 58 lineto
+518 38 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+418.5 45 moveto 91 (_PySwigObject_type) alignedtext
+grestore
+% Node1->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 110 69 moveto
+176 70 283 71 374 62 curveto
+386 61 399 59 411 57 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 110 65.5 moveto
+100 69 lineto
+110 72.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 110 65.5 moveto
+100 69 lineto
+110 72.5 lineto
+closepath stroke
+grestore
+% Node15
+gsave
+[ /Rect [ 137 38 235 58 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#583098e08a46d7e859389718996329f7) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 137 38 moveto
+137 58 lineto
+236 58 lineto
+236 38 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 137 38 moveto
+137 58 lineto
+236 58 lineto
+236 38 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+144.5 45 moveto 83 (PySwigObject_repr) alignedtext
+grestore
+% Node1->Node15
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 110 59 moveto
+119 57 128 56 137 55 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 109.6 55.52 moveto
+100 60 lineto
+110.3 62.49 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 109.6 55.52 moveto
+100 60 lineto
+110.3 62.49 lineto
+closepath stroke
+grestore
+% Node3
+gsave
+[ /Rect [ 554 57 656 77 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#e9d4495d83ff6003860842b4e0ead69e) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 554 57 moveto
+554 77 lineto
+656 77 lineto
+656 57 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 554 57 moveto
+554 77 lineto
+656 77 lineto
+656 57 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+562 64 moveto 86 (PySwigObject_type) alignedtext
+grestore
+% Node2->Node3
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 528 57 moveto
+537 58 545 59 554 60 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 528.49 53.53 moveto
+518 55 lineto
+527.12 60.39 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 528.49 53.53 moveto
+518 55 lineto
+527.12 60.39 lineto
+closepath stroke
+grestore
+% Node4
+gsave
+[ /Rect [ 693 114 803 134 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#7fabac628f98725b7869762b75b1cbf9) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 693 114 moveto
+693 134 lineto
+804 134 lineto
+804 114 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 693 114 moveto
+693 134 lineto
+804 134 lineto
+804 114 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+700.5 121 moveto 95 (PySwigObject_Check) alignedtext
+grestore
+% Node3->Node4
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 639 81 moveto
+665 91 700 104 723 114 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 640.56 77.86 moveto
+630 77 lineto
+637.72 84.26 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 640.56 77.86 moveto
+630 77 lineto
+637.72 84.26 lineto
+closepath stroke
+grestore
+% Node12
+gsave
+[ /Rect [ 697 57 799 77 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#18eb63ce971eec6dfe4d1a5e109a95b6) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 697 57 moveto
+697 77 lineto
+799 77 lineto
+799 57 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 697 57 moveto
+697 77 lineto
+799 77 lineto
+799 57 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+705 64 moveto 86 (PySwigObject_New) alignedtext
+grestore
+% Node3->Node12
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 666 67 moveto
+676 67 687 67 697 67 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 666 63.5 moveto
+656 67 lineto
+666 70.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 666 63.5 moveto
+656 67 lineto
+666 70.5 lineto
+closepath stroke
+grestore
+% Node5
+gsave
+[ /Rect [ 857 171 971 191 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#7028f22c6d348327b36716d06b9aecc4) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 857 171 moveto
+857 191 lineto
+971 191 lineto
+971 171 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 857 171 moveto
+857 191 lineto
+971 191 lineto
+971 171 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+865 178 moveto 98 (PySwigObject_append) alignedtext
+grestore
+% Node4->Node5
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 779 138 moveto
+797 146 820 155 840 162 curveto
+850 165 862 168 872 171 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 780.56 134.86 moveto
+770 134 lineto
+777.72 141.26 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 780.56 134.86 moveto
+770 134 lineto
+777.72 141.26 lineto
+closepath stroke
+grestore
+% Node7
+gsave
+[ /Rect [ 845 133 983 153 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#7e3fa8fcef51b6a85adac9ee99884587) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 845 133 moveto
+845 153 lineto
+984 153 lineto
+984 133 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 845 133 moveto
+845 153 lineto
+984 153 lineto
+984 133 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+852.5 140 moveto 123 (SWIG_Python_GetSwigThis) alignedtext
+grestore
+% Node4->Node7
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 814 131 moveto
+824 133 834 134 845 135 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 814.3 127.51 moveto
+804 130 lineto
+813.6 134.48 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 814.3 127.51 moveto
+804 130 lineto
+813.6 134.48 lineto
+closepath stroke
+grestore
+% Node10
+gsave
+[ /Rect [ 851 95 977 115 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#c487bf25fd5238c01ad35edf4dde586f) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 851 95 moveto
+851 115 lineto
+977 115 lineto
+977 95 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 851 95 moveto
+851 115 lineto
+977 115 lineto
+977 95 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+859 102 moveto 110 (SWIG_Python_TypeError) alignedtext
+grestore
+% Node4->Node10
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 814 117 moveto
+826 115 838 114 851 112 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 813.6 113.52 moveto
+804 118 lineto
+814.3 120.49 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 813.6 113.52 moveto
+804 118 lineto
+814.3 120.49 lineto
+closepath stroke
+grestore
+% Node6
+gsave
+[ /Rect [ 1025 171 1193 191 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#77d3a8e01e24edf05e663b16f914e947) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1025 171 moveto
+1025 191 lineto
+1194 191 lineto
+1194 171 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1025 171 moveto
+1025 191 lineto
+1194 191 lineto
+1194 171 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1032.5 178 moveto 153 (SWIG_Python_InitShadowInstance) alignedtext
+grestore
+% Node5->Node6
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 981 181 moveto
+995 181 1011 181 1025 181 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 981 177.5 moveto
+971 181 lineto
+981 184.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 981 177.5 moveto
+971 181 lineto
+981 184.5 lineto
+closepath stroke
+grestore
+% Node7->Node6
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 975 155 moveto
+1002 160 1032 166 1058 171 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 975.49 151.53 moveto
+965 153 lineto
+974.12 158.39 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 975.49 151.53 moveto
+965 153 lineto
+974.12 158.39 lineto
+closepath stroke
+grestore
+% Node8
+gsave
+[ /Rect [ 1045 133 1173 153 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#fddb1b639fb789e0f8aa35e8e5f2635f) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1045 133 moveto
+1045 153 lineto
+1174 153 lineto
+1174 133 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1045 133 moveto
+1045 153 lineto
+1174 153 lineto
+1174 133 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1052.5 140 moveto 113 (SWIG_Python_AcquirePtr) alignedtext
+grestore
+% Node7->Node8
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 994 143 moveto
+1011 143 1028 143 1045 143 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 994 139.5 moveto
+984 143 lineto
+994 146.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 994 139.5 moveto
+984 143 lineto
+994 146.5 lineto
+closepath stroke
+grestore
+% Node9
+gsave
+[ /Rect [ 1026 95 1192 115 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#b5bec3f786db25fd4085c1534d785a0d) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1026 95 moveto
+1026 115 lineto
+1193 115 lineto
+1193 95 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1026 95 moveto
+1026 115 lineto
+1193 115 lineto
+1193 95 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1033.5 102 moveto 151 (SWIG_Python_ConvertPtrAndOwn) alignedtext
+grestore
+% Node7->Node9
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 975 131 moveto
+1002 126 1032 120 1058 115 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 974.12 127.61 moveto
+965 133 lineto
+975.49 134.47 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 974.12 127.61 moveto
+965 133 lineto
+975.49 134.47 lineto
+closepath stroke
+grestore
+% Node11
+gsave
+[ /Rect [ 1042 57 1176 77 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#041942a8dcdbf97b08b0f28336265f29) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 1042 57 moveto
+1042 77 lineto
+1176 77 lineto
+1176 57 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 1042 57 moveto
+1042 77 lineto
+1176 77 lineto
+1176 57 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+1050 64 moveto 118 (SWIG_Python_MustGetPtr) alignedtext
+grestore
+% Node10->Node11
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 975 93 moveto
+1002 88 1032 82 1058 77 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 974.12 89.61 moveto
+965 95 lineto
+975.49 96.47 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 974.12 89.61 moveto
+965 95 lineto
+975.49 96.47 lineto
+closepath stroke
+grestore
+% Node13
+gsave
+[ /Rect [ 857 19 971 39 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#aefe09cae945ca4cdd2bec36f23dd0c9) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 857 19 moveto
+857 39 lineto
+971 39 lineto
+971 19 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 857 19 moveto
+857 39 lineto
+971 39 lineto
+971 19 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+865 26 moveto 98 (PySwigObject_dealloc) alignedtext
+grestore
+% Node12->Node13
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 802 55 moveto
+824 50 850 44 871 39 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 801.12 51.61 moveto
+792 57 lineto
+802.49 58.47 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 801.12 51.61 moveto
+792 57 lineto
+802.49 58.47 lineto
+closepath stroke
+grestore
+% Node14
+gsave
+[ /Rect [ 840 57 988 77 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#c38032f5ef17442eac70b6c3798bc8b2) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 840 57 moveto
+840 77 lineto
+988 77 lineto
+988 57 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 840 57 moveto
+840 77 lineto
+988 77 lineto
+988 57 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+848 64 moveto 132 (SWIG_Python_NewPointerObj) alignedtext
+grestore
+% Node12->Node14
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 809 67 moveto
+819 67 830 67 840 67 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 809 63.5 moveto
+799 67 lineto
+809 70.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 809 63.5 moveto
+799 67 lineto
+809 70.5 lineto
+closepath stroke
+grestore
+% Node13->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 847 31 moveto
+757 36 601 42 518 46 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 847 34.5 moveto
+857 31 lineto
+847 27.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 847 34.5 moveto
+857 31 lineto
+847 27.5 lineto
+closepath stroke
+grestore
+% Node15->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 246 48 moveto
+295 48 363 48 411 48 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 246 44.5 moveto
+236 48 lineto
+246 51.5 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 246 44.5 moveto
+236 48 lineto
+246 51.5 lineto
+closepath stroke
+grestore
+% Node16
+gsave
+[ /Rect [ 272 0 374 20 ]
+  /Border [ 0 0 0 ]
+  /Action << /Subtype /URI /URI ($_lgm___c_trans__wrap_8c.html#e2b9dae8c96855ad0fe6079ce97ad8f8) >>
+  /Subtype /Link
+/ANN pdfmark
+0.000 0.000 1.000 nodecolor
+newpath 272 0 moveto
+272 20 lineto
+374 20 lineto
+374 0 lineto
+closepath fill
+1 setlinewidth
+filled
+0.000 0.000 0.000 nodecolor
+newpath 272 0 moveto
+272 20 lineto
+374 20 lineto
+374 0 lineto
+closepath stroke
+0.000 0.000 0.000 nodecolor
+10 /FreeSans set_font
+280 7 moveto 86 (PySwigObject_print) alignedtext
+grestore
+% Node15->Node16
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 232 36 moveto
+250 31 270 25 287 20 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 231.12 32.61 moveto
+222 38 lineto
+232.49 39.47 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 231.12 32.61 moveto
+222 38 lineto
+232.49 39.47 lineto
+closepath stroke
+grestore
+% Node16->Node2
+gsave
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 370 22 moveto
+389 27 410 33 427 38 curveto
+stroke
+0.667 0.776 0.439 edgecolor
+newpath 370.49 18.53 moveto
+360 20 lineto
+369.12 25.39 lineto
+closepath fill
+1 setlinewidth
+solid
+0.667 0.776 0.439 edgecolor
+newpath 370.49 18.53 moveto
+360 20 lineto
+369.12 25.39 lineto
+closepath stroke
+grestore
+endpage
+showpage
+grestore
+%%PageTrailer
+%%EndPage: 1
+%%Trailer
+%%Pages: 1
+%%BoundingBox: 36 36 1238 235
+end
+restore
+%%EOF

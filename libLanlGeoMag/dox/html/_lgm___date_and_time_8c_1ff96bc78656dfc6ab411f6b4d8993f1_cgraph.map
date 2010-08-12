@@ -1,0 +1,14 @@
+<area shape="rect" href="$_lgm___c_trans_8h.html#ae7db2b4a40466c781a6a29f91a51133" title="Lgm_GPS_to_TAI" alt="" coords="361,175,487,201">
+<area shape="rect" href="$_lgm___c_trans_8h.html#de5bfe94202a0503dbbe1cb6a066ecf9" title="Lgm_TAI_to_UTC" alt="" coords="188,124,311,151">
+<area shape="rect" href="$_lgm___c_trans_8h.html#661496b1335a95d593265c548f64899f" title="Lgm_hour24" alt="" coords="568,175,659,201">
+<area shape="rect" href="$_lgm___c_trans_8h.html#73a444d73b7a1119517c60f5a070cc9d" title="Lgm_JD" alt="" coords="579,124,648,151">
+<area shape="rect" href="$_lgm___c_trans_8h.html#4a4b0532bf6fb44bc8d4d9fbbab0d5cf" title="Compute the Julian Day number for the given date." alt="" coords="553,73,673,100">
+<area shape="rect" href="$_lgm___c_trans_8h.html#7d638a5de1c5a2b0176e2c51f4e85427" title="Lgm_IsLeapSecondDay" alt="" coords="739,48,899,75">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e869fd88ef397bce460b886a6a1b840d" title="Lgm_JDN" alt="" coords="780,175,857,201">
+<area shape="rect" href="$_lgm___c_trans_8h.html#de46e5122248c7bf19ce56f2ed4b7e91" title="Lgm_GetLeapSeconds" alt="" coords="537,377,689,404">
+<area shape="rect" href="$_lgm___c_trans_8h.html#af81b2f637efd027fd4fb425f16dd027" title="Lgm_RemapTime" alt="" coords="363,73,485,100">
+<area shape="rect" href="$_lgm___c_trans_8h.html#fc2358593ed2c075d04b1ae6663a86a6" title="Lgm_UTC_to_TAI" alt="" coords="363,225,485,252">
+<area shape="rect" href="$_lgm___c_trans_8h.html#38f91ae9f05bbcd134091cea464ee003" title="Lgm_DayOfWeek" alt="" coords="552,225,675,252">
+<area shape="rect" href="$_lgm___c_trans_8h.html#104fe1084e885dd5b4e9d7421ee361a2" title="Lgm_Doy" alt="" coords="576,327,651,353">
+<area shape="rect" href="$_lgm___c_trans_8h.html#df736dd325580fae9f0bd5fde0fab40e" title="Lgm_UT_to_HMSd" alt="" coords="548,276,679,303">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e6f9029d80696fdffbe753ff07962368" title="Lgm_LeapYear" alt="" coords="765,327,872,353">

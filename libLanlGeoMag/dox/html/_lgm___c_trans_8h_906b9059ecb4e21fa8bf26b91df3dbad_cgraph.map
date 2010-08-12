@@ -1,0 +1,15 @@
+<area shape="rect" href="$_lgm___c_trans_8h.html#de5bfe94202a0503dbbe1cb6a066ecf9" title="Lgm_TAI_to_UTC" alt="" coords="249,157,372,184">
+<area shape="rect" href="$_lgm___date_and_time_8c.html#39c239611e99c1ad3a2ae8af2cb93d9c" title="Lgm_TaiSeconds_to_TAI" alt="" coords="228,259,393,285">
+<area shape="rect" href="$_lgm___c_trans_8h.html#de46e5122248c7bf19ce56f2ed4b7e91" title="Lgm_GetLeapSeconds" alt="" coords="617,107,769,133">
+<area shape="rect" href="$_lgm___c_trans_8h.html#7d638a5de1c5a2b0176e2c51f4e85427" title="Lgm_IsLeapSecondDay" alt="" coords="819,81,979,108">
+<area shape="rect" href="$_lgm___c_trans_8h.html#73a444d73b7a1119517c60f5a070cc9d" title="Lgm_JD" alt="" coords="659,157,728,184">
+<area shape="rect" href="$_lgm___c_trans_8h.html#4a4b0532bf6fb44bc8d4d9fbbab0d5cf" title="Compute the Julian Day number for the given date." alt="" coords="633,411,753,437">
+<area shape="rect" href="$_lgm___c_trans_8h.html#af81b2f637efd027fd4fb425f16dd027" title="Lgm_RemapTime" alt="" coords="444,5,567,32">
+<area shape="rect" href="$_lgm___c_trans_8h.html#fc2358593ed2c075d04b1ae6663a86a6" title="Lgm_UTC_to_TAI" alt="" coords="444,208,567,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e869fd88ef397bce460b886a6a1b840d" title="Lgm_JDN" alt="" coords="860,183,937,209">
+<area shape="rect" href="$_lgm___c_trans_8h.html#38f91ae9f05bbcd134091cea464ee003" title="Lgm_DayOfWeek" alt="" coords="632,208,755,235">
+<area shape="rect" href="$_lgm___c_trans_8h.html#104fe1084e885dd5b4e9d7421ee361a2" title="Lgm_Doy" alt="" coords="656,259,731,285">
+<area shape="rect" href="$_lgm___c_trans_8h.html#661496b1335a95d593265c548f64899f" title="Lgm_hour24" alt="" coords="648,309,739,336">
+<area shape="rect" href="$_lgm___c_trans_8h.html#df736dd325580fae9f0bd5fde0fab40e" title="Lgm_UT_to_HMSd" alt="" coords="628,360,759,387">
+<area shape="rect" href="$_lgm___c_trans_8h.html#e6f9029d80696fdffbe753ff07962368" title="Lgm_LeapYear" alt="" coords="845,259,952,285">
+<area shape="rect" href="$_lgm___c_trans_8h.html#8235053e9b85c2b8573f4631df5406a1" title="Lgm_jd_to_ymdh" alt="" coords="445,309,565,336">
