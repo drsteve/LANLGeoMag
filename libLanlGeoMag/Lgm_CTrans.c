@@ -60,7 +60,7 @@ Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
 
 }
 
-/*
+/**
  *  The Lgm_CTrans structure has pointers in it, so simple
  *  asignments (e.g. *t = *s) are dangerous. Here we make sure that
  *  the target gets an independent copy of the structure.
@@ -108,7 +108,7 @@ Lgm_CTrans *Lgm_CopyCTrans( Lgm_CTrans *s ) {
 
 
 
-/*
+/**
  *  Converts RA and DEC to unit vector in cartesian coords
  */
 void Lgm_Radec_to_Cart(double ra, double dec, Lgm_Vector *r) {
@@ -168,7 +168,7 @@ double Lgm_angle360(double angle) {
 
 
 
-/*
+/**
  *  Compute the Julian Day number for the given date.
  *  Julian Date is the number of days since noon of Jan 1 4713 B.C.
  */

@@ -63,71 +63,71 @@
  * them.
  */
 
-#define EME2000_COORDS  1   //  Earth Mean Equator and Equinox of Epoch J2000 (EME2000 system)
-#define ICRF2000_COORDS 1   //  aka International Celestial Reference Frame (ICRF)
-#define GEI2000_COORDS  1   //  aka GEI (Geocentric Equatorial Inertial) at Epoch J2000
-                            //
-                            //      Z-axis - parallel to mean rot axis of Earth 
-                            //               at fixed epoch J2000
-                            //      X-axis - points to direction of mean vernal 
-                            //               equinox at the fixed epoch J2000
-                            //      Y-axis - completes right handed system
-                            //
+#define EME2000_COORDS  1   //!<  Earth Mean Equator and Equinox of Epoch J2000 (EME2000 system)
+#define ICRF2000_COORDS 1   //!<  aka International Celestial Reference Frame (ICRF)
+#define GEI2000_COORDS  1   //!<  aka GEI (Geocentric Equatorial Inertial) at Epoch J2000
+                            //!<
+                            //!<      Z-axis - parallel to mean rot axis of Earth 
+                            //!<               at fixed epoch J2000
+                            //!<      X-axis - points to direction of mean vernal 
+                            //!<               equinox at the fixed epoch J2000
+                            //!<      Y-axis - completes right handed system
+                            //!<
 
-#define MOD_COORDS      2   // Mean Of Date (MOD) system.
-                            //
-                            // This is same as EME2000_COORDS, except that the
-                            // mean rotation axis and mean equinox of date are
-                            // used to define the system.  Transforming between
-                            // J2000 and MOD involves roatations using the
-                            // so-called Precession angles (Zeta, Zee, Theta).
-                            // The sun position (and other quantities) that we
-                            // compute natively comes out in MOD coords.
-                            // Transformation between MOD and EME2000
-                            //      Umod = Rz(-Zee)Ry(Theta)Rz(-Zeta) Ueme2000
+#define MOD_COORDS      2   //!< Mean Of Date (MOD) system.
+                            //!<
+                            //!< This is same as EME2000_COORDS, except that the
+                            //!< mean rotation axis and mean equinox of date are
+                            //!< used to define the system.  Transforming between
+                            //!< J2000 and MOD involves roatations using the
+                            //!< so-called Precession angles (Zeta, Zee, Theta).
+                            //!< The sun position (and other quantities) that we
+                            //!< compute natively comes out in MOD coords.
+                            //!< Transformation between MOD and EME2000
+                            //!<      Umod = Rz(-Zee)Ry(Theta)Rz(-Zeta) Ueme2000
 
-#define TOD_COORDS      3   // True Of Date (TOD) system.
-                            //
-                            // This is same as MOD, except that the true
-                            // rotation axis and true equinox of date are used
-                            // to define the system.  Transforming between MOD
-                            // and TOD involves roatations using the Nutation
-                            // corrections delta-Psi and delta-Eps.
-                            // Transformation between TOD and MOD
-                            //      Utod = Rx( -(Eps+dEps) )Rz(-dPsi)Rx(Eps) Umod
+#define TOD_COORDS      3   //!< True Of Date (TOD) system.
+                            //!<
+                            //!< This is same as MOD, except that the true
+                            //!< rotation axis and true equinox of date are used
+                            //!< to define the system.  Transforming between MOD
+                            //!< and TOD involves roatations using the Nutation
+                            //!< corrections delta-Psi and delta-Eps.
+                            //!< Transformation between TOD and MOD
+                            //!<      Utod = Rx( -(Eps+dEps) )Rz(-dPsi)Rx(Eps) Umod
 
-#define TEME_COORDS     4   // True Equator, Mean Equinox (of Date). 
-                            //
-                            // This is a hybrid system using true equat., but
-                            // mean equinox.  This is the system that the
-                            // output of the SGP4 orbit propagator uses
-                            // implicitly. The system comes about implicitly
-                            // when mean sidereal time is used in place of true
-                            // sidereal time when transforming between an
-                            // earth-fixed system and an interial one.  Its not
-                            // a system we would necessarily want to work in,
-                            // but its what SGP4 (implicitly) outputs due to
-                            // the nature of how the TLEs and orbit
-                            // calculations are done.
-                            // Transformation between TEME and TOD
-                            //      Utod = Rz( dPsi cos(Eps) ) Uteme
+#define TEME_COORDS     4   //!< True Equator, Mean Equinox (of Date). 
+                            //!<
+                            //!< This is a hybrid system using true equat., but
+                            //!< mean equinox.  This is the system that the
+                            //!< output of the SGP4 orbit propagator uses
+                            //!< implicitly. The system comes about implicitly
+                            //!< when mean sidereal time is used in place of true
+                            //!< sidereal time when transforming between an
+                            //!< earth-fixed system and an interial one.  Its not
+                            //!< a system we would necessarily want to work in,
+                            //!< but its what SGP4 (implicitly) outputs due to
+                            //!< the nature of how the TLEs and orbit
+                            //!< calculations are done.
+                            //!< Transformation between TEME and TOD
+                            //!<      Utod = Rz( dPsi cos(Eps) ) Uteme
 
 
-#define PEF_COORDS      5   // Pseudo Earth Fixed (PEF) system
-                            //
-                            // This system has Z-axis aligned with
-                            // instantaneous rotation axis of the Earth and
-                            // X-axis to Greenwich meridian. Its closely
-                            // related to TOD system. PEF to TOD are related by
-                            // a single rotation around z-axis by angle
-                            // correspondingm to true sidereal time. This is
-                            // called Pseudo-Fixed because in reality the
-                            // rotation axis moves slightly relative to the
-                            // ground (pole wander). So its not a truely
-                            // Earth-fixed system.
-                            // Transformation:
-                            //      Upef = Rz( Theta ) Utod
-                            //      (Theta is true sidereal time; Theta = Mean Theta + Eqn or Equinoxes)
+#define PEF_COORDS      5   //!< Pseudo Earth Fixed (PEF) system
+                            //!<
+                            //!< This system has Z-axis aligned with
+                            //!< instantaneous rotation axis of the Earth and
+                            //!< X-axis to Greenwich meridian. Its closely
+                            //!< related to TOD system. PEF to TOD are related by
+                            //!< a single rotation around z-axis by angle
+                            //!< correspondingm to true sidereal time. This is
+                            //!< called Pseudo-Fixed because in reality the
+                            //!< rotation axis moves slightly relative to the
+                            //!< ground (pole wander). So its not a truely
+                            //!< Earth-fixed system.
+                            //!< Transformation:
+                            //!<      Upef = Rz( Theta ) Utod
+                            //!<      (Theta is true sidereal time; Theta = Mean Theta + Eqn or Equinoxes)
 
 
 #define WGS84_COORDS    6   // World Geodetic System 1984 (WGS84)
@@ -419,26 +419,13 @@
 
 typedef struct Lgm_LeapSeconds {
 
-    int         nLeapSecondDates;   /*
-                                     * Number of leap second dates.
-                                     */
+    int         nLeapSecondDates;   //!< Number of leap second dates.
 
-    long int    *LeapSecondDates;   /*
-                                     * Array for holdin the Dates on which leap
-                                     * seconds were added
-                                     */
+    long int    *LeapSecondDates;   //!< Array for holdin the Dates on which leap seconds were added
 
-    double      *LeapSecondJDs;     /*
-                                     * Array for holdin the Julian Dates on
-                                     * which leap seconds were added
-                                     */
+    double      *LeapSecondJDs;     //!< Array for holdin the Julian Dates on which leap seconds were added
 
-
-
-    double      *LeapSeconds;       /*
-                                     * The actual number of leap seconds that
-                                     * went into effect on the given date
-                                     */
+    double      *LeapSeconds;       //!< The actual number of leap seconds that  went into effect on the given date
 
 
 } Lgm_LeapSeconds;
@@ -446,41 +433,40 @@ typedef struct Lgm_LeapSeconds {
 
 typedef struct Lgm_DateTime {
 
-    long int    Date;       // In basic ISO format (YYYYMMDD or YYYYDDD)
-                            // Represented as a single long int
+    long int    Date;       //!< In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int 
 
-    int         Year;       // 4-digit year
+    int         Year;       //!< 4-digit year
 
-    int         Month;      // [1-12]
+    int         Month;      //!< [1-12]
 
-    int         Day;        // Day Of Month [1-31]
+    int         Day;        //!< Day Of Month [1-31]
     
-    int         Doy;        // Day Of Year [1-31]
+    int         Doy;        //!< Day Of Year [1-31]
 
-    double      Time;       // Decimal value of time in hours
+    double      Time;       //!< Decimal value of time in hours
 
-    int         Hour;       // Hours [0-23]
+    int         Hour;       //!< Hours [0-23]
 
-    int         Minute;     // Minutes [0-59]
+    int         Minute;     //!< Minutes [0-59]
 
-    double      Second;     // Seconds [0-60] (the 60 accommodates leap seconds)
+    double      Second;     //!< Seconds [0-60] (the 60 accommodates leap seconds)
 
-    int         Week;       // ISO Week number [1-53]
+    int         Week;       //!< ISO Week number [1-53]
 
-    int         Dow;        // ISO Day Of Week number [1-7]
+    int         Dow;        //!< ISO Day Of Week number [1-7]
 
-    char        DowStr[10]; // ISO Day Of Week number [1-7]
+    char        DowStr[10]; //!< ISO Day Of Week number [1-7]
 
-    double      fYear;      // Decimal year (e.g. 2004.2345)
+    double      fYear;      //!< Decimal year (e.g. 2004.2345)
 
-    double      JD;         // Julian Date
+    double      JD;         //!< Julian Date
 
-    double      T;          // Julian Centuries since J2000
-                            // for this time system
+    double      T;          //!< Julian Centuries since J2000
+                            //!< for this time system
 
-    double      DaySeconds; // Number of seconds in the day.
+    double      DaySeconds; //!< Number of seconds in the day.
 
-    int         TimeSystem; // e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
+    int         TimeSystem; //!< e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
 
 } Lgm_DateTime;
 
@@ -490,11 +476,12 @@ typedef struct Lgm_CTrans {
 
     int               Verbose;
 
-    Lgm_LeapSeconds   l;            /*
-                                     * structure containing Leap Second Info
+    Lgm_LeapSeconds   l;            /**<
+                                     * Structure containing Leap Second Info
                                      */
 
-    Lgm_DateTime     UT1;           /* UT is the mean solar time at Greenwich.
+    Lgm_DateTime     UT1;           /**<
+                                     * UT is the mean solar time at Greenwich.
                                      * UT0 is a version of UT that uses data
                                      * from many different ground stations.
                                      * UT1 is a version of UT0 in which
@@ -505,7 +492,8 @@ typedef struct Lgm_CTrans {
                                      * Units: Decimal hours
                                      */
 
-    Lgm_DateTime     UTC;           /* Universal Time Coordinated.
+    Lgm_DateTime     UTC;           /**<
+                                     * Universal Time Coordinated.
                                      * Most commonly used time system. Derived
                                      * from atomic time. It is maintained to be
                                      * within +/- 0.9s of UT1 (via addition or
@@ -513,7 +501,8 @@ typedef struct Lgm_CTrans {
                                      * Units: Decimal hours
                                      */
 
-    double           DUT1;          /* Difference between UT1 and UTC.
+    double           DUT1;          /**<
+                                     * Difference between UT1 and UTC.
                                      *      DUT1 = UT1 - UTC.
                                      * This is monitored and reported as part
                                      * of the Earth Orientation Parameters
@@ -526,102 +515,103 @@ typedef struct Lgm_CTrans {
                                      * Units: Decimal seconds
                                      */
 
-    double          LOD;            /* Length Of Day (LOD). Its the amount of extra
+    double          LOD;            /**<
+                                     * Length Of Day (LOD). Its the amount of extra
                                      * time in seconds that the current day has. Not
                                      * predictable. Part of EOP values.
                                      */
 
-    Lgm_DateTime    TAI;             /* International Atomic Time.
+    Lgm_DateTime    TAI;             /**<
+                                      *  International Atomic Time.
                                       *     TAI = UTC + DAT
                                       */
 
-    Lgm_DateTime    GPS;             /* GPS time
+    Lgm_DateTime    GPS;             /**<
+                                      *  GPS time
                                       *     GPS = TAI - 19s
                                       */
 
-    double          DAT;             /* Difference between UTC and TAI.
+    double          DAT;             /**<
+                                      *  Difference between UTC and TAI.
                                       *     DAT = TAI - UTC
                                       * DAT is essentially the number of leap seconds
                                       * and are an integral number of whole seconds.
                                       * Units: Decimal seconds.
                                       */
 
-    Lgm_DateTime    TT;             /* Terestrial Time (TT).
-                                     * Essentially the same thing as
-                                     * "Terrestrial Dynamical Time (TDT) or
-                                     * Ephmeris Time (ET). Its defined to be,
-                                     *      TT = TAI + 32.184s
-                                     * Units: Decimal hours.
-                                     */
+    Lgm_DateTime    TT;             /**<
+                                      *  Terestrial Time (TT).
+                                      * Essentially the same thing as
+                                      * "Terrestrial Dynamical Time (TDT) or
+                                      * Ephmeris Time (ET). Its defined to be,
+                                      *      TT = TAI + 32.184s
+                                      * Units: Decimal hours.
+                                      */
 
-    Lgm_DateTime    TDB;            /* Barycentric Dynamical Time.
-                                     * Not used here.
-                                     * Units: Decimal hours
-                                     */
+    Lgm_DateTime    TDB;            /**<
+                                      *  Barycentric Dynamical Time.
+                                      * Not used here.
+                                      * Units: Decimal hours
+                                      */
 
-    Lgm_DateTime    TCG;            /* Geocentric Coordinate Time.
-                                     * Not used here.
-                                     * Units: Decimal hours
-                                     */
-
-
-    double      gmst;               /* Greenwich Mean Sidereal Time 
-                                     * units: in radians 
-                                     */
-
-    double      gast;               /* Greenwich Apparent Sidereal Time
-                                     * Units: in radians 
-                                     */
+    Lgm_DateTime    TCG;            /**<
+                                      *  Geocentric Coordinate Time.
+                                      * Not used here.
+                                      * Units: Decimal hours
+                                      */
 
 
-    double      xp, yp;             /* Pole wander parameters.
-                                     * part of EOP data.
-                                     * Units: radians
-                                     */
+    double      gmst;               /**<
+                                      *  Greenwich Mean Sidereal Time 
+                                      * units: in radians 
+                                      */
 
-    double      epsilon;            /* Mean Obliquity of the Ecliptic 
+    double      gast;               /**<
+                                      *  Greenwich Apparent Sidereal Time
+                                      * Units: in radians 
+                                      */
+
+
+    double      xp, yp;             /**<
+                                      * Pole wander parameters.
+                                      * part of EOP data.
+                                      * Units: radians
+                                      */
+
+    double      epsilon;            /**<
+                                     *  Mean Obliquity of the Ecliptic 
                                      * (in radians) 
                                      */
 
-    double      epsilon_true;       /* True Obliquity of the Ecliptic 
-                                     *  epsilon_true = epsilon + dEps
+    double      epsilon_true;       /**<
+                                     *  True Obliquity of the Ecliptic 
+                                     *  \f$\epsilon_{true} = \epsilon + dEps\f$
                                      * (in radians) 
                                      */
 
+    double      eccentricity;       /**< Eccentricity of Earth-Sun orbit */
 
+    double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
+    double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
+    double      RA_sun;             /**< Right Ascention of Sun (in degrees) */
+    double      DEC_sun;            /**< Declination of Sun (in degrees) */
 
-//    double      fYear;              /* Decimal year */
-//    long int    Date;               /* YYMMDD YYDDD YYYYMMDD or YYYYDDD */
+    double      lambda_sun_ha;      /**< high accuracy eccliptic coords of sun */
+    double      r_sun_ha;           /**< high accuracy eccliptic coords of sun */
+    double      beta_sun_ha;        /**< high accuracy eccliptic coords of sun */
+    double      RA_sun_ha;          /**< high accuracy Right Ascention of Sun (in degrees) */
+    double      DEC_sun_ha;         /**< high accuracy Declination of Sun (in degrees) */
 
-//    int         year;               /* 4 digit year */
-//    int         month;              /* 2 digit month of year */
-//    int         day;                /* 2 digit day of month */
-//    int         doy;                /* 3 digit Day Of Year */
-//    int         dow;                /* 1 digit day of week */
-//    char        dowstr[80];         /* Day of week String (e.g. "Sun") */
-    double      eccentricity;       /* Eccentricity of Earth-Sun orbit */
-
-    double      lambda_sun;         /* Ecliptic Long. of Sun (in radians) */
-    double      earth_sun_dist;     /* Earth-Sun distance (in units of earth radii) */
-    double      RA_sun;             /* Right Ascention of Sun (in degrees) */
-    double      DEC_sun;            /* Declination of Sun (in degrees) */
-
-    double      lambda_sun_ha;      /* high accuracy eccliptic coords of sun */
-    double      r_sun_ha;           /* high accuracy eccliptic coords of sun */
-    double      beta_sun_ha;        /* high accuracy eccliptic coords of sun */
-    double      RA_sun_ha;          /* high accuracy Right Ascention of Sun (in degrees) */
-    double      DEC_sun_ha;         /* high accuracy Declination of Sun (in degrees) */
-
-    Lgm_Vector  Sun;                /* direction of Sun in GEI system (unit vector) */
-    Lgm_Vector  EcPole;             /* direction of Ecliptic Pole in GEI system (unit vector) */
-    double      psi;                /* Geodipole tilt angle (in radians) */
-    double      sin_psi;            /* sin( psi ) */
-    double      cos_psi;            /* cos( psi ) */
-    double      tan_psi;            /* cos( psi ) */
-    double      RA_moon;            /* Right Ascention of Moon (in degrees) */
-    double      DEC_moon;           /* Declination of Moon (in degrees) */
-    double      MoonPhase;          /* The Phase of the Moon (in days) */
-    double      EarthMoonDistance;  /* Distance between the Earth and Moon (in earth-radii) */
+    Lgm_Vector  Sun;                /**< direction of Sun in GEI system (unit vector) */
+    Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in GEI system (unit vector) */
+    double      psi;                /**< Geodipole tilt angle, \f$\psi\f$ (in radians) */
+    double      sin_psi;            /**< \f$\sin(\psi)\f$ */
+    double      cos_psi;            /**< \f$\cos(\psi)\f$ */
+    double      tan_psi;            /**< \f$\tan(\psi)\f$ */
+    double      RA_moon;            /**< Right Ascention of Moon (in degrees) */
+    double      DEC_moon;           /**< Declination of Moon (in degrees) */
+    double      MoonPhase;          /**< The Phase of the Moon (in days) */
+    double      EarthMoonDistance;  /**< Distance between the Earth and Moon (in earth-radii) */
 
 
     /*
@@ -629,36 +619,36 @@ typedef struct Lgm_CTrans {
      *  the IGRF field. Note that these are the basis for defining
      *  Mag coord systems. That's why they are here and not somewhere else...
      */
-    double      M_cd;               /* centered  dipole Magnetic moment. (nT Re^3)*/
-    double      M_cd_McIllwain;     /*  magnetic dipole moment used by McIllwain to compute L. Sometimes want to use this for consistency? */
-    double      CD_gcolat;          /* Geographic colat of centered dipole axis (deg.)  */
-    double      CD_glon;            /* Geographic long. of centered dipole axis (deg.)  */
-    double      ED_x0;              /*  x-comp of dipole displacement from center. Used in eccentric dipole field. */
-    double      ED_y0;              /*  y-comp of dipole displacement from center. Used in eccentric dipole field. */
-    double      ED_z0;              /*  z-comp of dipole displacement from center. Used in eccentric dipole field. */
+    double      M_cd;               /**< centered  dipole Magnetic moment. (nT Re^3)*/
+    double      M_cd_McIllwain;     /**<  magnetic dipole moment used by McIllwain to compute L. Sometimes want to use this for consistency? */
+    double      CD_gcolat;          /**< Geographic colat of centered dipole axis (deg.)  */
+    double      CD_glon;            /**< Geographic long. of centered dipole axis (deg.)  */
+    double      ED_x0;              /**<  x-comp of dipole displacement from center. Used in eccentric dipole field. */
+    double      ED_y0;              /**<  y-comp of dipole displacement from center. Used in eccentric dipole field. */
+    double      ED_z0;              /**<  z-comp of dipole displacement from center. Used in eccentric dipole field. */
 
 
     /*
      * Precession Angles
      */
-    double      Zeta;
-    double      Theta;
-    double      Zee;
+    double      Zeta;               /**< Precession angle, \f$\zeta\f$ */
+    double      Theta;              /**< Precession angle, \f$\theta\f$ */
+    double      Zee;                /**< Precession angle, \f$z\f$ */
 
     /*
      * Some things for nutation reduction
      */
-    int         nNutationTerms; // number of terms to usek in the dPsi/dEps Nutation series.
+    int         nNutationTerms; /**< number of terms to usek in the dPsi/dEps Nutation series. */
     double      dPsi;
     double      dEps;
     double      dPsiCosEps;
     double      dPsiSinEps;
-    double      ddPsi;      // radians additional corrections to dPsi -- part of EOP data
-    double      ddEps;      // radians additional corrections to dEps -- part of EOP data
-    double      EQ_Eq;      // Equation of the equinoxes.
-    double      OmegaMoon;  // Ascending node of Moon.
-    double      dX;         // for IUA-2000A reduction (not used yet)
-    double      dY;         // for IUA-2000A reduction (not used yet)
+    double      ddPsi;      /**< radians additional corrections to dPsi -- part of EOP data */
+    double      ddEps;      /**< radians additional corrections to dEps -- part of EOP data */
+    double      EQ_Eq;      /**< Equation of the equinoxes. */
+    double      OmegaMoon;  /**< Ascending node of Moon. */
+    double      dX;         /**< for IUA-2000A reduction (not used yet) */
+    double      dY;         /**< for IUA-2000A reduction (not used yet) */
 
 
 

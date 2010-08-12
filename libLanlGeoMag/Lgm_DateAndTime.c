@@ -22,7 +22,7 @@ int Lgm_LeapYear(int year) {
 }
 
 
-/*
+/*!
  * Routines for dealing with leap seconds. Also time conversions that require
  * knowledge about leap seconds.
  *
