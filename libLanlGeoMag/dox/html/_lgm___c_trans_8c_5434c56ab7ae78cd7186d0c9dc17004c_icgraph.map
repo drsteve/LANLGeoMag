@@ -1,7 +1,0 @@
-<area shape="rect" href="$_lgm___init_mag_info_8c.html#87ae57349dac55ae7393b6a168c080b2" title="Lgm_FreeMagInfo" alt="" coords="180,5,305,32">
-<area shape="rect" href="$_lgm___eop_8c.html#347307f1d5e5e8ddeb1159efb500169e" title="Lgm_init_eop" alt="" coords="193,56,292,83">
-<area shape="rect" href="$_lgm___sgp_8c.html#1cdf495d9a7e1309a4b1ababdc14a64c" title="Lgm_SgpDecodeTle" alt="" coords="173,107,312,133">
-<area shape="rect" href="$_lgm___lstar_info_8h.html#edbca525fb67c0d6cde4b890ff37c1a3" title="FreeLstarInfo" alt="" coords="412,5,511,32">
-<area shape="rect" href="$_lgm___init_mag_ephem_info_8c.html#e0999b29f4d136a628c2b0084ff74f9a" title="Lgm_FreeMagEphemInfo" alt="" coords="611,5,779,32">
-<area shape="rect" href="$_lgm___sgp_8c.html#21a21fc6d39baa848658e76b661a8063" title="LgmSgp_ReadTlesFromFile" alt="" coords="371,81,552,108">
-<area shape="rect" href="$_lgm___sgp_8c.html#c8c62bf872785b575faa2f2c6093049a" title="LgmSgp_ReadTlesFromStrings" alt="" coords="360,132,563,159">
