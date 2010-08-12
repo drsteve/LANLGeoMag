@@ -1,5 +1,7 @@
 SUBDIRS = Lgm
 
+AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+
 # Location to keep Eop-related stuff
 LGM_EOP_DATA_DIR = @prefix@/share/LanlGeoMag/EopData
 includedir       = @prefix@/include/Lgm

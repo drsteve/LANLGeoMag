@@ -1,0 +1,31 @@
+Instructions for developers who use the source code repository
+**************************************************************
+
+SVN repository
+==============
+
+Initial checkout:
+
+svn co svn+ssh://YOUR_LOGIN@svn.isr.lanl.gov/n/svn/LanlGeoMag/trunk LanlGeoMag
+cd LanlGeoMag
+
+Later updates:
+
+svn update
+
+Committing your work:
+
+svn commit
+
+
+Compiling
+=========
+
+Just once (or just occasionally):
+
+autoreconf -i
+./configure
+
+Every time:
+
+make

@@ -6,7 +6,11 @@
 AC_PREREQ([2.63])
 AC_INIT([LanlGeoMag], [1.5.6], [mghenderson@lanl.gov])
 AC_CONFIG_HEADERS([config.h])
-AC_DEFINE([LGM_EOP_DATA_DIR],["/usr/local/share/LanlGeoMag/EopData"],["Define directory where Eop data can be found"])
+AC_CONFIG_MACRO_DIR([m4])
+#AC_DEFINE([LGM_EOP_DATA_DIR],["/usr/local/share/LanlGeoMag/EopData"],["Define directory where Eop data can be found"])
+#AH_VERBATIM([PDDH], [#define LGM_EOP_DATA_DIR "@datadir@/LanlGeoMag/EopData"])
+#AC_DEFINE([PDD], ["PDD @prefix@/data"], ["dude"])
+AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory where Eop data can be found])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL

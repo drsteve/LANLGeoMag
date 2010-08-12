@@ -1,11 +1,14 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Quat.h"
+#include "config.h"
+
 #include <ctype.h>
 #include <time.h>
 
 #define USE_HIGH_ACCURACY_SUN 1
 
 #ifndef LGM_EOP_DATA_DIR
+#warning "hard-coding LGM_EOP_DATA_DIR because it was not in config.h"
 #define LGM_EOP_DATA_DIR    /usr/local/share/LanlGeoMag/EopData
 #endif
 
