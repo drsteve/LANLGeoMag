@@ -39,7 +39,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     Lgm_Vector      v1, v2, v3, vv1, Bvec;
     double          sa, sa2, Blocal;
     double          Lam, CosLam, LSimple;
-    int             i, LS_Flag, nn, tk;
+    int             i, LS_Flag, nn, tk, TraceFlag;
     char            *PreStr, *PostStr;
 
     LstarInfo = MagEphemInfo->LstarInfo;
@@ -73,10 +73,19 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     /*
      *  Compute Field-related quantities for each Pitch Angle.
      */
-    if ( Lgm_Trace( u, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo->mInfo ) == 1 ) {
+    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, 120.0, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
+    MagEphemInfo->FieldLineType = TraceFlag;
+    if ( TraceFlag > 0 ) {
+        MagEphemInfo->Footprint_Ps  = v1;
+        MagEphemInfo->Footprint_Pn  = v2;
+        MagEphemInfo->Pmin_gsm      = v3;
+        MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
+        MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
+        MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
+        MagEphemInfo->Mused         = MagEphemInfo->Mcurr;
+    }
+    if ( TraceFlag == 1 ) {
 
-        MagEphemInfo->Pmin_gsm = v3;
-        MagEphemInfo->Bmin     = LstarInfo->mInfo->Bmin;
 
 
             /*
@@ -138,6 +147,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                         printf("\t%sUTC, LSimple     = %g %g%s\n\n\n", PreStr, UTC, LSimple, PostStr );
                     }
                     MagEphemInfo->Lstar[i] = LstarInfo2->LS;
+                    MagEphemInfo->I[i] = LstarInfo2->I[i];
 
                     printf("%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
 
@@ -178,6 +188,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
 
         } 
         // ***** END PARALLEL EXECUTION *****
+
 
     }
 

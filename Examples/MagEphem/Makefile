@@ -4,7 +4,7 @@ LIBS      = `pkg-config --libs lgm`
 CFLAGS    = `pkg-config --cflags lgm`
 CC        = gcc
 
-FILES1    =  ComputeLstarVersusPA.c
+FILES1    =  ComputeLstarVersusPA.c Test.c
 
 all   : LstarVersusPA
 

@@ -999,6 +999,7 @@ void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
      d = d - Month*100;
 
     // probably a cleaner way to do this(?)
+    // Styles 0, 1, and 2 are ISO compliant...(check?)
     if ( p <= 0 ) {
         if ( Style == 0 ) {
             if ( DT.TimeSystem == LGM_TIME_SYS_UTC )

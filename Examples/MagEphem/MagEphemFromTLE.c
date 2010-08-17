@@ -7,6 +7,8 @@
 #define KP_DEFAULT 0
 
 void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
+void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemInfo *m );
+void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m );
 
 
 /*
@@ -56,8 +58,10 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     // Create array of Pitch Angles to compute
     for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
         Alpha[nAlpha] = a ;
+        MagEphemInfo->Alpha[nAlpha] = a;
         //printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
+    MagEphemInfo->nAlpha = nAlpha;
 
 
 
@@ -134,6 +138,16 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     fprintf(fp, "%%%s\n", TLEs[0].Line1 );
     fprintf(fp, "%%%s\n", TLEs[0].Line2 );
 
+
+    /*
+     * Open Mag Ephem file for writing
+     */
+FILE *fp_MagEphem;
+    fp_MagEphem = fopen("puke.txt", "wb");
+    WriteMagEphemHeader( fp_MagEphem, "mgh", "mithril", MagEphemInfo );
+//fclose(fp_MagEphem);
+//exit(0);
+
     // loop over specified time range
     for ( JD = StartJD; JD <= EndJD; JD += JDinc ) {
 
@@ -161,6 +175,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
         printf("\n\n\nDate, UTC = %ld %g   Ugsm = %g %g %g \n", Date, UTC, Ugsm.x, Ugsm.y, Ugsm.z );
         ComputeLstarVersusPA( Date, UTC, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
 
+        WriteMagEphemData( fp_MagEphem, MagEphemInfo );
 
 
     }
@@ -170,6 +185,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     free( s );
     free( TLEs );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
+
 
 
     return(0);
