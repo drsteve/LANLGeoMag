@@ -22,7 +22,8 @@
 #include <GL/glew.h>
 //#include <GL/glut.h>
 #include "support.h"
-#include "MagEphemInfo.h"
+//#include "MagEphemInfo.h"
+#include <Lgm/Lgm_MagEphemInfo.h>
 #include "PsdAssim.h"
 #include <Lgm/Lgm_Quat.h>
 #include <Lgm/Lgm_Sgp.h>
@@ -83,6 +84,8 @@
 #define TIME_PLAY_FOREWARD               2
 #define TIME_RESET_FOREWARD_TO_END       3
 #define TIME_REALTIMEPLAY                4
+
+Lgm_MagEphemInfo   *MagEphemInfo;
 
 
 GtkFileFilter *PngFilter;
@@ -3165,8 +3168,8 @@ void GenerateDriftShellLists(){
         glNewList( DriftShellList4 + p, GL_COMPILE );
             for (i=0;i<nFieldPoints-1;i++) {
                 glBegin(GL_QUAD_STRIP);
-                for (k=0;k<nShellPoints2-60;k++) {
-                //for (k=0;k<nShellPoints2;k++) {
+                //for (k=0;k<nShellPoints2-60;k++) {
+                for (k=0;k<nShellPoints2;k++) {
                     glNormal3f( nx4_gsm[p][k][i], ny4_gsm[p][k][i], nz4_gsm[p][k][i] );
                     glVertex3f( x4_gsm[p][k][i], y4_gsm[p][k][i], z4_gsm[p][k][i] );
                     glNormal3f( nx4_gsm[p][k][i+1], ny4_gsm[p][k][i+1], nz4_gsm[p][k][i+1] );
@@ -5197,6 +5200,7 @@ void MakeFieldLines( int nAddPnts, int *nNewFieldPoints ){
     double  xout[200], yout[200], zout[200];
 
     for ( i=0; i<MagEphemInfo->nAlpha; i++ ) {
+//printf("MagEphemInfo->nShellPoints[%d] = %d\n", i, MagEphemInfo->nShellPoints[i]);
         for ( ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++ ) {
             /*
              *  Lets interp the points to a fixed number so we can make a mesh
@@ -5231,6 +5235,7 @@ void MakeFieldLines( int nAddPnts, int *nNewFieldPoints ){
             
         }
     }
+//exit(0);
 
 }
 
@@ -5498,7 +5503,6 @@ printf("CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT );
                 }
             }
             nPnts2[i][ns] = kk;
-//printf("kk = %d\n", kk);
 
 
 
@@ -7968,44 +7972,52 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
 
 
 
-    MagEphemInfo = (_MagEphemInfo *)calloc( 1, sizeof(_MagEphemInfo));
+    MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(Lgm_MagEphemInfo));
 //    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20091026/20091026_002230_GOES_11_MagEphem.dat", O_RDONLY );
-    fd = open( "/home/mgh/LanlGeoMag-1.5.4/Examples/MagCoords/test.dat", O_RDONLY );
+    fd = open( "test.dat", O_RDONLY );
 //    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20080722/20080722_185730_GOES_11_MagEphem_T89_Kp5.dat", O_RDONLY );
     //fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20090420/20090420_000230_VIRTUAL_MagEphem_T89_Kp5.dat", O_RDONLY );
 
     read( fd, MagEphemInfo, sizeof( *MagEphemInfo ) );
+//KLUDGE
+//printf("nAlpha = %d\n", MagEphemInfo->nAlpha);
+//int iiii;
+//for (iiii=0; iiii<MagEphemInfo->nAlpha; iiii++){
+//printf("nShellPoints[%d] = %d\n", iiii, MagEphemInfo->nShellPoints[iiii]);
+//}
+MagEphemInfo->nAlpha = 9;
+//exit(0);
     close( fd );
 
 
-    for (i=0; i<10; i++){
+    for (i=0; i<20; i++){
         //ShowPitchAngle[i] = ShowAllPitchAngles;
         //ShowPitchAngle2[i] = ShowAllPitchAngles2;
         ShowPitchAngle[i] = 0;
         ShowPitchAngle2[i] = 0;
     }
     ShowPitchAngle[4] = 0;
-    ShowPitchAngle2[4] = 0;
+    ShowPitchAngle2[4] = 1;
 
 
     /*
      * Set up materials
      */
-    ARRAY_1D( gInfo->FieldLineMaterial, 10,  MaterialProp );
-    ARRAY_1D( gInfo->DriftShellMaterial, 10,  MaterialProp );
-    ARRAY_2D( gInfo->FieldLineColorButton,  10, 3, GtkWidget * );
-    ARRAY_2D( gInfo->DriftShellColorButton, 10, 3, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineShininessButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellShininessButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineMaterialButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineMaterialButtonHandler, 10, gulong );
-    ARRAY_1D( gInfo->DriftShellMaterialButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellMaterialButtonHandler, 10, gulong );
+    ARRAY_1D( gInfo->FieldLineMaterial, 19,  MaterialProp );
+    ARRAY_1D( gInfo->DriftShellMaterial, 19,  MaterialProp );
+    ARRAY_2D( gInfo->FieldLineColorButton,  19, 3, GtkWidget * );
+    ARRAY_2D( gInfo->DriftShellColorButton, 19, 3, GtkWidget * );
+    ARRAY_1D( gInfo->FieldLineShininessButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->DriftShellShininessButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->FieldLineMaterialButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->FieldLineMaterialButtonHandler, 19, gulong );
+    ARRAY_1D( gInfo->DriftShellMaterialButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->DriftShellMaterialButtonHandler, 19, gulong );
 
-    ARRAY_1D( gInfo->FieldLineShowPitchAngleButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler, 10, gulong );
-    ARRAY_1D( gInfo->DriftShellShowPitchAngleButton, 10, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, 10, gulong );
+    ARRAY_1D( gInfo->FieldLineShowPitchAngleButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler, 19, gulong );
+    ARRAY_1D( gInfo->DriftShellShowPitchAngleButton, 19, GtkWidget * );
+    ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, 19, gulong );
     for (i=0; i<10; i++){
         gInfo->FieldLineMaterial[i] = mat_silver;
         gInfo->FieldLineMaterial[i].diffuse[0] = colors[i][0];

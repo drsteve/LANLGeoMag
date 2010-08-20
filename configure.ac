@@ -16,10 +16,10 @@ AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
 
-DX_INIT_DOXYGEN($PACKAGE_NAME, libLanlGeoMag/Doxyfile)
-DX_HTML_FEATURE(ON)
-DX_MAN_FEATURE(ON)
-DX_PDF_FEATURE(ON)
+#DX_INIT_DOXYGEN($PACKAGE_NAME, libLanlGeoMag/Doxyfile)
+#DX_HTML_FEATURE(ON)
+#DX_MAN_FEATURE(ON)
+#DX_PDF_FEATURE(ON)
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])

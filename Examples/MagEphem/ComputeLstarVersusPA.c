@@ -42,6 +42,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     int             i, LS_Flag, nn, tk, TraceFlag;
     char            *PreStr, *PostStr;
 
+    MagEphemInfo->LstarInfo->SaveShellLines = TRUE;
     LstarInfo = MagEphemInfo->LstarInfo;
 
     // Save Date, UTC to MagEphemInfo structure
@@ -68,6 +69,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
+
 
 
     /*
@@ -175,6 +177,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                             MagEphemInfo->y_gsm[i][nn][tk] = LstarInfo2->y_gsm[nn][tk];
                             MagEphemInfo->z_gsm[i][nn][tk] = LstarInfo2->z_gsm[nn][tk];
                         }
+//printf("LstarInfo2->nFieldPnts[%d] = %d\n", nn, LstarInfo2->nFieldPnts[nn]);
                     }
 
                 } else {

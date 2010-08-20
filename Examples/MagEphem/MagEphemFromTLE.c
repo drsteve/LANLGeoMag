@@ -1,5 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <Lgm_CTrans.h>
 #include <Lgm_Sgp.h>
 #include <Lgm_MagEphemInfo.h>
@@ -56,7 +60,8 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
 
     // Create array of Pitch Angles to compute
-    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
+    //for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
+    for (nAlpha=0,a=90.0; a>0.0; a-=5.0,++nAlpha) {
         Alpha[nAlpha] = a ;
         MagEphemInfo->Alpha[nAlpha] = a;
         //printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
@@ -176,6 +181,10 @@ FILE *fp_MagEphem;
         ComputeLstarVersusPA( Date, UTC, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
 
         WriteMagEphemData( fp_MagEphem, MagEphemInfo );
+
+        long int fd = open("test.dat", O_CREAT|O_WRONLY);
+        write( fd, MagEphemInfo, sizeof(*MagEphemInfo) );
+        close(fd);
 
 
     }
