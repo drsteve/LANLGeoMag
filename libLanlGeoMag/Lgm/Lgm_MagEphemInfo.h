@@ -4,7 +4,7 @@
 #include <Lgm/Lgm_MagModelInfo.h>
 #include <Lgm/Lgm_LstarInfo.h>
 
-#define MAX_PITCH_ANGLES 900
+#define MAX_PITCH_ANGLES 90
 
 
 /**
@@ -30,6 +30,7 @@ typedef struct Lgm_MagEphemInfo {
 
     Lgm_Vector      Pmin_gsm;       //< position of minimum |B| in GSM
     double          Bmin;           //< Value of |Bmin|
+    double          smin;           //< Distance from southern footpoint to Pmin along FL.
 
     Lgm_Vector      Footprint_Pn;   //< position of northern footpoint (at 120km)
     double          Footprint_Bn;   //< Value of |B| at Footprint_Pn

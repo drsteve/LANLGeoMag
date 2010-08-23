@@ -81,6 +81,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
         MagEphemInfo->Footprint_Ps  = v1;
         MagEphemInfo->Footprint_Pn  = v2;
         MagEphemInfo->Pmin_gsm      = v3;
+        MagEphemInfo->smin          = LstarInfo->mInfo->smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
@@ -156,6 +157,8 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                     /*
                      * Save results to the MagEphemInfo structure.
                      */
+printf("LstarInfo->SaveShellLines = %d\n", LstarInfo->SaveShellLines);
+
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];

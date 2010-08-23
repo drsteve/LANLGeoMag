@@ -61,10 +61,10 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
 
     // Create array of Pitch Angles to compute
     //for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
-    for (nAlpha=0,a=90.0; a>0.0; a-=5.0,++nAlpha) {
+    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
         Alpha[nAlpha] = a ;
         MagEphemInfo->Alpha[nAlpha] = a;
-        //printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
+        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
     MagEphemInfo->nAlpha = nAlpha;
 
