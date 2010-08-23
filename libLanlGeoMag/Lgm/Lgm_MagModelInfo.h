@@ -126,14 +126,43 @@ typedef struct Lgm_MagModelInfo {
     double              ds;         // spacing in s (dist. along FL)
                                     // this will help in seacrhing the 
                                     // arrays (e.g. for interpolation).
-    double              smin;       // location of Bmin
-    double              Bmin;       // value of Bmin
-    Lgm_Vector          Bvecmin;    // value of Bvecmin
-    Lgm_Vector          Pmin;       // location of Bmin (in GSM)
+
+    Lgm_Vector      P_gsm;          //< S/C position in GSM
+    double          S;              //< Distance along FL from southern footpoint to S/C location in Re.
+    double          B;              //< Local (model) B-field magnitude (i.e. at S/C position)
+
+    Lgm_Vector      Pmin;           //< position of minimum |B| in GSM
+    Lgm_Vector      Bvecmin;        //< value of Bvecmin
+    double          Bmin;           //< Value of |Bmin|
+    double          Smin;           //< Distance from southern footpoint to Pmin along FL.
+
+    Lgm_Vector      Spherical_Footprint_Pn;   //< position of northern footpoint (at 120km)
+    double          Spherical_Footprint_Sn;   //< Distance along FL from southern foorpoint in Re
+    double          Spherical_Footprint_Bn;   //< Value of |B| at Footprint_Pn
+
+    Lgm_Vector      Spherical_Footprint_Ps;   //< position of southern footpoint (at 120km)
+    double          Spherical_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Spherical_Footprint_Bs;   //< Value of |B| at Footprint_Ps
+
+    Lgm_Vector      Ellipsoid_Footprint_Pn;   //< position of northern footpoint (at 120km above surface of WGS84 ellipsoid)
+    double          Ellipsoid_Footprint_Sn;   //< Distance along FL from southern footpoint in Re
+    double          Ellipsoid_Footprint_Bn;   //< Value of |B| at Footprint_Pn
+
+    Lgm_Vector      Ellipsoid_Footprint_Ps;   //< position of southern footpoint (at 120km)
+    double          Ellipsoid_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Ellipsoid_Footprint_Bs;   //< Value of |B| at Footprint_Ps
+
+    int             FieldLineType;  //< Field line type. (I.e., LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE)
+
+
+
+
     double              d2B_ds2;    // second derivative of B wrt to s at smin.
     double              Sb0;        // value of Sb integral for eq. mirroring particles.
     int                 imin1;      // imin1 and imin2 are the indices in the
     int                 imin2;      //   array between which smin is located.
+
+
 
     /*
      *  GSL defs for spline interpolation

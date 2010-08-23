@@ -2058,7 +2058,7 @@ void CreateSCPos( ) {
 
         glPushMatrix();
         glColor4f( 0.5, 0.5, 0.2, 0.5 );
-        glTranslatef(MagEphemInfo->P_gsm.x, MagEphemInfo->P_gsm.y, MagEphemInfo->P_gsm.z );  gdk_gl_draw_sphere( TRUE, 0.11, 20, 20 );
+        glTranslatef(MagEphemInfo->P.x, MagEphemInfo->P.y, MagEphemInfo->P.z );  gdk_gl_draw_sphere( TRUE, 0.11, 20, 20 );
         glPopMatrix();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -3111,8 +3111,8 @@ if ( MagEphemInfo->Lstar[i] > 1.0 ) {
             ////for (ns=0; ns<1; ns++){
 
                 // Foot Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellFootprint_Pn[i][ns].x, MagEphemInfo->ShellFootprint_Pn[i][ns].y, MagEphemInfo->ShellFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellFootprint_Ps[i][ns].x, MagEphemInfo->ShellFootprint_Ps[i][ns].y, MagEphemInfo->ShellFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
+                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
+                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
 
                 // Field Lines
                 MakeTube( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], nPnts[i][ns], 12, 0.0375/2.0 );
@@ -3145,8 +3145,8 @@ if ( MagEphemInfo->Lstar[i] > 1.0 ) {
 //            for (ns=0; ns<1; ns++){
 
                 // Foot Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellFootprint_Pn[i][ns].x, MagEphemInfo->ShellFootprint_Pn[i][ns].y, MagEphemInfo->ShellFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellFootprint_Ps[i][ns].x, MagEphemInfo->ShellFootprint_Ps[i][ns].y, MagEphemInfo->ShellFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
+                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
+                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
 
                 // Field Lines
                 //MakeTube( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], nPnts2[i][ns], 12, 0.0375/2.0 );
@@ -5246,6 +5246,7 @@ printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
                 InterpFieldLine( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], s_gsm[i][ns], 
                         MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns], 
                         nPnts[i][ns], xout, yout, zout, nInterpPoints );
+printf("MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns] = %g %g\n", MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns]);
                 for (ii=0; ii<nInterpPoints; ii++){
                     x3_gsm[i][ns][kk] = xout[ii];
                     y3_gsm[i][ns][kk] = yout[ii];

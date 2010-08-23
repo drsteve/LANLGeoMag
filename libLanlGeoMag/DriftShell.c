@@ -127,27 +127,6 @@ int FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mla
              LstarInfo->mInfo->Hmax = 0.1;
              if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, 120.0, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
 
-//printf("LstarInfo->mInfo->Bm = %g\n", LstarInfo->mInfo->Bm);
-//Lgm_Vector Bcrap;
-//double BBBB;
-//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bcrap, LstarInfo->mInfo );
-//BBBB=Lgm_Magnitude( &Bcrap );
-//printf("LstarInfo->mInfo->Pm_North = %g %g %g   B = %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, BBBB);
-//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bcrap, LstarInfo->mInfo );
-//BBBB=Lgm_Magnitude( &Bcrap );
-//printf("LstarInfo->mInfo->Pm_South = %g %g %g   B = %g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, BBBB);
-//
-//FILE *fpcrap;
-//int iiii;
-//if ((MLT>20.0)&&(MLT<23.0)){
-//fpcrap = fopen("TraceLine2.dat", "a");
-////fprintf(fpcrap, "%g %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y);
-//Lgm_Convert_Coords( &(LstarInfo->mInfo->Pm_North), &w, GSM_TO_SM, LstarInfo->mInfo->c );
-//fprintf(fpcrap, "%g %g\n", w.x, w.y );
-//fclose(fpcrap);
-//}
-
-//LstarInfo->mInfo->UseInterpRoutines=FALSE;
                 if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
                     /*
@@ -158,29 +137,16 @@ int FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mla
                      */
                     // 1.0 is way too big -- this was causing errors for the lower PAs
                     //LstarInfo->mInfo->Hmax = (I0 > 5.0 ) ? 1.0 : 0.1;
-//                    LstarInfo->mInfo->Hmax = 0.1;
-                    LstarInfo->mInfo->Hmax = 0.01;
-//LstarInfo->mInfo->Hmax = 0.5;
-LstarInfo->mInfo->Hmax = SS/200.0;
+                    //LstarInfo->mInfo->Hmax = 0.1;
+                    //LstarInfo->mInfo->Hmax = 0.01;
+                    LstarInfo->mInfo->Hmax = SS/200.0;
 
 
 
 
                     // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
 
-//printf("Pm_South, Pm_North = %g %g %g    %g %g %g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, Pm_North.x, Pm_North.y, Pm_North.z );
                     Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
-
-//printf("LstarInfo->mInfo->nPnts = %d    LstarInfo->mInfo->Hmax = %g\n", LstarInfo->mInfo->nPnts, LstarInfo->mInfo->Hmax );
-//if ((MLT>20.0)&&(MLT<23.0)){
-//fpcrap = fopen("TraceLine2.dat", "a");
-//for (iiii=0; iiii<LstarInfo->mInfo->nPnts; ++iiii){
-//fprintf(fpcrap, "%g %g\n", LstarInfo->mInfo->Px[iiii], LstarInfo->mInfo->Pz[iiii]);
-//}
-//fprintf(fpcrap, "%g %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y);
-//fprintf(fpcrap, "%g %g\n", Pm_North.x, Pm_North.y);
-//fclose(fpcrap);
-//}
 
 
                     /*
@@ -196,16 +162,6 @@ LstarInfo->mInfo->Hmax = SS/200.0;
                     //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
-//int ij;
-//
-//printf("Bm: %.15lf\n", LstarInfo->mInfo->Bm );
-//for (ij=0; ij<LstarInfo->mInfo->nPnts; ++ij){
-//printf("Interp Array: %.15lf %.15lf\n", LstarInfo->mInfo->s[ij], LstarInfo->mInfo->Bmag[ij] );
-//}
-//printf("Bm: %.15lf\n", LstarInfo->mInfo->Bm );
-
-
-
 
 
                     InitSpline( LstarInfo->mInfo );

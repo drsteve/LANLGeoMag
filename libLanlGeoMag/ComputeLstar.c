@@ -307,7 +307,7 @@ void NewTimeLstarInfo( long int Date, double UT, double PitchAngle, int (*Mag)(L
 int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
-    Lgm_Vector	u, v, w, v1, v2, v3, Bvec;
+    Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
     int		done2, Count, FoundShellLine;
     double	B, dSa, dSb, smax, SS, L;
@@ -347,56 +347,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-
-
-
-
     if ( Lgm_Trace( &u, &v1, &v2, &v3, 120.0, 1e-7, 1e-7, LstarInfo->mInfo ) == 1 ) {
-
-
-        /*
-         * Trace out FL from southern footprint to northern footprint. This
-         * call saves the FL points in a form that can be interpolated.
-         */
-//THIS SECTION IS REALLY ONLY HERE TO 1) GET THE FOOTPOINTS and 2) SAVE THE INITIAL FL
-// WE PROBABLY NEED TO CHANGE THIS TO BE MORE CONSIST WITH WHAT IS GOING ON IN DRIFTSHELL.c
-if (0==1){
-        LstarInfo->mInfo->Hmax = 0.1;
-        Lgm_TraceLine2( &v1, &v, 0.0, .01, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
-
-        InitSpline( LstarInfo->mInfo );
-        LstarInfo->Footprint_Ps[0] = v1;
-        LstarInfo->Footprint_Pn[0] = v;
-
-        /*
-         * If SaveShellLines is set true, then save the points
-         * Note that since we appear to only have the north footpoint. We start there and trace
-         * to south. So lets pack them in the the saved arrays backwards so that they go from south
-         * to north.
-         */
-        if ( LstarInfo->SaveShellLines ) {
-
-            nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
-            for (tkk=0, nfp=0; nfp<nnn; nfp++){
-                if ( LstarInfo->mInfo->Bmag[nfp] > 0.0 ) {
-                    LstarInfo->s_gsm[0][tkk] = LstarInfo->mInfo->s[nfp];
-                    LstarInfo->Bmag[0][tkk]  = LstarInfo->mInfo->Bmag[nfp];
-                    LstarInfo->x_gsm[0][tkk] = LstarInfo->mInfo->Px[nfp];
-                    LstarInfo->y_gsm[0][tkk] = LstarInfo->mInfo->Py[nfp];
-                    LstarInfo->z_gsm[0][tkk] = LstarInfo->mInfo->Pz[nfp];
-                    ++tkk;
-                }
-            }
-            LstarInfo->nFieldPnts[0] = tkk;
-
-        }
-        FreeSpline( LstarInfo->mInfo );
-        
-}
-
-
-
-
 
 
 
@@ -646,19 +597,28 @@ mlat0 = -30.0;
          * Save GSM cartesian as well...
          */
         LstarInfo->Mirror_Pn[k] = v;
+        LstarInfo->Mirror_Sn[k] = LstarInfo->mInfo->Sm_North;
+
         LstarInfo->Mirror_Ps[k] = LstarInfo->mInfo->Pm_South;
+        LstarInfo->Mirror_Ss[k] = LstarInfo->mInfo->Sm_South;
 
         /*
-         *  Trace to earth. Here we need to trace to the actual surface. This
-         *  will give the correct L* when we are using a dipole field already.
+         *  Trace to earth to get the footpoint. Note that we are trying to
+         *  compute L* here, and to do that, we eventually need to integrate B
+         *  dot dA to get magnetic flux. We could trace down to the ellipsoid,
+         *  but that would complicate the integral. Its much easier to do the
+         *  integral on a sphere. So, instead of tracing to ellipsoid, we will
+         *  trace to the spherical approx to the Earth instead. There is no
+         *  loss of generality in doing this when calculating L*, but we need
+         *  to take note that the footpoints obtained are not relative to the
+         *  elipsoid.
          */
         LstarInfo->mInfo->Hmax = 0.1;
-        //Lgm_TraceToSphericalEarth( &v, &w, 1e-6, 1.0, 1e-7, LstarInfo->mInfo );
-        //Lgm_TraceToSphericalEarth( &v, &w, 10.0, 1.0, 1e-7, LstarInfo->mInfo );
-        if ( !Lgm_TraceToSphericalEarth( &v, &w, 0.0, 1.0, 1e-7, LstarInfo->mInfo ) ){
-                return(-4);
-        }
-        LstarInfo->Footprint_Pn[k] = w;
+        if ( !Lgm_TraceToSphericalEarth( &v, &w, 0.0, 1.0, 1e-7, LstarInfo->mInfo ) ){ return(-4); }
+        LstarInfo->Spherical_Footprint_Pn[k] = w;
+
+
+
 	
 
         /*
@@ -681,8 +641,9 @@ mlat0 = -30.0;
          */
         if ( LstarInfo->SaveShellLines ) {
 
-            Lgm_TraceLine( &LstarInfo->Footprint_Pn[k], &v2, 0.1, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
-            LstarInfo->Footprint_Ps[k] = v2;
+            Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 120.0, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+            //Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.0, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+            LstarInfo->Spherical_Footprint_Ps[k] = v2;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
             for (tkk=0, nfp=nnn-1; nfp>=0; nfp--){
@@ -696,6 +657,45 @@ mlat0 = -30.0;
                 }
             }
             LstarInfo->nFieldPnts[k] = tkk;
+
+
+            LstarInfo->Spherical_Footprint_Ss[k] = LstarInfo->s_gsm[k][0];
+            LstarInfo->Spherical_Footprint_Sn[k] = smax;
+
+
+            /*
+             * Find true footpoints (i.e. relative to ellipsoid), we may want to do an additional trace here...
+             */
+            if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ) {
+
+                LstarInfo->Ellipsoid_Footprint_Ss[k] = LstarInfo->Spherical_Footprint_Ss[k] - LstarInfo->mInfo->Trace_s; // should be slightly negative
+
+                if ( Lgm_TraceToEarth( &LstarInfo->Ellipsoid_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ) {
+
+                    LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s; 
+
+                }
+
+            }
+
+            /*
+             *  So far, the way we have done this, we have never really needed
+             *  to know the distance of the mirror points from the footpoints.
+             *  To compute these, trace from Pm_south back to southern
+             *  spherical footpoint. Then add this distance to Sm_South and
+             *  Sm_North. That should give the distance of both mirror points
+             *  rtelativen to the southern spherical footpoint -- which is how
+             *  the field line is defined that we are trying to save.
+             */
+            if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
+                LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
+                LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
+printf("LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k] = %g %g\n", LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k]);
+            }
+
+
+
+
 
         }
 

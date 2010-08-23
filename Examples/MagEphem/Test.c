@@ -269,26 +269,26 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
     fprintf( fp, " %13.8lf", m->UTC );  // UTC
     fprintf( fp, " %25s",  Str );       // Date+Time in ISO 8601 format
 
-    Lgm_Convert_Coords( &m->P_gsm, &v, GSM_TO_GEO, c );
+    Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );
     fprintf( fp, " %12g", v.x );        // Xgeo
     fprintf( fp, " %12g", v.y );        // Ygeo
     fprintf( fp, " %12g", v.z );        // Zgeo
 
-    fprintf( fp, " %12g", m->P_gsm.x );  // Xgsm
-    fprintf( fp, " %12g", m->P_gsm.y );  // Ygsm
-    fprintf( fp, " %12g", m->P_gsm.z );  // Zgsm
+    fprintf( fp, " %12g", m->P.x );  // Xgsm
+    fprintf( fp, " %12g", m->P.y );  // Ygsm
+    fprintf( fp, " %12g", m->P.z );  // Zgsm
 
-    Lgm_Convert_Coords( &m->P_gsm, &v, GSM_TO_SM, c );
+    Lgm_Convert_Coords( &m->P, &v, GSM_TO_SM, c );
     fprintf( fp, " %12g", v.x );        // Xsm
     fprintf( fp, " %12g", v.y );        // Ysm
     fprintf( fp, " %12g", v.z );        // Zsm
 
-    Lgm_Convert_Coords( &m->P_gsm, &v, GSM_TO_GEI2000, c );
+    Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEI2000, c );
     fprintf( fp, " %12g", v.x );        // Xgei
     fprintf( fp, " %12g", v.y );        // Ygei
     fprintf( fp, " %12g", v.z );        // Zgei
 
-    Lgm_Convert_Coords( &m->P_gsm, &v, GSM_TO_GSE, c );
+    Lgm_Convert_Coords( &m->P, &v, GSM_TO_GSE, c );
     fprintf( fp, " %12g", v.x );        // Xgse
     fprintf( fp, " %12g", v.y );        // Ygse
     fprintf( fp, " %12g", v.z );        // Zgse
@@ -319,11 +319,11 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_N_LOBE) ) {
 
-        fprintf( fp, " %12g", m->Footprint_Pn.x );     // Xgsm   North Foot
-        fprintf( fp, " %12g", m->Footprint_Pn.y );     // Ygsm
-        fprintf( fp, " %12g", m->Footprint_Pn.z );     // Zgsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.x );     // Xgsm   North Foot
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.y );     // Ygsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.z );     // Zgsm
 
-        Lgm_Convert_Coords( &m->Footprint_Pn, &v, GSM_TO_GEO, c );
+        Lgm_Convert_Coords( &m->Ellipsoid_Footprint_Pn, &v, GSM_TO_GEO, c );
         fprintf( fp, " %12g", v.x );                    // Xgeo   North Foot
         fprintf( fp, " %12g", v.y );                    // Ygeo
         fprintf( fp, " %12g", v.z );                    // Zgeo
@@ -352,11 +352,11 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_S_LOBE) ) {
 
-        fprintf( fp, " %12g", m->Footprint_Ps.x );     // Xgsm   South Foot
-        fprintf( fp, " %12g", m->Footprint_Ps.y );     // Ygsm
-        fprintf( fp, " %12g", m->Footprint_Ps.z );     // Zgsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.x );     // Xgsm   South Foot
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.y );     // Ygsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.z );     // Zgsm
 
-        Lgm_Convert_Coords( &m->Footprint_Ps, &v, GSM_TO_GEO, c );
+        Lgm_Convert_Coords( &m->Ellipsoid_Footprint_Ps, &v, GSM_TO_GEO, c );
         fprintf( fp, " %12g", v.x );                    // Xgeo   South Foot
         fprintf( fp, " %12g", v.y );                    // Ygeo
         fprintf( fp, " %12g", v.z );                    // Zgeo
@@ -383,9 +383,9 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
     
 
     if ( m->FieldLineType == LGM_CLOSED ) {
-        fprintf( fp, " %12g", m->Pmin_gsm.x );          // Xgsm  Pmin
-        fprintf( fp, " %12g", m->Pmin_gsm.y );          // Ygsm
-        fprintf( fp, " %12g", m->Pmin_gsm.z );          // Zgsm
+        fprintf( fp, " %12g", m->Pmin.x );          // Xgsm  Pmin
+        fprintf( fp, " %12g", m->Pmin.y );          // Ygsm
+        fprintf( fp, " %12g", m->Pmin.z );          // Zgsm
     } else {
         fprintf( fp, " %12g", 0.0 );
         fprintf( fp, " %12g", 0.0 );

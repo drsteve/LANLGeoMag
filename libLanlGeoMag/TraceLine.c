@@ -1,5 +1,8 @@
 /* TraceLine, Copyright (c) 2007 Michael G. Henderson <mghenderson@lanl.gov>
  *
+ *  This assumes a spherical Earth. Use Lgm_TraceToEarth() if you need to trace
+ *  to a height aboveb the ellipsoid.
+ *
  *    - This routine is intended to trace a field line and save the points in
  *    an array. The idea is that the user can use the adaptive tracing routines
  *    to identify critical points on a FL, (and/or if its open, etc.). Here we
@@ -287,12 +290,13 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
      *  in our interp array.
      */
     //v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
-    *v = Pc; ss = Sc;
+    *v = Pc; ss += Sc;
 
 
     /*
      *  Save final point.
      */
+printf("ss, Info->s[n-1] = %g %g\n", ss, Info->s[n-1]);
     if ( ss > Info->s[n-1] ) {
         Info->Bfield( v, &Bvec, Info );
         Info->s[n]    = ss;                         // save arc length
@@ -313,7 +317,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
     /*
-     *  Add the smin, Bmin point. Only do this if AddBminPoint is TRUE
+     *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      * 
@@ -321,7 +325,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     if ( AddBminPoint ) {
 //printf("1) ADDING NEW POINT\n");
 // MUST ADD Bcdip for this too!
-        AddNewPoint( Info->smin, Info->Bmin, &Info->Pmin, Info );
+        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
 //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
@@ -562,12 +566,12 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
     /*
-     *  Add the smin, Bmin point. Only do if AddBminPoint is TRUE.
+     *  Add the Smin, Bmin point. Only do if AddBminPoint is TRUE.
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      */
     if ( AddBminPoint ) {
-        AddNewPoint( Info->smin, Info->Bmin, &Info->Pmin, Info );
+        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
 //printf("2) ADDING NEW POINT\n");
     }
 
@@ -784,22 +788,22 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
 
 
     /*
-     * If smin (location of Bmin) is in the interval [s(i1):s(i2)]
+     * If Smin (location of Bmin) is in the interval [s(i1):s(i2)]
      * then we need to do more work...
      */
     if ( (i1==Info->imin1) && (i2==Info->imin2)){
-        if ( s > Info->smin ){
-            ds = Info->s[i2] - Info->smin;
+        if ( s > Info->Smin ){
+            ds = Info->s[i2] - Info->Smin;
             if ( ds > 1e-7) {
                 m  = (Info->Bmag[i2] - Info->Bmin)/ds;
-                B  = m*(s-Info->smin) + Info->Bmin;
+                B  = m*(s-Info->Smin) + Info->Bmin;
             } else {
-                // handles possibles cases where smin is extremely close to one
+                // handles possibles cases where Smin is extremely close to one
                 // of the grid points.
                 B = Info->Bmag[i2];
             }
         } else {
-            ds = Info->smin - Info->s[i1];
+            ds = Info->Smin - Info->s[i1];
             if ( ds > 1e-7) {
                 m  = (Info->Bmin - Info->Bmag[i1])/ds;
                 B  = m*(s-Info->s[i1]) + Info->Bmag[i1];
@@ -851,7 +855,7 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
     }
 
 
-    s = Info->smin;
+    s = Info->Smin;
     B = BofS( s, Info );
 
     s1 = s2 = s;
@@ -911,7 +915,7 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 
 
 
-    s = Info->smin;
+    s = Info->Smin;
     B = BofS( s, Info );
 
     s1 = s2 = s;

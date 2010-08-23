@@ -65,7 +65,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     /*
      *  Blocal at sat location.
      */
-    MagEphemInfo->P_gsm = *u;
+    MagEphemInfo->P = *u;
     LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
@@ -78,10 +78,10 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, 120.0, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
     MagEphemInfo->FieldLineType = TraceFlag;
     if ( TraceFlag > 0 ) {
-        MagEphemInfo->Footprint_Ps  = v1;
-        MagEphemInfo->Footprint_Pn  = v2;
-        MagEphemInfo->Pmin_gsm      = v3;
-        MagEphemInfo->smin          = LstarInfo->mInfo->smin;
+        MagEphemInfo->Ellipsoid_Footprint_Ps  = v1;
+        MagEphemInfo->Ellipsoid_Footprint_Pn  = v2;
+        MagEphemInfo->Pmin          = v3;
+        MagEphemInfo->Smin          = LstarInfo->mInfo->Smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
@@ -162,12 +162,29 @@ printf("LstarInfo->SaveShellLines = %d\n", LstarInfo->SaveShellLines);
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
-                        MagEphemInfo->ShellFootprint_Pn[i][nn] = LstarInfo2->Footprint_Pn[nn];
-                        MagEphemInfo->ShellFootprint_Ps[i][nn] = LstarInfo2->Footprint_Ps[nn];
+
+                        MagEphemInfo->ShellSphericalFootprint_Pn[i][nn] = LstarInfo2->Spherical_Footprint_Pn[nn];
+                        MagEphemInfo->ShellSphericalFootprint_Sn[i][nn] = LstarInfo2->Spherical_Footprint_Sn[nn];
+                        MagEphemInfo->ShellSphericalFootprint_Bn[i][nn] = LstarInfo2->Spherical_Footprint_Bn[nn];
+                        MagEphemInfo->ShellSphericalFootprint_Ps[i][nn] = LstarInfo2->Spherical_Footprint_Ps[nn];
+                        MagEphemInfo->ShellSphericalFootprint_Ss[i][nn] = LstarInfo2->Spherical_Footprint_Ss[nn];
+                        MagEphemInfo->ShellSphericalFootprint_Bs[i][nn] = LstarInfo2->Spherical_Footprint_Bs[nn];
+
+                        MagEphemInfo->ShellEllipsoidFootprint_Pn[i][nn] = LstarInfo2->Ellipsoid_Footprint_Pn[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Sn[i][nn] = LstarInfo2->Ellipsoid_Footprint_Sn[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Bn[i][nn] = LstarInfo2->Ellipsoid_Footprint_Bn[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Ps[i][nn] = LstarInfo2->Ellipsoid_Footprint_Ps[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Ss[i][nn] = LstarInfo2->Ellipsoid_Footprint_Ss[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Bs[i][nn] = LstarInfo2->Ellipsoid_Footprint_Bs[nn];
+
+
                         MagEphemInfo->ShellMirror_Pn[i][nn]    = LstarInfo2->Mirror_Pn[nn];
+                        //MagEphemInfo->ShellMirror_Sn[i][nn]    = LstarInfo2->mInfo->Sm_North;
+                        MagEphemInfo->ShellMirror_Sn[i][nn]    = LstarInfo2->Mirror_Sn[nn];
+
                         MagEphemInfo->ShellMirror_Ps[i][nn]    = LstarInfo2->Mirror_Ps[nn];
-                        MagEphemInfo->ShellMirror_Ss[i][nn]    = LstarInfo2->mInfo->Sm_South;
-                        MagEphemInfo->ShellMirror_Sn[i][nn]    = LstarInfo2->mInfo->Sm_North;
+                        //MagEphemInfo->ShellMirror_Ss[i][nn]    = LstarInfo2->mInfo->Sm_South;
+                        MagEphemInfo->ShellMirror_Ss[i][nn]    = LstarInfo2->Mirror_Ss[nn];
 
                         /*
                          *  Save all of the drift shell FLs in MagEphemInfo structure

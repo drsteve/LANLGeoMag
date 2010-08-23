@@ -25,18 +25,29 @@ typedef struct Lgm_MagEphemInfo {
     double          Lon;            //< Geographic Longitude
     double          Rad;            //< Geographic Radius
 
-    Lgm_Vector      P_gsm;          //< S/C position in GSM
+    Lgm_Vector      P;              //< S/C position in GSM
+    double          S;              //< Distance along FL from southern footpoint to S/C location in Re.
     double          B;              //< Local (model) B-field magnitude (i.e. at S/C position)
 
-    Lgm_Vector      Pmin_gsm;       //< position of minimum |B| in GSM
+    Lgm_Vector      Pmin;           //< position of minimum |B| in GSM
     double          Bmin;           //< Value of |Bmin|
-    double          smin;           //< Distance from southern footpoint to Pmin along FL.
+    double          Smin;           //< Distance from southern footpoint to Pmin along FL.
 
-    Lgm_Vector      Footprint_Pn;   //< position of northern footpoint (at 120km)
-    double          Footprint_Bn;   //< Value of |B| at Footprint_Pn
+    Lgm_Vector      Spherical_Footprint_Pn;   //< position of northern footpoint (at 120km above spherical Earth)
+    double          Spherical_Footprint_Sn;   //< Distance along FL from southern foorpoint in Re
+    double          Spherical_Footprint_Bn;   //< Value of |B| at Spherical_Footprint_Pn
 
-    Lgm_Vector      Footprint_Ps;   //< position of southern footpoint (at 120km)
-    double          Footprint_Bs;   //< Value of |B| at Footprint_Ps
+    Lgm_Vector      Spherical_Footprint_Ps;   //< position of southern footpoint (at 120km above spherical Earth)
+    double          Spherical_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Spherical_Footprint_Bs;   //< Value of |B| at Spherical_Footprint_Ps
+
+    Lgm_Vector      Ellipsoid_Footprint_Pn;   //< position of northern footpoint (at 120km above WGS84 ellipsoid)
+    double          Ellipsoid_Footprint_Sn;   //< Distance along FL from southern foorpoint in Re
+    double          Ellipsoid_Footprint_Bn;   //< Value of |B| at Ellipsoid_Footprint_Pn
+
+    Lgm_Vector      Ellipsoid_Footprint_Ps;   //< position of southern footpoint (at 120km above WGS84 ellipsoid)
+    double          Ellipsoid_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Ellipsoid_Footprint_Bs;   //< Value of |B| at Ellipsoid_Footprint_Ps
 
     int             FieldLineType;  //< Field line type. (I.e., LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE)
 
@@ -62,12 +73,39 @@ typedef struct Lgm_MagEphemInfo {
     double      K[MAX_PITCH_ANGLES];
 
     int         nShellPoints[MAX_PITCH_ANGLES];               // # of point (i.e. FLs) in a shell calculation)
-    Lgm_Vector  ShellFootprint_Pn[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
-    Lgm_Vector  ShellFootprint_Ps[MAX_PITCH_ANGLES][100];    // south footprints of shell lines
+
+
+    /*
+     * Footpoints XXXkm above spherical Earth defined as sphere with
+     * radius==WGS84_A (i.e. equatorial radius of WGS84 model)
+     */
+    Lgm_Vector  ShellSphericalFootprint_Pn[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
+    double      ShellSphericalFootprint_Sn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    double      ShellSphericalFootprint_Bn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+
+    Lgm_Vector  ShellSphericalFootprint_Ps[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
+    double      ShellSphericalFootprint_Ss[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    double      ShellSphericalFootprint_Bs[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+
+    /*
+     * footpoints at XXXkm above surface of ellipsoid.
+     */
+    Lgm_Vector  ShellEllipsoidFootprint_Ps[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
+    double      ShellEllipsoidFootprint_Ss[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    double      ShellEllipsoidFootprint_Bs[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+
+    Lgm_Vector  ShellEllipsoidFootprint_Pn[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
+    double      ShellEllipsoidFootprint_Sn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    double      ShellEllipsoidFootprint_Bn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+
+
     Lgm_Vector  ShellMirror_Pn[MAX_PITCH_ANGLES][100];       // north mirror locations
-    Lgm_Vector  ShellMirror_Ps[MAX_PITCH_ANGLES][100];       // south mirror locations
     double      ShellMirror_Sn[MAX_PITCH_ANGLES][100];       // north mirror locations (dist along FL)
+
+    Lgm_Vector  ShellMirror_Ps[MAX_PITCH_ANGLES][100];       // south mirror locations
     double      ShellMirror_Ss[MAX_PITCH_ANGLES][100];       // south mirror locations (dist along FL)
+
+
     double      ShellI[MAX_PITCH_ANGLES][100];               // Individual I values computed for each FL
 
     /*

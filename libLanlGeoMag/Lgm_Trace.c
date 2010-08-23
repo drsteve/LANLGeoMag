@@ -161,7 +161,7 @@ Info->Hmax = 0.10;
 
     
 
-    Info->smin = -9e99;
+    Info->Smin = -9e99;
     Info->Bmin = -9e99;
 
 
@@ -172,7 +172,7 @@ Info->Hmax = 0.10;
 	     */
         Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
         Info->Pmin = *v3;
-        Info->smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
+        Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );
         Info->Bvecmin = Bvec;
         Info->Bmin = Lgm_Magnitude( &Bvec );

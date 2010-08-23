@@ -33,6 +33,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
     Lgm_Vector	Pa, Pc, P, w;
     int		    done, reset, AboveTargetHeight;
 
+    reset = TRUE;
 
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
@@ -220,7 +221,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
      */
     P     = Pa;
     done  = FALSE;
-    reset = TRUE;
+//    reset = TRUE;
     while ( !done ) {
 
         Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );

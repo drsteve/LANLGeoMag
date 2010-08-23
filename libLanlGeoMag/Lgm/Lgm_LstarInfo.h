@@ -46,10 +46,29 @@ typedef struct Lgm_LstarInfo {
      */
     int                 nPnts;
     double              MLT[100], mlat[100];
-    Lgm_Vector          Footprint_Pn[100];
+
+    Lgm_Vector          Spherical_Footprint_Pn[100];
+    double              Spherical_Footprint_Sn[100];
+    double              Spherical_Footprint_Bn[100];
+
+    Lgm_Vector          Spherical_Footprint_Ps[100];
+    double              Spherical_Footprint_Ss[100];
+    double              Spherical_Footprint_Bs[100];
+
+    Lgm_Vector          Ellipsoid_Footprint_Pn[100];
+    double              Ellipsoid_Footprint_Sn[100];
+    double              Ellipsoid_Footprint_Bn[100];
+
+    Lgm_Vector          Ellipsoid_Footprint_Ps[100];
+    double              Ellipsoid_Footprint_Ss[100];
+    double              Ellipsoid_Footprint_Bs[100];
+
     Lgm_Vector          Mirror_Pn[100];
-    Lgm_Vector          Footprint_Ps[100];
+    double              Mirror_Sn[100];
+
     Lgm_Vector          Mirror_Ps[100];
+    double              Mirror_Ss[100];
+
     double              PhiVal[100], AngularVelocity[100];
     double              I[100];
                                                                                                                                                   

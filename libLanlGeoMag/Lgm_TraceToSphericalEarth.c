@@ -40,6 +40,8 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Lgm_Vector	Pa, Pc, P;
     int		    done, reset, AboveTargetHeight;
 
+    Info->Trace_s = 0.0;
+//printf("Info->Trace_s = %g\n", Info->Trace_s);
 
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
@@ -163,6 +165,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
             Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, direction, &s, &reset, Info->Bfield, Info );
+            Info->Trace_s += Hdid;
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
             F = Height - TargetHeight;
             if ( F > 0.0 ){
@@ -252,6 +255,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	        Fa = F;
 	        Height_a = Height;
 	        Sa = 0.0;
+            Info->Trace_s += Hdid;
 	    }
 
         Htry = Hnext; // adaptively reset Htry
@@ -318,6 +322,8 @@ Sa = 0.0;
 
         }
     }
+    Info->Trace_s += Sa;
+//printf("Info->Trace_s = %g\n", Info->Trace_s);
 
 
 
