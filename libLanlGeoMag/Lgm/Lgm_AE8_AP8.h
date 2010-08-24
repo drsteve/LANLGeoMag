@@ -1,6 +1,8 @@
 #ifndef LGM_AE8_H
 #define LGM_AE8_H
 
+#include <Lgm/Lgm_Vec.h>
+
 /*
  *  Lgm_AE8.h
  *
