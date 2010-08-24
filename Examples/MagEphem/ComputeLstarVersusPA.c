@@ -157,7 +157,6 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                     /*
                      * Save results to the MagEphemInfo structure.
                      */
-printf("LstarInfo->SaveShellLines = %d\n", LstarInfo->SaveShellLines);
 
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){

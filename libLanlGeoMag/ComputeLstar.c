@@ -656,10 +656,6 @@ mlat0 = -30.0;
                 }
             }
             LstarInfo->nFieldPnts[k] = tkk;
-printf("LstarInfo->Spherical_Footprint_Ps[k] = %g %g %g  LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0] = %g %g %g    s = %g\n", 
-LstarInfo->Spherical_Footprint_Ps[k].x, LstarInfo->Spherical_Footprint_Ps[k].y, LstarInfo->Spherical_Footprint_Ps[k].z, LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0], LstarInfo->s_gsm[k][0] );
-printf("LstarInfo->Spherical_Footprint_Pn[k] = %g %g %g  LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0] = %g %g %g    s = %g\n", 
-LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, LstarInfo->x_gsm[k][nnn-1], LstarInfo->y_gsm[k][nnn-1], LstarInfo->z_gsm[k][nnn-1], LstarInfo->s_gsm[k][nnn-1]);
 
 
 
@@ -675,13 +671,11 @@ LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, 
             if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                 LstarInfo->Ellipsoid_Footprint_Ss[k] = LstarInfo->Spherical_Footprint_Ss[k] - LstarInfo->mInfo->Trace_s; // should be slightly negative
-printf("LstarInfo->Ellipsoid_Footprint_Ss[k] = %g LstarInfo->Ellipsoid_Footprint_Ps[k] = %g %g %g  LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Ellipsoid_Footprint_Ss[k], LstarInfo->Ellipsoid_Footprint_Ps[k].x, LstarInfo->Ellipsoid_Footprint_Ps[k].y, LstarInfo->Ellipsoid_Footprint_Ps[k].z, LstarInfo->mInfo->Trace_s);
 
                 LstarInfo->mInfo->Hmax = 0.001;
                 if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                     LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s; 
-printf("LstarInfo->Ellipsoid_Footprint_Sn[k] = %g LstarInfo->Ellipsoid_Footprint_Pn[k] = %g %g %g  LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Ellipsoid_Footprint_Sn[k], LstarInfo->Ellipsoid_Footprint_Pn[k].x, LstarInfo->Ellipsoid_Footprint_Pn[k].y, LstarInfo->Ellipsoid_Footprint_Pn[k].z, LstarInfo->mInfo->Trace_s);
 
                 }
 
@@ -699,12 +693,8 @@ printf("LstarInfo->Ellipsoid_Footprint_Sn[k] = %g LstarInfo->Ellipsoid_Footprint
              */
             //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
             Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo );
-// LstarInfo->mInfo->Trace_s=0.0;
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
-                //LstarInfo->Mirror_Ss[k] = 0.0;
-                //LstarInfo->Mirror_Sn[k] = LstarInfo->mInfo->Trace_s;
-printf("LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k] = %g %g   *********** LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k], LstarInfo->mInfo->Trace_s);
             //}
 
 
