@@ -36,7 +36,7 @@ AC_PROG_CC
 # FIXME: Replace `main' with a function in `-lm':
 AC_CHECK_LIB([m], [sin])
 # FIXME: Replace `main' with a function in `-lgsl':
-AC_CHECK_LIB([gsl], [gsl_spline_init], [], [AC_MSG_ERROR(could not find required version of GSL)])
+#AC_CHECK_LIB([gsl], [gsl_spline_init], [], [AC_MSG_ERROR(could not find required version of GSL)])
 # FIXME: Replace `main' with a function in `-lgslcblas':
 #AC_CHECK_LIB([gslcblas], [main])
 
