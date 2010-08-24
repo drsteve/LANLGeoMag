@@ -35,12 +35,14 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
     reset = TRUE;
 
+    Info->Trace_s = 0.0;
+    Sa = Sc = 0.0;
+
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
      * units of Re where we define Re to be WGS84_A.)
      */
     Rinitial = WGS84_A*Lgm_Magnitude( u ); // km
-//printf( "Lgm_TraceToEarth: Rinitial = %g km\n", Rinitial);
 
 
     /*
@@ -82,8 +84,6 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
      *  Now check to see if we are currently above or below the target height.
      */
     AboveTargetHeight = ( Height > TargetHeight ) ? TRUE : FALSE;
-//printf( "Lgm_TraceToEarth: Height, TargetHeight = %g, %g km\n", Height, TargetHeight);
-//printf( "Lgm_TraceToEarth: AboveTargetHeight = %d\n", AboveTargetHeight );
 
 
 
@@ -155,9 +155,9 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
             Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, direction, &s, &reset, Info->Bfield, Info );
+            Sa += Hdid;
             Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
             Lgm_WGS84_to_GeodHeight( &w, &Height );
-            //Height = WGS84_A*(Lgm_Magnitude( &w )-1.0);
             F = Height - TargetHeight;
             if ( F > 0.0 ){
                 done = TRUE;
@@ -196,7 +196,6 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
     Lgm_Convert_Coords( &Pa, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height_a );
     //Height_a = WGS84_A*(Lgm_Magnitude( &w )-1.0);
-    Sa   = 0.0;
 
 //printf( "Lgm_TraceToEarth: Pa = <%g, %g, %g> Re\n", Pa.x, Pa.y, Pa.z );
 //printf( "Lgm_TraceToEarth: Height_a = %g\n", Height_a );
@@ -227,8 +226,6 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
-        //Height = WGS84_A*(Lgm_Magnitude( &w )-1.0);
-//printf( "Lgm_TraceToEarth: Height, TargetHeight = %g, %g km\n", Height, TargetHeight);
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
 
@@ -244,12 +241,12 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 	        Pc = P;
 	        Height_c = Height;
 	        Fc = F;
-	        Sc += Hdid;
+	        Sc = Sa + Hdid;
 	    } else {
 	        Pa = P;
 	        Fa = F;
 	        Height_a = Height;
-	        Sa = 0.0;
+	        Sa += Hdid;
 	    }
 
         Htry = Hnext; // adaptively reset Htry
@@ -310,6 +307,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
         }
     }
+    Info->Trace_s = Sa;
 
 
 

@@ -5174,9 +5174,8 @@ void InterpFieldLine( double *x, double *y, double *z, double *s, double Ss, dou
     double  ss, s_inc;
     int     t;
 
-    //s_inc = ( s[n1-1] -s[0] )/((double)(n2+1));
-    s_inc = ( Sn-Ss )/((double)(n2+1));
-printf("Ss, Sn = %g %g   s[0], s[n1-1] = %g %g \n", Ss, Sn, s[0], s[n1-1]);
+    s_inc = ( Sn-Ss )/((double)(n2-1));
+//printf("Ss, Sn = %g %g   s[0], s[n1-1] = %g %g \n", Ss, Sn, s[0], s[n1-1]);
 
     //Px
     acc    = gsl_interp_accel_alloc( );
@@ -5244,9 +5243,11 @@ printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
             if (nPnts[i][ns] > 4 ){
 //                InterpFieldLine( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], s2_gsm[i][ns], nPnts2[i][ns], xout, yout, zout, nInterpPoints );
                 InterpFieldLine( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], s_gsm[i][ns], 
+                        //MagEphemInfo->ShellEllipsoidFootprint_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns], 
                         MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns], 
+                        //MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns], 
+                        //0.0, MagEphemInfo->ShellMirror_Sn[i][ns], 
                         nPnts[i][ns], xout, yout, zout, nInterpPoints );
-printf("MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns] = %g %g\n", MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns]);
                 for (ii=0; ii<nInterpPoints; ii++){
                     x3_gsm[i][ns][kk] = xout[ii];
                     y3_gsm[i][ns][kk] = yout[ii];
@@ -5260,8 +5261,9 @@ printf("MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns]
 ////            y3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Pn[i][ns].y;
 ////            z3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Pn[i][ns].z;
 ////            ++kk;
+//printf("z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2] = %g %g\n", z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2]);
             nNewFieldPoints[i] = kk; // will be 2 more than before.
-//printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
+printf("nNewFieldPoints[i] = %d\n", nNewFieldPoints[i]);
             
         }
     }

@@ -133,8 +133,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
             }
         }
 
-
-
         /*
          * Save this (new) point only if its different from the first one)
          */
@@ -196,13 +194,13 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 	        Pc = P;
 	        Rc = R;
 	        Fc = F;
-	        Sc += Hdid;
+	        Sc = Sa + Hdid;
 	    } else {
 	        Pa = P;
 	        Fa = F;
 	        Ra = R;
 	        Sa = 0.0;
-            ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
+            ss += Hdid;  
             /*
              * Compute field strength and save the results in the array.
              */
@@ -273,7 +271,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
             F =  R - R0;
             if ( F >= 0.0 ) {
                 Pa = P; Fa = F; Sa += Hdid;
-                ss += Hdid;
             } else {
                 Pc = P; Fc = F; Sc = Sa + Hdid;
             }
@@ -296,7 +293,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     /*
      *  Save final point.
      */
-printf("ss, Info->s[n-1] = %g %g\n", ss, Info->s[n-1]);
     if ( ss > Info->s[n-1] ) {
         Info->Bfield( v, &Bvec, Info );
         Info->s[n]    = ss;                         // save arc length
@@ -323,7 +319,7 @@ printf("ss, Info->s[n-1] = %g %g\n", ss, Info->s[n-1]);
      * 
      */
     if ( AddBminPoint ) {
-//printf("1) ADDING NEW POINT\n");
+printf("1) ADDING NEW POINT\n");
 // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
@@ -417,8 +413,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     done    = FALSE;
     reset   = TRUE;
     SavePnt = TRUE;
-//FILE *fpcrap;
-//fpcrap = fopen("LINE.txt", "a");
     while ( !done ) {
 
         Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
@@ -439,8 +433,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
             Fa = F;
             Ra = R;
             Sa = 0.0;
-            ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
-
+            ss += Hdid;
             /*
              * Compute field strength and save the results in the array.
              */
@@ -461,7 +454,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
             Pc = P;
             Rc = R;
             Fc = F;
-            Sc += Hdid;
+            Sc = Sa + Hdid;
         } 
 
 
@@ -486,12 +479,8 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
         } else {
             SavePnt = TRUE;
         }
-//fprintf(fpcrap, "%g %g\n", P.x, P.z);
-//fflush(fpcrap);
-//printf("1) B >>>>>>>>> %d %.15lf %.15lf %.15lf  R, R0, F = %.15lf %.15lf %.15lf Hdid = %.15lf Htry = %.15lf s = %.15lf <<<<<<<<<<\n", n, P.x, P.y, P.z, R, R0, F, Htry, Hdid, ss);
 
     }
-//fclose(fpcrap);
 
     /*
      *  We have a bracket. Now go in for the kill. This just finds where mthe
@@ -521,11 +510,9 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
             F =  R - R0;
             if ( F >= 0.0 ) {
                 Pa = P; Fa = F; Sa += Hdid;
-                ss += Hdid;
             } else {
                 Pc = P; Fc = F; Sc = Sa + Hdid;
             }
-//printf("2) K >>>>>>>>> %d %.15lf %.15lf %.15lf  F = %.15lf Hdid = %.15lf Htry = %.15lf s = %.15lf <<<<<<<<<<\n", n, P.x, P.y, P.z, F, Htry, Hdid, ss);
 	    }    
     }
 
@@ -540,7 +527,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
      *  in our interp array.
      */
     //v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
-    *v = Pc; ss = Sc;
+    *v = Pc; ss += Sc;
 
 
     /*

@@ -310,7 +310,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
     int		done2, Count, FoundShellLine;
-    double	B, dSa, dSb, smax, SS, L;
+    double	B, dSa, dSb, smax, SS, L, Hmax;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[500], MirrorMlat_Old[500];
@@ -614,7 +614,7 @@ mlat0 = -30.0;
          *  elipsoid.
          */
         LstarInfo->mInfo->Hmax = 0.1;
-        if ( !Lgm_TraceToSphericalEarth( &v, &w, 0.0, 1.0, 1e-7, LstarInfo->mInfo ) ){ return(-4); }
+        if ( !Lgm_TraceToSphericalEarth( &v, &w, 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ){ return(-4); }
         LstarInfo->Spherical_Footprint_Pn[k] = w;
 
 
@@ -642,7 +642,6 @@ mlat0 = -30.0;
         if ( LstarInfo->SaveShellLines ) {
 
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 120.0, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
-            //Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.0, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
@@ -657,6 +656,11 @@ mlat0 = -30.0;
                 }
             }
             LstarInfo->nFieldPnts[k] = tkk;
+printf("LstarInfo->Spherical_Footprint_Ps[k] = %g %g %g  LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0] = %g %g %g    s = %g\n", 
+LstarInfo->Spherical_Footprint_Ps[k].x, LstarInfo->Spherical_Footprint_Ps[k].y, LstarInfo->Spherical_Footprint_Ps[k].z, LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0], LstarInfo->s_gsm[k][0] );
+printf("LstarInfo->Spherical_Footprint_Pn[k] = %g %g %g  LstarInfo->x_gsm[k][0], LstarInfo->y_gsm[k][0], LstarInfo->z_gsm[k][0] = %g %g %g    s = %g\n", 
+LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, LstarInfo->x_gsm[k][nnn-1], LstarInfo->y_gsm[k][nnn-1], LstarInfo->z_gsm[k][nnn-1], LstarInfo->s_gsm[k][nnn-1]);
+
 
 
             LstarInfo->Spherical_Footprint_Ss[k] = LstarInfo->s_gsm[k][0];
@@ -666,17 +670,23 @@ mlat0 = -30.0;
             /*
              * Find true footpoints (i.e. relative to ellipsoid), we may want to do an additional trace here...
              */
+            Hmax = LstarInfo->mInfo->Hmax;
+            LstarInfo->mInfo->Hmax = 0.001;
             if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                 LstarInfo->Ellipsoid_Footprint_Ss[k] = LstarInfo->Spherical_Footprint_Ss[k] - LstarInfo->mInfo->Trace_s; // should be slightly negative
+printf("LstarInfo->Ellipsoid_Footprint_Ss[k] = %g LstarInfo->Ellipsoid_Footprint_Ps[k] = %g %g %g  LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Ellipsoid_Footprint_Ss[k], LstarInfo->Ellipsoid_Footprint_Ps[k].x, LstarInfo->Ellipsoid_Footprint_Ps[k].y, LstarInfo->Ellipsoid_Footprint_Ps[k].z, LstarInfo->mInfo->Trace_s);
 
-                if ( Lgm_TraceToEarth( &LstarInfo->Ellipsoid_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ) {
+                LstarInfo->mInfo->Hmax = 0.001;
+                if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                     LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s; 
+printf("LstarInfo->Ellipsoid_Footprint_Sn[k] = %g LstarInfo->Ellipsoid_Footprint_Pn[k] = %g %g %g  LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Ellipsoid_Footprint_Sn[k], LstarInfo->Ellipsoid_Footprint_Pn[k].x, LstarInfo->Ellipsoid_Footprint_Pn[k].y, LstarInfo->Ellipsoid_Footprint_Pn[k].z, LstarInfo->mInfo->Trace_s);
 
                 }
 
             }
+            LstarInfo->mInfo->Hmax = Hmax;
 
             /*
              *  So far, the way we have done this, we have never really needed
@@ -687,11 +697,15 @@ mlat0 = -30.0;
              *  rtelativen to the southern spherical footpoint -- which is how
              *  the field line is defined that we are trying to save.
              */
-            if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
+            //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
+            Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo );
+// LstarInfo->mInfo->Trace_s=0.0;
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
-printf("LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k] = %g %g\n", LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k]);
-            }
+                //LstarInfo->Mirror_Ss[k] = 0.0;
+                //LstarInfo->Mirror_Sn[k] = LstarInfo->mInfo->Trace_s;
+printf("LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k] = %g %g   *********** LstarInfo->mInfo->Trace_s = %g\n", LstarInfo->Mirror_Ss[k], LstarInfo->Mirror_Sn[k], LstarInfo->mInfo->Trace_s);
+            //}
 
 
 

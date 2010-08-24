@@ -30,7 +30,6 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 
 
 
-    Info->Trace_s = 0.0;
     Hmax = 0.5;
 //    Hmin = 0.00001;
     Hmin = 1e-7;
@@ -86,7 +85,6 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      */
     P = Pa; reset = TRUE;
     Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info );
-    Info->Trace_s -= Hdid;
     Info->Bfield( &P, &Btmp, Info );
     B = Lgm_Magnitude( &Btmp );
 
@@ -142,7 +140,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 	    if ( B < Bb ) {
 	        Pa = Pb; Ba = Bb; Sa = Sb;
 	        Pb = P;  Bb = B;  Sb = Sa + Hdid; 
-                if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
+            if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
                     || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
 		        /*
 		         *  Open FL!
@@ -224,7 +222,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      */
     *v = Pb;
 
-    Info->Trace_s = Sb;
+    Info->Trace_s = Sb*sgn;
 
 
     return( 1 );

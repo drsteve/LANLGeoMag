@@ -41,14 +41,13 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     int		    done, reset, AboveTargetHeight;
 
     Info->Trace_s = 0.0;
-//printf("Info->Trace_s = %g\n", Info->Trace_s);
+    Sa = Sc = 0.0;
 
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
      * units of Re where we define Re to be WGS84_A.)
      */
     Rinitial = WGS84_A*Lgm_Magnitude( u ); // km
-//printf( "Lgm_TraceToSphericalEarth: Rinitial = %g km\n", Rinitial);
 
 
     /*
@@ -95,8 +94,6 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     Height = Rinitial - WGS84_A; // distance above spherical Earth
     AboveTargetHeight = ( Height > TargetHeight ) ? TRUE : FALSE;
-//printf( "Lgm_TraceToSphericalEarth: Height, TargetHeight = %g, %g km\n", Height, TargetHeight);
-//printf( "Lgm_TraceToSphericalEarth: AboveTargetHeight = %d\n", AboveTargetHeight );
 
 
 
@@ -165,6 +162,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
             Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, direction, &s, &reset, Info->Bfield, Info );
+            Sa += Hdid;
             Info->Trace_s += Hdid;
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
             F = Height - TargetHeight;
@@ -204,10 +202,6 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     Pa   = P;
     Height_a = WGS84_A*(Lgm_Magnitude( &Pa )-1.0);
-    Sa   = 0.0;
-
-//printf( "Lgm_TraceToSphericalEarth: Pa = <%g, %g, %g> Re\n", Pa.x, Pa.y, Pa.z );
-//printf( "Lgm_TraceToSphericalEarth: Height_a = %g\n", Height_a );
 
     /*
      *  Get an initial Htry that is safe -- i.e. start off slowly
@@ -237,7 +231,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
 
-            if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
+        if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
                 || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
 	        /*
 	         *  Open FL!
@@ -247,15 +241,15 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	    } else if ( F < 0.0 ) {
 	        done = TRUE;
 	        Pc = P;
-	        Height_c = Height;
 	        Fc = F;
-	        Sc += Hdid;
+	        Height_c = Height;
+	        //Sc += Hdid;
+	        Sc = Sa + Hdid;
 	    } else {
 	        Pa = P;
 	        Fa = F;
 	        Height_a = Height;
-	        Sa = 0.0;
-            Info->Trace_s += Hdid;
+	        Sa += Hdid;
 	    }
 
         Htry = Hnext; // adaptively reset Htry
@@ -292,9 +286,6 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     done  = FALSE;
     reset = TRUE;
-Sa = 0.0;
-//printf( "Lgm_TraceToSphericalEarth: About to go in for kill \n");
-//    Htry = LGM_1M_1O_GOLD*(Sc - Sa);
     while (!done) {
 
         d = Sc - Sa;
@@ -312,8 +303,6 @@ Sa = 0.0;
             Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, tol, sgn, &s, &reset, Info->Bfield, Info );
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 	        F =  Height - TargetHeight;
-//printf( "Lgm_TraceToSphericalEarth: Inside kill loop. Htry, Hdid, Hnext, tol, F = %g %g %g %g %g      P = %g %g %g\n", Htry, Hdid, Hnext, tol, F, P.x, P.y, P.z);
-//printf("Pa, Pc = %.15lf %.15lf\n", Lgm_Magnitude(&Pa), Lgm_Magnitude(&Pc) );
             if ( F >= 0.0 ) {
                 Pa = P; Fa = F; Sa += Hdid;
             } else {
@@ -322,8 +311,7 @@ Sa = 0.0;
 
         }
     }
-    Info->Trace_s += Sa;
-//printf("Info->Trace_s = %g\n", Info->Trace_s);
+    Info->Trace_s = Sa;
 
 
 
@@ -331,7 +319,7 @@ Sa = 0.0;
      *  Take average as the final answer.
      */
     v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
-//printf( "Lgm_TraceToSphericalEarth: v = %g %g %g\n", v->x, v->y, v->z);
+    //printf( "Lgm_TraceToSphericalEarth: v = %g %g %g\n", v->x, v->y, v->z);
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
 
     return( 1 );
