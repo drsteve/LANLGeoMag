@@ -33,12 +33,13 @@ AC_PROG_CC
 #AC_CHECK_LIB([LanlGeoMag], [Lgm_Convert_Coords])
 # FIXME: Replace `main' with a function in `-lgfortran':
 #AC_CHECK_LIB([gfortran], [main])
-# FIXME: Replace `main' with a function in `-lgsl':
-AC_CHECK_LIB([gsl], [gsl_spline_init])
-# FIXME: Replace `main' with a function in `-lgslcblas':
-#AC_CHECK_LIB([gslcblas], [main])
 # FIXME: Replace `main' with a function in `-lm':
 AC_CHECK_LIB([m], [sin])
+# FIXME: Replace `main' with a function in `-lgsl':
+AC_CHECK_LIB([gsl], [gsl_spline_init], [], [AC_MSG_ERROR(could not find required version of GSL)])
+# FIXME: Replace `main' with a function in `-lgslcblas':
+#AC_CHECK_LIB([gslcblas], [main])
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
