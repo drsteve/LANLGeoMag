@@ -5299,7 +5299,6 @@ void MakeDriftShellMesh( int *nNewShellPoints ){
     nShellPoints = 24;
     nAddShellPoints = 10; // number of points to add in between each given Shell point
     for (p=0; p<MagEphemInfo->nAlpha; p++) { // Loop over pitch angle
-printf("Alpha = %d\n", p);
         for (i=0; i<nFieldPoints[p]; i++ ){
 
             // create interpolation arrays
@@ -5328,7 +5327,6 @@ printf("Alpha = %d\n", p);
             if ( !MonoTonic ) {
                 for ( ns=0; ns<nShellPoints; ns++ ){
                     PhiArray[ns] = ns*360.0/(double)nShellPoints;
-printf("Phi = %g\n", PhiArray[ns]);
                 }
             }
         
@@ -5348,7 +5346,6 @@ printf("Phi = %g\n", PhiArray[ns]);
                 xArray2[ns] = xArray[ns];
                 yArray2[ns] = yArray[ns];
                 zArray2[ns] = zArray[ns];
-printf("d=%g\n", d);
             }
             /*
              * Finally Add in the first point again for periodic spline
@@ -5366,15 +5363,8 @@ printf("d=%g\n", d);
             /*
              *  Add 'nAddShellPoints' points between each of the nominal points.
              */
-printf("here. nShellPoints = %d\n", nShellPoints);
-int iiii;
-for (iiii=0; iiii<nShellPoints+1; iiii++){
-printf("here. x[%d] = %g\n", iiii, PhiArray2[iiii] );
-}
             acc_x    = gsl_interp_accel_alloc( ); spline_x = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_x, PhiArray2, xArray2, nShellPoints+1 );
-printf("here\n");
             acc_y    = gsl_interp_accel_alloc( ); spline_y = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_y, PhiArray2, yArray2, nShellPoints+1 );
-printf("here\n");
             acc_z    = gsl_interp_accel_alloc( ); spline_z = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_z, PhiArray2, zArray2, nShellPoints+1 );
             for (j=0, ns=0; ns<nShellPoints; ns++ ){
 
@@ -5420,7 +5410,7 @@ printf("here\n");
         for (i=0;i<nFieldPoints[p];i++) {
             for (k=0;k<*nNewShellPoints;k++) {
 
-                if (( i>0 ) && ( i<nFieldPoints-1 )) {
+                if (( i>0 ) && ( i<(nFieldPoints[p]-1) )) {
                     /*
                      * Interior FL points
                      */
@@ -5457,6 +5447,7 @@ printf("here\n");
         }
 
     } // p loop
+
 
 
     
