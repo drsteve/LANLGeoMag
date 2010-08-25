@@ -6135,7 +6135,7 @@ printf("done\n");
 GtkWidget *PitchAngleDisplayProperties(){
 
     int         i, col, row, MaxDay;
-    char        Str[32];
+    char        Str[320];
     int         ii;
     GtkObject   *spinbutton1_adj;
     GdkColor    color;
