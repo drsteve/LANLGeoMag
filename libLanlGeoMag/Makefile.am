@@ -34,7 +34,16 @@ EXTRA_DIST = EopData
 
 install-exec-hook:
 	mkdir -p $(LGM_EOP_DATA_DIR)
-	sed -e "s+CHANGE_ME+$(LGM_EOP_DATA_DIR)+" EopData/GetEopFiles.in > EopData/GetEopFiles
+#	sed -e "s+CHANGE_ME+$(LGM_EOP_DATA_DIR)+" EopData/GetEopFiles.in > EopData/GetEopFiles
 	chmod +x EopData/GetEopFiles
 	cp EopData/GetEopFiles $(LGM_EOP_DATA_DIR)/.
+	cp EopData/LgmEop.dat $(LGM_EOP_DATA_DIR)/.
+	cp EopData/Lgm_LeapSecondDates.dat $(LGM_EOP_DATA_DIR)/.
+	cp EopData/eopc04.62-now $(LGM_EOP_DATA_DIR)/.
+	cp EopData/eopc04_IAU2000.62-now $(LGM_EOP_DATA_DIR)/.
+	cp EopData/finals2000A.all $(LGM_EOP_DATA_DIR)/.
+	cp EopData/finals2000A.daily $(LGM_EOP_DATA_DIR)/.
+	cp EopData/finals.all $(LGM_EOP_DATA_DIR)/.
+	cp EopData/finals.daily $(LGM_EOP_DATA_DIR)/.
+	cp EopData/tai-utc.dat $(LGM_EOP_DATA_DIR)/.
 #	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles 
