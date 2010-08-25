@@ -1,6 +1,0 @@
-mv results_1.5_1e-03.dat DipoleTest_1.5/results_1e-03.dat
-mv results_1.5_1e-04.dat DipoleTest_1.5/results_1e-04.dat
-mv results_1.5_1e-05.dat DipoleTest_1.5/results_1e-05.dat
-mv results_1.5_1e-06.dat DipoleTest_1.5/results_1e-06.dat
-mv results_1.5_1e-07.dat DipoleTest_1.5/results_1e-07.dat
-mv results_1.5_1e-08.dat DipoleTest_1.5/results_1e-08.dat
