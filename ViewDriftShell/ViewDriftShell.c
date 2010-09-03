@@ -18,72 +18,44 @@
 #define MAIN
 #endif
 
-//#include "ViewDriftShell.h"
-#include <GL/glew.h>
-//#include <GL/glut.h>
-#include "support.h"
-//#include "MagEphemInfo.h"
-#include <Lgm/Lgm_MagEphemInfo.h>
-#include "PsdAssim.h"
-#include <Lgm/Lgm_Quat.h>
-#include <Lgm/Lgm_Sgp.h>
-#include "Atmosphere.h"
-#include "DynamicMemory.h"
-#include "NamedMaterials.h"
-
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-
-#include <gtk/gtkgl.h>
-
-#ifdef G_OS_WIN32
-#define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
-#endif
-
-#define GL_GLEXT_PROTOTYPES 1
-
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
-
-
-#include "SatSelector.h"
-
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
-//#define GSL_INTERP  gsl_interp_linear
-#define GSL_INTERP  gsl_interp_akima
-//#define GSL_INTERP  gsl_interp_cspline
+#include "ViewDriftShell.h"
 
 
 /*
- * For compiling/loading/etc. custom 
- * vertex and fragment shaders
+ *  Menu Bar stuff
  */
-//#include <Cg/cg.h>
-//#include <Cg/cgGL.h>
+static GtkItemFactoryEntry MenuItems[] = {
 
-#define SHADER_PATH "/home/mgh/DREAM/Dream/Dream/Shaders"
+    {"/File",                           NULL,           0,                              0,      "<Branch>"                              },
+    {"/File/tearoff1",                  NULL,           0,                              0,      "<Tearoff>"                             },
+//    {"/File/Print ...",               NULL,           PrintRasterFile,                0,      "<StockItem>",  GTK_STOCK_PRINT         },
+    {"/File/Add MagEphem File ...",     NULL,           raise_OpenMagEphemFileDialog,   0,      "<StockItem>",  GTK_STOCK_OPEN          },
+    {"/File/Add Earth-Fixed Sites ...", NULL,           raise_OpenMagEphemFileDialog,   0,      "<StockItem>",  GTK_STOCK_OPEN          },
+    {"/File/Save As ...",               "<CTL>S",       raise_SaveRasterFileDialog,     0,      "<StockItem>",  GTK_STOCK_SAVE_AS       },
+    {"/File/sep1",                      NULL,           0,                              0,      "<Separator>"                           },
+    {"/File/_Quit",                     "<CTL>Q",       gtk_main_quit,                  0,      "<StockItem>",  GTK_STOCK_QUIT          },
 
-#define TIME_RESET_BACKWARD_TO_START    -3
-#define TIME_PLAY_BACKWARD              -2
-#define TIME_STEP_BACKWARD              -1
-#define TIME_STOP                        0
-#define TIME_STEP_FOREWARD               1
-#define TIME_PLAY_FOREWARD               2
-#define TIME_RESET_FOREWARD_TO_END       3
-#define TIME_REALTIMEPLAY                4
+    {"/View",                           NULL,           0,                              0,      "<Branch>"                              },
+    {"/View/tearoff2",                  NULL,           0,                              0,      "<Tearoff>"                             },
+    {"/View/Full Screen",               "<CTL>L",       GoFullScreen,                   0,      "<StockItem>",  GTK_STOCK_FULLSCREEN    },
+    {"/View/Undo Full Screen",          "<ALT>L",       GoNormalScreen,                 0,      "<StockItem>",  GTK_STOCK_LEAVE_FULLSCREEN    },
+
+    {"/Tools",                          NULL,           0,                              0,      "<Branch>"                              },
+    {"/Tools/tearoff3",                 NULL,           0,                              0,      "<Tearoff>"                             },
+//    {"/Tools/Modify Color Table ...",   NULL,           raise_xBow,                     0,      "<StockItem>",  GTK_STOCK_SELECT_COLOR  },
+//    {"/Tools/Fonts and Colors ...",     NULL,           raise_fontselectiondialog1,     0,      "<StockItem>",  GTK_STOCK_SELECT_FONT   },
+//    {"/Tools/Line Plot Legend ...",     NULL,           raise_spacecraftlegenddialog1,  0,      "<StockItem>",  GTK_STOCK_PROPERTIES    },
+//    {"/Tools/PSD Window ...",           NULL,           raise_PsdWindow,                0,      "<StockItem>",  GTK_STOCK_PROPERTIES    },
+//    {"/Tools/View Drift Shell ...",     NULL,           raise_ViewDriftShell,           0,      "<StockItem>",  GTK_STOCK_PROPERTIES    },
+
+    {"/Help",                           "<CTL>H",       0,                              0,      "<Branch>"                              },
+    {"/Help/tearoff4",                  NULL,           0,                              0,      "<Tearoff>"                             },
+    {"/Help/Help Contents ...",         NULL,           0,                              0,      "<StockItem>",  GTK_STOCK_HELP          },
+    {"/Help/Release Notes ...",         NULL,           0,                              0,      "<StockItem>",  GTK_STOCK_INFO          },
+//    {"/Help/About ...",                 "<CTL>A",       create_aboutdialog,             0,      "<StockItem>",  GTK_STOCK_ABOUT         }
+
+};
+
 
 Lgm_MagEphemInfo   *MagEphemInfo;
 
@@ -113,7 +85,6 @@ int         RunTime;
 int         StepTime;
 int         DumpFrames;
 GtkWidget   *DumpFramesCheckbutton;
-long int    nFrames, cFrame, nFramesLeft;
 GtkWidget   *cFramesLabel;
 int         MonthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 char        *MonthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
@@ -231,6 +202,30 @@ GLint g_shaderFrontFinal_ColorTexLoc;
 
 
 
+void raise_OpenMagEphemFileDialog( gpointer callback_data, guint callback_action, GtkWidget *menu_item ) {
+    GtkWidget *w;
+    w = CreateOpenMagEphemFileDialog( );
+    gtk_widget_show( w );
+    return;
+}
+
+void raise_SaveRasterFileDialog( gpointer callback_data, guint callback_action, GtkWidget *menu_item ) {
+    GtkWidget *w;
+    w = CreateSaveRasterFileDialog( );
+    gtk_widget_show( w );
+    return;
+}
+
+void GoFullScreen( gpointer callback_data, guint callback_action, GtkWidget *menu_item ) {
+    gtk_window_fullscreen( GTK_WINDOW( ViewDriftShellWindow) );
+    return;
+}
+
+void GoNormalScreen( gpointer callback_data, guint callback_action, GtkWidget *menu_item ) {
+    gtk_window_unfullscreen( GTK_WINDOW( ViewDriftShellWindow) );
+    return;
+}
+
 
 
 
@@ -257,6 +252,8 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     // Set transforms, get Tilt
     Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
     DipoleTiltAngle = mInfo->c->psi*DegPerRad;;
+printf("CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
+printf("DipoleTiltAngle = %g\n", DipoleTiltAngle);
 
 
 
@@ -284,7 +281,13 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
 
     } else if ( ObserverCoords == GSM_COORDS ) {
 
+printf("HERE\n");
+//Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
         Lgm_MatrixToQuat( mInfo->c->Agsm_to_wgs84, Q );
+printf("                        [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][0], mInfo->c->Agsm_to_wgs84[1][0], mInfo->c->Agsm_to_wgs84[2][0]);
+printf("    Agsm_to_wgs84     = [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][1], mInfo->c->Agsm_to_wgs84[1][1], mInfo->c->Agsm_to_wgs84[2][1]);
+printf("                        [ %15.8e  %15.8e  %15.8e ]\n\n", mInfo->c->Agsm_to_wgs84[0][2], mInfo->c->Agsm_to_wgs84[1][2], mInfo->c->Agsm_to_wgs84[2][2]);
+   
 
         Lgm_MatrixToQuat( mInfo->c->Agsm_to_sm, Q2 );
 
@@ -324,6 +327,9 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     Lgm_QuatToAxisAngle(  Q, &RotAngle,  &RotAxis );
     Lgm_QuatToAxisAngle( Q2, &RotAngle2, &RotAxis2 );
     Lgm_QuatToAxisAngle( Q3, &RotAngle3, &RotAxis3 );
+printf("RotAxis = %g %g %g   RotAngle = %g\n", RotAxis.x, RotAxis.y, RotAxis.z, RotAngle);
+printf("RotAxis2 = %g %g %g   RotAngle2 = %g\n", RotAxis2.x, RotAxis2.y, RotAxis2.z, RotAngle2);
+printf("RotAxis3 = %g %g %g   RotAngle3 = %g\n", RotAxis3.x, RotAxis3.y, RotAxis3.z, RotAngle3);
 
 
     /*
@@ -340,6 +346,7 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
     Sun        = v;
     aInfo->Sun = v; // This is the struct for the Atmosphere stuff
+printf(" Sun = %g %g %g\n", v.x, v.y, v.z);
 
 
 }
@@ -979,7 +986,6 @@ int u, v;
 int res=20;
 int lowres=40;
 int hires=140; // nurb resolution
-GtkWidget   *ViewDriftShellWindow;
 float   Orange[3]   =   {1.0, 0.4, 0.0};
 float colors[][3] =    {
                         {1.000000, 0.109804, 0.109804}, // 0
@@ -1064,7 +1070,6 @@ double      x3_gsm[90][24][200], y3_gsm[90][24][200], z3_gsm[90][24][200];
 double      nx3_gsm[90][24][200], ny3_gsm[90][24][200], nz3_gsm[90][24][200];
 double      x4_gsm[90][500][200], y4_gsm[90][500][200], z4_gsm[90][500][200];
 double      nx4_gsm[90][500][200], ny4_gsm[90][500][200], nz4_gsm[90][500][200];
-GtkWidget   *drawing_area;
 gulong      PitchAngleAllHandler;
 gulong      PitchAngleHandler[90];
 GtkWidget   *PitchAngleCheckMenuItem[91];
@@ -1788,16 +1793,27 @@ void CreateEarth( ){
 
 
     // EqPlane image
-if (0==1){
+if (1==1){
     EqPlaneDL = glGenLists( 1 );
     glNewList( EqPlaneDL, GL_COMPILE );
+        glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_earth2.diffuse);
+        glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_earth2.specular);
+        glMaterialf(  GL_FRONT, GL_SHININESS, mat_earth2.shininess * 128.0);
         glBindTexture( GL_TEXTURE_2D, Texture_EqPlane );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
         glEnable( GL_TEXTURE_2D );
-        glEnable( GL_BLEND ); 
-//        glDepthMask( GL_FALSE );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+//        glEnable( GL_BLEND ); 
+        glDepthMask( GL_FALSE );
+//        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glPushMatrix();
-        glRotatef( DipoleTiltAngle, 0.0, 1.0, 0.0);
+        // do a rotation so that the current x,y,z coord sys corresponds to the SM system
+        glRotatef( RotAngle2, RotAxis2.x, RotAxis2.y, RotAxis2.z );
+//        glRotatef( DipoleTiltAngle, 0.0, 1.0, 0.0);
         glBegin(GL_QUADS);
             glNormal3f( 0.0, 0.0, 1.0 ); glTexCoord2f(0.0, 0.0); glVertex3f( -10.0,  10.0, 0.0 );
             glNormal3f( 0.0, 0.0, 1.0 ); glTexCoord2f(1.0, 0.0); glVertex3f( -10.0, -10.0, 0.0 );
@@ -1805,8 +1821,8 @@ if (0==1){
             glNormal3f( 0.0, 0.0, 1.0 ); glTexCoord2f(0.0, 1.0); glVertex3f(  10.0,  10.0, 0.0 );
         glEnd();
         glPopMatrix();
-//        glDepthMask( GL_TRUE );
-        glDisable( GL_BLEND ); 
+        glDepthMask( GL_TRUE );
+//        glDisable( GL_BLEND ); 
         glDisable( GL_TEXTURE_2D );
     glEndList( );
 }
@@ -3406,9 +3422,12 @@ void DrawScene( ) {
 
 
 
-//20100305    glCallList( DipoleAxisDL );
-//20100305    glCallList( SunDirectionDL );
+//20100305    
+glCallList( DipoleAxisDL );
+//20100305    
+glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
+//glCallList( EqPlaneDL );
 
 
 /*
@@ -4007,8 +4026,16 @@ static gboolean button_press_event( GtkWidget *widget, GdkEventButton *event, gp
 
 static gboolean button_release_event( GtkWidget *widget, GdkEventButton *event, gpointer data) {
 
-    if (event->button == 1 && ((dx*dx + dy*dy) > ANIMATE_THRESHOLD)){
+    int diff=dx*dx + dy*dy;
+
+    if (event->button == 1 && (diff >= ANIMATE_THRESHOLD)){
         AnimateView = TRUE;
+    } else if ( event->button == 1 && (diff < ANIMATE_THRESHOLD ) ){
+        // view animation rotations to zero
+        view_quat_diff[0] = 0.0;
+        view_quat_diff[1] = 0.0;
+        view_quat_diff[2] = 0.0;
+        view_quat_diff[3] = 1.0;
     } else if (event->button == 3 ){
         // dont animate the second trackball
         // that controls side to side viewing.
@@ -4546,6 +4573,8 @@ static void TimeAction( GtkWidget *widget, gpointer data ) {
 
                 RunTime     = FALSE;
                 AnimateTime = TIME_STOP;
+if (k== TIME_RESET_BACKWARD_TO_START)
+printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
                 UpdateTimeDepQuants( CurrentDate, CurrentUT );
 
                 cFrame = 0;
@@ -5516,6 +5545,13 @@ void create_ViewDriftShell( void *data ) {
     GtkWidget           *vbox;
     GtkWidget           *menu;
     GtkWidget           *button;
+//    GtkWidget       *EventBox;
+    GtkWidget           *Menubar;
+    GtkAccelGroup       *AccelGroup;
+    GtkItemFactory      *ItemFactory;
+    int                 nMenuItems;
+//    int             row;
+
     int                 i;
 //    Lgm_Vector          u;
 //    double              Q[4];
@@ -5588,6 +5624,20 @@ void create_ViewDriftShell( void *data ) {
 
 
 
+   /*
+     *  Add a menubar to the vbox
+     */
+    AccelGroup  = gtk_accel_group_new();
+    ItemFactory = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", AccelGroup);
+    nMenuItems  = sizeof( MenuItems ) / sizeof( MenuItems[0] );
+    gtk_item_factory_create_items( ItemFactory, nMenuItems, MenuItems, NULL );
+    Menubar = gtk_item_factory_get_widget( ItemFactory, "<main>" );
+    gtk_box_pack_start( vbox , Menubar, FALSE, FALSE, 0);
+    gtk_window_add_accel_group( GTK_WINDOW( ViewDriftShellWindow ), AccelGroup);
+    gtk_widget_show( Menubar );
+
+
+
 
     /*
      * Drawing area for drawing OpenGL scene.
@@ -5653,10 +5703,10 @@ void create_ViewDriftShell( void *data ) {
     /*
      * Simple quit button.
      */
-    button = gtk_button_new_with_label( "Quit" );
-    g_signal_connect_swapped( GTK_OBJECT( button ), "clicked", G_CALLBACK( quit_app ), NULL );
-    gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
-    gtk_widget_show( button );
+//    button = gtk_button_new_with_label( "Quit" );
+//    g_signal_connect_swapped( GTK_OBJECT( button ), "clicked", G_CALLBACK( quit_app ), NULL );
+//    gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
+//    gtk_widget_show( button );
 
 
 
@@ -6408,7 +6458,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_misc_set_alignment (GTK_MISC(CurrentTimeLabel), 0, 0.5);
  
 
-    // action buttons
+    // ********* action buttons ************
     ++row;
     hbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (hbox); 
     gtk_table_attach (GTK_TABLE (table1), hbox, 0, 4, row, row+1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);

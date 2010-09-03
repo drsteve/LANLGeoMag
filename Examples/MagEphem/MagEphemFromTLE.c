@@ -127,7 +127,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     Lgm_Doy( EndDate, &EndYear, &EndMonth, &EndDay, &EndDoy );
     EndJD = Lgm_JD( EndYear, EndMonth, EndDay, EndUT, LGM_TIME_SYS_UTC, c );
 
-    JDinc = 5.0/1440.0; // 5-min increment
+    JDinc = 1.0/1440.0; // 1-min increment
 
     if ( (fp = fopen( OutputFile, "w" )) == NULL ) {
         printf( "Couldnt open file %s for writing\n", OutputFile );
