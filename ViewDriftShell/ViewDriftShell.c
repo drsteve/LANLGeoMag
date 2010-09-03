@@ -29,9 +29,9 @@ static GtkItemFactoryEntry MenuItems[] = {
     {"/File",                           NULL,           0,                              0,      "<Branch>"                              },
     {"/File/tearoff1",                  NULL,           0,                              0,      "<Tearoff>"                             },
 //    {"/File/Print ...",               NULL,           PrintRasterFile,                0,      "<StockItem>",  GTK_STOCK_PRINT         },
+    {"/File/Save View As ...",          "<CTL>S",       raise_SaveRasterFileDialog,     0,      "<StockItem>",  GTK_STOCK_SAVE_AS       },
     {"/File/Add MagEphem File ...",     NULL,           raise_OpenMagEphemFileDialog,   0,      "<StockItem>",  GTK_STOCK_OPEN          },
     {"/File/Add Earth-Fixed Sites ...", NULL,           raise_OpenMagEphemFileDialog,   0,      "<StockItem>",  GTK_STOCK_OPEN          },
-    {"/File/Save As ...",               "<CTL>S",       raise_SaveRasterFileDialog,     0,      "<StockItem>",  GTK_STOCK_SAVE_AS       },
     {"/File/sep1",                      NULL,           0,                              0,      "<Separator>"                           },
     {"/File/_Quit",                     "<CTL>Q",       gtk_main_quit,                  0,      "<StockItem>",  GTK_STOCK_QUIT          },
 
