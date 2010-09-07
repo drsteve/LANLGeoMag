@@ -10,9 +10,12 @@
  *
  *
  *
- *  The T89 Magnetic field model. See following reference (note: there are some errors in the
- *  paper);
+ *  The T89 Magnetic field model. See following reference (note: there are some
+ *  errors in the paper);
  *
+ *      Tsyganenko, N. A., A magnetospheric magnetic field model with a warped
+ *      tail current sheet, Planetary and Space Science Volume 37, Issue 1,
+ *      January 1989, Pages 5-20.
  *
  *
  */
