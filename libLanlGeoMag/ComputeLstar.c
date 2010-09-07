@@ -347,7 +347,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-    if ( Lgm_Trace( &u, &v1, &v2, &v3, 120.0, 1e-7, 1e-7, LstarInfo->mInfo ) == 1 ) {
+    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-7, 1e-7, LstarInfo->mInfo ) == 1 ) {
 
 
 
@@ -357,7 +357,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
          * FL from the starting points point. So dSa is from the Bmin value.
          * And dSb is from the Psouth value.
          */
-        if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &dSa, 120.0, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
+        if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &dSa, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
 	        if (LstarInfo->VerbosityLevel > 0) {
                 printf("\n\t\t%sMirror Point Location, Pm_South (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, PostStr);
@@ -366,7 +366,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 printf("\t\t%sMag. Field Strength, Bm at Pm_South (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
             }
 
-            if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, 120.0, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
                 if (LstarInfo->VerbosityLevel > 0) {
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
@@ -429,14 +429,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
             } else {
 
-	            printf("\t\t%sMirror point below 120km in Northern Hemisphere%s\n", PreStr, PostStr );
+	            printf("\t\t%sMirror point below %g km in Northern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
 	            return(-1);
 
 	        }
 
         } else {
 
-	        printf("\t\t%sMirror point below 120km in Southern Hemisphere%s\n", PreStr, PostStr );
+	        printf("\t\t%sMirror point below %g km in Southern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
 	        return(-2);
 
         }
@@ -614,7 +614,7 @@ mlat0 = -30.0;
          *  elipsoid.
          */
         LstarInfo->mInfo->Hmax = 0.1;
-        if ( !Lgm_TraceToSphericalEarth( &v, &w, 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ){ return(-4); }
+        if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-7, LstarInfo->mInfo ) ){ return(-4); }
         LstarInfo->Spherical_Footprint_Pn[k] = w;
 
 
@@ -641,7 +641,7 @@ mlat0 = -30.0;
          */
         if ( LstarInfo->SaveShellLines ) {
 
-            Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 120.0, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+            Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
@@ -668,12 +668,12 @@ mlat0 = -30.0;
              */
             Hmax = LstarInfo->mInfo->Hmax;
             LstarInfo->mInfo->Hmax = 0.001;
-            if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ) {
+            if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                 LstarInfo->Ellipsoid_Footprint_Ss[k] = LstarInfo->Spherical_Footprint_Ss[k] - LstarInfo->mInfo->Trace_s; // should be slightly negative
 
                 LstarInfo->mInfo->Hmax = 0.001;
-                if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], 120.0, 1.0, 1e-7, LstarInfo->mInfo ) ) {
+                if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                     LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s; 
 
@@ -691,8 +691,8 @@ mlat0 = -30.0;
              *  rtelativen to the southern spherical footpoint -- which is how
              *  the field line is defined that we are trying to save.
              */
-            //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
-            Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, 120.0, -1.0, 1e-7, LstarInfo->mInfo );
+            //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
+            Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo );
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
             //}

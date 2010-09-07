@@ -5707,7 +5707,7 @@ double  Lgm_AE8_AP8_FluxFromPos( Lgm_Vector *u, int MODEL, int FLUXTYPE, double 
     /*
      * From given position, determine the character of the field line
      */
-    if ( Lgm_Trace( u, &v1, &v2, &v3, 120.0, 0.01, 1e-7, m ) != LGM_CLOSED ) {
+    if ( Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, 0.01, 1e-7, m ) != LGM_CLOSED ) {
 
         return( 0.0 );
 

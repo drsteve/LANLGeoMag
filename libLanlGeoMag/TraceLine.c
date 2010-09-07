@@ -74,16 +74,16 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
 
 
     /*
-     *  H0 is in km above Earth's surface. Convert to geocentric
-     *  radius.
+     *  H0 is in km above Earth's surface (assumed to be spherical here).
+     *  Convert to geocentric radius.
      */
     R0 = H0/Re + 1.0;
 
 
 
-    Htry = Info->Hmax; // we want to step with constant increments.
+    Htry = Info->Hmax;  // we want to step with constant increments.
     Hmin = 0.0001;      // This may be necessary to find the endpoint.
-    Hmax = Info->Hmax; // Dont use step bigger than this.
+    Hmax = Info->Hmax;  // Dont use step bigger than this.
     u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
     R = Ra = Rb = Rc = 0.0;
     F = Fa = Fb = Fc = 0.0;

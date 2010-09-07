@@ -75,7 +75,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     /*
      *  Compute Field-related quantities for each Pitch Angle.
      */
-    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, 120.0, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
+    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
     MagEphemInfo->FieldLineType = TraceFlag;
     if ( TraceFlag > 0 ) {
         MagEphemInfo->Ellipsoid_Footprint_Ps  = v1;
@@ -97,7 +97,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
             Lgm_Convert_Coords( &v1, &vv1, GSM_TO_SM, LstarInfo->mInfo->c );
             Lam = asin( vv1.z/Lgm_Magnitude( &vv1 ) );
             CosLam = cos( Lam );
-            LSimple = (1.0+120.0/WGS84_A)/( CosLam*CosLam );
+            LSimple = (1.0+LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A)/( CosLam*CosLam );
 
 
 

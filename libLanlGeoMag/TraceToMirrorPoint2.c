@@ -22,49 +22,35 @@
 
 
 
-int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info ) {
+int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;
     double	    Htry, Hdid, Hnext, Hmin, Hmax, s;
     double	    Sa=0.0, Sb=0.0, d;
-    double	    R0, R, Fa, Fb, F;
-    double	    Ra, Rb;
-    Lgm_Vector	Pa, Pb, P, Bvec;
+    double	    Rlc, R, Fa, Fb, F;
+    double	    Ra, Rb, Height;
+    Lgm_Vector	w, Pa, Pb, P, Bvec;
     int		    done, reset;
 
 
-
     /*
-     *  mu_eq must be greater than 0.0. For the case of mu_eq = 0.0, just
-     *  trace to the height of the atmospheric loss cone instead.
-    if ( fabs(Bm) < 1e-6 ) return( -1 );
+     *  If particle mirrors below Info->Lgm_LossConeHeight, we are in the loss cone.
      */
+    Lgm_Convert_Coords( u, &w, GSM_TO_WGS84, Info->c );
+    Lgm_WGS84_to_GeodHeight( &w, &Height );
+    if ( Height < Info->Lgm_LossConeHeight ) {
+        if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE \n", Info->Lgm_LossConeHeight );
+        return(-1); // below loss cone height -> particle is in loss cone!
+    }
 
-
-    /*
-     *  H0 is in km above Earth's surface. Convert to geocentric
-     *  radius. If particle mirrors below this, we are in the loss cone.
-     */
-    R0 = H0/Re + 1.0;
 
 
 
     Hmax = Info->Hmax;
-//    Hmin = 0.001;
     Hmin = 1e-7;
     u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
     R = Ra = Rb = 0.0;
     F = Fa = Fb = 0.0;
-
-
-    /*
-     *   Add code to check to see if the start point is already below the target height.
-     *   If it is, we can trace up until we are beyond it or some such thing...
-     */
-  
-
-
-
 
 
 
@@ -73,12 +59,6 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
      *  Bracket the minimum first. 
      *  We want to stop when F = 0.0
      *
-     */
-
-
-
-
-    /* 
      *  Set the first point of the bracket to be the start point.
      *  A point of caution here...
      *  One might think that if Fa is identically zero (or very small) already 
@@ -93,21 +73,18 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
     Info->Bfield( &Pa, &Bvec, Info );
     Ra   = Lgm_Magnitude( &Pa );
     Fa   = Lgm_Magnitude( &Bvec ) - Bm;
-//printf("Fa = %g\n", Fa);
 
 
     /*
      *  Set the step size to be XX% of the (linear) distance to surface of earth
      */
     Htry = 0.2*(Ra-1.0);
-//printf("1. Htry = %g\n", Htry);
 
 
     /*
      *  If user doesnt want large steps, limit Htry ...
      */
     if (Htry > Hmax) Htry = Hmax;
-//printf("2. Htry = %g\n", Htry);
 
 
 
@@ -120,8 +97,6 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 
     done  = FALSE;
     reset = TRUE;
-//printf("Initial: Pa, Pb = %g %g %g   %g %g %g   Fa, Fb = %g %g\n", Pa.x, Pa.y, Pa.z, Pb.x, Pb.y, Pb.z, Fa, Fb);
-//if ( Fa > 0.0 ) sgn *= -1.0;
     while ( !done ) {
 
         if ( Htry > 0.1 ) Htry = 0.1;
@@ -134,8 +109,9 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 	    Info->Bfield( &P, &Bvec, Info );
         R = Lgm_Magnitude( &P );
 	    F = Lgm_Magnitude( &Bvec ) - Bm;
+        Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
+        Lgm_WGS84_to_GeodHeight( &w, &Height );
 
-//printf("P = %g %g %g   F = %g Bm = %g |Bvec| = %g\n", P.x, P.y, P.z, F, Bm, Lgm_Magnitude( &Bvec ));
 
         if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
                 || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
@@ -144,7 +120,6 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 	         */
 	        v->x = v->y = v->z = 0.0;
             if ( Info->VerbosityLevel > 1 ) printf("TraceToMirrorPoint: FL OPEN\n");
-//printf("I got here\n");
 	        return(-2);
 	    } else if ( F > 0.0 ) { /* not >= because we want to explore at least a step beyond */
 	        done = TRUE;
@@ -164,20 +139,13 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 	     */
 	    Htry = fabs(0.2*(R-0.999999));
         if (Htry < 1e-12) done = TRUE;
-//printf("Htry = %g R = %g\n", Htry, R);
-	    if ( R < (1.0 + 120.0/Re) ) {
-            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Mirror Height is below 120km -- LOSS CONE \n");
-	        return(-1); /* dropped below 120km -> particle is in loss cone! */
-	    }
-//	if (Htry > Hmax) Htry = Hmax;
-//	else if (Htry < Hmin) Htry = Hmin;
 
-//printf("Bracketing: Pa, Pb = %g %g %g   %g %g %g   Fa, Fb = %g %g\n", Pa.x, Pa.y, Pa.z, Pb.x, Pb.y, Pb.z, Fa, Fb);
+	    if ( Height < Info->Lgm_LossConeHeight ) {
+            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Mirror Height is below %g km -- LOSS CONE \n", Info->Lgm_LossConeHeight );
+	        return(-1); /* dropped below loss cone height -> particle is in loss cone! */
+	    }
 
     }
-
-//printf("Bracket: Pa, Pb = %g %g %g   %g %g %g   Fa, Fb = %g %g\n", Pa.x, Pa.y, Pa.z, Pb.x, Pb.y, Pb.z, Fa, Fb);
-
 
 
 
@@ -195,7 +163,6 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 
 	    d = Sb - Sa;
 
-	    //if ( (d < 1e-8) || (fabs(F) < tol)  ) {
 	    if ( (fabs(d) < tol)  ) {
 	        done = TRUE;
 	    } else {
@@ -211,7 +178,6 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0,
 	        }
 	    
 	    }
-//printf("Htry = %g  Pa, Pb = %f %f %f,\t %f %f %f   Sa, Sb = %g, %g   F = %g    Fa, Fb = %g %g\n", Htry, Pa.x, Pa.y, Pa.z, Pb.x, Pb.y, Pb.z, Sa, Sb, F, Fa, Fb);
 
     }
 

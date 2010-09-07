@@ -125,7 +125,7 @@ int FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mla
              //LstarInfo->mInfo->Hmax = 10.0;
              //LstarInfo->mInfo->Hmax = 0.1;
              LstarInfo->mInfo->Hmax = 0.1;
-             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, 120.0, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
 
                 if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
@@ -318,7 +318,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  case. Lets search for it in 0.5 Re increments. Assume a0, but lets step
      *  out to find c0.
      */
-    a0 = 1.0 + 120.0/Re;      // 110 km altitude
+    a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // 110 km altitude
 
     u.x = a0*f; u.y = a0*g; u.z = a0*sl;
     Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );

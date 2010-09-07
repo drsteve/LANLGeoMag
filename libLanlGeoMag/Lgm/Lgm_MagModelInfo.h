@@ -278,6 +278,8 @@ typedef struct Lgm_MagModelInfo {
     double OpenLimit_zMin;
     double OpenLimit_zMax;
 
+    double  Lgm_LossConeHeight;
+
 
 
 } Lgm_MagModelInfo;
@@ -300,7 +302,7 @@ void InitSpline( Lgm_MagModelInfo *Info );
 void FreeSpline( Lgm_MagModelInfo *Info );
 int Lgm_TraceToMinRdotB( Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
 int Lgm_TraceIDL( int, void *argv[] );
-int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double H0, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
+int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
 
 
 
@@ -426,6 +428,8 @@ void Lgm_Set_Octree_kNN_InterpMethod( Lgm_MagModelInfo *m, int Method );
 void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
 void Lgm_Set_Octree_kNN_MaxDist( Lgm_MagModelInfo *m, double MaxDist );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
+void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
+
 
 
 

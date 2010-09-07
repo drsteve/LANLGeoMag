@@ -63,6 +63,11 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
     MagInfo->Lgm_TraceToMirrorPoint_Tol = 1e-7;
 
 
+    /*
+     * Bounce Loss Cone Height
+     */
+    MagInfo->Lgm_LossConeHeight = 100.0; // km above the Earth Ellipsoid.
+    
 
 
 
@@ -161,6 +166,10 @@ void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double 
 }
 
 
+void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight ) {
+    m->Lgm_LossConeHeight = LossConeHeight;
+    return;
+}
 
 
 

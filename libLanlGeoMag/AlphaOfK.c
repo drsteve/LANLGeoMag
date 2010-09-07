@@ -108,34 +108,36 @@ double  AlphaOfK( double K,Lgm_LstarInfo *LstarInfo ) {
  */
 double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
 
-    double  sa, sa2, Sma, Smb, I, K;
+    double           sa, sa2, Sma, Smb, I, K;
+    Lgm_MagModelInfo *m;
 
+    m = LstarInfo->mInfo;
 
     LstarInfo->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo->mInfo->Bm =LstarInfo->mInfo->Blocal/sa2; 
+    m->Bm = m->Blocal/sa2; 
 
     /*
      * Trace from Bmin point up to northern mirror point and down to
      * southern mirror point. Sma and Smb are the distances along
      * (i.e. up and down) the FL from the Bmin point.
      */
-     if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &Sma, 120.0, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) ) {
-        if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &Smb, 120.0, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) ) {
+     if ( Lgm_TraceToMirrorPoint( &(m->Pmin), &(m->Pm_South), &Sma, m->Bm, -1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) ) {
+        if ( Lgm_TraceToMirrorPoint( &(m->Pm_South), &(m->Pm_North), &Smb, m->Bm,  1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) ) {
 
             
             /*
              *  Set the limits of integration. Also set tolerances for
              *  Quadpack routines.
              */
-            //LstarInfo->mInfo->Sm_South = LstarInfo->mInfo->smin - Sma;
-            //LstarInfo->mInfo->Sm_North = LstarInfo->mInfo->smin + Smb;
-            LstarInfo->mInfo->Sm_South = 0.0;
-            LstarInfo->mInfo->Sm_North = Smb;
-//            LstarInfo->mInfo->epsrel = 0.0;
-//            LstarInfo->mInfo->epsabs = 1e-1;
-//            LstarInfo->mInfo->Lgm_I_Integrator  = DQK21;
-//            LstarInfo->mInfo->UseInterpRoutines = TRUE;
+            //m->Sm_South = m->smin - Sma;
+            //m->Sm_North = m->smin + Smb;
+            m->Sm_South = 0.0;
+            m->Sm_North = Smb;
+//            m->epsrel = 0.0;
+//            m->epsabs = 1e-1;
+//            m->Lgm_I_Integrator  = DQK21;
+//            m->UseInterpRoutines = TRUE;
 
             /*
              *  Since the Pm_South and Pm_north points are not likely
@@ -145,20 +147,20 @@ double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
              *  the mirror points.  If we dont do it, we could get
              *  slight differences due to it.
              */
-            FreeSpline( LstarInfo->mInfo );
-            //AddNewPoint( LstarInfo->mInfo->smin-Sma, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-            //AddNewPoint( LstarInfo->mInfo->smin+Smb, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
-            AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-            AddNewPoint( Smb, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
-            InitSpline( LstarInfo->mInfo );
-//            LstarInfo->mInfo->UseInterpRoutines = TRUE;
+            FreeSpline( m );
+            //AddNewPoint( m->smin-Sma, m->Bm, &m->Pm_South, m );
+            //AddNewPoint( m->smin+Smb, m->Bm, &m->Pm_North, m );
+            AddNewPoint( 0.0, m->Bm, &m->Pm_South, m );
+            AddNewPoint( Smb, m->Bm, &m->Pm_North, m );
+            InitSpline( m );
+//            m->UseInterpRoutines = TRUE;
 
-            if (  LstarInfo->mInfo->UseInterpRoutines ) {
+            if (  m->UseInterpRoutines ) {
 
                 /*
                  *  Do interped I integral.
                  */
-                I = Iinv_interped( LstarInfo->mInfo  );
+                I = Iinv_interped( m  );
                 if (LstarInfo->VerbosityLevel >= 2) printf("Iinv (Interped Integral) = %g\n",  I );
 
             } else {
@@ -166,7 +168,7 @@ double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
                 /*
                  *  Do full blown I integral. 
                  */
-                I = Iinv( LstarInfo->mInfo  );
+                I = Iinv( m  );
                 if (LstarInfo->VerbosityLevel >= 2) printf("Iinv (Full Integral) = %g\n",  I );
 
             }
@@ -175,7 +177,7 @@ double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
             /*
              *  Compute K(Alpha) (units of G^1/2 Re)
              */
-            K = 3.16227766e-3*I*sqrt(LstarInfo->mInfo->Bm);
+            K = 3.16227766e-3*I*sqrt(m->Bm);
 
 
             /*

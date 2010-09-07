@@ -49,11 +49,11 @@ void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemI
     fprintf( fp, "# File Fmt Version :  %s\n", "" );
     fprintf( fp, "#\n");
     fprintf( fp, "# Description of Variables:\n");
+    fprintf( fp, "#     DateTime:       The date and time in ISO 8601 compliant format.\n");
+    fprintf( fp, "#\n");
     fprintf( fp, "#     Date:           The date. In YYYMMDD format.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#     UTC:            Universal Time (Coordinated). In decimal hours.\n");
-    fprintf( fp, "#\n");
-    fprintf( fp, "#     DateTime:       The date and time in ISO 8601 compliant format.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#     Xgeo:            X-component of Geographic position of S/C. In units of Re.\n");
     fprintf( fp, "#\n");
@@ -91,7 +91,7 @@ void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemI
     fprintf( fp, "#\n");
 
     // Column Header
-    fprintf( fp, "%51s",  "# +----------------- Date and Time ----------------+" );
+    fprintf( fp, "%89s",  "# +------------------------------------ Date and Time -----------------------------------+" );
     fprintf( fp, " %38s",  " +----- Geographic Coordinates ------+" );
     fprintf( fp, " %38s",  " +--------- GSM Coordinates ---------+" );
     fprintf( fp, " %38s",  " +---------- SM Coordinates ---------+" );
@@ -110,9 +110,12 @@ void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemI
 
 
     // Column Header
-    fprintf( fp, "# %-10s", "Date" );
+    fprintf( fp, "# %25s", "DateTime" );
+    fprintf( fp, " %10s", "Date" );
+    fprintf( fp, " %5s",  "DOY" );
     fprintf( fp, " %13s", "UTC" );
-    fprintf( fp, " %25s", "DateTime" );
+    fprintf( fp, " %16s", "Julian Date" );
+    fprintf( fp, " %15s", "Gps Time" );
 
     fprintf( fp, " %12s", "Xgeo" );
     fprintf( fp, " %12s", "Ygeo" );
@@ -178,9 +181,12 @@ void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemI
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "I%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
     // Units/Format
-    fprintf( fp, "# %-10s", "YYYYMMDD" );
+    fprintf( fp, "# %25s", "YYYY-MM-DDTHH:MM:SS.SSSSZ" );
+    fprintf( fp, " %10s", "YYYYMMDD" );
+    fprintf( fp, " %5s",  "DDD" );
     fprintf( fp, " %13s", "Hours" );
-    fprintf( fp, " %25s", "YYYY-MM-DDTHH:MM:SS.SSSSZ" );
+    fprintf( fp, " %16s", "Days" );
+    fprintf( fp, " %15s", "Seconds" );
 
     fprintf( fp, " %12s", "Re" );
     fprintf( fp, " %12s", "Re" );
@@ -265,14 +271,18 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
     Lgm_DateTimeToString( Str, DT_UTC, 0, 4 );
     
 
-    fprintf( fp, "%10ld  ",   m->Date );  // Date
-    fprintf( fp, " %13.8lf", m->UTC );  // UTC
-    fprintf( fp, " %25s",  Str );       // Date+Time in ISO 8601 format
+    fprintf( fp, "%25s",     Str );          // Date+Time in ISO 8601 format
+    fprintf( fp, "   %10ld", c->UTC.Date );  // Date
+    fprintf( fp, " %5d",     c->UTC.Doy );   // DOY
+    fprintf( fp, " %13.8lf", c->UTC.Time );  // UTC
+    fprintf( fp, " %16.8lf", c->UTC.JD );    // Julian Date
+    fprintf( fp, " %15.3lf", Lgm_UTC_to_GpsSeconds( &c->UTC, c ) ); // GpsTime
+
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );
-    fprintf( fp, " %12g", v.x );        // Xgeo
-    fprintf( fp, " %12g", v.y );        // Ygeo
-    fprintf( fp, " %12g", v.z );        // Zgeo
+    fprintf( fp, " %12g", v.x );     // Xgeo
+    fprintf( fp, " %12g", v.y );     // Ygeo
+    fprintf( fp, " %12g", v.z );     // Zgeo
 
     fprintf( fp, " %12g", m->P.x );  // Xgsm
     fprintf( fp, " %12g", m->P.y );  // Ygsm

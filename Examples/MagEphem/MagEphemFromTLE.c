@@ -10,7 +10,7 @@
 
 #define KP_DEFAULT 0
 
-void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
+void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
 void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemInfo *m );
 void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m );
 
@@ -22,22 +22,21 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m );
 
 int main( int argc, char *argv[] ){
 
-    int         Year, Month, Day;
-    int         StartYear, StartMonth, StartDay, StartDoy;
-    int         EndYear, EndMonth, EndDay, EndDoy;
-    long int    Date, StartDate, EndDate;
-    double      UTC, tsince, JD, StartUT, EndUT, StartJD, EndJD, JDinc;
-    Lgm_CTrans  *c = Lgm_init_ctrans( 0 );
-    Lgm_Vector  Ugsm, Uteme;
-    int         nTLEs;
-    char        Line0[100], Line1[100], Line2[100], *ptr;
-    char        *InputFile  = "input.txt";
-    char        *OutputFile = "output.txt";
-    FILE        *fp;
+    long int        StartDate, EndDate;
+    double          tsince, JD, StartUT, EndUT;
+    double          GpsTime, StartGpsTime, StopGpsTime, GpsInc;
+    Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
+    Lgm_Vector      Ugsm, Uteme;
+    Lgm_DateTime    UTC;
+    int             nTLEs;
+    char            Line0[100], Line1[100], Line2[100], *ptr;
+    char            *InputFile  = "input.txt";
+    char            *OutputFile = "output.txt";
+    FILE            *fp;
+
 
 double           Alpha[1000], a;
 int              nAlpha, Kp;
-char             Filename2[1024];
 Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
 
 
@@ -60,12 +59,12 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
 
     // Create array of Pitch Angles to compute
-    //for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
     for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
         Alpha[nAlpha] = a ;
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
+nAlpha = 0.0;
     MagEphemInfo->nAlpha = nAlpha;
 
 
@@ -90,6 +89,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
 
     /*
      * Remove any extraneous newline and/or linefeeds at the end of the strings.
+     * Probably not needed, but TLEs may have non-linux terminating characters...
      */
     if ( (ptr = strstr(Line0, "\n")) != NULL ) *ptr = '\0'; 
     if ( (ptr = strstr(Line0, "\r")) != NULL ) *ptr = '\0';
@@ -121,13 +121,14 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
      * interest, we need to compute the tsince needed. Convert Start/End Dates
      * to Julian dates -- they are easier to loop over contiguously.
      */
-    Lgm_Doy( StartDate, &StartYear, &StartMonth, &StartDay, &StartDoy );
-    StartJD = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
+    Lgm_Make_UTC( StartDate, StartUT, &UTC, c );
+    StartGpsTime = Lgm_UTC_to_GpsSeconds( &UTC, c );
 
-    Lgm_Doy( EndDate, &EndYear, &EndMonth, &EndDay, &EndDoy );
-    EndJD = Lgm_JD( EndYear, EndMonth, EndDay, EndUT, LGM_TIME_SYS_UTC, c );
 
-    JDinc = 1.0/1440.0; // 1-min increment
+    Lgm_Make_UTC( EndDate, EndUT, &UTC, c );
+    StopGpsTime = Lgm_UTC_to_GpsSeconds( &UTC, c );
+
+    GpsInc = 60.0; // seconds
 
     if ( (fp = fopen( OutputFile, "w" )) == NULL ) {
         printf( "Couldnt open file %s for writing\n", OutputFile );
@@ -147,20 +148,21 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
     /*
      * Open Mag Ephem file for writing
      */
-FILE *fp_MagEphem;
-    fp_MagEphem = fopen("puke.txt", "wb");
+    FILE *fp_MagEphem;
+    fp_MagEphem = fopen( "puke.txt", "wb" );
     WriteMagEphemHeader( fp_MagEphem, "mgh", "mithril", MagEphemInfo );
-//fclose(fp_MagEphem);
-//exit(0);
 
     // loop over specified time range
-    for ( JD = StartJD; JD <= EndJD; JD += JDinc ) {
+    for ( GpsTime = StartGpsTime; GpsTime <= StopGpsTime; GpsTime += GpsInc ) {
 
-        // Convert the current JD back to Date/UT etc..
-        Lgm_jd_to_ymdh ( JD, &Date, &Year, &Month, &Day, &UTC );
+
+        // Convert the current GpsTime back to Date/UT etc..
+        // Need JD to compute tsince
+        Lgm_GpsSeconds_to_UTC( GpsTime, &UTC, c ) ;
+        JD = Lgm_JD( UTC.Year, UTC.Month, UTC.Day, UTC.Time, LGM_TIME_SYS_UTC, c );
 
         // Set up the trans matrices
-        Lgm_Set_Coord_Transforms( Date, UTC, c );
+        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
     
         // "time since" in minutes (thats what SGP4 wants)
         tsince = (JD - TLEs[0].JD)*1440.0; 
@@ -177,8 +179,8 @@ FILE *fp_MagEphem;
          * Compute L*s, Is, Bms, Footprints, etc...
          * These quantities are stored in the MagEphemInfo Structure
          */
-        printf("\n\n\nDate, UTC = %ld %g   Ugsm = %g %g %g \n", Date, UTC, Ugsm.x, Ugsm.y, Ugsm.z );
-        ComputeLstarVersusPA( Date, UTC, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
+        printf("\n\n\nDate, ut = %ld %g   Ugsm = %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
+        ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
 
         WriteMagEphemData( fp_MagEphem, MagEphemInfo );
 
@@ -189,6 +191,7 @@ FILE *fp_MagEphem;
 
     }
     fclose(fp);
+    fclose(fp_MagEphem);
 
     Lgm_free_ctrans( c );
     free( s );

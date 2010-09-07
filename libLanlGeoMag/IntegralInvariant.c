@@ -387,13 +387,13 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
              * Trace to northern mirror point
              */
             printf("A. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, 120.0, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
                 printf("B. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, 120.0, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                     a = 0.0; b = Sa+Sb;
                     fInfo->Pm_South = Pa; fInfo->Sm_South = a;
@@ -408,12 +408,12 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
                 } else {
-                    printf("\t\tMirror point below 120km in Southern Hemisphere\n");
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below 120km in Northern Hemisphere\n");
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
@@ -445,13 +445,13 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
              * Trace to northern mirror point
              */
             printf("C. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, 120.0, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
                 printf("D. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, 120.0, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                     a = 0.0; b = Sa+Sb;
                     fInfo->Pm_South = Pa; fInfo->Sm_South = a;
@@ -466,12 +466,12 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
                 } else {
-                    printf("\t\tMirror point below 120km in Southern Hemisphere\n");
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below 120km in Northern Hemisphere\n");
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
@@ -502,13 +502,13 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
              * Trace to northern mirror point
              */
             printf("E. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, 120.0, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
                 printf("F. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, 120.0, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
 
                     a = 0.0; b = Sa+Sb;
                     fInfo->Pm_South = Pa; fInfo->Sm_South = a;
@@ -523,12 +523,12 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
                 } else {
-                    printf("\t\tMirror point below 120km in Southern Hemisphere\n");
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below 120km in Northern Hemisphere\n");
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
