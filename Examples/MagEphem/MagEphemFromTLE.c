@@ -64,6 +64,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
+nAlpha = 0;
     MagEphemInfo->nAlpha = nAlpha;
 
 
@@ -149,7 +150,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
      */
     FILE *fp_MagEphem;
     fp_MagEphem = fopen( "puke.txt", "wb" );
-    WriteMagEphemHeader( fp_MagEphem, "mgh", "mithril", MagEphemInfo );
+    WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, "T89", MagEphemInfo );
 
     // loop over specified time range
     for ( GpsTime = StartGpsTime; GpsTime <= StopGpsTime; GpsTime += GpsInc ) {
@@ -183,9 +184,9 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
 
         WriteMagEphemData( fp_MagEphem, MagEphemInfo );
 
-        long int fd = open("test.dat", O_CREAT|O_WRONLY);
-        write( fd, MagEphemInfo, sizeof(*MagEphemInfo) );
-        close(fd);
+//        long int fd = open("test.dat", O_CREAT|O_WRONLY);
+//        write( fd, MagEphemInfo, sizeof(*MagEphemInfo) );
+//        close(fd);
 
 
     }
