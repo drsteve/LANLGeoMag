@@ -64,7 +64,6 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
-nAlpha = 0.0;
     MagEphemInfo->nAlpha = nAlpha;
 
 
