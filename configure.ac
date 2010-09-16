@@ -40,6 +40,9 @@ AC_CHECK_LIB([m], [sin])
 # FIXME: Replace `main' with a function in `-lgslcblas':
 #AC_CHECK_LIB([gslcblas], [main])
 
+AM_CONDITIONAL([HAVE_CHECK], false)
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
@@ -58,5 +61,6 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/Lgm/Makefile
                  libLanlGeoMag/Makefile
                  libLanlGeoMag/EopData/GetEopFiles
-                 libLanlGeoMag/lgm.pc])
+                 libLanlGeoMag/lgm.pc]
+                 tests/Makefile)
 AC_OUTPUT

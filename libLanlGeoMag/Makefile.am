@@ -24,8 +24,8 @@ libLanlGeoMag_la_SOURCES =  AlphaOfK.c B_FromScatteredData.c ComputeLstar.c Drif
                             Lgm_Nutation.c Lgm_Octree.c Lgm_Quat.c Lgm_Sgp.c Lgm_SimplifiedMead.c  Lgm_SunPosition.c \
                             Lgm_Trace.c Lgm_TraceToEarth.c Lgm_TraceToSphericalEarth.c Lgm_Vec.c MagStep.c Lgm_QuadPack3.c \
                             Lgm_QuadPack.c quicksort.c SbIntegral.c T87.c T89.c TraceLine.c TraceToMinBSurf.c  \
-                            TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c TS04.c Tsyg2004.c W.c Lgm_InitMagEphemInfo.c \
-                            Lgm_AE8_AP8.c
+                            TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
+                            W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c
 
 EXTRA_DIST = EopData
 

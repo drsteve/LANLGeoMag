@@ -239,7 +239,7 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         printf("                     Setting the leap second values that I know about\n");
         printf("                     (latest leap second I know about was introduced on\n");
         printf("                     %8ld (total leap seconds is %g))\n", l->LeapSecondDates[N-1], l->LeapSeconds[N-1]);
-        return(LGM_ERROR);
+        //return(LGM_ERROR);
     }
 
     l->nLeapSecondDates = n;

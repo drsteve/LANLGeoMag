@@ -81,6 +81,7 @@ typedef struct Lgm_MagModelInfo {
     double		Hmax;
     FILE	    *fp;
     double      W[6];
+    double      G1, G2;
     int			Kp;
     double      Dst;
     double      P;

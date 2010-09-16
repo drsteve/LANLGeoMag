@@ -64,7 +64,6 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
-nAlpha = 0;
     MagEphemInfo->nAlpha = nAlpha;
 
 
@@ -128,7 +127,7 @@ nAlpha = 0;
     Lgm_Make_UTC( EndDate, EndUT, &UTC, c );
     StopGpsTime = Lgm_UTC_to_GpsSeconds( &UTC, c );
 
-    GpsInc = 60.0; // seconds
+    GpsInc = 15.0*60.0; // seconds
 
     if ( (fp = fopen( OutputFile, "w" )) == NULL ) {
         printf( "Couldnt open file %s for writing\n", OutputFile );
