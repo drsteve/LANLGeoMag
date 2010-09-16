@@ -21,7 +21,7 @@ START_TEST(test_IsLeapSecondDay) {
     int    Result;
     double sec_in_day;
 
-    Result = Lgm_IsLeapSecondDay(19910630, &sec_in_day, c);
+    Result = Lgm_IsLeapSecondDay(19920630, &sec_in_day, c);
     fail_unless( ((Result == 1) && (sec_in_day == 86401)), "1992/6/30 should be a leap second day, with sec_in_day = 86401 (got %g)", sec_in_day);
 
     return;
