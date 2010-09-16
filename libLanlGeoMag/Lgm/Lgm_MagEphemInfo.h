@@ -138,7 +138,7 @@ double  j_to_fp_2( double j, double Ek0, double Ek1 );
 double Ek_to_mu_1( double Ek, double alpha, double B );
 double Ek_to_mu_2( double Ek0, double Ek1, double alpha, double B );
 double  Ek_to_v( double Ek, int Species );
-void ComputeFieldLineQuantities( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
+//void ComputeFieldLineQuantities( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
 
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity );
 void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
