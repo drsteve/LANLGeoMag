@@ -18,12 +18,9 @@ void leapsecond_teardown(void) {
 
 START_TEST(test_IsLeapSecondDay) {
 
-  /*This is wrong...leap second is added at END of 19920630,
-   *not start of 19920701, but matching library for now...
-   */
   double sec_in_day;
 
-  fail_unless( Lgm_IsLeapSecondDay(19910630, &sec_in_day, c)==1, "1992/6/30 should be a leap second day");
+  fail_unless( Lgm_IsLeapSecondDay(19920630, &sec_in_day, c)==1, "1992/6/30 should be a leap second day");
 
   return;
 }
