@@ -8,13 +8,13 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
-#define ELECTRON_MASS   (9.10938188e-31)    /* Electron Mass , kg */
-#define AMU             (1.660538e-27)      /* kg */
-#define PROTON_MASS     (1.00794*AMU)       /* kg */
-#define OXYGEN_MASS     (15.9994*AMU)       /* kg */
-#define RE              (6378.135e3)        /* Earth Radius, m */
-#define CC              (2.99792458e8)      /* Speed of Light, m/s */
-#define EE              (1.6022e-19)        /* electron charge, C */
+#define LGM_ELECTRON_MASS   (9.10938188e-31)    /* Electron Mass , kg */
+#define LGM_AMU             (1.660538e-27)      /* kg */
+#define LGM_PROTON_MASS     (1.00794*AMU)       /* kg */
+#define LGM_OXYGEN_MASS     (15.9994*AMU)       /* kg */
+#define RE                  (6378.135e3)        /* Earth Radius, m */
+#define LGM_CC              (2.99792458e8)      /* Speed of Light, m/s */
+#define LGM_EE              (1.6022e-19)        /* electron charge, C */
 
 
 #ifndef TRUE
@@ -282,6 +282,14 @@ typedef struct Lgm_MagModelInfo {
     double  Lgm_LossConeHeight;
 
 
+    /*
+     *  Globals for OP77 Model
+     */
+    double OP77_TILTL;
+    double OP77_A[65], OP77_B[65], OP77_C[45], OP77_D[45], OP77_E[65], OP77_F[65], OP77_TT[5];
+
+
+
 
 } Lgm_MagModelInfo;
 
@@ -327,6 +335,14 @@ int Lgm_B_edip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 
 
 
+/*
+ *  
+ *  Function Prototypes for Olsen Pfitzer 1977  Model
+ *  
+ */
+int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m );
+
 
 
 /*
@@ -363,6 +379,22 @@ void lgm_field_t96mod_mgh__(double *PARMOD, double *AMDF, int *IYEAR,int *IDAY,i
 void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *, double *, double *, double *, double * );
 
 
+/*
+ *  T01S
+ *  
+ *  Function Prototypes for TS04 model
+ */
+int  Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], int nk );
+void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
+                double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
+                double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
+                double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
+                double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
+                double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
+                double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
+
 
 
 /*
@@ -370,16 +402,16 @@ void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *
  *  
  *  Function Prototypes for TS04 model
  */
-int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], int nk );
-void Lgm_T04_s( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void Lgm_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
-                double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
-                double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
-                double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
-                double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
-                double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
-                double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
+int  Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
+                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
+                    double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
+                    double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
+                    double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,
+                    double *BXR12, double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21,
+                    double *BXR22, double *BYR22, double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF,
+                    double *BX, double *BY, double *BZ);
 
 /*
  *  Computing B from scattered data -- (e.g. an irregular mesh)

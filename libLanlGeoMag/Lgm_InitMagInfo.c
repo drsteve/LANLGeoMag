@@ -70,6 +70,11 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
     
 
 
+    /*
+     * Inits for OP77
+     */
+    MagInfo->OP77_TILTL = 99.0;
+
 
     return MagInfo;
 
