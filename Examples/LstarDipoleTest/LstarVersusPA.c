@@ -18,7 +18,7 @@ int main( int argc, char *argv[] ){
     char             Filename2[1024];
     Lgm_Vector       Psm, P;
     Lgm_CTrans       *c = Lgm_init_ctrans(0);
-    Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
+    Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 1000);
 
     // Date and UTC
     Date       = 19800625;
@@ -27,10 +27,10 @@ int main( int argc, char *argv[] ){
 
     // Position in SM
     Psm.x = -3.0; Psm.y = 0.0; Psm.z = 0.0;
-    Psm.x = -6.6; Psm.y = 0.0; Psm.z = 0.0;
     Psm.x = -1.5; Psm.y = 0.0; Psm.z = 0.0;
     Psm.x = -1.25; Psm.y = 0.0; Psm.z = 0.0;
     Psm.x = -1.05; Psm.y = 0.0; Psm.z = 0.0;
+    Psm.x = -6.6; Psm.y = 0.0; Psm.z = 0.0;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, c );
 
     // Create array of Pitch Angles to compute

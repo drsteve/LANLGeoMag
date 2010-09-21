@@ -24,6 +24,8 @@
 #define FALSE           0
 #define TRUE            1
 
+
+
 #define Re              6378.137 	// This is consistent with equatorial
                                         // radius in the WGS84 model
 
@@ -34,7 +36,8 @@
 #define LGM_1O_GOLD     0.61803398874989484820  // 1/Phi
 #define LGM_1M_1O_GOLD  0.38196601125010515180  // 1-1/Phi
 
-#define LGM_ERROR       -1 // generic error flag
+#define LGM_ERROR       -1      // generic error flag
+#define LGM_FILL_VALUE (-1e31)  // Value to flag undefined or bad data
 
 #define  LGM_JD_J2000   2451545.0 // Julian Date of J2000 ( i.e. 12:00:00 TT on Jan 1 2000 (or 2000 Jan 1.5 TT ) ) 
 #define  LGM_JD_GPS0    2444245.0 // Julian Date of introduction of GPS time. (0h, Jan 6, 1980)

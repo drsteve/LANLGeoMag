@@ -845,7 +845,7 @@ double MagFluxIntegrand( double Phi, _qpInfo *qpInfo ) {
 
 double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 
-    double      a, b;
+    double      a, b, r;
     double      epsabs, epsrel, result, abserr;
     int         key, neval, ier, limit, lenw, last, iwork[501];
     double      work[2001];
@@ -891,8 +891,9 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 */
                                                                                                                                                   
                                                                                                                                                   
+    r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
                                                                                                                                                   
-    return( -result*LstarInfo->mInfo->c->M_cd );
+    return( -result*LstarInfo->mInfo->c->M_cd/r );
                                                                                                                                                   
 }
 
@@ -1026,7 +1027,7 @@ double MagFluxIntegrand2( double Phi, _qpInfo *qpInfo ) {
 
 double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
 
-    double      a, b;
+    double      a, b, r;
     double      epsabs, epsrel, result, abserr;
     int         key, neval, ier, limit, lenw, last, iwork[501];
     double      work[2001];
@@ -1068,8 +1069,9 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
 */
                                                                                                                                                   
                                                                                                                                                   
+    r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
                                                                                                                                                   
-    return( result );
+    return( result/r );
                                                                                                                                                   
 }
 

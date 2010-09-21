@@ -58,7 +58,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     // Set Tolerances
     SetLstarTolerances( MagEphemInfo->LstarQuality, LstarInfo );
 
-sprintf( Filename, "DipoleTest_1.05/results_%.0e.dat", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+sprintf( Filename, "DipoleTest_6.6/results_%.0e.dat", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
 fpout = fopen(Filename, "w");
 
 
@@ -69,7 +69,7 @@ fpout = fopen(Filename, "w");
     /*
      *  Blocal at sat location.
      */
-    MagEphemInfo->P_gsm = *u;
+    MagEphemInfo->P = *u;
     LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
@@ -80,7 +80,7 @@ fpout = fopen(Filename, "w");
      */
     if ( Lgm_Trace( u, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo->mInfo ) == 1 ) {
 
-        MagEphemInfo->Pmin_gsm = v3;
+        MagEphemInfo->Pmin = v3;
         MagEphemInfo->Bmin     = LstarInfo->mInfo->Bmin;
 
 
@@ -153,8 +153,8 @@ fpout = fopen(Filename, "w");
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
-                        MagEphemInfo->ShellFootprint_Pn[i][nn] = LstarInfo2->Footprint_Pn[nn];
-                        MagEphemInfo->ShellFootprint_Ps[i][nn] = LstarInfo2->Footprint_Ps[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Pn[i][nn] = LstarInfo2->Ellipsoid_Footprint_Pn[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Ps[i][nn] = LstarInfo2->Ellipsoid_Footprint_Ps[nn];
                         MagEphemInfo->ShellMirror_Pn[i][nn]    = LstarInfo2->Mirror_Pn[nn];
                         MagEphemInfo->ShellMirror_Ps[i][nn]    = LstarInfo2->Mirror_Ps[nn];
                         MagEphemInfo->ShellMirror_Ss[i][nn]    = LstarInfo2->mInfo->Sm_South;
@@ -176,7 +176,7 @@ fpout = fopen(Filename, "w");
                 } else {
                     printf(" Lsimple >= 10.0  ( Not doing L* calculation )\n" );
                 }
-fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (1.05-LstarInfo2->LS)/LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (6.6-LstarInfo2->LS)/LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
 fflush(fpout);
 
                 FreeLstarInfo( LstarInfo2 );

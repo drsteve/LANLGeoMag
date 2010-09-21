@@ -62,69 +62,69 @@ typedef struct Lgm_MagEphemInfo {
     /*
      * Array of PAs we need to compute things for...
      */
-    int         nAlpha;         // Number of PAs
-    double      Alpha[MAX_PITCH_ANGLES];      // Pitch Angles (Degrees)
-    Lgm_Vector  Pmn_gsm[MAX_PITCH_ANGLES];    // position of northern |Bmirror|
-    Lgm_Vector  Pms_gsm[MAX_PITCH_ANGLES];    // position of southern |Bmirror|
-    double      Bm[MAX_PITCH_ANGLES];         // Value of |Bm| (i.e. Bmirror)
-    double      I[MAX_PITCH_ANGLES];
-    double      Sb[MAX_PITCH_ANGLES];
-    double      Tb[MAX_PITCH_ANGLES];         // we calculate this for a 1Mev electron but could do more...
-    double      K[MAX_PITCH_ANGLES];
+    int         nAlpha;     // Number of PAs
+    double      *Alpha;     // Alpha[MAX_PITCH_ANGLES]    Pitch Angles (Degrees)
+    Lgm_Vector  *Pmn_gsm;   // Pmn_gsm[MAX_PITCH_ANGLES]  position of northern |Bmirror|
+    Lgm_Vector  *Pms_gsm;   // Pms_gsm[MAX_PITCH_ANGLES]  position of southern |Bmirror|
+    double      *Bm;        // Bm[MAX_PITCH_ANGLES]       Value of |Bm| (i.e. Bmirror)
+    double      *I;         // I[MAX_PITCH_ANGLES]
+    double      *Sb;        // Sb[MAX_PITCH_ANGLES]
+    double      *Tb;        // Tb[MAX_PITCH_ANGLES]       we calculate this for a 1Mev electron but could do more...
+    double      *K;         // K[MAX_PITCH_ANGLES]
 
-    int         nShellPoints[MAX_PITCH_ANGLES];               // # of point (i.e. FLs) in a shell calculation)
+    int         *nShellPoints; //  nShellPoints[MAX_PITCH_ANGLES] # of point (i.e. FLs) in a shell calculation)
 
 
     /*
      * Footpoints XXXkm above spherical Earth defined as sphere with
      * radius==WGS84_A (i.e. equatorial radius of WGS84 model)
      */
-    Lgm_Vector  ShellSphericalFootprint_Pn[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
-    double      ShellSphericalFootprint_Sn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
-    double      ShellSphericalFootprint_Bn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    Lgm_Vector  **ShellSphericalFootprint_Pn; // [MAX_PITCH_ANGLES][100]  north footprints of shell lines
+    double      **ShellSphericalFootprint_Sn; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
+    double      **ShellSphericalFootprint_Bn; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
 
-    Lgm_Vector  ShellSphericalFootprint_Ps[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
-    double      ShellSphericalFootprint_Ss[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
-    double      ShellSphericalFootprint_Bs[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    Lgm_Vector  **ShellSphericalFootprint_Ps; // [MAX_PITCH_ANGLES][100]  north footprints of shell lines
+    double      **ShellSphericalFootprint_Ss; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
+    double      **ShellSphericalFootprint_Bs; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
 
     /*
      * footpoints at XXXkm above surface of ellipsoid.
      */
-    Lgm_Vector  ShellEllipsoidFootprint_Ps[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
-    double      ShellEllipsoidFootprint_Ss[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
-    double      ShellEllipsoidFootprint_Bs[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
+    Lgm_Vector  **ShellEllipsoidFootprint_Ps; // [MAX_PITCH_ANGLES][100]  north footprints of shell lines
+    double      **ShellEllipsoidFootprint_Ss; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
+    double      **ShellEllipsoidFootprint_Bs; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
 
-    Lgm_Vector  ShellEllipsoidFootprint_Pn[MAX_PITCH_ANGLES][100];    // north footprints of shell lines
-    double      ShellEllipsoidFootprint_Sn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
-    double      ShellEllipsoidFootprint_Bn[MAX_PITCH_ANGLES][100];    // north mirror locations (dist along FL)
-
-
-    Lgm_Vector  ShellMirror_Pn[MAX_PITCH_ANGLES][100];       // north mirror locations
-    double      ShellMirror_Sn[MAX_PITCH_ANGLES][100];       // north mirror locations (dist along FL)
-
-    Lgm_Vector  ShellMirror_Ps[MAX_PITCH_ANGLES][100];       // south mirror locations
-    double      ShellMirror_Ss[MAX_PITCH_ANGLES][100];       // south mirror locations (dist along FL)
+    Lgm_Vector  **ShellEllipsoidFootprint_Pn; // [MAX_PITCH_ANGLES][100]  north footprints of shell lines
+    double      **ShellEllipsoidFootprint_Sn; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
+    double      **ShellEllipsoidFootprint_Bn; // [MAX_PITCH_ANGLES][100]  north mirror locations (dist along FL)
 
 
-    double      ShellI[MAX_PITCH_ANGLES][100];               // Individual I values computed for each FL
+    Lgm_Vector  **ShellMirror_Pn; // [MAX_PITCH_ANGLES][100]   north mirror locations
+    double      **ShellMirror_Sn; // [MAX_PITCH_ANGLES][100]   north mirror locations (dist along FL)
+
+    Lgm_Vector  **ShellMirror_Ps; // [MAX_PITCH_ANGLES][100]   south mirror locations
+    double      **ShellMirror_Ss; // [MAX_PITCH_ANGLES][100]   south mirror locations (dist along FL)
+
+
+    double      **ShellI;         // [MAX_PITCH_ANGLES][100]   Individual I values computed for each FL
 
     /*
      * these are like the variables in the LstarInfo structure. Except they have an extra
      * dimension to hold pitch angle as well.
      */
-    int         nFieldPnts[MAX_PITCH_ANGLES][48];     
-    double      s_gsm[MAX_PITCH_ANGLES][48][1000];
-    double      Bmag[MAX_PITCH_ANGLES][48][1000];
-    double      x_gsm[MAX_PITCH_ANGLES][48][1000];
-    double      y_gsm[MAX_PITCH_ANGLES][48][1000];
-    double      z_gsm[MAX_PITCH_ANGLES][48][1000];
+    int         **nFieldPnts;   // [MAX_PITCH_ANGLES][48]     
+    double      ***s_gsm;       // [MAX_PITCH_ANGLES][48][1000]
+    double      ***Bmag;        // [MAX_PITCH_ANGLES][48][1000]
+    double      ***x_gsm;       // [MAX_PITCH_ANGLES][48][1000]
+    double      ***y_gsm;       // [MAX_PITCH_ANGLES][48][1000]
+    double      ***z_gsm;       // [MAX_PITCH_ANGLES][48][1000]
 
     double      Mcurr;
     double      Mref;
     double      Mused;
-    double      LHilton[MAX_PITCH_ANGLES];
-    double      LMcIlwain[MAX_PITCH_ANGLES];
-    double      Lstar[MAX_PITCH_ANGLES];
+    double      *LHilton;    // LHilton[MAX_PITCH_ANGLES]
+    double      *LMcIlwain;  // LMcIlwain[MAX_PITCH_ANGLES]
+    double      *Lstar;      // Lstar[MAX_PITCH_ANGLES]
 
 
 } Lgm_MagEphemInfo;
@@ -140,7 +140,7 @@ double Ek_to_mu_2( double Ek0, double Ek1, double alpha, double B );
 double  Ek_to_v( double Ek, int Species );
 //void ComputeFieldLineQuantities( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
 
-Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity );
+Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
 void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
 
 

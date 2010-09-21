@@ -2,8 +2,6 @@
 #include <Lgm_MagEphemInfo.h>
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
-
-
 /*
 main(){
 
@@ -486,24 +484,24 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
 
     } else {
 
-        fprintf( fp, " %12g", 0.0 ); 
-        fprintf( fp, " %12g", 0.0 ); 
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE ); 
+        fprintf( fp, " %12g", LGM_FILL_VALUE ); 
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
     }
 
@@ -536,24 +534,24 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
 
 
     } else {
-        fprintf( fp, " %12g", 0.0 ); 
-        fprintf( fp, " %12g", 0.0 ); 
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE ); 
+        fprintf( fp, " %12g", LGM_FILL_VALUE ); 
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
     }
 
@@ -570,14 +568,14 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
         fprintf( fp, " %12g", Bmin.z );  // Bmin_z_gsm
         fprintf( fp, " %12g", (Bmin_mag = Lgm_Magnitude( &Bmin )) );    // |B|
     } else {
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
-        fprintf( fp, " %12g", 0.0 );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
     }
 
     

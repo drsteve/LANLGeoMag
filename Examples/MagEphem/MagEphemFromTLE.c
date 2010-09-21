@@ -37,7 +37,7 @@ int main( int argc, char *argv[] ){
 
 double           Alpha[1000], a;
 int              nAlpha, Kp;
-Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0);
+Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 18);
 
 
 
