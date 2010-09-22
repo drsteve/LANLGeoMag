@@ -7,6 +7,7 @@
 #include <Lgm_CTrans.h>
 #include <Lgm_Sgp.h>
 #include <Lgm_MagEphemInfo.h>
+#include <Lgm_DynamicMemory.h>
 
 #define KP_DEFAULT 0
 
@@ -28,7 +29,7 @@ int main( int argc, char *argv[] ){
     Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
     Lgm_Vector      Ugsm, Uteme;
     Lgm_DateTime    UTC;
-    int             nTLEs;
+    int             nTLEs, nPitchAngles = 18;
     char            Line0[100], Line1[100], Line2[100], *ptr;
     char            *InputFile  = "input.txt";
     char            *OutputFile = "output.txt";
@@ -37,7 +38,7 @@ int main( int argc, char *argv[] ){
 
 double           Alpha[1000], a;
 int              nAlpha, Kp;
-Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 18);
+Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
 
 
 
@@ -52,6 +53,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 18);
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_edip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_igrf;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
@@ -183,9 +185,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 18);
 
         WriteMagEphemData( fp_MagEphem, MagEphemInfo );
 
-//        long int fd = open("test.dat", O_CREAT|O_WRONLY);
-//        write( fd, MagEphemInfo, sizeof(*MagEphemInfo) );
-//        close(fd);
+        WriteMagEphemInfoStruct( "test.dat", nPitchAngles, MagEphemInfo );
 
 
     }
@@ -201,3 +201,4 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 18);
 
     return(0);
 }
+

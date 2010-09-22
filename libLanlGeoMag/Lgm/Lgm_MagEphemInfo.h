@@ -3,6 +3,13 @@
 
 #include <Lgm/Lgm_MagModelInfo.h>
 #include <Lgm/Lgm_LstarInfo.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define MAX_PITCH_ANGLES 90
 
@@ -142,6 +149,9 @@ double  Ek_to_v( double Ek, int Species );
 
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
 void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
+
+void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
+void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
 
 
 #endif

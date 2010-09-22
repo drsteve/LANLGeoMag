@@ -19,6 +19,7 @@
 #endif
 
 #include "ViewDriftShell.h"
+#include <Lgm_DynamicMemory.h>
 
 
 /*
@@ -8013,13 +8014,19 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
 
 
 
-    MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(Lgm_MagEphemInfo));
 //    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20091026/20091026_002230_GOES_11_MagEphem.dat", O_RDONLY );
-    fd = open( "test.dat", O_RDONLY );
+//    fd = open( "test.dat", O_RDONLY );
+
 //    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20080722/20080722_185730_GOES_11_MagEphem_T89_Kp5.dat", O_RDONLY );
     //fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20090420/20090420_000230_VIRTUAL_MagEphem_T89_Kp5.dat", O_RDONLY );
 
-    read( fd, MagEphemInfo, sizeof( *MagEphemInfo ) );
+    int nPitchAngles;
+MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(*MagEphemInfo));
+ReadMagEphemInfoStruct( "test.dat", &nPitchAngles, MagEphemInfo );
+printf("nPitchAngles = %d\n", nPitchAngles);
+//exit(0);
+//    read( fd, &nPitchAngles, sizeof( nPitchAngles ) );
+//    read( fd, MagEphemInfo, sizeof( *MagEphemInfo ) );
 //KLUDGE
 //printf("nAlpha = %d\n", MagEphemInfo->nAlpha);
 //int iiii;
@@ -8028,7 +8035,7 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
 //}
 //MagEphemInfo->nAlpha = 9;
 //exit(0);
-    close( fd );
+//    close( fd );
 
 
     for (i=0; i<20; i++){
@@ -8095,4 +8102,3 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
 
 
 }
-

@@ -149,7 +149,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                         printf("\t%sUTC, L*_McIlwain = %g %g%s\n", PreStr, UTC, LstarInfo2->LS_McIlwain_M, PostStr );
                         printf("\t%sUTC, LSimple     = %g %g%s\n\n\n", PreStr, UTC, LSimple, PostStr );
                     }
-                    MagEphemInfo->Lstar[i] = LstarInfo2->LS;
+                    MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
                     MagEphemInfo->I[i] = LstarInfo2->I[i];
 
                     printf("%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );

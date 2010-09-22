@@ -38,7 +38,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
      */
     fprintf( fp, "# Spacecraft:  %s\n", Spacecraft );
     fprintf( fp, "# Field Model:  %s\n", MagModel );
-    fprintf( fp, "# nAlpha:  %d; ", m->nAlpha ); for (i=0; i<m->nAlpha; i++) fprintf(fp, " %g", m->Alpha[i]); fprintf( fp, ";   Units: Degrees\n");
+    fprintf( fp, "# nAlpha:  %d; Alphas: ", m->nAlpha ); for (i=0; i<m->nAlpha; i++) fprintf(fp, " %g", m->Alpha[i]); fprintf( fp, ";   Units: Degrees\n");
     fprintf( fp, "#\n");
     fprintf( fp, "# File Contents    :  Magnetic Empherii for spacecraft trajectory.\n");
     fprintf( fp, "# File Created at  :  %02d:%02d:%02d UTC  %s %02d %4d\n", HH, MM, SS, sMonth[Month], Day, Year );
@@ -103,6 +103,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, "#    Foot_N_GeodLon:  Geodetic Longitude of Northern Magnetic Footpoint. (Degrees).\n");
     fprintf( fp, "# Foot_N_GeodHeight:  Geodetic Height of Northern Magnetic Footpoint. (km).\n");
     fprintf( fp, "#\n");
+    fprintf( fp, "#         Bfn_geo_x:  X-component of magnetic field vector at Northern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#         Bfn_geo_y:  y-component of magnetic field vector at Northern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#         Bfn_geo_z:  z-component of magnetic field vector at Northern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#           Bfn_geo:  Magnitude of magnetic field vector at Northern Footpoint. In units of nT.\n");
+    fprintf( fp, "#\n");
     fprintf( fp, "#             Bfn_x:  X-component of magnetic field vector at Northern Footpoint (in GSM coords). In units of nT.\n");
     fprintf( fp, "#             Bfn_y:  y-component of magnetic field vector at Northern Footpoint (in GSM coords). In units of nT.\n");
     fprintf( fp, "#             Bfn_z:  z-component of magnetic field vector at Northern Footpoint (in GSM coords). In units of nT.\n");
@@ -122,6 +127,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, "#    Foot_S_GeodLon:  Geodetic Longitude of Southern Magnetic Footpoint. (Degrees).\n");
     fprintf( fp, "# Foot_S_GeodHeight:  Geodetic Height of Southern Magnetic Footpoint. (km).\n");
     fprintf( fp, "#\n");
+    fprintf( fp, "#         Bfs_geo_x:  X-component of magnetic field vector at Southern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#         Bfs_geo_y:  y-component of magnetic field vector at Southern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#         Bfs_geo_z:  z-component of magnetic field vector at Southern Footpoint (in GEO coords). In units of nT.\n");
+    fprintf( fp, "#           Bfn_geo:  Magnitude of magnetic field vector at Southern Footpoint. In units of nT.\n");
+    fprintf( fp, "#\n");
     fprintf( fp, "#             Bfs_x:  X-component of magnetic field vector at Southern Footpoint (in GSM coords). In units of nT.\n");
     fprintf( fp, "#             Bfs_y:  y-component of magnetic field vector at Southern Footpoint (in GSM coords). In units of nT.\n");
     fprintf( fp, "#             Bfs_z:  z-component of magnetic field vector at Southern Footpoint (in GSM coords). In units of nT.\n");
@@ -139,22 +149,25 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, "#              Bmin:  Magnitude of magnetic field vector at Pmin. In units of nT.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#            M_used:  The magnetic dipole moment that was used to convert\n");
-    fprintf( fp, "#                     magnetic flux to l*. in units of nt.\n");
+    fprintf( fp, "#                     magnetic flux to L*. In units of nT.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#             M_ref:  T fixed reference magnetic dipole moment for converting\n");
-    fprintf( fp, "#                     magnetic flux to l*. in units of nt.\n");
+    fprintf( fp, "#                     magnetic flux to L*. In units of nT.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#            M_igrf:  Time-dependant magnetic dipole moment (probably shouldn't\n");
-    fprintf( fp, "#                     be used for converting magnetic flux to l*, but it\n");
-    fprintf( fp, "#                     sometimes is). in units of nt.\n");
+    fprintf( fp, "#                     be used for converting magnetic flux to L*, but it\n");
+    fprintf( fp, "#                     sometimes is). In units of nT.\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#    L*0-(nAlpha-1):  The nAlpha l* values obtained. l* values are dimensionless quantities.\n");
+    fprintf( fp, "#    L*0-(nAlpha-1):  The nAlpha L* values obtained. L* values are dimensionless quantities.\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#     L0-(nAlpha-1):  The nAlpha mcilwain l values obtained. l values are dimensionless quantities.\n");
+    fprintf( fp, "#     L0-(nAlpha-1):  The nAlpha mcilwain L values obtained. L values are dimensionless quantities.\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#    Bm0-(nAlpha-1):  The nAlpha bmirror values computed. in units of nt.\n");
+    fprintf( fp, "#    Bm0-(nAlpha-1):  The nAlpha bmirror values computed. In units of nT.\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#     I0-(nAlpha-1):  The nAlpha integral invariant values computed.  in units of re.\n");
+    fprintf( fp, "#     I0-(nAlpha-1):  The nAlpha integral invariant values computed.  In units of Re.\n");
+    fprintf( fp, "#\n");
+    fprintf( fp, "# Fill Value: %g\n", LGM_FILL_VALUE );
+    fprintf( fp, "#\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#\n");
 
@@ -170,12 +183,14 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %38s",  " +---- North Mag. Footpoint GSM -----+" );
     fprintf( fp, " %38s",  " +- North Mag. Footpoint Geographic -+" );
     fprintf( fp, " %38s",  " +-- North Mag. Footpoint Geodetic --+" );
-    fprintf( fp, " %51s",  " +---- Magnetic Field at North Mag. Footpoint ----+" );
+    fprintf( fp, " %51s",  " +---- Mag. Field at North Mag. Footpoint GEO ----+" );
+    fprintf( fp, " %51s",  " +---- Mag. Field at North Mag. Footpoint GSM ----+" );
     fprintf( fp, " %12s",  " +-N.L.Cone-+" );
     fprintf( fp, " %38s",  " +---- South Mag. Footpoint GSM -----+" );
     fprintf( fp, " %38s",  " +- South Mag. Footpoint Geographic -+" );
     fprintf( fp, " %38s",  " +-- South Mag. Footpoint Geodetic --+" );
-    fprintf( fp, " %51s",  " +---- Magnetic Field at South Mag. Footpoint ----+" );
+    fprintf( fp, " %51s",  " +---- Mag. Field at South Mag. Footpoint GEO ----+" );
+    fprintf( fp, " %51s",  " +---- Mag. Field at South Mag. Footpoint GSM ----+" );
     fprintf( fp, " %12s",  " +-S.L.Cone-+" );
     fprintf( fp, " %38s",  " +----- Minimum |B| Point GSM -------+" );
     fprintf( fp, " %51s",  " +---- Magnetic Field at Minimum |B| Pointint ----+" );
@@ -230,6 +245,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "GeodLon" );
     fprintf( fp, " %12s", "GeodHeight" );
 
+    fprintf( fp, " %12s", "Bfn_geo_x" ); // Bfn  geo
+    fprintf( fp, " %12s", "Bfn_geo_y" );
+    fprintf( fp, " %12s", "Bfn_geo_z" );
+    fprintf( fp, " %12s", "Bfn_geo" );
+
     fprintf( fp, " %12s", "Bfn_x" ); // Bfn  gsm
     fprintf( fp, " %12s", "Bfn_y" );
     fprintf( fp, " %12s", "Bfn_z" );
@@ -248,6 +268,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "GeodLat" );
     fprintf( fp, " %12s", "GeodLon" );
     fprintf( fp, " %12s", "GeodHeight" );
+
+    fprintf( fp, " %12s", "Bfs_geo_x" ); // Bfs  geo
+    fprintf( fp, " %12s", "Bfs_geo_y" );
+    fprintf( fp, " %12s", "Bfs_geo_z" );
+    fprintf( fp, " %12s", "Bfs_geo" );
 
     fprintf( fp, " %12s", "Bfs_x" ); // Bfs  gsm
     fprintf( fp, " %12s", "Bfs_y" );
@@ -324,7 +349,12 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "Deg." );
     fprintf( fp, " %12s", "km" );
 
-    fprintf( fp, " %12s", "nT" );   // Bfn
+    fprintf( fp, " %12s", "nT" );   // Bfn geo
+    fprintf( fp, " %12s", "nT" );
+    fprintf( fp, " %12s", "nT" );
+    fprintf( fp, " %12s", "nT" );
+
+    fprintf( fp, " %12s", "nT" );   // Bfn gsm
     fprintf( fp, " %12s", "nT" );
     fprintf( fp, " %12s", "nT" );
     fprintf( fp, " %12s", "nT" );
@@ -343,7 +373,12 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "Deg." );
     fprintf( fp, " %12s", "km" );
 
-    fprintf( fp, " %12s", "nT" );   // Bfs
+    fprintf( fp, " %12s", "nT" );   // Bfs geo
+    fprintf( fp, " %12s", "nT" );
+    fprintf( fp, " %12s", "nT" );
+    fprintf( fp, " %12s", "nT" );
+
+    fprintf( fp, " %12s", "nT" );   // Bfs gsm
     fprintf( fp, " %12s", "nT" );
     fprintf( fp, " %12s", "nT" );
     fprintf( fp, " %12s", "nT" );
@@ -386,7 +421,7 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
     double          Bsc_mag, Bfn_mag, Bfs_mag, Bmin_mag, Alpha_Loss_Cone_n, Alpha_Loss_Cone_s;
     Lgm_DateTime    DT_UTC;
     Lgm_CTrans      *c = Lgm_init_ctrans(0);
-    Lgm_Vector      v, Bsc, Bfn, Bfs, Bmin;
+    Lgm_Vector      v, Bsc, Bfn, Bfn_geo, Bfs, Bfs_geo, Bmin;
 
     Lgm_Set_Coord_Transforms( m->Date, m->UTC, c );
     Lgm_Make_UTC( m->Date, m->UTC, &DT_UTC, c );
@@ -473,6 +508,12 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
         fprintf( fp, " %12g", GeodHeight );             // Geod Height
 
         m->LstarInfo->mInfo->Bfield( &m->Ellipsoid_Footprint_Pn, &Bfn, m->LstarInfo->mInfo );
+        Lgm_Convert_Coords( &Bfn, &Bfn_geo, GSM_TO_WGS84, c );
+        fprintf( fp, " %12g", Bfn_geo.x );                                  // Bfn_x_geo
+        fprintf( fp, " %12g", Bfn_geo.y );                                  // Bfn_y_geo
+        fprintf( fp, " %12g", Bfn_geo.z );                                  // Bfn_z_geo
+        fprintf( fp, " %12g", (Bfn_mag = Lgm_Magnitude( &Bfn_geo )) );      // |B|
+
         fprintf( fp, " %12g", Bfn.x );                                  // Bfn_x_gsm
         fprintf( fp, " %12g", Bfn.y );                                  // Bfn_y_gsm
         fprintf( fp, " %12g", Bfn.z );                                  // Bfn_z_gsm
@@ -524,10 +565,16 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
         fprintf( fp, " %12g", GeodHeight );             // Geod Height
 
         m->LstarInfo->mInfo->Bfield( &m->Ellipsoid_Footprint_Ps, &Bfs, m->LstarInfo->mInfo );
+        Lgm_Convert_Coords( &Bfs, &Bfs_geo, GSM_TO_WGS84, c );
+        fprintf( fp, " %12g", Bfs_geo.x );                                  // Bfs_x_geo
+        fprintf( fp, " %12g", Bfs_geo.y );                                  // Bfs_y_geo
+        fprintf( fp, " %12g", Bfs_geo.z );                                  // Bfs_z_geo
+        fprintf( fp, " %12g", (Bfs_mag = Lgm_Magnitude( &Bfs_geo )) );      // |B|
+
         fprintf( fp, " %12g", Bfs.x );                                  // Bfs_x_gsm
         fprintf( fp, " %12g", Bfs.y );                                  // Bfs_y_gsm
         fprintf( fp, " %12g", Bfs.z );                                  // Bfs_z_gsm
-        fprintf( fp, " %12g", (Bfs_mag = Lgm_Magnitude( &Bfs )) );                  // |B|
+        fprintf( fp, " %12g", (Bfs_mag = Lgm_Magnitude( &Bfs )) );      // |B|
 
         Alpha_Loss_Cone_s = asin( sqrt( Bsc_mag/Bfs_mag ) )*DegPerRad;
         fprintf( fp, " %12g", Alpha_Loss_Cone_s );                      // Southern Loss Cone Angle
