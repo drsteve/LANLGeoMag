@@ -1,3 +1,11 @@
+2010-09-22  Mark Galassi  <markgalassi@lanl.gov>
+
+	* Makefile.am (EXTRA_DIST),
+	libLanlGeoMag/Makefile.am (EXTRA_DIST): now I add the files
+	individually instead of putting whole directories.  The problem
+	with whole directories is that the .svn directories also got put
+	there, which is not good.
+
 2010-08-12  Mark Galassi  <markgalassi@lanl.gov>
 
 	* libLanlGeoMag/dox: removed this directory from source control

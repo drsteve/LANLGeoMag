@@ -27,7 +27,15 @@ libLanlGeoMag_la_SOURCES =  AlphaOfK.c B_FromScatteredData.c ComputeLstar.c Drif
                             TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c
 
-EXTRA_DIST = EopData
+EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
+	EopData/finals.daily EopData/finals2000A.all EopData/finals.all \
+	EopData/finals2000A.daily EopData/tai-utc.dat \
+	EopData/eopc04_IAU2000.62-now EopData/GetEopFiles.in \
+	EopData/Lgm_LeapSecondDates.dat
+
+#EXTRA_DIST = EopData
+EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list
+
 
 
 
