@@ -15,9 +15,6 @@ else
     CRONDIR = /etc/periodic/daily
 endif
 
-
-
-
 lib_LTLIBRARIES          = libLanlGeoMag.la
 libLanlGeoMag_la_SOURCES =  AlphaOfK.c B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \
 	                        Lgm_B_internal.c Lgm_CTrans.c Lgm_DateAndTime.c Lgm_Eop.c Lgm_IGRF.c Lgm_InitMagInfo.c \
@@ -26,6 +23,8 @@ libLanlGeoMag_la_SOURCES =  AlphaOfK.c B_FromScatteredData.c ComputeLstar.c Drif
                             Lgm_QuadPack.c quicksort.c SbIntegral.c T87.c T89.c TraceLine.c TraceToMinBSurf.c  \
                             TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c
+
+include_HEADERS = DynamicMemory.h
 
 EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/finals.daily EopData/finals2000A.all EopData/finals.all \
