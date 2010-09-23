@@ -1,10 +1,7 @@
 #ifndef VIEWDRIFTSHELL_H
 #define VIEWDRIFTSHELL_H
 
-#include <GL/glew.h>
-//#include <GL/glut.h>
 #include "support.h"
-//#include "MagEphemInfo.h"
 #include <Lgm/Lgm_MagEphemInfo.h>
 #include "PsdAssim.h"
 #include <Lgm/Lgm_Quat.h>
