@@ -53,10 +53,10 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_edip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_igrf;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0 ) ? Kp : KP_DEFAULT;
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
 
