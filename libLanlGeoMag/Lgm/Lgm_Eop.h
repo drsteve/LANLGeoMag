@@ -75,3 +75,8 @@ void    Lgm_unset_eop( Lgm_EopOne *eop, Lgm_CTrans *c );
 
 
 #endif
+
+/*
+ *    $Id$
+ */
+

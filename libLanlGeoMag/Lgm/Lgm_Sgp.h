@@ -278,3 +278,8 @@ void LgmSgp_dsinit( int whichconst, double cosim, double emsq, double argpo,
 double LgmSgp_gstime( double jdut1 );
 
 #endif
+
+/*
+ *    $Id$
+ */
+

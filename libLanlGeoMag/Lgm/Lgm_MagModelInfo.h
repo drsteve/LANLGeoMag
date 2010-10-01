@@ -469,6 +469,8 @@ void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
 
 
 #endif
+
+
 /*
  *  $Id$
  */

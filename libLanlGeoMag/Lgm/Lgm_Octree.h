@@ -93,3 +93,9 @@ Lgm_OctreeCell  *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectDat
     
 
 #endif
+
+/*
+ *    $Id$
+ */
+
+

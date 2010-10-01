@@ -56,3 +56,8 @@ double      Lgm_TDB_to_UTC( double JD, double TDB, Lgm_LeapSeconds *l );
 
 
 #endif
+
+/*
+ *    $Id$
+ */
+

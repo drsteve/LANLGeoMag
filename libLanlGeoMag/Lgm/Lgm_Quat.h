@@ -32,3 +32,8 @@ void    Lgm_QuatCombineQuats( double Q1[4], double Q2[4], double Q[4] );
 
 
 #endif
+
+/*
+ *    $Id$
+ */
+

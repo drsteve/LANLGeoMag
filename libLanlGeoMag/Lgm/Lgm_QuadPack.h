@@ -54,3 +54,9 @@ int dqpsrt(int limit, int last, int *maxerr, double *ermax, double elist[],
 	int iord[], int *nrmax);
 
 #endif 
+
+
+/*
+ *    $Id$
+ */
+

@@ -853,6 +853,7 @@ void   Lgm_InitS( double S[13][13], int N );
 
 
 #endif
+
 /*
  *  $Id$
  */

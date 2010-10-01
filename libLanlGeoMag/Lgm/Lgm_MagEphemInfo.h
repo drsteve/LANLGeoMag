@@ -155,3 +155,8 @@ void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo
 
 
 #endif
+
+/*
+ *    $Id$
+ */
+

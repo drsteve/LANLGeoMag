@@ -679,3 +679,8 @@ static float IGRF_h[23][13][13] = {
 
 
 #endif
+
+/*
+ *    $Id$
+ */
+
