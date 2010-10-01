@@ -62,6 +62,8 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     return(1);
 
 }
+
+
 /*
- *   $id$
+ *   $Id$
  */

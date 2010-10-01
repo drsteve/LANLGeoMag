@@ -3030,5 +3030,5 @@ void    DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY,
 
 
 /*
- *   $id$
+ *   $Id$
  */

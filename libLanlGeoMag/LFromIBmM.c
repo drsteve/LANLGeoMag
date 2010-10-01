@@ -224,3 +224,7 @@ double	IFromLBmM_McIlwain( double L, double Bm, double M ) {
 }
 
 
+/*
+ *     $Id$
+ */
+

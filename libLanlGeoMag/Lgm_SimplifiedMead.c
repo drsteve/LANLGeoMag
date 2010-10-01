@@ -122,3 +122,10 @@ int Lgm_SimplifiedMead(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info) {
 
 
 }
+
+
+
+/*
+ *   $Id$
+ */
+

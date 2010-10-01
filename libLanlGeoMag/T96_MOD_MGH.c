@@ -45,6 +45,7 @@ int Lgm_B_T96MOD_MGH( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo ) 
     return(1);
 
 }
+
 /*
- *   $id$
+ *   $Id$
  */

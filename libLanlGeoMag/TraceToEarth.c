@@ -225,5 +225,5 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, doubl
 }
 
 /*
- *   $id$
+ *   $Id$
  */

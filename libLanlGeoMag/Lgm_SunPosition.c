@@ -149,3 +149,10 @@ void Lgm_SunPosition( double T, double *l, double *r, double *b ) {
 
 }
 
+
+
+
+/*
+ *   $Id$
+ */
+

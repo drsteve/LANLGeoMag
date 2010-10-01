@@ -229,6 +229,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 
 }
 
+
 /*
- *   $id$
+ *   $Id$
  */

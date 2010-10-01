@@ -384,3 +384,10 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
 
 
 }
+
+
+
+/*
+ *   $Id$
+ */
+

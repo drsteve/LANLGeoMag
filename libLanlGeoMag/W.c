@@ -50,6 +50,8 @@ void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], in
 
 
 }
+
+
 /*
- *   $id$
+ *   $Id$
  */

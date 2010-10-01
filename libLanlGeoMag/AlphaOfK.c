@@ -193,3 +193,7 @@ double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
 
 
 }
+
+/*
+ *    $Id$
+ */

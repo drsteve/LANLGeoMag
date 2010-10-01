@@ -558,3 +558,7 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
 
+/*
+ *    $Id$
+ */
+

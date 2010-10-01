@@ -333,3 +333,9 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
 
 
 }
+
+
+/*
+ *   $Id$
+ */
+

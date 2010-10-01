@@ -1370,3 +1370,7 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 }
 
+/*
+ *   $Id$ 
+ */
+

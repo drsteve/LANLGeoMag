@@ -434,3 +434,8 @@ int Lgm_ReadNgaEopp( Lgm_NgaEopp *e, int Verbosity ) {
     return(1);
 
 }
+
+/*
+ *   $Id$
+ */
+

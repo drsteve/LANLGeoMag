@@ -327,5 +327,5 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 }
 
 /*
- *   $id$
+ *   $Id$
  */

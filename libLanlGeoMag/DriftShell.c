@@ -455,3 +455,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 
     
+/*
+ *    $Id$
+ */
+

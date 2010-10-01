@@ -48,6 +48,7 @@ int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *m ) {
     return(1);
 
 }
+
 /*
- *   $id$
+ *   $Id$
  */

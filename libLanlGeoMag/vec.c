@@ -97,6 +97,7 @@ void Lgm_MatTimeMat( double A[3][3], double B[3][3], double Result[3][3] ) {
 
 }
 
+
 /*
- *   $id$
+ *   $Id$
  */

@@ -200,6 +200,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
 
 }
 
+
 /*
- *   $id$
+ *   $Id$
  */

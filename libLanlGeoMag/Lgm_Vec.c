@@ -163,5 +163,5 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
 }
 
 /*
- *   $id$
+ *   $Id$
  */

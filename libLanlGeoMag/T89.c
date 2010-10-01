@@ -477,5 +477,5 @@ int Lgm_B_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
 
 /*
- *   $id$
+ *   $Id$
  */

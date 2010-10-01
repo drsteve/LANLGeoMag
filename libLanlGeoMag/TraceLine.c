@@ -963,5 +963,5 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 
 
 /*
- *   $id$
+ *   $Id$
  */

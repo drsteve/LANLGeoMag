@@ -356,6 +356,8 @@ int Lgm_B_T87( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     return(1);
 
 }
+
+
 /*
  *   $Id$
  */

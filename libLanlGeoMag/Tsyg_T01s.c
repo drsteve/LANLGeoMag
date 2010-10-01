@@ -3080,3 +3080,9 @@ void    T01S_DIPOLE( double PS, double X, double Y, double Z, double *BX, double
     return;
 
 }
+
+
+/*
+ *   $Id$
+ */
+

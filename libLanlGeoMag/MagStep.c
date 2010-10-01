@@ -1,6 +1,6 @@
 /* Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
- * 	Routines to perform Bulirsch-Stoer step.
+ *     Routines to perform Bulirsch-Stoer step.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -15,11 +15,11 @@
 
 
 void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn, 
-	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ) {
+         int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ) {
 
-    int		    m;
-    double	    h2, h;
-    Lgm_Vector	z0, z1, z2, B;
+    int            m;
+    double        h2, h;
+    Lgm_Vector    z0, z1, z2, B;
 
 
     /*
@@ -53,8 +53,8 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
         z2.x = z0.x + h2*B.x; 
         z2.y = z0.y + h2*B.y; 
         z2.z = z0.z + h2*B.z;
-	z0 = z1;
-	z1 = z2;
+        z0 = z1;
+        z1 = z2;
 
     }
 
@@ -84,9 +84,9 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
 // NOT thread safe?
 void Lgm_RatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vector *dw, Lgm_MagModelInfo *Info ) {
 
-    int 	        i, j;
-    double 	        yy, v, ddy=0.0, c, b1, b, fx[LGM_MAGSTEP_JMAX];
-    double	        y_k[3], y[3], dy[3];
+    int             i, j;
+    double             yy, v, ddy=0.0, c, b1, b, fx[LGM_MAGSTEP_JMAX];
+    double            y_k[3], y[3], dy[3];
 //    static double   d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX], x[LGM_MAGSTEP_JMAX];
 
     /*
@@ -96,29 +96,29 @@ void Lgm_RatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
 
     Info->Lgm_MagStep_x[k] = x_k;
     if (k == 0) {
-	for (i=0; i<3; ++i) y[i] = dy[i] = Info->Lgm_MagStep_d[i][0] = y_k[i];
+        for (i=0; i<3; ++i) y[i] = dy[i] = Info->Lgm_MagStep_d[i][0] = y_k[i];
     } else {
-	for (j=0; j<k; ++j) fx[j+1] = Info->Lgm_MagStep_x[k-j-1] / x_k;
-	for (i=0; i<3; ++i) {
-	    v = Info->Lgm_MagStep_d[i][0];
-	    c = yy = Info->Lgm_MagStep_d[i][0] = y_k[i];
-	    for (j=1; j<=k; ++j) {
-		b1 = fx[j] * v;
-		b  = b1 - c;
-		if (b != 0.0) {
-		    b    = (c - v)/b;
-		    ddy  = c * b;
-		    c    = b1 * b;
-		} else{
-		    ddy = v;
-		}
-		if (j != k) v = Info->Lgm_MagStep_d[i][j];
-		Info->Lgm_MagStep_d[i][j]  = ddy;
-		yy      += ddy;
-	    }
-	    dy[i] = ddy;
-	    y[i]  = yy;
-	}
+        for (j=0; j<k; ++j) fx[j+1] = Info->Lgm_MagStep_x[k-j-1] / x_k;
+        for (i=0; i<3; ++i) {
+            v = Info->Lgm_MagStep_d[i][0];
+            c = yy = Info->Lgm_MagStep_d[i][0] = y_k[i];
+            for (j=1; j<=k; ++j) {
+            b1 = fx[j] * v;
+            b  = b1 - c;
+            if (b != 0.0) {
+                b    = (c - v)/b;
+                ddy  = c * b;
+                c    = b1 * b;
+            } else{
+                ddy = v;
+            }
+            if (j != k) v = Info->Lgm_MagStep_d[i][j];
+            Info->Lgm_MagStep_d[i][j]  = ddy;
+            yy      += ddy;
+            }
+            dy[i] = ddy;
+            y[i]  = yy;
+        }
     }
 
     /*
@@ -155,17 +155,17 @@ void Lgm_RatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
  */
 // NOT thread safe?
 int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale, 
-	      double Htry, double *Hdid, double *Hnext, 
-	      double eps, double sgn, double *s, int *reset,
-	      int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
+          double Htry, double *Hdid, double *Hnext, 
+          double eps, double sgn, double *s, int *reset,
+          int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
 
-    Lgm_Vector	    u_save, v, uerr, e;
-    int		        q, k, kk, km=0, n;
-    int		        reduction, done;
-    double	        h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1];
-    double	        eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
-//static int	    Info->Lgm_MagStep_FirstTimeThrough=TRUE, Info->Lgm_MagStep_kmax, Info->Lgm_MagStep_kopt;
+    Lgm_Vector        u_save, v, uerr, e;
+    int                q, k, kk, km=0, n;
+    int                reduction, done;
+    double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1];
+    double            eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
+//static int        Info->Lgm_MagStep_FirstTimeThrough=TRUE, Info->Lgm_MagStep_kmax, Info->Lgm_MagStep_kopt;
 //static double   Info->Lgm_MagStep_eps_old=-1.0, Info->Lgm_MagStep_snew;
 //static double   A[JMAX+1], Info->Lgm_MagStep_alpha[IMAX+1][IMAX+1];
     /*
@@ -173,7 +173,7 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
      *  really essential to speed things up (on some test runsa, its almost a factor of
      *  (2 slower without it!).
      */
-    static int 	Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
+    static int     Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
 
 
 
@@ -217,10 +217,10 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     H = Htry;
     u_save = *u;
     if ( (*s != Info->Lgm_MagStep_snew) || (H != *Hnext) || ( *reset ) ) {
-	    Info->Lgm_MagStep_snew = 0.0;
+        Info->Lgm_MagStep_snew = 0.0;
         *s   = 0.0;
-	    Info->Lgm_MagStep_kopt = Info->Lgm_MagStep_kmax;
-	    Info->Lgm_MagStep_FirstTimeThrough = TRUE;
+        Info->Lgm_MagStep_kopt = Info->Lgm_MagStep_kmax;
+        Info->Lgm_MagStep_FirstTimeThrough = TRUE;
     }
     reduction = FALSE;
     done      = FALSE;
@@ -237,8 +237,8 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
                 fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
                 Info->Lgm_MagStep_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_eps_old = -1.0;
-printf("HOW DID I GET HERE?\n");
-exit(0);
+printf("HOW DID I GET HERE? P = \n");
+//exit(0);
                 return(-1);
             }
 
@@ -291,10 +291,10 @@ exit(0);
 
                 }
 
-	        }
+            }
 
 
-	    }
+        }
 
         if (!done) {
             red = (red < LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;

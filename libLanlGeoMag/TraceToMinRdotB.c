@@ -143,6 +143,7 @@ printf("B: Sa, Sb, P = %g %g    (%g, %g, %g)   Htry = %f\n", Sa, Sb, P.x, P.y, P
 
 }
 
+
 /*
- *   $id$
+ *   $Id$
  */

@@ -196,3 +196,9 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 }
 
+
+/*
+ *   $Id$
+ */
+
+
