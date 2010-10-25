@@ -35,7 +35,7 @@ int Lgm_LeapYear(int year) {
  * Leap seconds are added when necessary. First preference is given to
  * opportunities at the end of December and the end of June. However, secondary
  * preference is also given to opportunities at the end of March and September
- * if needed. Since leap seconds were introduced in 1972, only dates in
+ * if needed. Since leap seconds were introduced in 1972, so far only dates in
  * December and June have been used to include leap seconds.
  *
  *
@@ -135,7 +135,7 @@ int Lgm_IsLeapSecondDay( long int Date, double *SecondsInDay, Lgm_CTrans *c ) {
                 if ( (l->LeapSeconds[i] - l->LeapSeconds[i-1]) > 0.0) {
                     *SecondsInDay = 86401.0;
                 } else {
-                    *SecondsInDay = 86399.0; // implies leap second deleted has never happened yet.
+                    *SecondsInDay = 86399.0; // implies leap second deleted (this has never happened yet).
                 }
             }
             return(1); 
@@ -150,7 +150,7 @@ int Lgm_IsLeapSecondDay( long int Date, double *SecondsInDay, Lgm_CTrans *c ) {
 
 /*
  * Reads in the file containing leap second info and packs the results into a
- * Lgm_LeapSeconds Structure.
+ * Lgm_LeapSeconds Structure contained in the Lgm_CTrans structure.
  */
 int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
 
@@ -334,7 +334,7 @@ void Lgm_GPS_to_UTC( Lgm_DateTime *GPS, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
 /*
  * GpsSeconds Routines
- * ----------------
+ * -------------------
  * Routines to compute number of SI seconds since 0h Jan 6, 1980 Some refer to
  * this as "GPS Time" but this is not a standard definition. (E.g., GPS Time is
  * often measured in whole weeks since 0h Jan 6, 1980 plus seconds into the
@@ -379,7 +379,7 @@ double Lgm_UTC_to_GpsSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
 /*
  * TaiSeconds Routines
- * ----------------
+ * -------------------
  * Routines to compute number of SI seconds since 0h Jan 1, 1958. Some refer to
  * this as "TAI", but this (IMO) is a distortion of what TAI means. TAI is
  * really defined in terms of how many seconds it differs from UTC. But some
@@ -807,6 +807,9 @@ void Lgm_UTC_to_TT( Lgm_DateTime *UTC, Lgm_DateTime *TT, Lgm_CTrans *c ) {
     return;
 }
 
+
+
+
 void Lgm_TT_to_UTC( Lgm_DateTime *TT, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
     Lgm_DateTime TAI;
@@ -936,6 +939,8 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     return( 1 ); // eventually return FALSE if invalid date.
 
 }
+
+
 
 /*
  * This routine prints out time in different ways.
