@@ -1,20 +1,52 @@
 #include <EXTERN.h>
 #include <perl.h>
-#define ISO_YYYYMMDDTHHMMSS 1
-#define ISO_YYYYWwwDTHHMMSS 2
-#define ISO_YYYYMMDDTHHMM   3
-#define ISO_YYYYWwwDTHHMM   4
-#define ISO_YYYYMMDD        5
-#define ISO_YYYYWwwD        6
-#define ISO_YYYYMM          7
-#define ISO_YYYYWww         8
+
+/*
+ *  Dates based on Months and Days
+ */
+#define ISO_YYYYMMDDTHHMMSS 1       // 4-digit years
+#define ISO_YYMMDDTHHMMSS   2       // 2-digit years
+#define ISO_YYYYDDDTHHMMSS  3       // 4-digit years
+#define ISO_YYDDDTHHMMSS    4       // 2-digit years
+
+#define ISO_YYYYWwwDTHHMMSS 5       // 4-digit years
+#define ISO_YYWwwDTHHMMSS   6       // 2-digit years
+
+#define ISO_YYYYMMDDTHHMM   7       // 4-digit years
+#define ISO_YYMMDDTHHMM     8       // 2-digit years
+
+#define ISO_YYYYWwwDTHHMM   9       // 4-digit years
+#define ISO_YYWwwDTHHMM     10      // 2-digit years
+
+
+#define ISO_YYYYMMDD        11      // 4-digit years (assumes UTC == 0)
+#define ISO_YYMMDD          12      // 2-digit years (assumes UTC == 0)
+#define ISO_YYYYDDD         13      // 4-digit years (assumes UTC == 0)
+#define ISO_YYDDD           14      // 2-digit years (assumes UTC == 0)
+
+#define ISO_YYYYWwwD        15      // 4-digit years (assumes UTC == 0)
+#define ISO_YYWwwD          16      // 2-digit years (assumes UTC == 0)
+
+#define ISO_YYYYMM          17      // 4-digit years (YYYY-MM only YYYYMM not allowed) (assumes UTC == 0)
+#define ISO_YYMM            18      // 2-digit years (is this allowed?) (assumes UTC == 0)
+
+#define ISO_YYYYWww         19      // 4-digit years (assumes UTC == 0)
+#define ISO_YYWww           20      // 2-digit years (assumes UTC == 0)
+
+#define ISO_YYYY            21      // 4-digit year 
+#define ISO_YY              22      // 2-digit year 
+
+/*
+ *  Dates based on DOY (i.e. ordinal dates)
+ */
+
 
 static PerlInterpreter *my_perl;
 
 ParseTimeString( char *TimeString ) {
 
-    int     Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek;
-    int     ISOFormat;
+    int     Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
+    int     ISOFormat, TZDError;
     double  Seconds;
     STRLEN  n_a;
     char    *embedding[] = { "", "-e", "0" };
@@ -67,93 +99,525 @@ ParseTimeString( char *TimeString ) {
      * can also have separate date and time formats and we recognize both E.g.,
      * 2009-06-21T05:12:34.01Z versus 2009-06-21 05:12:34.01Z
      */
-    sprintf( Str, " $str = '%s';\n\
-                    $str =~ m/^\\s*(\\S*\\s*\\S*)\\s*$/; $str = $1; # Strip leading and trailing whitespace\n\
-                    $str =~ s/\\s{2,}/ /g; # Compress out extraneous whitespace\n\
-                    print \"str = $str\\n\";\n\
-                    my $ISOFormat = 0; my $Year = -9999; my $Month = -9999; my $Day = -9999; my $Hour = -9999; my $Minute = -9999; my $Second = -9999; my $TZD = -9999;\n\
-                    if ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-]\\d{2}:?\\d{2}|Z)/ ) { #  YYYY[-]MM[-]DDThh[:]mm[:]ss[.ssssss](TZD or Z)\n\
-                        $Year = $1; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 1;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-]\\d{2}:?\\d{2}|Z)/ ) { #  YYYY[-]Www[-]DThh[:]mm[:]ss[.ssssss](TZD or Z)\n\
-                        $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 2;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2})([+-]\\d{2}:?\\d{2}|Z)$/ ) { #  YYYY[-]MM[-]DDThh[:]mm(TZD or Z)\n\
-                        $Year = $1; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $TZD = $6; $ISOFormat = 3;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-]\\d{2}:?\\d{2}|Z)$/ ) { #  YYYY[-]Www[-]DThh[:]mm(TZD or Z)\n\
-                        $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $TZD = $6; $ISOFormat = 4;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})$/ ) { # YYYY[-]MM[-]DD\n\
-                        $Year = $1; $Month = $2; $Day = $3;  $ISOFormat = 5;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})$/ ) { # YYYY[-]Www[-]D\n\
-                        $Year = $1; $Week = $2; $DayOfWeek = $3;  $ISOFormat = 6;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-(\\d{2})$/ ) { # YYYY-MM\n\
-                        $Year = $1; $Month = $2;  $ISOFormat = 7;\n\
-                    } elsif ( $str =~ m/^(\\d{4})-W(\\d{2})$/ ) { # YYYY-Www\n\
-                        $Year = $1; $Week = $2;  $ISOFormat = 8;\n\
-                    } elsif ( $str =~ m/^(\\d{4})$/ ) { # YYYY\n\
-                        $Year = $1; $ISOFormat = 9;\n\
-                    }\n\
-                    if ( $TZD =~ m/^Z$/ ) {\n\
+
+    sprintf( Str, " $str = '%s';\n"
+                  " $str =~ s/^\\s+|\\s+$//g;\n"
+                  " $str =~ s/\\s{2,}/ /g; # Compress out extraneous whitespace\n"
+                  " print \"str = [$str]\\n\";\n"
+                  " my $ISOFormat = 0; my $Year = -9999; my $Month = -9999; my $Day = -9999; my $Hour = -9999; my $Minute = -9999; my $Second = -9999; my $TZD = -9999;\n"
+
+                  /*
+                   *  ISO_YYYYMMDDTHHMMSS  
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *           YYYY[-]MM[-]DDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        2010-10-31T12:34:56.789-06:00
+                   *        20101031T123456.789-0600
+                   */
+                  " if ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = $1; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 1;\n"
+
+                  /*
+                   *  ISO_YYMMDDTHHMMSS
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *           YY[-]MM[-]DDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        10-10-31T12:34:56.789-06:00
+                   *        96-03-21T01:54:12.4534789+05:00
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 2;\n"
+
+                  /*
+                   *  ISO_YYYYDDDTHHMMSS
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *           YYYY[-]DDDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        2010-297T12:34:56.789-06:00
+                   *        1996-297T01:54:12.4534789+05:00
+                   *        2010297T123456.789-06:00
+                   *        1996297T015412.4534789+05:00
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?(\\d{3})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = $1; $DayOfYear = $2; $Hour = $3; $Minute = $4; $Second = $5; $TZD = $6; $ISOFormat = 3;\n"
+
+
+                  /*
+                   *  ISO_YYDDDTHHMMSS
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *           YY[-]DDDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        10-297T12:34:56.789-06:00
+                   *        96-297T01:54:12.4534789+05:00
+                   *        10297T123456.789-06:00
+                   *        96297T015412.4534789+05:00
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $3; $Minute = $4; $Second = $5; $TZD = $6; $ISOFormat = 4;\n"
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYWwwDTHHMMSS
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]Www[-]DThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples:  
+                   *       1986-W13-2T09:45:32+00
+                   *       1986W132T094532Z
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 5;\n"
+
+
+                  /*
+                   *  ISO_YYWwwDTHHMMSS
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *    YY[-]Www[-]DThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                   *
+                   *  Examples:  
+                   *       86-W13-2T09:45:32
+                   *       86W132T094532
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 6;\n"
+
+
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYMMDDTHHMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]MM[-]DDThh[:]mm(TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        2010-10-31T12:34-06:00
+                   *        20101031T1234-0600
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                        $Year = $1; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 7;\n"
+
+
+
+                  /*
+                   *  ISO_YYMMDDTHHMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YY[-]MM[-]DDThh[:]mm(TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *        10-10-31T12:34-06:00
+                   *        101031T1234-0600
+                   *        86-10-31T12:34-06:00
+                   *        661031T1234-0600
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 8;\n"
+
+
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYWwwDTHHMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]Www[-]DThh[:]mm(TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *       1986-W13-2T09:45+00
+                   *       1986W132T0945Z
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                        $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 9;\n"
+
+
+                  /*
+                   *  ISO_YYWwwDTHHMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YY[-]Www[-]DThh[:]mm(TZD or Z or nothing)
+                   *
+                   *  Examples: 
+                   *       86-W13-2T09:45+00
+                   *       86W132T0945Z
+                   *       09-W13-2T09:45+00
+                   *       09W132T0945Z
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 10;\n"
+
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYMMDD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]MM[-]DD
+                   *
+                   *  Examples: 
+                   *        1976-04-23
+                   *        19760423
+                   *        2006-04-23
+                   *        20060423
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})$/ ) {\n\
+                        $Year = $1; $Month = $2; $Day = $3;  $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 11;\n"
+
+
+                  /*
+                   *  ISO_YYMMDD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YY[-]MM[-]DD
+                   *
+                   *  Examples: 
+                   *        76-04-23
+                   *        760423
+                   *        06-04-23
+                   *        060423
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})$/ ) {\n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 12;\n"
+
+
+                  /*
+                   *  ISO_YYYYDDD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]DDD
+                   *
+                   *  Examples: 
+                   *        1976-142
+                   *        1976142
+                   *        2006-142
+                   *        2006142
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?(\\d{3})$/ ) {\n\
+                        $Year = $1; $DayOfYear = $2; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 13;\n"
+
+
+                  /*
+                   *  ISO_YYDDD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YY[-]DDD
+                   *
+                   *  Examples: 
+                   *        76-142
+                   *        76142
+                   *        06-142
+                   *        06142
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})$/ ) {\n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 14;\n"
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYWwwD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]Www[-]D
+                   *
+                   *  Examples: 
+                   *        1976-W12-6
+                   *        1976W126
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})$/ ) {\n\
+                        $Year = $1; $Week = $2; $DayOfWeek = $3;  $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 15;\n"
+
+
+                  /*
+                   *  ISO_YYYYWwwD
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YY[-]Www[-]D
+                   *
+                   *  Examples: 
+                   *        76-W12-6
+                   *        76W126
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})$/ ) {\n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 16;\n"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *        YYYY[-]MM
+                   *
+                   *  Examples: 
+                   *        1976-12
+                   *        197612
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-(\\d{2})$/ ) { \n\
+                        $Year = $1; $Month = $2;  $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 17;\n"
+
+                  /*
+                   *  ISO_YYMM
+                   *
+                   *  Match ISO strings of the form:
+                   *
+                   *    YY-MM
+                   *  
+                   *  The hyphen is mandatory here.
+                   *  Examples: 
+                   *        76-12
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-(\\d{2})$/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2;  $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 18;\n"
+
+
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYYWww
+                   *  
+                   *  Match ISO strings of the form:
+                   *  
+                   *        YYYY-Www
+                   *
+                   *  Examples: 
+                   *        1976-W32
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})-W(\\d{2})$/ ) { \n\
+                        $Year = $1; $Week = $2; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 19;\n"
+
+
+                  /*
+                   *  ISO_YYWww
+                   *  
+                   *  Match ISO strings of the form:
+                   *  
+                   *        YY-Www
+                   *
+                   *  Examples: 
+                   *        76-W32
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})-W(\\d{2})$/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 20;\n"
+
+
+
+
+
+
+
+                  /*
+                   *  ISO_YYYY
+                   *  
+                   *  Match ISO strings of the form:
+                   *  
+                   *        YYYY
+                   *
+                   *  Examples: 
+                   *        1976
+                   */
+                  " } elsif ( $str =~ m/^(\\d{4})$/ ) { \n\
+                        $Year = $1; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 21;\n"
+
+
+                  /*
+                   *  ISO_YY
+                   *  
+                   *  Match ISO strings of the form:
+                   *  
+                   *        YY
+                   *
+                   *  Examples: 
+                   *        76
+                   */
+                  " } elsif ( $str =~ m/^(\\d{2})$/ ) { \n\
+                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 22;\n"
+
+
+
+
+                  " }\n\
+                    $TZDError = 0;\n\
+                    if ( $TZD =~ m/^$/ ) {\n\
+                        $TZD_sgn = +1; $TZD_hh = 0; $TZD_mm = 0;\n\
+                    } elsif ( $TZD =~ m/^Z$/ ) {\n\
                         $TZD_sgn = +1; $TZD_hh = 0; $TZD_mm = 0;\n\
                     } elsif ( $TZD =~ m/^([+-])(\\d{2}):?(\\d{2})$/ ) {\n\
-                        $TZD_sgn = ($1 == '+') ? +1 : -1; $TZD_hh = $2; $TZD_mm = $3;\n\
+                        $TZD_sgn = ($1 eq '+') ? +1 : -1; $TZD_hh = $2; $TZD_mm = $3;\n\
                     } elsif ( $TZD =~ m/^([+-])(\\d{2})$/ ) {\n\
-                        $TZD_sgn = ($1 == '+') ? +1 : -1; $TZD_hh = $2; $TZD_mm = 0;\n\
+                        $TZD_sgn = ($1 eq '+') ? +1 : -1; $TZD_hh = $2; $TZD_mm = 0;\n\
                     } else { \n\
-                        $TZD_sgn = +1; $TZD_hh = 0; $TZD_mm = 0;\n\
+                        $TZDError = 1;\n\
                     }\n\
-                    $oYear = $Year; $oMonth = $Month; $oDay = $Day; $oHour = $Hour; $oMinute = $Minute; $oSecond = $Second; $oTZD = $TZD; $oTZD_sgn = $TZD_sgn; $oTZD_hh = $TZD_hh; $oTZD_mm = $TZD_mm; $oWeek = $Week; $oDayOfWeek = $DayOfWeek; $oISOFormat = $ISOFormat;\n", TimeString);
+                    $oYear = $Year; $oMonth = $Month; $oDay = $Day; $oHour = $Hour; $oMinute = $Minute; $oSecond = $Second; $oTZD = $TZD; $oTZD_sgn = $TZD_sgn; $oTZD_hh = $TZD_hh; $oTZD_mm = $TZD_mm; $oWeek = $Week; $oDayOfWeek = $DayOfWeek; $oDayOfYear = $DayOfYear; $oTZDError = $TZDError; $oISOFormat = $ISOFormat;\n", TimeString);
     
 
     eval_pv( Str, TRUE );
-    printf( "Year      = %d\n",  Year = SvIV(get_sv("oYear", FALSE)) );
-    printf( "Month     = %d\n",  Month = SvIV(get_sv("oMonth", FALSE)) );
-    printf( "Day       = %d\n",  Day = SvIV(get_sv("oDay", FALSE)) );
-    printf( "Hours     = %d\n",  Hours = SvIV(get_sv("oHour", FALSE)) );
-    printf( "Minutes   = %d\n",  Minutes = SvIV(get_sv("oMinute", FALSE)) );
-    printf( "Seconds   = %lf\n", Seconds = atof(SvPV(get_sv("oSecond", FALSE), n_a)));
-    printf( "TZD_sgn   = %d\n",  TZD_sgn = SvIV(get_sv("oTZD_sgn", FALSE)) );
-    printf( "TZD_hh    = %d\n",  TZD_hh = SvIV(get_sv("oTZD_hh", FALSE)) );
-    printf( "TZD_mm    = %d\n",  TZD_mm = SvIV(get_sv("oTZD_mm", FALSE)) );
-    printf( "Week      = %d\n",  Week = SvIV(get_sv("oWeek", FALSE)) );
+    printf( "Year      = %d\n",  Year      = SvIV(get_sv("oYear", FALSE)) );
+    printf( "Month     = %d\n",  Month     = SvIV(get_sv("oMonth", FALSE)) );
+    printf( "Day       = %d\n",  Day       = SvIV(get_sv("oDay", FALSE)) );
+    printf( "Hours     = %d\n",  Hours     = SvIV(get_sv("oHour", FALSE)) );
+    printf( "Minutes   = %d\n",  Minutes   = SvIV(get_sv("oMinute", FALSE)) );
+    printf( "Seconds   = %lf\n", Seconds   = atof(SvPV(get_sv("oSecond", FALSE), n_a)));
+    printf( "TZD_sgn   = %d\n",  TZD_sgn   = SvIV(get_sv("oTZD_sgn", FALSE)) );
+    printf( "TZD_hh    = %d\n",  TZD_hh    = SvIV(get_sv("oTZD_hh", FALSE)) );
+    printf( "TZD_mm    = %d\n",  TZD_mm    = SvIV(get_sv("oTZD_mm", FALSE)) );
+    printf( "Week      = %d\n",  Week      = SvIV(get_sv("oWeek", FALSE)) );
+    printf( "DayOfYear = %d\n",  DayOfYear = SvIV(get_sv("oDayOfYear", FALSE)) );
     printf( "DayOfWeek = %d\n",  DayOfWeek = SvIV(get_sv("oDayOfWeek", FALSE)) );
+    printf( "TZDError  = %d\n",  TZDError  = SvIV(get_sv("oTZDError", FALSE)) );
     printf( "ISOFormat = %d\n",  ISOFormat = SvIV(get_sv("oISOFormat", FALSE)) );
 
     perl_destruct(my_perl);
     perl_free(my_perl);
 
 
+
+
+
+
+
+
     /*
      * Test for sane numbers
      */
-    if        ( (ISOFormat == ISO_YYYYMMDDTHHMMSS) || (ISOFormat == ISO_YYYYMMDDTHHMM) ) {
+    if ( (ISOFormat == ISO_YYYYMMDDTHHMMSS) || (ISOFormat == ISO_YYYYMMDDTHHMM) 
+        || (ISOFormat == ISO_YYMMDDTHHMMSS) || (ISOFormat == ISO_YYMMDDTHHMM) ) {
 
-        if (ISOFormat == ISO_YYYYMMDDTHHMM) Seconds = 0.0; // assume seconds are zero
 
         if ( ( Year < 0 ) || ( Year > 9999 ) ) {
-            printf( "Year Out of Range!\n", Year );
+            printf( "Year Out of Range! (Year = %d)\n", Year );
             return( -1 );
         }
         if ( ( Month < 1 ) || ( Month > 12 ) ) {
-            printf( "Month Out of Range!\n", Month );
+            printf( "Month Out of Range! (Month = %d)\n", Month );
             return( -1 );
         }
         if ( ( Day < 1 ) || ( Day > 31 ) ) {
-            printf( "Day Out of Range!\n", Day );
+            printf( "Day Out of Range! (Day = %d)\n", Day );
             return( -1 );
         }
         if ( ( Hours < 0 ) || ( Hours > 23 ) ) {
-            printf( "Hours Out of Range!\n", Hours );
+            printf( "Hours Out of Range! (Hours = %d)\n", Hours );
             return( -1 );
         }
         if ( ( Minutes < 0 ) || ( Minutes > 59 ) ) {
-            printf( "Minutes Out of Range!\n", Minutes );
+            printf( "Minutes Out of Range! (Minutes = %d)\n", Minutes );
             return( -1 );
         }
         if ( ( Seconds < 0 ) || ( Seconds > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
-            printf( "Seconds Out of Range!\n", Seconds ); 
+            printf( "Seconds Out of Range! (Seconds = %lf)\n", Seconds ); 
             return( -1 );
         }
 
-    } else if ( (ISOFormat = ISO_YYYYWwwDTHHMM) || (ISOFormat = ISO_YYYYWwwDTHHMMSS) ) {
+    } else if ( (ISOFormat == ISO_YYYYDDDTHHMMSS) || (ISOFormat == ISO_YYDDDTHHMMSS) 
+        || (ISOFormat == ISO_YYYYDDD) || (ISOFormat == ISO_YYDDD) ) {
+
+        if ( ( Year < 0 ) || ( Year > 9999 ) ) {
+            printf( "Year Out of Range! (Year = %d)\n", Year );
+            return( -1 );
+        }
+        if ( ( DayOfYear < 1 ) || ( DayOfYear > 31 ) ) {
+//NEED LEAP YEAR TEST!!!!!
+            printf( "DayOfYear Out of Range! (DayOfYear = %d)\n", DayOfYear );
+            return( -1 );
+        }
+        if ( ( Hours < 0 ) || ( Hours > 23 ) ) {
+            printf( "Hours Out of Range! (Hours = %d)\n", Hours );
+            return( -1 );
+        }
+        if ( ( Minutes < 0 ) || ( Minutes > 59 ) ) {
+            printf( "Minutes Out of Range! (Minutes = %d)\n", Minutes );
+            return( -1 );
+        }
+        if ( ( Seconds < 0 ) || ( Seconds > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
+            printf( "Seconds Out of Range! (Seconds = %lf)\n", Seconds ); 
+            return( -1 );
+        }
+
+
+    } else if ( (ISOFormat = ISO_YYYYWwwDTHHMMSS) || (ISOFormat = ISO_YYYYWwwDTHHMM) 
+            || (ISOFormat = ISO_YYWwwDTHHMMSS) || (ISOFormat = ISO_YYWwwDTHHMM) ) {
 
         if (ISOFormat = ISO_YYYYWwwDTHHMMSS) Seconds = 0.0; // assume seconds are zero
         wYear = Year;
@@ -185,7 +649,7 @@ ParseTimeString( char *TimeString ) {
 
     } else if ( (ISOFormat = ISO_YYYYMM) || (ISOFormat = ISO_YYYYMMDD) ) {
         
-        if ( ISOFormat = ISO_YYYYMM ) Day = 1; //assume day is 1st day on Month
+        if ( ISOFormat = ISO_YYYYMM ) Day = 1; //assume day is 1st day of Month
 
         if ( ( Year < 0 ) || ( Year > 9999 ) ) {
             printf( "Year Out of Range!\n", Year );
@@ -202,7 +666,7 @@ ParseTimeString( char *TimeString ) {
 
     } else if ( (ISOFormat = ISO_YYYYWww) || (ISOFormat = ISO_YYYYWwwD) ) {
 
-        if ( ISOFormat = ISO_YYYYWww ) DayOfWeek = 1; //assume day is 1st day on Week
+        if ( ISOFormat = ISO_YYYYWww ) DayOfWeek = 1; //assume day is 1st day of Week
         wYear = Year;
 
         if ( ( wYear < 0 ) || ( wYear > 9999 ) ) {
@@ -220,7 +684,13 @@ ParseTimeString( char *TimeString ) {
 
     }
 
+    if (TZDError ) {
+        printf( "Unrecognized time zone field!\n" );
+        return(-1);
+    }
 
+
+    return( 1 );
 
 
 }
@@ -229,24 +699,31 @@ ParseTimeString( char *TimeString ) {
 
 main (int argc, char **argv, char **env) {
 
+    int     Flag;
     char    TimeString[128];
 
     sprintf(TimeString, "2009-06-21T05:12:34.123456789Z");
-    sprintf(TimeString, "2009-06-21T05:1234.01Z");
     sprintf(TimeString, "2009-06-21                           0512:34.01Z");
-    sprintf(TimeString, "2009-0621T99:12:34.123456789-03:34");
     sprintf(TimeString, "2009-W52-7T2312:34.01Z");
-    printf("TimeString = %s\n", TimeString );
+    sprintf(TimeString, "2009-W52-1T2312:34.01Z");
+    sprintf(TimeString, "2009-06-21T05:1234.01Z");
+    sprintf(TimeString, "2009-0621T19:12:34.123456789-03:34");
 
+//    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "2009-06-21T05:12:34.123456789"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "20090621T0545Z"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "2010-11-03T16:15:02-06:00"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+//    sprintf(TimeString, "2010-11-03T16:15:02-06"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+//    sprintf(TimeString, "2010-11-03T16:15:02-6"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+//    sprintf(TimeString, "2010-11-03T16:15:02"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+//    sprintf(TimeString, "19850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+//    sprintf(TimeString, "850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+    sprintf(TimeString, argv[1]); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
 
-    ParseTimeString( TimeString );
-
+//    sprintf(TimeString, "2007-04-05T14:30"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "    2007-04-05T14:30Z      "); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "2007-04-05T14:30Z"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
+//    sprintf(TimeString, "2007-04-05T14:30B"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 
 
 }
-
-
-/*
- *   $Id$
- */
-

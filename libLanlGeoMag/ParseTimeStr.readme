@@ -1,0 +1,2 @@
+gcc ParseTimeStr.c `perl -MExtUtils::Embed -e ccopts -e ldopts` -o ParseTimeStr
+
