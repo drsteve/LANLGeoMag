@@ -52,4 +52,5 @@
 ./ParseTimeStr 1976-W32
 ./ParseTimeStr 76-W32
 ./ParseTimeStr 1976
-./ParseTimeStr 76
+./ParseTimeStr 19
+./ParseTimeStr 20
