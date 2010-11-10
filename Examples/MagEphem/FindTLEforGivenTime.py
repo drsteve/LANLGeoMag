@@ -44,22 +44,9 @@ parser = OptionParser(  usage="%prog [options] [filenames to scan]\n"\
                        "       cat [filenames to scan] | %prog [options]", 
                         version="%prog Version 1.00 (October 27, 2010)"  )
 
-parser.add_option("-d", "--YYYYDDD",      dest="YYYYDDD",    
-                        help="Date the user wants a TLE for in YYYYDDD format,"\
-                             " where YYYY is a 4-digit year and DDD is a 3-digit "\
-                             "day-of-year.",  
-                        metavar="YYYYDDD")
-
-parser.add_option("-D", "--YYYYMMDD",     dest="YYYYMMDD",   
-                        help="Date the user wants a TLE for in YYYYMMDD format,"\
-                             " where YYYY is a 4-digit year, MM is a 2-digit month"\
-                             " (Jan=1), and DD is a 2-digit day-of month.",  
-                        metavar="YYYYMMDD")
-
-parser.add_option("-u", "--UTC",          dest="UTC",        
-                        help="Coordinated Universal Time in HH:MM:SS format, "\
-                             " where HH, MM, SS are hours, minutes and seconds.",
-                        metavar="HH:MM:SS")
+parser.add_option("-d", "--ISO_DateTime",      dest="ISO_DateTime",    
+                        help="Date the user wants a TLE for in ISO 8601 format.", 
+                        metavar="YYYY-MM-DDTHH:MM:SS")
 
 parser.add_option("-c", "--CommonName",   dest="CommonName", 
                         help="Common name of object to filter for.",  
@@ -108,29 +95,14 @@ if options.OutputFile != None:
 
 PurgeDuplicates = True
 
-if options.YYYYMMDD != None:
-    YYYY = int( options.YYYYMMDD[0:4] )
-    MM   = int( options.YYYYMMDD[4:6] )
-    DD   = int( options.YYYYMMDD[6:8] )
-    a = datetime.datetime( YYYY, MM, DD, 0, 0, 0 )
-    DDD = int(a.strftime( "%j" ))
-    #print YYYY, MM, DD
-
-if options.YYYYDDD != None:
-    YYYY = int( options.YYYYDDD[0:4] )
-    DDD  = int( options.YYYYDDD[4:7] )
-    #print YYYY, DDD
-    
-if options.UTC != None:
-    Hour   = int( options.UTC[0:2] )
-    Minute = int( options.UTC[3:5] )
-    Second = int( options.UTC[6:8] )
-    #print Hour, Minute, Second
-
-
-
-TargetEpoch = YYYY*1000 + DDD + Hour/24.0 + Minute/1440.0 + Second/86400.0
-#print TargetEpoch
+if options.ISO_DateTime == None:
+    print 'Must provide a date/time via -d option\n'
+    parser.print_help()
+    exit()
+else:
+    dt = datetime.datetime.strptime(options.ISO_DateTime, "%Y-%m-%dT%H:%M:%S")
+    TargetEpoch = int(dt.strftime('%Y%j')) + dt.hour/24.0 + dt.minute/1440.0 + dt.second/86400.0
+    #print TargetEpoch
     
 
 
@@ -156,7 +128,7 @@ if args.__len__() > 0:
     # If there are args provided, assume they are the names of files we want to
     # scan through. The shell will already have expanded wildcards to multiple
     # entries here -- we just have to prcoess them all.
-    #
+        #
     for filename in args:
         try:
             f = open(filename, 'r')
@@ -164,7 +136,7 @@ if args.__len__() > 0:
             f.close()
         except:
             print 'Unable to read file: ', filename
-            exit()
+            #exit()
 else:
     #
     # If there are no args provided, assume input is coming from the stdin

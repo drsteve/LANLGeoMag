@@ -31,8 +31,9 @@ int main( int argc, char *argv[] ){
     Lgm_DateTime    UTC;
     int             nTLEs, nPitchAngles = 18;
     char            Line0[100], Line1[100], Line2[100], *ptr;
-    char            *InputFile  = "input.txt";
-    char            *OutputFile = "output.txt";
+    char            *InputFile   = "input.txt";
+    char            *OutputFile  = "output.txt";
+    char            OutputFilename[1024];
     FILE            *fp;
 
 
@@ -78,17 +79,29 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
      *   2) Start Date and Time
      *   3) End Date and Time
      */
+    int sY, sM, sD, sh, sm, ss;
+    int eY, eM, eD, eh, em, es;
     if ( (fp = fopen( InputFile, "r" )) != NULL ) {
         fgets( Line0, 99, fp );
         fgets( Line1, 99, fp );
         fgets( Line2, 99, fp );
-        fscanf( fp, "%ld %lf", &StartDate, &StartUT );
-        fscanf( fp, "%ld %lf", &EndDate, &EndUT );
+        fscanf( fp, "%s", OutputFilename );
+        fscanf( fp, "%4d-%2d-%2dT%2d:%2d:%2d", &sY, &sM, &sD, &sh, &sm, &ss );
+        fscanf( fp, "%4d-%2d-%2dT%2d:%2d:%2d", &eY, &eM, &eD, &eh, &em, &es );
+        StartDate = sY*10000 + sM*100 + sD;
+        StartUT   = sh + sm/60.0 + ss/3600.0;
+        EndDate   = eY*10000 + eM*100 + eD;
+        EndUT     = eh + em/60.0 + es/3600.0;
     } else {
         printf( "Couldnt open file %s for reading\n", InputFile );
         exit( 1 );
     }
     fclose( fp );
+//printf("StartDate = %ld\n", StartDate);
+//printf("EndDate   = %ld\n", EndDate);
+//printf("StartUTC  = %g\n", StartUT);
+//printf("EndUTC    = %g\n", EndUT);
+//exit(0);
 
     /*
      * Remove any extraneous newline and/or linefeeds at the end of the strings.
@@ -152,8 +165,12 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
      * Open Mag Ephem file for writing
      */
     FILE *fp_MagEphem;
-    fp_MagEphem = fopen( "puke.txt", "wb" );
-    WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, "T89", MagEphemInfo );
+    if ( (argc > 1) && !strcmp(argv[1], "-a" ) ){
+        fp_MagEphem = fopen( OutputFilename, "ab" );
+    } else {
+        fp_MagEphem = fopen( OutputFilename, "wb" );
+        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, "T89", MagEphemInfo );
+    }
 
     // loop over specified time range
     for ( GpsTime = StartGpsTime; GpsTime <= StopGpsTime; GpsTime += GpsInc ) {
