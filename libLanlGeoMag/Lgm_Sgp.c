@@ -121,7 +121,7 @@ int LgmSgp_ReadTlesFromFile( char *Filename, int *nTLEs, _SgpTLE *TLEs, int Verb
                     TLEValid = FALSE;
                 }
 
-                if (TLEValid) {
+//                if (TLEValid) {
 
                     if (Verbosity > 3) printf("\n\t\tAdding valid TLE to list. nTLEs = %d\n", *nTLEs);
                     if (Verbosity > 3) printf("\t\t--------------------------------------\n");
@@ -130,7 +130,7 @@ int LgmSgp_ReadTlesFromFile( char *Filename, int *nTLEs, _SgpTLE *TLEs, int Verb
                     Lgm_SgpDecodeTle( Line0, Line1, Line2, &(TLEs[*nTLEs]), Verbosity );
 
                     ++(*nTLEs);
-                }
+//                }
 
             }
             
@@ -200,7 +200,7 @@ int LgmSgp_ReadTlesFromStrings( char *Line0, char *Line1, char *Line2, int *nTLE
         if (Verbosity > 0) printf("    TLE Line#1 doesn't\n");
         if (Verbosity > 0) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead1, CheckSumComp1);
         if (Verbosity > 0) printf("    Line1=\"%s\"\n\n", Line1);
-        TLEValid = FALSE;
+//        TLEValid = FALSE;
     }
     if ( Line2[0] != '2' ) {
         if (Verbosity > 0) printf("LgmSgp_ReadTwoLineElements: Format Error in Two Line Element.\n");
@@ -214,7 +214,7 @@ int LgmSgp_ReadTlesFromStrings( char *Line0, char *Line1, char *Line2, int *nTLE
         if (Verbosity > 0) printf("    TLE Line#2 doesn't\n");
         if (Verbosity > 0) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead2, CheckSumComp2);
         if (Verbosity > 0) printf("    Line2=\"%s\"\n\n", Line2);
-        TLEValid = FALSE;
+//        TLEValid = FALSE;
     }
 
     if (TLEValid) {
