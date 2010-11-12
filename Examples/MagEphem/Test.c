@@ -15,7 +15,7 @@ main(){
 */
 
 
-void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEphemInfo *m ){
+void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS;
     char        Str[80];
@@ -37,7 +37,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
      * Write Header
      */
     fprintf( fp, "# Spacecraft:  %s\n", Spacecraft );
-    fprintf( fp, "# Field Model:  %s\n", MagModel );
+//    fprintf( fp, "# Field Model:  %s\n", MagModel );
     fprintf( fp, "# nAlpha:  %d; Alphas: ", m->nAlpha ); for (i=0; i<m->nAlpha; i++) fprintf(fp, " %g", m->Alpha[i]); fprintf( fp, ";   Units: Degrees\n");
     fprintf( fp, "#\n");
     fprintf( fp, "# File Contents    :  Magnetic Empherii for spacecraft trajectory.\n");
@@ -78,6 +78,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, "#              Xgse:  X-compontent of GSE position vector. In units of Re.\n");
     fprintf( fp, "#              Ygse:  Y-compontent of GSE position vector. In units of Re.\n");
     fprintf( fp, "#              Zgse:  Z-compontent of GSE position vector. In units of Re.\n");
+    fprintf( fp, "#\n");
+    fprintf( fp, "#          IntModel:  Internal magnetic field model used.\n");
+    fprintf( fp, "#          ExtModel:  External magnetic field model used.\n");
+    fprintf( fp, "#                Kp:  Kp index value.\n");
+    fprintf( fp, "#               Dst:  Dst index value. In units of nT.\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#             Bsc_x:  X-component of magnetic field vector at S/C (in GSM coords). In units of nT.\n");
     fprintf( fp, "#             Bsc_y:  y-component of magnetic field vector at S/C (in GSM coords). In units of nT.\n");
@@ -178,6 +183,10 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %38s",  " +---------- SM Coordinates ---------+" );
     fprintf( fp, " %38s",  " +------- GEI 2000 Coordinates ------+" );
     fprintf( fp, " %38s",  " +---------- GSE Coordinates --------+" );
+    fprintf( fp, " %13s",  " +-Int Model-+" );
+    fprintf( fp, " %13s",  " +-Ext Model-+" );
+    fprintf( fp, " %6s",   " +-Kp-+" );
+    fprintf( fp, " %7s",   " +-Dst-+" );
     fprintf( fp, " %51s",  " +--------- Magnetic Field at SpaceCraft ---------+" );
     fprintf( fp, " %29s",  " +----- Field Line Type ----+" );
     fprintf( fp, " %38s",  " +---- North Mag. Footpoint GSM -----+" );
@@ -225,6 +234,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "Xgse" );
     fprintf( fp, " %12s", "Ygse" );
     fprintf( fp, " %12s", "Zgse" );
+
+    fprintf( fp, " %14s",  "              " );
+    fprintf( fp, " %14s",  "              " );
+    fprintf( fp, " %7s",   "       " );
+    fprintf( fp, " %8s",   "        " );
 
     fprintf( fp, " %12s", "Bsc_x" ); // Bsc  gsm
     fprintf( fp, " %12s", "Bsc_y" );
@@ -330,6 +344,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
     fprintf( fp, " %12s", "Re" );
     fprintf( fp, " %12s", "Re" );
 
+    fprintf( fp, " %14s",  " " );  // Int Model
+    fprintf( fp, " %14s",  " " );  // Ext Model
+    fprintf( fp, " %7s",   " " );  // Kp
+    fprintf( fp, " %8s",   "nT" ); // Dst
+
     fprintf( fp, " %12s", "nT" );   // Bsc
     fprintf( fp, " %12s", "nT" );
     fprintf( fp, " %12s", "nT" );
@@ -413,7 +432,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *MagModel, Lgm_MagEph
 }
 
 
-void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
+void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
 
     int             i;
     char            Str[128];
@@ -460,6 +479,15 @@ void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m ){
     fprintf( fp, " %12g", v.y );        // Ygse
     fprintf( fp, " %12g", v.z );        // Zgse
 
+    if ( !strcmp( ExtModel, "IGRF" ) || !strcmp( ExtModel, "CDIP" ) || !strcmp( ExtModel, "EDIP" ) ) {
+        // If our "external model is just a dipole or igrf, then "internal doesnt really mean anything...)
+        fprintf( fp, " %14s", "N/A" );       // Int model is Not applicable
+    } else {
+        fprintf( fp, " %14s", IntModel );    // Int Model
+    }
+    fprintf( fp, " %14s", ExtModel );        // Ext Model
+    fprintf( fp, " %7.1f",  Kp );            // Kp
+    fprintf( fp, " %8d",  (int)Dst );             // Dst
     
     m->LstarInfo->mInfo->Bfield( &m->P, &Bsc, m->LstarInfo->mInfo );
     fprintf( fp, " %12g", Bsc.x );  // Bsc_x_gsm

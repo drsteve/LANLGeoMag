@@ -2,9 +2,11 @@
 
 import sys
 from optparse import OptionParser
+import optparse
 import time
 import datetime
 import os
+import textwrap
 
 #
 # Kludgey way to create an enum -- which python doesnt natively support.
@@ -16,6 +18,62 @@ class Enum(set):
         raise AttributeError
 
 
+class IndentedHelpFormatterWithNL(optparse.IndentedHelpFormatter):
+#class IndentedHelpFormatterWithNL():
+  def format_description(self, description):
+    if not description: return ""
+    desc_width = self.width - self.current_indent
+    indent = " "*self.current_indent
+# the above is still the same
+    bits = description.split('\n')
+    formatted_bits = [
+      textwrap.fill(bit,
+        desc_width,
+        initial_indent=indent,
+        subsequent_indent=indent)
+      for bit in bits]
+    result = "\n".join(formatted_bits) + "\n"
+    return result
+
+  def format_option(self, option):
+    # The help for each option consists of two parts:
+    #   * the opt strings and metavars
+    #   eg. ("-x", or "-fFILENAME, --file=FILENAME")
+    #   * the user-supplied help string
+    #   eg. ("turn on expert mode", "read data from FILENAME")
+    #
+    # If possible, we write both of these on the same line:
+    #   -x    turn on expert mode
+    #
+    # But if the opt string list is too long, we put the help
+    # string on a second line, indented to the same column it would
+    # start in if it fit on the first line.
+    #   -fFILENAME, --file=FILENAME
+    #       read data from FILENAME
+    result = []
+    opts = self.option_strings[option]
+    opt_width = self.help_position - self.current_indent - 2
+    if len(opts) > opt_width:
+      opts = "%*s%s\n" % (self.current_indent, "", opts)
+      indent_first = self.help_position
+    else: # start help on same line as opts
+      opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
+      indent_first = 0
+    result.append(opts)
+    if option.help:
+      help_text = self.expand_default(option)
+# Everything is the same up through here
+      help_lines = []
+      for para in help_text.split("\n"):
+        help_lines.extend(textwrap.wrap(para, self.help_width))
+# Everything is the same after here
+      result.append("%*s%s\n" % (
+        indent_first, "", help_lines[0]))
+      result.extend(["%*s%s\n" % (self.help_position, "", line)
+        for line in help_lines[1:]])
+    elif opts[-1] != "\n":
+      result.append("\n")
+    return "".join(result) 
 
 
 
@@ -36,6 +94,10 @@ ParseMethod     = ParseMethods.None
 OutputFile      = ''
 DumpToFile      = False
 PurgeDuplicates = False
+IntFieldModel   = 'IGRF'
+ExtFieldModel   = 'T89'
+Kp              = 5
+Dst             = -20
 
 
 
@@ -43,7 +105,30 @@ PurgeDuplicates = False
 # Define a command-line option parser and add the options we need
 #
 parser = OptionParser(  usage="%prog [options]",\
-                        version="%prog Version 1.00 (Movember 10, 2010)"  )
+                        formatter=IndentedHelpFormatterWithNL(),\
+                        version="%prog Version 1.01 (Movember 12, 2010)"  )
+
+parser.add_option("-I", "--InternalFieldModel",   dest="IntFieldModel", 
+                        help="Internal field model to use. Valid choices are:\n"\
+                             "   CDIP - Centered Dipole (parameters taken from\n"\
+                             "          first 3 IGRF coeffs.)\n"
+                             "   EDIP - Eccentric dipole (parameters taken from\n"\
+                             "          first 8 IGRF coeffs.)\n"
+                             "   IGRF - International Geophysical Reference\n"\
+                             "          Field\n"\
+                             "Default is IGRF." )
+
+parser.add_option("-E", "--ExternalFieldModel",   dest="ExtFieldModel", 
+                        help="Internal field model to use. Valid choices are:\n"\
+                             "   T87 - Tsyganenko 1987 model.\n"\
+                             "   T89 - Tsyganenko 1989 model."\
+                             "   CDIP - Centered Dipole (parameters taken from\n"\
+                             "          first 3 IGRF coeffs.)\n"
+                             "   EDIP - Eccentric dipole (parameters taken from\n"\
+                             "          first 8 IGRF coeffs.)\n"
+                             "   IGRF - International Geophysical Reference\n"\
+                             "          Field\n"\
+                             "Default is T89." )
 
 parser.add_option("-s", "--Start",      dest="Start_ISO",    
                         help="Start date/time in ISO format",
@@ -58,8 +143,7 @@ parser.add_option("-c", "--Cadence",  dest="Cadence_ISO",
                         metavar="HH:MM:SS")
 
 parser.add_option("-n", "--SatNumber",    dest="SatNumber",  
-                        help="Satellite (or object) number (including trailing U "\
-                             "or S - for example 29155U).", 
+                        help="Satellite (or object) number ",
                         metavar="SAT_NUMBER")
 
 parser.add_option("-a", "--Append",   action="store_true", dest="AppendMode", 
@@ -109,7 +193,11 @@ if options.AppendMode:
 else:
     Append = False
 
+if options.IntFieldModel != None:
+    IntFieldModel = options.IntFieldModel
 
+if options.ExtFieldModel != None:
+    ExtFieldModel = options.ExtFieldModel
 
 
 # Start Date/Time
@@ -152,6 +240,8 @@ for t in range(s,e,delta):
     dt    = datetime.datetime.fromtimestamp(t)
     iso   = dt.isoformat()
 
+
+
     # 
     # Find correct TLE and dump to input.txt
     #
@@ -164,12 +254,24 @@ for t in range(s,e,delta):
     os.system(command)
 
     # 
-    # Add start and end times to input.txt
+    # Find correct Kp  and Dst
+    # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
+    #
+    Kp  = 4.3
+    Dst = -20 # nT
+
+
+    # 
+    # Add other information to the "input.txt file
     #
     with open("input.txt", "a") as f:
-        f.write(OutputFile+'\n')
-        f.write(iso+'\n')
-        f.write(iso+'\n')
+        f.write('OutputFile:'+OutputFile+'\n')    # Output file
+        f.write('ISO Start Date/Time:'+iso+'\n')           # Start Date/Time
+        f.write('ISO End   Date/Time:'+iso+'\n')           # End   Date/Time
+        f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
+        f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
+        f.write('Kp:'+str(Kp)+'\n') # The external field model to use
+        f.write('Dst:'+str(Dst)+'\n') # The external field model to use
         f.close()
 
 

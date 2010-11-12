@@ -12,8 +12,8 @@
 #define KP_DEFAULT 0
 
 void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
-void WriteMagEphemHeader( FILE *fp, char *UserName, char *Machine, Lgm_MagEphemInfo *m );
-void WriteMagEphemData( FILE *fp, Lgm_MagEphemInfo *m );
+void WriteMagEphemHeader( FILE *fp, char *Line0, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
+void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
 
 /*
@@ -34,42 +34,16 @@ int main( int argc, char *argv[] ){
     char            *InputFile   = "input.txt";
     char            *OutputFile  = "output.txt";
     char            OutputFilename[1024];
+    char            IntModel[20], ExtModel[20];
     FILE            *fp;
 
 
-double           Alpha[1000], a;
-int              nAlpha, Kp;
+double           Alpha[1000], a, Kp, Dst;
+int              nAlpha;
 Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
 
 
 
-    // Settings for Lstar calcs
-    MagEphemInfo->LstarQuality   = 2;
-    MagEphemInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->LSimpleMax     = 10.0;
-    MagEphemInfo->LstarInfo->VerbosityLevel = 0;
-    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
-
-    Kp = 5;
-/*
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_edip;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_igrf;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
-    MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
-*/
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
-    MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
-    MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0 ) ? Kp : KP_DEFAULT;
-    if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
-
-    // Create array of Pitch Angles to compute
-    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
-        Alpha[nAlpha] = a ;
-        MagEphemInfo->Alpha[nAlpha] = a;
-        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
-    }
-    MagEphemInfo->nAlpha = nAlpha;
 
 
 
@@ -85,22 +59,44 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
         fgets( Line0, 99, fp );
         fgets( Line1, 99, fp );
         fgets( Line2, 99, fp );
-        fscanf( fp, "%s", OutputFilename );
-        fscanf( fp, "%4d-%2d-%2dT%2d:%2d:%2d", &sY, &sM, &sD, &sh, &sm, &ss );
-        fscanf( fp, "%4d-%2d-%2dT%2d:%2d:%2d", &eY, &eM, &eD, &eh, &em, &es );
+        fscanf( fp, "%*[^:]:%s", OutputFilename );
+        fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &sY, &sM, &sD, &sh, &sm, &ss );
+        fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &eY, &eM, &eD, &eh, &em, &es );
+        fscanf( fp, "%*[^:]:%s", IntModel );
+        fscanf( fp, "%*[^:]:%s", ExtModel );
+        fscanf( fp, "%*[^:]:%lf", &Kp );
+        fscanf( fp, "%*[^:]:%lf", &Dst );
         StartDate = sY*10000 + sM*100 + sD;
         StartUT   = sh + sm/60.0 + ss/3600.0;
         EndDate   = eY*10000 + eM*100 + eD;
         EndUT     = eh + em/60.0 + es/3600.0;
+/*
+GOES 13
+1 29155U 06018A   08306.53086225 -.00000080  00000-0  10000-3 0  5107
+2 29155 000.5186 082.9944 0002696 166.9342 237.3066 01.00270767  8975
+OutputFile:PUKe.puke
+ISO Start Date/Time:2008-11-01T14:00:00
+ISO End   Date/Time:2008-11-01T14:00:00
+Internal Field Model:IGRF
+External Field Model:T89
+Kp:5
+Dst:-20
+*/
+
     } else {
         printf( "Couldnt open file %s for reading\n", InputFile );
         exit( 1 );
     }
     fclose( fp );
-//printf("StartDate = %ld\n", StartDate);
-//printf("EndDate   = %ld\n", EndDate);
-//printf("StartUTC  = %g\n", StartUT);
-//printf("EndUTC    = %g\n", EndUT);
+printf("OutputFilename = %s\n", OutputFilename);
+printf("StartDate = %ld\n", StartDate);
+printf("EndDate   = %ld\n", EndDate);
+printf("StartUTC  = %g\n", StartUT);
+printf("EndUTC    = %g\n", EndUT);
+printf("IntModel = %s\n", IntModel);
+printf("ExtModel = %s\n", ExtModel);
+printf("Kp        = %g\n", Kp);
+printf("Dst       = %g\n", Dst);
 //exit(0);
 
     /*
@@ -113,6 +109,62 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
     if ( (ptr = strstr(Line1, "\r")) != NULL ) *ptr = '\0';
     if ( (ptr = strstr(Line2, "\n")) != NULL ) *ptr = '\0'; 
     if ( (ptr = strstr(Line2, "\r")) != NULL ) *ptr = '\0';
+
+
+
+    // Settings for Lstar calcs
+    MagEphemInfo->LstarQuality   = 2;
+    MagEphemInfo->SaveShellLines = TRUE;
+    MagEphemInfo->LstarInfo->LSimpleMax     = 10.0;
+    MagEphemInfo->LstarInfo->VerbosityLevel = 0;
+    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
+
+//    Kp = 5;
+/*
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_edip;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_igrf;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
+    MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
+*/
+    if ( !strcmp( ExtModel, "T87" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T87;
+    } else if ( !strcmp( ExtModel, "CDIP" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_cdip;
+    } else if ( !strcmp( ExtModel, "EDIP" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_edip;
+    } else if ( !strcmp( ExtModel, "IGRF" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
+    } else { //if ( !strcmp( ExtModel, "T89" ) ){
+        // default
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+    }
+
+    if ( !strcmp( IntModel, "CDIP" ) ){
+        MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
+    } else if ( !strcmp( IntModel, "EDIP" ) ){
+        MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_EDIP;
+    } else {
+        // default
+        MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
+    }
+
+//    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
+    MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0.0 ) ? (int)(Kp+0.5) : KP_DEFAULT;
+    if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
+printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mInfo->Kp);
+
+    // Create array of Pitch Angles to compute
+    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
+        Alpha[nAlpha] = a ;
+        MagEphemInfo->Alpha[nAlpha] = a;
+        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
+    }
+    MagEphemInfo->nAlpha = nAlpha;
+
+
+
+
 
 
     /*
@@ -169,7 +221,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
-        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, "T89", MagEphemInfo );
+        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
     }
 
     // loop over specified time range
@@ -202,7 +254,7 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
         printf("\n\n\nDate, ut = %ld %g   Ugsm = %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
         ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
 
-        WriteMagEphemData( fp_MagEphem, MagEphemInfo );
+        WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
 
         WriteMagEphemInfoStruct( "test.dat", nPitchAngles, MagEphemInfo );
 
