@@ -420,6 +420,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
         R = Lgm_Magnitude( &P );
 	    F =  R - R0;
+//printf( "R, R0, F, Htry  = %g %g %g %g\n", R, R0, F, Htry);
 
 	    if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin) 
 	        || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {

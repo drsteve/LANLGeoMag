@@ -127,68 +127,76 @@ int FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mla
              LstarInfo->mInfo->Hmax = 0.1;
              if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
 
-                if ( LstarInfo->mInfo->UseInterpRoutines ) {
+                if ( SS < 1e-6 ) {
 
-                    /*
-                     *  Do interped I integral. For this to work, we need to trace out the FL with TraceLine().
-                     *  This is additional overhead to start with, but it may be faster in the end.
-                     *
-                     *  Note we start at Pm_South and trace to Pm_North (which is at an altitude of (r-1.0) Re above the Earth.
-                     */
-                    // 1.0 is way too big -- this was causing errors for the lower PAs
-                    //LstarInfo->mInfo->Hmax = (I0 > 5.0 ) ? 1.0 : 0.1;
-                    //LstarInfo->mInfo->Hmax = 0.1;
-                    //LstarInfo->mInfo->Hmax = 0.01;
-                    LstarInfo->mInfo->Hmax = SS/200.0;
-
-
-
-
-                    // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
-
-                    Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
-
-
-                    /*
-                     *  Set the limits of integration. 
-                     */
-                    LstarInfo->mInfo->Sm_South = 0.0;
-                    LstarInfo->mInfo->Sm_North = SS;
-
-                    /*
-                     *  Add the mirror points explicity. Update: Actually the
-                     *  first should already be there so dont include it.
-                     */
-                    //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-                    ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-                    AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
-
-
-                    InitSpline( LstarInfo->mInfo );
-
-                    /*
-                     *  Do I integral with interped integrand. 
-                     */
-                    I = Iinv_interped( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
-
-                    FreeSpline( LstarInfo->mInfo );
+                    I = 0.0;
 
                 } else {
+                    
+                    if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
-                    /*
-                     *  Set the limits of integration. Also set tolerances for
-                     *  Quadpack routines.
-                     */
-                    LstarInfo->mInfo->Sm_South = 0.0;
-                    LstarInfo->mInfo->Sm_North = SS;
+                        /*
+                         *  Do interped I integral. For this to work, we need to trace out the FL with TraceLine().
+                         *  This is additional overhead to start with, but it may be faster in the end.
+                         *
+                         *  Note we start at Pm_South and trace to Pm_North (which is at an altitude of (r-1.0) Re above the Earth.
+                         */
+                        // 1.0 is way too big -- this was causing errors for the lower PAs
+                        //LstarInfo->mInfo->Hmax = (I0 > 5.0 ) ? 1.0 : 0.1;
+                        //LstarInfo->mInfo->Hmax = 0.1;
+                        //LstarInfo->mInfo->Hmax = 0.01;
+                        LstarInfo->mInfo->Hmax = SS/200.0;
 
-                    /*
-                     *  Do full blown I integral. 
-                     */
-                    I = Iinv( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (full integral): %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
 
+
+
+                        // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
+
+//printf("SS = %g,   LstarInfo->mInfo->Hmax = %g\n", SS, LstarInfo->mInfo->Hmax);
+                        Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
+
+
+                        /*
+                         *  Set the limits of integration. 
+                         */
+                        LstarInfo->mInfo->Sm_South = 0.0;
+                        LstarInfo->mInfo->Sm_North = SS;
+
+                        /*
+                         *  Add the mirror points explicity. Update: Actually the
+                         *  first should already be there so dont include it.
+                         */
+                        //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
+                        ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
+                        AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
+
+
+                        InitSpline( LstarInfo->mInfo );
+
+                        /*
+                         *  Do I integral with interped integrand. 
+                         */
+                        I = Iinv_interped( LstarInfo->mInfo  );
+                        if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+
+                        FreeSpline( LstarInfo->mInfo );
+
+                    } else {
+
+                        /*
+                         *  Set the limits of integration. Also set tolerances for
+                         *  Quadpack routines.
+                         */
+                        LstarInfo->mInfo->Sm_South = 0.0;
+                        LstarInfo->mInfo->Sm_North = SS;
+
+                        /*
+                         *  Do full blown I integral. 
+                         */
+                        I = Iinv( LstarInfo->mInfo  );
+                        if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (full integral): %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+
+                    }
                 }
 
 
