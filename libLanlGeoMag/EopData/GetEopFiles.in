@@ -9,7 +9,7 @@ use POSIX;
     #$LGM_EOP_DATA_DIR          = "/usr/local/share/LanlGeoMag/EopData";
     #$LGM_EOP_DATA_DIR          = "CHANGE_ME";
     $prefix                    = "@prefix@";
-    $LGM_EOP_DATA_DIR          = "@datarootdir@";
+    $LGM_EOP_DATA_DIR          = "@datarootdir@/LanlGeoMag/EopData/";
     $LgmEopDatFile             = "$LGM_EOP_DATA_DIR/LgmEop.dat";
     $LgmLeapSecondDatesDatFile = "$LGM_EOP_DATA_DIR/Lgm_LeapSecondDates.dat";
 
