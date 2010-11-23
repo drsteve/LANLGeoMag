@@ -167,7 +167,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
-nAlpha = 0;
+//nAlpha = 0;
 //nAlpha = 1;
 //Alpha[0] = 90.0;
 //MagEphemInfo->Alpha[0] = 90.0;
