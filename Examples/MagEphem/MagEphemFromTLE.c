@@ -8,6 +8,9 @@
 #include <Lgm_Sgp.h>
 #include <Lgm_MagEphemInfo.h>
 #include <Lgm_DynamicMemory.h>
+#include <Lgm_Eop.h>                                                                                                                   
+#include <ctype.h>
+
 
 #define KP_DEFAULT 0
 
@@ -29,13 +32,17 @@ int main( int argc, char *argv[] ){
     Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
     Lgm_Vector      Ugsm, Uteme;
     Lgm_DateTime    UTC;
+    Lgm_Eop         *e = Lgm_init_eop( 0 );                                                                                            
+    Lgm_EopOne      eop;                      
     int             nTLEs, nPitchAngles = 18;
     char            Line0[100], Line1[100], Line2[100], *ptr;
     char            *InputFile   = "input.txt";
     char            *OutputFile  = "output.txt";
     char            OutputFilename[1024];
-    char            IntModel[20], ExtModel[20];
+    char            IntModel[20], ExtModel[20], opt;
+    int             AppendMode, UseEop;
     FILE            *fp;
+    FILE            *fp_MagEphem;
 
 
 double           Alpha[1000], a, Kp, Dst;
@@ -160,6 +167,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         MagEphemInfo->Alpha[nAlpha] = a;
         printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
     }
+nAlpha = 0;
 //nAlpha = 1;
 //Alpha[0] = 90.0;
 //MagEphemInfo->Alpha[0] = 90.0;
@@ -219,12 +227,29 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
     /*
      * Open Mag Ephem file for writing
      */
-    FILE *fp_MagEphem;
-    if ( (argc > 1) && !strcmp(argv[1], "-a" ) ){
+    AppendMode = FALSE;
+    UseEop     = FALSE;
+    while ( (opt = getopt( argc, argv, "a::e::" )) != -1 ) {
+        switch( opt ) {
+           case 'a':
+             AppendMode = TRUE;
+             break;
+           case 'e':
+             UseEop = TRUE;
+             break;
+        }
+    }
+
+    if ( AppendMode ){
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
         WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+    }
+
+    if ( UseEop ) {
+        // Read in the EOP vals
+        Lgm_read_eop( e );
     }
 
     // loop over specified time range
@@ -235,6 +260,15 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         // Need JD to compute tsince
         Lgm_GpsSeconds_to_UTC( GpsTime, &UTC, c ) ;
         JD = Lgm_JD( UTC.Year, UTC.Month, UTC.Day, UTC.Time, LGM_TIME_SYS_UTC, c );
+
+                                                                                                                                       
+        if ( UseEop ) {
+            // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+            Lgm_get_eop_at_JD( JD, &eop, e );
+
+            // Set the EOP vals in the CTrans structure.
+            Lgm_set_eop( &eop, c );
+        }
 
         // Set up the trans matrices
         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
@@ -267,6 +301,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
     fclose(fp_MagEphem);
 
     Lgm_free_ctrans( c );
+    Lgm_destroy_eop( e );
     free( s );
     free( TLEs );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
