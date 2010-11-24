@@ -15,18 +15,13 @@ main(){
 */
 
 
-void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
+void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS;
     char        Str[80];
     long int    CreateDate;
     double      JD, UTC;
     Lgm_CTrans  *c = Lgm_init_ctrans(0);
-
-    int         nAlpha;
-    double      a, Alpha[100];
-
-    for (nAlpha=0,a=5.0; a<=90.0; a+=5,++nAlpha) Alpha[nAlpha] = a;
 
 
     JD = Lgm_GetCurrentJD(c);
@@ -52,37 +47,43 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *IntModel, char *ExtM
     fprintf( fp, "#\n");
 
     fprintf( fp, "# \"GlobalVarInfo\": {\n");
+    fprintf( fp, "#        \"Spacecraft\": {  \"CommonName\": \"%s\",\n", Spacecraft );
+    fprintf( fp, "#                           \"IdNumber\": \"%d\",\n",   IdNumber );
+    fprintf( fp, "#                           \"IntDesig\": \"%s\" }\n",  IntDesig );
+    fprintf( fp, "#\n");
     fprintf( fp, "# },\n");
     fprintf( fp, "#\n");
 
 
     fprintf( fp, "# \"DependVarInfo\": {\n");
-    fprintf( fp, "#             \"Alpha\": { \"DESCRIPTION\": \"Pitch Angles.\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pitch Angle\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 18 ],\n");
-    fprintf( fp, "#                             \"VALUES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%g, ", Alpha[i] );
-    fprintf(fp, "%g ],\n", Alpha[i] ); 
+    if ( m->nAlpha > 0 ) {
+        fprintf( fp, "#             \"Alpha\": { \"DESCRIPTION\": \"Pitch Angles.\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Pitch Angle\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                             \"VALUES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%g, ", m->Alpha[i] );
+        fprintf(fp, "%g ],\n", m->Alpha[i] ); 
 
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"PA%02d\", ", i );
-    fprintf(fp, "\"PA%02d.\" ],\n", i ); 
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"PA%02d\", ", i );
+        fprintf(fp, "\"PA%02d.\" ],\n", i ); 
 
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%g Deg.\", ", Alpha[i] );
-    fprintf(fp, "\"%g Deg.\" ],\n", Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%g Deg.\", ", m->Alpha[i] );
+        fprintf(fp, "\"%g Deg.\" ],\n", m->Alpha[i] ); 
 
-    fprintf( fp, "#                              \"UNITS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Degrees\", " );
-    fprintf(fp, "\"Degrees\" ],\n" );
-    fprintf( fp, "#                          \"VALID_MIN\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, " 0.0, " );
-    fprintf(fp, " 0.0 ],\n" );
-    fprintf( fp, "#                          \"VALID_MAX\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "90.0, " );
-    fprintf(fp, "90.0 ],\n" );
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
-    fprintf( fp, "#\n");
+        fprintf( fp, "#                              \"UNITS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Degrees\", " );
+        fprintf(fp, "\"Degrees\" ],\n" );
+        fprintf( fp, "#                          \"VALID_MIN\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, " 0.0, " );
+        fprintf(fp, " 0.0 ],\n" );
+        fprintf( fp, "#                          \"VALID_MAX\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "90.0, " );
+        fprintf(fp, "90.0 ],\n" );
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+        fprintf( fp, "#\n");
+    }
     fprintf( fp, "# },\n");
     fprintf( fp, "#\n");
 
@@ -415,139 +416,141 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, char *IntModel, char *ExtM
 
 
 
-    fprintf( fp, "#                \"L*\": { \"DESCRIPTION\": \"Generalized Roederer L-shell value.\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"L*\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 18 ],\n");
+    if ( m->nAlpha > 0 ) {
+        fprintf( fp, "#                \"L*\": { \"DESCRIPTION\": \"Generalized Roederer L-shell value.\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"L*\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
 
-    fprintf( fp, "#                            \"COLUMNS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-    fprintf(fp, "%d ],\n", i+nCol ); 
+        fprintf( fp, "#                            \"COLUMNS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
+        fprintf(fp, "%d ],\n", i+nCol ); 
 
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L*(%g)\", ", Alpha[i] );
-    fprintf(fp, "\"L*(%g)\" ],\n", Alpha[i] ); 
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L*(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"L*(%g)\" ],\n", m->Alpha[i] ); 
 
-    fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
+        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
 
-    fprintf( fp, "#                              \"UNITS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-    fprintf(fp, "\"Dimensionless\" ],\n" );
+        fprintf( fp, "#                              \"UNITS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
+        fprintf(fp, "\"Dimensionless\" ],\n" );
 
-    fprintf( fp, "#                          \"VALID_MIN\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
-    fprintf(fp, "1.0 ],\n");
+        fprintf( fp, "#                          \"VALID_MIN\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
+        fprintf(fp, "1.0 ],\n");
 
-    fprintf( fp, "#                          \"VALID_MAX\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-    fprintf(fp, "1000.0 ],\n" );
+        fprintf( fp, "#                          \"VALID_MAX\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
+        fprintf(fp, "1000.0 ],\n" );
 
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
 
-    fprintf( fp, "#\n");
-    nCol += m->nAlpha;
-
-
-
-
-
-
-    fprintf( fp, "#                 \"L\": { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"L\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 18 ],\n");
-
-    fprintf( fp, "#                            \"COLUMNS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-    fprintf(fp, "%d ],\n", i+nCol ); 
-
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L(%g)\", ", Alpha[i] );
-    fprintf(fp, "\"L(%g)\" ],\n", Alpha[i] ); 
-
-    fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-
-    fprintf( fp, "#                              \"UNITS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-    fprintf(fp, "\"Dimensionless\" ],\n" );
-
-    fprintf( fp, "#                          \"VALID_MIN\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
-    fprintf(fp, "1.0 ],\n");
-
-    fprintf( fp, "#                          \"VALID_MAX\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-    fprintf(fp, "1000.0 ],\n" );
-
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
-    fprintf( fp, "#\n");
-    nCol += m->nAlpha;
-
-
-
-
-    fprintf( fp, "#                \"Bm\": { \"DESCRIPTION\": \"Magnetic field ftrength at mirror points for each pitch angle.\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bm\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 18 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-    fprintf(fp, "%d ],\n", i+nCol ); 
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Bm(%g)\", ", Alpha[i] );
-    fprintf(fp, "\"Bm(%g)\" ],\n", Alpha[i] ); 
-    fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-    fprintf( fp, "#                          \"VALID_MIN\": 1.0,\n");
-    fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
-    fprintf( fp, "#                              \"UNITS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-    fprintf(fp, "\"Dimensionless\" ],\n" );
-
-    fprintf( fp, "#                          \"VALID_MIN\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
-    fprintf(fp, "0.0 ],\n" );
-
-    fprintf( fp, "#                          \"VALID_MAX\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "50000.0, " );
-    fprintf(fp, "50000.0 ],\n" );
-
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
-    fprintf( fp, "#\n");
-    nCol += m->nAlpha;
+        fprintf( fp, "#\n");
+        nCol += m->nAlpha;
 
 
 
 
 
-    fprintf( fp, "#                 \"I\": { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"I\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 18 ],\n");
 
-    fprintf( fp, "#                            \"COLUMNS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-    fprintf(fp, "%d ],\n", i+nCol ); 
+        fprintf( fp, "#                 \"L\": { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"L\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
 
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I(%g)\", ", Alpha[i] );
-    fprintf(fp, "\"I(%g)\" ],\n", Alpha[i] ); 
+        fprintf( fp, "#                            \"COLUMNS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
+        fprintf(fp, "%d ],\n", i+nCol ); 
 
-    fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"L(%g)\" ],\n", m->Alpha[i] ); 
 
-    fprintf( fp, "#                              \"UNITS\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Re\", " );
-    fprintf(fp, "\"Re\" ],\n" );
+        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
 
-    fprintf( fp, "#                          \"VALID_MIN\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
-    fprintf(fp, "0.0 ],\n" );
+        fprintf( fp, "#                              \"UNITS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
+        fprintf(fp, "\"Dimensionless\" ],\n" );
 
-    fprintf( fp, "#                          \"VALID_MAX\": [ ");
-    for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-    fprintf(fp, "1000.0 ],\n" );
+        fprintf( fp, "#                          \"VALID_MIN\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
+        fprintf(fp, "1.0 ],\n");
 
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
-    nCol += m->nAlpha;
+        fprintf( fp, "#                          \"VALID_MAX\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
+        fprintf(fp, "1000.0 ],\n" );
+
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+        nCol += m->nAlpha;
+
+
+
+
+        fprintf( fp, "#                \"Bm\": { \"DESCRIPTION\": \"Magnetic field ftrength at mirror points for each pitch angle.\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Bm\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                            \"COLUMNS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
+        fprintf(fp, "%d ],\n", i+nCol ); 
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Bm(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"Bm(%g)\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\": 1.0,\n");
+        fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+        fprintf( fp, "#                              \"UNITS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
+        fprintf(fp, "\"Dimensionless\" ],\n" );
+
+        fprintf( fp, "#                          \"VALID_MIN\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
+        fprintf(fp, "0.0 ],\n" );
+
+        fprintf( fp, "#                          \"VALID_MAX\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "50000.0, " );
+        fprintf(fp, "50000.0 ],\n" );
+
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+        nCol += m->nAlpha;
+
+
+
+
+
+        fprintf( fp, "#                 \"I\": { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"I\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+
+        fprintf( fp, "#                            \"COLUMNS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
+        fprintf(fp, "%d ],\n", i+nCol ); 
+
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"I(%g)\" ],\n", m->Alpha[i] ); 
+
+        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
+
+        fprintf( fp, "#                              \"UNITS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Re\", " );
+        fprintf(fp, "\"Re\" ],\n" );
+
+        fprintf( fp, "#                          \"VALID_MIN\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
+        fprintf(fp, "0.0 ],\n" );
+
+        fprintf( fp, "#                          \"VALID_MAX\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
+        fprintf(fp, "1000.0 ],\n" );
+
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+        nCol += m->nAlpha;
+    }
 
 
 

@@ -15,7 +15,7 @@
 #define KP_DEFAULT 0
 
 void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
-void WriteMagEphemHeader( FILE *fp, char *Line0, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
+void WriteMagEphemHeader( FILE *fp, char *Line0, int IdNumber, char *IntDesig2, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
 
@@ -34,7 +34,7 @@ int main( int argc, char *argv[] ){
     Lgm_DateTime    UTC;
     Lgm_Eop         *e = Lgm_init_eop( 0 );                                                                                            
     Lgm_EopOne      eop;                      
-    int             nTLEs, nPitchAngles = 18;
+    int             i, nTLEs; 
     char            Line0[100], Line1[100], Line2[100], *ptr;
     char            *InputFile   = "input.txt";
     char            *OutputFile  = "output.txt";
@@ -45,9 +45,10 @@ int main( int argc, char *argv[] ){
     FILE            *fp_MagEphem;
 
 
-double           Alpha[1000], a, Kp, Dst;
-int              nAlpha;
-Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
+    double           Alpha[1000], Kp, Dst;
+    int              nAlpha;
+    //Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
+    Lgm_MagEphemInfo *MagEphemInfo;
 
 
 
@@ -73,6 +74,8 @@ Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
         fscanf( fp, "%*[^:]:%s", ExtModel );
         fscanf( fp, "%*[^:]:%lf", &Kp );
         fscanf( fp, "%*[^:]:%lf", &Dst );
+        fscanf( fp, "%*[^:]:%d", &nAlpha );
+        for (i=0; i<nAlpha; i++ ) fscanf( fp, "%lf", &Alpha[i]);
         StartDate = sY*10000 + sM*100 + sD;
         StartUT   = sh + sm/60.0 + ss/3600.0;
         EndDate   = eY*10000 + eM*100 + eD;
@@ -105,6 +108,12 @@ printf("ExtModel = %s\n", ExtModel);
 printf("Kp        = %g\n", Kp);
 printf("Dst       = %g\n", Dst);
 //exit(0);
+    if ( nAlpha > 0 ){
+        MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
+    } else {
+        // doesnt seem to like allocating zero size...
+        MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
+    }
 
     /*
      * Remove any extraneous newline and/or linefeeds at the end of the strings.
@@ -162,18 +171,21 @@ printf("Dst       = %g\n", Dst);
 printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mInfo->Kp);
 
     // Create array of Pitch Angles to compute
-    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
-        Alpha[nAlpha] = a ;
-        MagEphemInfo->Alpha[nAlpha] = a;
-        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
-    }
+//    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
+//        Alpha[nAlpha] = a ;
+//        MagEphemInfo->Alpha[nAlpha] = a;
+//        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
+//    }
 //nAlpha = 0;
 //nAlpha = 1;
 //Alpha[0] = 90.0;
 //MagEphemInfo->Alpha[0] = 90.0;
+
     MagEphemInfo->nAlpha = nAlpha;
-
-
+    for (i=0; i<nAlpha; i++){
+        MagEphemInfo->Alpha[i] = Alpha[i];
+        printf("Alpha[%d] = %g\n", i, Alpha[i]);
+    }
 
 
 
@@ -244,7 +256,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
-        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, TLEs[0].IdNumber, TLEs[0].IntDesig2, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
     }
 
     if ( UseEop ) {
@@ -293,7 +305,9 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
 
         WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
 
-        WriteMagEphemInfoStruct( "test.dat", nPitchAngles, MagEphemInfo );
+        if ( nAlpha > 0 ){
+            WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
+        }
 
 
     }

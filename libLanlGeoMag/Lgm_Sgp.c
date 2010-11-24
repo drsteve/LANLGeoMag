@@ -240,7 +240,7 @@ void Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int 
 
     char    str[40], *p;
     int     d2, yy, yyyy;
-    int     hh, mm, ss;
+    int     hh, mm, ss, i, ll;
     long    d1;
     Lgm_CTrans *c = Lgm_init_ctrans(0); // need this for JD calcs
 
@@ -279,6 +279,16 @@ void Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int 
     yy = (int)(TLE->IntDesig[0] -'0')*10 + (int)(TLE->IntDesig[1] -'0');
     yyyy = (yy<50) ? 2000+yy : 1900+yy;
     sprintf( TLE->IntDesig2, "%4d-%s", yyyy, &(TLE->IntDesig[2]) );
+    // strip off trailing spaces if any..
+    if ( (ll = strlen(TLE->IntDesig2)) > 0 ){
+        for (i=ll-1; i>=0; i--){
+            if (TLE->IntDesig2[i] == ' ') {
+                TLE->IntDesig2[i] = '\0';
+            } else {
+                break;
+            }
+        }
+    }
     if (Verbosity > 3) printf("\t\tIntDesig        = %s  (%s)\n", TLE->IntDesig, TLE->IntDesig2);
 
     // Element Set Epoch (UTC) (also decode into other date formats)

@@ -7,6 +7,8 @@ import time
 import datetime
 import os
 import textwrap
+import re
+import math
 
 #
 # Kludgey way to create an enum -- which python doesnt natively support.
@@ -146,6 +148,14 @@ parser.add_option("-n", "--SatNumber",    dest="SatNumber",
                         help="Satellite (or object) number ",
                         metavar="SAT_NUMBER")
 
+parser.add_option("-p", "--PitchAngles",    dest="PitchAngles",  
+                        help="Satellite (or object) number ",
+                        metavar="PA_START, PA_END, PA_INC")
+
+parser.add_option("-P", "--NoPitchAngles",   action="store_true", dest="NoPitchAngles", 
+                        help="Do not compute pitch-angle dependent quantities.")
+
+
 parser.add_option("-a", "--Append",   action="store_true", dest="AppendMode", 
                         help="Append results to file (specified with the -o option).")
 
@@ -163,6 +173,76 @@ parser.add_option("-o", "--OutputFile",   dest="OutputFile",
 (options, args) = parser.parse_args()
 print options
 print args
+
+
+
+if options.NoPitchAngles:
+    DoPitchAngles = False
+else:
+    DoPitchAngles = True
+
+
+
+if DoPitchAngles:
+    if options.PitchAngles:
+    #    pat = re.compile( r"\s*(\d+\.?\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*" )
+
+        pat = re.compile( r"\s*([+-]?\d*\.?\d*)\s*,\s*([+-]?\d*\.?\d*)\s*,\s*([+-]?\d*\.?\d*)\s*" )
+
+
+
+        m = re.match( pat, options.PitchAngles )
+        if ( m != None ):
+            l = m.groups()
+            if ( len(l) != 3 ): 
+                exit()
+            else:
+                ps = float(l[0])
+                pe = float(l[1])
+                pi = float(l[2])
+                if (ps < 0.0)or(ps>90.0)or(pe < 0.0)or(pe>90.0):
+                    print 'pitch angles must be in range [0,90]\n'
+                    parser.print_help()
+                    exit()
+                if (math.fabs(pi) < .1):
+                    print 'pitch angle increment too small\n'
+                    parser.print_help()
+                    exit()
+            
+        else:
+            print 'Must provide 3 values for pitch angle range.\n'
+            parser.print_help()
+            exit()
+    else:
+        ps = 5.0
+        pe = 90.0
+        pi = 5.0
+        
+    if (pe >= ps):
+        p = ps
+        PitchAngles = []
+        while ( p <= pe ):
+            PitchAngles.append(p)
+            p += pi
+    else:
+        p = ps
+        PitchAngles = []
+        while ( p >= pe ):
+            PitchAngles.append(p)
+            p -= pi
+
+    nPitchAngles = len(PitchAngles)
+
+    StrList = []
+    StrList.append('{0:d}'.format(nPitchAngles))
+    for p in PitchAngles:
+        StrList.append(' {0:g}'.format(p))
+    PA_Str = ''.join(StrList)
+else:
+    PA_Str = '0'
+
+
+print PA_Str
 
 
 #
@@ -187,6 +267,10 @@ if options.OutputFile == None:
     exit()
 else:
     OutputFile = options.OutputFile
+
+    
+
+
 
 if options.AppendMode:
     Append = True
@@ -272,6 +356,7 @@ for t in range(s,e,delta):
         f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
         f.write('Kp:'+str(Kp)+'\n') # The external field model to use
         f.write('Dst:'+str(Dst)+'\n') # The external field model to use
+        f.write('PitchAngles:'+PA_Str+'\n')
         f.close()
 
 
