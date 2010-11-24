@@ -45,7 +45,7 @@ int main( int argc, char *argv[] ){
     FILE            *fp_MagEphem;
 
 
-    double           Alpha[1000], Kp, Dst;
+    double           Alpha[1000], Kp, Dst, Delta;
     int              nAlpha;
     //Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
     Lgm_MagEphemInfo *MagEphemInfo;
@@ -70,6 +70,7 @@ int main( int argc, char *argv[] ){
         fscanf( fp, "%*[^:]:%s", OutputFilename );
         fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &sY, &sM, &sD, &sh, &sm, &ss );
         fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &eY, &eM, &eD, &eh, &em, &es );
+        fscanf( fp, "%*[^:]:%lf", &Delta );
         fscanf( fp, "%*[^:]:%s", IntModel );
         fscanf( fp, "%*[^:]:%s", ExtModel );
         fscanf( fp, "%*[^:]:%lf", &Kp );
@@ -219,7 +220,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
     Lgm_Make_UTC( EndDate, EndUT, &UTC, c );
     StopGpsTime = Lgm_UTC_to_GpsSeconds( &UTC, c );
 
-    GpsInc = 15.0*60.0; // seconds
+    GpsInc = Delta; // seconds
 
     if ( (fp = fopen( OutputFile, "w" )) == NULL ) {
         printf( "Couldnt open file %s for writing\n", OutputFile );

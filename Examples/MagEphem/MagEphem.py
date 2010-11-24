@@ -352,6 +352,7 @@ for t in range(s,e,delta):
         f.write('OutputFile:'+OutputFile+'\n')    # Output file
         f.write('ISO Start Date/Time:'+iso+'\n')           # Start Date/Time
         f.write('ISO End   Date/Time:'+iso+'\n')           # End   Date/Time
+        f.write('Cadence in seconds:'+str(delta)+'\n')          # Cadence in seconds
         f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
         f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
         f.write('Kp:'+str(Kp)+'\n') # The external field model to use
