@@ -2436,7 +2436,7 @@ void DrawSatLabels(){
 void CreateSats() {
 
     double           tsince, JD;
-    Lgm_Vector       Ugsm, Ugei, EarthToSun, EarthToSun_obs, g1, g2, g3, P, Pobs, Uobs;
+    Lgm_Vector       Ugsm, Uteme, Ugei, EarthToSun, EarthToSun_obs, g1, g2, g3, P, Pobs, Uobs;
     int              i, Flag1=0, Flag2=0, Flag3=0;
     _GroupNode      *g;
     _SpaceObjects   *Group;
@@ -2596,12 +2596,38 @@ void CreateSats() {
                         LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                         glBegin( GL_LINES );
                             LgmSgp_SGP4( tsince, s );
-                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
+//                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
+Uteme.x = s->X/Re; Uteme.y = s->Y/Re; Uteme.z = s->Z/Re;
+long int tDate;
+int tYear, tMonth, tDay;
+double tUT;
+CurrentJD = Lgm_GetCurrentJD( mInfo->c );
+Lgm_jd_to_ymdh( CurrentJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+printf("tDate, tYear, tMonth, tDay, tUT = %ld, %d %d %d %lf\n", tDate, tYear, tMonth, tDay, tUT);
+Lgm_Set_Coord_Transforms( tDate, tUT, mInfo->c );
+
+//Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, mInfo->c );
+Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_TOD, mInfo->c );
+double tmp_r = Lgm_Magnitude( &Ugei );
+double tmp_dec = asin( Ugei.z/tmp_r) *DegPerRad;
+double tmp_ra  = atan2( Ugei.y, Ugei.x )*DegPerRad;
+printf("tsince = %lf\n", tsince);
+printf("tmp_r = %lf\n", tmp_r);
+printf("Uteme = %lf %lf %lf\n", Uteme.x, Uteme.y, Uteme.z);
+printf("Ugei  = %lf %lf %lf\n", Ugei.x, Ugei.y, Ugei.z);
+printf("tmp_dec = %lf\n", tmp_dec);
+printf("tmp_ra = %lf\n", tmp_ra);
+printf("tmp_dec = "); Lgm_Print_DMSd( tmp_dec ); printf(" )\n");
+printf("tmp_ra  = "); Lgm_Print_HMSd( tmp_dec/15.0 ); printf(" )\n");
+printf("JD = %lf\n", JD);
+
+
+//RA   = %15lf  ( ",  c->RA_sun);          Lgm_Print_HMSd( c->RA_sun/15.0 ); printf(" )\n");
                             Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, mInfo->c );
                             glColor4f( Group->Sat[i].ssglRed, Group->Sat[i].ssglGrn, Group->Sat[i].ssglBlu, Group->Sat[i].ssglAlf );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Lgm_NormalizeVector( &Ugsm );
-                            Lgm_ScaleVector( &Ugsm, 1.01 );
+                            Lgm_ScaleVector( &Ugsm, 1.00 );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                         glEnd();
                     }
@@ -6145,10 +6171,15 @@ void PredictIridiumFlares( GtkWidget *widget, gpointer data) {
         Lgm_Set_Coord_Transforms( tDate, tUT, tc );
         Lgm_Convert_Coords( &u, &uu, GEO_TO_MOD, tc );
 
+printf("here\n");
+
+printf("SpaceObjects->nSat = %d\n", SpaceObjects->nSat);
         for (i=0; i<SpaceObjects->nSat; i++){
             if ( strstr( SpaceObjects->Sat[i].TLE.Name, "IRIDIUM" ) ) {
                 EarthToSun = tc->Sun; Lgm_ScaleVector( &EarthToSun, tc->earth_sun_dist );
                 IridiumFlare( JD, &SpaceObjects->Sat[i].TLE, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P);
+diff = Re*Lgm_VecDiffMag( &uu, &g1 );
+printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name ); 
                 if (Flag1){
                     diff = Re*Lgm_VecDiffMag( &uu, &g1 );
                     if ( diff < 40.0 ) {
