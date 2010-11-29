@@ -21,6 +21,20 @@ DX_HTML_FEATURE(ON)
 DX_MAN_FEATURE(ON)
 DX_PDF_FEATURE(ON)
 
+dnl Add LDFLAGS for embedded perl
+FOO=`perl -MExtUtils::Embed -e ldopts`
+AC_MSG_NOTICE([Adding perl LIBS ${FOO}])
+LDFLAGS=${LDFLAGS}\ ${FOO}
+AC_CHECK_LIB([perl], [perl_alloc],, AC_MSG_ERROR([No libperl found]))
+
+dnl Add CFLAGS for embedded perl
+FOO=`perl -MExtUtils::Embed -e ccopts`
+AC_MSG_NOTICE([Adding perl CFLAGS ${FOO}])
+CFLAGS=${CFLAGS}\ ${FOO}
+
+
+
+
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
 

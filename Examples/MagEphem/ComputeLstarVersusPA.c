@@ -74,6 +74,10 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
 
     /*
      *  Compute Field-related quantities for each Pitch Angle.
+     *
+     *
+     *  First do a trace to identify the FL type and some of its critical points.
+     *
      */
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
     MagEphemInfo->FieldLineType = TraceFlag;

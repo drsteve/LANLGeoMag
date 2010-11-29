@@ -45,7 +45,7 @@ int main( int argc, char *argv[] ){
     FILE            *fp_MagEphem;
 
 
-    double           Alpha[1000], Kp, Dst, Delta;
+    double           Alpha[1000], Kp, Dst, Delta, FootpointHeight;
     int              nAlpha;
     //Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
     Lgm_MagEphemInfo *MagEphemInfo;
@@ -77,38 +77,28 @@ int main( int argc, char *argv[] ){
         fscanf( fp, "%*[^:]:%lf", &Dst );
         fscanf( fp, "%*[^:]:%d", &nAlpha );
         for (i=0; i<nAlpha; i++ ) fscanf( fp, "%lf", &Alpha[i]);
+        fscanf( fp, "%*[^:]:%lf", &FootpointHeight );
         StartDate = sY*10000 + sM*100 + sD;
         StartUT   = sh + sm/60.0 + ss/3600.0;
         EndDate   = eY*10000 + eM*100 + eD;
         EndUT     = eh + em/60.0 + es/3600.0;
-/*
-GOES 13
-1 29155U 06018A   08306.53086225 -.00000080  00000-0  10000-3 0  5107
-2 29155 000.5186 082.9944 0002696 166.9342 237.3066 01.00270767  8975
-OutputFile:PUKe.puke
-ISO Start Date/Time:2008-11-01T14:00:00
-ISO End   Date/Time:2008-11-01T14:00:00
-Internal Field Model:IGRF
-External Field Model:T89
-Kp:5
-Dst:-20
-*/
-
     } else {
         printf( "Couldnt open file %s for reading\n", InputFile );
         exit( 1 );
     }
     fclose( fp );
-printf("OutputFilename = %s\n", OutputFilename);
-printf("StartDate = %ld\n", StartDate);
-printf("EndDate   = %ld\n", EndDate);
-printf("StartUTC  = %g\n", StartUT);
-printf("EndUTC    = %g\n", EndUT);
-printf("IntModel = %s\n", IntModel);
-printf("ExtModel = %s\n", ExtModel);
-printf("Kp        = %g\n", Kp);
-printf("Dst       = %g\n", Dst);
-//exit(0);
+
+    printf("OutputFilename  = %s\n", OutputFilename);
+    printf("StartDate       = %ld\n", StartDate);
+    printf("EndDate         = %ld\n", EndDate);
+    printf("StartUTC        = %g\n", StartUT);
+    printf("EndUTC          = %g\n", EndUT);
+    printf("IntModel        = %s\n", IntModel);
+    printf("ExtModel        = %s\n", ExtModel);
+    printf("Kp              = %g\n", Kp);
+    printf("Dst             = %g\n", Dst);
+    printf("FootpointHeight = %g", FootpointHeight);
+    //exit(0);
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
     } else {
@@ -130,11 +120,12 @@ printf("Dst       = %g\n", Dst);
 
 
     // Settings for Lstar calcs
-    MagEphemInfo->LstarQuality   = 2;
+    MagEphemInfo->LstarQuality = 2;
     MagEphemInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->LSimpleMax     = 10.0;
+    MagEphemInfo->LstarInfo->LSimpleMax = 10.0;
     MagEphemInfo->LstarInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
+    MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
 //    Kp = 5;
 /*
@@ -172,15 +163,12 @@ printf("Dst       = %g\n", Dst);
 printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mInfo->Kp);
 
     // Create array of Pitch Angles to compute
-//    for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
-//        Alpha[nAlpha] = a ;
-//        MagEphemInfo->Alpha[nAlpha] = a;
-//        printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
-//    }
-//nAlpha = 0;
-//nAlpha = 1;
-//Alpha[0] = 90.0;
-//MagEphemInfo->Alpha[0] = 90.0;
+    // Read them in from file now...
+    //for (nAlpha=0,a=5.0; a<=90.0; a+=5.0,++nAlpha) {
+    //    Alpha[nAlpha] = a ;
+    //    MagEphemInfo->Alpha[nAlpha] = a;
+    //    printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
+    //}
 
     MagEphemInfo->nAlpha = nAlpha;
     for (i=0; i<nAlpha; i++){

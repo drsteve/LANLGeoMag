@@ -129,7 +129,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
     fprintf( fp, "#                              \"UNITS\": [ \"Seconds\" ] },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Rgeo\": { \"DESCRIPTION\":  \"Geographic position vector of S/C.\",\n");
+    fprintf( fp, "#              \"Rgeo\": { \"DESCRIPTION\":  \"Geocentric Geographic position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgeo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
@@ -137,6 +137,16 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
     fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
+    fprintf( fp, "#             \"Rgeod\": { \"DESCRIPTION\":  \"Geodetic Geographic position vector of S/C (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Rgeod\",\n");
+    fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
+    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Rgeod_lat\", \"Rgeod_long\", \"Rgeod_height\" ],\n");
+    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
+    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
+    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#              \"Rgsm\": { \"DESCRIPTION\":  \"Geocentric Solar Magnetospheric position vector of S/C.\",\n");
@@ -264,7 +274,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                              \"LABEL\": \"Pfn_geod\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_gsm_x\", \"Pfn_gsm_y\", \"Pfn_gsm_z\" ],\n");
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_geod_lat\", \"Pfn_geod_lon\", \"Pfn_geod_height\" ],\n");
     fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
     fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
@@ -325,7 +335,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geod_lat\", \"Pfs_geod_long\", \"Pfs_geod_height\" ],\n");
     fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
     fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
@@ -409,7 +419,11 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                              \"UNITS\": [ \"nT\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": [     0.0 ],\n");
     fprintf( fp, "#                          \"VALID_MAX\": [ 50000.0 ],\n");
-    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    if ( m->nAlpha > 0 ){
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    } else {
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+    }
     fprintf( fp, "#\n");
 
 
@@ -567,7 +581,8 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
 
     // column header
     fprintf( fp, "%91s",  "#  +------------------------------------ Date and Time -----------------------------------+" );
-    fprintf( fp, " %38s",  " +----- Geographic Coordinates ------+" );
+    fprintf( fp, " %38s",  " +--- Geocentric Geographic Coords --+" );
+    fprintf( fp, " %38s",  " +---- Geodetic Geographic Coords ---+" );
     fprintf( fp, " %38s",  " +--------- GSM Coordinates ---------+" );
     fprintf( fp, " %38s",  " +---------- SM Coordinates ---------+" );
     fprintf( fp, " %38s",  " +------- GEI 2000 Coordinates ------+" );
@@ -607,6 +622,10 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, " %12s", "Xgeo" );
     fprintf( fp, " %12s", "Ygeo" );
     fprintf( fp, " %12s", "Zgeo" );
+
+    fprintf( fp, " %12s", "GeodLat" );
+    fprintf( fp, " %12s", "GeodLon" );
+    fprintf( fp, " %12s", "GeodHeight" );
 
     fprintf( fp, " %12s", "Xgsm" );
     fprintf( fp, " %12s", "Ygsm" );
@@ -713,9 +732,13 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, " %16s", "Days" );
     fprintf( fp, " %15s", "Seconds" );
 
+    fprintf( fp, " %12s", "Re" ); // Geocentric GEO
     fprintf( fp, " %12s", "Re" );
     fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+
+    fprintf( fp, " %12s", "Deg." ); // Geodetic GEO
+    fprintf( fp, " %12s", "Deg." );
+    fprintf( fp, " %12s", "km" );
 
     fprintf( fp, " %12s", "Re" );
     fprintf( fp, " %12s", "Re" );
@@ -848,6 +871,11 @@ void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, dou
     fprintf( fp, " %12g", v.x );     // Xgeo
     fprintf( fp, " %12g", v.y );     // Ygeo
     fprintf( fp, " %12g", v.z );     // Zgeo
+
+    Lgm_WGS84_to_GEOD( &v, &GeodLat, &GeodLong, &GeodHeight );
+    fprintf( fp, " %12g", GeodLat );                // Geod Lat   of SC
+    fprintf( fp, " %12g", GeodLong );               // Geod Long
+    fprintf( fp, " %12g", GeodHeight );             // Geod Height
 
     fprintf( fp, " %12g", m->P.x );  // Xgsm
     fprintf( fp, " %12g", m->P.y );  // Ygsm

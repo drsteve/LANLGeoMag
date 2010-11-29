@@ -110,6 +110,43 @@ parser = OptionParser(  usage="%prog [options]",\
                         formatter=IndentedHelpFormatterWithNL(),\
                         version="%prog Version 1.01 (Movember 12, 2010)"  )
 
+parser.add_option("-n", "--SatNumber",    dest="SatNumber",  
+                        help="Satellite (or object) number ",
+                        metavar="SAT_NUMBER")
+
+
+parser.add_option("-s", "--Start",      dest="Start_ISO",    
+                        help="Start date/time in ISO format",
+                        metavar="YYYY-MM-DDTHH:MM:SS")
+
+parser.add_option("-e", "--End",      dest="End_ISO",    
+                        help="End date/time in ISO format",
+                        metavar="YYYY-MM-DDTHH:MM:SS")
+
+parser.add_option("-c", "--Cadence",  dest="Cadence_ISO",    
+                        help="Time increment in ISO format",
+                        metavar="HH:MM:SS")
+
+parser.add_option("-p", "--PitchAngles",    dest="PitchAngles",  
+                        help="Range of pitch angles to compute. Default is \"5,90,5\" which gives 18 pitch angles from 5 to 90 degrees in 5 degree increments.",
+                        metavar="PA_START, PA_END, PA_INC")
+
+parser.add_option("-P", "--NoPitchAngles",   action="store_true", dest="NoPitchAngles", 
+                        help="Do not compute pitch-angle dependent quantities.")
+
+parser.add_option("-H", "--FootpointHeight",  dest="FootpointHeight",    
+                        help="Geodetic altitude to use for footpoints. This is the height (in km) above the WGS84 geoid.",
+                        metavar="HEIGHT_IN_KM")
+
+parser.add_option("-a", "--Append",   action="store_true", dest="AppendMode", 
+                        help="Append results to file (specified with the -o option).")
+
+
+parser.add_option("-o", "--OutputFile",   dest="OutputFile", 
+                        help="Filename to dump output to. Stdout is assumed if "\
+                             "no file given.",    
+                        metavar="OUTFILE")
+
 parser.add_option("-I", "--InternalFieldModel",   dest="IntFieldModel", 
                         help="Internal field model to use. Valid choices are:\n"\
                              "   CDIP - Centered Dipole (parameters taken from\n"\
@@ -131,39 +168,6 @@ parser.add_option("-E", "--ExternalFieldModel",   dest="ExtFieldModel",
                              "   IGRF - International Geophysical Reference\n"\
                              "          Field\n"\
                              "Default is T89." )
-
-parser.add_option("-s", "--Start",      dest="Start_ISO",    
-                        help="Start date/time in ISO format",
-                        metavar="YYYY-MM-DDTHH:MM:SS")
-
-parser.add_option("-e", "--End",      dest="End_ISO",    
-                        help="End date/time in ISO format",
-                        metavar="YYYY-MM-DDTHH:MM:SS")
-
-parser.add_option("-c", "--Cadence",  dest="Cadence_ISO",    
-                        help="Time increment in ISO format",
-                        metavar="HH:MM:SS")
-
-parser.add_option("-n", "--SatNumber",    dest="SatNumber",  
-                        help="Satellite (or object) number ",
-                        metavar="SAT_NUMBER")
-
-parser.add_option("-p", "--PitchAngles",    dest="PitchAngles",  
-                        help="Satellite (or object) number ",
-                        metavar="PA_START, PA_END, PA_INC")
-
-parser.add_option("-P", "--NoPitchAngles",   action="store_true", dest="NoPitchAngles", 
-                        help="Do not compute pitch-angle dependent quantities.")
-
-
-parser.add_option("-a", "--Append",   action="store_true", dest="AppendMode", 
-                        help="Append results to file (specified with the -o option).")
-
-
-parser.add_option("-o", "--OutputFile",   dest="OutputFile", 
-                        help="Filename to dump output to. Stdout is assumed if "\
-                             "no file given.",    
-                        metavar="OUTFILE")
 
 
 
@@ -269,6 +273,12 @@ else:
     OutputFile = options.OutputFile
 
     
+if options.FootpointHeight != None:
+    FootpointHeight = float(options.FootpointHeight)
+else:
+    FootpointHeight = 100.0
+
+print FootpointHeight
 
 
 
@@ -358,8 +368,10 @@ for t in range(s,e,delta):
         f.write('Kp:'+str(Kp)+'\n') # The external field model to use
         f.write('Dst:'+str(Dst)+'\n') # The external field model to use
         f.write('PitchAngles:'+PA_Str+'\n')
+        f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
         f.close()
 
+        #exit()
 
     # 
     # Add start and end times to input.txt

@@ -22,7 +22,7 @@ libLanlGeoMag_la_SOURCES =  AlphaOfK.c B_FromScatteredData.c ComputeLstar.c Drif
                             Lgm_Trace.c Lgm_TraceToEarth.c Lgm_TraceToSphericalEarth.c Lgm_Vec.c MagStep.c Lgm_QuadPack3.c \
                             Lgm_QuadPack.c quicksort.c SbIntegral.c T87.c T89.c TraceLine.c TraceToMinBSurf.c  \
                             TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
-                            W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c
+                            W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c ParseTimeStr.c
 
 include_HEADERS = DynamicMemory.h
 

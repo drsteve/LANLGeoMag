@@ -2012,15 +2012,15 @@ void Lgm_GLATLON_TO_EDMLATLONMLT( double GLAT, double GLON, double *MLAT, double
 }
 
 
-void ParseTimeStr( char *Str, int *Year, int *Month, int *Day, int *hh, int *mm, double *ss, long int *Date, double *H ) {
-    char *p = (char *)malloc(10);
-    sscanf( Str, "%4d %3s %d %2d:%2d:%lf", Year, p, Day, hh, mm, ss );
-    *Month = MonthStrToNum( p );
-//printf("Year, p, Day, hh, mm, ss = %d %d %d %d %d %lf\n", *Year, *Month, *Day, *hh, *mm, *ss );
-    free(p);
-    *Date = *Year*10000+ *Month*100 + *Day;
-    *H    = (double)*hh + (double)*mm/60.0 + *ss/3600.0;
-}
+//void ParseTimeStr( char *Str, int *Year, int *Month, int *Day, int *hh, int *mm, double *ss, long int *Date, double *H ) {
+//    char *p = (char *)malloc(10);
+//    sscanf( Str, "%4d %3s %d %2d:%2d:%lf", Year, p, Day, hh, mm, ss );
+//    *Month = MonthStrToNum( p );
+////printf("Year, p, Day, hh, mm, ss = %d %d %d %d %d %lf\n", *Year, *Month, *Day, *hh, *mm, *ss );
+//    free(p);
+//    *Date = *Year*10000+ *Month*100 + *Day;
+//    *H    = (double)*hh + (double)*mm/60.0 + *ss/3600.0;
+//}
 
 
 int MonthStrToNum( char *str ) {
