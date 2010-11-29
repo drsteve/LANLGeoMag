@@ -1353,6 +1353,11 @@ double Lgm_RemapTime( double Time, double SecondsInADay ) {
 double Lgm_UTC_to_TDBSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c ){
     return( Lgm_TDBSecSinceJ2000( UTC, c ) );
 }
+
+
+/*
+ * TDBSecSinceJ2000 is like SPICE's 'ephemeris time'
+ */
 double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
     long int        JDN;
