@@ -456,6 +456,8 @@ typedef struct Lgm_DateTime {
 
     int         Week;       //!< ISO Week number [1-53]
 
+    int         ISO_WeekYear; //!< ISO Year associated with the ISO Week Number (can be different from Year)
+
     int         Dow;        //!< ISO Day Of Week number [1-7]
 
     char        DowStr[10]; //!< ISO Day Of Week number [1-7]
@@ -735,7 +737,6 @@ void        Lgm_mjd_to_ymdh ( double MJD, long int *Date, int *year, int *month,
 
 double      Lgm_hour24( double );
 double      Lgm_kepler( double, double );
-int         Lgm_DayofWeek( int, int, int, char *, Lgm_CTrans *c );
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
@@ -792,7 +793,11 @@ void          Lgm_GPS_to_UTC( Lgm_DateTime *GPS, Lgm_DateTime *UTC, Lgm_CTrans *
 void          Lgm_Print_DateTime( Lgm_DateTime DT, int Style, int p );
 void          Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p );
 void          Lgm_Print_SimpleTime( Lgm_DateTime *DT, int p, char * );
+//int         Lgm_DayofWeek( int, int, int, char *, Lgm_CTrans *c );
 int           Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr );
+long int      Lgm_JDNofWeek1( int Year );
+int           Lgm_ISO_WeekNumber( int Year, int Month, int Day, int *ISO_WeekYear );
+void          Lgm_ISO_YearWeekDow_to_Date( int ISO_WeekYear, int Week, int Dow, long int *Date, int *Year, int *Month, int *Day );
 double        Lgm_RemapTime( double Time, double SecondsInADay );
 
 double        Lgm_GPS_to_GpsSeconds( Lgm_DateTime *GPS );

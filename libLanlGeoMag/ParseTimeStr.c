@@ -79,7 +79,7 @@ static PerlInterpreter *my_perl;
 int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
 
     long int    Date;
-    int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
+    int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear, ISO_WeekYear;
     int         ISOFormat, TZDError;
     double      Seconds;
     STRLEN      n_a;
@@ -659,7 +659,11 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
             || (ISOFormat == ISO_YYYYWwwD) || (ISOFormat == ISO_YYWwwD)
             || (ISOFormat == ISO_YYYYWww) || (ISOFormat == ISO_YYWww) ) {
 
-        printf( "Warning: need to add code to conveert weeks\n");
+        // Warning: need to add code to check if a date is valid. E.g. 2010-W53-7 is not valid, but 2009-W53-7 is.
+        // No checking is done yet for this. We need to know what WeekLast is for a given year.
+        ISO_WeekYear = Year;
+        Lgm_ISO_YearWeekDow_to_Date( ISO_WeekYear, Week, DayOfWeek, &Date, &Year, &Month, &Day );
+        Lgm_Doy( Date, &Year, &Month, &Day, &DayOfYear );
 
     } else {
 
@@ -694,6 +698,7 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
     d->TZD_hh     = TZD_hh;
     d->TZD_mm     = TZD_mm;
     d->Dow        = Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+    d->Week       = Lgm_ISO_WeekNumber( Year, Month, Day, &d->ISO_WeekYear );
 printf( "Parse: Year, Month, Day = %d %d %d\n", Year, Month, Day);
     d->JD         = Lgm_JD( d->Year, d->Month, d->Day, d->Time, d->TimeSystem, c );
     Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
@@ -754,12 +759,12 @@ printf( "Parse: Year, Month, Day = %d %d %d\n", Year, Month, Day);
             printf( "Year Out of Range!\n", wYear );
             return( -1 );
         }
-        if ( ( Week < 1 ) || ( Week > 53 ) ) {
-            printf( "Week Out of Range!\n", Week );
+        if ( ( d->Week < 1 ) || ( d->Week > 53 ) ) {
+            printf( "Week Out of Range!\n", d->Week );
             return( -1 );
         }
-        if ( ( DayOfWeek < 1 ) || ( DayOfWeek > 7 ) ) {
-            printf( "DayOfWeek Out of Range!\n", DayOfWeek );
+        if ( ( d->Dow < 1 ) || ( d->Dow > 7 ) ) {
+            printf( "DayOfWeek Out of Range!\n", d->Dow );
             return( -1 );
         }
 

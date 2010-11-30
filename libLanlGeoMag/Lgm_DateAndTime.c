@@ -919,6 +919,7 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     UTC->Day    = day;
     UTC->Doy    = doy;
     UTC->Dow    = Lgm_DayOfWeek( year, month, day, UTC->DowStr );
+    UTC->Week   = Lgm_ISO_WeekNumber( year, month, day, &UTC->ISO_WeekYear );
     UTC->Time   = Time;
 //printf("Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
 
@@ -1243,6 +1244,56 @@ int Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr ) {
 
 }
 
+/*
+ * Compute the JDN of the start of week 1 for the given year
+ */
+long int Lgm_JDNofWeek1( int Year ) {
+    char     str[10];
+    int      Dow_JAN4 = Lgm_DayOfWeek( Year, 1, 4, str );
+    long int JDN_JAN4 = Lgm_JDN( Year, 1, 4 );
+    return( JDN_JAN4 + 1 - Dow_JAN4 );
+}
+
+/*
+ * Compute ISO week number
+ */
+int Lgm_ISO_WeekNumber( int Year, int Month, int Day, int *ISO_WeekYear ) {
+
+    int      ISO_Year  = Year;
+    long int JDN_DEC29 = Lgm_JDN( Year, 12, 29 );
+    long int JDN       = Lgm_JDN( Year, Month, Day );
+    long int JDN_Week1;
+
+    if ( JDN >= JDN_DEC29 ) {
+        JDN_Week1 = Lgm_JDNofWeek1( ISO_Year+1 );
+        if ( JDN < JDN_Week1 ){
+            JDN_Week1 = Lgm_JDNofWeek1( ISO_Year );
+        } else {
+            ++ISO_Year;
+        }
+    } else {
+        JDN_Week1 = Lgm_JDNofWeek1( ISO_Year );
+        if ( JDN < JDN_Week1 ) JDN_Week1 = Lgm_JDNofWeek1( --ISO_Year );
+    }
+
+    *ISO_WeekYear = ISO_Year;
+    return( (JDN-JDN_Week1)/7 + 1 );
+
+}
+
+
+void Lgm_ISO_YearWeekDow_to_Date( int ISO_WeekYear, int Week, int Dow, long int *Date, int *Year, int *Month, int *Day ) {
+
+
+    long int    JDN_Week1 = Lgm_JDNofWeek1( ISO_WeekYear );
+    long int    JDN       = JDN_Week1 + 7*(Week-1) + Dow - 1;
+    double      tmp;
+
+    Lgm_jd_to_ymdh( JDN, Date, Year, Month, Day, &tmp);
+
+}
+
+
 
 /*
  *  Routine converts between day number and mmdd formats. Input date can be in any of the following
@@ -1391,6 +1442,16 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
     return( Seconds );
 
 }
+
+
+
+
+
+
+
+
+
+
 
 /*
  *   $Id$ 
