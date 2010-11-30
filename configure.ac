@@ -22,15 +22,15 @@ DX_MAN_FEATURE(ON)
 DX_PDF_FEATURE(ON)
 
 dnl Add LDFLAGS for embedded perl
-FOO=`perl -MExtUtils::Embed -e ldopts`
-AC_MSG_NOTICE([Adding perl LIBS ${FOO}])
-LDFLAGS=${LDFLAGS}\ ${FOO}
+PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+AC_MSG_NOTICE([Adding perl LIBS ${PERL_LDFLAGS}])
+LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
 AC_CHECK_LIB([perl], [perl_alloc],, AC_MSG_ERROR([No libperl found]))
 
 dnl Add CFLAGS for embedded perl
-FOO=`perl -MExtUtils::Embed -e ccopts`
-AC_MSG_NOTICE([Adding perl CFLAGS ${FOO}])
-CFLAGS=${CFLAGS}\ ${FOO}
+PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
+AC_MSG_NOTICE([Adding perl CFLAGS ${PERL_CFLAGS}])
+CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 
 
 
