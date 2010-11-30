@@ -1208,26 +1208,38 @@ int Lgm_DayOfYear(int year, int month, int day, Lgm_CTrans *c) {
 
 
 
+/*
+ * Here the number goes from 0-6 Sun-Sat.
+ * But ISO 8601 goes from: 1 is Monday to 7 is Sunday
+ * In the Lgm_DateTime struct we will use ISO defs thats why the last bit that changes 0 to 7 if we get a zero....
+ */
 int Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr ) {
 
-    double  JD, A, Afrac;
-    int     n, iA;
+    int q, m, K, J, Y, h, d;
 
-    JD = Lgm_JDN( Year, Month, Day );
-    A = (JD + 1.5)/7.0;
-    iA = (int)A;
-    Afrac = A - (double)iA;
-    n = (int)(Afrac*7.0 + 0.5);
+    q = Day; 
+    m = Month; 
+    Y = Year;
+    if (m<3){
+        --Y; 
+        m+=12;
+    }
+    K = Y%100;
+    J = Year/100;                                             
 
-    if      ( n == 0 ) {  strcpy(dowstr, "Sun");  }
-    else if ( n == 1 ) {  strcpy(dowstr, "Mon");  }
-    else if ( n == 2 ) {  strcpy(dowstr, "Tue");  }
-    else if ( n == 3 ) {  strcpy(dowstr, "Wed");  }
-    else if ( n == 4 ) {  strcpy(dowstr, "Thu");  }
-    else if ( n == 5 ) {  strcpy(dowstr, "Fri");  }
-    else if ( n == 6 ) {  strcpy(dowstr, "Sat");  }
+    h = ( q + (((m+1)*26)/10) + Y + (Y/4) + 6*(Y/100) + (Y/400))%7;          
+    d = ((h+5)%7)+1;          
 
-    return(n);
+    if      ( d == 1 ) {  strcpy(dowstr, "Mon");  }
+    else if ( d == 2 ) {  strcpy(dowstr, "Tue");  }
+    else if ( d == 3 ) {  strcpy(dowstr, "Wed");  }
+    else if ( d == 4 ) {  strcpy(dowstr, "Thu");  }
+    else if ( d == 5 ) {  strcpy(dowstr, "Fri");  }
+    else if ( d == 6 ) {  strcpy(dowstr, "Sat");  }
+    else if ( d == 7 ) {  strcpy(dowstr, "Sun");  }
+
+
+    return(d);
 
 }
 

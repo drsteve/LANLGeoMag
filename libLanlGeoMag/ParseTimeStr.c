@@ -76,7 +76,7 @@
 
 static PerlInterpreter *my_perl;
 
-int ParseTimeString( char *TimeString ) {
+int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
 
     long int    Date;
     int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
@@ -678,20 +678,42 @@ int ParseTimeString( char *TimeString ) {
     }
 
 
-    printf( "Year      = %d\n",  Year );
-    printf( "DayOfYear = %d\n",  DayOfYear );
-    printf( "Month     = %d\n",  Month );
-    printf( "Day       = %d\n",  Day );
-    printf( "Hours     = %d\n",  Hours );
-    printf( "Minutes   = %d\n",  Minutes );
-    printf( "Seconds   = %lf\n", Seconds );
-    printf( "TZD_sgn   = %d\n",  TZD_sgn );
-    printf( "TZD_hh    = %d\n",  TZD_hh );
-    printf( "TZD_mm    = %d\n",  TZD_mm );
-    printf( "Week      = %d\n",  Week );
-    printf( "DayOfWeek = %d\n",  DayOfWeek );
-    printf( "TZDError  = %d\n",  TZDError );
-    printf( "ISOFormat = %d\n",  ISOFormat );
+    d->Date       = Year*10000 + Month*100 + Day;
+    d->Year       = Year;
+    d->Month      = Month;
+    d->Day        = Day;
+    d->Doy        = DayOfYear;
+    d->Time       = Hours + Minutes/60.0 + Seconds/3600.0;
+    d->Hour       = Hours;
+    d->Minute     = Minutes;
+    d->Second     = Seconds;
+    d->Week       = Week;
+    d->Dow        = DayOfWeek;
+    d->TimeSystem = LGM_TIME_SYS_UTC;
+    d->TZD_sgn    = TZD_sgn;
+    d->TZD_hh     = TZD_hh;
+    d->TZD_mm     = TZD_mm;
+    d->Dow        = Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+printf( "Parse: Year, Month, Day = %d %d %d\n", Year, Month, Day);
+    d->JD         = Lgm_JD( d->Year, d->Month, d->Day, d->Time, d->TimeSystem, c );
+    Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
+    d->T          = (d->JD - 2451545.0)/36525.0;
+    d->fYear      = (double)d->Year + ((double)d->Doy + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
+    
+//    printf( "year      = %d\n",  year );
+//    printf( "dayofyear = %d\n",  dayofyear );
+//    printf( "Month     = %d\n",  Month );
+//    printf( "Day       = %d\n",  Day );
+//    printf( "Hours     = %d\n",  Hours );
+//    printf( "Minutes   = %d\n",  Minutes );
+//    printf( "Seconds   = %lf\n", Seconds );
+//    printf( "TZD_sgn   = %d\n",  TZD_sgn );
+//    printf( "TZD_hh    = %d\n",  TZD_hh );
+//    printf( "TZD_mm    = %d\n",  TZD_mm );
+//    printf( "Week      = %d\n",  Week );
+//    printf( "DayOfWeek = %d\n",  DayOfWeek );
+//    printf( "TZDError  = %d\n",  TZDError );
+//    printf( "ISOFormat = %d\n",  ISOFormat );
 
 
 
@@ -849,17 +871,17 @@ int ParseTimeString( char *TimeString ) {
 
 
 
-int main (int argc, char **argv, char **env) {
-
-    int     Flag;
-    char    TimeString[128];
-
-    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z");
-    sprintf(TimeString, "2009-06-21                           0512:34.01Z");
-    sprintf(TimeString, "2009-W52-7T2312:34.01Z");
-    sprintf(TimeString, "2009-W52-1T2312:34.01Z");
-    sprintf(TimeString, "2009-06-21T05:1234.01Z");
-    sprintf(TimeString, "2009-0621T19:12:34.123456789-03:34");
+//int main (int argc, char **argv, char **env) {
+//
+//    int     Flag;
+//    char    TimeString[128];
+//
+//    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z");
+//    sprintf(TimeString, "2009-06-21                           0512:34.01Z");
+//    sprintf(TimeString, "2009-W52-7T2312:34.01Z");
+//    sprintf(TimeString, "2009-W52-1T2312:34.01Z");
+//    sprintf(TimeString, "2009-06-21T05:1234.01Z");
+//    sprintf(TimeString, "2009-0621T19:12:34.123456789-03:34");
 
 //    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 //    sprintf(TimeString, "2009-06-21T05:12:34.123456789"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
@@ -870,13 +892,13 @@ int main (int argc, char **argv, char **env) {
 //    sprintf(TimeString, "2010-11-03T16:15:02"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
 //    sprintf(TimeString, "19850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
 //    sprintf(TimeString, "850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-    sprintf(TimeString, argv[1]); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+ //ME   sprintf(TimeString, argv[1]); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n\n", Flag ); 
 
 //    sprintf(TimeString, "2007-04-05T14:30"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 //    sprintf(TimeString, "    2007-04-05T14:30Z      "); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 //    sprintf(TimeString, "2007-04-05T14:30Z"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 //    sprintf(TimeString, "2007-04-05T14:30B"); printf("TimeString = %s\n", TimeString ); Flag = ParseTimeString( TimeString ); printf( "Flag = %d\n", Flag ); 
 
-    return(0);
+//    return(0);
 
-}
+//}
