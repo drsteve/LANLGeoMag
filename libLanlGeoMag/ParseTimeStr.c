@@ -79,8 +79,8 @@ static PerlInterpreter *my_perl;
 int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
 
     long int    Date;
-    int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear, ISO_WeekYear;
-    int         ISOFormat, TZDError;
+    int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
+    int         ISOFormat, TZDError=FALSE, MaxWeek, InvalidDate=FALSE;
     double      Seconds;
     STRLEN      n_a;
     char        *embedding[] = { "", "-e", "0" };
@@ -139,7 +139,7 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
     sprintf( Str, " $str = '%s';\n"
                   " $str =~ s/^\\s+|\\s+$//g;\n"
                   " $str =~ s/\\s{2,}/ /g; # Compress out extraneous whitespace\n"
-                  " print \"str = [$str]\\n\";\n"
+                  " #print \"str = [$str]\\n\";\n"
                   " my $ISOFormat = 0; my $Year = -9999; my $DayOfYear = -9999; my $Month = -9999; my $Day = -9999; my $Hour = -9999; my $Minute = -9999; my $Second = -9999; my $TZD = 'Z';\n", TimeString );
             
 
@@ -659,13 +659,22 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
             || (ISOFormat == ISO_YYYYWwwD) || (ISOFormat == ISO_YYWwwD)
             || (ISOFormat == ISO_YYYYWww) || (ISOFormat == ISO_YYWww) ) {
 
-        // Warning: need to add code to check if a date is valid. E.g. 2010-W53-7 is not valid, but 2009-W53-7 is.
-        // No checking is done yet for this. We need to know what WeekLast is for a given year.
-        ISO_WeekYear = Year;
-        Lgm_ISO_YearWeekDow_to_Date( ISO_WeekYear, Week, DayOfWeek, &Date, &Year, &Month, &Day );
+        d->wYear  = Year;
+        d->Week   = Week;
+        d->Dow    = DayOfWeek;
+        Lgm_ISO_YearWeekDow_to_Date( d->wYear, Week, DayOfWeek, &Date, &Year, &Month, &Day );
         Lgm_Doy( Date, &Year, &Month, &Day, &DayOfYear );
+        Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+        MaxWeek = Lgm_MaxWeekNumber( d->wYear );
+        if ( Week > MaxWeek ) {
+            printf("ParseTimeString: Invalid Date. Week number %d does not exist in year %d\n", d->Week, d->wYear );
+            InvalidDate = TRUE;
+        } 
 
     } else {
+
+        d->Dow        = Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+        d->Week       = Lgm_ISO_WeekNumber( Year, Month, Day, &d->wYear );
 
         if ( DayOfYear > 0 ){
             Date = Year*1000 + DayOfYear;
@@ -676,7 +685,7 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
             Lgm_Doy( Date, &Year, &Month, &Day, &DayOfYear );
         } else {
             printf( "Date is invalid\n" );
-            return(-1);
+            InvalidDate = TRUE;
         }
 
     }
@@ -691,180 +700,67 @@ int ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
     d->Hour       = Hours;
     d->Minute     = Minutes;
     d->Second     = Seconds;
-    d->Week       = Week;
-    d->Dow        = DayOfWeek;
     d->TimeSystem = LGM_TIME_SYS_UTC;
     d->TZD_sgn    = TZD_sgn;
     d->TZD_hh     = TZD_hh;
     d->TZD_mm     = TZD_mm;
-    d->Dow        = Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
-    d->Week       = Lgm_ISO_WeekNumber( Year, Month, Day, &d->ISO_WeekYear );
-printf( "Parse: Year, Month, Day = %d %d %d\n", Year, Month, Day);
     d->JD         = Lgm_JD( d->Year, d->Month, d->Day, d->Time, d->TimeSystem, c );
     Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
     d->T          = (d->JD - 2451545.0)/36525.0;
     d->fYear      = (double)d->Year + ((double)d->Doy + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
     
-//    printf( "year      = %d\n",  year );
-//    printf( "dayofyear = %d\n",  dayofyear );
-//    printf( "Month     = %d\n",  Month );
-//    printf( "Day       = %d\n",  Day );
-//    printf( "Hours     = %d\n",  Hours );
-//    printf( "Minutes   = %d\n",  Minutes );
-//    printf( "Seconds   = %lf\n", Seconds );
-//    printf( "TZD_sgn   = %d\n",  TZD_sgn );
-//    printf( "TZD_hh    = %d\n",  TZD_hh );
-//    printf( "TZD_mm    = %d\n",  TZD_mm );
-//    printf( "Week      = %d\n",  Week );
-//    printf( "DayOfWeek = %d\n",  DayOfWeek );
-//    printf( "TZDError  = %d\n",  TZDError );
-//    printf( "ISOFormat = %d\n",  ISOFormat );
-
-
 
     /*
      * Test for sane numbers
      */
-//    if ( (ISOFormat == ISO_YYYYMMDDTHHMMSS) 
-
-        if ( ( Year < 0 ) || ( Year > 9999 ) ) {
-            printf( "Year Out of Range! (Year = %d)\n", Year );
-            return( -1 );
-        }
-        if ( ( DayOfYear < 1 ) || ( DayOfYear > 365+Lgm_LeapYear(Year) ) ) {
-            printf( "DayOfYear Out of Range! (DayOfYear = %d)\n", DayOfYear );
-            return( -1 );
-        }
-        if ( ( Month < 1 ) || ( Month > 12 ) ) {
-            printf( "Month Out of Range! (Month = %d)\n", Month );
-            return( -1 );
-        }
-        if ( ( Day < 1 ) || ( Day > 31 ) ) {
-            printf( "Day Out of Range! (Day = %d)\n", Day );
-            return( -1 );
-        }
-        if ( ( Hours < 0 ) || ( Hours > 23 ) ) {
-            printf( "Hours Out of Range! (Hours = %d)\n", Hours );
-            return( -1 );
-        }
-        if ( ( Minutes < 0 ) || ( Minutes > 59 ) ) {
-            printf( "Minutes Out of Range! (Minutes = %d)\n", Minutes );
-            return( -1 );
-        }
-        if ( ( Seconds < 0 ) || ( Seconds > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
-            printf( "Seconds Out of Range! (Seconds = %lf)\n", Seconds ); 
-            return( -1 );
-        }
-        if ( ( wYear < 0 ) || ( wYear > 9999 ) ) {
-            printf( "Year Out of Range!\n", wYear );
-            return( -1 );
-        }
-        if ( ( d->Week < 1 ) || ( d->Week > 53 ) ) {
-            printf( "Week Out of Range!\n", d->Week );
-            return( -1 );
-        }
-        if ( ( d->Dow < 1 ) || ( d->Dow > 7 ) ) {
-            printf( "DayOfWeek Out of Range!\n", d->Dow );
-            return( -1 );
-        }
-
-/*
-    } else if ( (ISOFormat == ISO_YYYYDDDTHHMMSS) || (ISOFormat == ISO_YYDDDTHHMMSS) 
-        || (ISOFormat == ISO_YYYYDDD) || (ISOFormat == ISO_YYDDD) ) {
-
-        if ( ( Year < 0 ) || ( Year > 9999 ) ) {
-            printf( "Year Out of Range! (Year = %d)\n", Year );
-            return( -1 );
-        }
-        if ( ( DayOfYear < 1 ) || ( DayOfYear > 365+Lgm_LeapYear(Year) ) ) {
-            printf( "DayOfYear Out of Range! (DayOfYear = %d)\n", DayOfYear );
-            return( -1 );
-        }
-        if ( ( Hours < 0 ) || ( Hours > 23 ) ) {
-            printf( "Hours Out of Range! (Hours = %d)\n", Hours );
-            return( -1 );
-        }
-        if ( ( Minutes < 0 ) || ( Minutes > 59 ) ) {
-            printf( "Minutes Out of Range! (Minutes = %d)\n", Minutes );
-            return( -1 );
-        }
-        if ( ( Seconds < 0 ) || ( Seconds > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
-            printf( "Seconds Out of Range! (Seconds = %lf)\n", Seconds ); 
-            return( -1 );
-        }
-
-
-    } else if ( (ISOFormat = ISO_YYYYWwwDTHHMMSS) || (ISOFormat = ISO_YYYYWwwDTHHMM) 
-            || (ISOFormat = ISO_YYWwwDTHHMMSS) || (ISOFormat = ISO_YYWwwDTHHMM) ) {
-
-        if (ISOFormat == ISO_YYYYWwwDTHHMMSS) Seconds = 0.0; // assume seconds are zero
-        wYear = Year;
-
-        if ( ( wYear < 0 ) || ( wYear > 9999 ) ) {
-            printf( "wYear Out of Range!\n", wYear );
-            return( -1 );
-        }
-        if ( ( Week < 1 ) || ( Week > 53 ) ) {
-            printf( "Week Out of Range!\n", Week );
-            return( -1 );
-        }
-        if ( ( DayOfWeek < 1 ) || ( DayOfWeek > 7 ) ) {
-            printf( "DayOfWeek Out of Range!\n", DayOfWeek );
-            return( -1 );
-        }
-        if ( ( Hours < 0 ) || ( Hours > 23 ) ) {
-            printf( "Hours Out of Range!\n", Hours );
-            return( -1 );
-        }
-        if ( ( Minutes < 0 ) || ( Minutes > 59 ) ) {
-            printf( "Minutes Out of Range!\n", Minutes );
-            return( -1 );
-        }
-        if ( ( Seconds < 0 ) || ( Seconds > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
-            printf( "Seconds Out of Range!\n", Seconds ); 
-            return( -1 );
-        }
-
-    } else if ( (ISOFormat = ISO_YYYYMM) || (ISOFormat = ISO_YYYYMMDD) ) {
-        
-        if ( ISOFormat == ISO_YYYYMM ) Day = 1; //assume day is 1st day of Month
-
-        if ( ( Year < 0 ) || ( Year > 9999 ) ) {
-            printf( "Year Out of Range!\n", Year );
-            return( -1 );
-        }
-        if ( ( Month < 1 ) || ( Month > 12 ) ) {
-            printf( "Month Out of Range!\n", Month );
-            return( -1 );
-        }
-        if ( ( Day < 1 ) || ( Day > 31 ) ) {
-            printf( "Day Out of Range!\n", Day );
-            return( -1 );
-        }
-
-    } else if ( (ISOFormat = ISO_YYYYWww) || (ISOFormat = ISO_YYYYWwwD) ) {
-
-        if ( ISOFormat == ISO_YYYYWww ) DayOfWeek = 1; //assume day is 1st day of Week
-        wYear = Year;
-
-        if ( ( wYear < 0 ) || ( wYear > 9999 ) ) {
-            printf( "Year Out of Range!\n", wYear );
-            return( -1 );
-        }
-        if ( ( Week < 1 ) || ( Week > 53 ) ) {
-            printf( "Week Out of Range!\n", Week );
-            return( -1 );
-        }
-        if ( ( DayOfWeek < 1 ) || ( DayOfWeek > 7 ) ) {
-            printf( "DayOfWeek Out of Range!\n", DayOfWeek );
-            return( -1 );
-        }
-
+    if ( ( d->Year < 0 ) || ( d->Year > 9999 ) ) {
+        printf( "Year Out of Range! (Year = %d)\n", d->Year );
+        InvalidDate = TRUE;
     }
-*/
+    if ( ( d->Doy < 1 ) || ( d->Doy > 365+Lgm_LeapYear(d->Year) ) ) {
+        printf( "DayOfYear Out of Range! (DayOfYear = %d)\n", d->Doy );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Month < 1 ) || ( d->Month > 12 ) ) {
+        printf( "Month Out of Range! (Month = %d)\n", d->Month );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Day < 1 ) || ( d->Day > 31 ) ) {
+        printf( "Day Out of Range! (Day = %d)\n", d->Day );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Hour < 0 ) || ( d->Hour > 23 ) ) {
+        printf( "Hours Out of Range! (Hours = %d)\n", d->Hour );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Minute < 0 ) || ( d->Minute > 59 ) ) {
+        printf( "Minutes Out of Range! (Minutes = %d)\n", d->Minute );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Second < 0 ) || ( d->Second > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
+        printf( "Seconds Out of Range! (Seconds = %lf)\n", d->Second ); 
+        InvalidDate = TRUE;
+    }
+    if ( ( d->wYear < 0 ) || ( d->wYear > 9999 ) ) {
+        printf( "Year Out of Range!\n", d->wYear );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Week < 1 ) || ( d->Week > 53 ) ) {
+        printf( "Week Out of Range!\n", d->Week );
+        InvalidDate = TRUE;
+    }
+    if ( ( d->Dow < 1 ) || ( d->Dow > 7 ) ) {
+        printf( "DayOfWeek Out of Range!\n", d->Dow );
+        InvalidDate = TRUE;
+    }
 
     if (TZDError ) {
         printf( "Unrecognized time zone field!\n" );
+        return(-1);
+    }
+
+    if ( InvalidDate ) {
+        printf( "Invalid Date!\n" );
         return(-1);
     }
 

@@ -919,7 +919,7 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     UTC->Day    = day;
     UTC->Doy    = doy;
     UTC->Dow    = Lgm_DayOfWeek( year, month, day, UTC->DowStr );
-    UTC->Week   = Lgm_ISO_WeekNumber( year, month, day, &UTC->ISO_WeekYear );
+    UTC->Week   = Lgm_ISO_WeekNumber( year, month, day, &UTC->wYear );
     UTC->Time   = Time;
 //printf("Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
 
@@ -1246,6 +1246,7 @@ int Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr ) {
 
 /*
  * Compute the JDN of the start of week 1 for the given year
+ * This relies on the fact that Jan 4 is always in the first week of its year.
  */
 long int Lgm_JDNofWeek1( int Year ) {
     char     str[10];
@@ -1282,15 +1283,23 @@ int Lgm_ISO_WeekNumber( int Year, int Month, int Day, int *ISO_WeekYear ) {
 }
 
 
+/*
+ * Compute the last week of the year. It can be 52 or 53.
+ * This relies on the fact that Dec 28 is always in the last week of its year.
+ */
+int Lgm_MaxWeekNumber( int Year ) {
+    int tmp;
+    return( Lgm_ISO_WeekNumber( Year, 12, 28, &tmp ) );
+}
+
+/*
+ * Convert ISO_WeekYear/Week/Dow back to Date
+ */
 void Lgm_ISO_YearWeekDow_to_Date( int ISO_WeekYear, int Week, int Dow, long int *Date, int *Year, int *Month, int *Day ) {
-
-
     long int    JDN_Week1 = Lgm_JDNofWeek1( ISO_WeekYear );
     long int    JDN       = JDN_Week1 + 7*(Week-1) + Dow - 1;
     double      tmp;
-
     Lgm_jd_to_ymdh( JDN, Date, Year, Month, Day, &tmp);
-
 }
 
 

@@ -456,7 +456,7 @@ typedef struct Lgm_DateTime {
 
     int         Week;       //!< ISO Week number [1-53]
 
-    int         ISO_WeekYear; //!< ISO Year associated with the ISO Week Number (can be different from Year)
+    int         wYear;      //!< ISO Year associated with the ISO Week Number (can be different from Year)
 
     int         Dow;        //!< ISO Day Of Week number [1-7]
 
@@ -796,6 +796,7 @@ void          Lgm_Print_SimpleTime( Lgm_DateTime *DT, int p, char * );
 //int         Lgm_DayofWeek( int, int, int, char *, Lgm_CTrans *c );
 int           Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr );
 long int      Lgm_JDNofWeek1( int Year );
+int           Lgm_MaxWeekNumber( int Year );
 int           Lgm_ISO_WeekNumber( int Year, int Month, int Day, int *ISO_WeekYear );
 void          Lgm_ISO_YearWeekDow_to_Date( int ISO_WeekYear, int Week, int Dow, long int *Date, int *Year, int *Month, int *Day );
 double        Lgm_RemapTime( double Time, double SecondsInADay );
