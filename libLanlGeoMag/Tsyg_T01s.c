@@ -100,9 +100,9 @@ static _CB_DTHETA           CB_DTHETA;
 
 /*
  *  SIN(PS) and COS(PS) are calculated 6 times each. This is very wasteful
- *  especially since we have it already. Lets pass sin_psi and cos_psi as globals....
+ *  especially since we have it already. Lets pass T01_sin_psi and T01_cos_psi as globals....
  */
-double    sin_psi, cos_psi;
+double    T01_sin_psi, T01_cos_psi;
 
 
 /*
@@ -939,7 +939,7 @@ void    T01S_DEFORMED( int IOPT, double PS, double X, double Y, double Z,
 
 
 
-    SPS = sin_psi; CPS = cos_psi;
+    SPS = T01_sin_psi; CPS = T01_cos_psi;
     R2    =  X*X + Y*Y + Z*Z;
     R     =  sqrt( R2 ); ooR = 1.0/R;
     ZR    =  Z*ooR; ZR2 = ZR*ZR; 
@@ -1884,8 +1884,8 @@ void    T01S_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZCh
      *  if PS has changed we need to recompute things
      */
     if ( PSChanged || !DoneJ[J] ) {
-        CPS  = cos_psi;
-        SPS  = sin_psi;
+        CPS  = T01_cos_psi;
+        SPS  = T01_sin_psi;
         S3PS = 2.0*CPS;
         PST1[J] = PS*A[85];
         PST2[J] = PS*A[86];
@@ -2180,7 +2180,7 @@ void     T01S_SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double 
 
 
     //CPS = cos(PS); SPS = sin(PS);
-    CPS = cos_psi; SPS = sin_psi;
+    CPS = T01_cos_psi; SPS = T01_sin_psi;
 
     XT = X*CPS - Z*SPS;
     ZT = Z*CPS + X*SPS;
@@ -2905,7 +2905,7 @@ void    T01S_RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, d
     FAC_SC = X_SCp13;
 
     //CPS = cos(PS); SPS = sin(PS);
-    CPS = cos_psi; SPS = sin_psi;
+    CPS = T01_cos_psi; SPS = T01_sin_psi;
 
     S3PS = 2.0*CPS;
 
@@ -3065,7 +3065,7 @@ void    T01S_DIPOLE( double PS, double X, double Y, double Z, double *BX, double
     double    SPS, CPS, P, U, V, T, s, s2, s3, s5, Q;
 
     //SPS = sin(PS); CPS = cos(PS);
-    SPS = sin_psi; CPS = cos_psi;
+    SPS = T01_sin_psi; CPS = T01_cos_psi;
     P = X*X;
     U = Z*Z;
     V = 3.0*Z*X;
