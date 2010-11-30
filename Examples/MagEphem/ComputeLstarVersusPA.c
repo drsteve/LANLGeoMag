@@ -33,7 +33,7 @@ int Colors[9] = { 224, 209, 21, 46, 55, 104, 22, 185, 23 };
  *              MagEphemInfo:  Structure used to input and output parameters/settings/results to/from routine.
  *  
  */
-void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo ) {
+void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
     Lgm_LstarInfo 	*LstarInfo, *LstarInfo2, *LstarInfo3;
     Lgm_Vector      v1, v2, v3, vv1, Bvec;
@@ -124,7 +124,11 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                 LstarInfo3 = Lgm_CopyLstarInfo( LstarInfo );
 
                 // colorize the diagnostic messages.
-                sprintf( LstarInfo3->PreStr, "\033[38;5;%dm", Colors[i%9]); sprintf( LstarInfo3->PostStr, "\033[0m");
+                if ( Colorize ){
+                    sprintf( LstarInfo3->PreStr, "\033[38;5;%dm", Colors[i%9]); sprintf( LstarInfo3->PostStr, "\033[0m");
+                } else {
+                    LstarInfo3->PreStr[0] = '\0'; LstarInfo3->PostStr[0] = '\0';
+                }
                 PreStr = LstarInfo3->PreStr; PostStr = LstarInfo3->PostStr;
 
                 /*

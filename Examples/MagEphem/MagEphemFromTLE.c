@@ -14,7 +14,7 @@
 
 #define KP_DEFAULT 0
 
-void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
+void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo );
 void WriteMagEphemHeader( FILE *fp, char *Line0, int IdNumber, char *IntDesig2, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
@@ -39,8 +39,8 @@ int main( int argc, char *argv[] ){
     char            *InputFile   = "input.txt";
     char            *OutputFile  = "output.txt";
     char            OutputFilename[1024];
-    char            IntModel[20], ExtModel[20], opt;
-    int             AppendMode, UseEop;
+    char            IntModel[20], ExtModel[20], opt, ColorizeStr[20];
+    int             AppendMode, UseEop, Colorize;
     FILE            *fp;
     FILE            *fp_MagEphem;
 
@@ -78,6 +78,12 @@ int main( int argc, char *argv[] ){
         fscanf( fp, "%*[^:]:%d", &nAlpha );
         for (i=0; i<nAlpha; i++ ) fscanf( fp, "%lf", &Alpha[i]);
         fscanf( fp, "%*[^:]:%lf", &FootpointHeight );
+        fscanf( fp, "%*[^:]:%s", ColorizeStr );
+        if ( !strcmp(ColorizeStr, "True") ) {
+            Colorize = TRUE;
+        } else {
+            Colorize = FALSE;
+        }
         StartDate = sY*10000 + sM*100 + sD;
         StartUT   = sh + sm/60.0 + ss/3600.0;
         EndDate   = eY*10000 + eM*100 + eD;
@@ -97,7 +103,8 @@ int main( int argc, char *argv[] ){
     printf("ExtModel        = %s\n", ExtModel);
     printf("Kp              = %g\n", Kp);
     printf("Dst             = %g\n", Dst);
-    printf("FootpointHeight = %g", FootpointHeight);
+    printf("FootpointHeight = %g\n", FootpointHeight);
+    printf("Colorize        = %d\n", Colorize);
     //exit(0);
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -290,7 +297,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
          * These quantities are stored in the MagEphemInfo Structure
          */
         printf("\n\n\nDate, ut = %ld %g   Ugsm = %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
-        ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
+        ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
         WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
 

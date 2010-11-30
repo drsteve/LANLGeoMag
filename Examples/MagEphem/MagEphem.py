@@ -123,9 +123,12 @@ parser.add_option("-e", "--End",      dest="End_ISO",
                         help="End date/time in ISO format",
                         metavar="YYYY-MM-DDTHH:MM:SS")
 
-parser.add_option("-c", "--Cadence",  dest="Cadence_ISO",    
+parser.add_option("-d", "--Delta",  dest="Delta_ISO",    
                         help="Time increment in ISO format",
                         metavar="HH:MM:SS")
+
+parser.add_option("-c", "--Colorize",   action="store_true", dest="Colorize", 
+                        help="Print messages out in different colors when running multi-threaded.")
 
 parser.add_option("-p", "--PitchAngles",    dest="PitchAngles",  
                         help="Range of pitch angles to compute. Default is \"5,90,5\" which gives 18 pitch angles from 5 to 90 degrees in 5 degree increments.",
@@ -179,6 +182,10 @@ print options
 print args
 
 
+if options.Colorize:
+    Colorize = True
+else:
+    Colorize = False
 
 if options.NoPitchAngles:
     DoPitchAngles = False
@@ -317,12 +324,12 @@ else:
 
 
 # Cadence
-if options.Cadence_ISO == None:
+if options.Delta_ISO == None:
     print 'Must provide a cadence or time increment via -c option\n'
     parser.print_help()
     exit()
 else:
-    cad = datetime.datetime.strptime(options.Cadence_ISO, "%H:%M:%S")
+    cad = datetime.datetime.strptime(options.Delta_ISO, "%H:%M:%S")
     delta = int(cad.hour*3600 + cad.minute*60 + cad.second)
     #print delta
 
@@ -369,6 +376,7 @@ for t in range(s,e,delta):
         f.write('Dst:'+str(Dst)+'\n') # The external field model to use
         f.write('PitchAngles:'+PA_Str+'\n')
         f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
+        f.write('Colorize:'+str(Colorize)+'\n')
         f.close()
 
         #exit()
