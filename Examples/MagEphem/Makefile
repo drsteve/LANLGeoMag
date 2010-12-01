@@ -6,9 +6,12 @@ CC        = gcc
 
 FILES1    =  ComputeLstarVersusPA.c MagEphemWrite.o
 
-all   : LstarVersusPA
+all   : MagEphemFromTLE MagEphemFromFile
 
-LstarVersusPA : Makefile $(FILES1) MagEphemFromTLE.o
+MagEphemFromFile : Makefile $(FILES1) MagEphemFromFile.o
+	$(CC) $(FILES1) MagEphemFromFile.o $(LIBS) $(CFLAGS) -o MagEphemFromFile
+
+MagEphemFromTLE : Makefile $(FILES1) MagEphemFromTLE.o
 	$(CC) $(FILES1) MagEphemFromTLE.o $(LIBS) $(CFLAGS) -o MagEphemFromTLE
 
 

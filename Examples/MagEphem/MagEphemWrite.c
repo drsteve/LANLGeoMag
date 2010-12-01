@@ -581,12 +581,12 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
 
     // column header
     fprintf( fp, "%91s",  "#  +------------------------------------ Date and Time -----------------------------------+" );
-    fprintf( fp, " %38s",  " +--- Geocentric Geographic Coords --+" );
-    fprintf( fp, " %38s",  " +---- Geodetic Geographic Coords ---+" );
-    fprintf( fp, " %38s",  " +--------- GSM Coordinates ---------+" );
-    fprintf( fp, " %38s",  " +---------- SM Coordinates ---------+" );
-    fprintf( fp, " %38s",  " +------- GEI 2000 Coordinates ------+" );
-    fprintf( fp, " %38s",  " +---------- GSE Coordinates --------+" );
+    fprintf( fp, " %41s",  " +--- Geocentric Geographic Coords --+" );
+    fprintf( fp, " %41s",  " +---- Geodetic Geographic Coords ---+" );
+    fprintf( fp, " %41s",  " +--------- GSM Coordinates ---------+" );
+    fprintf( fp, " %41s",  " +---------- SM Coordinates ---------+" );
+    fprintf( fp, " %41s",  " +------- GEI 2000 Coordinates ------+" );
+    fprintf( fp, " %41s",  " +---------- GSE Coordinates --------+" );
     fprintf( fp, " %13s",  " +-Int Model-+" );
     fprintf( fp, " %13s",  " +-Ext Model-+" );
     fprintf( fp, " %6s",   " +-Kp-+" );
@@ -619,29 +619,29 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, " %16s", "Julian Date" );
     fprintf( fp, " %15s", "GPS Time" );
 
-    fprintf( fp, " %12s", "Xgeo" );
-    fprintf( fp, " %12s", "Ygeo" );
-    fprintf( fp, " %12s", "Zgeo" );
+    fprintf( fp, " %13s", "Xgeo" );
+    fprintf( fp, " %13s", "Ygeo" );
+    fprintf( fp, " %13s", "Zgeo" );
 
-    fprintf( fp, " %12s", "GeodLat" );
-    fprintf( fp, " %12s", "GeodLon" );
-    fprintf( fp, " %12s", "GeodHeight" );
+    fprintf( fp, " %13s", "GeodLat" );
+    fprintf( fp, " %13s", "GeodLon" );
+    fprintf( fp, " %13s", "GeodHeight" );
 
-    fprintf( fp, " %12s", "Xgsm" );
-    fprintf( fp, " %12s", "Ygsm" );
-    fprintf( fp, " %12s", "Zgsm" );
+    fprintf( fp, " %13s", "Xgsm" );
+    fprintf( fp, " %13s", "Ygsm" );
+    fprintf( fp, " %13s", "Zgsm" );
 
-    fprintf( fp, " %12s", "Xsm" );
-    fprintf( fp, " %12s", "Ysm" );
-    fprintf( fp, " %12s", "Zsm" );
+    fprintf( fp, " %13s", "Xsm" );
+    fprintf( fp, " %13s", "Ysm" );
+    fprintf( fp, " %13s", "Zsm" );
 
-    fprintf( fp, " %12s", "Xgei" );
-    fprintf( fp, " %12s", "Ygei" );
-    fprintf( fp, " %12s", "Zgei" );
+    fprintf( fp, " %13s", "Xgei" );
+    fprintf( fp, " %13s", "Ygei" );
+    fprintf( fp, " %13s", "Zgei" );
 
-    fprintf( fp, " %12s", "Xgse" );
-    fprintf( fp, " %12s", "Ygse" );
-    fprintf( fp, " %12s", "Zgse" );
+    fprintf( fp, " %13s", "Xgse" );
+    fprintf( fp, " %13s", "Ygse" );
+    fprintf( fp, " %13s", "Zgse" );
 
     fprintf( fp, " %14s",  "Int Model" );
     fprintf( fp, " %14s",  "Ext Model" );
@@ -732,29 +732,29 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, " %16s", "Days" );
     fprintf( fp, " %15s", "Seconds" );
 
-    fprintf( fp, " %12s", "Re" ); // Geocentric GEO
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %13s", "Re" ); // Geocentric GEO
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %12s", "Deg." ); // Geodetic GEO
-    fprintf( fp, " %12s", "Deg." );
-    fprintf( fp, " %12s", "km" );
+    fprintf( fp, " %13s", "Deg." ); // Geodetic GEO
+    fprintf( fp, " %13s", "Deg." );
+    fprintf( fp, " %13s", "km" );
 
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
     fprintf( fp, " %14s",  " " );  // Int Model
     fprintf( fp, " %14s",  " " );  // Ext Model
@@ -868,33 +868,33 @@ void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, dou
 
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );
-    fprintf( fp, " %12g", v.x );     // Xgeo
-    fprintf( fp, " %12g", v.y );     // Ygeo
-    fprintf( fp, " %12g", v.z );     // Zgeo
+    fprintf( fp, " %13.6lf", v.x );     // Xgeo
+    fprintf( fp, " %13.6lf", v.y );     // Ygeo
+    fprintf( fp, " %13.6lf", v.z );     // Zgeo
 
     Lgm_WGS84_to_GEOD( &v, &GeodLat, &GeodLong, &GeodHeight );
-    fprintf( fp, " %12g", GeodLat );                // Geod Lat   of SC
-    fprintf( fp, " %12g", GeodLong );               // Geod Long
-    fprintf( fp, " %12g", GeodHeight );             // Geod Height
+    fprintf( fp, " %13.6lf", GeodLat );                // Geod Lat   of SC
+    fprintf( fp, " %13.6lf", GeodLong );               // Geod Long
+    fprintf( fp, " %13.4lf", GeodHeight );             // Geod Height
 
-    fprintf( fp, " %12g", m->P.x );  // Xgsm
-    fprintf( fp, " %12g", m->P.y );  // Ygsm
-    fprintf( fp, " %12g", m->P.z );  // Zgsm
+    fprintf( fp, " %13.6lf", m->P.x );  // Xgsm
+    fprintf( fp, " %13.6lf", m->P.y );  // Ygsm
+    fprintf( fp, " %13.6lf", m->P.z );  // Zgsm
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_SM, c );
-    fprintf( fp, " %12g", v.x );        // Xsm
-    fprintf( fp, " %12g", v.y );        // Ysm
-    fprintf( fp, " %12g", v.z );        // Zsm
+    fprintf( fp, " %13.6lf", v.x );        // Xsm
+    fprintf( fp, " %13.6lf", v.y );        // Ysm
+    fprintf( fp, " %13.6lf", v.z );        // Zsm
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEI2000, c );
-    fprintf( fp, " %12g", v.x );        // Xgei
-    fprintf( fp, " %12g", v.y );        // Ygei
-    fprintf( fp, " %12g", v.z );        // Zgei
+    fprintf( fp, " %13.6lf", v.x );        // Xgei
+    fprintf( fp, " %13.6lf", v.y );        // Ygei
+    fprintf( fp, " %13.6lf", v.z );        // Zgei
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GSE, c );
-    fprintf( fp, " %12g", v.x );        // Xgse
-    fprintf( fp, " %12g", v.y );        // Ygse
-    fprintf( fp, " %12g", v.z );        // Zgse
+    fprintf( fp, " %13.6lf", v.x );        // Xgse
+    fprintf( fp, " %13.6lf", v.y );        // Ygse
+    fprintf( fp, " %13.6lf", v.z );        // Zgse
 
     if ( !strcmp( ExtModel, "IGRF" ) || !strcmp( ExtModel, "CDIP" ) || !strcmp( ExtModel, "EDIP" ) ) {
         // If our "external model is just a dipole or igrf, then "internal doesnt really mean anything...)
