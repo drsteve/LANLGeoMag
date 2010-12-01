@@ -145,6 +145,11 @@ parser.add_option("-a", "--Append",   action="store_true", dest="AppendMode",
                         help="Append results to file (specified with the -o option).")
 
 
+parser.add_option("-i", "--InputFile",   dest="InputFile", 
+                        help="If specified, the times and positions to compute the magnetic ephemeris for will be read from INFILE. "\
+                             "INFILE should have 4 columns: ISO DateTime String, and GEI_J2000 cartesian components in units of Re.",    
+                        metavar="INFILE")
+
 parser.add_option("-o", "--OutputFile",   dest="OutputFile", 
                         help="Filename to dump output to. Stdout is assumed if "\
                              "no file given.",    
@@ -163,7 +168,7 @@ parser.add_option("-I", "--InternalFieldModel",   dest="IntFieldModel",
 parser.add_option("-E", "--ExternalFieldModel",   dest="ExtFieldModel", 
                         help="Internal field model to use. Valid choices are:\n"\
                              "   T87 - Tsyganenko 1987 model.\n"\
-                             "   T89 - Tsyganenko 1989 model."\
+                             "   T89 - Tsyganenko 1989 model.\n"\
                              "   CDIP - Centered Dipole (parameters taken from\n"\
                              "          first 3 IGRF coeffs.)\n"
                              "   EDIP - Eccentric dipole (parameters taken from\n"\
@@ -259,18 +264,12 @@ print PA_Str
 #
 # Set variables based on what we got on the command line
 #
-if options.SatNumber != None:
-    ParseMethod     = ParseMethods.UseSatelliteNumber
-    SatelliteNumber = options.SatNumber
-    SatNum          = int( SatelliteNumber )
-#elif options.ID != None:
-#    ParseMethod   = ParseMethods.UseIntDesignator
-#    IntDesignator = options.ID
-else:
-    print 'Must specify object catalog number via -n option.\n'
-    parser.print_help()
-    exit()
 
+if options.InputFile != None:
+    ReadFromFile = True
+    InputFile = options.InputFile
+else:
+    ReadFromFile = False
 
 if options.OutputFile == None:
     print 'Must provide an output file via -o option\n'
@@ -301,96 +300,146 @@ if options.ExtFieldModel != None:
     ExtFieldModel = options.ExtFieldModel
 
 
-# Start Date/Time
-if options.Start_ISO == None:
-    print 'Must provide a start date/time via -s option\n'
-    parser.print_help()
-    exit()
+
+if ReadFromFile == True:
+        # 
+        # Find correct Kp  and Dst
+        # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
+        # We are letting MagEphemFromFile do the entire file which means that there will be a problem
+        # with Kp/Dst stuff. Maybe we still want to do one line at a time.
+        #
+        Kp  = 4.3
+        Dst = -20 # nT
+
+
+        # 
+        # Add other information to the "input.txt" file. This is a slightly
+        # different format to the one used for tle's
+        #
+        with open("input.txt", "w") as f:
+            f.write('InputFile:'+InputFile+'\n')    # Input file
+            f.write('OutputFile:'+OutputFile+'\n')    # Output file
+            f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
+            f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
+            f.write('Kp:'+str(Kp)+'\n') # The external field model to use
+            f.write('Dst:'+str(Dst)+'\n') # The external field model to use
+            f.write('PitchAngles:'+PA_Str+'\n')
+            f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
+            f.write('Colorize:'+str(Colorize)+'\n')
+            f.close()
+
+            #exit()
+
+        # 
+        # Add start and end times to input.txt
+        #
+        if Append:
+            os.system('./MagEphemFromFile -a')
+        else:
+            os.system('./MagEphemFromFile')
+            Append = True
+
 else:
-    sdt = datetime.datetime.strptime(options.Start_ISO, "%Y-%m-%dT%H:%M:%S")
-    s = int(time.mktime(sdt.timetuple()))
-    #print s
 
-
-# End Date/Time
-if options.End_ISO == None:
-    print 'Must provide a end date/time via -e option\n'
-    parser.print_help()
-    exit()
-else:
-    edt = datetime.datetime.strptime(options.End_ISO, "%Y-%m-%dT%H:%M:%S")
-    e = int(time.mktime(edt.timetuple()))
-    #print e
-
-
-# Cadence
-if options.Delta_ISO == None:
-    print 'Must provide a cadence or time increment via -c option\n'
-    parser.print_help()
-    exit()
-else:
-    cad = datetime.datetime.strptime(options.Delta_ISO, "%H:%M:%S")
-    delta = int(cad.hour*3600 + cad.minute*60 + cad.second)
-    #print delta
-
-
-a = int(SatNum/1000)
-
-
-for t in range(s,e,delta):
-    dt    = datetime.datetime.fromtimestamp(t)
-    iso   = dt.isoformat()
-
-
-
-    # 
-    # Find correct TLE and dump to input.txt
-    #
-    b     = dt.year
-    c     = b-1
-    fname1 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, b )
-    fname2 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, c )
-    command = str.format('./FindTLEforGivenTime.py -n {0} -d {1} -o input.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
-    print command
-    os.system(command)
-
-    # 
-    # Find correct Kp  and Dst
-    # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
-    #
-    Kp  = 4.3
-    Dst = -20 # nT
-
-
-    # 
-    # Add other information to the "input.txt file
-    #
-    with open("input.txt", "a") as f:
-        f.write('OutputFile:'+OutputFile+'\n')    # Output file
-        f.write('ISO Start Date/Time:'+iso+'\n')           # Start Date/Time
-        f.write('ISO End   Date/Time:'+iso+'\n')           # End   Date/Time
-        f.write('Cadence in seconds:'+str(delta)+'\n')          # Cadence in seconds
-        f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
-        f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
-        f.write('Kp:'+str(Kp)+'\n') # The external field model to use
-        f.write('Dst:'+str(Dst)+'\n') # The external field model to use
-        f.write('PitchAngles:'+PA_Str+'\n')
-        f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
-        f.write('Colorize:'+str(Colorize)+'\n')
-        f.close()
-
-        #exit()
-
-    # 
-    # Add start and end times to input.txt
-    #
-    if Append:
-        os.system('./MagEphemFromTLE -a')
+    if options.SatNumber != None:
+        ParseMethod     = ParseMethods.UseSatelliteNumber
+        SatelliteNumber = options.SatNumber
+        SatNum          = int( SatelliteNumber )
     else:
-        os.system('./MagEphemFromTLE')
-        Append = True
+        print 'Must specify object catalog number via -n option.\n'
+        parser.print_help()
+        exit()
+
+    # Start Date/Time
+    if options.Start_ISO == None:
+        print 'Must provide a start date/time via -s option\n'
+        parser.print_help()
+        exit()
+    else:
+        sdt = datetime.datetime.strptime(options.Start_ISO, "%Y-%m-%dT%H:%M:%S")
+        s = int(time.mktime(sdt.timetuple()))
+        #print s
+
+
+    # End Date/Time
+    if options.End_ISO == None:
+        print 'Must provide a end date/time via -e option\n'
+        parser.print_help()
+        exit()
+    else:
+        edt = datetime.datetime.strptime(options.End_ISO, "%Y-%m-%dT%H:%M:%S")
+        e = int(time.mktime(edt.timetuple()))
+        #print e
+
+
+    # Cadence
+    if options.Delta_ISO == None:
+        print 'Must provide a cadence or time increment via -c option\n'
+        parser.print_help()
+        exit()
+    else:
+        cad = datetime.datetime.strptime(options.Delta_ISO, "%H:%M:%S")
+        delta = int(cad.hour*3600 + cad.minute*60 + cad.second)
+        #print delta
+
+
+    a = int(SatNum/1000)
+
+
+    for t in range(s,e,delta):
+        dt    = datetime.datetime.fromtimestamp(t)
+        iso   = dt.isoformat()
+
+
+
+        # 
+        # Find correct TLE and dump to input.txt
+        #
+        b     = dt.year
+        c     = b-1
+        fname1 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, b )
+        fname2 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, c )
+        command = str.format('./FindTLEforGivenTime.py -n {0} -d {1} -o input.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
+        print command
+        os.system(command)
+
+        # 
+        # Find correct Kp  and Dst
+        # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
+        #
+        Kp  = 4.3
+        Dst = -20 # nT
+
+
+        # 
+        # Add other information to the "input.txt file
+        #
+        with open("input.txt", "a") as f:
+            f.write('OutputFile:'+OutputFile+'\n')    # Output file
+            f.write('ISO Start Date/Time:'+iso+'\n')           # Start Date/Time
+            f.write('ISO End   Date/Time:'+iso+'\n')           # End   Date/Time
+            f.write('Cadence in seconds:'+str(delta)+'\n')          # Cadence in seconds
+            f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
+            f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
+            f.write('Kp:'+str(Kp)+'\n') # The external field model to use
+            f.write('Dst:'+str(Dst)+'\n') # The external field model to use
+            f.write('PitchAngles:'+PA_Str+'\n')
+            f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
+            f.write('Colorize:'+str(Colorize)+'\n')
+            f.close()
+
+            #exit()
+
+        # 
+        # Add start and end times to input.txt
+        #
+        if Append:
+            os.system('./MagEphemFromTLE -a')
+        else:
+            os.system('./MagEphemFromTLE')
+            Append = True
+            
         
-    
 
 
 

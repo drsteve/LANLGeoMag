@@ -764,8 +764,7 @@ void        Lgm_WGS84_to_GEOD( Lgm_Vector *uin, double *GeodLat, double *GeodLon
 void        Lgm_WGS84_to_GeodHeight( Lgm_Vector *uin, double *GeodHieght );
 void        Lgm_GEOD_to_WGS84( double GeodLat, double GeodLong, double GeodHieght, Lgm_Vector *v );
 void        Lgm_Nutation( double T_TT, double nTerms, double *dPSi, double *dEps );
-//void        ParseTimeStr( char *Str, int *Year, int *Month, int *Day, int *hh, int *mm, double *ss, long int *Date, double *H );
-int         ParseTimeString( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c );
+int         IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c );
 int         MonthStrToNum( char *str );
 char       *Lgm_StrToLower( char *str, int nmax );
 char       *Lgm_StrToUpper( char *str, int nmax );

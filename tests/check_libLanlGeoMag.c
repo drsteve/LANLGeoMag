@@ -40,7 +40,7 @@ END_TEST // END Leap seconds test case
 
 Suite *lgm_suite(void) {
 
-  Suite *s = suite_create("LGM");
+  Suite *s = suite_create("LEAP_SECOND_TESTS");
 
   TCase *tc_leapseconds = tcase_create("Leap seconds");
   tcase_add_checked_fixture(tc_leapseconds, leapsecond_setup, leapsecond_teardown);
@@ -52,15 +52,23 @@ Suite *lgm_suite(void) {
 
 }
 
-int main(void)
-{
-  int      number_failed;
-  Suite   *s = lgm_suite();
-  SRunner *sr = srunner_create(s);
+int main(void) {
 
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
+    int      number_failed;
+    Suite   *s = lgm_suite();
+    SRunner *sr = srunner_create(s);
 
-  return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    printf("\n\n\n======================================================\n");
+    printf("\n                    UNIT TESTS                   \n");
+    printf("    Note: Some reported errors may be normal. For\n");
+    printf("    example, we may be testing to see if the code \n");
+    printf("    properly catches errors (e.g. like invalid \n");
+    printf("    dates etc.)\n\n");
+    printf("\n======================================================\n\n");
+    srunner_run_all(sr, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+
+    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+
 }

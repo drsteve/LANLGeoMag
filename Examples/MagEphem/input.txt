@@ -1,5 +1,5 @@
 InputFile:TEST_FILE.txt
-OutputFile:JSON.txt
+OutputFile:CRAP.txt
 Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
