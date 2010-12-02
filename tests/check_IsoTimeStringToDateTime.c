@@ -232,8 +232,8 @@ START_TEST(test_ISO_05) {
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86401.0)<1e-10), "For string %s DaySeconds should be 86401, got %g", TimeString, d.DaySeconds );
     fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
-    fail_unless( (d.TZD_hh  == 7),       "For string %s TZD_hh should be 3, got %d", TimeString, d.TZD_hh );
-    fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 30, got %d", TimeString, d.TZD_mm );
+    fail_unless( (d.TZD_hh  == 7),       "For string %s TZD_hh should be 7, got %d", TimeString, d.TZD_hh );
+    fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
 
     return;
@@ -353,8 +353,8 @@ START_TEST(test_ISO_08) {
     fail_unless( (fabs(d.Second-56.0)<1e-12),   "For string %s Second should be 56, got %lf", TimeString, d.Second );
     fail_unless( (d.Week   == 53),       "For string %s Week should be 53, got %d", TimeString, d.Week );
     fail_unless( (d.wYear  == 2004),     "For string %s Iso Week Year should be 2004, got %d", TimeString, d.wYear );
-    fail_unless( (d.Dow    == 6),        "For string %s Day of Week should be 7, got %d", TimeString, d.Dow );
-    fail_unless( !strcmp(d.DowStr,"Sat"),"For string %s DowStr should be \"Sun\", got \"%s\"", TimeString, d.DowStr );
+    fail_unless( (d.Dow    == 6),        "For string %s Day of Week should be 6, got %d", TimeString, d.Dow );
+    fail_unless( !strcmp(d.DowStr,"Sat"),"For string %s DowStr should be \"Sat\", got \"%s\"", TimeString, d.DowStr );
     fYear = 2005.0 + (1.0 - 1.0 + t/24.0)/365.0;
     fail_unless( (fabs(d.fYear-fYear)<1e-12), "For string %s fYear should be %.10lf, got %.10lf", TimeString, fYear, d.fYear );
     JD = 2453371.5+t/24.0;
@@ -362,7 +362,7 @@ START_TEST(test_ISO_08) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
     fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
@@ -405,8 +405,8 @@ START_TEST(test_ISO_09) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
-    fail_unless( (d.TZD_hh  == 6),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_hh  == 6),       "For string %s TZD_hh should be 6, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
 
@@ -449,7 +449,7 @@ START_TEST(test_ISO_10) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
     fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
@@ -494,7 +494,7 @@ START_TEST(test_ISO_11) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
     fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
@@ -516,8 +516,8 @@ START_TEST(test_ISO_12) {
     Result = IsoTimeStringToDateTime( TimeString, &d, c );
 
     fail_unless( (Result   == 1),        "Error returned by IsoTimeStringToDateTime()");
-    fail_unless( (d.Date   == 20050101), "For string %s Year should be 20001201, got %ld", TimeString, d.Date );
-    fail_unless( (d.Year   == 2005),     "For string %s Year should be 2000, got %d", TimeString, d.Year );
+    fail_unless( (d.Date   == 20050101), "For string %s Year should be 20050101, got %ld", TimeString, d.Date );
+    fail_unless( (d.Year   == 2005),     "For string %s Year should be 2005, got %d", TimeString, d.Year );
     fail_unless( (d.Month  == 1),        "For string %s Month should be 1, got %d", TimeString, d.Month );
     fail_unless( (d.Day    == 1),       "For string %s Day should be 1, got %d", TimeString, d.Day );
     fail_unless( (d.Doy    == 1),      "For string %s Doy should be 1, got %d", TimeString, d.Doy );
@@ -537,7 +537,7 @@ START_TEST(test_ISO_12) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
     fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
@@ -572,7 +572,7 @@ START_TEST(test_ISO_13) {
     fail_unless( (d.Minute == 0),       "For string %s Minute should be 0, got %d", TimeString, d.Minute );
     fail_unless( (fabs(d.Second-0.0)<1e-12),   "For string %s Second should be 0, got %lf", TimeString, d.Second );
     fail_unless( (d.Week   == 52),       "For string %s Week should be 52, got %d", TimeString, d.Week );
-    fail_unless( (d.wYear  == 1999),     "For string %s Iso Week Year should be 2003, got %d", TimeString, d.wYear );
+    fail_unless( (d.wYear  == 1999),     "For string %s Iso Week Year should be 1999, got %d", TimeString, d.wYear );
     fail_unless( (d.Dow    == 6),        "For string %s Day of Week should be 6, got %d", TimeString, d.Dow );
     fail_unless( !strcmp(d.DowStr,"Sat"),"For string %s DowStr should be \"Sat\", got \"%s\"", TimeString, d.DowStr );
     fYear = 2000.0 + (1.0 - 1.0 + t/24.0)/365.0;
@@ -582,7 +582,7 @@ START_TEST(test_ISO_13) {
     T = (JD-2451545.0)/36525.0;
     fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
     fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
-    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be -1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
     fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
     fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
     fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
@@ -591,6 +591,93 @@ START_TEST(test_ISO_13) {
 }
 END_TEST
 
+
+START_TEST(test_ISO_14) {
+
+    int          Result;
+    char         TimeString[128];
+    double       t, fYear, JD, T;
+    Lgm_DateTime d;
+
+    // This should be 19861215. 
+    sprintf(TimeString, "861215");
+    printf("Converting ISO string: %s\n", TimeString);
+    Result = IsoTimeStringToDateTime( TimeString, &d, c );
+
+    fail_unless( (Result   == 1),        "Error returned by IsoTimeStringToDateTime()");
+    fail_unless( (d.Date   == 19861215), "For string %s Year should be 19861215, got %ld", TimeString, d.Date );
+    fail_unless( (d.Year   == 1986),     "For string %s Year should be 1986, got %d", TimeString, d.Year );
+    fail_unless( (d.Month  == 12),        "For string %s Month should be 12, got %d", TimeString, d.Month );
+    fail_unless( (d.Day    == 15),       "For string %s Day should be 15, got %d", TimeString, d.Day );
+    fail_unless( (d.Doy    == 349),      "For string %s Doy should be 349, got %d", TimeString, d.Doy );
+    t = 0.0 + 0.0/60.0 + 0.0/3600.0;
+    fail_unless( (fabs(d.Time-t)<1e-12), "For string %s Time should be %.10lf, got %.10lf", TimeString, t, d.Time );
+    fail_unless( (d.Hour   == 0),        "For string %s Hour should be 0, got %d", TimeString, d.Hour );
+    fail_unless( (d.Minute == 0),       "For string %s Minute should be 0, got %d", TimeString, d.Minute );
+    fail_unless( (fabs(d.Second-0.0)<1e-12),   "For string %s Second should be 0, got %lf", TimeString, d.Second );
+    fail_unless( (d.Week   == 51),       "For string %s Week should be 51, got %d", TimeString, d.Week );
+    fail_unless( (d.wYear  == 1986),     "For string %s Iso Week Year should be 1986, got %d", TimeString, d.wYear );
+    fail_unless( (d.Dow    == 1),        "For string %s Day of Week should be 1, got %d", TimeString, d.Dow );
+    fail_unless( !strcmp(d.DowStr,"Mon"),"For string %s DowStr should be \"Mon\", got \"%s\"", TimeString, d.DowStr );
+    fYear = 1986.0 + (349.0 - 1.0 + t/24.0)/365.0;
+    fail_unless( (fabs(d.fYear-fYear)<1e-12), "For string %s fYear should be %.10lf, got %.10lf", TimeString, fYear, d.fYear );
+    JD = 2446779.5+t/24.0;
+    fail_unless( (fabs(d.JD-JD)<1e-12),       "For string %s JD should be %.10lf, got %.10lf", TimeString, JD, d.JD );
+    T = (JD-2451545.0)/36525.0;
+    fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
+    fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
+    fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
+    fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
+
+    return;
+}
+END_TEST
+
+
+START_TEST(test_ISO_15) {
+
+    int          Result;
+    char         TimeString[128];
+    double       t, fYear, JD, T;
+    Lgm_DateTime d;
+
+    // This should be 19860123. 
+    sprintf(TimeString, "86023");
+    printf("Converting ISO string: %s\n", TimeString);
+    Result = IsoTimeStringToDateTime( TimeString, &d, c );
+
+    fail_unless( (Result   == 1),        "Error returned by IsoTimeStringToDateTime()");
+    fail_unless( (d.Date   == 19860123), "For string %s Year should be 19860123, got %ld", TimeString, d.Date );
+    fail_unless( (d.Year   == 1986),     "For string %s Year should be 1986, got %d", TimeString, d.Year );
+    fail_unless( (d.Month  == 1),        "For string %s Month should be 1, got %d", TimeString, d.Month );
+    fail_unless( (d.Day    == 23),       "For string %s Day should be 23, got %d", TimeString, d.Day );
+    fail_unless( (d.Doy    == 349),      "For string %s Doy should be 349, got %d", TimeString, d.Doy );
+    t = 0.0 + 0.0/60.0 + 0.0/3600.0;
+    fail_unless( (fabs(d.Time-t)<1e-12), "For string %s Time should be %.10lf, got %.10lf", TimeString, t, d.Time );
+    fail_unless( (d.Hour   == 0),        "For string %s Hour should be 0, got %d", TimeString, d.Hour );
+    fail_unless( (d.Minute == 0),       "For string %s Minute should be 0, got %d", TimeString, d.Minute );
+    fail_unless( (fabs(d.Second-0.0)<1e-12),   "For string %s Second should be 0, got %lf", TimeString, d.Second );
+    fail_unless( (d.Week   == 4),       "For string %s Week should be 4, got %d", TimeString, d.Week );
+    fail_unless( (d.wYear  == 1986),     "For string %s Iso Week Year should be 1986, got %d", TimeString, d.wYear );
+    fail_unless( (d.Dow    == 4),        "For string %s Day of Week should be 4, got %d", TimeString, d.Dow );
+    fail_unless( !strcmp(d.DowStr,"Thu"),"For string %s DowStr should be \"Thu\", got \"%s\"", TimeString, d.DowStr );
+    fYear = 1986.0 + (23.0 - 1.0 + t/24.0)/365.0;
+    fail_unless( (fabs(d.fYear-fYear)<1e-12), "For string %s fYear should be %.10lf, got %.10lf", TimeString, fYear, d.fYear );
+    JD = 2446453.5+t/24.0;
+    fail_unless( (fabs(d.JD-JD)<1e-12),       "For string %s JD should be %.10lf, got %.10lf", TimeString, JD, d.JD );
+    T = (JD-2451545.0)/36525.0;
+    fail_unless( (fabs(d.T-T)<1e-12),         "For string %s T should be %.10lf, got %.10lf", TimeString, T, d.T );
+    fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
+    fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
+    fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
+
+    return;
+}
+END_TEST
 
 
 Suite *ParseTimeStr_suite(void) {
@@ -612,6 +699,7 @@ Suite *ParseTimeStr_suite(void) {
   tcase_add_test(tc_ParseTimeStr, test_ISO_11);
   tcase_add_test(tc_ParseTimeStr, test_ISO_12);
   tcase_add_test(tc_ParseTimeStr, test_ISO_13);
+  tcase_add_test(tc_ParseTimeStr, test_ISO_14);
   suite_add_tcase(s, tc_ParseTimeStr);
 
   return s;

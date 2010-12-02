@@ -75,7 +75,7 @@ int main(void) {
     SRunner *sr = srunner_create(s);
 
     printf("\n\n\n======================================================\n");
-    printf("\n                    UNIT TESTS                   \n");
+    printf("\n               UNIT/REGRESSION TESTS                   \n");
     printf("    Note: Some reported errors may be normal. For\n");
     printf("    example, we may be testing to see if the code \n");
     printf("    properly catches errors (e.g. like invalid \n");
