@@ -79,6 +79,8 @@ static PerlInterpreter *my_perl;
 int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
 
     long int    Date;
+    double      Offset, Time;
+    int         tyear, tday, tmonth, sgn;
     int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
     int         ISOFormat, TZDError=FALSE, MaxWeek, InvalidDate=FALSE;
     double      Seconds;
@@ -654,6 +656,11 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     perl_free(my_perl);
 
 
+
+
+
+
+    // Assume time is UTC for now...
     if ( (ISOFormat == ISO_YYYYWwwDTHHMMSS) || (ISOFormat == ISO_YYWwwDTHHMMSS)
             || (ISOFormat == ISO_YYYYWwwDTHHMM) || (ISOFormat == ISO_YYWwwDTHHMM)
             || (ISOFormat == ISO_YYYYWwwD) || (ISOFormat == ISO_YYWwwD)
@@ -691,22 +698,71 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     }
 
 
-    d->Date       = Year*10000 + Month*100 + Day;
-    d->Year       = Year;
-    d->Month      = Month;
-    d->Day        = Day;
-    d->Doy        = DayOfYear;
-    d->Time       = Hours + Minutes/60.0 + Seconds/3600.0;
-    d->Hour       = Hours;
-    d->Minute     = Minutes;
-    d->Second     = Seconds;
+
+
+    // determine time zone offset
+    Offset = (double)TZD_hh + (double)TZD_mm/60.0;
+
+    // set UTC. At this point this may not be in the range [0,24] -- this is what we want.
+    Time = Hours + Minutes/60.0 + Seconds/3600.0 - TZD_sgn*Offset;
+
+    // Stuff date and time into JD. (JD takes Time as it is even if its not in range [0,24])
+    d->JD     = Lgm_JD( Year, Month, Day, Time, LGM_TIME_SYS_UTC, c );
+
+    // back out the date and time. Note date could be different from what we
+    // started with due to time not in range [0,24]
+    d->Date   = Lgm_JD_to_Date( d->JD, &d->Year, &d->Month, &d->Day, &Time );
+
+    // Redo the Week stuff, as dates may have changed...
+    d->Dow    = Lgm_DayOfWeek( d->Year, d->Month, d->Day, d->DowStr );
+    d->Week   = Lgm_ISO_WeekNumber( d->Year, d->Month, d->Day, &d->wYear );
+
+
+    // set hours, minutes, seconds based on originally parsed vals. (Dont
+    // decode the "Time" value returned from Lgm_JD_to_Date() -- its not as
+    // precise.)
+    d->Hour   = Hours-TZD_sgn*TZD_hh; 
+    d->Minute = Minutes-TZD_sgn*TZD_mm;
+    d->Second = Seconds;
+
+
+    // correct minutes for roll-overs
+    if ( d->Minute < 0 ) {
+        d->Minute += 60; 
+        --d->Hour;
+    } else if ( d->Minute > 59 ) {
+        d->Minute -= 60;
+        ++d->Hour;
+    }
+
+    // correct hours for roll-overs
+    if ( d->Hour <  0 ) {
+        d->Hour += 24; 
+    } else if ( d->Hour > 23 ) {
+        d->Hour -= 24;
+    }
+
+    // reconstruct Time
+    d->Time       = (double)d->Hour + (double)d->Minute/60.0 + d->Second/3600.0;
+
+    // Set Doy -p- ignore other things returned
+    Lgm_Doy( d->Date, &tyear, &tmonth, &tday, &d->Doy);
+
+    // The time is UTC now
     d->TimeSystem = LGM_TIME_SYS_UTC;
+
+    // save TZ info
     d->TZD_sgn    = TZD_sgn;
     d->TZD_hh     = TZD_hh;
     d->TZD_mm     = TZD_mm;
-    d->JD         = Lgm_JD( d->Year, d->Month, d->Day, d->Time, d->TimeSystem, c );
+
+    // save # secs in a day
     Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
+
+    // Julian centuries
     d->T          = (d->JD - 2451545.0)/36525.0;
+
+    // decimal year
     d->fYear      = (double)d->Year + ((double)d->Doy + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
     
 
