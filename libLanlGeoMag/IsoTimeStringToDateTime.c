@@ -160,23 +160,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     " if ( $str =~ m/^(\\d{4})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
                          $Year = $1; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 1;\n");
 
-                /*
-                 *  ISO_YYMMDDTHHMMSS
-                 *
-                 *  Match ISO strings of the form:
-                 *
-                 *           YY[-]MM[-]DDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
-                 *
-                 *  Examples: 
-                 *        10-10-31T12:34:56.789-06:00
-                 *        96-03-21T01:54:12.4534789+05:00
-                 */
-                if ( AllowTruncatedReps ) {
-                    strcat( Str,    
-                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
-                                $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 2;\n"
-                    );
-                }
 
                 /*
                  *  ISO_YYYYDDDTHHMMSS
@@ -197,34 +180,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                 );
 
 
-                /*
-                 *  ISO_YYDDDTHHMMSS
-                 *
-                 *  Match ISO strings of the form:
-                 *
-                 *           YY[-]DDDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
-                 *
-                 *  Examples: 
-                 *        10-297T12:34:56.789-06:00
-                 *        96-297T01:54:12.4534789+05:00
-                 *        10297T123456.789-06:00
-                 *        96297T015412.4534789+05:00
-                 */
-                if ( AllowTruncatedReps ) {
-                    strcat( Str, 
-                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
-                                $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $3; $Minute = $4; $Second = $5; $TZD = $6; $ISOFormat = 4;\n"
-                    );
-                }
-
-
-
-
-
-
-
-
-
                   /*
                    *  ISO_YYYYWwwDTHHMMSS
                    *
@@ -240,34 +195,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                   " } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
                         $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 5;\n"
                 );
-
-
-                  /*
-                   *  ISO_YYWwwDTHHMMSS
-                   *
-                   *  Match ISO strings of the form:
-                   *
-                   *    YY[-]Www[-]DThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
-                   *
-                   *  Examples:  
-                   *       86-W13-2T09:45:32
-                   *       86W132T094532
-                   */
-                if ( AllowTruncatedReps ) {
-                    strcat( Str, 
-                    " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
-                            $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 6;\n"
-                    );
-                }
-
-
-
-
-
-
-
-
-
 
 
                   /*
@@ -287,37 +214,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                 );
 
 
-
-                /*
-                 *  ISO_YYMMDDTHHMM
-                 *
-                 *  Match ISO strings of the form:
-                 *
-                 *        YY[-]MM[-]DDThh[:]mm(TZD or Z or nothing)
-                 *
-                 *  Examples: 
-                 *        10-10-31T12:34-06:00
-                 *        101031T1234-0600
-                 *        86-10-31T12:34-06:00
-                 *        661031T1234-0600
-                 */
-                if ( AllowTruncatedReps ) {
-                    strcat( Str, 
-                      " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
-                            $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 8;\n"
-                    );
-                }
-
-
-
-
-
-
-
-
-
-
-
                   /*
                    *  ISO_YYYYWwwDTHHMM
                    *
@@ -333,35 +229,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                   " } elsif ( $str =~ m/^(\\d{4})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
                         $Year = $1; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 9;\n"
                 );
-
-
-                /*
-                 *  ISO_YYWwwDTHHMM
-                 *
-                 *  Match ISO strings of the form:
-                 *
-                 *        YY[-]Www[-]DThh[:]mm(TZD or Z or nothing)
-                 *
-                 *  Examples: 
-                 *       86-W13-2T09:45+00
-                 *       86W132T0945Z
-                 *       09-W13-2T09:45+00
-                 *       09W132T0945Z
-                 */
-                if ( AllowTruncatedReps ) {
-                    strcat( Str, 
-                            " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
-                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 10;\n"
-                    );
-                }
-
-
-
-
-
-
-
-
 
 
                   /*
@@ -384,24 +251,21 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYMMDD
+                   *  ISO_YYYYMM
                    *
                    *  Match ISO strings of the form:
                    *
-                   *        YY[-]MM[-]DD
+                   *        YYYY-MM
                    *
                    *  Examples: 
-                   *        76-04-23
-                   *        760423
-                   *        06-04-23
-                   *        060423
+                   *        1976-12
+                   *        197612 <- this is not allowed in ISO 8601
+                   * (Keep this one before ISO_YYMMDD)
                    */
-                if ( AllowTruncatedReps ) {
                 strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})$/ ) {\n\
-                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 12;\n"
+                  " } elsif ( $str =~ m/^(\\d{4})-(\\d{2})$/ ) { \n\
+                        $Year = $1; $Month = $2;  $Day = 1; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 17;\n"
                 );
-                }
 
 
                   /*
@@ -422,39 +286,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                         $Year = $1; $DayOfYear = $2; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 13;\n"
                 );
 
-
-                  /*
-                   *  ISO_YYDDD
-                   *
-                   *  Match ISO strings of the form:
-                   *
-                   *        YY[-]DDD
-                   *
-                   *  Examples: 
-                   *        76-142
-                   *        76142
-                   *        06-142
-                   *        06142
-                   */
-                if ( AllowTruncatedReps ) {
-                strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})$/ ) {\n\
-                        $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 14;\n"
-                );
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
                   /*
                    *  ISO_YYYYWwwD
                    *
@@ -473,77 +304,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYWwwD
-                   *
-                   *  Match ISO strings of the form:
-                   *
-                   *        YY[-]Www[-]D
-                   *
-                   *  Examples: 
-                   *        76-W12-6
-                   *        76W126
-                   */
-                strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})$/ ) {\n\
-                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 16;\n"
-                );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  /*
-                   *  ISO_YYYYMM
-                   *
-                   *  Match ISO strings of the form:
-                   *
-                   *        YYYY[-]MM
-                   *
-                   *  Examples: 
-                   *        1976-12
-                   *        197612
-                   */
-                strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{4})-(\\d{2})$/ ) { \n\
-                        $Year = $1; $Month = $2;  $Day = 1; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 17;\n"
-                );
-
-                  /*
-                   *  ISO_YYMM
-                   *
-                   *  Match ISO strings of the form:
-                   *
-                   *    YY-MM
-                   *  
-                   *  The hyphen is mandatory here.
-                   *  Examples: 
-                   *        76-12
-                   */
-                if ( AllowTruncatedReps ) {
-                strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{2})-(\\d{2})$/ ) { \n\
-                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Day = 1; $Month = $2;  $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 18;\n"
-                );
-                }
-
-
-
-
-
-
-
-
-
-                  /*
                    *  ISO_YYYYWww
                    *  
                    *  Match ISO strings of the form:
@@ -558,23 +318,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                         $Year = $1; $Week = $2; $DayOfWeek = 1; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 19;\n"
                 );
 
-
-                  /*
-                   *  ISO_YYWww
-                   *  
-                   *  Match ISO strings of the form:
-                   *  
-                   *        YY-Www
-                   *
-                   *  Examples: 
-                   *        76-W32
-                   */
-                if ( AllowTruncatedReps ) {
-                strcat( Str, 
-                  " } elsif ( $str =~ m/^(\\d{2})-W(\\d{2})$/ ) { \n\
-                        $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = 1; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 20;\n"
-                );
-                }
 
 
 
@@ -614,6 +357,184 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                         " } elsif ( $str =~ m/^(\\d{2})$/ ) { \n\
                                 $Year = $1*100; $Month = 1; $Day = 1; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 22;\n"
                 );
+
+
+
+
+
+                if ( AllowTruncatedReps ) {
+
+                    /*
+                     *  ISO_YYMMDDTHHMMSS
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *           YY[-]MM[-]DDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                     *
+                     *  Examples: 
+                     *        10-10-31T12:34:56.789-06:00
+                     *        96-03-21T01:54:12.4534789+05:00
+                     */
+                    strcat( Str,    
+                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                                $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 2;\n"
+                    );
+
+                    /*
+                     *  ISO_YYDDDTHHMMSS
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *           YY[-]DDDThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                     *
+                     *  Examples: 
+                     *        10-297T12:34:56.789-06:00
+                     *        96-297T01:54:12.4534789+05:00
+                     *        10297T123456.789-06:00
+                     *        96297T015412.4534789+05:00
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                                $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $3; $Minute = $4; $Second = $5; $TZD = $6; $ISOFormat = 4;\n"
+                    );
+
+                    /*
+                     *  ISO_YYWwwDTHHMMSS
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *    YY[-]Www[-]DThh[:]mm[:]ss[.ssssss](TZD or Z or nothing)
+                     *
+                     *  Examples:  
+                     *       86-W13-2T09:45:32
+                     *       86W132T094532
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2}):?(\\d{2}[\\.]?\\d*)([+-].*|Z?)/ ) { \n\
+                            $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = $6; $TZD = $7; $ISOFormat = 6;\n"
+                    );
+
+                    /*
+                     *  ISO_YYMMDDTHHMM
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *        YY[-]MM[-]DDThh[:]mm(TZD or Z or nothing)
+                     *
+                     *  Examples: 
+                     *        10-10-31T12:34-06:00
+                     *        101031T1234-0600
+                     *        86-10-31T12:34-06:00
+                     *        661031T1234-0600
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                            $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 8;\n"
+                    );
+
+                    /*
+                     *  ISO_YYWwwDTHHMM
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *        YY[-]Www[-]DThh[:]mm(TZD or Z or nothing)
+                     *
+                     *  Examples: 
+                     *       86-W13-2T09:45+00
+                     *       86W132T0945Z
+                     *       09-W13-2T09:45+00
+                     *       09W132T0945Z
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})[T ](\\d{2}):?(\\d{2})([+-].*|Z?)$/ ) { \n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 10;\n"
+                    );
+                    /*
+                     *  ISO_YYMMDD
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *        YY[-]MM[-]DD
+                     *
+                     *  Examples: 
+                     *        76-04-23
+                     *        760423
+                     *        06-04-23
+                     *        060423
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{2})-?(\\d{2})$/ ) {\n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Month = $2; $Day = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 12;\n"
+                    );
+
+                    /*
+                     *  ISO_YYDDD
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *        YY[-]DDD
+                     *
+                     *  Examples: 
+                     *        76-142
+                     *        76142
+                     *        06-142
+                     *        06142
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?(\\d{3})$/ ) {\n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $DayOfYear = $2; $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 14;\n"
+                    );
+
+                    /*
+                     *  ISO_YYWwwD
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *        YY[-]Www[-]D
+                     *
+                     *  Examples: 
+                     *        76-W12-6
+                     *        76W126
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-?W(\\d{2})-?(\\d{1})$/ ) {\n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 16;\n"
+                    );
+
+
+                    /*
+                     *  ISO_YYMM
+                     *
+                     *  Match ISO strings of the form:
+                     *
+                     *    YY-MM
+                     *  
+                     *  The hyphen is mandatory here.
+                     *  Examples: 
+                     *        76-12
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-(\\d{2})$/ ) { \n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Day = 1; $Month = $2;  $Hour = $Minute = 0; $Second = 0.0;$ISOFormat = 18;\n"
+                    );
+
+                    /*
+                     *  ISO_YYWww
+                     *  
+                     *  Match ISO strings of the form:
+                     *  
+                     *        YY-Www
+                     *
+                     *  Examples: 
+                     *        76-W32
+                     */
+                    strcat( Str, 
+                        " } elsif ( $str =~ m/^(\\d{2})-W(\\d{2})$/ ) { \n\
+                                    $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = 1; $Hour = $Minute = 0; $Second = 0.0; $ISOFormat = 20;\n"
+                    );
+
+                }
+
 
 
 
@@ -763,7 +684,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     d->T          = (d->JD - 2451545.0)/36525.0;
 
     // decimal year
-    d->fYear      = (double)d->Year + ((double)d->Doy + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
+    d->fYear      = (double)d->Year + ((double)d->Doy - 1.0 + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
     
 
     /*

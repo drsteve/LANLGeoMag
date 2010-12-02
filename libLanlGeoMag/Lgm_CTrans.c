@@ -306,7 +306,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->UTC.Dow    = Lgm_DayOfWeek( year, month, day, c->UTC.DowStr );
     c->UTC.JD     = Lgm_JD( c->UTC.Year, c->UTC.Month, c->UTC.Day, c->UTC.Time, LGM_TIME_SYS_UTC, c );
     c->UTC.T      = (c->UTC.JD - 2451545.0)/36525.0;
-    c->UTC.fYear = (double)c->UTC.Year + ((double)c->UTC.Doy + c->UTC.Time/24.0)/(365.0 + (double)Lgm_LeapYear(c->UTC.Year));
+    c->UTC.fYear = (double)c->UTC.Year + ((double)c->UTC.Doy - 1.0 + c->UTC.Time/24.0)/(365.0 + (double)Lgm_LeapYear(c->UTC.Year));
 
     // set DAT
     c->DAT        = Lgm_GetLeapSeconds( c->UTC.JD, c ); 

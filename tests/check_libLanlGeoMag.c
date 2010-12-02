@@ -16,13 +16,27 @@ void leapsecond_teardown(void) {
 }
 
 
-START_TEST(test_IsLeapSecondDay) {
+START_TEST(test_IsLeapSecondDay_01) {
 
     int    Result;
     double sec_in_day;
 
-    Result = Lgm_IsLeapSecondDay(19920630, &sec_in_day, c);
+    printf("Testing to see if 19920630 is a leap second date (it should be)\n");
+    Result = Lgm_IsLeapSecondDay( 19920630, &sec_in_day, c );
     fail_unless( ((Result == 1) && (sec_in_day == 86401)), "1992/6/30 should be a leap second day, with sec_in_day = 86401 (got %g)", sec_in_day);
+
+    return;
+}
+END_TEST
+
+START_TEST(test_IsLeapSecondDay_02) {
+
+    int    Result;
+    double sec_in_day;
+
+    printf("Testing to see if 19920629 is a leap second date (it should not be)\n");
+    Result = Lgm_IsLeapSecondDay( 19920629, &sec_in_day, c );
+    fail_unless( ((Result == 0) && (sec_in_day == 86400)), "1992/6/29 should be a leap second day, with sec_in_day = 86400 (got %g)", sec_in_day);
 
     return;
 }
@@ -32,6 +46,7 @@ END_TEST
 
 START_TEST(test_GetLeapSeconds) {
     double n_leap = Lgm_GetLeapSeconds(2454984.0, c);
+    printf("Check to see that number of leap seconds by 2009/6/1 is 34\n");
     fail_unless( n_leap == 34.0, "Should be 34 leap seconds by 2009/6/1, not %f", n_leap);
   return;
 }
@@ -44,7 +59,8 @@ Suite *lgm_suite(void) {
 
   TCase *tc_leapseconds = tcase_create("Leap seconds");
   tcase_add_checked_fixture(tc_leapseconds, leapsecond_setup, leapsecond_teardown);
-  tcase_add_test(tc_leapseconds, test_IsLeapSecondDay);
+  tcase_add_test(tc_leapseconds, test_IsLeapSecondDay_01);
+  tcase_add_test(tc_leapseconds, test_IsLeapSecondDay_02);
   tcase_add_test(tc_leapseconds, test_GetLeapSeconds);
   suite_add_tcase(s, tc_leapseconds);
 
