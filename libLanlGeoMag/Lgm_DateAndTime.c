@@ -44,7 +44,7 @@ int Lgm_LeapYear(int year) {
  *      JD  -- Julian Date
  *      MJD -- Modified Julian Date (JD - 2400000.5)
  *      UT  -- Universal Time (before 1960 astro calcs were done with UT)
- *      ET  -- Ephermeris Time (then ET replaced it)
+ *      ET  -- Ephemeris Time (then ET replaced it)
  *      TDT -- Terrestrial Dynamical Time (TDT replaced ET in 1981)
  *      TT  -- Terrestrial Time (in 1991 TDT was renamed to be TT)
  *      UTC -- Universal Time Coordinated
@@ -62,7 +62,7 @@ int Lgm_LeapYear(int year) {
  *      TAI = UTC + dAT
  *      TT = TAI + 32.184 (i.e.  TT = UTC + dAT + 32.184 )
  *
- * This routine simply determined what the dAT value should be for a given JD.
+ * This routine simply determines what the dAT value should be for a given JD.
  * Note that after 1972 they are just leap seconds, but before they are
  * non-integral (leap seconds (werent invented yet?)
  *

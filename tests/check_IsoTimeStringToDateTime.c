@@ -21,18 +21,36 @@ START_TEST(test_ISO_01) {
 
     int          Result;
     char         TimeString[128];
+    double       t;
     Lgm_DateTime d;
 
     sprintf(TimeString, "2009-06-21T05:12:34.123456789Z");
     Result = IsoTimeStringToDateTime( TimeString, &d, c );
 
-    fail_unless( (Result   == 1),    "Error returned by IsoTimeStringToDateTime()");
-    fail_unless( (d.Year   == 2009), "For string %s Year should be 2009, got %d", TimeString, d.Year );
-    fail_unless( (d.Month  == 6),    "For string %s Month should be 6, got %d", TimeString, d.Month );
-    fail_unless( (d.Day    == 21),   "For string %s Day should be 21, got %d", TimeString, d.Day );
-    fail_unless( (d.Hour   == 5),    "For string %s Hour should be 5, got %d", TimeString, d.Hour );
-    fail_unless( (d.Minute == 12),   "For string %s Minute should be 12, got %d", TimeString, d.Minute );
+    fail_unless( (Result   == 1),        "Error returned by IsoTimeStringToDateTime()");
+    fail_unless( (d.Date   == 20090621), "For string %s Year should be 20090621, got %ld", TimeString, d.Date );
+    fail_unless( (d.Year   == 2009),     "For string %s Year should be 2009, got %d", TimeString, d.Year );
+    fail_unless( (d.Month  == 6),        "For string %s Month should be 6, got %d", TimeString, d.Month );
+    fail_unless( (d.Day    == 21),       "For string %s Day should be 21, got %d", TimeString, d.Day );
+    fail_unless( (d.Doy    == 172),      "For string %s Doy should be 172, got %d", TimeString, d.Doy );
+    t = 5.0 + 12.0/60.0 + 34.123456789/3600.0;
+    fail_unless( (fabs(d.Time-t)<1e-10), "For string %s Time should be %.10lf, got %.10lf", TimeString, t, d.Time );
+    fail_unless( (d.Hour   == 5),        "For string %s Hour should be 5, got %d", TimeString, d.Hour );
+    fail_unless( (d.Minute == 12),       "For string %s Minute should be 12, got %d", TimeString, d.Minute );
     fail_unless( (d.Second == 34.123456789),   "For string %s Second should be 34.123456789, got %lf", TimeString, d.Second );
+    fail_unless( (d.Week   == 25),       "For string %s Week should be 25, got %d", TimeString, d.Week );
+    fail_unless( (d.wYear  == 2009),     "For string %s Iso Week Year should be 2009, got %d", TimeString, d.wYear );
+    fail_unless( (d.Dow    == 7),        "For string %s Day of Week should be 7, got %d", TimeString, d.Dow );
+    fail_unless( !strcmp(d.DowStr,"Sun"),"For string %s DowStr should be \"Sun\", got \"%s\"", TimeString, d.DowStr );
+//test fYear
+//test JD
+//test T
+    fail_unless( (fabs(d.DaySeconds-86400.0)<1e-10), "For string %s DaySeconds should be 86400, got %g", TimeString, d.DaySeconds );
+    fail_unless( (d.TZD_sgn == 1),       "For string %s TZD_sgn should be 1, got %d", TimeString, d.TZD_sgn );
+    fail_unless( (d.TZD_hh  == 0),       "For string %s TZD_hh should be 0, got %d", TimeString, d.TZD_hh );
+    fail_unless( (d.TZD_mm  == 0),       "For string %s TZD_mm should be 0, got %d", TimeString, d.TZD_mm );
+    fail_unless( (d.TimeSystem == LGM_TIME_SYS_UTC), "For string %s TimeSystem should be %d, got %d", TimeString, LGM_TIME_SYS_UTC, d.TimeSystem );
+
 
     return;
 }
