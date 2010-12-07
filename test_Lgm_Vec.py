@@ -1,28 +1,35 @@
+#!/usr/bin/env python2.6
 
 import unittest
 import Lgm_Vec
 
+# npt yet functional 
 
-class TimeTests(unittest.TestCase):
-    """Tests related to converting times"""
+class Lgm_VecTests(unittest.TestCase):
+    """Tests related to Lgm_Vec"""
 
     def setUp(self):
-        """Load the leap second kernel"""
-        super(TimeTests, self).setUp()
-        naif.spice.load_kern(lsk_kern)
-        naif.spice.load_kern(sclk_kern)
+        super(Lgm_VecTests, self).setUp()
+        self.lgm = Lgm_Vec.Lgm_Vec()
+        self.vec1 = Lgm_Vec.Lgm_Vector_cls(1,2,3)
+        self.vec2 = Lgm_Vec.Lgm_Vector_cls(3,1,0)
+        self.vec3 = Lgm_Vec.Lgm_Vector_cls(7,8,6)
+        self.vec4 = Lgm_Vec.Lgm_Vector_cls(8,3,9)
+        self.vec5 = Lgm_Vec.Lgm_Vector_cls(2,5,1.4)
+
 
     def tearDown(self):
-        """Unload the leap second kernel"""
-        super(TimeTests, self).tearDown()
-        naif.spice.load_kern(sclk_kern)
-        naif.spice.unload_kern(lsk_kern)
+        super(Lgm_VecTests, self).tearDown()
 
-    def testZeroEpoch(self):
-        """Test the UT for ET=0"""
-        et = naif.spice.time_to_ET(
-            datetime.datetime(2000, 1, 1, 11, 58, 55, 816000))
-        self.assertAlmostEqual(0.0, et, places=3)
+    def test_Lgm_CrossProduct(self):
+        """Lgm_CrossProduct should give known output"""
+        vecans = Lgm_Vec.Lgm_Vector_cls()
+        self.lgm.lib.Lgm_CrossProduct(self.vec1, self.vec2, vecans)
+        self.assertEqual(-3.0, vecans.x)
+        self.assertEqual( 9.0, vecans.y)
+        self.assertEqual(-5.0, vecans.z)
+
+
 
 
 
