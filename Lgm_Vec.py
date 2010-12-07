@@ -44,16 +44,6 @@ class Lgm_Vec(object):
     def __init__(self):
         self.lib = ctypes.CDLL('/usr/local/lib/libLanlGeoMag.dylib')
 
-#        lgm.Lgm_Magnitude.argtypes=[ctypes.POINTER(Lgm_Vector)]
-#lgm.Lgm_Magnitude.restype = ctypes.c_double
-#vec = Lgm_Vector(1., 2., 3.)
-#ans = lgm.Lgm_Magnitude(vec)
-#
-#if ans != 3.74165738677:
-#    print("Answers not equal")
-#    print("Got %f" % (ans))
-
-
         self.call_dict = {
             'Lgm_CrossProduct': [None, Lgm_Vector, Lgm_Vector, Lgm_Vector],
             'Lgm_DotProduct': [LgmDouble, Lgm_Vector, Lgm_Vector],

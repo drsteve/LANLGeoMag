@@ -3,7 +3,7 @@
 import unittest
 import Lgm_Vec
 
-# npt yet functional 
+# npt yet functional
 
 class Lgm_VecTests(unittest.TestCase):
     """Tests related to Lgm_Vec"""
