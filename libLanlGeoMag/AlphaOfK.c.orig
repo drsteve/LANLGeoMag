@@ -106,7 +106,7 @@ double  AlphaOfK( double K,Lgm_LstarInfo *LstarInfo ) {
  *  negative for low pitch angles and crosses zero at some
  *  PA, then goes positive. 
  */
-double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
+double Func( double Kt, double Alpha, Lgm_LstarInfo *LstarInfo ) {
 
     double           sa, sa2, Sma, Smb, I, K;
     Lgm_MagModelInfo *m;
@@ -195,5 +195,5 @@ double Func( double Kt, double Alpha,Lgm_LstarInfo *LstarInfo ) {
 }
 
 /*
- *    $Id$
+ *    $Id: AlphaOfK.c 45 2010-10-01 20:43:29Z mgh $
  */

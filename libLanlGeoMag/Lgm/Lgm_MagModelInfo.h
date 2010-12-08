@@ -449,6 +449,7 @@ double      IFromLBmM_McIlwain( double L, double Bm, double M );
 
 double      BofS( double s, Lgm_MagModelInfo *Info );
 int         SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info );
+double      AlphaOfK( double K, Lgm_MagModelInfo *Info );
 
 
 /*

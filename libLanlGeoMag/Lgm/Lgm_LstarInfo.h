@@ -112,7 +112,6 @@ Lgm_LstarInfo  *InitLstarInfo( int VerbosityLevel );
 void FreeLstarInfo( Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );
 
-double      AlphaOfK( double K, Lgm_LstarInfo *LstarInfo );
 int         Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_LstarInfo *LstarInfo );
 int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 int 	    FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo );
