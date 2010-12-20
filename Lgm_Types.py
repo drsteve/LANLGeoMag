@@ -8,10 +8,11 @@ Simple palce to keep all the types used by the Lgm wrapper
 @version: V1: 20-Dec-2010 (BAL)
 """
 
-
+import ctypes
 
 
 #set up types
+LgmInt = ctypes.c_int
 LgmLong = ctypes.c_long
 LgmBoolean = ctypes.c_int
 ConstLgmBoolean = LgmBoolean
@@ -27,8 +28,6 @@ LgmDoubleP = ctypes.POINTER(LgmDouble)
 #idx = c_sizes.index(ctypes.sizeof(LgmDouble) / 2)
 ConstLgmInt = LgmInt
 LgmIntP = ctypes.POINTER(LgmInt)
-Lgm_VectorP = ctypes.POINTER(Lgm_Vector)
-LgmInt = ctypes.c_int
 
 c_types = [ctypes.c_byte, ctypes.c_short, ctypes.c_int,
            ctypes.c_long, ctypes.c_longlong]

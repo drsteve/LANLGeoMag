@@ -695,14 +695,68 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 ###############################################################################
 
-import Lgm_Types
+from Lgm_Types import * 
 import ctypes
 
-class Lgm_LeapSeconds(ctypes.Structre):
+class Lgm_LeapSeconds(ctypes.Structure):
     _fields_ = [("nLeapSecondDates", LgmInt), # Number of leap second dates.
         ("LeapSecondDates", ctypes.POINTER(LgmLong)), # Array for holdin the Dates on which leap seconds were added
         ("LeapSecondJDs",ctypes.POINTER(LgmDouble)), # Array for holdin the Julian Dates on which leap seconds were added
         ("LeapSeconds",ctypes.POINTER(LgmDouble)) ] # The actual number of leap seconds that  went into effect on the given date
 
+class Lgm_DateTime(ctypes.Structure):
+    _fields_ = [ ("Date", LgmLong ), # In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
+        ("Year", LgmInt), #  4-digit year
+        ("Month", LgmInt), # [1-12]
+        ("Day", LgmInt), # Day Of Month [1-31]
+        ("Doy", LgmInt), # Day Of Year [1-31]
+        ("Time", LgmDouble), # Decimal value of time in hours
+        ("Hour", LgmInt), # Hours [0-23]
+        ("Minute", LgmInt), # Minutes [0-59]
+        ("Second", LgmDouble), # Seconds [0-60] (the 60 accommodates leap seconds)
+        ("Week", LgmInt), # ISO Week number [1-53]
+        ("wYear", LgmInt), #  ISO Year associated with the ISO Week Number (can be different from Year)
+        ("Dow", LgmInt), # ISO Day Of Week number [1-7]
+        ("DowStr", LgmChar*10), # ISO Day Of Week number [1-7]
+        ("fYear", LgmDouble), # Decimal year (e.g. 2004.2345)
+        ("JD", LgmDouble), # Julian Date
+        ("T", LgmDouble), # Julian Centuries since J2000 for this time system
+        ("DaySeconds", LgmDouble), # Number of seconds in the day.
+        ("TZD_sgn", LgmInt), # Sign of Time zone offset
+        ("TZD_hh", LgmInt), # Time zone offset hours
+        ("TZD_mm", LgmInt), # Time zone offset minutes
+        ("TimeSystem", LgmInt) ] # e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
 
 
+
+
+
+
+
+#class Lgm_DateTime(ctypes.Structure):
+#    _fields_ = [ ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ),
+#        ("", ) ]
