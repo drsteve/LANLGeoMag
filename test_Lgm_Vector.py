@@ -64,7 +64,24 @@ class Lgm_VecTests(unittest.TestCase):
         magans = self.lgm.lib.Lgm_Magnitude(vec1)
         self.assertAlmostEqual(3.1622776601683795, magans)
 
+    def test_Lgm_Vector(self):
+        """Lgm_Vector has a x, y, z"""
+        self.assertTrue(hasattr(Lgm_Vector.Lgm_Vector, 'x'))
+        self.assertTrue(hasattr(Lgm_Vector.Lgm_Vector, 'y'))
+        self.assertTrue(hasattr(Lgm_Vector.Lgm_Vector, 'z'))
 
+    def test_Lgm_Vector_Type(self):
+        """Lgm_Vector should be of type LgmDouble"""
+        vec1 = Lgm_Vector.Lgm_Vector(3,1,0)
+        self.assertTrue(isinstance(vec1.x, float))
+        self.assertTrue(isinstance(vec1.y, float))
+        self.assertTrue(isinstance(vec1.z, float))
+        self.assertRaises(TypeError, Lgm_Vector.Lgm_Vector, 'bad', 0, 1)
+        self.assertRaises(TypeError, Lgm_Vector.Lgm_Vector, 1, 'bad', 0)
+        self.assertRaises(TypeError, Lgm_Vector.Lgm_Vector, 5, 3, 'bad')
+
+
+# Tests not written for these yet
 #'Lgm_Magnitude': [LgmDouble, Lgm_VectorP],
 #'Lgm_VecSub': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
 #'Lgm_VecAdd': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
