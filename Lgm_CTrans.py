@@ -697,13 +697,8 @@ CDMAG_TO_CDMAG = 1111
 
 from Lgm_Types import *
 from Lgm_Vector import *
+from Lgm_LeapSeconds import *
 import ctypes
-
-class Lgm_LeapSeconds(ctypes.Structure):
-    _fields_ = [("nLeapSecondDates", LgmInt), # Number of leap second dates.
-        ("LeapSecondDates", ctypes.POINTER(LgmLong)), # Array for holdin the Dates on which leap seconds were added
-        ("LeapSecondJDs",ctypes.POINTER(LgmDouble)), # Array for holdin the Julian Dates on which leap seconds were added
-        ("LeapSeconds",ctypes.POINTER(LgmDouble)) ] # The actual number of leap seconds that  went into effect on the given date
 
 class Lgm_DateTime(ctypes.Structure):
     _fields_ = [ ("Date", LgmLong ), # In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
