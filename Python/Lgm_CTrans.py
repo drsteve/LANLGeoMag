@@ -697,13 +697,8 @@ CDMAG_TO_CDMAG = 1111
 
 from Lgm_Types import *
 from Lgm_Vector import *
+from Lgm_LeapSeconds import *
 import ctypes
-
-class Lgm_LeapSeconds(ctypes.Structure):
-    _fields_ = [("nLeapSecondDates", LgmInt), # Number of leap second dates.
-        ("LeapSecondDates", ctypes.POINTER(LgmLong)), # Array for holdin the Dates on which leap seconds were added
-        ("LeapSecondJDs",ctypes.POINTER(LgmDouble)), # Array for holdin the Julian Dates on which leap seconds were added
-        ("LeapSeconds",ctypes.POINTER(LgmDouble)) ] # The actual number of leap seconds that  went into effect on the given date
 
 class Lgm_DateTime(ctypes.Structure):
     _fields_ = [ ("Date", LgmLong ), # In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
@@ -727,7 +722,7 @@ class Lgm_DateTime(ctypes.Structure):
         ("TZD_hh", LgmInt), # Time zone offset hours
         ("TZD_mm", LgmInt), # Time zone offset minutes
         ("TimeSystem", LgmInt) ] # e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
-
+Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
 
 
 class Lgm_CTrans(ctypes.Structure):
@@ -907,6 +902,7 @@ class Lgm_CTrans(ctypes.Structure):
         ("Lgm_IGRF_NpMm1_Over_NmM", LgmDouble * 13 * 13), #
         ("Lgm_IGRF_SqrtNM1", LgmDouble * 13 * 13), #
         ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]  #
+Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
 
 
 #class Lgm_DateTime(ctypes.Structure):
