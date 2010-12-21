@@ -25,14 +25,19 @@ dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 AC_MSG_NOTICE([Adding perl LIBS ${PERL_LDFLAGS}])
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
-AC_CHECK_LIB([perl], [perl_alloc],, AC_MSG_ERROR([No libperl found]))
+#AC_CHECK_LIB([perl], [perl_alloc],, AC_MSG_ERROR([No libperl found]))
 
 dnl Add CFLAGS for embedded perl
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 AC_MSG_NOTICE([Adding perl CFLAGS ${PERL_CFLAGS}])
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 
-
+dnl Add LDFLAGS for gsl
+dnl GSL_LDFLAGS=-lgsl 
+GSL_LDFLAGS=-lgsl
+LDFLAGS=${LDFLAGS}\ ${GSL_LDFLAGS}
+GSLCBLAS_LDFLAGS=-lgslcblas
+LDFLAGS=${LDFLAGS}\ ${GSLCBLAS_LDFLAGS}
 
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
