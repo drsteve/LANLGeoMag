@@ -8,15 +8,15 @@
 
 
 /*
- *   This routine evaluates the "Sb integral" from mirror point to
- *   mirror point. Instead of tracing the whole field line, this version allows
- *   the Quadpack integration routine to evaluate B(s). The hope is that this
- *   will decrease the amount of tracing needed to evaluate the integral. It may
- *   very well be slower than tracing the whole line and then doing the integral,
- *   but we'll try this for comparison ... The other obvious way to do it is to
- *   pre-trace the FL and then interpolate the points in some manner. I'm hoping
- *   that combining dqags and Bulirsch-Stoer (which are both extrapolation methods)
- *   that we'll get a speedup.
+ *   This routine evaluates the "Sb integral" from mirror point to mirror
+ *   point. Instead of tracing the whole field line, this version allows the
+ *   Quadpack integration routine to evaluate B(s). The hope is that this will
+ *   decrease the amount of tracing needed to evaluate the integral. It may
+ *   very well be slower than tracing the whole line and then doing the
+ *   integral, but we'll try this for comparison ... The other obvious way to
+ *   do it is to pre-trace the FL and then interpolate the points in some
+ *   manner. I'm hoping that combining dqags and Bulirsch-Stoer (which are both
+ *   extrapolation methods) that we'll get a speedup.
  *   
  *   The integral is as follows:
  *

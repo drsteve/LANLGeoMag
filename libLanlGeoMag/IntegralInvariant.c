@@ -7,7 +7,8 @@
 #define USE_FOUR_POINT  1
 #define USE_TWO_POINT   2
 
-#define DIFF_SCHEME     USE_TWO_POINT
+//#define DIFF_SCHEME     USE_TWO_POINT
+#define DIFF_SCHEME     USE_FOUR_POINT
 
 
 
@@ -39,7 +40,7 @@
  *  I think these are now all reentrant.
  *
  */
-double Iinv( Lgm_MagModelInfo *fInfo ) {
+double Iinv( Lgm_MagModelInfo *mInfo ) {
 
 
     double	a, b;
@@ -55,38 +56,38 @@ double Iinv( Lgm_MagModelInfo *fInfo ) {
      *  The structure holds auzilliary info we need down 
      *  in the function calls.
      */
-    qpInfo = (_qpInfo *)fInfo;
+    qpInfo = (_qpInfo *)mInfo;
 
 
 
     /*
      *  Limits of integration.
      */
-    a = fInfo->Sm_South;
-    b = fInfo->Sm_North;
+    a = mInfo->Sm_South;
+    b = mInfo->Sm_North;
 
 
     /*
      *   set tolerances. 
      */
-    //epsabs = fInfo->epsabs;
-    //epsrel = fInfo->epsrel;
-    epsabs = fInfo->Lgm_I_Integrator_epsabs;
-    epsrel = fInfo->Lgm_I_Integrator_epsrel;
+    //epsabs = mInfo->epsabs;
+    //epsrel = mInfo->epsrel;
+    epsabs = mInfo->Lgm_I_Integrator_epsabs;
+    epsrel = mInfo->Lgm_I_Integrator_epsrel;
 
 
     /*
      *  Init some vars used in I_integrand() (these are not declared static in
      *  I_integrand() in order to avoid making it non-reentrant).
      */
-    fInfo->Lgm_I_integrand_S         = 0.0;
-    fInfo->Lgm_I_integrand_FirstCall = TRUE;
-    fInfo->Lgm_n_I_integrand_Calls    = 0;
+    mInfo->Lgm_I_integrand_S         = 0.0;
+    mInfo->Lgm_I_integrand_FirstCall = TRUE;
+    mInfo->Lgm_n_I_integrand_Calls    = 0;
 
                                                                                                                                                                              
 
 
-    if ( fInfo->Lgm_I_Integrator == DQAGS ) {
+    if ( mInfo->Lgm_I_Integrator == DQAGS ) {
 
         /*
          *  Use DQAGS
@@ -94,7 +95,7 @@ double Iinv( Lgm_MagModelInfo *fInfo ) {
         limit = 500; lenw = 4*limit; key = 6;
         dqags(I_integrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
 
-    } else if ( fInfo->Lgm_I_Integrator == DQK21 ) {
+    } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 
         /*
          *  Use DQK21
@@ -106,7 +107,7 @@ double Iinv( Lgm_MagModelInfo *fInfo ) {
         /*
          *  Unknown Integrator
          */
-        printf("Iinv: Unknown integrator. Lgm_Inv_Integrator = %d\n", fInfo->Lgm_n_I_integrand_Calls );
+        printf("Iinv: Unknown integrator. Lgm_Inv_Integrator = %d\n", mInfo->Lgm_n_I_integrand_Calls );
         result = -9e99;
 
     }
@@ -116,7 +117,7 @@ double Iinv( Lgm_MagModelInfo *fInfo ) {
 
 }
 
-double Iinv_interped( Lgm_MagModelInfo *fInfo ) {
+double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
 
     double	a, b;
     double	epsabs, epsrel, result, abserr, resabs, resasc;
@@ -131,32 +132,32 @@ double Iinv_interped( Lgm_MagModelInfo *fInfo ) {
      *  The structure holds auzilliary info we need down 
      *  in the function calls.
      */
-    qpInfo = (_qpInfo *)fInfo;
+    qpInfo = (_qpInfo *)mInfo;
 
     /*
      *  Limits of integration.
      */
-    a = fInfo->Sm_South;
-    b = fInfo->Sm_North;
+    a = mInfo->Sm_South;
+    b = mInfo->Sm_North;
 
     /*
      *   set tolerances for QuadPack routines. 
      */
-    //epsabs = fInfo->epsabs;
-    //epsrel = fInfo->epsrel;
-    epsabs = fInfo->Lgm_I_Integrator_epsabs;
-    epsrel = fInfo->Lgm_I_Integrator_epsrel;
+    //epsabs = mInfo->epsabs;
+    //epsrel = mInfo->epsrel;
+    epsabs = mInfo->Lgm_I_Integrator_epsabs;
+    epsrel = mInfo->Lgm_I_Integrator_epsrel;
 
 
     /*
      *  Init some vars used in I_integrand_interped() (these are not declared static in
      *  I_integrand() in order to avoid making it non-reentrant).
      */
-    fInfo->Lgm_n_I_integrand_Calls  = 0;
+    mInfo->Lgm_n_I_integrand_Calls  = 0;
 
 
 
-    if ( fInfo->Lgm_I_Integrator == DQAGS ) {
+    if ( mInfo->Lgm_I_Integrator == DQAGS ) {
 
         /*
          *  Use DQAGS
@@ -164,7 +165,7 @@ double Iinv_interped( Lgm_MagModelInfo *fInfo ) {
         limit = 500; lenw = 4*limit; key = 6;
         dqags(I_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
 
-    } else if ( fInfo->Lgm_I_Integrator == DQK21 ) {
+    } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 
         /*
          *  Use DQAGS
@@ -176,7 +177,7 @@ double Iinv_interped( Lgm_MagModelInfo *fInfo ) {
         /*
          *  Unknown Integrator
          */
-        printf("Iinv_interped: Unknown integrator. Lgm_I_Integrator = %d\n", fInfo->Lgm_n_I_integrand_Calls );
+        printf("Iinv_interped: Unknown integrator. Lgm_I_Integrator = %d\n", mInfo->Lgm_n_I_integrand_Calls );
         result = -9e99;
 
     }
@@ -189,17 +190,17 @@ double Iinv_interped( Lgm_MagModelInfo *fInfo ) {
 double I_integrand_interped( double s, _qpInfo *qpInfo ) {
 
     double              B, g, f;
-    Lgm_MagModelInfo    *fInfo;
+    Lgm_MagModelInfo    *mInfo;
 
     /*
      *  Get pointer to our auxilliary data structure.
      */
-    fInfo = (Lgm_MagModelInfo *)qpInfo;
+    mInfo = (Lgm_MagModelInfo *)qpInfo;
 
-    B = BofS( s, fInfo );
-    g = 1.0 - B/fInfo->Bm;
+    B = BofS( s, mInfo );
+    g = 1.0 - B/mInfo->Bm;
     f = (g > 0.0) ? sqrt( g ) : 0.0;
-    ++fInfo->Lgm_n_I_integrand_Calls;
+    ++mInfo->Lgm_n_I_integrand_Calls;
 
     return( f );
 
@@ -220,32 +221,32 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
     Lgm_Vector 		    Bvec;
     int			        reset=1, done, Count;
     double		        f, g, Hremaining, Hdone, H, Htry, Hdid, Hnext, sgn=1.0, sdid, B, dS;
-    Lgm_MagModelInfo    *fInfo;
+    Lgm_MagModelInfo    *mInfo;
 
 
 
     /*
      *  Get pointer to our auxilliary data structure.
      */
-    fInfo = (Lgm_MagModelInfo *)qpInfo;
+    mInfo = (Lgm_MagModelInfo *)qpInfo;
 
-	fInfo->Lgm_I_integrand_u_scale.x =  10.0;  fInfo->Lgm_I_integrand_u_scale.y = 1.0; fInfo->Lgm_I_integrand_u_scale.z = 10.0;
+	mInfo->Lgm_I_integrand_u_scale.x =  10.0;  mInfo->Lgm_I_integrand_u_scale.y = 1.0; mInfo->Lgm_I_integrand_u_scale.z = 10.0;
 
 
 
-    if ( fInfo->Lgm_I_integrand_JumpMethod == LGM_RELATIVE_JUMP_METHOD ) {
+    if ( mInfo->Lgm_I_integrand_JumpMethod == LGM_RELATIVE_JUMP_METHOD ) {
 
         /*
          *  Set starting point.  If this is the first call for this integral,
          *  set point to the lower limit. 
          */
-        if ( fInfo->Lgm_I_integrand_FirstCall  == TRUE ) {
-	        fInfo->Lgm_I_integrand_FirstCall = FALSE;
-            fInfo->Lgm_I_integrand_P = fInfo->Pm_South;
-	        fInfo->Lgm_I_integrand_S = 0.0;
+        if ( mInfo->Lgm_I_integrand_FirstCall  == TRUE ) {
+	        mInfo->Lgm_I_integrand_FirstCall = FALSE;
+            mInfo->Lgm_I_integrand_P = mInfo->Pm_South;
+	        mInfo->Lgm_I_integrand_S = 0.0;
 	        dS = s;
         } else {
-	        dS = s - fInfo->Lgm_I_integrand_S;
+	        dS = s - mInfo->Lgm_I_integrand_S;
         }
 
         if (dS < 0.0) {
@@ -254,7 +255,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
             H = dS; sgn = 1.0;
         }
 
-    } else if ( fInfo->Lgm_I_integrand_JumpMethod == LGM_ABSOLUTE_JUMP_METHOD ) {
+    } else if ( mInfo->Lgm_I_integrand_JumpMethod == LGM_ABSOLUTE_JUMP_METHOD ) {
 
 	    /*
          *  This strategy starts at start each time.  Slower(?), but seems to
@@ -263,16 +264,16 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
          *  that the integrator is picking. If they are bouncing all over the
          *  place the relative method still does alot of tracing.
 	     */
-        if ( fInfo->Lgm_I_integrand_FirstCall == TRUE ) {
-	        fInfo->Lgm_I_integrand_FirstCall = FALSE;
+        if ( mInfo->Lgm_I_integrand_FirstCall == TRUE ) {
+	        mInfo->Lgm_I_integrand_FirstCall = FALSE;
         } 
-	    fInfo->Lgm_I_integrand_P = fInfo->Pm_South;
-        fInfo->Lgm_I_integrand_S = 0.0;
+	    mInfo->Lgm_I_integrand_P = mInfo->Pm_South;
+        mInfo->Lgm_I_integrand_S = 0.0;
 	    H = s; sgn = 1.0; // H is a positive qnty
  
     } else {
 
-        printf("I_integrand: Error, unknown Jump Method ( Lgm_I_integrand_JumpMethod = %d\n", fInfo->Lgm_I_integrand_JumpMethod );
+        printf("I_integrand: Error, unknown Jump Method ( Lgm_I_integrand_JumpMethod = %d\n", mInfo->Lgm_I_integrand_JumpMethod );
         exit(-1);
 
     }
@@ -291,19 +292,19 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
      */
     done = FALSE; Count = 0; Htry = 0.5*H; Hdone = 0.0; reset = TRUE;
     if (Htry > 0.5) Htry = 0.5;
-    if ( fabs(fInfo->Lgm_I_integrand_S-s) < 1e-12 ) done = TRUE;
+    if ( fabs(mInfo->Lgm_I_integrand_S-s) < 1e-12 ) done = TRUE;
 
     while ( !done ) {
 
-        Lgm_MagStep( &fInfo->Lgm_I_integrand_P, &fInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, fInfo->Bfield, fInfo );
+        Lgm_MagStep( &mInfo->Lgm_I_integrand_P, &mInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, mInfo->Bfield, mInfo );
         Hdone += Hdid; // positive qnty
 
-        fInfo->Lgm_I_integrand_S += sgn*Hdid;
+        mInfo->Lgm_I_integrand_S += sgn*Hdid;
         Hremaining = H - Hdone;
 	    if ( Count > 1000 ) {
             printf("I_integrand: Warning, early return because Count > 1000. Ill-conditioned integrand?\n");
 	        done = TRUE;
-        } else if ( fabs(fInfo->Lgm_I_integrand_S-s) < 1e-12 ){
+        } else if ( fabs(mInfo->Lgm_I_integrand_S-s) < 1e-12 ){
 	        done = TRUE;
 	    } else {
             if ( Htry > Hremaining ) Htry = Hremaining;
@@ -311,7 +312,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 	    ++Count;
     }
 
-    fInfo->Bfield( &fInfo->Lgm_I_integrand_P, &Bvec, fInfo );
+    mInfo->Bfield( &mInfo->Lgm_I_integrand_P, &Bvec, mInfo );
     B = Lgm_Magnitude( &Bvec );
 
     /*
@@ -319,10 +320,10 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
      * negative. If it is, assume its zero. (Note that sometimes (due to
      * round-off error) it could be very slightly negative).
      */
-    g = 1.0 - B/fInfo->Bm;
+    g = 1.0 - B/mInfo->Bm;
     f = (g > 0.0) ? sqrt( g ) : 0.0;
 
-    ++fInfo->Lgm_n_I_integrand_Calls;
+    ++mInfo->Lgm_n_I_integrand_Calls;
 
     return( f );
 
@@ -333,10 +334,10 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 /*
  *  Compute Gradient of I
  */
-int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
+int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector  u, Pa, Pb;
-    double  H, h, a, b, Sa, Sb, I, f[6];
+    double  H, h, a, b, Sa, Sb, I, f[6], r;
     int     i, N;
     
 
@@ -355,6 +356,8 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
      *  Set h to a smallish value
      */
     h = 5e-2;
+    h = .1;
+    h = .5;
 
 
     switch ( DIFF_SCHEME ) {
@@ -371,12 +374,14 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
     // User should set these?
-    //fInfo->epsabs = 0.0;
-    //fInfo->epsrel = 1e-3;
+    mInfo->Lgm_I_Integrator_epsabs = 0.0;
+    mInfo->Lgm_I_Integrator_epsrel = 1e-3;
 
     
     /* X-component */
-    if (fInfo->VerbosityLevel > 0) printf("\t\tComputing dIdx: h = %g\n", h);
+mInfo->VerbosityLevel=3;
+    mInfo->UseInterpRoutines = 1;
+    if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdx: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -386,34 +391,52 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
             /*
              * Trace to northern mirror point
              */
-            printf("A. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            //printf("A. Lgm_TraceToMirrorPoint\n");
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
-                printf("B. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                //printf("B. Lgm_TraceToMirrorPoint\n");
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
-                    a = 0.0; b = Sa+Sb;
-                    fInfo->Pm_South = Pa; fInfo->Sm_South = a;
-                    fInfo->Pm_North = Pb; fInfo->Sm_North = b;
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
+                    r  = Lgm_Magnitude( &Pb );
+//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = Sa;
+                    ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
+                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
+                    mInfo->FirstCall = TRUE;
+                    mInfo->Lgm_n_I_integrand_Calls = 0;
+                    InitSpline( mInfo );
+mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
+mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
+mInfo->Lgm_n_I_integrand_Calls    = 0;
+                    I = Iinv_interped( mInfo  );
+                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
+                    FreeSpline( mInfo );
 
-                    fInfo->FirstCall = TRUE;
-                    fInfo->Lgm_n_I_integrand_Calls = 0;
-                    I = Iinv( fInfo );
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-                    if (fInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", fInfo->Lgm_n_I_integrand_Calls );
+//                    a = 0.0; b = Sa+Sb;
+//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
+//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
+//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
+//
+//                    mInfo->FirstCall = TRUE;
+//                    mInfo->Lgm_n_I_integrand_Calls = 0;
+//                    I = Iinv( mInfo );
+                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
+//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
 
                 } else {
-                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
@@ -434,7 +457,7 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
     
 
     /* Y-component */
-    if (fInfo->VerbosityLevel > 0) printf("\t\tComputing dIdy: h = %g\n", h);
+    if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdy: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -444,34 +467,51 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
             /*
              * Trace to northern mirror point
              */
-            printf("C. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            //printf("C. Lgm_TraceToMirrorPoint\n");
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
-                printf("D. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                //printf("D. Lgm_TraceToMirrorPoint\n");
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
-                    a = 0.0; b = Sa+Sb;
-                    fInfo->Pm_South = Pa; fInfo->Sm_South = a;
-                    fInfo->Pm_North = Pb; fInfo->Sm_North = b;
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
-
-                    fInfo->FirstCall = TRUE;
-                    fInfo->Lgm_n_I_integrand_Calls = 0;
-                    I = Iinv( fInfo );
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-                    if (fInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", fInfo->Lgm_n_I_integrand_Calls );
+                    r  = Lgm_Magnitude( &mInfo->Pm_North );
+//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = Sa;
+                    ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
+                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
+                    InitSpline( mInfo );
+                    mInfo->Lgm_n_I_integrand_Calls = 0;
+                    InitSpline( mInfo );
+mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
+mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
+mInfo->Lgm_n_I_integrand_Calls    = 0;
+                    I = Iinv_interped( mInfo  );
+                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
+                    FreeSpline( mInfo );
+//                    a = 0.0; b = Sa+Sb;
+//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
+//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
+//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
+//
+//                    mInfo->FirstCall = TRUE;
+//                    mInfo->Lgm_n_I_integrand_Calls = 0;
+//                    I = Iinv( mInfo );
+//                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
+//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
 
                 } else {
-                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
@@ -491,7 +531,7 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
 
 
     /* Z-component */
-    if (fInfo->VerbosityLevel > 0) printf("\t\tComputing dIdz: h = %g\n", h);
+    if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdz: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -501,34 +541,51 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
             /*
              * Trace to northern mirror point
              */
-            printf("E. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, fInfo->Bm, 1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+            //printf("E. Lgm_TraceToMirrorPoint\n");
+            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
                  * Trace to southern mirror point
                  */
-                printf("F. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, fInfo->Bm, -1.0, fInfo->Lgm_TraceToMirrorPoint_Tol, fInfo ) > 0 ) {
+                //printf("F. Lgm_TraceToMirrorPoint\n");
+                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
-                    a = 0.0; b = Sa+Sb;
-                    fInfo->Pm_South = Pa; fInfo->Sm_South = a;
-                    fInfo->Pm_North = Pb; fInfo->Sm_North = b;
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
-
-                    fInfo->FirstCall = TRUE;
-                    fInfo->Lgm_n_I_integrand_Calls = 0;
-                    I = Iinv( fInfo );
-                    if (fInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-                    if (fInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", fInfo->Lgm_n_I_integrand_Calls );
+                    r  = Lgm_Magnitude( &mInfo->Pm_North );
+//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = Sa;
+                    ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
+                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
+                    InitSpline( mInfo );
+                    mInfo->Lgm_n_I_integrand_Calls = 0;
+                    InitSpline( mInfo );
+mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
+mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
+mInfo->Lgm_n_I_integrand_Calls    = 0;
+                    I = Iinv_interped( mInfo  );
+                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
+                    FreeSpline( mInfo );
+//                    a = 0.0; b = Sa+Sb;
+//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
+//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
+//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
+//
+//                    mInfo->FirstCall = TRUE;
+//                    mInfo->Lgm_n_I_integrand_Calls = 0;
+//                    I = Iinv( mInfo );
+//                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
+//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
 
                 } else {
-                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                    printf("\t\tMirror point below %g km in Southern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                     exit(0);
                 }
 
             } else {
-                printf("\t\tMirror point below %g km in Northern Hemisphere\n", fInfo->Lgm_LossConeHeight);
+                printf("\t\tMirror point below %g km in Northern Hemisphere\n", mInfo->Lgm_LossConeHeight);
                 exit(0);
             }
 
@@ -546,7 +603,7 @@ int Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *fInfo ) {
         GradI->z = (f[2] - f[0])/(2.0*h);
     }
 
-    printf("\t\tGrad_I = %g %g %g\n", GradI->x, GradI->y, GradI->z);
+    //printf("\t\tGrad_I = %g %g %g\n", GradI->x, GradI->y, GradI->z);
 
     return(0);
 

@@ -20,7 +20,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
  *
  */
 
-double  AlphaOfK( double K, Lgm_MagModelInfo *m ) {
+double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
 
     double  a0, a1, a;
     double  f0, f1, f;

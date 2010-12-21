@@ -42,6 +42,10 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ps,             MaxPitchAngles, 100, Lgm_Vector );
     LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ss,             MaxPitchAngles, 100, double );
     LGM_ARRAY_2D( MagEphemInfo->ShellI,                     MaxPitchAngles, 100, double );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Bmin,                 MaxPitchAngles, 100, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Pmin,                 MaxPitchAngles, 100, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_GradI,                MaxPitchAngles, 100, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Vgc,                  MaxPitchAngles, 100, Lgm_Vector );
 
     LGM_ARRAY_2D( MagEphemInfo->nFieldPnts, MaxPitchAngles, 48, int );
     LGM_ARRAY_3D( MagEphemInfo->s_gsm,      MaxPitchAngles, 48, 1000, double );

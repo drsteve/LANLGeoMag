@@ -63,7 +63,8 @@ typedef struct Lgm_MagEphemInfo {
 
 
 
-    int         UseInterpRoutines;
+    int         UseInterpRoutines;  // Whether to use the interped integrands or not.
+    int         ComputeVgc;         // Whether to compute the Grad-I vals at Pmin for each shell FL
 
 
     /*
@@ -112,6 +113,10 @@ typedef struct Lgm_MagEphemInfo {
     Lgm_Vector  **ShellMirror_Ps; // [MAX_PITCH_ANGLES][100]   south mirror locations
     double      **ShellMirror_Ss; // [MAX_PITCH_ANGLES][100]   south mirror locations (dist along FL)
 
+    Lgm_Vector  **Shell_Bmin;     // [MAX_PITCH_ANGLES][100]   value of Bmin
+    Lgm_Vector  **Shell_Pmin;     // [MAX_PITCH_ANGLES][100]   Bmin points 
+    Lgm_Vector  **Shell_GradI;    // [MAX_PITCH_ANGLES][100]   Gradient and Curvature Drift velocity at Pmin
+    Lgm_Vector  **Shell_Vgc;      // [MAX_PITCH_ANGLES][100]   Gradient of I at Pmin
 
     double      **ShellI;         // [MAX_PITCH_ANGLES][100]   Individual I values computed for each FL
 

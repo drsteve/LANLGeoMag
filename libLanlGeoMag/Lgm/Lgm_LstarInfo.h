@@ -32,6 +32,8 @@ typedef struct Lgm_LstarInfo {
     /*
      *  Variables to hold info on field lines defining the Drift Shell
      */
+    int         FindShellPmin;      // Find the Bmin location on each FL
+    int         ComputeVgc;         // Compute the gradient of I and Vgc
     int         SaveShellLines;     // only save them if this is true
     int         nFieldPnts[100];    // number of points in each FL.
     double      s_gsm[100][1000];   // distance along FL.
@@ -71,6 +73,11 @@ typedef struct Lgm_LstarInfo {
 
     double              PhiVal[100], AngularVelocity[100];
     double              I[100];
+
+    Lgm_Vector          Bmin[100];
+    Lgm_Vector          Pmin[100];
+    Lgm_Vector          GradI[100];
+    Lgm_Vector          Vgc[100];
                                                                                                                                                   
     int                 nSplnPnts;
     double              xa[500], ya[500], y2[500];

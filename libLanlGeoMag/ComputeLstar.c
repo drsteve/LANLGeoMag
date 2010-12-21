@@ -636,9 +636,67 @@ mlat0 = -30.0;
         /*
          * If SaveShellLines is set true, then retrace the FL and save the
          * whole FL.  Note that since we appear to only have the north
-         * footpoint. We start there and trace to south. So lets pack them in
+         * footpoint, we start there and trace to south. So lets pack them in
          * the the saved arrays backwards so that they go from south to north.
          */
+        if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
+            Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
+            LstarInfo->mInfo->Bfield( &v2, &LstarInfo->Bmin[k], LstarInfo->mInfo );
+            LstarInfo->Pmin[k] = v2;
+        }
+
+        /*
+         * Compute the gradient of I, Sb and Vgc
+         */
+        if ( LstarInfo->ComputeVgc ) {
+            LstarInfo->mInfo->FirstCall = TRUE;
+            LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls = 0;
+            LstarInfo->mInfo->Lgm_Sb_Integrator_epsabs = 0.0;
+            LstarInfo->mInfo->Lgm_Sb_Integrator_epsrel = 1e-3;
+            double Sb = SbIntegral( LstarInfo->mInfo );
+//            if (LstarInfo->VerbosityLevel > 0) printf("\t\tSb = %g   ", Sb);
+//            if (LstarInfo->VerbosityLevel > 0) printf("n_Sb_integrand_Calls = %d\n", LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls );
+//            printf("\t\tSb = %g   ", Sb);
+//            printf("n_Sb_integrand_Calls = %d\n", LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls );
+
+            Lgm_Grad_I( &LstarInfo->Pmin[k], &LstarInfo->GradI[k], LstarInfo->mInfo );
+
+            LstarInfo->mInfo->Bfield( &LstarInfo->Pmin[k], &Bvec, LstarInfo->mInfo );
+            printf("\t\tB = %g %g %g\n", Bvec.x, Bvec.y, Bvec.z);
+            B = Lgm_NormalizeVector( &Bvec );   // nT
+            B *= 1e-9;                          // T
+            printf("\t\tB = %g T\n", B);
+
+            double K = LstarInfo->KineticEnergy;       // keV
+K = 1000.0; //keV
+            K *= 1e3*EE;                        // Joules
+            double M = LstarInfo->Mass;                // kg
+M = ELECTRON_MASS; // kg
+
+
+            /*
+             * Note: Kinetic energy is difference between total E and rest Energy
+             * In non-rel. limit, the factor g=2. So ration of Non Rel to Rel velocity is
+             * (2Eta+2)/(Eta+2)
+             */
+            double Eta = K/(M*CC*CC);
+            double g = K*(2.0+Eta)/(1.0+Eta);
+
+
+            double q = 1.0;            // units of elementary charge
+            q *= 1.6021e-19;    // Coulombs
+            Sb *= 6371e3;       // m
+            double f = g/(q*Sb*B)/1000.0;
+
+            Lgm_Vector Vcg;
+            Lgm_CrossProduct( &LstarInfo->GradI[k], &Bvec, &Vcg );
+            Vcg.x *= f; Vcg.y *= f; Vcg.z *= f;
+            printf("\t\tEta = %g    <Vcg>_non./<vcg>_rel. = %g (%g)\n", Eta, (2.0*Eta+2.0)/(Eta+2.0), (Eta+2.0)/(2.0*Eta+2.0));
+            printf("\t\t<Vcg> = %g, %g, %g    km/s\n\n\n", Vcg.x, Vcg.y, Vcg.z);
+            LstarInfo->Vgc[k] = Vcg;
+
+        }
+
         if ( LstarInfo->SaveShellLines ) {
 
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
