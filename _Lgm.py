@@ -1,8 +1,19 @@
+"""
+Main Lgm Library file, contains all the fucntion definitions
+
+
+@author: Brian Larsen
+@organization: LANL
+@contact: balarsen@lanl.gov
+
+@version: V1: 20-Dec-2010 (BAL)
+"""
 
 import ctypes
 from Lgm_Types import *
-from Lgm_Vector import *
 from Lgm_CTrans import *
+from Lgm_Vector import *
+from Lgm_Eop import *
 
 
 class _Lgm(object):
@@ -58,18 +69,18 @@ class _Lgm(object):
                 'Lgm_TaiSeconds_to_TAI' : [None, LgmDouble, Lgm_DateTimeP],
                 'Lgm_TaiSeconds_to_UTC' : [None, LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_UTC_to_TaiSeconds' : [LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
-                'Lgm_UTC_to_TAI' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TAI_to_UTC' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TT_to_TAI' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TAI_to_TT' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TT_to_TDB' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TT_to_TDB_IAU2006' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TDB_to_TT' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_UTC_to_TT' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TT_to_UTC' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_UTC_to_TDB' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_TDB_to_UTC' : [None, LgmDateTimeP, LgmDateTimeP, LgmCTransP],
-                'Lgm_DateTime_Create' : [Lgm_DateTime, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, LgmCTransP],
+                'Lgm_UTC_to_TAI' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TAI_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TT_to_TAI' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TAI_to_TT' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TT_to_TDB' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TT_to_TDB_IAU2006' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TDB_to_TT' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_UTC_to_TT' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TT_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_UTC_to_TDB' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_TDB_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                'Lgm_DateTime_Create' : [Lgm_DateTime, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP],
                 'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_Print_DateTime' : [None, Lgm_DateTime, LgmInt, LgmInt],
                 'Lgm_DateTimeToString' : [None, ctypes.create_string_buffer(80), Lgm_DateTime, LgmInt, LgmInt], # todo 80 was made up use a pointer
