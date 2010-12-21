@@ -1,9 +1,21 @@
-#!/usr/bin/env python2.6
+"""
+Test suite for the Lgm_Vector file
+
+@author: Brian Larsen
+@organization: LANL
+@contact: balarsen@lanl.gov
+
+@version: V1: 20-Dec-2010 (BAL)
+"""
+
+#!/usr/bin/env python
 
 import unittest
 import Lgm_Vector
 import _Lgm
 import math
+from Lgm_CTrans import *
+
 
 class Lgm_VecTests(unittest.TestCase):
     """
@@ -94,4 +106,3 @@ class Lgm_VecTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
