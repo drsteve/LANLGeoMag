@@ -5,7 +5,7 @@ from Lgm_Vector import *
 from Lgm_CTrans import *
 
 
-class Lgm(object):
+class _Lgm(object):
     """
     Python wrapper for LanlGeoMag
     TODO incomplete wrapper, do more
