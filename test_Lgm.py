@@ -11,3 +11,8 @@ Master test suite for the package
 from test_Lgm_Vector import *
 # add others here as they exist
 
+
+
+if __name__ == '__main__':
+    unittest.main()
+

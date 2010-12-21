@@ -20,6 +20,7 @@ class _Lgm(object):
         self.lib = ctypes.CDLL('/usr/local/lib/libLanlGeoMag.dylib')
 
         self.call_dict = {
+            # Lgm_Vector
                 'Lgm_CrossProduct': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_DotProduct': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_NormalizeVector': [LgmDouble, Lgm_VectorP],
@@ -29,6 +30,10 @@ class _Lgm(object):
                 'Lgm_VecAdd': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_VecDiffMag': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_ForceMagnitude': [None, Lgm_VectorP, LgmDouble],
+                'Lgm_MatTimesVec': [None, LgmDouble * 3 * 3, Lgm_VectorP, Lgm_VectorP],
+                'Lgm_Transpose' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
+                'Lgm_MatTimesMat' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
+            # Lgm_LeapSeconds
                 'Lgm_LeapYear': [LgmInt, LgmInt],
                 'Lgm_GetLeapSeconds': [LgmDouble, LgmDouble, Lgm_CTransP],
                 'Lgm_LoadLeapSeconds' : [LgmInt, Lgm_LeapSecondsP],

@@ -2,34 +2,77 @@
 
 import unittest
 import Lgm_Vector
-
+import _Lgm
+import math
 
 class Lgm_VecTests(unittest.TestCase):
-    """Tests related to Lgm_Vector"""
+    """
+    Tests related to Lgm_Vector
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 20-Dec-2010 (BAL)
+    """
 
     def setUp(self):
         super(Lgm_VecTests, self).setUp()
-        self.lgm = Lgm_Vec.Lgm_Vec()
-        self.vec1 = Lgm_Vec.Lgm_Vector_cls(1,2,3)
-        self.vec2 = Lgm_Vec.Lgm_Vector_cls(3,1,0)
-        self.vec3 = Lgm_Vec.Lgm_Vector_cls(7,8,6)
-        self.vec4 = Lgm_Vec.Lgm_Vector_cls(8,3,9)
-        self.vec5 = Lgm_Vec.Lgm_Vector_cls(2,5,1.4)
-
+        self.lgm = _Lgm._Lgm()
 
     def tearDown(self):
         super(Lgm_VecTests, self).tearDown()
 
     def test_Lgm_CrossProduct(self):
         """Lgm_CrossProduct should give known output"""
-        vecans = Lgm_Vec.Lgm_Vector_cls()
-        self.lgm.lib.Lgm_CrossProduct(self.vec1, self.vec2, vecans)
+        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        vec2 = Lgm_Vector.Lgm_Vector(3,1,0)
+        vecans = Lgm_Vector.Lgm_Vector()
+        self.lgm.lib.Lgm_CrossProduct(vec1, vec2, vecans)
         self.assertEqual(-3.0, vecans.x)
         self.assertEqual( 9.0, vecans.y)
         self.assertEqual(-5.0, vecans.z)
 
+    def test_Lgm_DotProduct(self):
+        """Lgm_DotProduct should give known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        vec2 = Lgm_Vector.Lgm_Vector(3,1,0)
+        self.assertEqual(5, self.lgm.lib.Lgm_DotProduct(vec1, vec2))
+        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        vec2 = Lgm_Vector.Lgm_Vector(1,2,3)
+        self.assertEqual(14, self.lgm.lib.Lgm_DotProduct(vec1, vec2))
+
+    def test_Lgm_NormalizeVector(self):
+        """Lgm_NormalizeVector should give known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(3,1,0)
+        magans = self.lgm.lib.Lgm_NormalizeVector(vec1)
+        self.assertAlmostEqual(3.1622776601683795, magans)
+        self.assertAlmostEqual(0.94868329805051377, vec1.x)
+        self.assertAlmostEqual(0.31622776601683794, vec1.y)
+        self.assertAlmostEqual(0.0, vec1.z)
+
+    def test_Lgm_ScaleVector(self):
+        """Lgm_ScaleVector should give known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(3,1,0)
+        self.lgm.lib.Lgm_ScaleVector(vec1, 10.5)
+        self.assertAlmostEqual(31.5, vec1.x)
+        self.assertAlmostEqual(10.5, vec1.y)
+        self.assertAlmostEqual(0.0, vec1.z)
+
+    def test_Lgm_Magnitude(self):
+        """Lgm_Magnitude should give known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(3,1,0)
+        magans = self.lgm.lib.Lgm_Magnitude(vec1)
+        self.assertAlmostEqual(3.1622776601683795, magans)
 
 
+#'Lgm_Magnitude': [LgmDouble, Lgm_VectorP],
+#'Lgm_VecSub': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
+#'Lgm_VecAdd': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
+#'Lgm_VecDiffMag': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
+#'Lgm_ForceMagnitude': [None, Lgm_VectorP, LgmDouble],
+#'Lgm_MatTimesVec': [None, LgmDouble * 3 * 3, Lgm_VectorP, Lgm_VectorP],
+#'Lgm_Transpose' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
+#'Lgm_MatTimesMat' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
 
 
 if __name__ == '__main__':
