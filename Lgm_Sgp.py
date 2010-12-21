@@ -7,8 +7,8 @@
 #  Line 0:
 #      Columns     Example                         Description
 #      -------     -----------         ----------------------------------------------------------
-#      1-24        ISS (ZARYA)         The common name for the object based on information from 
-                                        the SatCat. 
+#      1-24        ISS (ZARYA)         The common name for the object based on information from
+                                        the SatCat.
 #
 #  Line 1:
 #      Columns     Example                         Description
@@ -19,8 +19,8 @@
 #      10-17       98067A              International Designator Search by International Designator
 #      19-32       04236.56031392      Element Set Epoch (UTC)
 #      34-43       .00020137           1st Derivative of the Mean Motion with respect to Time
-#      45-52(46-53??)       12345-7             2nd Derivative of the Mean Motion with respect to Time 
-#                                      NOTE: decimal point assumed.  This type of format is to be 
+#      45-52(46-53??)       12345-7             2nd Derivative of the Mean Motion with respect to Time
+#                                      NOTE: decimal point assumed.  This type of format is to be
 #                                      read as: 0.12345e-7
 #      54-61       16538-3             B* Drag Term
 #      63  0       Element             Set Type
@@ -75,13 +75,13 @@ from Lgm_Types import *
 
 
 class _SgpTLE(ctypes.Structure):
-    _fields_ = [("Line0", LgmChar * 80 ), # Contains the common name for the object
-        ("Line1", LgmChar * 80), # Contains identifiers derivatives of mean motion, drag term etc..
-        ("Line2", LgmChar * 80), # Contains orbital elements (RA of Asc Node, mean anomaly, etc..)
-        ("Name", LgmChar * 80), # Coman object name
+    _fields_ = [("Line0", ctypes.create_string_buffer(80) ), # Contains the common name for the object
+        ("Line1", ctypes.create_string_buffer(80) ), # Contains identifiers derivatives of mean motion, drag term etc..
+        ("Line2", ctypes.create_string_buffer(80) ), # Contains orbital elements (RA of Asc Node, mean anomaly, etc..)
+        ("Name", ctypes.create_string_buffer(80) ), # Coman object name
         ("IdNumber", LgmInt), # Object identification number
-        ("ElsetClass", LgmChar), # Elset Classification
-        ("IntDesig", LgmChar * 20), # International designator
+        ("ElsetClass", ctypes.create_string_buffer(1)), # Elset Classification
+        ("IntDesig", ctypes.create_string_buffer(20) ), # International designator
         ("ElementSetEpoch", LgmDouble), # Element Set Epoch Time
         ("dMMdT1", LgmDouble), # 1st Derivative of the Mean Motion with respect to Time
         ("dMMdT2", LgmDouble), # 2nd Derivative of the Mean Motion with respect to Time
@@ -103,19 +103,19 @@ class _SgpTLE(ctypes.Structure):
         ("Month", LgmInt), #
         ("Day", LgmInt), #
         ("Doy", LgmInt), #
-        ("Dow", LgmChar * 5), #
+        ("Dow", ctypes.create_string_buffer(5) ), #
         ("JD", LgmDouble), # Julian Date of Epoch
         ("Period", LgmDouble), # in minutes
-        ("IntDesig2", LgmChar * 20), # e.g. 1989-046A
-        ("ObjectType", LgmChar * 20), # SAT, R/B or DEB
-        ("EpochStr", LgmChar * 20), # A more readabl version of the epoch time...
+        ("IntDesig2", ctypes.create_string_buffer(20) ), # e.g. 1989-046A
+        ("ObjectType", ctypes.create_string_buffer(20) ), # SAT, R/B or DEB
+        ("EpochStr", ctypes.create_string_buffer(20) ), # A more readabl version of the epoch time...
         ("YYYYDDDdFRAC", LgmDouble) ] #  YYYYDDD.FRAC
-_SgpTLEP = ctypes.POINTER(_SgpTLE)     
+_SgpTLEP = ctypes.POINTER(_SgpTLE)
 
 class _SgpInfo(ctypes.Structure):
     _fields_ = [ \
         #THESE WERE FOR THGE STR3 codes
-        ("IFLAG", LgmInt), # 
+        ("IFLAG", LgmInt), #
         ("XMO", LgmDouble), #
         ("XNODEO", LgmDouble), #
         ("OMEGAO", LgmDouble), #
@@ -142,7 +142,7 @@ class _SgpInfo(ctypes.Structure):
         ("con41", LgmDouble),
         ("d2", LgmDouble),
         ("d2201", LgmDouble),
-        ("d2211", LgmDouble), 
+        ("d2211", LgmDouble),
         ("d3", LgmDouble),
         ("d3210", LgmDouble),
         ("d3222", LgmDouble),
@@ -154,7 +154,7 @@ class _SgpInfo(ctypes.Structure):
         ("d5421", LgmDouble),
         ("d5433", LgmDouble),
         ("dedt", LgmDouble),
-        ("del1", LgmDouble), 
+        ("del1", LgmDouble),
         ("del2", LgmDouble),
         ("del3", LgmDouble),
         ("delmo", LgmDouble),
@@ -176,7 +176,7 @@ class _SgpInfo(ctypes.Structure):
         ("nodedot", LgmDouble),
         ("nodeo", LgmDouble),
         ("omgcof", LgmDouble),
-        ("peo", LgmDouble), 
+        ("peo", LgmDouble),
         ("pgho", LgmDouble),
         ("pho", LgmDouble),
         ("pinco", LgmDouble),
@@ -190,7 +190,7 @@ class _SgpInfo(ctypes.Structure):
         ("sh3", LgmDouble),
         ("si2", LgmDouble),
         ("si3", LgmDouble),
-        ("sinmao", LgmDouble), 
+        ("sinmao", LgmDouble),
         ("sl2", LgmDouble),
         ("sl3", LgmDouble),
         ("sl4", LgmDouble),
@@ -202,7 +202,7 @@ class _SgpInfo(ctypes.Structure):
         ("x1mth2", LgmDouble),
         ("x7thm1", LgmDouble),
         ("xfact", LgmDouble),
-        ("xgh2", LgmDouble), 
+        ("xgh2", LgmDouble),
         ("xgh3", LgmDouble),
         ("xgh4", LgmDouble),
         ("xh2", LgmDouble),
@@ -216,14 +216,14 @@ class _SgpInfo(ctypes.Structure):
         ("xlcof", LgmDouble),
         ("xli", LgmDouble),
         ("xmcof", LgmDouble),
-        ("xni", LgmDouble), 
+        ("xni", LgmDouble),
         ("zmol", LgmDouble),
-        ("zmos", LgmDouble), 
+        ("zmos", LgmDouble),
         ("GravConst", LgmInt), #
-        ("irez", LgmChar), #
-        ("init", LgmChar), #
-        ("method", LgmChar), #
-        ("isimp", LgmChar), #
+        ("irez", ctypes.create_string_buffer(1) ), #
+        ("init", ctypes.create_string_buffer(1) ), #
+        ("method", ctypes.create_string_buffer(1) ), #
+        ("isimp", ctypes.create_string_buffer(1) ), #
         ("X", ), #
         ("Y", ), #
         ("Z", ), #
