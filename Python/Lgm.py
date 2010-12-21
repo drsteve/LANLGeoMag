@@ -25,7 +25,9 @@ class Lgm(object):
                 'Lgm_VecSub': [None, Lgm_Vector_p, Lgm_Vector_p, Lgm_Vector_p],
                 'Lgm_VecAdd': [None, Lgm_Vector_p, Lgm_Vector_p, Lgm_Vector_p],
                 'Lgm_VecDiffMag': [LgmDouble, Lgm_Vector_p, Lgm_Vector_p],
-                'Lgm_ForceMagnitude': [None, Lgm_Vector_p, LgmDouble] #,
+                'Lgm_ForceMagnitude': [None, Lgm_Vector_p, LgmDouble],
+                'Lgm_LeapYear': [LgmInt, LgmInt],
+                'Lgm_GetLeapSeconds': [LgmDouble, LgmDouble, Lgm_CTrans_p]
 #                'Lgm_B_T89': [int, Lgm_Vector_p, Lgm_Vector_p, Lgm_MagModelInfo_p]
             }
         self.load_call_dict()
