@@ -14,7 +14,7 @@ from Lgm_Types import *
 from Lgm_CTrans import *
 from Lgm_Vector import *
 from Lgm_Eop import *
-
+import sys
 
 class _Lgm(object):
     """
@@ -28,7 +28,14 @@ class _Lgm(object):
     @version: V1: 06-Dec-2010 (BAL)
     """
     def __init__(self):
-        self.lib = ctypes.CDLL('/usr/local/lib/libLanlGeoMag.dylib')
+        if sys.platform == 'win32':
+            raise(NotImplementedError("Sorry windows isn't up and running"))
+        elif sys.platform == 'darwin':
+            libname = 'libLanlGeoMag.dylib'
+        else:
+            libname = 'libLanlGeoMag.so'
+
+        self.lib = ctypes.CDLL('/usr/local/lib/' + libname )
 
         # format is [Out type, In type1, In type2, In type3, ... ]
         self.call_dict = {
