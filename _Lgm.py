@@ -32,7 +32,7 @@ class _Lgm(object):
 
         # format is [Out type, In type1, In type2, In type3, ... ]
         self.call_dict = {
-            # Lgm_Vector
+                # Lgm_Vector
                 'Lgm_CrossProduct': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_DotProduct': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_NormalizeVector': [LgmDouble, Lgm_VectorP],
@@ -45,7 +45,7 @@ class _Lgm(object):
                 'Lgm_MatTimesVec': [None, LgmDouble * 3 * 3, Lgm_VectorP, Lgm_VectorP],
                 'Lgm_Transpose' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
                 'Lgm_MatTimesMat' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
-            # Lgm_DateAndTime
+                # Lgm_DateAndTime
                 'Lgm_GetLeapSeconds': [LgmDouble, LgmDouble, Lgm_CTransP],
                 'Lgm_LoadLeapSeconds' : [LgmInt, Lgm_LeapSecondsP],
                 'Lgm_GetLeapSeconds' : [LgmDouble, LgmDouble, Lgm_LeapSecondsP],
@@ -83,13 +83,13 @@ class _Lgm(object):
                 'Lgm_DateTime_Create' : [Lgm_DateTime, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP],
                 'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_Print_DateTime' : [None, Lgm_DateTime, LgmInt, LgmInt],
-                'Lgm_DateTimeToString' : [None, ctypes.create_string_buffer(80), Lgm_DateTime, LgmInt, LgmInt], # todo 80 was made up use a pointer
-                'Lgm_Print_SimpleTime' : [None, Lgm_DateTimeP, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer
+                #'Lgm_DateTimeToString' : [None, ctypes.create_string_buffer(80), Lgm_DateTime, LgmInt, LgmInt], # todo 80 was made up use a pointer
+                #'Lgm_Print_SimpleTime' : [None, Lgm_DateTimeP, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer
                 'Lgm_JDN' : [LgmLong, LgmInt, LgmInt, LgmInt],
                 'Lgm_MJD' : [LgmDouble, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP ],
                 'Lgm_Date_to_JD' : [LgmDouble, LgmLong, LgmDouble, Lgm_CTransP],
                 'Lgm_DayOfYear' : [LgmInt, LgmInt, LgmInt, LgmInt, Lgm_CTransP],
-                'Lgm_DayOfWeek' : [LgmInt, LgmInt, LgmInt, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer
+                #'Lgm_DayOfWeek' : [LgmInt, LgmInt, LgmInt, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer
                 'Lgm_JDNofWeek1' : [LgmLong, LgmInt],
                 'Lgm_ISO_WeekNumber' : [LgmInt, LgmInt, LgmInt, LgmInt, LgmIntP],
                 'Lgm_MaxWeekNumber' : [LgmInt, LgmInt],
@@ -99,10 +99,6 @@ class _Lgm(object):
                 'Lgm_RemapTime' : [LgmDouble, LgmDouble, LgmDouble],
                 'Lgm_UTC_to_TDBSeconds' : [LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_TDBSecSinceJ2000' : [LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
-
-            # coor transforms
-                'Lgm_Set_Coord_Transforms' : [None, LgmInt, LgmDouble, Lgm_CTransP ],
-                'Lgm_Convert_Coords' : [None, Lgm_VectorP, Lgm_VectorP, LgmInt, Lgm_CTransP],
                 'Lgm_UTC_to_TAI' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_TAI_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_UTC_to_TT' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
@@ -110,7 +106,10 @@ class _Lgm(object):
                 'Lgm_TT_to_TDB' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_TDB_to_TT' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
                 'Lgm_UTC_to_TDB' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
-                'Lgm_TDB_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP]
+                'Lgm_TDB_to_UTC' : [None, Lgm_DateTimeP, Lgm_DateTimeP, Lgm_CTransP],
+                # coord transforms
+                'Lgm_Set_Coord_Transforms' : [None, LgmInt, LgmDouble, Lgm_CTransP ],
+                'Lgm_Convert_Coords' : [None, Lgm_VectorP, Lgm_VectorP, LgmInt, Lgm_CTransP] }
                 #'' : [],
                 #'' : [],
                 #'' : [],
@@ -126,7 +125,7 @@ class _Lgm(object):
                 #'' : [],
                 #'' : [],
 
-            }
+
         self.load_call_dict()
 
 

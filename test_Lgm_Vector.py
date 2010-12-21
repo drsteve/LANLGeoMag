@@ -12,10 +12,10 @@ Test suite for the Lgm_Vector file
 
 
 import unittest
+from Lgm_CTrans import *
 import Lgm_Vector
 import _Lgm
 import math
-from Lgm_CTrans import *
 
 
 class Lgm_VecTests(unittest.TestCase):
