@@ -695,7 +695,8 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 ###############################################################################
 
-from Lgm_Types import * 
+from Lgm_Types import *
+from Lgm_Vector import *
 import ctypes
 
 class Lgm_LeapSeconds(ctypes.Structure):
@@ -729,8 +730,183 @@ class Lgm_DateTime(ctypes.Structure):
 
 
 
-
-
+class Lgm_CTrans(ctypes.Structure):
+    _fields_ = [ ("Verbose", LgmInt),
+        ("l", Lgm_LeapSeconds), # Structure containing Leap Second Info
+        ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
+                                     # UT0 is a version of UT that uses data
+                                     # from many different ground stations.
+                                     # UT1 is a version of UT0 in which
+                                     # corrections for polar motion have been
+                                     # made so that time is independant of
+                                     # observing location. There is also a UT2,
+                                     # but we wont use UT0 or UT2 here.
+                                     # Units: Decimal hours
+        ("UTC", Lgm_DateTime), # Universal Time Coordinated.
+                                     # Most commonly used time system. Derived
+                                     # from atomic time. It is maintained to be
+                                     # within +/- 0.9s of UT1 (via addition or
+                                     # subtraction(?) of leap seconds).
+                                     # Units: Decimal hours
+        ("DUT1", LgmDouble), # Difference between UT1 and UTC.
+                                     #      DUT1 = UT1 - UTC.
+                                     # This is monitored and reported as part
+                                     # of the Earth Orientation Parameters
+                                     # (EOP). Can be predicted a short time
+                                     # into the future, but definitive values
+                                     # only available retrospectively.  We set
+                                     # this value to 0.0 by default. Thus in
+                                     # the absence of EOP data, we assume its
+                                     # initial value.
+                                     # Units: Decimal seconds
+        ("LOD", LgmDouble), # Length Of Day (LOD). Its the amount of extra
+                                     # time in seconds that the current day has. Not
+                                     # predictable. Part of EOP values.
+        ("TAI", Lgm_DateTime), # International Atomic Time.
+                                      #     TAI = UTC + DAT
+        ("GPS", Lgm_DateTime), # GPS time
+                                      #     GPS = TAI - 19s
+        ("DAT", LgmDouble), # Difference between UTC and TAI.
+                                      #     DAT = TAI - UTC
+                                      # DAT is essentially the number of leap seconds
+                                      # and are an integral number of whole seconds.
+                                      # Units: Decimal seconds.
+        ("TT", Lgm_DateTime), # Terestrial Time (TT).
+                                      # Essentially the same thing as
+                                      # "Terrestrial Dynamical Time (TDT) or
+                                      # Ephmeris Time (ET). Its defined to be,
+                                      #      TT = TAI + 32.184s
+                                      # Units: Decimal hours.
+        ("TDB", Lgm_DateTime), # Barycentric Dynamical Time.
+                                      # Not used here.
+                                      # Units: Decimal hours
+        ("TCG", Lgm_DateTime), # Geocentric Coordinate Time.
+                                      # Not used here.
+                                      # Units: Decimal hours
+        ("gmst", LgmDouble), # Greenwich Mean Sidereal Time
+                                      # units: in radians
+        ("gast", LgmDouble), # Greenwich Apparent Sidereal Time
+                                      # Units: in radians
+        ("xp", LgmDouble), #  Pole wander parameters.
+                                      # part of EOP data.
+                                      # Units: radians
+        ("yp", LgmDouble ), # Pole wander parameters.
+                                      # part of EOP data.
+                                      # Units: radians
+        ("epsilon", LgmDouble ), # Mean Obliquity of the Ecliptic
+                                     # (in radians)
+        ("epsilon_true", LgmDouble ), # True Obliquity of the Ecliptic
+                                     #  \f$\epsilon_{true} = \epsilon + dEps\f$
+                                     # (in radians)
+        ("eccentricity", LgmDouble ), # Eccentricity of Earth-Sun orbit
+        ("lambda_sun", LgmDouble ), #  Ecliptic Long. of Sun (in radians)
+        ("earth_sun_dist", LgmDouble ), #  Earth-Sun distance (in units of earth radii)
+        ("RA_sun", LgmDouble ), #  Right Ascention of Sun (in degrees)
+        ("DEC_sun", LgmDouble ), # Declination of Sun (in degrees)
+        ("lambda_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
+        ("r_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
+        ("beta_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
+        ("RA_sun_ha", LgmDouble ), # high accuracy Right Ascention of Sun (in degrees)
+        ("DEC_sun_ha", LgmDouble ), # high accuracy Declination of Sun (in degrees)
+        ("Sun", Lgm_Vector), # direction of Sun in GEI system (unit vector)
+        ("EcPole", Lgm_Vector), # direction of Ecliptic Pole in GEI system (unit vector)
+        ("psi", LgmDouble), # Geodipole tilt angle, \f$\psi\f$ (in radians)
+        ("sin_psi", LgmDouble), # \f$\sin(\psi)\f$
+        ("cos_psi", LgmDouble), # \f$\cos(\psi)\f$
+        ("tan_psi", LgmDouble), # \f$\tan(\psi)\f$
+        ("RA_moon", LgmDouble), # Right Ascention of Moon (in degrees)
+        ("DEC_moon", LgmDouble), # Declination of Moon (in degrees)
+        ("MoonPhase", LgmDouble), # The Phase of the Moon (in days)
+        ("EarthMoonDistance", LgmDouble), # Distance between the Earth and Moon (in earth-radii)
+     #  The following are various important parameters derived from
+     #  the IGRF field. Note that these are the basis for defining
+     #  Mag coord systems. That's why they are here and not somewhere else...
+        ("M_cd", LgmDouble), # centered  dipole Magnetic moment. (nT Re^3)
+        ("M_cd_McIllwain", LgmDouble), # magnetic dipole moment used by McIllwain to compute L. Sometimes want to use this for consistency?
+        ("CD_gcolat", LgmDouble), #  Geographic colat of centered dipole axis (deg.)
+        ("CD_glon", LgmDouble), # Geographic long. of centered dipole axis (deg.)
+        ("ED_x0", LgmDouble), # x-comp of dipole displacement from center. Used in eccentric dipole field.
+        ("ED_y0", LgmDouble), # y-comp of dipole displacement from center. Used in eccentric dipole field.
+        ("ED_z0", LgmDouble), # z-comp of dipole displacement from center. Used in eccentric dipole field.
+        ("Zeta", LgmDouble), # Precession angle, \f$\zeta\f$
+        ("Theta", LgmDouble), # Precession angle, \f$\theta\f$
+        ("Zee", LgmDouble), # Precession angle, \f$z\f$
+        ("nNutationTerms", LgmInt), # number of terms to usek in the dPsi/dEps Nutation series.
+        ("dPsi", LgmDouble), #
+        ("dEps", LgmDouble), #
+        ("dPsiCosEps", LgmDouble), #
+        ("dPsiSinEps", LgmDouble), #
+        ("ddPsi", LgmDouble), # radians additional corrections to dPsi -- part of EOP data
+        ("ddEps", LgmDouble), # radians additional corrections to dEps -- part of EOP data
+        ("EQ_Eq", LgmDouble), # Equation of the equinoxes.
+        ("OmegaMoon", LgmDouble), # Ascending node of Moon.
+        ("dX", LgmDouble), #  for IUA-2000A reduction (not used yet)
+        ("dY", LgmDouble), # for IUA-2000A reduction (not used yet)
+        # Transformation matrices between various ccord systems
+        ("Agei_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gei", LgmDouble * 3 * 3), #
+        ("Amod_to_tod", LgmDouble * 3 * 3), #
+        ("Atod_to_mod", LgmDouble * 3 * 3), #
+        ("Ateme_to_pef", LgmDouble * 3 * 3), #
+        ("Apef_to_teme", LgmDouble * 3 * 3), #
+        ("Apef_to_tod", LgmDouble * 3 * 3), #
+        ("Atod_to_pef", LgmDouble * 3 * 3), #
+        ("Awgs84_to_pef", LgmDouble * 3 * 3), #
+        ("Apef_to_wgs84", LgmDouble * 3 * 3), #
+        ("Agse_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gse", LgmDouble * 3 * 3), #
+        ("Asm_to_gsm", LgmDouble * 3 * 3), #
+        ("Agsm_to_sm", LgmDouble * 3 * 3), #
+        ("Agsm_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gsm", LgmDouble * 3 * 3), #
+        ("Agsm_to_gse", LgmDouble * 3 * 3), #
+        ("Agse_to_gsm", LgmDouble * 3 * 3), #
+        ("Awgs84_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_wgs84", LgmDouble * 3 * 3), #
+        ("Awgs84_to_gei", LgmDouble * 3 * 3), #
+        ("Agei_to_wgs84", LgmDouble * 3 * 3), #
+        ("Agsm_to_wgs84", LgmDouble * 3 * 3), #
+        ("Awgs84_to_gsm", LgmDouble * 3 * 3), #
+        ("Awgs84_to_cdmag", LgmDouble * 3 * 3), #
+        ("Acdmag_to_wgs84", LgmDouble * 3 * 3), #
+        ("Agei_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gei", LgmDouble * 3 * 3), #
+        ("Amod_to_tod", LgmDouble * 3 * 3), #
+        ("Atod_to_mod", LgmDouble * 3 * 3), #
+        ("Ateme_to_pef", LgmDouble * 3 * 3), #
+        ("Apef_to_teme", LgmDouble * 3 * 3), #
+        ("Apef_to_tod", LgmDouble * 3 * 3), #
+        ("Atod_to_pef", LgmDouble * 3 * 3), #
+        ("Awgs84_to_pef", LgmDouble * 3 * 3), #
+        ("Apef_to_wgs84", LgmDouble * 3 * 3), #
+        ("Agse_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gse", LgmDouble * 3 * 3), #
+        ("Asm_to_gsm", LgmDouble * 3 * 3), #
+        ("Agsm_to_sm", LgmDouble * 3 * 3), #
+        ("Agsm_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_gsm", LgmDouble * 3 * 3), #
+        ("Agsm_to_gse", LgmDouble * 3 * 3), #
+        ("Agse_to_gsm", LgmDouble * 3 * 3), #
+        ("Awgs84_to_mod", LgmDouble * 3 * 3), #
+        ("Amod_to_wgs84", LgmDouble * 3 * 3), #
+        ("Awgs84_to_gei", LgmDouble * 3 * 3), #
+        ("Agei_to_wgs84", LgmDouble * 3 * 3), #
+        ("Agsm_to_wgs84", LgmDouble * 3 * 3), #
+        ("Awgs84_to_gsm", LgmDouble * 3 * 3), #
+        ("Awgs84_to_cdmag", LgmDouble * 3 * 3), #
+        ("Acdmag_to_wgs84", LgmDouble * 3 * 3), #
+        # These variables are needed to make IGRF Calls reentrant/thread-safe.
+        ("Lgm_IGRF_FirstCall", LgmInt), #
+        ("Lgm_IGRF_OldYear", LgmDouble), #
+        ("Lgm_IGRF_g", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_h", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_R", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_K", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_S", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_TwoNm1_Over_NmM", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_NpMm1_Over_NmM", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_SqrtNM1", LgmDouble * 13 * 13), #
+        ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]  #
 
 
 #class Lgm_DateTime(ctypes.Structure):
