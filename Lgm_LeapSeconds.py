@@ -443,3 +443,6 @@ class Lgm_LeapSeconds(ctypes.Structure):
                                      # which leap seconds were added
         ("LeapSeconds", ctypes.POINTER(LgmDouble)) ] # The actual number of leap seconds that
                                      # went into effect on the given date
+
+Lgm_LeapSecondsP = ctypes.POINTER(Lgm_LeapSeconds)
+
