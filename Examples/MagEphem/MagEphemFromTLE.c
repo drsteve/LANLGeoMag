@@ -127,6 +127,7 @@ int main( int argc, char *argv[] ){
 
 
     // Settings for Lstar calcs
+    MagEphemInfo->ComputeVgc = TRUE;
     MagEphemInfo->LstarQuality = 2;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 10.0;

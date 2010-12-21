@@ -43,6 +43,8 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     char            *PreStr, *PostStr;
 
     MagEphemInfo->LstarInfo->SaveShellLines = TRUE;
+    MagEphemInfo->LstarInfo->FindShellPmin  = TRUE;
+    MagEphemInfo->LstarInfo->ComputeVgc     = TRUE;
     LstarInfo = MagEphemInfo->LstarInfo;
 
     // Save Date, UTC to MagEphemInfo structure
@@ -168,6 +170,12 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
 
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
+                        MagEphemInfo->Shell_Pmin[i][nn]  = LstarInfo2->Pmin[nn];
+                        MagEphemInfo->Shell_Bmin[i][nn]  = LstarInfo2->Bmin[nn];
+                        MagEphemInfo->Shell_GradI[i][nn] = LstarInfo2->GradI[nn];
+                        MagEphemInfo->Shell_Vgc[i][nn]   = LstarInfo2->Vgc[nn];
+printf("MagEphemInfo->Shell_GradI[%d][%d] = %g %g %g\n", i, nn, MagEphemInfo->Shell_GradI[i][nn].x, MagEphemInfo->Shell_GradI[i][nn].y, MagEphemInfo->Shell_GradI[i][nn].z);
+
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
 
                         MagEphemInfo->ShellSphericalFootprint_Pn[i][nn] = LstarInfo2->Spherical_Footprint_Pn[nn];
@@ -206,6 +214,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                         }
 //printf("LstarInfo2->nFieldPnts[%d] = %d\n", nn, LstarInfo2->nFieldPnts[nn]);
                     }
+
 
                 } else {
                     printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo2->LSimpleMax );

@@ -1,9 +1,14 @@
-InputFile:TEST_FILE.txt
-OutputFile:CRAP.txt
+CRRES
+1 20712U 90065  A 91031.94613567  .00002561 +00000-0 +20479-2 0 01223
+2 20712 018.1622 329.1495 7128052 344.9703 001.7466 02.43821116004659
+OutputFile:CRRES.txt
+ISO Start Date/Time:1991-02-01T00:00:00
+ISO End   Date/Time:1991-02-01T00:00:00
+Cadence in seconds:300
 Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
 Dst:-20
-PitchAngles:18 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90
+PitchAngles:1 90
 Footpoint Height:100.0
-Colorize:False
+Colorize:True
