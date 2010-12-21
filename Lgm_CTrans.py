@@ -902,7 +902,20 @@ class Lgm_CTrans(ctypes.Structure):
         ("Lgm_IGRF_NpMm1_Over_NmM", LgmDouble * 13 * 13), #
         ("Lgm_IGRF_SqrtNM1", LgmDouble * 13 * 13), #
         ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]  #
+    # Mike has Lgm_init_ctrans that sets a few vars, set them here
+    def __init__(self, verbose = 0):
+        self.nNutationTerms = 106
+        self.Verbose = verbose
+        self.DUT1 = 0.0
+        self.xp = 0.0
+        self.yp = 0.0
+        self.ddPsi = 0.0
+        self.ddEps = 0.0
+
+
 Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
+
+
 
 
 #class Lgm_DateTime(ctypes.Structure):
