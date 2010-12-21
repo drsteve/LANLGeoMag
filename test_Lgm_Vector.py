@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Test suite for the Lgm_Vector file
 
@@ -8,7 +10,6 @@ Test suite for the Lgm_Vector file
 @version: V1: 20-Dec-2010 (BAL)
 """
 
-#!/usr/bin/env python
 
 import unittest
 import Lgm_Vector

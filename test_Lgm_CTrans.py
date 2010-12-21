@@ -1,4 +1,14 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
+
+"""
+Test suite for the Lgm_CTrans file <<This is an important one>>
+
+@author: Brian Larsen
+@organization: LANL
+@contact: balarsen@lanl.gov
+
+@version: V1: 20-Dec-2010 (BAL)
+"""
 
 import unittest
 import Lgm_CTrans

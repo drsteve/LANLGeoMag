@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Master test suite for the package
 
@@ -9,10 +11,10 @@ Master test suite for the package
 """
 
 from test_Lgm_Vector import *
+from test_Lgm_CTrans import *
 # add others here as they exist
 
 
 
 if __name__ == '__main__':
     unittest.main()
-
