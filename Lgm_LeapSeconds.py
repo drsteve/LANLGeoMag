@@ -437,12 +437,11 @@ from Lgm_Types import *
 
 class Lgm_LeapSeconds(ctypes.Structure):
     _fields_ = [ ("nLeapSecondDates", LgmInt), # Number of leap second dates.
-        ("LeapSecondDates", ctypes.POINTER(LgmLong)), # Array for holdin the Dates on which leap
+        ("LeapSecondDates", LgmLongP), # Array for holdin the Dates on which leap
                                      # seconds were added
-        ("LeapSecondJDs", ctypes.POINTER(LgmDouble)), # Array for holdin the Julian Dates on
+        ("LeapSecondJDs", LgmDoubleP), # Array for holdin the Julian Dates on
                                      # which leap seconds were added
-        ("LeapSeconds", ctypes.POINTER(LgmDouble)) ] # The actual number of leap seconds that
+        ("LeapSeconds", LgmDoubleP) ] # The actual number of leap seconds that
                                      # went into effect on the given date
 
 Lgm_LeapSecondsP = ctypes.POINTER(Lgm_LeapSeconds)
-
