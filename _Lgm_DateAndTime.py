@@ -436,12 +436,13 @@ from _Lgm_Types import *
 
 
 class Lgm_DateAndTime(ctypes.Structure):
-    _fields_ = [ ("nLeapSecondDates", LgmInt), # Number of leap second dates.
-        ("LeapSecondDates", LgmLong), # Array for holdin the Dates on which leap
-                                     # seconds were added
-        ("LeapSecondJDs", LgmDouble), # Array for holdin the Julian Dates on
-                                     # which leap seconds were added
-        ("LeapSeconds", LgmDouble) ] # The actual number of leap seconds that
-                                     # went into effect on the given date
+    @classmethod
+    def assign_fields(cls):
+        cls._fields_ = [ ("nLeapSecondDates", LgmInt), # Number of leap second dates.
+            ("LeapSecondDates", LgmLong), # Array for holdin the Dates on which leap
+                                      # seconds were added
+            ("LeapSecondJDs", LgmDouble), # Array for holdin the Julian Dates on
+                                       # which leap seconds were added
+            ("LeapSeconds", LgmDouble) ] # The actual number of leap seconds that
+                                         # went into effect on the given date
 
-Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)

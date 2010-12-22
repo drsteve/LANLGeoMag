@@ -1,15 +1,29 @@
 
-from _Lgm import *
+from _Lgm import lib
 from _Lgm_Types import *
-from _Lgm_Vector import *
+import Lgm_Vector
 from _Lgm_CTrans import *
 from _Lgm_Eop import *
 from _Lgm_DateAndTime import *
 
+# the order here matters, if you get a _fields_ is final then play with order
+# it becomes final when pointers are created as Pyhton has to figure how big
+# the object is (is the current theory)
+
+Lgm_Vector.Lgm_Vector.assign_fields()
 Lgm_DateAndTime.assign_fields()
-Lgm_Vector.assign_fields()
 Lgm_CTrans.assign_fields()
 Lgm_Eop.assign_fields()
+
+Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
+Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)
+Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
+Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
+Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
+Lgm_EopP = ctypes.POINTER(Lgm_Eop)
+Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
+
+
 
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {
