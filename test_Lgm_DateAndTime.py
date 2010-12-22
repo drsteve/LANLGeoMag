@@ -12,10 +12,10 @@ Test suite for the Lgm_DateAndTime file
 
 
 import unittest
-import Lgm_DateAndTime
+import _Lgm_DateAndTime
 import _Lgm
-import Lgm_CTrans
-from Lgm_Types import *
+import _Lgm_CTrans
+from _Lgm_Types import *
 
 
 class Lgm_DateAndTimeTests(unittest.TestCase):
@@ -38,10 +38,10 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
 
     def test_Lgm_DateAndTime(self):
         """Lgm_DateAndTime has a nLeapSecondDates, LeapSecondDates, LeapSecondJDs, LeapSeconds"""
-        self.assertTrue(hasattr(Lgm_DateAndTime.Lgm_DateAndTime, 'nLeapSecondDates'))
-        self.assertTrue(hasattr(Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSecondDates'))
-        self.assertTrue(hasattr(Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSecondJDs'))
-        self.assertTrue(hasattr(Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSeconds'))
+        self.assertTrue(hasattr(_Lgm_DateAndTime.Lgm_DateAndTime, 'nLeapSecondDates'))
+        self.assertTrue(hasattr(_Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSecondDates'))
+        self.assertTrue(hasattr(_Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSecondJDs'))
+        self.assertTrue(hasattr(_Lgm_DateAndTime.Lgm_DateAndTime, 'LeapSeconds'))
 
 
     def test_Lgm_DateAndTime_Type(self):
@@ -49,7 +49,7 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
         b = LgmLong()
         c = LgmDouble()
         d = LgmDouble()
-        ans = Lgm_DateAndTime.Lgm_DateAndTime(5, b, c, d)
+        ans = _Lgm_DateAndTime.Lgm_DateAndTime(5, b, c, d)
         self.assertTrue(isinstance(ans.nLeapSecondDates, int))
         self.assertTrue(isinstance(ans.LeapSecondDates, int))
         self.assertTrue(isinstance(ans.LeapSecondJDs, float))
@@ -84,7 +84,7 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
         2440622.73684211,  2442755.63157895,  2444888.52631579,
         2447021.42105263,  2449154.31578947,  2451287.21052632,
         2453420.10526316,  2455553.        ]
-        c = Lgm_CTrans.Lgm_CTrans()
+        c = _Lgm_CTrans.Lgm_CTrans()
         ans = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                2.888061368417114, 8.091415894748657, 13.619879052638948,
                19.148342210528032, 24.676805368417114, 30.2052685263062,
@@ -97,7 +97,7 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
         leapSdays = [19711231, 19720630, 19721231, 19731231, 19810630, 19871231,
                     19920630, 19951231]
 
-        c = Lgm_CTrans.Lgm_CTrans()
+        c = _Lgm_CTrans.Lgm_CTrans()
         ans = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                2.888061368417114, 8.091415894748657, 13.619879052638948,
                19.148342210528032, 24.676805368417114, 30.2052685263062,
@@ -111,8 +111,8 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
 
     def test_Lgm_Lgm_Make_UTC(self):
         """Lgm_Make_UTC should give known answer for known input"""
-        UTC = Lgm_DateAndTime.Lgm_DateAndTime()
-        c = Lgm_CTrans.Lgm_CTrans()
+        UTC = _Lgm_DateAndTime.Lgm_DateAndTime()
+        c = _Lgm_CTrans.Lgm_CTrans()
         self.assertEqual(self.lgm.lib.Lgm_Make_UTC(19850629, 0.0/3600.0, UTC, c ), 1)
         self.assertEqual( UTC.nLeapSecondDates, 19850629)
         self.assertEqual( UTC.LeapSecondDates, 25769805761)

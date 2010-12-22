@@ -11,11 +11,11 @@ Main Lgm Library file, contains all the fucntion definitions
 
 # import everything here then in each file just import as needed
 import ctypes
-from Lgm_Types import *
-from Lgm_CTrans import *
-from Lgm_Vector import *
-from Lgm_Eop import *
-from Lgm_DateAndTime import *
+from _Lgm_Types import *
+from _Lgm_CTrans import *
+from _Lgm_Vector import *
+from _Lgm_Eop import *
+from _Lgm_DateAndTime import *
 import sys
 
 class _Lgm(object):
