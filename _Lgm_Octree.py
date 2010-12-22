@@ -12,8 +12,10 @@ OCTREE_IS_NULL = -2
 
 
 import ctypes
+import Lgm
+from _Lgm import lib
 from Lgm_Types import *
-import Lgm_Vector 
+import Lgm_Vector
 
 
 class _Lgm_OctreeData(ctypes.Structure):

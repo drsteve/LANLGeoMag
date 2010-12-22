@@ -1,3 +1,16 @@
+"""
+Main import to use the LanlGeoMag
+
+import Lgm
+then import what you want next
+
+@author: Brian Larsen
+@organization: LANL
+@contact: balarsen@lanl.gov
+
+@version: V1: 21-Dec-2010 (BAL)
+"""
+
 
 from _Lgm import lib
 from _Lgm_Types import *
@@ -5,6 +18,7 @@ import Lgm_Vector
 from _Lgm_CTrans import *
 from _Lgm_Eop import *
 from _Lgm_DateAndTime import *
+from _Lgm_MagModelInfo import *
 
 # the order here matters, if you get a _fields_ is final then play with order
 # it becomes final when pointers are created as Pyhton has to figure how big
