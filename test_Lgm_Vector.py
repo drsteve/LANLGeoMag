@@ -12,7 +12,7 @@ Test suite for the Lgm_Vector file
 
 
 import unittest
-from Lgm_CTrans import *
+import Lgm_CTrans 
 import Lgm_Vector
 import _Lgm
 import math

@@ -13,12 +13,12 @@ OCTREE_IS_NULL = -2
 
 import ctypes
 from Lgm_Types import *
-from Lgm_Vector import *
+import Lgm_Vector 
 
 
 class _Lgm_OctreeData(ctypes.Structure):
-    _fields_ = [("Position", Lgm_Vector ), # 
-        ("B", Lgm_Vector), # 
+    _fields_ = [("Position", Lgm_Vector ), #
+        ("B", Lgm_Vector), #
         ("Dist2", LgmDouble) ]
 _Lgm_OctreeDataP = ctypes.POINTER(_Lgm_OctreeData)
 
@@ -43,7 +43,7 @@ class _pQueue(ctypes.Structure):
 _pQueueP = ctypes.POINTER(_pQueue)
 
 
-_pQueue._fields_ = [("Obj", LgmUInt ), #  
+_pQueue._fields_ = [("Obj", LgmUInt ), #
         ("MinDist2", LgmUInt), #  Minimum possible distance^2 between object and query point.
                             # If the object is a point, then its the actual distance^2.
         ("IsPoint", LgmUInt), # If this is TRUE, then a data point is stored in Obj.Data[j]
@@ -51,5 +51,3 @@ _pQueue._fields_ = [("Obj", LgmUInt ), #
         ("j", LgmUInt), # Index where data point is stored.
         ("Prev", LgmUInt), # for linked list
         ("Next", LgmUInt) ] # for linked list
- 
-

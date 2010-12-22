@@ -9,11 +9,13 @@ Main Lgm Library file, contains all the fucntion definitions
 @version: V1: 20-Dec-2010 (BAL)
 """
 
+# import everything here then in each file just import as needed
 import ctypes
 from Lgm_Types import *
 from Lgm_CTrans import *
 from Lgm_Vector import *
 from Lgm_Eop import *
+from Lgm_LeapSeconds import *
 import sys
 
 class _Lgm(object):
