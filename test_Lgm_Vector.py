@@ -12,7 +12,7 @@ Test suite for the Lgm_Vector file
 
 
 import unittest
-import Lgm_CTrans 
+import Lgm_CTrans
 import Lgm_Vector
 import _Lgm
 import math
@@ -95,7 +95,6 @@ class Lgm_VecTests(unittest.TestCase):
 
 
 # Tests not written for these yet
-#'Lgm_Magnitude': [LgmDouble, Lgm_VectorP],
 #'Lgm_VecSub': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
 #'Lgm_VecAdd': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
 #'Lgm_VecDiffMag': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
