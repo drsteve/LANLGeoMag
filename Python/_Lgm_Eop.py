@@ -9,7 +9,7 @@ Lgm_Eop module, this contains the necessary code
 """
 
 import ctypes
-from Lgm_Types import *
+from _Lgm_Types import *
 
 class Lgm_NgaEopp(ctypes.Structure):
     _fields_ = [("ta", LgmDouble),
@@ -84,5 +84,3 @@ class Lgm_EopOne(ctypes.Structure):
         ("dY", LgmDouble),
         ("DAT", LgmDouble) ]
 Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
-
-

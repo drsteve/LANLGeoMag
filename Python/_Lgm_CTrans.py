@@ -695,10 +695,10 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 ###############################################################################
 
-from Lgm_Types import *
-from Lgm_Vector import *
-from Lgm_LeapSeconds import *
 import ctypes
+from _Lgm_Types import *
+import _Lgm_Vector
+import _Lgm_DateAndTime
 
 class Lgm_DateTime(ctypes.Structure):
     _fields_ = [ ("Date", LgmLong ), # In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
@@ -727,7 +727,7 @@ Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
 
 class Lgm_CTrans(ctypes.Structure):
     _fields_ = [ ("Verbose", LgmInt),
-        ("l", Lgm_LeapSeconds), # Structure containing Leap Second Info
+        ("l", _Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
         ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                      # UT0 is a version of UT that uses data
                                      # from many different ground stations.
@@ -803,8 +803,8 @@ class Lgm_CTrans(ctypes.Structure):
         ("beta_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
         ("RA_sun_ha", LgmDouble ), # high accuracy Right Ascention of Sun (in degrees)
         ("DEC_sun_ha", LgmDouble ), # high accuracy Declination of Sun (in degrees)
-        ("Sun", Lgm_Vector), # direction of Sun in GEI system (unit vector)
-        ("EcPole", Lgm_Vector), # direction of Ecliptic Pole in GEI system (unit vector)
+        ("Sun", _Lgm_Vector.Lgm_Vector), # direction of Sun in GEI system (unit vector)
+        ("EcPole", _Lgm_Vector.Lgm_Vector), # direction of Ecliptic Pole in GEI system (unit vector)
         ("psi", LgmDouble), # Geodipole tilt angle, \f$\psi\f$ (in radians)
         ("sin_psi", LgmDouble), # \f$\sin(\psi)\f$
         ("cos_psi", LgmDouble), # \f$\cos(\psi)\f$
