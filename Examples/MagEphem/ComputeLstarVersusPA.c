@@ -122,10 +122,14 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
 
                 
 
-                // make a local copy of LstarInfo structure -- needed for multi-threading
+                /*
+                 * make a local copy of LstarInfo structure -- needed for multi-threading
+                 */
                 LstarInfo3 = Lgm_CopyLstarInfo( LstarInfo );
 
-                // colorize the diagnostic messages.
+                /*
+                 * colorize the diagnostic messages.
+                 */
                 if ( Colorize ){
                     sprintf( LstarInfo3->PreStr, "\033[38;5;%dm", Colors[i%9]); sprintf( LstarInfo3->PostStr, "\033[0m");
                 } else {
@@ -174,7 +178,8 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                         MagEphemInfo->Shell_Bmin[i][nn]  = LstarInfo2->Bmin[nn];
                         MagEphemInfo->Shell_GradI[i][nn] = LstarInfo2->GradI[nn];
                         MagEphemInfo->Shell_Vgc[i][nn]   = LstarInfo2->Vgc[nn];
-printf("MagEphemInfo->Shell_GradI[%d][%d] = %g %g %g\n", i, nn, MagEphemInfo->Shell_GradI[i][nn].x, MagEphemInfo->Shell_GradI[i][nn].y, MagEphemInfo->Shell_GradI[i][nn].z);
+//printf("MagEphemInfo->Shell_Vgc[%d][%d] = %g %g %g\n", i, nn, MagEphemInfo->Shell_Vgc[i][nn].x, MagEphemInfo->Shell_Vgc[i][nn].y, MagEphemInfo->Shell_Vgc[i][nn].z);
+printf("%g %g %g\n", MagEphemInfo->Shell_Vgc[i][nn].x, MagEphemInfo->Shell_Vgc[i][nn].y, MagEphemInfo->Shell_Vgc[i][nn].z);
 
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
 

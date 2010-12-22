@@ -315,6 +315,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[500], MirrorMlat_Old[500];
     char    *PreStr, *PostStr;
+    Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
 
     PreStr = LstarInfo->PreStr;
@@ -649,23 +650,25 @@ mlat0 = -30.0;
          * Compute the gradient of I, Sb and Vgc
          */
         if ( LstarInfo->ComputeVgc ) {
-            LstarInfo->mInfo->FirstCall = TRUE;
-            LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls = 0;
-            LstarInfo->mInfo->Lgm_Sb_Integrator_epsabs = 0.0;
-            LstarInfo->mInfo->Lgm_Sb_Integrator_epsrel = 1e-3;
-            double Sb = SbIntegral( LstarInfo->mInfo );
-//            if (LstarInfo->VerbosityLevel > 0) printf("\t\tSb = %g   ", Sb);
-//            if (LstarInfo->VerbosityLevel > 0) printf("n_Sb_integrand_Calls = %d\n", LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls );
-//            printf("\t\tSb = %g   ", Sb);
-//            printf("n_Sb_integrand_Calls = %d\n", LstarInfo->mInfo->Lgm_n_Sb_integrand_Calls );
+            // Lgm_Grad_I() and other rotuines may modify mInfo in undesirable ways, so give it a copy.
+            mInfo2 = Lgm_CopyMagInfo( LstarInfo->mInfo );
 
-            Lgm_Grad_I( &LstarInfo->Pmin[k], &LstarInfo->GradI[k], LstarInfo->mInfo );
+            mInfo2->FirstCall = TRUE;
+            mInfo2->Lgm_n_Sb_integrand_Calls = 0;
+            mInfo2->Lgm_Sb_Integrator_epsabs = 0.0;
+            mInfo2->Lgm_Sb_Integrator_epsrel = 1e-3;
+            double Sb = SbIntegral( mInfo2 );
+Sb = 1.0;
+
+            Lgm_Grad_I( &LstarInfo->Pmin[k], &LstarInfo->GradI[k], mInfo2 );
 
             LstarInfo->mInfo->Bfield( &LstarInfo->Pmin[k], &Bvec, LstarInfo->mInfo );
             printf("\t\tB = %g %g %g\n", Bvec.x, Bvec.y, Bvec.z);
             B = Lgm_NormalizeVector( &Bvec );   // nT
             B *= 1e-9;                          // T
             printf("\t\tB = %g T\n", B);
+
+            Lgm_FreeMagInfo( mInfo2 );
 
             double K = LstarInfo->KineticEnergy;       // keV
 K = 1000.0; //keV

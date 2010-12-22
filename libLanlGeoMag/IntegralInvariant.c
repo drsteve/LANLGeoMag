@@ -356,8 +356,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
      *  Set h to a smallish value
      */
     h = 5e-2;
-    h = .1;
-    h = .5;
+    h = 0.1;
+    h = 0.2;
 
 
     switch ( DIFF_SCHEME ) {
@@ -375,13 +375,14 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
     // User should set these?
     mInfo->Lgm_I_Integrator_epsabs = 0.0;
-    mInfo->Lgm_I_Integrator_epsrel = 1e-3;
+    mInfo->Lgm_I_Integrator_epsrel = 1e-7;
+//            mInfo2->FirstCall = TRUE;
 
     
     /* X-component */
-mInfo->VerbosityLevel=3;
     mInfo->UseInterpRoutines = 1;
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdx: h = %g\n", h);
+printf("\t\tComputing dIdx: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -414,7 +415,8 @@ mInfo->Lgm_I_integrand_S         = 0.0;
 mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
 mInfo->Lgm_n_I_integrand_Calls    = 0;
                     I = Iinv_interped( mInfo  );
-                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
 //                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     FreeSpline( mInfo );
 
@@ -458,6 +460,7 @@ mInfo->Lgm_n_I_integrand_Calls    = 0;
 
     /* Y-component */
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdy: h = %g\n", h);
+printf("\t\tComputing dIdy: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -490,7 +493,8 @@ mInfo->Lgm_I_integrand_S         = 0.0;
 mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
 mInfo->Lgm_n_I_integrand_Calls    = 0;
                     I = Iinv_interped( mInfo  );
-                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
 //                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     FreeSpline( mInfo );
 //                    a = 0.0; b = Sa+Sb;
@@ -532,6 +536,7 @@ mInfo->Lgm_n_I_integrand_Calls    = 0;
 
     /* Z-component */
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdz: h = %g\n", h);
+printf("\t\tComputing dIdz: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -564,7 +569,8 @@ mInfo->Lgm_I_integrand_S         = 0.0;
 mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
 mInfo->Lgm_n_I_integrand_Calls    = 0;
                     I = Iinv_interped( mInfo  );
-                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
 //                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     FreeSpline( mInfo );
 //                    a = 0.0; b = Sa+Sb;
