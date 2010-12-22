@@ -2,3 +2,4 @@
 .svn*
 .coverage
 htmlcov*
+html*
