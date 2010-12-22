@@ -12,11 +12,9 @@ Test suite for the Lgm_LeapSeconds file
 
 
 import unittest
-import Lgm_CTrans
-import Lgm_Vector
 import Lgm_LeapSeconds
 import _Lgm
-import math
+from Lgm_Types import *
 
 
 class Lgm_LeapSecondsTests(unittest.TestCase):
@@ -35,6 +33,27 @@ class Lgm_LeapSecondsTests(unittest.TestCase):
 
     def tearDown(self):
         super(Lgm_LeapSecondsTests, self).tearDown()
+
+
+    def test_Lgm_LeapSeconds(self):
+        """Lgm_LeapSeconds has a nLeapSecondDates, LeapSecondDates, LeapSecondJDs, LeapSeconds"""
+        self.assertTrue(hasattr(Lgm_LeapSeconds.Lgm_LeapSeconds, 'nLeapSecondDates'))
+        self.assertTrue(hasattr(Lgm_LeapSeconds.Lgm_LeapSeconds, 'LeapSecondDates'))
+        self.assertTrue(hasattr(Lgm_LeapSeconds.Lgm_LeapSeconds, 'LeapSecondJDs'))
+        self.assertTrue(hasattr(Lgm_LeapSeconds.Lgm_LeapSeconds, 'LeapSeconds'))
+
+
+    def test_Lgm_LeapSeconds_Type(self):
+        """Lgm_LeapSeconds input should be of correct types """
+        b = LgmLongP()
+        c = LgmDoubleP()
+        d = LgmDoubleP()
+        ans = Lgm_LeapSeconds.Lgm_LeapSeconds(5, b, c, d)
+        self.assertTrue(isinstance(ans.nLeapSecondDates, int))
+        self.assertTrue(isinstance(ans.LeapSecondDates, LgmLongP))
+        self.assertTrue(isinstance(ans.LeapSecondJDs, LgmDoubleP))
+        self.assertTrue(isinstance(ans.LeapSeconds, LgmDoubleP))
+
 
 
 
