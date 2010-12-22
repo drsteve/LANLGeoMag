@@ -15,7 +15,7 @@ from Lgm_Types import *
 from Lgm_CTrans import *
 from Lgm_Vector import *
 from Lgm_Eop import *
-from Lgm_LeapSeconds import *
+from Lgm_DateAndTime import *
 import sys
 
 class _Lgm(object):
@@ -56,9 +56,9 @@ class _Lgm(object):
                 'Lgm_MatTimesMat' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
                 # Lgm_DateAndTime
                 'Lgm_GetLeapSeconds': [LgmDouble, LgmDouble, Lgm_CTransP],
-                'Lgm_LoadLeapSeconds' : [LgmInt, Lgm_LeapSecondsP],
-                'Lgm_GetLeapSeconds' : [LgmDouble, LgmDouble, Lgm_LeapSecondsP],
-                'Lgm_IsLeapSecondDay' : [LgmInt, LgmInt, Lgm_LeapSecondsP],
+                'Lgm_LoadLeapSeconds' : [LgmInt, Lgm_DateAndTimeP],
+                'Lgm_GetLeapSeconds' : [LgmDouble, LgmDouble, Lgm_DateAndTimeP],
+                'Lgm_IsLeapSecondDay' : [LgmInt, LgmInt, Lgm_DateAndTimeP],
                 'Lgm_LeapYear': [LgmInt, LgmInt],
                 'Lgm_JD' : [LgmDouble, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP  ],
                 'Lgm_Date_to_JD' : [LgmDouble, LgmLong, LgmDouble, Lgm_CTransP],

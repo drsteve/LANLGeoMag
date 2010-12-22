@@ -698,7 +698,7 @@ CDMAG_TO_CDMAG = 1111
 import ctypes
 from Lgm_Types import *
 import Lgm_Vector
-import Lgm_LeapSeconds
+import Lgm_DateAndTime
 
 class Lgm_DateTime(ctypes.Structure):
     _fields_ = [ ("Date", LgmLong ), # In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
@@ -727,7 +727,7 @@ Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
 
 class Lgm_CTrans(ctypes.Structure):
     _fields_ = [ ("Verbose", LgmInt),
-        ("l", Lgm_LeapSeconds.Lgm_LeapSeconds), # Structure containing Leap Second Info
+        ("l", Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
         ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                      # UT0 is a version of UT that uses data
                                      # from many different ground stations.
