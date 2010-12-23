@@ -16,7 +16,7 @@ import Lgm
 from _Lgm import lib
 import _Lgm_DateAndTime
 import _Lgm_CTrans
-from _Lgm_Types import *
+from Lgm_Types import *
 
 
 class Lgm_DateAndTimeTests(unittest.TestCase):

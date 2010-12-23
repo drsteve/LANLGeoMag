@@ -13,7 +13,7 @@ then import what you want next
 
 
 from _Lgm import lib
-from _Lgm_Types import *
+from Lgm_Types import *
 import Lgm_Vector
 from _Lgm_CTrans import *
 from _Lgm_Eop import *

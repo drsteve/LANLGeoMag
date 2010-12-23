@@ -9,7 +9,7 @@ Lgm_Eop module, this contains the necessary code
 """
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import *
 
 class Lgm_NgaEopp(ctypes.Structure):
     @classmethod

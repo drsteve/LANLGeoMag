@@ -431,7 +431,7 @@ TRUE = 1
 ###############################################################################
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import *
 
 
 

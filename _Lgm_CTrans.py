@@ -277,7 +277,7 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import *
 import Lgm_Vector
 import _Lgm_DateAndTime
 

@@ -10,7 +10,7 @@ Vector class for Lgm
 
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import *
 import Lgm
 from _Lgm import lib
 
