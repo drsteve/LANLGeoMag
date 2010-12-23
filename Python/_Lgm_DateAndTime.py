@@ -431,7 +431,7 @@ TRUE = 1
 ###############################################################################
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import LgmLong, LgmDouble, LgmInt
 
 
 
@@ -445,4 +445,3 @@ class Lgm_DateAndTime(ctypes.Structure):
                                        # which leap seconds were added
             ("LeapSeconds", LgmDouble) ] # The actual number of leap seconds that
                                          # went into effect on the given date
-

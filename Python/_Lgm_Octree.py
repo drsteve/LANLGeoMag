@@ -12,13 +12,15 @@ OCTREE_IS_NULL = -2
 
 
 import ctypes
-from Lgm_Types import *
-import Lgm_Vector 
+import Lgm
+from _Lgm import lib
+from Lgm_Types import LgmLong, LgmDouble, LgmUInt, LgmULong
+import Lgm_Vector
 
 
 class _Lgm_OctreeData(ctypes.Structure):
-    _fields_ = [("Position", Lgm_Vector ), #
-        ("B", Lgm_Vector), #
+    _fields_ = [("Position", Lgm_Vector.Lgm_Vector ), #
+        ("B", Lgm_Vector.Lgm_Vector), #
         ("Dist2", LgmDouble) ]
 _Lgm_OctreeDataP = ctypes.POINTER(_Lgm_OctreeData)
 
@@ -30,7 +32,7 @@ _Lgm_OctreeCell._fields_ = [("xLocationCode", LgmUInt ), #  X Location Code
         ("yLocationCode", LgmUInt), #  Y Location Code
         ("zLocationCode", LgmUInt), # Z Location Code
         ("Level", LgmUInt), # keeps track of what level we are on
-        ("Center", Lgm_Vector), # Center of cube
+        ("Center", Lgm_Vector.Lgm_Vector), # Center of cube
         ("h", LgmDouble), # half width of cube face
         ("Parent", _Lgm_OctreeCellP), # points to parent cell
         ("Octant", _Lgm_OctreeCellP), # points to block of 8 children cells
@@ -41,7 +43,6 @@ _Lgm_OctreeCell._fields_ = [("xLocationCode", LgmUInt ), #  X Location Code
 class _pQueue(ctypes.Structure):
     pass
 _pQueueP = ctypes.POINTER(_pQueue)
-
 
 _pQueue._fields_ = [("Obj", LgmUInt ), #
         ("MinDist2", LgmUInt), #  Minimum possible distance^2 between object and query point.

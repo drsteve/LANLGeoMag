@@ -10,16 +10,11 @@ Vector class for Lgm
 
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import LgmDouble
 import Lgm
 from _Lgm import lib
 
 class Lgm_Vector(ctypes.Structure):
-    @classmethod
-    def assign_fields(cls):
-        cls._fields_ = [ ( "x", LgmDouble ),
-            ("y", LgmDouble),
-            ("z", LgmDouble) ]
     """
     Lgm_Vector class to wrap up the LanlGeoMag routines and add methods
 
@@ -38,6 +33,11 @@ class Lgm_Vector(ctypes.Structure):
 
     @version: V1: 22-Dec-2010 (BAL)
     """
+    @classmethod
+    def assign_fields(cls):
+        cls._fields_ = [ ( "x", LgmDouble ),
+            ("y", LgmDouble),
+            ("z", LgmDouble) ]
 
     def __str__(self):
         """
@@ -253,9 +253,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        o_vec = Lgm_Vector()
-        lib.Lgm_DotProduct(self, other, o_vec)
-        return o_vec
+        return lib.Lgm_DotProduct(self, other)
 
     def scale(self, val):
         """

@@ -9,12 +9,13 @@ Lgm_Eop module, this contains the necessary code
 """
 
 import ctypes
-from _Lgm_Types import *
+from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP
+
 
 class Lgm_NgaEopp(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
-            cls._fields_ = [("ta", LgmDouble),
+        cls._fields_ = [("ta", LgmDouble),
             ("A", LgmDouble),
             ("B", LgmDouble),
             ("C1", LgmDouble),
@@ -54,7 +55,7 @@ class Lgm_NgaEopp(ctypes.Structure):
 class Lgm_Eop(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
-            cls._fields_ = [("Size", LgmLong),
+        cls._fields_ = [("Size", LgmLong),
             ("nEopVals", LgmLong),
             ("Verbosity", LgmInt),
             ("Date", LgmLong),
@@ -75,15 +76,15 @@ class Lgm_EopOne(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
         cls._fields_ = [("Date", LgmLong),
-        ("JD", LgmDouble),
-        ("MJD", LgmDouble),
-        ("UTC", LgmDouble),
-        ("xp", LgmDouble),
-        ("yp", LgmDouble),
-        ("DUT1", LgmDouble),
-        ("LOD", LgmDouble),
-        ("dPsi", LgmDouble),
-        ("eDps", LgmDouble),
-        ("dX", LgmDouble),
-        ("dY", LgmDouble),
-        ("DAT", LgmDouble) ]
+            ("JD", LgmDouble),
+            ("MJD", LgmDouble),
+            ("UTC", LgmDouble),
+            ("xp", LgmDouble),
+            ("yp", LgmDouble),
+            ("DUT1", LgmDouble),
+            ("LOD", LgmDouble),
+            ("dPsi", LgmDouble),
+            ("eDps", LgmDouble),
+            ("dX", LgmDouble),
+            ("dY", LgmDouble),
+            ("DAT", LgmDouble) ]

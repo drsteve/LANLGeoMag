@@ -162,6 +162,16 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual( 8.0, ans.y)
         self.assertEqual(-4.0, ans.z)
 
+    def test_dotProduct(self):
+        """crossProduct gives known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        vec2 = Lgm_Vector.Lgm_Vector(3,2,1)
+        self.assertEqual(10.0, vec1.dotProduct(vec2))
+        self.assertEqual(14.0, vec1.dotProduct(vec1))
+        vec1 = Lgm_Vector.Lgm_Vector(1,0,0)
+        vec2 = Lgm_Vector.Lgm_Vector(0,1,0)
+        self.assertEqual(0.0, vec1.dotProduct(vec2))
+
     def test_magnitude(self):
         """magnitude gives known output"""
         vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
