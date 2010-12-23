@@ -60,6 +60,7 @@ LGM_ABSOLUTE_JUMP_METHOD = 1
 ###############################################################################
 
 import Lgm
+
 import ctypes
 from _Lgm import lib
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, c_types, c_sizes, LgmUInt, \
@@ -150,7 +151,8 @@ class Lgm_MagModelInfo(ctypes.Structure):
         Set the default values from Lgm
         """
         self.InternalModel = LGM_IGRF
-        self.c     = ctypes.pointer(Lgm_CTrans())
+        c_tmp = Lgm_CTrans()
+        self.c     = ctypes.pointer(c_tmp)
         self.Kp    = 5
         self.P     = 2.1 # SW pressure in nPa
         self.nFunc = 0
@@ -220,7 +222,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("B0", LgmDouble),
         ("B1", LgmDouble),
         ("B2", LgmDouble),
-        ("InteralModel", LgmInt),
+        ("InternalModel", LgmInt),
         ("KineticEnergy", LgmDouble),
         ("Mass", LgmDouble),
         ("PitchAngle", LgmDouble),

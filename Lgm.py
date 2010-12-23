@@ -26,14 +26,6 @@ from _Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
 
 from _Lgm_DateAndTime import Lgm_DateAndTime
 
-# the order here matters, if you get a _fields_ is final then play with order
-# it becomes final when pointers are created as Pyhton has to figure how big
-# the object is (is the current theory)
-
-Lgm_DateAndTime.assign_fields()
-Lgm_CTrans.assign_fields()
-Lgm_Eop.assign_fields()
-Lgm_EopOne.assign_fields()
 
 Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
 Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)
@@ -42,6 +34,18 @@ Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
 Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
 Lgm_EopP = ctypes.POINTER(Lgm_Eop)
 Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
+
+
+
+# the order here matters, if you get a _fields_ is final then play with order
+# it becomes final when pointers are created as Pyhton has to figure how big
+# the object is (is the current theory)
+
+Lgm_DateAndTime.assign_fields()
+Lgm_CTrans.assign_fields()
+Lgm_Eop.assign_fields()
+Lgm_EopOne.assign_fields()
+Lgm_MagModelInfo.assign_fields()
 
 
 
@@ -132,8 +136,8 @@ call_dict = {
         'Lgm_Set_Octree_kNN_k' : [Lgm_MagModelInfoP, LgmInt],
         'Lgm_Set_Octree_kNN_InterpMethod' : [None, Lgm_MagModelInfoP, LgmInt],
         'Lgm_MagModelInfo_Set_Psw' : [None, LgmDouble, Lgm_MagModelInfoP],
-        'Lgm_MagModelInfo_Set_Kp' : [LgmDouble, Lgm_MagModelInfoP] }
-        #'' : [],
+        'Lgm_MagModelInfo_Set_Kp' : [LgmDouble, Lgm_MagModelInfoP],
+        'Lgm_B_T89' : [LgmInt, Lgm_VectorP, Lgm_VectorP, Lgm_MagModelInfoP ] }
         #'' : [],
         #'' : [],
         #'' : [],
