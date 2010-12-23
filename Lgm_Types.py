@@ -14,9 +14,15 @@ import ctypes
 #set up types
 LgmInt = ctypes.c_int
 LgmIntP = ctypes.POINTER(LgmInt)
+LgmUInt = ctypes.c_uint
+LgmUIntP = ctypes.POINTER(LgmUInt)
+
 
 LgmLong = ctypes.c_long
 LgmLongP = ctypes.POINTER(LgmLong)
+
+LgmULong = ctypes.c_ulong
+LgmULongP = ctypes.POINTER(LgmULong)
 
 LgmBoolean = ctypes.c_int
 LgmBooleanP = ctypes.POINTER(LgmBoolean)

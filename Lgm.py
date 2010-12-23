@@ -11,23 +11,29 @@ then import what you want next
 @version: V1: 21-Dec-2010 (BAL)
 """
 
-
+import ctypes
 from _Lgm import lib
-from Lgm_Types import *
 import Lgm_Vector
-from _Lgm_CTrans import *
-from _Lgm_Eop import *
-from _Lgm_DateAndTime import *
-from _Lgm_MagModelInfo import *
+Lgm_Vector.Lgm_Vector.assign_fields()
+
+from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
+
+from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP
+from _Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
+
+from _Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
+
+
+from _Lgm_DateAndTime import Lgm_DateAndTime
 
 # the order here matters, if you get a _fields_ is final then play with order
 # it becomes final when pointers are created as Pyhton has to figure how big
 # the object is (is the current theory)
 
-Lgm_Vector.Lgm_Vector.assign_fields()
 Lgm_DateAndTime.assign_fields()
 Lgm_CTrans.assign_fields()
 Lgm_Eop.assign_fields()
+Lgm_EopOne.assign_fields()
 
 Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
 Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)
@@ -118,15 +124,15 @@ call_dict = {
         'Lgm_TDB_to_UTC' : [None, Lgm_CTransP, Lgm_CTransP, Lgm_CTransP],
         # coord transforms
         'Lgm_Set_Coord_Transforms' : [None, LgmInt, LgmDouble, Lgm_CTransP ],
-        'Lgm_Convert_Coords' : [None, Lgm_VectorP, Lgm_VectorP, LgmInt, Lgm_CTransP] }
-        #'' : [],
-        #'' : [],
-        #'' : [],
-        #'' : [],
-        #'' : [],
-        #'' : [],
-        #'' : [],
-        #'' : [],
+        'Lgm_Convert_Coords' : [None, Lgm_VectorP, Lgm_VectorP, LgmInt, Lgm_CTransP],
+        'size_t_size' : [LgmInt],
+        'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
+        'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
+        'Lgm_Set_Octree_kNN_MaxDist' : [Lgm_MagModelInfoP, LgmDouble],
+        'Lgm_Set_Octree_kNN_k' : [Lgm_MagModelInfoP, LgmInt],
+        'Lgm_Set_Octree_kNN_InterpMethod' : [None, Lgm_MagModelInfoP, LgmInt],
+        'Lgm_MagModelInfo_Set_Psw' : [None, LgmDouble, Lgm_MagModelInfoP],
+        'Lgm_MagModelInfo_Set_Kp' : [LgmDouble, Lgm_MagModelInfoP] }
         #'' : [],
         #'' : [],
         #'' : [],
