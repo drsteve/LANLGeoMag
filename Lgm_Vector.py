@@ -10,7 +10,7 @@ Vector class for Lgm
 
 
 import ctypes
-from Lgm_Types import *
+from Lgm_Types import LgmDouble
 import Lgm
 from _Lgm import lib
 
@@ -253,9 +253,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        o_vec = Lgm_Vector()
-        lib.Lgm_DotProduct(self, other, o_vec)
-        return o_vec
+        return lib.Lgm_DotProduct(self, other)
 
     def scale(self, val):
         """
