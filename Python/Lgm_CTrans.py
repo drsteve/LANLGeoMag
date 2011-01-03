@@ -279,7 +279,7 @@ CDMAG_TO_CDMAG = 1111
 import ctypes
 from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar
 import Lgm_Vector
-import _Lgm_DateAndTime
+import Lgm_DateAndTime
 
 class Lgm_DateTime(ctypes.Structure):
     def __init__(self, verbose = 0):
@@ -319,7 +319,7 @@ class Lgm_CTrans(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
         cls._fields_ = [ ("Verbose", LgmInt),
-            ("l", _Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
+            ("l", Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
             ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                          # UT0 is a version of UT that uses data
                                          # from many different ground stations.

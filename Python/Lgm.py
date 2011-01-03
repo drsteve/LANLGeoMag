@@ -21,10 +21,10 @@ from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP
 from _Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
 
-from _Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
+from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
 
 
-from _Lgm_DateAndTime import Lgm_DateAndTime
+from Lgm_DateAndTime import Lgm_DateAndTime
 
 
 Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)

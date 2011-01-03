@@ -12,7 +12,7 @@ Master test suite for the package
 
 from test_Lgm_Vector import *
 from test_Lgm_CTrans import *
-from test_Lgm_DateAndTime import * 
+from test_Lgm_DateAndTime import *
 # add others here as they exist
 
 
