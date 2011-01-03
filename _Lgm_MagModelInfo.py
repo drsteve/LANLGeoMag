@@ -67,7 +67,7 @@ from Lgm_Types import LgmDouble, LgmInt, LgmLong, c_types, c_sizes, LgmUInt, \
         LgmDoubleP
 import Lgm_Vector
 from _Lgm_Octree import _Lgm_OctreeCell
-from _Lgm_CTrans import Lgm_CTrans
+from Lgm_CTrans import Lgm_CTrans
 
 # size_t is either unisigned int or unsigned long (or maybe unsigned short)
 # in the Lgm lib is a funstion to tell us
