@@ -9,7 +9,7 @@ int main(){
     double              UTC;
     Lgm_Vector          u, B;
     Lgm_MagModelInfo    *MagInfo;
-    int i, j;
+    int i;
 
 
     Date = 20050831;
@@ -21,7 +21,7 @@ int main(){
     MagInfo->Bfield = Lgm_B_T89;
 
 
-    printf("%6s", "Kp");
+    printf("%13s", "Kp");
     printf("%13s", "Ux (Re)");
     printf("%13s", "Uy (Re)");
     printf("%13s", "Uz (Re)");
@@ -31,11 +31,11 @@ int main(){
     printf("%13s", "Bmag (nT)\n");
 
 
-    for (i=0; i<13; i++) {
+    for (i=0; i<=5; i++) {
         MagInfo->Kp = i;
         u.x = -6.6; u.y =  0.0;  u.z =  0.0;
         MagInfo->Bfield( &u, &B, MagInfo );
-        printf( "%6i", MagInfo->Kp);
+        printf( "%13i", MagInfo->Kp);
         printf( "%13g%13g%13g", u.x, u.y, u.z );
         printf( "%13g%13g%13g", B.x, B.y, B.z );
         printf( "%13g\n", Lgm_Magnitude( &B ) );
@@ -46,7 +46,7 @@ int main(){
         u.x = -1. - (float)i * 0.5;
         u.y =  0.0;  u.z =  0.0;
         MagInfo->Bfield( &u, &B, MagInfo );
-        printf( "%6i", MagInfo->Kp);
+        printf( "%13i", MagInfo->Kp);
         printf( "%13g%13g%13g", u.x, u.y, u.z );
         printf( "%13g%13g%13g", B.x, B.y, B.z );
         printf( "%13g\n", Lgm_Magnitude( &B ) );
