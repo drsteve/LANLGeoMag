@@ -1,6 +1,6 @@
 #include <Lgm_MagModelInfo.h>
 
-/* BAL 4-Jan2013 modified for more cases */
+/* BAL 04-Jan-2011 modified for more cases */
 
 int main(){
 
