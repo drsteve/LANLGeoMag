@@ -6,6 +6,7 @@
 #include <math.h>
 #include "Lgm/Lgm_PhaseSpaceDensity.h"
 #include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_DynamicMemory.h"
 
 
 /*
@@ -17,7 +18,7 @@
 
 /*
  * Returns First adiabatic invariant, Mu, given: Particle's kinetic energy,
- * Pitch Angle and the local B-field strength.
+ * Pitch Angle and the local B-field strength. (Mu is Eperp/B.)
  *  
  *  Inputs:
  *          E -- Kinetic Energy of Particle.    ( MeV )
@@ -31,7 +32,7 @@ double  Lgm_Energy_to_Mu( double E, double a, double B ) {
 
     double  sa, sa2;
 
-    if ( B <= 0.0 ) return( -9e99 );
+    if ( B <= 1e-12 ) return( 9e99 );
 
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
@@ -62,7 +63,7 @@ double  Lgm_Mu_to_Energy( double Mu, double a, double B ) {
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
 
-    if ( sa2 < 1e-10 ) return( -9e99 );
+    if ( sa2 < 1e-12 ) return( 9e99 );
     else return( Mu*B/sa2 );    // Mu = E*sin^2(Alpha)/B
 
 
@@ -150,7 +151,8 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *  
  *  Reason for making it c^3 is that the final units become,
  *  c^3 cm^-3 MeV^-3 or (c/cm/MeV)^3
- *  
+ *
+ * -------------------------------------------------------------
  *  Inputs:
  *          j    -- Differential Flux in units of #/cm^2/s/sr/MeV
  *          p2c2 -- (pc)^2 in units of Mev^2
@@ -179,6 +181,7 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *  Reason for making it c^3 is that the final units become,
  *  c^3 cm^-3 MeV^-3 or (c/cm/MeV)^3
  *
+ * -------------------------------------------------------------
  *  Inputs:
  *          f    -- Phase space density in units of (c/cm/MeV)^3
  *          p2c2 -- (pc)^2 in units of Mev^2
@@ -195,49 +198,69 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
 
 
 
-Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double Flux, double E, double A, int nE, int nA, int DumpDiagnostics ) {
+/*
+ * This allocates memory for and initializes a Lgm_PhaseSpaceDensity structure.
+ * It returns a pointer to the alloced structure.
+ *
+ *
+ *  Inputs:
+ *                 Flux: 2D array containing the differential flux values as a function of energy and pitch angle.
+ *                    E: 1D array containing the energy values implied by the first index of Flux[][] array.
+ *                    A: 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *                   nE: number of energies.
+ *                   nA: number of pitch angles.
+ *      DumpDiagnostics: Flag to switch on/off diagnostic output.
+ *
+ */
+Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, double *A, int nE, int nA, int DumpDiagnostics ) {
 
     
-    int     i, j, nE, na;
+    int     i, j;
     double  flux, p2c2, fp, Min, Max;
     double  **PsdArray_LoRes, **PsdArray_HiRes;
 
     Lgm_PhaseSpaceDensity *p;
     
 
+    /*
+     * Allocate memory for a Lgm_PhaseSpaceDensity structure.
+     */
     p = (Lgm_PhaseSpaceDensity *) calloc( 1, sizeof(*p) );
+
+    /*
+     * Set DumpDiagnostics flag to what we got here. This can be changed later as well.
+     */
     p->DumpDiagnostics = DumpDiagnostics;
 
 
     /*
-     * Add Flux array info to p
+     * Add Flux array info to p structure. Alloc arrays appropriately.
      */
     p->nE1 = nE; 
     p->nA1 = nA; 
-    ARRAY_1D( p->E1, p->nE, double );
-    ARRAY_1D( p->A1, p->nA, double );
-    ARRAY_2D( p->FLUX_EA1, p->nE, p->nA, double );
-    for (i=0; i<p->nE; i++) p->E1[i] = E[i];
-    for (i=0; i<p->nA; i++) p->A1[i] = A[i];
-    for (j=0; j<p->nA; j++) {
-        for (i=0; i<p->nE; i++) {
-            p->FLUX_EA1[i][j] = Flux[i][j];
-        }
+    LGM_ARRAY_1D( p->E1, p->nE1, double );
+    LGM_ARRAY_1D( p->A1, p->nA1, double );
+    LGM_ARRAY_2D( p->FLUX_EA1, p->nE1, p->nA1, double );
+    for (i=0; i<p->nE1; i++) {
+        p->E1[i] = E[i];
+        p->A1[i] = A[i];
+        for (j=0; j<p->nA1; j++) p->FLUX_EA1[i][j] = Flux[i][j];
     }
 
 
     /*
-     * Convert Flux array info to PSD
+     * Alloc mem for the PSD array.
+     * Convert Flux array into to PSD array. Values are stored as log10(f).
      */
-    ARRAY_2D( p->PSD_EA1, p->nE, p->nA, double );
-    for (j=0; j<p->nA; j++) {
-        for (i=0; i<p->nE; i++) {
+    LGM_ARRAY_2D( p->PSD_EA1, p->nE1, p->nA1, double );
+    for (j=0; j<p->nA1; j++) {
+        for (i=0; i<p->nE1; i++) {
 
-            flux   = p->Flux[i][j];
+            flux   = p->FLUX_EA1[i][j];
             p2c2   = Lgm_p2c2( p->E1[i], LGM_Ee0 );
             fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
             fp     = (fp > 0.0) ? log10(fp) : LGM_FILL_VALUE;
-            p->PSD_EA1[p->nE1-i][j] = fp;
+            p->PSD_EA1[p->nE1-1-i][j] = fp;
             
         }
     }
@@ -253,12 +276,13 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double Flux, double E, double 
      */
     p->nE2 = 400; // Energy 
     p->nA2 = 400; // Pitch Angles
-    ARRAY_2D( p->PSD_EA2, p->nE2, p->nA2, double );         // (Energy, Pitch Angle) -> (Row/Col)
+    LGM_ARRAY_2D( p->PSD_EA2, p->nE2, p->nA2, double );         // (Energy, Pitch Angle) -> (Row/Col)
     UpSizeImage( p->PSD_EA1, p->E1, p->A1, p->nE1, p->nA1, 
                     p->PSD_EA2, p->E2, p->A2, p->nE2, p->nA2 ); // returns p->PSD_EA2, p->E2, p->A2
     if ( p->DumpDiagnostics ) {
         DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nE2, p->nA2, p->PSD_EA2 );
     }
+   
 
 
 
@@ -312,36 +336,36 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double Flux, double E, double 
  * 
  * 
  */
-void Lgm_PsdAtConstMuAndK( double **PSD, int nMu, double *Mu, int nK, double *K, Lgm_MagModelInfo *m ) {
-
-    int     i, k;
-    double  *a, E;
-
-    
-    /*
-     * Compute the alpha's -- 1d array
-     * parallelize this loop?
-     */
-    // #pragma etc..
-    LGM_ARRAY_1D( a, nK, double );
-    for ( k=0; k<nK; k++ ){
-        a[k] = Lgm_AlphaOfK( K[k], m );
-    }
-
-
-    /*
-     * Compute the PSD's -- 2d array
-     */
-    for ( i=0; i<nMu; i++ ){
-        for ( k=0; k<nK; k++ ){
-            E = Lgm_Mu_to_Energy( Mu[i], a[k], B );
-            PSD[i][k] = Lgm_Psd( E, a, INFO THAT CONTAINS THE HIRES array );
-        }
-    }
-
-    LGM_ARRAY_1D_FREE( a );
-
-}
+//void Lgm_PsdAtConstMuAndK( double **PSD, int nMu, double *Mu, int nK, double *K, Lgm_MagModelInfo *m ) {
+//
+//    int     i, k;
+//    double  *a, E;
+//
+//    
+//    /*
+//     * Compute the alpha's -- 1d array
+//     * parallelize this loop?
+//     */
+//    // #pragma etc..
+//    LGM_ARRAY_1D( a, nK, double );
+//    for ( k=0; k<nK; k++ ){
+////        a[k] = Lgm_AlphaOfK( K[k], m );
+//    }
+//
+//
+//    /*
+//     * Compute the PSD's -- 2d array
+//     */
+//    for ( i=0; i<nMu; i++ ){
+//        for ( k=0; k<nK; k++ ){
+//            E = Lgm_Mu_to_Energy( Mu[i], a[k], B );
+////            PSD[i][k] = Lgm_Psd( E, a, INFO THAT CONTAINS THE HIRES array );
+//        }
+//    }
+//
+//    LGM_ARRAY_1D_FREE( a );
+//
+//}
 
 
 

@@ -1,6 +1,8 @@
 #ifndef LGM_PHASE_SPACE_DENSITY_H
 #define LGM_PHASE_SPACE_DENSITY_H
 
+#define LGM_Ee0     0.510998910  // Electron rest energy in MeV
+
 
 typedef struct Lgm_PhaseSpaceDensity {
 
@@ -18,7 +20,7 @@ typedef struct Lgm_PhaseSpaceDensity {
 
     double      **PSD_EA1;          //!< Array of PSD at native resolution, PSD[E1][A1].
 
-    double      **FLUX_EA1;         //!< Array of measured differential flux, Flux[E1][A1].
+    double      **FLUX_EA1;         //!< Array of measured differential flux (i.e. at antive resolution), Flux[E1][A1].
 
 
 
