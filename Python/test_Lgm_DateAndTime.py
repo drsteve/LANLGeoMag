@@ -12,6 +12,10 @@ Test suite for the Lgm_DateAndTime file
 
 
 import unittest
+import datetime
+
+import numpy
+
 import Lgm
 from _Lgm import lib
 import Lgm_DateAndTime
@@ -112,8 +116,15 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
     def test_time_various(self):
         """Time conversions should work correctly"""
         utc = 2004.613427
-        
 
+    def test_dateToDateLong(self):
+        """dateToDateLong should give known output"""
+        t = datetime.datetime(2000, 12, 2)
+        self.assertEqual(20001202, Lgm_DateAndTime.dateToDateLong(t))
+        self.assertEqual([20001202, 20001202], Lgm_DateAndTime.dateToDateLong([t,t]))
+        tmp = Lgm_DateAndTime.dateToDateLong(numpy.array([t,t]))
+        for i, val in enumerate(numpy.array([20001202, 20001202])):
+            self.assertEqual(val, tmp[i])
 
 # this is a srg fault here
     #def test_Lgm_Lgm_Make_UTC(self):
