@@ -1,5 +1,6 @@
 #ifndef LGM_PHASE_SPACE_DENSITY_H
 #define LGM_PHASE_SPACE_DENSITY_H
+#include "Lgm_DynamicMemory.h"
 
 #define LGM_Ee0     0.510998910  // Electron rest energy in MeV
 
@@ -80,15 +81,22 @@ typedef struct Lgm_PhaseSpaceDensity {
 
 
 
+Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double *A, int nE, int nA, int DumpDiagnostics );
+void Lgm_FreePhaseSpaceDensity( Lgm_PhaseSpaceDensity *p );
+void UpSizeImage( double **Orig, double *X, double *Y, int M, int N, double **New, double *U, double *V, int K, int J );
+
+
+
 
 
 double Lgm_Energy_to_Mu( double E, double a, double B );
 double Lgm_Mu_to_Energy( double Mu, double a, double B );
-double  Lgm_p2c2( double Ek, double E0 );
-double  Lgm_v2overc2( double Ek, double E0 );
-double  Lgm_gamma( double Ek, double E0 );
+double Lgm_p2c2( double Ek, double E0 );
+double Lgm_v2overc2( double Ek, double E0 );
+double Lgm_gamma( double Ek, double E0 );
 double Lgm_PsdToDiffFlux( double f, double p2c2 );
 double Lgm_DiffFluxToPsd( double j, double p2c2 );
+
 
 
 #endif

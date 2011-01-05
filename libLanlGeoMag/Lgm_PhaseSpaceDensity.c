@@ -212,7 +212,7 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
  *      DumpDiagnostics: Flag to switch on/off diagnostic output.
  *
  */
-Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, double *A, int nE, int nA, int DumpDiagnostics ) {
+Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double *A, int nE, int nA, int DumpDiagnostics ) {
 
     
     int     i, j;
@@ -241,10 +241,12 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, doub
     LGM_ARRAY_1D( p->E1, p->nE1, double );
     LGM_ARRAY_1D( p->A1, p->nA1, double );
     LGM_ARRAY_2D( p->FLUX_EA1, p->nE1, p->nA1, double );
+    for (i=0; i<p->nE1; i++) p->E1[i] = E[i];
+    for (i=0; i<p->nA1; i++) p->A1[i] = A[i];
     for (i=0; i<p->nE1; i++) {
-        p->E1[i] = E[i];
-        p->A1[i] = A[i];
-        for (j=0; j<p->nA1; j++) p->FLUX_EA1[i][j] = Flux[i][j];
+        for (j=0; j<p->nA1; j++) {
+            p->FLUX_EA1[i][j] = J[i][j];
+        }
     }
 
 
@@ -260,12 +262,12 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, doub
             p2c2   = Lgm_p2c2( p->E1[i], LGM_Ee0 );
             fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
             fp     = (fp > 0.0) ? log10(fp) : LGM_FILL_VALUE;
-            p->PSD_EA1[p->nE1-1-i][j] = fp;
+            p->PSD_EA1[i][j] = fp;
             
         }
     }
     if ( p->DumpDiagnostics ) {
-        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", p->nE1, p->nA1, p->PSD_EA1 );
+//        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", p->nE1, p->nA1, p->PSD_EA1 );
     }
 
 
@@ -280,7 +282,7 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, doub
     UpSizeImage( p->PSD_EA1, p->E1, p->A1, p->nE1, p->nA1, 
                     p->PSD_EA2, p->E2, p->A2, p->nE2, p->nA2 ); // returns p->PSD_EA2, p->E2, p->A2
     if ( p->DumpDiagnostics ) {
-        DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nE2, p->nA2, p->PSD_EA2 );
+//        DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nE2, p->nA2, p->PSD_EA2 );
     }
    
 
@@ -288,6 +290,20 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, doub
 
     return p;
 
+}
+
+
+void Lgm_FreePhaseSpaceDensity( Lgm_PhaseSpaceDensity *p ) {
+
+    LGM_ARRAY_1D_FREE( p->E1 );
+    LGM_ARRAY_1D_FREE( p->A1 );
+    LGM_ARRAY_2D_FREE( p->FLUX_EA1 );
+    LGM_ARRAY_2D_FREE( p->PSD_EA1 );
+    LGM_ARRAY_2D_FREE( p->PSD_EA2 );
+
+    free( p );
+
+    return;
 }
 
 
@@ -390,6 +406,188 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **Flux, double *E, doub
 
 
 
+
+
+
+
+
+
+
+
+/*
+ * Routine to increase the size of an image smoothly. Uses an area-weighting
+ * interpolation scheme.
+ */
+void UpSizeImage( double **Orig, double *X, double *Y, int M, int N, double **New, double *U, double *V, int K, int J ) {
+
+    double  DX, DY, DXO2, DYO2, A;
+    double  x, y, xe, ye, xx, yy, xp, yp;
+    double  f[4], w0, w1, w2, w3;
+    double  dxm, dxp, dym, dyp;
+    int     j, k, np, mp, ne, me;
+    int     n0, n1, n2, n3;
+    int     m0, m1, m2, m3;
+
+
+
+    /*
+     * compute size and area of a pixel in orig image.
+     */
+    DX = 1.0/(double)N;
+    DY = 1.0/(double)M;
+    DXO2 = 0.5*DX;
+    DYO2 = 0.5*DY;
+    A    = DX*DY;
+    printf("A = %g\n", A);
+
+
+    for (j=0; j<J; j++ ){
+        for (k=0; k<K; k++ ){
+
+
+            /*
+             *  Compute the normalized coords (x,y) for the center of this
+             *  pixel.
+             */
+            x = ((double)j+0.5)/(double)J;
+            y = ((double)k+0.5)/(double)K;
+
+
+
+            /*
+             *  Determine which pixel of the original image we are in.
+             */
+            np = (int)(x*N);
+            mp = (int)(y*M);
+            xp = ((double)np+0.5)/(double)N;
+            yp = ((double)mp+0.5)/(double)M;
+
+
+
+            /*
+             *  Find the edges in the original image that this pixel is closest to.
+             */
+            ne = (int)(x*N + 0.5);
+            me = (int)(y*M + 0.5);
+            xe = (double)ne/(double)N;
+            ye = (double)me/(double)M;
+
+
+
+
+            /*
+             * Compute coords of the four closest pixels
+             */
+            //if        ( ( np < ne ) && ( mp < me ) ){  // we are in upper left  Pix #0
+            if        ( ( x > xp ) && ( y > yp ) ){  // we are in upper left  Pix #0
+                n0 = np;   m0 = mp;
+                n1 = np+1; m1 = mp;
+                n2 = np+1; m2 = mp+1;
+                n3 = np;   m3 = mp+1;
+            //} else if ( ( np > ne ) && ( mp < me ) ){  // we are in upper right Pix #1
+            } else if ( ( x < xp ) && ( y > yp ) ){  // we are in upper right Pix #1
+                n0 = np-1; m0 = mp;
+                n1 = np;   m1 = mp;
+                n2 = np;   m2 = mp+1;
+                n3 = np-1; m3 = mp+1;
+            //} else if ( ( np > ne ) && ( mp > me ) ){  // we are in lower right Pix #2
+            } else if ( ( x < xp ) && ( y < yp ) ){  // we are in lower right Pix #2
+                n0 = np-1; m0 = mp-1;
+                n1 = np;   m1 = mp-1;
+                n2 = np;   m2 = mp;
+                n3 = np-1; m3 = mp;
+            } else {                                   // we are in lower left  Pix #3
+                n0 = np;   m0 = mp-1;
+                n1 = np+1; m1 = mp-1;
+                n2 = np+1; m2 = mp;
+                n3 = np;   m3 = mp;
+            }
+
+  xe = 0.5*(n0+n1+1.0)/(double)N;
+  ye = 0.5*(m1+m2+1.0)/(double)M;
+
+
+
+            /*
+             *  Check for edge problems
+             */
+            if (n0 < 0)   n0 = 0;
+            if (n3 < 0)   n3 = 0;
+            if (n1 > N-1) n1 = N-1;
+            if (n2 > N-1) n2 = N-1;
+
+            if (m0 < 0) m0 = 0;
+            if (m1 < 0) m1 = 0;
+            if (m2 > M-1)   m2 = M-1;
+            if (m3 > M-1)   m3 = M-1;
+
+            
+
+            /*
+             * Extract the pixel vals.
+             */
+            f[0] = Orig[ m0 ][ n0 ];
+            f[1] = Orig[ m1 ][ n1 ];
+            f[2] = Orig[ m2 ][ n2 ];
+            f[3] = Orig[ m3 ][ n3 ];
+
+
+
+            /*
+             *  Compute (x',y') (i.e. the coords relative to center of 4 pixels.)
+             */
+            xx = x - xe;
+            yy = y - ye;
+
+
+
+            /*
+             *  Compute weights (i.e. overlapping areas)
+             */
+            dxm = DXO2 - xx;
+            dxp = DXO2 + xx;
+            dym = DYO2 - yy;
+            dyp = DYO2 + yy;
+//if (dxm < 0.0) { printf("dxm = %g\n", dxm); exit(0); }
+//if (dxp < 0.0) { printf("dxp = %g\n", dxp); exit(0); }
+//if (dym < 0.0) { printf("dym = %g    DYO2 = %g  x, y = %g %g   xx, yy = %g %g\n", dym, DYO2, x, y, xx, yy); exit(0); }
+//if (dyp < 0.0) { printf("dyp = %g\n", dyp); exit(0); }
+
+            w0 = dxm*dym;
+            w1 = dxp*dym;
+            w2 = dxp*dyp;
+            w3 = dxm*dyp;
+            /*
+            w0=0.1;
+            w1=0.2;
+            w2=0.3;
+            w3=0.4;
+            */
+
+if ((j==189)&&(k==118)) {
+                printf("np,mp = %d %d    pixels:  %d %d   %d %d   %d %d   %d %d\n", np, mp, n0, m0, n1, m1, n2, m2, n3, m3);
+                printf("j,k = %d %d     f = %g %g %g %g     w = %g %g %g %g     xp, yp = %g %g   x,y = %g %g    xx, yy = %g %g\n", j, k, f[0], f[1], f[2], f[3], w0, w1, w2, w3, xp, yp, x, y, xx, yy);
+}
+
+            /*
+             *  Finally compute weighted average and assign to current pixel of new image.
+             *  A is the total area of an original pixel. w's are the partial overlap areas.
+             */
+            New[k][j] = (f[0]*w0 + f[1]*w1 + f[2]*w2 + f[3]*w3)/A;
+            //New[k][j] = (f[0]*w0 + f[1]*w1 )/A;
+            //New[k][j] = (f[0]*w0 )/A;
+            //New[k][j] = (double)k;
+
+
+        }
+    }
+
+
+
+
+
+
+}
 
 
 
