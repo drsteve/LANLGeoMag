@@ -9,7 +9,7 @@ Lgm_DateAndTime module, this contains the necessary code Leap Seconds
 @version: V1: 20-Dec-2010 (BAL)
 """
 
-
+from __future__ import division
 import ctypes
 import datetime
 
@@ -50,3 +50,27 @@ def dateToDateLong(inval):
     except:
         return long(inval.strftime('%Y%m%d'))
 
+def dateToFPHours(inval):
+    """
+    convert a python datetime object to a Floating point hours (double) object that
+    LanlGeoMag Likes to use
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 06-Jan-2011 (BAL)
+    """
+    try:
+        if len(inval) > 1:
+            lst = [val.hour + val.minute/60 +
+                                    val.second/60/60 +
+                                    val.microsecond/60/60/1000000 for val in inval]
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array(lst)
+            else:
+                return lst
+    except:
+        return inval.hour + inval.minute/60 + \
+                                    inval.second/60/60 + \
+                                    inval.microsecond/60/60/1000000

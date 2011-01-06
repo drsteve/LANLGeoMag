@@ -11,6 +11,7 @@ Python implementation of the LanlGeoMag T89 Magnetic field model
 
 import ctypes
 import itertools
+import datetime
 
 import numpy as np
 import spacepy.toolbox as tb
@@ -22,6 +23,7 @@ from _Lgm import lib
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+import Lgm_DateAndTime
 
 class Lgm_T89(object):
     """
@@ -33,40 +35,61 @@ class Lgm_T89(object):
 
     @version: V1: 23-Dec-2010 (BAL)
     """
-    pass
+    def __init__(self, pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
+        # pos must be a Lgm_Vector or list of Lgm_Vectors
+        if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
+            not isinstance(pos, list) and \
+            not isinstance(pos, np.ndarray):
+            raise(TypeError('pos must be a Lgm_Vector or (list, numpy.ndarray) of Lgm_vectors') )
+        self.pos = pos
 
+        # time must be a datetime
+        if not isinstance(time, datetime.datetime) and \
+            not isinstance(time, list) and \
+            not isinstance(time, np.ndarray):
+            raise(TypeError('time must be a datetime or (list, numpy.ndarray) of datetime') )
+        self.time = time
 
+        #TODO implement this and remove this bit
+        try:
+            assert(len(pos))
+            assert(len(time))
+            raise(NotImplementedError('Multi element input not yet written') )
+        except:
+            pass
 
+        if Kp < 0 or Kp > 5:
+            raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
+        self.Kp = Kp
 
+        if INTERNAL_MODEL not in (Lgm_MagModelInfo.LGM_CDIP,
+                                  Lgm_MagModelInfo.LGM_EDIP,
+                                  Lgm_MagModelInfo.LGM_IGRF) and \
+            INTERNAL_MODEL not in ('LGM_CDIP',
+                                  'LGM_EDIP',
+                                  'LGM_IGRF'):
+            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
+        if isinstance(INTERNAL_MODEL, str):
+            self.INTERNAL_MODEL = Lgm_MagModelInfo.__getattribute__(INTERNAL_MODEL)
+        else:
+            self.INTERNAL_MODEL = INTERNAL_MODEL
 
+        if coord_system != 'GSM':
+            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+        self.coord_system = coord_system
 
-from pylab import *
+        self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
-pos = Lgm_Vector.Lgm_Vector(-6.6, 0.1, 0)
-
-B = Lgm_Vector.Lgm_Vector()
-mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-
-## up good
-
-#c = Lgm_CTrans.Lgm_CTrans()
-#mmi.c = ctypes.pointer(c)
-
-
-Date = 20050831
-UTC  = 9.0
-
-
-lib.Lgm_Set_Coord_Transforms( Date, UTC, mmi.c);
-
-#mmi.Bfield = ctypes.pointer((ctypes.CFUNCTYPE(LgmInt))(lib.Lgm_B_T89))
-
-pos = Lgm_Vector.Lgm_Vector(-6.6, 0.0, 0.0)
-
-for val in [0, 1, 2, 3, 4, 5]:
-    mmi.Kp = val
-    lib.Lgm_B_T89(pos, B, mmi)
-    print(mmi.Kp, pos.x, pos.y, pos.z, B.x, B.y, B.z, B.magnitude())
+    def calc_B(self):
+        date = Lgm_DateAndTime.dateToDateLong(self.time)
+        utc = Lgm_DateAndTime.dateToFPHours(self.time)
+        lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
+        self.B = Lgm_Vector.Lgm_Vector()
+        self._mmi.Kp = self.Kp
+        retval = lib.Lgm_B_T89(self.pos, self.B, self._mmi)
+        if retval != 1:
+            raise(RuntimeWarning('Odd return from Lgm_T89') )
+        return self.B
 
 
 
@@ -93,68 +116,3 @@ for val in [0, 1, 2, 3, 4, 5]:
 # 3         -6.5            0            0      -27.055     -1.97955      68.6516      73.8169
 # 3           -7            0            0     -24.2235     -1.48334      51.1005      56.5706
 ##################################################
-
-
-ans = np.zeros(shape=[1001*1001, 6])
-z = 0.
-count = 0
-for x in np.linspace(-10, 10, 1001):
-    print('x:%f' % (x) )
-    for y in np.linspace(-10, 10, 1001):
-        #for z in np.linspace(-10, 10, 101):
-        pos = Lgm_Vector.Lgm_Vector(x, y, z)
-            #mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-        bla = lib.Lgm_B_T89(pos, B, mmi)
-        ans[count, :] = [x, y, z, B.x, B.y, B.z]
-        count = count + 1
-
-bx = ans[:, 3]
-by = ans[:, 4]
-bz = ans[:, 5]
-x = ans[:, 0]
-y = ans[:, 1]
-z = ans[:, 2]
-
-ind = np.negative(np.isnan(bx) + np.isnan(by) + np.isnan(bz))
-
-bx = bx[ind]
-by = by[ind]
-bz = bz[ind]
-x = x[ind]
-y = y[ind]
-z = z[ind]
-
-ind = np.sqrt(x**2 + y**2 + z**2) > 1
-bx = bx[ind]
-by = by[ind]
-bz = bz[ind]
-x = x[ind]
-y = y[ind]
-z = z[ind]
-
-ind = ( np.sqrt(bx**2+ by**2 + bz**2) < 1000 )
-
-bx = bx[ind]
-by = by[ind]
-bz = bz[ind]
-x = x[ind]
-y = y[ind]
-z = z[ind]
-
-
-
-
-z0ind = np.where(z==0)[0]
-
-xb = np.array(tb.bin_center_to_edges(np.linspace(-10, 10, 101)))
-yb = np.array(tb.bin_center_to_edges(np.linspace(-10, 10, 101)))
-
-gd = griddata(x[z0ind], y[z0ind], np.log10(np.sqrt(bx[z0ind]**2+ by[z0ind]**2 + bz[z0ind]**2)), \
-              np.linspace(-10, 10, 101), np.linspace(-10, 10, 101))
-pcolormesh(xb, yb, gd)
-ax = gca()
-ax.set_xlabel('X (Re)')
-ax.set_ylabel('Y (Re)')
-cb = colorbar()
-cb.set_label('Bmag (nT)')
-draw()
