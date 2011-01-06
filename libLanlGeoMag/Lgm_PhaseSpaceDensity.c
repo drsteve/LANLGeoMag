@@ -248,6 +248,9 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double 
             p->FLUX_EA1[i][j] = J[i][j];
         }
     }
+    if ( p->DumpDiagnostics ) {
+        DumpGif( "Flux_Versus_E_and_A_LoRes.gif", p->nA1, p->nE1, p->FLUX_EA1 );
+    }
 
 
     /*
@@ -267,7 +270,7 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double 
         }
     }
     if ( p->DumpDiagnostics ) {
-//        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", p->nE1, p->nA1, p->PSD_EA1 );
+        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", p->nA1, p->nE1, p->PSD_EA1 );
     }
 
 
@@ -282,7 +285,7 @@ Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double 
     UpSizeImage( p->PSD_EA1, p->E1, p->A1, p->nE1, p->nA1, 
                     p->PSD_EA2, p->E2, p->A2, p->nE2, p->nA2 ); // returns p->PSD_EA2, p->E2, p->A2
     if ( p->DumpDiagnostics ) {
-//        DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nE2, p->nA2, p->PSD_EA2 );
+        DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nA2, p->nE2, p->PSD_EA2 );
     }
    
 
@@ -516,8 +519,8 @@ void UpSizeImage( double **Orig, double *X, double *Y, int M, int N, double **Ne
             if (n1 > N-1) n1 = N-1;
             if (n2 > N-1) n2 = N-1;
 
-            if (m0 < 0) m0 = 0;
-            if (m1 < 0) m1 = 0;
+            if (m0 < 0)     m0 = 0;
+            if (m1 < 0)     m1 = 0;
             if (m2 > M-1)   m2 = M-1;
             if (m3 > M-1)   m3 = M-1;
 
@@ -584,6 +587,57 @@ if ((j==189)&&(k==118)) {
 
 
 
+
+
+
+}
+
+void DumpGif( char *Filename, int W, int H, double **Image ){
+
+    double           Val, Min, Max;
+    int              w, h;
+    unsigned char   *uImage, uVal;
+    FILE            *fp_gif;
+
+
+    // Determine Min/Max values...
+    Min =  9e99;
+    Max = -9e99;
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+
+            Val = Image[h][w];
+            if (Val > Max) Max = Val;
+            if ((Val < Min)&&(Val > -1e99)) Min = Val;
+
+        }
+    }
+
+    printf("Min, Max = %g %g\n", Min, Max);
+
+
+
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+
+            Val = Image[h][w];
+            if ( Val < -1e99 ) {
+                uVal = 0;
+            } else {
+                uVal = (unsigned char)( (Val - Min)/(Max-Min)*255.0 );
+            }
+            *(uImage + W*h + w) = uVal;
+
+        }
+    }
+
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    fclose(fp_gif);
+
+    free( uImage );
 
 
 
