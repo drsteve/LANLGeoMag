@@ -9,6 +9,20 @@ Python implementation of the LanlGeoMag T89 Magnetic field model
 @version: V1: 23-Dec-2010 (BAL)
 """
 
+import ctypes
+import itertools
+
+import numpy as np
+import spacepy.toolbox as tb
+from pylab import griddata, pcolor, pcolormesh, gca, draw
+
+import Lgm
+from Lgm_Types import LgmInt
+from _Lgm import lib
+import Lgm_Vector
+import Lgm_CTrans
+import Lgm_MagModelInfo
+
 class Lgm_T89(object):
     """
     Python implementation of the LanlGeoMag T89 Magnetic field model
@@ -23,19 +37,7 @@ class Lgm_T89(object):
 
 
 
-import ctypes
-import itertools
 
-import numpy as np
-import spacepy.toolbox as tb
-from pylab import griddata, pcolor, pcolormesh, gca, draw
-
-import Lgm
-from Lgm_Types import LgmInt
-from _Lgm import lib
-import Lgm_Vector
-import Lgm_CTrans
-import _Lgm_MagModelInfo
 
 
 from pylab import *
@@ -43,7 +45,7 @@ from pylab import *
 pos = Lgm_Vector.Lgm_Vector(-6.6, 0.1, 0)
 
 B = Lgm_Vector.Lgm_Vector()
-mmi = _Lgm_MagModelInfo.Lgm_MagModelInfo()
+mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
 ## up good
 
@@ -101,7 +103,7 @@ for x in np.linspace(-10, 10, 1001):
     for y in np.linspace(-10, 10, 1001):
         #for z in np.linspace(-10, 10, 101):
         pos = Lgm_Vector.Lgm_Vector(x, y, z)
-            #mmi = _Lgm_MagModelInfo.Lgm_MagModelInfo()
+            #mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
         bla = lib.Lgm_B_T89(pos, B, mmi)
         ans[count, :] = [x, y, z, B.x, B.y, B.z]
         count = count + 1

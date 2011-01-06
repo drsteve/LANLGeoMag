@@ -12,14 +12,14 @@ import ctypes
 from Lgm_Types import LgmDouble
 import Lgm
 import Lgm_Vector
-import _Lgm_MagModelInfo
+import Lgm_MagModelInfo
 from _Lgm import lib
 
 
 Date = 20100203
 UTC  = 12.34567
 
-MagInfo = _Lgm_MagModelInfo.Lgm_MagModelInfo()
+MagInfo = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
 lib.Lgm_Set_Coord_Transforms(Date, UTC, MagInfo.c)
 
