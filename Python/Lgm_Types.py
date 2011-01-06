@@ -12,6 +12,7 @@ import ctypes
 
 
 #set up types
+
 LgmInt = ctypes.c_int
 LgmIntP = ctypes.POINTER(LgmInt)
 LgmUInt = ctypes.c_uint
