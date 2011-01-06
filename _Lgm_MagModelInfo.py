@@ -153,7 +153,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         self.InternalModel = LGM_IGRF
         c_tmp = Lgm_CTrans()
         self.c     = ctypes.pointer(c_tmp)
-        self.Kp    = 5
+        self.Kp    = 100
         self.P     = 2.1 # SW pressure in nPa
         self.nFunc = 0
         self.B0    = 1.00   # Should nominally be 1.0 See page 30 of Schultz and Lanzerotti, [1974]
@@ -208,7 +208,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("SavePoints", LgmInt),
         ("Hmax", LgmDouble),
         ("fp", ctypes.c_void_p),
-        ("W", LgmDouble),
+        ("W", LgmDouble * 6),
         ("G1", LgmDouble),
         ("G2", LgmDouble),
         ("Kp", LgmInt),
