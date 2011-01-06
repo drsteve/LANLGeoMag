@@ -20,7 +20,7 @@ from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
 from Lgm_DateAndTime import Lgm_DateAndTime
 
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP, LgmCharP
-from _Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
+from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
 
 from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
 
