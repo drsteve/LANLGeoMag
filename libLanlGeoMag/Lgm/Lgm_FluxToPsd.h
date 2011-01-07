@@ -1,5 +1,5 @@
-#ifndef LGM_PHASE_SPACE_DENSITY_H
-#define LGM_PHASE_SPACE_DENSITY_H
+#ifndef LGM_FLUX_TO_PSD_H
+#define LGM_FLUX_TO_PSD_H
 #include "Lgm_DynamicMemory.h"
 static unsigned char Rainbow2_Red[] = { 0, 34, 35, 35, 36, 37, 38, 39, 39, 40, 40, 41,
 41, 42, 42, 42, 42, 42, 42, 42, 41, 41, 41, 40, 40, 39, 38, 38, 37, 37, 36, 35,
@@ -51,72 +51,55 @@ static unsigned char Rainbow2_Blu[] = { 0, 89, 93, 96, 99, 102, 106, 109, 113, 1
 
 #define LGM_Ee0     0.510998910  // Electron rest energy in MeV
 
-typedef unsigned char byte;
+typedef unsigned char byte; // needed for gif writer
 
-typedef struct Lgm_PhaseSpaceDensity {
-
-
-    /*
-     * Params for measured Differential Flux versus Energy and Pitch Angle -- native or Lo-Res.
-     */
-    int         nE1;                //!< Number of energy bins in Flux array.
-
-    double      *E1;                //!< Array of energies corresponding to energy bins in flux array.
-
-    int         nA1;                //!< Number of pitch angle bins in Flux array.
-
-    double      *A1;                //!< Array of pitch angles corresponding to pitch angle bins in flux array.
-
-    double      **PSD_EA1;          //!< Array of PSD at native resolution, PSD[E1][A1].
-
-    double      **FLUX_EA1;         //!< Array of measured differential flux (i.e. at antive resolution), Flux[E1][A1].
-
+typedef struct Lgm_FluxToPsd {
 
 
     /*
-     * Params for Phase Space Density versus Energy and Pitch Angle - Hi-Res.
+     * Params for Differential Flux versus Energy and Pitch Angle.
+     * And for PSD versus Energy and Pitch Angle.
      */
-    int         nE2;                //!< Number of energy bins in Hi-Res PSD array.
+    int         nE;                //!< Number of energy bins in Flux array.
 
-    double      *E2;                //!< Array of energies corresponding to energy bins in Hi-Res PSD array.
+    double      *E;                //!< Array of energy values in Flux array.
 
-    int         nA2;                //!< Number of pitch angle bins in Hi-Res PSD array.
+    int         nA;                //!< Number of pitch angle bins in Flux array.
 
-    double      *A2;                //!< Array of pitch angles corresponding to pitch angle bins in Hi-Res PSD array.
+    double      *A;                //!< Array of pitch angle values in Flux array.
 
-    double      **PSD_EA2;          //!< Hi-Res Array of PSD,  PSD[E2][A2].
+    double      **FLUX_EA;         //!< Array of differential flux versus Energy and PitchAngle, Flux[E][A].
+
+    double      **PSD_EA;          //!< Array of PSD versus Energy and PitchAngle, PSD[E][A].
+
+
+
+    /*
+     * Intermediate quantities needed.
+     */
+    double      *AofK;             //!< Array of Alpha values that are implied by the k values. Size is nK.
+
+    double      **EofMu;           //!< Array of Energy values that are implied by the Mu, Alpha and B values. Size is nMu.
+
+
+
+    /*
+     * Params for PSD versus Mu and K
+     */
+    int         nMu;               //!< Number of Mu bins in PSD array.
+
+    double      *Mu;               //!< Array of Mu values in PSD array.
+
+    int         nK;                //!< Number of K bins in PSD array.
+
+    double      *K;                //!< Array of K values in PSD array.
+
+
+    double      **PSD_MK;          //!< Array of PSD versus Mu and K,  PSD[Mu][K].
 
     
 
 
-    /*
-     * Params for Phase Space Density versus Mu and K -- native or Lo-Res.
-     */
-    int         nM1;                //!< Number of energy bins in Flux array.
-
-    double      *M1;                //!< Array of energies corresponding to energy bins in flux array.
-
-    int         nK1;                //!< Number of pitch angle bins in Flux array.
-
-    double      *K1;                //!< Array of pitch angles corresponding to pitch angle bins in flux array.
-
-    double      **PSD_MK1;          //!< Array of measured differential flux. Flux[E][alpha]
-    
-
-
-    /*
-     * Params for Phase Space Density versus Mu and K -- Hi-Res.
-     */
-    int         nM2;                //!< Number of energy bins in Flux array.
-
-    double      *M2;                //!< Array of energies corresponding to energy bins in flux array.
-
-    int         nK2;                //!< Number of pitch angle bins in Flux array.
-
-    double      *K2;                //!< Array of pitch angles corresponding to pitch angle bins in flux array.
-
-    double      **PSD_MK2;          //!< Array of measured differential flux. Flux[E][alpha]
-    
 
 
     /*
@@ -125,20 +108,21 @@ typedef struct Lgm_PhaseSpaceDensity {
     int         DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
 
 
-} Lgm_PhaseSpaceDensity;
+} Lgm_FluxToPsd;
 
 
 
-Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double *A, int nE, int nA, int DumpDiagnostics );
-void Lgm_FreePhaseSpaceDensity( Lgm_PhaseSpaceDensity *p );
-void UpSizeImage( double **Orig, double *X, double *Y, int M, int N, double **New, double *U, double *V, int K, int J );
-void DumpGif( char *Filename, int W, int H, double **Image );
+Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics );
+void           Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f );
+void           Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
+void           Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxPsd *p );
 
 
 
 
 
 
+void   DumpGif( char *Filename, int W, int H, double **Image );
 double Lgm_Energy_to_Mu( double E, double a, double B );
 double Lgm_Mu_to_Energy( double Mu, double a, double B );
 double Lgm_p2c2( double Ek, double E0 );
