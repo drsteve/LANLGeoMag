@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "Lgm/Lgm_PhaseSpaceDensity.h"
+#include "Lgm/Lgm_FluxToPsd.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_DynamicMemory.h"
 
@@ -196,115 +196,39 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
 
 
 
-
-
 /*
- * This allocates memory for and initializes a Lgm_PhaseSpaceDensity structure.
- * It returns a pointer to the alloced structure.
- *
- *
- *  Inputs:
- *                 Flux: 2D array containing the differential flux values as a function of energy and pitch angle.
- *                    E: 1D array containing the energy values implied by the first index of Flux[][] array.
- *                    A: 1D array containing the pitch angles values implied by the second index of Flux[][] array.
- *                   nE: number of energies.
- *                   nA: number of pitch angles.
- *      DumpDiagnostics: Flag to switch on/off diagnostic output.
- *
+ * Create a calloc'd Lgm_FluxToPsd structure.
  */
-Lgm_PhaseSpaceDensity *Lgm_InitPhaseSpaceDensity( double **J, double *E, double *A, int nE, int nA, int DumpDiagnostics ) {
+Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
 
-    
-    int     i, j;
-    double  flux, p2c2, fp, Min, Max;
-    double  **PsdArray_LoRes, **PsdArray_HiRes;
-
-    Lgm_PhaseSpaceDensity *p;
-    
+    Lgm_FluxToPsd *f;
 
     /*
      * Allocate memory for a Lgm_PhaseSpaceDensity structure.
      */
-    p = (Lgm_PhaseSpaceDensity *) calloc( 1, sizeof(*p) );
+    f = (Lgm_FluxToPsd *) calloc( 1, sizeof(*f) );
 
     /*
      * Set DumpDiagnostics flag to what we got here. This can be changed later as well.
      */
-    p->DumpDiagnostics = DumpDiagnostics;
+    f->DumpDiagnostics = DumpDiagnostics;
 
 
-    /*
-     * Add Flux array info to p structure. Alloc arrays appropriately.
-     */
-    p->nE1 = nE; 
-    p->nA1 = nA; 
-    LGM_ARRAY_1D( p->E1, p->nE1, double );
-    LGM_ARRAY_1D( p->A1, p->nA1, double );
-    LGM_ARRAY_2D( p->FLUX_EA1, p->nE1, p->nA1, double );
-    for (i=0; i<p->nE1; i++) p->E1[i] = E[i];
-    for (i=0; i<p->nA1; i++) p->A1[i] = A[i];
-    for (i=0; i<p->nE1; i++) {
-        for (j=0; j<p->nA1; j++) {
-            p->FLUX_EA1[i][j] = J[i][j];
-        }
-    }
-    if ( p->DumpDiagnostics ) {
-        DumpGif( "Flux_Versus_E_and_A_LoRes.gif", p->nA1, p->nE1, p->FLUX_EA1 );
-    }
-
-
-    /*
-     * Alloc mem for the PSD array.
-     * Convert Flux array into to PSD array. Values are stored as log10(f).
-     */
-    LGM_ARRAY_2D( p->PSD_EA1, p->nE1, p->nA1, double );
-    for (j=0; j<p->nA1; j++) {
-        for (i=0; i<p->nE1; i++) {
-
-            flux   = p->FLUX_EA1[i][j];
-            p2c2   = Lgm_p2c2( p->E1[i], LGM_Ee0 );
-            fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
-            fp     = (fp > 0.0) ? log10(fp) : LGM_FILL_VALUE;
-            p->PSD_EA1[i][j] = fp;
-            
-        }
-    }
-    if ( p->DumpDiagnostics ) {
-        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", p->nA1, p->nE1, p->PSD_EA1 );
-    }
-
-
-
-
-    /*
-     * Set desired size of HiRes array.
-     */
-    p->nE2 = 400; // Energy 
-    p->nA2 = 400; // Pitch Angles
-    LGM_ARRAY_2D( p->PSD_EA2, p->nE2, p->nA2, double );         // (Energy, Pitch Angle) -> (Row/Col)
-    UpSizeImage( p->PSD_EA1, p->E1, p->A1, p->nE1, p->nA1, 
-                    p->PSD_EA2, p->E2, p->A2, p->nE2, p->nA2 ); // returns p->PSD_EA2, p->E2, p->A2
-    if ( p->DumpDiagnostics ) {
-        DumpGif( "PSD_Versus_E_and_A_HiRes.gif", p->nA2, p->nE2, p->PSD_EA2 );
-    }
-   
-
-
-
-    return p;
+    return f;
 
 }
 
+/*
+ * Destroy a Lgm_FluxPsd structure.
+ */
+void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
-void Lgm_FreePhaseSpaceDensity( Lgm_PhaseSpaceDensity *p ) {
+    LGM_ARRAY_1D_FREE( f->E );
+    LGM_ARRAY_1D_FREE( f->A );
+    LGM_ARRAY_2D_FREE( f->FLUX_EA );
+    LGM_ARRAY_2D_FREE( f->PSD_EA );
 
-    LGM_ARRAY_1D_FREE( p->E1 );
-    LGM_ARRAY_1D_FREE( p->A1 );
-    LGM_ARRAY_2D_FREE( p->FLUX_EA1 );
-    LGM_ARRAY_2D_FREE( p->PSD_EA1 );
-    LGM_ARRAY_2D_FREE( p->PSD_EA2 );
-
-    free( p );
+    free( f );
 
     return;
 }
@@ -312,79 +236,149 @@ void Lgm_FreePhaseSpaceDensity( Lgm_PhaseSpaceDensity *p ) {
 
 
 
+
 /*
- *  The routine Lgm_ComputePsdVersusEAndAlpha() gives us a Hi-Res array of f(E,
- *  alpha).  BUT, what we really need in the end is f( mu, K ). Although mu is
- *  easy to compute, it is dependant on both E and alpha. K is only dependant
- *  upon alpha, but on the other hand K is not so easy to compute and we dont
- *  want to have to compute lots of K's if we dont have to. So we will use the
- *  following strategy instead,
+ *  Lgm_FluxToPsd_SetFlux()
+ *      
+ *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *
+ *  Inputs:
+ *                 Flux: 2D array containing the differential flux values as a function of energy and pitch angle.
+ *                    E: 1D array containing the energy values implied by the first index of Flux[][] array.
+ *                    A: 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *                   nE: number of energies.
+ *                   nA: number of pitch angles.
+ *                    v: Spacecraft position
+ *      DumpDiagnostics: Flag to switch on/off diagnostic output.
+ *
+ */
+void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
+
+    
+    int     i, j;
+    double  flux, p2c2, fp, Min, Max;
+
+
+    /*
+     * Add Flux array to f structure. Alloc arrays appropriately.
+     */
+    f->nE = nE; 
+    f->nA = nA; 
+    LGM_ARRAY_1D( f->E, f->nE, double );
+    LGM_ARRAY_1D( f->A, f->nA, double );
+    LGM_ARRAY_2D( f->FLUX_EA, f->nE, f->nA, double );
+    for (i=0; i<f->nE; i++) f->E[i] = E[i];
+    for (i=0; i<f->nA; i++) f->A[i] = A[i];
+    for (i=0; i<f->nE; i++) {
+        for (j=0; j<f->nA; j++) {
+            f->FLUX_EA[i][j] = J[i][j]; // FLUX_EA is "Flux versus Energy and Pitch Angle".
+        }
+    }
+    if ( f->DumpDiagnostics ) {
+        DumpGif( "Lgm_FluxToPsd_SetFlux_FLUX_EA.gif", f->nA, f->nE, f->FLUX_EA );
+    }
+
+
+    /*
+     * Alloc mem for the PSD array.
+     * Convert Flux array into to PSD array.
+     * Note, the result here is not PSD at constant Mu and K, it is PSD at the
+     * same Es and Alphas we started with.
+     */
+    LGM_ARRAY_2D( f->PSD_EA, f->nE, f->nA, double );
+    for (j=0; j<f->nA; j++) {
+        for (i=0; i<f->nE; i++) {
+            flux   = f->FLUX_EA[i][j];
+            p2c2   = Lgm_p2c2( f->E[i], LGM_Ee0 );
+            fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
+            f->PSD_EA[i][j] = fp; // PSD_EA is "PSD versus Energy and Pitch Angle".
+        }
+    }
+    if ( f->DumpDiagnostics ) {
+        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", f->nA, f->nE, f->PSD_EA );
+    }
+
+   
+    return;
+
+}
+
+
+
+
+/*
+ *  The routine Lgm_FluxPsd_SetFlux() gives us an  array of f(E, Alpha).  BUT,
+ *  what we really need in the end is f( mu, K ). Although mu is easy to
+ *  compute, it is dependant on both E and Alpha. K is only dependant upon
+ *  Alpha, but on the other hand K is not so easy to compute from Alpha.
  * 
  *  Note that f( E, a ) is the same as f( E(mu, a(K)), a(K) ). Thus, for a
  *  given mu and K, we can figure out what E and a they correspond to and then
- *  we can just look up the f value in our HiRes array. The steps are;
+ *  we can just use the f(E, a) array to compute the desired f values. The
+ *  steps are;
  *
- *      1. For each K, compute a(K). We already have this routine ( AlphaOfK() ).
+ *      1. For each K, compute Alpha(K). We already have this routine ( AlphaOfK() ).
  *
- *      2. Then we compute E from a and the given mu value.
+ *      2. Then we compute E from Alpha and the given mu and Alpha values.
  *
- *      3. Then just look up f(E,a) from the array (interp or fit or whatever).
+ *      3. Then just look up f(E,Alpha) from the array (interp or fit or whatever).
  *
  *  Inputs:
  *          nMu -- Number of Mu values
  *           Mu -- 1-D array of Mu values
  *           nK -- Number of K values
  *            K -- 1-D array of K values
+ *
  *  Outputs:
  *          PSD -- 2-D array of f(Mu, K). The user must alloc memory for this array.
  * 
  *  Usage:
- *          If m->UseInterpRoutines is TRUE, then the user must have pre-traced
- *          a FL with Lgm_TraceLine(). This initializes field line dependant
- *          information that is needed for Lgm_AlphaOfK() to work in the
- *          interpolated mode. Basically Lgm_AlphaOfK() uses bisection to solve
- *          for a(K) and it much faster to use the pre-tracing strategy. E.g.;
- *
- *
- *              m->UseInterpRoutines = TRUE;
- *              Lgm_TraceLine( &u_in, &u_out, m->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, m );
- *              LGM_ARRAY_2D( PSD, nMU, nK, double );
- *              Lgm_PsdAtConstMuAndK( PSD, nMu, MU, nK, K, m );
- *                  ... do stuff with PSD ...
- *              LGM_ARRAY_2D_FREE( PSD );
  * 
  * 
  */
-//void Lgm_PsdAtConstMuAndK( double **PSD, int nMu, double *Mu, int nK, double *K, Lgm_MagModelInfo *m ) {
-//
-//    int     i, k;
-//    double  *a, E;
-//
-//    
-//    /*
-//     * Compute the alpha's -- 1d array
-//     * parallelize this loop?
-//     */
-//    // #pragma etc..
-//    LGM_ARRAY_1D( a, nK, double );
-//    for ( k=0; k<nK; k++ ){
-////        a[k] = Lgm_AlphaOfK( K[k], m );
-//    }
-//
-//
-//    /*
-//     * Compute the PSD's -- 2d array
-//     */
-//    for ( i=0; i<nMu; i++ ){
-//        for ( k=0; k<nK; k++ ){
-//            E = Lgm_Mu_to_Energy( Mu[i], a[k], B );
-////            PSD[i][k] = Lgm_Psd( E, a, INFO THAT CONTAINS THE HIRES array );
-//        }
-//    }
-//
-//    LGM_ARRAY_1D_FREE( a );
-//
-//}
+void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p ) {
+
+    int k, m;
+
+    /*
+     * Copy K's into p structure.
+     * Transform the K's into Alpha's.
+     * Save the results in the p structure.
+     */
+    for ( k=0; k<nK; k++ ){
+        p->K[k] = K[k];
+        // Need to set up the call to AlphaOfK() properly
+        p->AofK[k] = AlphaOfK( p->K[k] );
+    }
+
+
+    /*
+     * Copy Mu's into p structure.
+     * Transform the Mu's into Emergy's.
+     * Save the results in the p structure.
+     * Note that since this conversion involves Mu and Alpha, the result is 2D.
+     */
+    for ( m=0; m<nK; m++ ){
+        p->Mu[m] = Mu[m];
+        for ( k=0; k<nK; k++ ){
+            p->EofMu[m][k] = Lgm_Mu_to_Energy( p->Mu[m], p->AofK[k], p->B );
+        }
+    }
+
+
+    /*
+     * Now, from the PSD[E][mu] array, get PSD at the E's and Alpha's we just computed.
+     * The result will be the same as PSD at the given Mu's and K's
+     * Transform the Mu's into Emergy's.
+     */
+    for ( m=0; m<nK; m++ ){
+        for ( k=0; k<nK; k++ ){
+            PSD[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( p->EofMu[m][k], p->AofK[k], p );
+        }
+    }
+
+
+}
 
 
 

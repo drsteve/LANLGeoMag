@@ -81,6 +81,7 @@ typedef struct Lgm_FluxToPsd {
 
     double      **EofMu;           //!< Array of Energy values that are implied by the Mu, Alpha and B values. Size is nMu.
 
+    double      B;                 //!< MAgnetic field strength.
 
 
     /*
@@ -115,7 +116,7 @@ typedef struct Lgm_FluxToPsd {
 Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics );
 void           Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f );
 void           Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
-void           Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxPsd *p );
+void           Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p );
 
 
 
