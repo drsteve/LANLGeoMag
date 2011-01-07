@@ -52,8 +52,25 @@ class Lgm_T89Tests(unittest.TestCase):
             self.assertAlmostEqual(ans[i][1], B.y)
             self.assertAlmostEqual(ans[i][2], B.z)
 
-    def test_list_in(self):
+    def test_kp_checking(self):
+        """for T89 Kp is between 0 and 5 inclusive"""
+        dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
+        pos = [-6.6, 0, 0]
+        self.assertRaises(ValueError, Lgm_T89.Lgm_T89, pos, dt, 10)
+        self.assertRaises(ValueError, Lgm_T89.Lgm_T89, pos, dt, 6)
+        self.assertRaises(ValueError, Lgm_T89.Lgm_T89, pos, dt, -1)
+
+    def test_list_inKp(self):
         """Make sure that list inputs work correctly"""
+        dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
+        pos = [-6.6, 0, 0]
+        kp = range(6)
+        ans = [[-18.97193562594128, -1.8611995170538265, 80.3933831714847],
+            [-20.828853435515278, -1.8611995170538265, 74.62222419125123 ],
+            [-22.558420054640656, -1.8611995170538265, 70.52457956754591],
+            [-26.412234393652312, -1.8611995170538265, 64.64506509634843],
+            [-32.16112573540407, -1.8611995170538265, 60.078415300152216],
+            [-45.379156657247805, -1.8611995170538265, 49.36315537639906] ]
 
 
 
