@@ -41,7 +41,8 @@ class Lgm_T89(object):
             not isinstance(pos, list) and \
             not isinstance(pos, np.ndarray):
             raise(TypeError('pos must be a Lgm_Vector or (list, numpy.ndarray) of Lgm_vectors') )
-        self.pos = pos
+        self.position = pos
+        self._Vpos = self._pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
@@ -86,11 +87,22 @@ class Lgm_T89(object):
         lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
         self.B = Lgm_Vector.Lgm_Vector()
         self._mmi.Kp = self.Kp
-        retval = lib.Lgm_B_T89(self.pos, self.B, self._mmi)
+        retval = lib.Lgm_B_T89(self._Vpos, self.B, self._mmi)
         if retval != 1:
             raise(RuntimeWarning('Odd return from Lgm_T89') )
         return self.B
 
+    def _pos2Lgm_Vector(self, pos):
+        if isinstance(pos, Lgm_Vector.Lgm_Vector):
+            return pos
+        if isinstance(pos, list):
+            Vpos = []
+            for val in pos:
+                if not isinstance(val, list):
+                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
+                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
+        if isinstance(pos, np.ndarray):
+            raise(NotImplementedError('Only lists can be imput for position now') )
 
 
 ##################################################
