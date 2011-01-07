@@ -126,6 +126,56 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
         for i, val in enumerate(numpy.array([20001202, 20001202])):
             self.assertEqual(val, tmp[i])
 
+    def test_dateToFPHours(self):
+        """dateToFPHours should return known output from known input"""
+        t = datetime.datetime(2000, 12, 2)
+        self.assertEqual(Lgm_DateAndTime.dateToFPHours(t), 0)
+        t = datetime.datetime(2000, 12, 2, 12)
+        self.assertEqual(Lgm_DateAndTime.dateToFPHours(t), 12.0)
+        t = datetime.datetime(2000, 12, 2, 11, 40)
+        self.assertAlmostEqual(Lgm_DateAndTime.dateToFPHours(t), 11.666666666666666)
+        t = datetime.datetime(2000, 12, 2, 1, 1, 20)
+        self.assertAlmostEqual(Lgm_DateAndTime.dateToFPHours(t), 1.0222222222222221)
+        t = datetime.datetime(2000, 12, 2, 1, 1, 20, 34567)
+        self.assertAlmostEqual(Lgm_DateAndTime.dateToFPHours(t), 1.0222318241666666)
+        # and test arrays and lists
+        t = datetime.datetime(2000, 12, 2, 12)
+        self.assertEqual(Lgm_DateAndTime.dateToFPHours([t, t]), [12.0, 12.0])
+        ans = Lgm_DateAndTime.dateToFPHours([t, t])
+        self.assertTrue(isinstance(ans, list))
+        ans = Lgm_DateAndTime.dateToFPHours(numpy.array([t, t]))
+        for i, val in enumerate(ans):
+            self.assertEqual(ans[i], 12.0)
+        self.assertEqual(len(ans), 2)
+        self.assertTrue(isinstance(ans, numpy.ndarray))
+
+#def dateToFPHours(inval):
+#    """
+#    convert a python datetime object to a Floating point hours (double) object that
+#    LanlGeoMag Likes to use
+#
+#    @author: Brian Larsen
+#    @organization: LANL
+#    @contact: balarsen@lanl.gov
+#
+#    @version: V1: 06-Jan-2011 (BAL)
+#    """
+#    try:
+#        if len(inval) > 1:
+#            lst = [val.hour + val.minute/60 +
+#                                    val.second/60/60 +
+#                                    val.microsecond/60/60/1000000 for val in inval]
+#            if isinstance(inval, numpy.ndarray):
+#                return numpy.array(lst)
+#            else:
+#                return lst
+#    except:
+#        return inval.hour + inval.minute/60 + \
+#                                    inval.second/60/60 + \
+#                                    inval.microsecond/60/60/1000000
+
+
+
 # this is a srg fault here
     #def test_Lgm_Lgm_Make_UTC(self):
     #    """Lgm_Make_UTC should give known answer for known input"""

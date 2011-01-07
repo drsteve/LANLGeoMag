@@ -52,6 +52,10 @@ class Lgm_T89Tests(unittest.TestCase):
             self.assertAlmostEqual(ans[i][1], B.y)
             self.assertAlmostEqual(ans[i][2], B.z)
 
+    def test_list_in(self):
+        """Make sure that list inputs work correctly"""
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -81,6 +81,29 @@ class Lgm_T89(object):
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
+        try:
+            if len(self._Vpos) > len(self.time):
+                if isinstance(time, list):
+                    self.time = self.time * len(self._Vpos)
+        except:
+            try:
+                self.time = [self.time] * len(self._Vpos)
+            except TypeError:
+                pass
+
+        try:
+            if len(self._Vpos) > len(self.Kp):
+                if isinstance(self.Kp, list):
+                    self.Kp = self.Kp * len(self._Vpos)
+        except:
+            try:
+                self.Kp = [self.Kp] * len(self._Vpos)
+            except TypeError:
+                pass
+
+
+        self.calc_B()
+
     def calc_B(self):
         date = Lgm_DateAndTime.dateToDateLong(self.time)
         utc = Lgm_DateAndTime.dateToFPHours(self.time)
@@ -101,8 +124,9 @@ class Lgm_T89(object):
                 if not isinstance(val, list):
                     return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
                 Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
+            return Vpos
         if isinstance(pos, np.ndarray):
-            raise(NotImplementedError('Only lists can be imput for position now') )
+            raise(NotImplementedError('Only lists can be input for position now') )
 
 
 ##################################################
