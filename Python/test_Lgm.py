@@ -15,7 +15,7 @@ import unittest_pretty
 from test_Lgm_Vector import *
 from test_Lgm_CTrans import *
 from test_Lgm_DateAndTime import *
-#from test_Lgm_T89 import *
+from test_Lgm_T89 import *
 # add others here as they exist
 
 
