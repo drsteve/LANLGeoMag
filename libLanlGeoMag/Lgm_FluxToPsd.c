@@ -347,7 +347,7 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      */
     for ( k=0; k<nK; k++ ){
         p->K[k] = K[k];
-        // Need to set up the call to AlphaOfK() properly
+// Need to set up the call to AlphaOfK() properly
         p->AofK[k] = AlphaOfK( p->K[k] );
     }
 
@@ -373,6 +373,7 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      */
     for ( m=0; m<nK; m++ ){
         for ( k=0; k<nK; k++ ){
+// NEED to create the Lgm_FluxPsd_GetPsdAtEandAlpha() function
             PSD[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( p->EofMu[m][k], p->AofK[k], p );
         }
     }
