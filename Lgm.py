@@ -24,6 +24,7 @@ from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
 
 from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
 
+from _Lgm_Octree import Lgm_OctreeCell
 
 
 
@@ -36,7 +37,6 @@ Lgm_EopP = ctypes.POINTER(Lgm_Eop)
 Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
 
 
-
 # the order here matters, if you get a _fields_ is final then play with order
 # it becomes final when pointers are created as Pyhton has to figure how big
 # the object is (is the current theory)
@@ -47,7 +47,7 @@ Lgm_CTrans.assign_fields()
 Lgm_Eop.assign_fields()
 Lgm_EopOne.assign_fields()
 Lgm_MagModelInfo.assign_fields()
-
+Lgm_OctreeCell.assign_fields()
 
 
 # format is [Out type, In type1, In type2, In type3, ... ]
@@ -139,7 +139,9 @@ call_dict = {
         'size_gsl_interp_type' : [LgmInt],
         'size_gsl_interp' : [LgmInt],
         'size_gsl_spline' : [LgmInt],
-
+        'size_Lgm_OctreeData' : [LgmInt],
+        'size_Lgm_OctreeCell' : [LgmInt],
+        'size_pQueue' : [LgmInt],
 
 
 
