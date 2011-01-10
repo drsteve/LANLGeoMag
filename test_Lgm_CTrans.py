@@ -10,12 +10,14 @@ Test suite for the Lgm_CTrans file <<This is an important one>>
 @version: V1: 20-Dec-2010 (BAL)
 """
 
+import ctypes
 import unittest
+import math
+
 import Lgm
 import Lgm_CTrans
 import Lgm_Vector
 from _Lgm import lib
-import math
 
 class Lgm_CTransTests(unittest.TestCase):
     """
@@ -32,6 +34,17 @@ class Lgm_CTransTests(unittest.TestCase):
 
     def tearDown(self):
         super(Lgm_CTransTests, self).tearDown()
+
+    def test_sizeDateTime(self):
+        """DateTime c and python should match size"""
+        self.assertEqual(ctypes.sizeof(Lgm_CTrans.Lgm_DateTime), lib.size_DateTime())
+
+    def test_Lgm_DateTime(self):
+        """Lgm_DateTime should create and set defaults"""
+        a = Lgm_CTrans.Lgm_DateTime()
+        self.assertEqual(a.nNutationTerms, 106)
+        self.assertEqual(a.DUT1, 0.0)
+        self.assertEqual(a.ddPsi, 0.0)
 
     def test_Lgm_Convert_Coords(self):
         """Lgm_Convert_Coords should give known output (regression)"""

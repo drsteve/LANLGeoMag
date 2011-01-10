@@ -38,29 +38,25 @@ class Lgm_T89(object):
     def __init__(self, pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
         # pos must be a Lgm_Vector or list of Lgm_Vectors
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
-            not isinstance(pos, list) and \
-            not isinstance(pos, np.ndarray):
-            raise(TypeError('pos must be a Lgm_Vector or (list, numpy.ndarray) of Lgm_vectors') )
+            not isinstance(pos, list):
+            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
         self.position = pos
         self._Vpos = self._pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
-            not isinstance(time, list) and \
-            not isinstance(time, np.ndarray):
-            raise(TypeError('time must be a datetime or (list, numpy.ndarray) of datetime') )
+            not isinstance(time, list):
+            raise(TypeError('time must be a datetime or list of datetime') )
         self.time = time
 
-        #TODO implement this and remove this bit
-        try:
-            assert(len(pos))
-            assert(len(time))
-            raise(NotImplementedError('Multi element input not yet written') )
-        except:
-            pass
 
-        if Kp < 0 or Kp > 5:
-            raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
+        try:
+            for val in Kp:
+                if val < 0 or val > 5:
+                    raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
+        except TypeError:
+            if Kp < 0 or Kp > 5:
+                raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
         self.Kp = Kp
 
         if INTERNAL_MODEL not in (Lgm_MagModelInfo.LGM_CDIP,
@@ -81,30 +77,44 @@ class Lgm_T89(object):
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
+        # either they are all one elemet or they are compatible lists no 1/2 way
         try:
-            if len(self._Vpos) > len(self.time):
-                if isinstance(time, list):
-                    self.time = self.time * len(self._Vpos)
-        except:
-            try:
-                self.time = [self.time] * len(self._Vpos)
-            except TypeError:
-                pass
-
-        try:
-            if len(self._Vpos) > len(self.Kp):
-                if isinstance(self.Kp, list):
-                    self.Kp = self.Kp * len(self._Vpos)
-        except:
-            try:
-                self.Kp = [self.Kp] * len(self._Vpos)
-            except TypeError:
-                pass
-
+            if len(self._Vpos) != len(self.Kp) or \
+                len(self._Vpos) != len(self.time) or \
+                len(self.time) != len(self.Kp):
+                raise(ValueError('Inputs must be the same length, scalars or lists'))
+        except TypeError:
+            if isinstance(self._Vpos, list) and not isinstance(self.Kp, list) \
+                and not isinstance(self.time, list):
+                    raise(ValueError('Inputs must be the same length, scalars or lists'))
 
         self.calc_B()
 
     def calc_B(self):
+        try:
+            ans = []
+            for v1, v2, v3 in zip(self._Vpos, self.time, self.Kp):
+                date = Lgm_DateAndTime.dateToDateLong(v2)
+                utc = Lgm_DateAndTime.dateToFPHours(v2)
+                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
+                self.B = Lgm_Vector.Lgm_Vector()
+                self._mmi.Kp = v3
+                retval = lib.Lgm_B_T89(v1, self.B, self._mmi)
+                if retval != 1:
+                    raise(RuntimeWarning('Odd return from Lgm_T89') )
+                ans.append(self.B)
+            return ans
+        except TypeError:
+                date = Lgm_DateAndTime.dateToDateLong(self.time)
+                utc = Lgm_DateAndTime.dateToFPHours(self.time)
+                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
+                self.B = Lgm_Vector.Lgm_Vector()
+                self._mmi.Kp = self.Kp
+                retval = lib.Lgm_B_T89(self._Vpos, self.B, self._mmi)
+                if retval != 1:
+                    raise(RuntimeWarning('Odd return from Lgm_T89') )
+                return self.B
+
         date = Lgm_DateAndTime.dateToDateLong(self.time)
         utc = Lgm_DateAndTime.dateToFPHours(self.time)
         lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);

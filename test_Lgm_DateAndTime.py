@@ -13,6 +13,7 @@ Test suite for the Lgm_DateAndTime file
 
 import unittest
 import datetime
+import ctypes
 
 import numpy
 
@@ -39,6 +40,10 @@ class Lgm_DateAndTimeTests(unittest.TestCase):
     def tearDown(self):
         super(Lgm_DateAndTimeTests, self).tearDown()
 
+    #def test_DateAndTimeSize(self):
+    #    """Lgm_DateAndTime shize should match c/python"""
+    #    self.assertEqual(ctypes.sizeof(Lgm_DateAndTime.Lgm_DateAndTime),
+    #                     lib.size_DateAndTime())
 
     def testLgm_DateAndTime(self):
         """Lgm_DateAndTime has a nLeapSecondDates, LeapSecondDates, LeapSecondJDs, LeapSeconds"""

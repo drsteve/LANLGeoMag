@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import unittest
+import ctypes
+
 import Lgm
 import Lgm_Vector
 from Lgm import lib
@@ -101,6 +103,10 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         """str has known output"""
         vec1 = Lgm_Vector.Lgm_Vector()
         self.assertEqual(str(vec1), '[0.0, 0.0, 0.0]')
+
+    def test_size(self):
+        """Make sure that the Lgm c and python are the same size"""
+        self.assertEqual(ctypes.sizeof(Lgm_Vector.Lgm_Vector), lib.size_Vector())
 
     def test_add(self):
         """add gives known output"""
