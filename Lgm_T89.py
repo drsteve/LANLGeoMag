@@ -23,7 +23,6 @@ from _Lgm import lib
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
-import Lgm_DateAndTime
 
 class Lgm_T89(object):
     """
@@ -94,8 +93,8 @@ class Lgm_T89(object):
         try:
             ans = []
             for v1, v2, v3 in zip(self._Vpos, self.time, self.Kp):
-                date = Lgm_DateAndTime.dateToDateLong(v2)
-                utc = Lgm_DateAndTime.dateToFPHours(v2)
+                date = Lgm_CTrans.dateToDateLong(v2)
+                utc = Lgm_CTrans.dateToFPHours(v2)
                 lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
                 self.B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = v3
@@ -105,8 +104,8 @@ class Lgm_T89(object):
                 ans.append(self.B)
             return ans
         except TypeError:
-                date = Lgm_DateAndTime.dateToDateLong(self.time)
-                utc = Lgm_DateAndTime.dateToFPHours(self.time)
+                date = Lgm_CTrans.dateToDateLong(self.time)
+                utc = Lgm_CTrans.dateToFPHours(self.time)
                 lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
                 self.B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = self.Kp
@@ -115,8 +114,8 @@ class Lgm_T89(object):
                     raise(RuntimeWarning('Odd return from Lgm_T89') )
                 return self.B
 
-        date = Lgm_DateAndTime.dateToDateLong(self.time)
-        utc = Lgm_DateAndTime.dateToFPHours(self.time)
+        date = Lgm_CTrans.dateToDateLong(self.time)
+        utc = Lgm_CTrans.dateToFPHours(self.time)
         lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
         self.B = Lgm_Vector.Lgm_Vector()
         self._mmi.Kp = self.Kp

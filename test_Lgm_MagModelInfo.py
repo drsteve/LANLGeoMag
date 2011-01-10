@@ -40,7 +40,11 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
         self.assertEqual(lib.size_gsl_interp(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp))
         self.assertEqual(lib.size_gsl_spline(), ctypes.sizeof(Lgm_MagModelInfo.gsl_spline))
 
-
+    def test_size_Lgm_MagModelInfo(self):
+        """for Lgm_MagModelInfo the c and python sizes should match"""
+        print("c: %d" % (lib.size_MagModelInfo()) )
+        self.assertEqual(lib.size_MagModelInfo(),
+                         ctypes.sizeof(Lgm_MagModelInfo.Lgm_MagModelInfo) )
 
 
 if __name__ == '__main__':

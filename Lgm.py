@@ -17,7 +17,6 @@ import Lgm_Vector
 Lgm_Vector.Lgm_Vector.assign_fields()
 
 from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
-from Lgm_DateAndTime import Lgm_DateAndTime
 
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP, LgmCharP
 from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
@@ -29,7 +28,6 @@ from _Lgm_Octree import Lgm_OctreeCell
 
 
 Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
-Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)
 Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
 Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
 Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
@@ -41,14 +39,13 @@ Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
 # it becomes final when pointers are created as Pyhton has to figure how big
 # the object is (is the current theory)
 
+Lgm_LeapSeconds.assign_fields()
 Lgm_DateTime.assign_fields()
-Lgm_DateAndTime.assign_fields()
 Lgm_CTrans.assign_fields()
 Lgm_Eop.assign_fields()
 Lgm_EopOne.assign_fields()
 Lgm_MagModelInfo.assign_fields()
 Lgm_OctreeCell.assign_fields()
-Lgm_LeapSeconds.assign_fields()
 
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {
@@ -101,7 +98,7 @@ call_dict = {
         'Lgm_UTC_to_TDB' : [None, Lgm_CTransP, Lgm_CTransP, Lgm_CTransP],
         'Lgm_TDB_to_UTC' : [None, Lgm_CTransP, Lgm_CTransP, Lgm_CTransP],
         'Lgm_DateTime_Create' : [Lgm_DateTime, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP],
-        'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateAndTimeP, Lgm_CTransP],
+        'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
         'Lgm_Print_DateTime' : [None, Lgm_DateTime, LgmInt, LgmInt],
         'Lgm_DateTimeToString' : [None, LgmCharP, Lgm_DateTime, LgmInt, LgmInt], # todo 80 was made up use a pointer
         #'Lgm_Print_SimpleTime' : [None, Lgm_CTransP, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer

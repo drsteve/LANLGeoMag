@@ -66,8 +66,9 @@ from _Lgm import lib
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, c_types, c_sizes, LgmUInt, \
         LgmDoubleP, ConstLgmCharP
 import Lgm_Vector
-from _Lgm_Octree import _Lgm_OctreeCell
 from Lgm_CTrans import Lgm_CTrans
+from _Lgm_Octree import Lgm_OctreeCellP
+
 
 # size_t is either unisigned int or unsigned long (or maybe unsigned short)
 # in the Lgm lib is a funstion to tell us
@@ -202,7 +203,8 @@ class Lgm_MagModelInfo(ctypes.Structure):
 
     @classmethod
     def assign_fields(cls):
-        cls._fields_ = [ ("c", Lgm.Lgm_CTransP),
+        cls._fields_ = [ \
+        ("c", Lgm.Lgm_CTransP),
         ("nFunc", LgmLong),
         ("Bfield", ctypes.POINTER(ctypes.CFUNCTYPE(ctypes.c_int))),
         ("SavePoints", LgmInt),
@@ -233,8 +235,8 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Sm_North", LgmDouble),
         ("Blocal", LgmDouble),
         ("FirstCall", LgmInt),
-        ("epsabs", LgmDouble),
-        ("epsrel", LgmDouble),
+#        ("epsabs", LgmDouble), # commented out in Lgm c code as of 10Jen2011
+#        ("epsrel", LgmDouble), # commented out in Lgm c code as of 10Jen2011
         # Arrays containing FL vals
         ("s", LgmDouble * LGM_MAX_INTERP_PNTS), # distance along FL
         ("Px", LgmDouble * LGM_MAX_INTERP_PNTS), # Px along FL  (in GSM)
@@ -273,14 +275,14 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Sb0", LgmDouble), #value of Sb integral for eq. mirroring particles.
         ("imin1", LgmInt), #imin1 and imin2 are the indices in the
         ("imin2", LgmInt), #array between which smin is located.
-        ("acc", gsl_interp_accel), #accelerator
-        ("accPx", gsl_interp_accel), #accelerator
-        ("accPy", gsl_interp_accel), #accelerator
-        ("accPz", gsl_interp_accel), #accelerator
-        ("spline", gsl_spline), #spline object
-        ("splinePx", gsl_spline), #spline object
-        ("splinePy", gsl_spline), #spline object
-        ("splinePz", gsl_spline), #spline object
+        ("acc", gsl_interp_accelP), #accelerator
+        ("accPx", gsl_interp_accelP), #accelerator
+        ("accPy", gsl_interp_accelP), #accelerator
+        ("accPz", gsl_interp_accelP), #accelerator
+        ("spline", gsl_splineP), #spline object
+        ("splinePx", gsl_splineP), #spline object
+        ("splinePy", gsl_splineP), #spline object
+        ("splinePz", gsl_splineP), #spline object
 
         #Other stuff
         ("VerbosityLevel", LgmInt), #VerbosityLevel
@@ -291,8 +293,8 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Lgm_MagStep_FirstTimeThrough", LgmInt), #
         ("Lgm_MagStep_kmax", LgmInt), #
         ("Lgm_MagStep_kopt", LgmInt), #
-        ("Lgm_MagStep_snew", LgmInt), #
-        ("Lgm_MagStep_A", LgmDouble * LGM_MAGSTEP_JMAX), #
+        ("Lgm_MagStep_snew", LgmDouble), #
+        ("Lgm_MagStep_A", LgmDouble * (LGM_MAGSTEP_JMAX+1)), #
         ("Lgm_MagStep_alpha", LgmDouble * (LGM_MAGSTEP_JMAX+1) * (LGM_MAGSTEP_JMAX+1) ), #
         ("Lgm_MagStep_d", LgmDouble * LGM_MAGSTEP_JMAX * LGM_MAGSTEP_JMAX ), #
         ("Lgm_MagStep_x", LgmDouble * LGM_MAGSTEP_JMAX), #
@@ -333,7 +335,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Lgm_FindShellLine_I_Tol", LgmDouble), #
         ("Lgm_TraceToMirrorPoint_Tol", LgmDouble), #
         # Variables for defining Octree stuff
-        ("OctreeRoot", _Lgm_OctreeCell), #
+        ("OctreeRoot", Lgm_OctreeCellP), #
         ("Octree_kNN_k", LgmInt), #
         ("Octree_kNN_InterpMethod", LgmInt), #
         ("Octree_kNN_MaxDist", LgmDouble), #
@@ -350,11 +352,11 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Lgm_LossConeHeight", LgmDouble), #
         # Globals for OP77 Model
         ("OP77_TILTL", LgmDouble), #
-        ("OP77_A", LgmDouble), #
-        ("OP77_B", LgmDouble), #
-        ("OP77_C", LgmDouble), #
-        ("OP77_D", LgmDouble), #
-        ("OP77_E", LgmDouble), #
-        ("OP77_F", LgmDouble), #
-        ("OP77_TT", LgmDouble)] #
+        ("OP77_A", LgmDouble*65), #
+        ("OP77_B", LgmDouble*65), #
+        ("OP77_C", LgmDouble*45), #
+        ("OP77_D", LgmDouble*45), #
+        ("OP77_E", LgmDouble*65), #
+        ("OP77_F", LgmDouble*65), #
+        ("OP77_TT", LgmDouble*5)] #
 Lgm_MagModelInfoP = ctypes.POINTER(Lgm_MagModelInfo)

@@ -279,7 +279,6 @@ CDMAG_TO_CDMAG = 1111
 import ctypes
 from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar, LgmLongP, LgmDoubleP
 import Lgm_Vector
-import Lgm_DateAndTime
 
 class Lgm_DateTime(ctypes.Structure):
     def __init__(self, verbose = 0):
@@ -329,7 +328,7 @@ class Lgm_CTrans(ctypes.Structure):
     def assign_fields(cls):
         cls._fields_ = [ \
             ("Verbose", LgmInt),
-            ("l", Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
+            ("l", Lgm_LeapSeconds), # Structure containing Leap Second Info
             ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                          # UT0 is a version of UT that uses data
                                          # from many different ground stations.
@@ -506,6 +505,52 @@ class Lgm_CTrans(ctypes.Structure):
             ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]  #
         # Mike has Lgm_init_ctrans that sets a few vars, set them here
 
+
+
+def dateToDateLong(inval):
+    """
+    convert a python date or datetime object to a Date (long) object that
+    LanlGeoMag Likes to use
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 04-Jan-2011 (BAL)
+    """
+    try:
+        if len(inval) > 1:
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array([long(val.strftime('%Y%m%d')) for val in inval])
+            else:
+                return [long(val.strftime('%Y%m%d')) for val in inval]
+    except:
+        return long(inval.strftime('%Y%m%d'))
+
+def dateToFPHours(inval):
+    """
+    convert a python datetime object to a Floating point hours (double) object that
+    LanlGeoMag Likes to use
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 06-Jan-2011 (BAL)
+    """
+    try:
+        if len(inval) > 1:
+            lst = [val.hour + val.minute/60 +
+                                    val.second/60/60 +
+                                    val.microsecond/60/60/1000000 for val in inval]
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array(lst)
+            else:
+                return lst
+    except:
+        return inval.hour + inval.minute/60 + \
+                                    inval.second/60/60 + \
+                                    inval.microsecond/60/60/1000000
 
 
 
