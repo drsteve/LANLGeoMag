@@ -12,7 +12,6 @@ Test suite for the Lgm_CTrans file <<This is an important one>>
 
 import ctypes
 import unittest
-import math
 
 import Lgm
 import Lgm_MagModelInfo
@@ -33,6 +32,14 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
 
     def tearDown(self):
         super(Lgm_MagModelInfoTests, self).tearDown()
+
+    def test_gslStructSizes(self):
+        """The c and pyhtion sizes of the used GSL structs much be the same"""
+        self.assertEqual(lib.size_gsl_interp_accel(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_accel))
+        self.assertEqual(lib.size_gsl_interp_type(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_type))
+        self.assertEqual(lib.size_gsl_interp(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp))
+        self.assertEqual(lib.size_gsl_spline(), ctypes.sizeof(Lgm_MagModelInfo.gsl_spline))
+
 
 
 

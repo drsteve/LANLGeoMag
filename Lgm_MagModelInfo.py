@@ -64,7 +64,7 @@ import Lgm
 import ctypes
 from _Lgm import lib
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, c_types, c_sizes, LgmUInt, \
-        LgmDoubleP
+        LgmDoubleP, ConstLgmCharP
 import Lgm_Vector
 from _Lgm_Octree import _Lgm_OctreeCell
 from Lgm_CTrans import Lgm_CTrans
@@ -89,7 +89,7 @@ gsl_interp_accelP = ctypes.POINTER(gsl_interp_accel)
 
 
 class gsl_interp_type(ctypes.Structure):
-    _fields_ = [ ("name", ctypes.c_byte), #
+    _fields_ = [ ("name", ConstLgmCharP), #
         ("min_size", LgmUInt), #
         ("alloc", ctypes.c_void_p), #
         ("init", ctypes.POINTER(ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p,

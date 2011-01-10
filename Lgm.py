@@ -135,6 +135,14 @@ call_dict = {
         'size_CTrans' : [LgmInt],
         'size_Vector' : [LgmInt],
         'size_DateTime' : [LgmInt],
+        'size_gsl_interp_accel' : [LgmInt],
+        'size_gsl_interp_type' : [LgmInt],
+        'size_gsl_interp' : [LgmInt],
+        'size_gsl_spline' : [LgmInt],
+
+
+
+
         'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
         'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
         'Lgm_Set_Octree_kNN_MaxDist' : [Lgm_MagModelInfoP, LgmDouble],
