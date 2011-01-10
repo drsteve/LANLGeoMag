@@ -142,8 +142,7 @@ call_dict = {
         'size_Lgm_OctreeData' : [LgmInt],
         'size_Lgm_OctreeCell' : [LgmInt],
         'size_pQueue' : [LgmInt],
-
-
+        'size_Lgm_LeapSeconds' : [LgmInt],
 
         'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
         'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
