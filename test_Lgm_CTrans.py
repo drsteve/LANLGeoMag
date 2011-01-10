@@ -34,6 +34,16 @@ class Lgm_CTransTests(unittest.TestCase):
     def tearDown(self):
         super(Lgm_CTransTests, self).tearDown()
 
+    def test_sizeLgm_CTrans(self):
+        """Lgm_CTrans c and python must have same size"""
+        print("c: %d" % (lib.size_CTrans()) )
+        self.assertEqual(ctypes.sizeof(Lgm_CTrans.Lgm_CTrans), lib.size_CTrans())
+
+    def test_sizeLgm_LeapSeconds(self):
+        """Lgm_LeapSeconds c/python must be same size"""
+        self.assertEqual(ctypes.sizeof(Lgm_CTrans.Lgm_LeapSeconds),
+                         lib.size_Lgm_LeapSeconds())
+
     def test_sizeDateTime(self):
         """DateTime c and python should match size"""
         self.assertEqual(ctypes.sizeof(Lgm_CTrans.Lgm_DateTime), lib.size_DateTime())

@@ -277,7 +277,7 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 
 import ctypes
-from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar
+from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar, LgmLongP, LgmDoubleP
 import Lgm_Vector
 import Lgm_DateAndTime
 
@@ -314,11 +314,21 @@ class Lgm_DateTime(ctypes.Structure):
             ("TZD_mm", LgmInt), # Time zone offset minutes
             ("TimeSystem", LgmInt) ] # e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
 
+class Lgm_LeapSeconds(ctypes.Structure):
+    @classmethod
+    def assign_fields(cls):
+        cls._fields_ = [ ("nLeapSecondDates", LgmInt ), # Number of leap second dates.
+            ("LeapSecondDates", LgmLongP), # Array for holding the Dates on which leap seconds were added
+            ("LeapSecondJDs", LgmDoubleP), # Array for holding the Julian Dates on which leap seconds were added
+            ("LeapSeconds", LgmDoubleP) ] #The actual number of leap seconds that  went into effect on the given date
+
+
 
 class Lgm_CTrans(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
-        cls._fields_ = [ ("Verbose", LgmInt),
+        cls._fields_ = [ \
+            ("Verbose", LgmInt),
             ("l", Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
             ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                          # UT0 is a version of UT that uses data

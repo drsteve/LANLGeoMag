@@ -22,7 +22,7 @@ from Lgm_DateAndTime import Lgm_DateAndTime
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP, LgmCharP
 from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
 
-from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
+from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans, Lgm_LeapSeconds
 
 from _Lgm_Octree import Lgm_OctreeCell
 
@@ -48,7 +48,7 @@ Lgm_Eop.assign_fields()
 Lgm_EopOne.assign_fields()
 Lgm_MagModelInfo.assign_fields()
 Lgm_OctreeCell.assign_fields()
-
+Lgm_LeapSeconds.assign_fields()
 
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {
@@ -142,6 +142,9 @@ call_dict = {
         'size_Lgm_OctreeData' : [LgmInt],
         'size_Lgm_OctreeCell' : [LgmInt],
         'size_pQueue' : [LgmInt],
+        'size_Lgm_LeapSeconds' : [LgmInt],
+
+
 
         'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
         'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
