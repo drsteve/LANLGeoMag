@@ -12,8 +12,6 @@ Test suite for the Lgm_DateAndTime file
 
 
 import unittest
-import datetime
-import ctypes
 
 import numpy
 

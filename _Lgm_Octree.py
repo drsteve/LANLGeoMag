@@ -14,7 +14,7 @@ OCTREE_IS_NULL = -2
 import ctypes
 import Lgm
 from _Lgm import lib
-from Lgm_Types import LgmLong, LgmDouble, LgmUInt, LgmULong
+from Lgm_Types import LgmDouble, LgmUInt, LgmULong
 import Lgm_Vector
 
 

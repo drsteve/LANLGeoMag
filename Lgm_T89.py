@@ -10,12 +10,12 @@ Python implementation of the LanlGeoMag T89 Magnetic field model
 """
 
 import ctypes
-import itertools
+#import itertools
 import datetime
 
 import numpy as np
 import spacepy.toolbox as tb
-from pylab import griddata, pcolor, pcolormesh, gca, draw
+# from pylab import griddata, pcolor, pcolormesh, gca, draw
 
 import Lgm
 from Lgm_Types import LgmInt

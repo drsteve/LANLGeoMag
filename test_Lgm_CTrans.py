@@ -12,7 +12,6 @@ Test suite for the Lgm_CTrans file <<This is an important one>>
 
 import ctypes
 import unittest
-import math
 
 import Lgm
 import Lgm_CTrans
