@@ -99,6 +99,54 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
     def tearDown(self):
         super(Lgm_VectorTestsWrap, self).tearDown()
 
+    def test_eq(self):
+        """__eq__ has known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        self.assertTrue(vec1 == vec1)
+        self.assertFalse(vec1 == vec2)
+        vec2.x = vec1.x
+        self.assertFalse(vec1 == vec2)
+        vec2.y = vec1.y
+        self.assertFalse(vec1 == vec2)
+        self.assertTrue(vec1 == [1, 2, 3])
+        self.assertFalse(vec1 == [3, 2, 3])
+        self.assertRaises(TypeError, vec1.__eq__, ['bad'])
+        self.assertRaises(TypeError, vec1.__eq__, 'bad')
+
+
+    def test_gt(self):
+        """__gt__ has known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        self.assertTrue(vec2 > vec1)
+        self.assertFalse(vec1 > vec2)
+        self.assertFalse(vec1 > vec1)
+
+    def test_ge(self):
+        """__ge__ has known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        self.assertTrue(vec2 >= vec1)
+        self.assertFalse(vec1 >= vec2)
+        self.assertTrue(vec1 >= vec1)
+
+    def test_lt(self):
+        """__lt__ has known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        self.assertTrue(vec1 < vec2)
+        self.assertFalse(vec2 < vec1)
+        self.assertFalse(vec1 < vec1)
+
+    def test_le(self):
+        """__le__ has known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        self.assertTrue(vec1 <= vec2)
+        self.assertFalse(vec2 <= vec1)
+        self.assertTrue(vec1 <= vec1)
+
     def test_str(self):
         """str has known output"""
         vec1 = Lgm_Vector.Lgm_Vector()

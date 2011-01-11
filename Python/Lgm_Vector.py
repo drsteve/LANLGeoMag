@@ -27,6 +27,8 @@ class Lgm_Vector(ctypes.Structure):
     @ivar z: z-component of the vector
     @type z: double
 
+    @todo: __eq__ forks vector==list but no others
+
     @author: Brian Larsen
     @organization: LANL
     @contact: balarsen@lanl.gov
@@ -38,6 +40,78 @@ class Lgm_Vector(ctypes.Structure):
         cls._fields_ = [ ( "x", LgmDouble ),
             ("y", LgmDouble),
             ("z", LgmDouble) ]
+
+    def __eq__(self, other):
+        """
+        if the components of a Vector are equal the vectors are equal
+        """
+        if isinstance(other, Lgm_Vector):
+            if other.x != self.x:
+                return False
+            elif other.y != self.y:
+                return False
+            elif other.z != self.z:
+                return False
+            else:
+                return True
+        elif isinstance(other, list):
+            try:
+                other = Lgm_Vector(other[0], other[1], other[2])
+            except:
+                raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+            else:
+                return self == other
+        else:
+            raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+
+
+    def __gt__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 > m2:
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 < m2:
+            return True
+        else:
+            return False
+
+    def __le__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 <= m2:
+            return True
+        else:
+            return False
+
+    def __ge__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 >= m2:
+            return True
+        else:
+            return False
 
     def __str__(self):
         """
