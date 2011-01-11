@@ -140,7 +140,6 @@ call_dict = {
         'size_Lgm_LeapSeconds' : [LgmInt],
 
 
-
         'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
         'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
         'Lgm_Set_Octree_kNN_MaxDist' : [Lgm_MagModelInfoP, LgmDouble],

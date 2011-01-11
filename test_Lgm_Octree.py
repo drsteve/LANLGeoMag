@@ -34,17 +34,17 @@ class Lgm_OctreeTests(unittest.TestCase):
         super(Lgm_OctreeTests, self).tearDown()
 
     def test_Lgm_OctreeDataSize(self):
-        """the Lgm_OctreeData struct must have same C/Pythion size"""
+        """the Lgm_OctreeData struct must have same C/Python size"""
         self.assertEqual(lib.size_Lgm_OctreeData(),
                          ctypes.sizeof(_Lgm_Octree.Lgm_OctreeData) )
 
     def test_Lgm_OctreeCellSize(self):
-        """the Lgm_OctreeCell struct must have same C/Pythion size"""
+        """the Lgm_OctreeCell struct must have same C/Python size"""
         self.assertEqual(lib.size_Lgm_OctreeCell(),
                          ctypes.sizeof(_Lgm_Octree.Lgm_OctreeCell) )
 
     def test_pQueueSize(self):
-        """the pQueue struct must have same C/Pythion size"""
+        """the pQueue struct must have same C/Python size"""
         self.assertEqual(lib.size_pQueue(),
                          ctypes.sizeof(_Lgm_Octree.pQueue) )
 
