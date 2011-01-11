@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-setup(name='Python_Lgm',
+setup(name='lgmpy',
       version='0.0',
       description='Python wrapper for Lgm',
       author='Brian Larsen',
