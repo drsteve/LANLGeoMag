@@ -61,6 +61,9 @@ class Lgm_Vector(ctypes.Structure):
                 raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
             else:
                 return self == other
+        else:
+            raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+
 
     def __gt__(self, other):
         """

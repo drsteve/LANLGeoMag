@@ -111,6 +111,8 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertFalse(vec1 == vec2)
         self.assertTrue(vec1 == [1, 2, 3])
         self.assertFalse(vec1 == [3, 2, 3])
+        self.assertRaises(TypeError, vec1.__eq__, ['bad'])
+        self.assertRaises(TypeError, vec1.__eq__, 'bad')
 
 
     def test_gt(self):
