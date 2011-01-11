@@ -6,6 +6,7 @@
 #include <math.h>
 #include "Lgm/Lgm_FluxToPsd.h"
 #include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_DynamicMemory.h"
 
 
@@ -213,6 +214,8 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
      */
     f->DumpDiagnostics = DumpDiagnostics;
 
+    f->Alloced = FALSE;
+
 
     return f;
 
@@ -234,7 +237,19 @@ void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 }
 
 
+/*
+ *  Lgm_FluxToPsd_SetFlux()
+ *      
+ *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *
+ *  Inputs:
+ */
+void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f ) {
 
+    f->DateTime = *d;
+    f->Position = *u;
+
+}
 
 
 /*
@@ -257,6 +272,17 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
     
     int     i, j;
     double  flux, p2c2, fp, Min, Max;
+
+
+    /*
+     * If arrays are already alloc'd, free them first
+     */
+    if ( f->Alloced ) {
+        LGM_ARRAY_1D_FREE( f->E );
+        LGM_ARRAY_1D_FREE( f->A );
+        LGM_ARRAY_2D_FREE( f->FLUX_EA );
+        LGM_ARRAY_2D_FREE( f->PSD_EA );
+    }
 
 
     /*
@@ -298,6 +324,7 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
         DumpGif( "PSD_Versus_E_and_A_LoRes.gif", f->nA, f->nE, f->PSD_EA );
     }
 
+    f->Alloced = TRUE;
    
     return;
 
@@ -336,19 +363,26 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
  * 
  * 
  */
-void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p ) {
+void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
-    int k, m;
+    int               k, m;
+    Lgm_MagModelInfo *mInfo;
+
+    /*
+     * Init mInfo
+     */
+    mInfo = Lgm_InitMagInfo();
+    
 
     /*
      * Copy K's into p structure.
      * Transform the K's into Alpha's.
      * Save the results in the p structure.
      */
+    Lgm_Init_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
     for ( k=0; k<nK; k++ ){
-        p->K[k] = K[k];
-// Need to set up the call to AlphaOfK() properly
-        p->AofK[k] = Lgm_AlphaOfK( p->K[k] );
+        f->K[k] = K[k];
+        f->AofK[k] = Lgm_AlphaOfK( f->K[k], mInfo );
     }
 
 
@@ -359,9 +393,11 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
      */
     for ( m=0; m<nK; m++ ){
-        p->Mu[m] = Mu[m];
+        f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
-            p->EofMu[m][k] = Lgm_Mu_to_Energy( p->Mu[m], p->AofK[k], p->B );
+// NEED to set B somewhere.
+// Also, user needs to be able to set up B-field model.
+            f->EofMu[m][k] = Lgm_Mu_to_Energy( f->Mu[m], f->AofK[k], f->B );
         }
     }
 
@@ -374,10 +410,12 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
     for ( m=0; m<nK; m++ ){
         for ( k=0; k<nK; k++ ){
 // NEED to create the Lgm_FluxPsd_GetPsdAtEandAlpha() function
-//            PSD[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( p->EofMu[m][k], p->AofK[k], p );
+//            PSD[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
         }
     }
 
+
+    Lgm_FreeMagInfo( mInfo );
 
 }
 

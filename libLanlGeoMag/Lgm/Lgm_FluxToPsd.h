@@ -1,6 +1,8 @@
 #ifndef LGM_FLUX_TO_PSD_H
 #define LGM_FLUX_TO_PSD_H
 #include "Lgm_DynamicMemory.h"
+#include "Lgm_CTrans.h"
+#include "Lgm_Vec.h"
 static unsigned char Rainbow2_Red[] = { 0, 34, 35, 35, 36, 37, 38, 39, 39, 40, 40, 41,
 41, 42, 42, 42, 42, 42, 42, 42, 41, 41, 41, 40, 40, 39, 38, 38, 37, 37, 36, 35,
 35, 34, 33, 33, 32, 32, 31, 30, 30, 29, 28, 28, 27, 27, 26, 25, 25, 24, 24, 23,
@@ -60,43 +62,47 @@ typedef struct Lgm_FluxToPsd {
      * Params for Differential Flux versus Energy and Pitch Angle.
      * And for PSD versus Energy and Pitch Angle.
      */
-    int         nE;                //!< Number of energy bins in Flux array.
+    int          nE;                //!< Number of energy bins in Flux array.
 
-    double      *E;                //!< Array of energy values in Flux array.
+    double       *E;                //!< Array of energy values in Flux array.
 
-    int         nA;                //!< Number of pitch angle bins in Flux array.
+    int          nA;                //!< Number of pitch angle bins in Flux array.
 
-    double      *A;                //!< Array of pitch angle values in Flux array.
+    double       *A;                //!< Array of pitch angle values in Flux array.
 
-    double      **FLUX_EA;         //!< Array of differential flux versus Energy and PitchAngle, Flux[E][A].
+    double       **FLUX_EA;         //!< Array of differential flux versus Energy and PitchAngle, Flux[E][A].
 
-    double      **PSD_EA;          //!< Array of PSD versus Energy and PitchAngle, PSD[E][A].
+    double       **PSD_EA;          //!< Array of PSD versus Energy and PitchAngle, PSD[E][A].
 
 
 
     /*
      * Intermediate quantities needed.
      */
-    double      *AofK;             //!< Array of Alpha values that are implied by the k values. Size is nK.
+    Lgm_DateTime DateTime;         //!< Date/Time of measurment.
 
-    double      **EofMu;           //!< Array of Energy values that are implied by the Mu, Alpha and B values. Size is nMu.
+    Lgm_Vector   Position;         //!< Position of measurment.
 
-    double      B;                 //!< MAgnetic field strength.
+    double       *AofK;            //!< Array of Alpha values that are implied by the k values. Size is nK.
+
+    double       **EofMu;          //!< Array of Energy values that are implied by the Mu, Alpha and B values. Size is nMu.
+
+    double       B;                //!< Magnetic field strength.
 
 
     /*
      * Params for PSD versus Mu and K
      */
-    int         nMu;               //!< Number of Mu bins in PSD array.
+    int          nMu;               //!< Number of Mu bins in PSD array.
 
-    double      *Mu;               //!< Array of Mu values in PSD array.
+    double       *Mu;               //!< Array of Mu values in PSD array.
 
-    int         nK;                //!< Number of K bins in PSD array.
+    int          nK;                //!< Number of K bins in PSD array.
 
-    double      *K;                //!< Array of K values in PSD array.
+    double       *K;                //!< Array of K values in PSD array.
 
 
-    double      **PSD_MK;          //!< Array of PSD versus Mu and K,  PSD[Mu][K].
+    double       **PSD_MK;          //!< Array of PSD versus Mu and K,  PSD[Mu][K].
 
     
 
@@ -106,7 +112,9 @@ typedef struct Lgm_FluxToPsd {
     /*
      * Other things..
      */
-    int         DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
+    int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
+
+    int          Alloced;            //!< If true, the arrays are alloced.
 
 
 } Lgm_FluxToPsd;

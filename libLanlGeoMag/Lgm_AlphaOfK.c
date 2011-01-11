@@ -14,12 +14,40 @@
 double Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
 
 
+
+/*
+ * Do initial setup for AlphaOfK(). This involves setting time and doing an
+ * initial field trace to get m->Pmin set up properly.
+ */
+int  Lgm_Init_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
+
+    int         TraceFlag;
+    Lgm_Vector  v1, v2, v3;
+
+
+    /*
+     * Set the coordinate transformations for the gievn date/time
+     */
+    Lgm_Set_Coord_Transforms( d->Date, d->Time, m->c );
+
+
+    /*
+     * Trace the field line for the givcen position.
+     */
+    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, m );
+    
+    return( TraceFlag );
+
+}
+
+
+
+
 /*
  *   This routine returns the pitch angle that corresponds to a given value of K
  *   K = sqrt(Bm)I
  *
  */
-
 double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
 
     double  a0, a1, a;
@@ -147,7 +175,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
                 /*
                  *  Do interped I integral.
                  */
-                I = Iinv_interped( m  );
+                I = Iinv_interped( m );
                 if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Interped Integral) = %g\n",  I );
 
             } else {
@@ -155,7 +183,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
                 /*
                  *  Do full blown I integral. 
                  */
-                I = Iinv( m  );
+                I = Iinv( m );
                 if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Full Integral) = %g\n",  I );
 
             }
