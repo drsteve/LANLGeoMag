@@ -52,6 +52,8 @@ class Lgm_NgaEopp(ctypes.Structure):
             ("EOPPWk", LgmInt),
             ("teff", LgmInt) ]
 
+Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
+
 class Lgm_Eop(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
@@ -70,7 +72,7 @@ class Lgm_Eop(ctypes.Structure):
             ("dY", LgmDoubleP),
             ("DAT", LgmDoubleP) ]
 
-
+Lgm_EopP = ctypes.POINTER(Lgm_Eop)
 
 class Lgm_EopOne(ctypes.Structure):
     @classmethod
@@ -88,3 +90,5 @@ class Lgm_EopOne(ctypes.Structure):
             ("dX", LgmDouble),
             ("dY", LgmDouble),
             ("DAT", LgmDouble) ]
+
+Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)

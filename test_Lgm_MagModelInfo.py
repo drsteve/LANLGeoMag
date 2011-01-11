@@ -35,8 +35,10 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
 
     def test_gslStructSizes(self):
         """The c and pyhtion sizes of the used GSL structs much be the same"""
-        self.assertEqual(lib.size_gsl_interp_accel(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_accel))
-        self.assertEqual(lib.size_gsl_interp_type(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_type))
+        self.assertEqual(lib.size_gsl_interp_accel(),
+                         ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_accel))
+        self.assertEqual(lib.size_gsl_interp_type(),
+                         ctypes.sizeof(Lgm_MagModelInfo.gsl_interp_type))
         self.assertEqual(lib.size_gsl_interp(), ctypes.sizeof(Lgm_MagModelInfo.gsl_interp))
         self.assertEqual(lib.size_gsl_spline(), ctypes.sizeof(Lgm_MagModelInfo.gsl_spline))
 

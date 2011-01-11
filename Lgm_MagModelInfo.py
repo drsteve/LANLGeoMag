@@ -66,7 +66,7 @@ from _Lgm import lib
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, c_types, c_sizes, LgmUInt, \
         LgmDoubleP, ConstLgmCharP
 import Lgm_Vector
-from Lgm_CTrans import Lgm_CTrans
+from Lgm_CTrans import Lgm_CTrans, Lgm_CTransP
 from _Lgm_Octree import Lgm_OctreeCellP
 
 
@@ -204,7 +204,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
         cls._fields_ = [ \
-        ("c", Lgm.Lgm_CTransP),
+        ("c", Lgm_CTransP),
         ("nFunc", LgmLong),
         ("Bfield", ctypes.POINTER(ctypes.CFUNCTYPE(ctypes.c_int))),
         ("SavePoints", LgmInt),
@@ -359,4 +359,3 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("OP77_E", LgmDouble*65), #
         ("OP77_F", LgmDouble*65), #
         ("OP77_TT", LgmDouble*5)] #
-Lgm_MagModelInfoP = ctypes.POINTER(Lgm_MagModelInfo)

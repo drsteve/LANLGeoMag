@@ -14,25 +14,23 @@ then import what you want next
 import ctypes
 from _Lgm import lib
 import Lgm_Vector
+
 Lgm_Vector.Lgm_Vector.assign_fields()
 
-from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
+from Lgm_Vector import Lgm_Vector, Lgm_VectorP
+
+from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne, Lgm_EopP, Lgm_EopOneP
 
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP, LgmCharP
-from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
+from Lgm_MagModelInfo import Lgm_MagModelInfo
 
-from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans, Lgm_LeapSeconds
+from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans, Lgm_LeapSeconds, Lgm_CTransP, Lgm_DateTimeP
 
 from _Lgm_Octree import Lgm_OctreeCell
 
+Lgm_MagModelInfoP = ctypes.POINTER(Lgm_MagModelInfo)
 
 
-Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
-Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
-Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
-Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
-Lgm_EopP = ctypes.POINTER(Lgm_Eop)
-Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
 
 
 # the order here matters, if you get a _fields_ is final then play with order

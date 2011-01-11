@@ -307,3 +307,5 @@ class Lgm_Vector(ctypes.Structure):
         @version: V1: 22-Dec-2010 (BAL)
         """
         lib.Lgm_ForceMagnitude(self, val)
+
+Lgm_VectorP = ctypes.POINTER(Lgm_Vector)
