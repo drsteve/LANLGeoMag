@@ -48,7 +48,6 @@ class Lgm_T89(object):
             raise(TypeError('time must be a datetime or list of datetime') )
         self.time = time
 
-
         try:
             for val in Kp:
                 if val < 0 or val > 5:
@@ -87,7 +86,7 @@ class Lgm_T89(object):
                 and not isinstance(self.time, list):
                     raise(ValueError('Inputs must be the same length, scalars or lists'))
 
-        self.calc_B()
+        self.B = self.calc_B()
 
     def calc_B(self):
         try:
@@ -96,33 +95,23 @@ class Lgm_T89(object):
                 date = Lgm_CTrans.dateToDateLong(v2)
                 utc = Lgm_CTrans.dateToFPHours(v2)
                 lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
-                self.B = Lgm_Vector.Lgm_Vector()
+                B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = v3
-                retval = lib.Lgm_B_T89(v1, self.B, self._mmi)
+                retval = lib.Lgm_B_T89(v1, B, self._mmi)
                 if retval != 1:
                     raise(RuntimeWarning('Odd return from Lgm_T89') )
-                ans.append(self.B)
+                ans.append(B)
             return ans
         except TypeError:
                 date = Lgm_CTrans.dateToDateLong(self.time)
                 utc = Lgm_CTrans.dateToFPHours(self.time)
                 lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
-                self.B = Lgm_Vector.Lgm_Vector()
+                B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = self.Kp
-                retval = lib.Lgm_B_T89(self._Vpos, self.B, self._mmi)
+                retval = lib.Lgm_B_T89(self._Vpos, B, self._mmi)
                 if retval != 1:
                     raise(RuntimeWarning('Odd return from Lgm_T89') )
-                return self.B
-
-        date = Lgm_CTrans.dateToDateLong(self.time)
-        utc = Lgm_CTrans.dateToFPHours(self.time)
-        lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
-        self.B = Lgm_Vector.Lgm_Vector()
-        self._mmi.Kp = self.Kp
-        retval = lib.Lgm_B_T89(self._Vpos, self.B, self._mmi)
-        if retval != 1:
-            raise(RuntimeWarning('Odd return from Lgm_T89') )
-        return self.B
+                return B
 
     def _pos2Lgm_Vector(self, pos):
         if isinstance(pos, Lgm_Vector.Lgm_Vector):
@@ -137,27 +126,36 @@ class Lgm_T89(object):
         if isinstance(pos, np.ndarray):
             raise(NotImplementedError('Only lists can be input for position now') )
 
+def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
+    """
+    Easy wrapper to just return values without having to create an instance of
+    Lgm_T89
 
-##################################################
-#
-#Kp      Ux (Re)      Uy (Re)      Uz (Re)      Bx (nT)      By (nT)      Bz (nT)   Bmag (nT)
-# 0         -6.6            0            0     -18.9764      -1.8654      80.3931      82.6235
-# 1         -6.6            0            0     -20.8334      -1.8654      74.6219       77.498
-# 2         -6.6            0            0      -22.563      -1.8654      70.5243      74.0692
-# 3         -6.6            0            0     -26.4168      -1.8654      64.6448       69.859
-# 4         -6.6            0            0     -32.1658      -1.8654      60.0782      68.1726
-# 5         -6.6            0            0      -45.384      -1.8654      49.3629      67.0812
-# 3           -1            0            0     -6244.66     -792.844      31094.6      31725.3
-# 3         -1.5            0            0     -1630.83     -386.285      9019.71      9174.09
-# 3           -2            0            0     -641.802     -157.771      3731.95      3790.02
-# 3         -2.5            0            0     -317.069     -72.7738      1865.09      1893.25
-# 3           -3            0            0     -181.087     -37.5704      1045.65      1061.88
-# 3         -3.5            0            0     -114.734      -21.193      632.635      643.304
-# 3           -4            0            0     -78.8141     -12.8114       403.97      411.785
-# 3         -4.5            0            0     -57.8633     -8.18183      268.621      274.905
-# 3           -5            0            0     -44.9333     -5.46261      184.424      189.897
-# 3         -5.5            0            0     -36.5814     -3.78302       129.97      135.073
-# 3           -6            0            0      -30.969     -2.70126      93.6087      98.6355
-# 3         -6.5            0            0      -27.055     -1.97955      68.6516      73.8169
-# 3           -7            0            0     -24.2235     -1.48334      51.1005      56.5706
-##################################################
+    @param pos: a list of 3 element lists of positions in coord_system system
+    @type pos: list
+    @param time: a datetime or list of datetime objects
+    @type time: (list, datetime)
+    @param Kp: the Kp value for T89 (0,1,2,3,4,5)
+    @type Kp: int
+
+    @keyword coord_system: the name of the coord system to use (or Lgm number)
+    @type coord_system: (str, int)
+    @keyword INTERNAL_MODEL: the intermal magnetic field model to use (or Lgm number)
+    @type INTERNAL_MODEL: (str, int)
+
+    @retval: list of the x, y, z, compents of B in nT
+    @rtype: list
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 11-Jan-2011 (BAL)
+    """
+    a = Lgm_T89(pos, time, Kp, coord_system = 'GSM',
+                        INTERNAL_MODEL='LGM_IGRF')
+    try:
+        ret = [val.tolist() for val in a.B]
+        return ret
+    except TypeError:
+        return a.B.tolist()
