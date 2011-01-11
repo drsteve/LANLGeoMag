@@ -44,6 +44,7 @@ Lgm_Eop.assign_fields()
 Lgm_EopOne.assign_fields()
 Lgm_MagModelInfo.assign_fields()
 Lgm_OctreeCell.assign_fields()
+Lgm_NgaEopp.assign_fields()
 
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {

@@ -104,6 +104,18 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         vec1 = Lgm_Vector.Lgm_Vector()
         self.assertEqual(str(vec1), '[0.0, 0.0, 0.0]')
 
+    def test_repr_(self):
+        """__repr__ has a known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        val = vec1.__repr__()
+        self.assertEqual('[1.0, 2.0, 3.0]', val)
+
+    def test_getattr(self):
+        """__getattr__ has 1 element and 1 exception"""
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        val = vec1.mag
+        self.assertAlmostEqual(3.7416573867739413, vec1.mag)
+
     def test_Vectorsize(self):
         """Make sure that the Lgm c and python are the same size"""
         self.assertEqual(ctypes.sizeof(Lgm_Vector.Lgm_Vector), lib.size_Vector())
@@ -122,6 +134,8 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual(3.5, vec3.y)
         self.assertEqual(4.5, vec3.z)
 
+        self.assertRaises(ArithmeticError, vec1.__add__, 'bad' )
+
     def test_sub(self):
         """sub gives known output"""
         vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
@@ -135,6 +149,9 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual(-0.5, vec3.x)
         self.assertEqual(0.5, vec3.y)
         self.assertEqual(1.5, vec3.z)
+
+        self.assertRaises(ArithmeticError, vec1.__sub__, 'bad' )
+
 
     def test_mul(self):
         """mul gives known output"""
@@ -151,6 +168,8 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual(6, vec3.y)
         self.assertEqual(9, vec3.z)
 
+        self.assertRaises(ArithmeticError, vec1.__mul__, 'bad' )
+
     def test_div(self):
         """div gives known output"""
         vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
@@ -158,6 +177,8 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual(0.1, ans.x)
         self.assertEqual(0.2, ans.y)
         self.assertEqual(0.3, ans.z)
+
+        self.assertRaises(ArithmeticError, vec1.__div__, 'bad' )
 
     def test_crossProduct(self):
         """crossProduct gives known output"""
@@ -183,6 +204,39 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
         self.assertAlmostEqual(3.7416573867739413, vec1.magnitude())
 
+    def test_normalize(self):
+        """Normalize should have known behaviour"""
+        vec1 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        vec1.normalize()
+        ans = [0.4242640687119285, 0.565685424949238, 0.7071067811865475]
+        self.assertEqual(ans[0], vec1.x)
+        self.assertEqual(ans[1], vec1.y)
+        self.assertEqual(ans[2], vec1.z)
+
+    def test_scale(self):
+        """scale should have known output"""
+        vec1 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        vec1.scale(2)
+        ans = [6, 8, 10]
+        self.assertEqual(ans[0], vec1.x)
+        self.assertEqual(ans[1], vec1.y)
+        self.assertEqual(ans[2], vec1.z)
+
+    def test_diffMag(self):
+        """diffMag should have known output (regression)"""
+        vec1 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        vec2 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        ans = 3.4641016151377544
+        self.assertAlmostEqual(ans, vec1.diffMag(vec2))
+
+    def test_forceMagnitude(self):
+        """forceMagnitude should have known output (regression)"""
+        vec1 = Lgm_Vector.Lgm_Vector(3, 4, 5)
+        vec1.forceMagnitude(10)
+        ans = [4.242640687119285, 5.65685424949238, 7.071067811865475]
+        self.assertEqual(ans[0], vec1.x)
+        self.assertEqual(ans[1], vec1.y)
+        self.assertEqual(ans[2], vec1.z)
 
 if __name__ == '__main__':
     unittest.main()
