@@ -478,18 +478,18 @@ class Lgm_CTrans(ctypes.Structure):
             ("Acdmag_to_wgs84", LgmDouble * 3 * 3), #
 
             ("Lgm_IGRF_FirstCall", LgmInt),
-            ("Lgm_IGRF_OldYear", LgmDouble),
-            ("Lgm_IGRF_FirstCall", LgmInt), #
-            ("Lgm_IGRF_OldYear", LgmDouble), #
-            ("Lgm_IGRF_g", LgmDouble * 13 * 13), #
+            ("Lgm_IGRF_OldYear", LgmDouble) ,
+
+            ("Lgm_IGRF_g", LgmDouble * 13 * 13), # , #
             ("Lgm_IGRF_h", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_R", LgmDouble * 13 * 13), #
-            ("Lgm_IGRF_K", LgmDouble * 13 * 13), #
+            ("Lgm_IGRF_K", LgmDouble * 13 * 13), # , #
             ("Lgm_IGRF_S", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_TwoNm1_Over_NmM", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_NpMm1_Over_NmM", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_SqrtNM1", LgmDouble * 13 * 13), #
-            ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]
+            ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13),
+            ]
 
 Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
 

@@ -36,7 +36,7 @@ class Lgm_CTransTests(unittest.TestCase):
 
     def test_sizeLgm_CTrans(self):
         """Lgm_CTrans c and python must have same size"""
-        print("c: %d" % (lib.size_CTrans()) )
+        #print("c: %d" % (lib.size_CTrans()) )
         self.assertEqual(ctypes.sizeof(Lgm_CTrans.Lgm_CTrans), lib.size_CTrans())
 
     def test_sizeLgm_LeapSeconds(self):
