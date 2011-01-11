@@ -192,6 +192,12 @@ class Lgm_Vector(ctypes.Structure):
         else:
             raise(ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other))))
 
+    def tolist(self):
+        """
+        change an Lgm_Vector to a list
+        """
+        return [self.x, self.y, self.z]
+
     def crossProduct(self, other):
         """
         compute the cross product of two vectors
@@ -301,3 +307,5 @@ class Lgm_Vector(ctypes.Structure):
         @version: V1: 22-Dec-2010 (BAL)
         """
         lib.Lgm_ForceMagnitude(self, val)
+
+Lgm_VectorP = ctypes.POINTER(Lgm_Vector)

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import unittest
+import ctypes
+
 import Lgm
 import Lgm_Vector
 from Lgm import lib
@@ -102,6 +104,10 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         vec1 = Lgm_Vector.Lgm_Vector()
         self.assertEqual(str(vec1), '[0.0, 0.0, 0.0]')
 
+    def test_Vectorsize(self):
+        """Make sure that the Lgm c and python are the same size"""
+        self.assertEqual(ctypes.sizeof(Lgm_Vector.Lgm_Vector), lib.size_Vector())
+
     def test_add(self):
         """add gives known output"""
         vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
@@ -164,17 +170,17 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
 
     def test_dotProduct(self):
         """crossProduct gives known output"""
-        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
-        vec2 = Lgm_Vector.Lgm_Vector(3,2,1)
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
+        vec2 = Lgm_Vector.Lgm_Vector(3, 2, 1)
         self.assertEqual(10.0, vec1.dotProduct(vec2))
         self.assertEqual(14.0, vec1.dotProduct(vec1))
-        vec1 = Lgm_Vector.Lgm_Vector(1,0,0)
-        vec2 = Lgm_Vector.Lgm_Vector(0,1,0)
+        vec1 = Lgm_Vector.Lgm_Vector(1, 0, 0)
+        vec2 = Lgm_Vector.Lgm_Vector(0, 1, 0)
         self.assertEqual(0.0, vec1.dotProduct(vec2))
 
     def test_magnitude(self):
         """magnitude gives known output"""
-        vec1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        vec1 = Lgm_Vector.Lgm_Vector(1, 2, 3)
         self.assertAlmostEqual(3.7416573867739413, vec1.magnitude())
 
 

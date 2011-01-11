@@ -277,9 +277,8 @@ CDMAG_TO_CDMAG = 1111
 ###############################################################################
 
 import ctypes
-from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar
+from Lgm_Types import LgmInt, LgmDouble, LgmLong, LgmChar, LgmLongP, LgmDoubleP
 import Lgm_Vector
-import Lgm_DateAndTime
 
 class Lgm_DateTime(ctypes.Structure):
     def __init__(self, verbose = 0):
@@ -314,12 +313,24 @@ class Lgm_DateTime(ctypes.Structure):
             ("TZD_mm", LgmInt), # Time zone offset minutes
             ("TimeSystem", LgmInt) ] # e.g. LGM_UTC, LGM_UT1, LGM_TAI, LGM_GPS, LGM_TT, LGM_TDB, LGM_TCG, etc..
 
+Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
+
+class Lgm_LeapSeconds(ctypes.Structure):
+    @classmethod
+    def assign_fields(cls):
+        cls._fields_ = [ ("nLeapSecondDates", LgmInt ), # Number of leap second dates.
+            ("LeapSecondDates", LgmLongP), # Array for holding the Dates on which leap seconds were added
+            ("LeapSecondJDs", LgmDoubleP), # Array for holding the Julian Dates on which leap seconds were added
+            ("LeapSeconds", LgmDoubleP) ] #The actual number of leap seconds that  went into effect on the given date
+
+
 
 class Lgm_CTrans(ctypes.Structure):
     @classmethod
     def assign_fields(cls):
-        cls._fields_ = [ ("Verbose", LgmInt),
-            ("l", Lgm_DateAndTime.Lgm_DateAndTime), # Structure containing Leap Second Info
+        cls._fields_ = [ \
+            ("Verbose", LgmInt),
+            ("l", Lgm_LeapSeconds), # Structure containing Leap Second Info
             ("UT1", Lgm_DateTime), # UT is the mean solar time at Greenwich.
                                          # UT0 is a version of UT that uses data
                                          # from many different ground stations.
@@ -386,15 +397,18 @@ class Lgm_CTrans(ctypes.Structure):
                                          #  \f$\epsilon_{true} = \epsilon + dEps\f$
                                          # (in radians)
             ("eccentricity", LgmDouble ), # Eccentricity of Earth-Sun orbit
+
             ("lambda_sun", LgmDouble ), #  Ecliptic Long. of Sun (in radians)
             ("earth_sun_dist", LgmDouble ), #  Earth-Sun distance (in units of earth radii)
             ("RA_sun", LgmDouble ), #  Right Ascention of Sun (in degrees)
             ("DEC_sun", LgmDouble ), # Declination of Sun (in degrees)
+
             ("lambda_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
             ("r_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
             ("beta_sun_ha", LgmDouble ), # high accuracy eccliptic coords of sun
             ("RA_sun_ha", LgmDouble ), # high accuracy Right Ascention of Sun (in degrees)
             ("DEC_sun_ha", LgmDouble ), # high accuracy Declination of Sun (in degrees)
+
             ("Sun", Lgm_Vector.Lgm_Vector), # direction of Sun in GEI system (unit vector)
             ("EcPole", Lgm_Vector.Lgm_Vector), # direction of Ecliptic Pole in GEI system (unit vector)
             ("psi", LgmDouble), # Geodipole tilt angle, \f$\psi\f$ (in radians)
@@ -405,6 +419,7 @@ class Lgm_CTrans(ctypes.Structure):
             ("DEC_moon", LgmDouble), # Declination of Moon (in degrees)
             ("MoonPhase", LgmDouble), # The Phase of the Moon (in days)
             ("EarthMoonDistance", LgmDouble), # Distance between the Earth and Moon (in earth-radii)
+
          #  The following are various important parameters derived from
          #  the IGRF field. Note that these are the basis for defining
          #  Mag coord systems. That's why they are here and not somewhere else...
@@ -415,9 +430,13 @@ class Lgm_CTrans(ctypes.Structure):
             ("ED_x0", LgmDouble), # x-comp of dipole displacement from center. Used in eccentric dipole field.
             ("ED_y0", LgmDouble), # y-comp of dipole displacement from center. Used in eccentric dipole field.
             ("ED_z0", LgmDouble), # z-comp of dipole displacement from center. Used in eccentric dipole field.
+
+            # Precession Angles
             ("Zeta", LgmDouble), # Precession angle, \f$\zeta\f$
             ("Theta", LgmDouble), # Precession angle, \f$\theta\f$
             ("Zee", LgmDouble), # Precession angle, \f$z\f$
+
+            # Some things for nutation reduction
             ("nNutationTerms", LgmInt), # number of terms to usek in the dPsi/dEps Nutation series.
             ("dPsi", LgmDouble), #
             ("dEps", LgmDouble), #
@@ -429,6 +448,7 @@ class Lgm_CTrans(ctypes.Structure):
             ("OmegaMoon", LgmDouble), # Ascending node of Moon.
             ("dX", LgmDouble), #  for IUA-2000A reduction (not used yet)
             ("dY", LgmDouble), # for IUA-2000A reduction (not used yet)
+
             # Transformation matrices between various ccord systems
             ("Agei_to_mod", LgmDouble * 3 * 3), #
             ("Amod_to_gei", LgmDouble * 3 * 3), #
@@ -456,33 +476,9 @@ class Lgm_CTrans(ctypes.Structure):
             ("Awgs84_to_gsm", LgmDouble * 3 * 3), #
             ("Awgs84_to_cdmag", LgmDouble * 3 * 3), #
             ("Acdmag_to_wgs84", LgmDouble * 3 * 3), #
-            ("Agei_to_mod", LgmDouble * 3 * 3), #
-            ("Amod_to_gei", LgmDouble * 3 * 3), #
-            ("Amod_to_tod", LgmDouble * 3 * 3), #
-            ("Atod_to_mod", LgmDouble * 3 * 3), #
-            ("Ateme_to_pef", LgmDouble * 3 * 3), #
-            ("Apef_to_teme", LgmDouble * 3 * 3), #
-            ("Apef_to_tod", LgmDouble * 3 * 3), #
-            ("Atod_to_pef", LgmDouble * 3 * 3), #
-            ("Awgs84_to_pef", LgmDouble * 3 * 3), #
-            ("Apef_to_wgs84", LgmDouble * 3 * 3), #
-            ("Agse_to_mod", LgmDouble * 3 * 3), #
-            ("Amod_to_gse", LgmDouble * 3 * 3), #
-            ("Asm_to_gsm", LgmDouble * 3 * 3), #
-            ("Agsm_to_sm", LgmDouble * 3 * 3), #
-            ("Agsm_to_mod", LgmDouble * 3 * 3), #
-            ("Amod_to_gsm", LgmDouble * 3 * 3), #
-            ("Agsm_to_gse", LgmDouble * 3 * 3), #
-            ("Agse_to_gsm", LgmDouble * 3 * 3), #
-            ("Awgs84_to_mod", LgmDouble * 3 * 3), #
-            ("Amod_to_wgs84", LgmDouble * 3 * 3), #
-            ("Awgs84_to_gei", LgmDouble * 3 * 3), #
-            ("Agei_to_wgs84", LgmDouble * 3 * 3), #
-            ("Agsm_to_wgs84", LgmDouble * 3 * 3), #
-            ("Awgs84_to_gsm", LgmDouble * 3 * 3), #
-            ("Awgs84_to_cdmag", LgmDouble * 3 * 3), #
-            ("Acdmag_to_wgs84", LgmDouble * 3 * 3), #
-            # These variables are needed to make IGRF Calls reentrant/thread-safe.
+
+            ("Lgm_IGRF_FirstCall", LgmInt),
+            ("Lgm_IGRF_OldYear", LgmDouble),
             ("Lgm_IGRF_FirstCall", LgmInt), #
             ("Lgm_IGRF_OldYear", LgmDouble), #
             ("Lgm_IGRF_g", LgmDouble * 13 * 13), #
@@ -493,9 +489,56 @@ class Lgm_CTrans(ctypes.Structure):
             ("Lgm_IGRF_TwoNm1_Over_NmM", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_NpMm1_Over_NmM", LgmDouble * 13 * 13), #
             ("Lgm_IGRF_SqrtNM1", LgmDouble * 13 * 13), #
-            ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]  #
-        # Mike has Lgm_init_ctrans that sets a few vars, set them here
+            ("Lgm_IGRF_SqrtNM2", LgmDouble * 13 * 13) ]
 
+Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
+
+
+
+def dateToDateLong(inval):
+    """
+    convert a python date or datetime object to a Date (long) object that
+    LanlGeoMag Likes to use
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 04-Jan-2011 (BAL)
+    """
+    try:
+        if len(inval) > 1:
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array([long(val.strftime('%Y%m%d')) for val in inval])
+            else:
+                return [long(val.strftime('%Y%m%d')) for val in inval]
+    except:
+        return long(inval.strftime('%Y%m%d'))
+
+def dateToFPHours(inval):
+    """
+    convert a python datetime object to a Floating point hours (double) object that
+    LanlGeoMag Likes to use
+
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 06-Jan-2011 (BAL)
+    """
+    try:
+        if len(inval) > 1:
+            lst = [val.hour + val.minute/60 +
+                                    val.second/60/60 +
+                                    val.microsecond/60/60/1000000 for val in inval]
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array(lst)
+            else:
+                return lst
+    except:
+        return inval.hour + inval.minute/60 + \
+                                    inval.second/60/60 + \
+                                    inval.microsecond/60/60/1000000
 
 
 

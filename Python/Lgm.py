@@ -14,26 +14,22 @@ then import what you want next
 import ctypes
 from _Lgm import lib
 import Lgm_Vector
+
 Lgm_Vector.Lgm_Vector.assign_fields()
 
-from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne
-from Lgm_DateAndTime import Lgm_DateAndTime
+from Lgm_Vector import Lgm_Vector, Lgm_VectorP
+
+from _Lgm_Eop import Lgm_NgaEopp, Lgm_Eop, Lgm_EopOne, Lgm_EopP, Lgm_EopOneP
 
 from Lgm_Types import LgmDouble, LgmInt, LgmLong, LgmDoubleP, LgmIntP, LgmLongP, LgmCharP
-from Lgm_MagModelInfo import Lgm_MagModelInfo, Lgm_MagModelInfoP
+from Lgm_MagModelInfo import Lgm_MagModelInfo
 
-from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans
+from Lgm_CTrans import Lgm_DateTime, Lgm_CTrans, Lgm_LeapSeconds, Lgm_CTransP, Lgm_DateTimeP
 
+from _Lgm_Octree import Lgm_OctreeCell
 
+Lgm_MagModelInfoP = ctypes.POINTER(Lgm_MagModelInfo)
 
-
-Lgm_VectorP = ctypes.POINTER(Lgm_Vector.Lgm_Vector)
-Lgm_DateAndTimeP = ctypes.POINTER(Lgm_DateAndTime)
-Lgm_DateTimeP = ctypes.POINTER(Lgm_DateTime)
-Lgm_CTransP = ctypes.POINTER(Lgm_CTrans)
-Lgm_NgaEoppP = ctypes.POINTER(Lgm_NgaEopp)
-Lgm_EopP = ctypes.POINTER(Lgm_Eop)
-Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
 
 
 
@@ -41,14 +37,13 @@ Lgm_EopOneP = ctypes.POINTER(Lgm_EopOne)
 # it becomes final when pointers are created as Pyhton has to figure how big
 # the object is (is the current theory)
 
+Lgm_LeapSeconds.assign_fields()
 Lgm_DateTime.assign_fields()
-Lgm_DateAndTime.assign_fields()
 Lgm_CTrans.assign_fields()
 Lgm_Eop.assign_fields()
 Lgm_EopOne.assign_fields()
 Lgm_MagModelInfo.assign_fields()
-
-
+Lgm_OctreeCell.assign_fields()
 
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {
@@ -101,7 +96,7 @@ call_dict = {
         'Lgm_UTC_to_TDB' : [None, Lgm_CTransP, Lgm_CTransP, Lgm_CTransP],
         'Lgm_TDB_to_UTC' : [None, Lgm_CTransP, Lgm_CTransP, Lgm_CTransP],
         'Lgm_DateTime_Create' : [Lgm_DateTime, LgmInt, LgmInt, LgmInt, LgmDouble, LgmInt, Lgm_CTransP],
-        'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateAndTimeP, Lgm_CTransP],
+        'Lgm_Make_UTC' : [LgmInt, LgmLong, LgmDouble, Lgm_DateTimeP, Lgm_CTransP],
         'Lgm_Print_DateTime' : [None, Lgm_DateTime, LgmInt, LgmInt],
         'Lgm_DateTimeToString' : [None, LgmCharP, Lgm_DateTime, LgmInt, LgmInt], # todo 80 was made up use a pointer
         #'Lgm_Print_SimpleTime' : [None, Lgm_CTransP, LgmInt, ctypes.create_string_buffer(80)],# todo 80 was made up use a pointer
@@ -131,6 +126,21 @@ call_dict = {
         'Lgm_Set_Coord_Transforms' : [None, LgmLong, LgmDouble, Lgm_CTransP ],
         'Lgm_Convert_Coords' : [None, Lgm_VectorP, Lgm_VectorP, LgmInt, Lgm_CTransP],
         'size_t_size' : [LgmInt],
+        'size_MagModelInfo' : [LgmInt],
+        'size_CTrans' : [LgmInt],
+        'size_Vector' : [LgmInt],
+        'size_DateTime' : [LgmInt],
+        'size_gsl_interp_accel' : [LgmInt],
+        'size_gsl_interp_type' : [LgmInt],
+        'size_gsl_interp' : [LgmInt],
+        'size_gsl_spline' : [LgmInt],
+        'size_Lgm_OctreeData' : [LgmInt],
+        'size_Lgm_OctreeCell' : [LgmInt],
+        'size_pQueue' : [LgmInt],
+        'size_Lgm_LeapSeconds' : [LgmInt],
+
+
+
         'Lgm_Set_Open_Limits' : [None, Lgm_MagModelInfoP, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble, LgmDouble ],
         'Lgm_Set_LossConeHeight' : [None, Lgm_MagModelInfoP, LgmDouble],
         'Lgm_Set_Octree_kNN_MaxDist' : [Lgm_MagModelInfoP, LgmDouble],

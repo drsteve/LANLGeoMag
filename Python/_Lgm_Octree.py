@@ -14,41 +14,44 @@ OCTREE_IS_NULL = -2
 import ctypes
 import Lgm
 from _Lgm import lib
-from Lgm_Types import LgmLong, LgmDouble, LgmUInt, LgmULong
+from Lgm_Types import LgmDouble, LgmUInt, LgmULong
 import Lgm_Vector
 
 
-class _Lgm_OctreeData(ctypes.Structure):
+class Lgm_OctreeData(ctypes.Structure):
     _fields_ = [("Position", Lgm_Vector.Lgm_Vector ), #
         ("B", Lgm_Vector.Lgm_Vector), #
         ("Dist2", LgmDouble) ]
-_Lgm_OctreeDataP = ctypes.POINTER(_Lgm_OctreeData)
+Lgm_OctreeDataP = ctypes.POINTER(Lgm_OctreeData)
 
-class _Lgm_OctreeCell(ctypes.Structure):
+class Lgm_OctreeCell(ctypes.Structure):
     pass
-_Lgm_OctreeCellP = ctypes.POINTER(_Lgm_OctreeCell)
+    @classmethod
+    def assign_fields(cls):
+        cls._fields_ = [("xLocationCode", LgmUInt ), #  X Location Code
+            ("yLocationCode", LgmUInt), #  Y Location Code
+            ("zLocationCode", LgmUInt), # Z Location Code
+            ("Level", LgmUInt), # keeps track of what level we are on
+            ("Center", Lgm_Vector.Lgm_Vector), # Center of cube
+            ("h", LgmDouble), # half width of cube face
+            ("Parent", Lgm_OctreeCellP), # points to parent cell
+            ("Octant", Lgm_OctreeCellP), # points to block of 8 children cells
+            ("nDataBelow", LgmULong), # Keeps track of data contained in all children below.
+            ("nData", LgmULong), # Number of data items in this cell. (0 for non-leaf nodes)
+            ("Data", Lgm_OctreeDataP) ] # Cell data. This will be NULL except for the leafs.
 
-_Lgm_OctreeCell._fields_ = [("xLocationCode", LgmUInt ), #  X Location Code
-        ("yLocationCode", LgmUInt), #  Y Location Code
-        ("zLocationCode", LgmUInt), # Z Location Code
-        ("Level", LgmUInt), # keeps track of what level we are on
-        ("Center", Lgm_Vector.Lgm_Vector), # Center of cube
-        ("h", LgmDouble), # half width of cube face
-        ("Parent", _Lgm_OctreeCellP), # points to parent cell
-        ("Octant", _Lgm_OctreeCellP), # points to block of 8 children cells
-        ("nDataBelow", LgmULong), # Keeps track of data contained in all children below.
-        ("nData", LgmULong), # Number of data items in this cell. (0 for non-leaf nodes)
-        ("Data", _Lgm_OctreeDataP) ] # Cell data. This will be NULL except for the leafs.
+Lgm_OctreeCellP = ctypes.POINTER(Lgm_OctreeCell)
 
-class _pQueue(ctypes.Structure):
+
+class pQueue(ctypes.Structure):
     pass
-_pQueueP = ctypes.POINTER(_pQueue)
+pQueueP = ctypes.POINTER(pQueue)
 
-_pQueue._fields_ = [("Obj", LgmUInt ), #
-        ("MinDist2", LgmUInt), #  Minimum possible distance^2 between object and query point.
+pQueue._fields_ = [("Obj", Lgm_OctreeCellP ), #
+        ("MinDist2", LgmDouble), #  Minimum possible distance^2 between object and query point.
                             # If the object is a point, then its the actual distance^2.
         ("IsPoint", LgmUInt), # If this is TRUE, then a data point is stored in Obj.Data[j]
                                 # Else its a non-leaf node.
         ("j", LgmUInt), # Index where data point is stored.
-        ("Prev", LgmUInt), # for linked list
-        ("Next", LgmUInt) ] # for linked list
+        ("Prev", pQueueP), # for linked list
+        ("Next", pQueueP) ] # for linked list

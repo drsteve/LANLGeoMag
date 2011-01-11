@@ -71,7 +71,7 @@ M_2PI = 6.283185307179586476925287
 
 
 import ctypes
-from Lgm_Types import LgmInt, ConstLgmBoolean
+from Lgm_Types import LgmInt
 
 
 class _SgpTLE(ctypes.Structure):
