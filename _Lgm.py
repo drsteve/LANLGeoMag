@@ -13,7 +13,6 @@ Main Lgm Library file, contains all the fucntion definitions
 import ctypes
 import sys
 
-print sys.platform
 if sys.platform == 'win32':
     raise(NotImplementedError("Sorry windows isn't up and running"))
 elif sys.platform == 'darwin':

@@ -1,0 +1,1 @@
+../libLanlGeoMag/Lgm/Lgm_MagModelInfo.h
