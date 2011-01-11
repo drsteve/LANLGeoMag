@@ -287,6 +287,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         #Other stuff
         ("VerbosityLevel", LgmInt), #VerbosityLevel
         ("UseInterpRoutines", LgmInt), #whether to use fast I and Sb routines.
+
         # These variables are needed to make Lgm_MagStep() reentrant/thread-safe.
             #  They basically used to be static declarations within Lgm_MagStep()
         ("Lgm_MagStep_eps_old", LgmDouble), #
@@ -295,7 +296,7 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("Lgm_MagStep_kopt", LgmInt), #
         ("Lgm_MagStep_snew", LgmDouble), #
         ("Lgm_MagStep_A", LgmDouble * (LGM_MAGSTEP_JMAX+1)), #
-        ("Lgm_MagStep_alpha", LgmDouble * (LGM_MAGSTEP_JMAX+1) * (LGM_MAGSTEP_JMAX+1) ), #
+        ("Lgm_MagStep_alpha", LgmDouble * (LGM_MAGSTEP_IMAX+1) * (LGM_MAGSTEP_IMAX+1) ), #
         ("Lgm_MagStep_d", LgmDouble * LGM_MAGSTEP_JMAX * LGM_MAGSTEP_JMAX ), #
         ("Lgm_MagStep_x", LgmDouble * LGM_MAGSTEP_JMAX), #
         # These variables are needed to make I_integrand() reentrant/thread-safe.
@@ -358,4 +359,5 @@ class Lgm_MagModelInfo(ctypes.Structure):
         ("OP77_D", LgmDouble*45), #
         ("OP77_E", LgmDouble*65), #
         ("OP77_F", LgmDouble*65), #
-        ("OP77_TT", LgmDouble*5)] #
+        ("OP77_TT", LgmDouble*5),
+        ] #

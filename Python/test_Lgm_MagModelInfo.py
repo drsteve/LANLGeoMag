@@ -44,9 +44,10 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
 
     def test_size_Lgm_MagModelInfo(self):
         """for Lgm_MagModelInfo the c and python sizes should match"""
-        print("c: %d" % (lib.size_MagModelInfo()) )
         self.assertEqual(lib.size_MagModelInfo(),
                          ctypes.sizeof(Lgm_MagModelInfo.Lgm_MagModelInfo) )
+
+
 
 
 if __name__ == '__main__':

@@ -80,13 +80,6 @@ int size_Lgm_LeapSeconds(void) {
 
 
 
-//int size_(void) {
-//    return sizeof();
-//}
-//
-
-
-
 
 /*
 int size_DateAndTime(void) {
