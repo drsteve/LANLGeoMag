@@ -39,6 +39,67 @@ class Lgm_Vector(ctypes.Structure):
             ("y", LgmDouble),
             ("z", LgmDouble) ]
 
+    def __eq__(self, other):
+        """
+        if the components of a Vector are equal the vectors are equal
+        """
+        if other.x != self.x:
+            return False
+        elif other.y != self.y:
+            return False
+        elif other.z != self.z:
+            return False
+        else:
+            return True
+
+    def __gt__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 > m2:
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 < m2:
+            return True
+        else:
+            return False
+
+    def __le__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 <= m2:
+            return True
+        else:
+            return False
+
+    def __ge__(self, other):
+        """
+        if the magnitude is greater the vector is greater
+        """
+        # done this way because diffMag is not signed
+        m1 = self.magnitude()
+        m2 = other.magnitude()
+        if m1 >= m2:
+            return True
+        else:
+            return False
+
     def __str__(self):
         """
         print out the Lgm_Vector as a list
