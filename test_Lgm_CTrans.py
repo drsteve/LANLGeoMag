@@ -12,6 +12,9 @@ Test suite for the Lgm_CTrans file <<This is an important one>>
 
 import ctypes
 import unittest
+import datetime
+
+import numpy
 
 import Lgm
 import Lgm_CTrans
@@ -86,6 +89,33 @@ class Lgm_CTransTests(unittest.TestCase):
         self.assertAlmostEqual(-6.6, Ugsm.x)
         self.assertAlmostEqual( 3.4, Ugsm.y)
         self.assertAlmostEqual(-2.3, Ugsm.z)
+
+    def test_dateToDateLong(self):
+        """dateToDateLong should give known results for known input"""
+        d1 = datetime.datetime(2000, 12, 12)
+        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1))
+        self.assertEqual([20001212L, 20001212L], Lgm_CTrans.dateToDateLong([d1, d1]))
+        self.assertEqual([20001212L, 20001212L],
+            Lgm_CTrans.dateToDateLong(numpy.array([d1, d1])).tolist())
+        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1.date()))
+
+    def test_dateToFPHours(self):
+        """dateToFPHours should give known output for known input"""
+        d1 = datetime.datetime(2000, 12, 12)
+        self.assertEqual(0.0, Lgm_CTrans.dateToFPHours(d1))
+        for val in range(24):
+            self.assertEqual(val,
+                Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, val)))
+        self.assertEqual(12.5,
+            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 30)))
+        self.assertEqual(12.25,
+            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 15)))
+        self.assertEqual(12.75,
+            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 45)))
+        d1 = datetime.datetime(2000, 12, 12, 12, 30)
+        self.assertEqual([12.5, 12.5], Lgm_CTrans.dateToFPHours([d1, d1]))
+        self.assertEqual([12.5, 12.5],
+            Lgm_CTrans.dateToFPHours(numpy.array([d1, d1])).tolist())
 
 
 if __name__ == '__main__':
