@@ -109,6 +109,9 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertFalse(vec1 == vec2)
         vec2.y = vec1.y
         self.assertFalse(vec1 == vec2)
+        self.assertTrue(vec1 == [1, 2, 3])
+        self.assertFalse(vec1 == [3, 2, 3])
+
 
     def test_gt(self):
         """__gt__ has known output"""

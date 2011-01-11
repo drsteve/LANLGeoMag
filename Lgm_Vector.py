@@ -27,6 +27,8 @@ class Lgm_Vector(ctypes.Structure):
     @ivar z: z-component of the vector
     @type z: double
 
+    @todo: __eq__ forks vector==list but no others
+
     @author: Brian Larsen
     @organization: LANL
     @contact: balarsen@lanl.gov
@@ -43,14 +45,22 @@ class Lgm_Vector(ctypes.Structure):
         """
         if the components of a Vector are equal the vectors are equal
         """
-        if other.x != self.x:
-            return False
-        elif other.y != self.y:
-            return False
-        elif other.z != self.z:
-            return False
-        else:
-            return True
+        if isinstance(other, Lgm_Vector):
+            if other.x != self.x:
+                return False
+            elif other.y != self.y:
+                return False
+            elif other.z != self.z:
+                return False
+            else:
+                return True
+        elif isinstance(other, list):
+            try:
+                other = Lgm_Vector(other[0], other[1], other[2])
+            except:
+                raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+            else:
+                return self == other
 
     def __gt__(self, other):
         """
