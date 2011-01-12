@@ -49,6 +49,7 @@ Lgm_NgaEopp.assign_fields()
 # format is [Out type, In type1, In type2, In type3, ... ]
 call_dict = {
         # Lgm_Vector
+        'Lgm_SphToCartCoords': [None, LgmDouble, LgmDouble, LgmDouble, Lgm_VectorP],
         'Lgm_CrossProduct': [None, Lgm_VectorP, Lgm_VectorP, Lgm_VectorP],
         'Lgm_DotProduct': [LgmDouble, Lgm_VectorP, Lgm_VectorP],
         'Lgm_NormalizeVector': [LgmDouble, Lgm_VectorP],
@@ -61,6 +62,7 @@ call_dict = {
         'Lgm_MatTimesVec': [None, LgmDouble * 3 * 3, Lgm_VectorP, Lgm_VectorP],
         'Lgm_Transpose' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
         'Lgm_MatTimesMat' : [None, LgmDouble * 3 * 3, LgmDouble * 3 * 3, LgmDouble * 3 * 3],
+
         # Lgm_DateAndTime
         'Lgm_GetLeapSeconds': [LgmDouble, LgmDouble, Lgm_CTransP],
         'Lgm_LoadLeapSeconds' : [LgmInt, Lgm_CTransP],

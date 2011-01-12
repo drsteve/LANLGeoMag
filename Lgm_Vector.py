@@ -10,8 +10,11 @@ Vector class for Lgm
 
 
 import ctypes
-from Lgm_Types import LgmDouble
+import itertools
+import copy
+
 import Lgm
+from Lgm_Types import LgmDouble
 from _Lgm import lib
 
 class Lgm_Vector(ctypes.Structure):
@@ -63,7 +66,6 @@ class Lgm_Vector(ctypes.Structure):
                 return self == other
         else:
             raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
-
 
     def __gt__(self, other):
         """
@@ -381,5 +383,22 @@ class Lgm_Vector(ctypes.Structure):
         @version: V1: 22-Dec-2010 (BAL)
         """
         lib.Lgm_ForceMagnitude(self, val)
+
+def SphToCart(lat, lon, rad):
+    """takes an input Lat, Lon, Rad and returns x, y, z"""
+    vec1 = Lgm_Vector()
+    try:
+        if len(lat) != len(lon) != len(rad):
+            raise(ValueError('All input must be the same length'))
+    except TypeError:
+        lib.Lgm_SphToCartCoords(lat, lon, rad, vec1)
+        return vec1
+    else:
+        ans = []
+        for v1, v2, v3 in itertools.izip(lat, lon, rad):
+            lib.Lgm_SphToCartCoords(v1, v2, v3, vec1)
+            ans.append(copy.copy(vec1))
+        return ans
+
 
 Lgm_VectorP = ctypes.POINTER(Lgm_Vector)
