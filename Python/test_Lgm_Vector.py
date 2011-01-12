@@ -3,6 +3,8 @@
 import unittest
 import ctypes
 
+import numpy
+
 import Lgm
 import Lgm_Vector
 from Lgm import lib
@@ -285,6 +287,29 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         self.assertEqual(ans[0], vec1.x)
         self.assertEqual(ans[1], vec1.y)
         self.assertEqual(ans[2], vec1.z)
+
+    def test_SphToCart(self):
+        """SphToCart should known known output (regression)"""
+        invals = [ [0, 0, 5],
+            [90, 0, 5],
+            [90, 90, 5],
+            [90, 180, 5] ]
+        ans = [ [5.0, 0.0, 0.0],
+            [3.061616997868383e-16, 0.0, 5.0],
+            [1.8746997283273223e-32, 3.061616997868383e-16, 5.0],
+            [-3.061616997868383e-16, 3.7493994566546446e-32, 5.0] ]
+        vec1 = Lgm_Vector.Lgm_Vector()
+        for i, val in enumerate(invals):
+            vec1 = Lgm_Vector.SphToCart(*val)
+            for j, val2 in enumerate(vec1.tolist()):
+                self.assertAlmostEqual(ans[i][j], val2)
+        # test an input check
+        self.assertRaises(ValueError, Lgm_Vector.SphToCart, [1]*2, [2]*3, [3]*2)
+        # test putting in lists
+        ans_tst = Lgm_Vector.SphToCart(zip(*invals)[0], zip(*invals)[1], zip(*invals)[2] )
+        for i, v1 in enumerate(ans_tst):
+            for j, v2 in enumerate(v1.tolist()):
+                self.assertAlmostEqual(ans[i][j], ans_tst[i].tolist()[j])
 
 if __name__ == '__main__':
     unittest.main()

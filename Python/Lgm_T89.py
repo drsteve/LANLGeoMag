@@ -8,17 +8,10 @@ Python implementation of the LanlGeoMag T89 Magnetic field model
 
 @version: V1: 23-Dec-2010 (BAL)
 """
-
-import ctypes
-#import itertools
 import datetime
 
 import numpy as np
-import spacepy.toolbox as tb
-# from pylab import griddata, pcolor, pcolormesh, gca, draw
 
-import Lgm
-from Lgm_Types import LgmInt
 from _Lgm import lib
 import Lgm_Vector
 import Lgm_CTrans
@@ -94,7 +87,7 @@ class Lgm_T89(object):
             for v1, v2, v3 in zip(self._Vpos, self.time, self.Kp):
                 date = Lgm_CTrans.dateToDateLong(v2)
                 utc = Lgm_CTrans.dateToFPHours(v2)
-                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
+                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c)
                 B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = v3
                 retval = lib.Lgm_B_T89(v1, B, self._mmi)
@@ -103,15 +96,15 @@ class Lgm_T89(object):
                 ans.append(B)
             return ans
         except TypeError:
-                date = Lgm_CTrans.dateToDateLong(self.time)
-                utc = Lgm_CTrans.dateToFPHours(self.time)
-                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c);
-                B = Lgm_Vector.Lgm_Vector()
-                self._mmi.Kp = self.Kp
-                retval = lib.Lgm_B_T89(self._Vpos, B, self._mmi)
-                if retval != 1:
-                    raise(RuntimeWarning('Odd return from Lgm_T89') )
-                return B
+            date = Lgm_CTrans.dateToDateLong(self.time)
+            utc = Lgm_CTrans.dateToFPHours(self.time)
+            lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c)
+            B = Lgm_Vector.Lgm_Vector()
+            self._mmi.Kp = self.Kp
+            retval = lib.Lgm_B_T89(self._Vpos, B, self._mmi)
+            if retval != 1:
+                raise(RuntimeWarning('Odd return from Lgm_T89') )
+            return B
 
     def _pos2Lgm_Vector(self, pos):
         if isinstance(pos, Lgm_Vector.Lgm_Vector):
