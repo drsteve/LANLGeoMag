@@ -170,7 +170,7 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
  * Inputs:
  *          Lat: Latitude in Spherical Polar - Degrees
  *          Lon: Longitude in Spherical Polar - Degrees
- *            r: Geocentric Radiusin Spherical Polar
+ *            r: Geocentric Radius in Spherical Polar
  *
  * Output:
  *            u: Cartesian vector (units of whatever you used for r)
@@ -178,14 +178,14 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
  */
 void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c ) {
 
-    double  CosLat;
+    double  rCosLat;
 
     Lat *= RadPerDeg;
     Lon *= RadPerDeg;
-    CosLat = cos(Lat);
+    rCosLat = r*cos(Lat);
     
-    c->x = r*CosLat*cos(Lon);
-    c->y = r*CosLat*sin(Lon);
+    c->x = rCosLat*cos(Lon);
+    c->y = rCosLat*sin(Lon);
     c->z = r*sin(Lat);
 
     return;
