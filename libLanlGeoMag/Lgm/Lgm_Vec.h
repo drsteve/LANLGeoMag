@@ -25,6 +25,8 @@ void        Lgm_VecSub(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b );
 void        Lgm_VecAdd(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b );
 double      Lgm_VecDiffMag(Lgm_Vector *a, Lgm_Vector *b );
 void        Lgm_Transpose( double A[3][3], double B[3][3] );
+void        Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c );
+
 
 
 
