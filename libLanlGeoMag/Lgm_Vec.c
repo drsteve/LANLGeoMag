@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "Lgm/Lgm_Vec.h"
+#include "Lgm/Lgm_CTrans.h"
 
 /*
  * Create an Lgm_Vector
@@ -183,9 +184,9 @@ void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c ) {
     Lon *= RadPerDeg;
     CosLat = cos(Lat);
     
-    u->x = r*CosLat*cos(Lon);
-    u->y = r*CosLat*sin(Lon);
-    u->z = r*sin(Lat);
+    c->x = r*CosLat*cos(Lon);
+    c->y = r*CosLat*sin(Lon);
+    c->z = r*sin(Lat);
 
     return;
 }
