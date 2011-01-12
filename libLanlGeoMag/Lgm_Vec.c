@@ -162,6 +162,35 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
 
 }
 
+
+/*
+ * Convert Spherical-Polar coords to Cartesian
+ *
+ * Inputs:
+ *          Lat: Latitude in Spherical Polar - Degrees
+ *          Lon: Longitude in Spherical Polar - Degrees
+ *            r: Geocentric Radiusin Spherical Polar
+ *
+ * Output:
+ *            u: Cartesian vector (units of whatever you used for r)
+ *
+ */
+void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c ) {
+
+    double  CosLat;
+
+    Lat *= RadPerDeg;
+    Lon *= RadPerDeg;
+    CosLat = cos(Lat);
+    
+    u->x = r*CosLat*cos(Lon);
+    u->y = r*CosLat*sin(Lon);
+    u->z = r*sin(Lat);
+
+    return;
+}
+
+
 /*
  *   $Id$
  */

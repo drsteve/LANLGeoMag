@@ -226,10 +226,12 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
  */
 void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
-    LGM_ARRAY_1D_FREE( f->E );
-    LGM_ARRAY_1D_FREE( f->A );
-    LGM_ARRAY_2D_FREE( f->FLUX_EA );
-    LGM_ARRAY_2D_FREE( f->PSD_EA );
+    if ( f->Alloced ) {
+        LGM_ARRAY_1D_FREE( f->E );
+        LGM_ARRAY_1D_FREE( f->A );
+        LGM_ARRAY_2D_FREE( f->FLUX_EA );
+        LGM_ARRAY_2D_FREE( f->PSD_EA );
+    }
 
     free( f );
 
@@ -318,10 +320,11 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
             p2c2   = Lgm_p2c2( f->E[i], LGM_Ee0 );
             fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
             f->PSD_EA[i][j] = fp; // PSD_EA is "PSD versus Energy and Pitch Angle".
+            f->PSD_EA[i][j] = p2c2;
         }
     }
     if ( f->DumpDiagnostics ) {
-        DumpGif( "PSD_Versus_E_and_A_LoRes.gif", f->nA, f->nE, f->PSD_EA );
+        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_EA.gif", f->nA, f->nE, f->PSD_EA );
     }
 
     f->Alloced = TRUE;
@@ -373,6 +376,12 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      */
     mInfo = Lgm_InitMagInfo();
     
+    f->nMu = nMu; 
+    f->nK  = nK; 
+    LGM_ARRAY_1D( f->Mu,    f->nMu, double );
+    LGM_ARRAY_1D( f->K,     f->nK,  double );
+    LGM_ARRAY_1D( f->AofK,  f->nK,  double );
+    LGM_ARRAY_2D( f->EofMu, f->nMu,  f->nK,  double );
 
     /*
      * Copy K's into p structure.
@@ -383,8 +392,10 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
     for ( k=0; k<nK; k++ ){
         f->K[k] = K[k];
         f->AofK[k] = Lgm_AlphaOfK( f->K[k], mInfo );
+printf("f->K[k] = %g   f->AofK[k] = %g\n", f->K[k], f->AofK[k]);
     }
 
+return;
 
     /*
      * Copy Mu's into p structure.

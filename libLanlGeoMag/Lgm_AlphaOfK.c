@@ -22,7 +22,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
 int  Lgm_Init_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
 
     int         TraceFlag;
-    Lgm_Vector  v1, v2, v3;
+    Lgm_Vector  v1, v2, v3, Bvec;
 
 
     /*
@@ -30,6 +30,11 @@ int  Lgm_Init_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      */
     Lgm_Set_Coord_Transforms( d->Date, d->Time, m->c );
 
+    /*
+     * Set local B-field magnitude
+     */
+    m->Bfield( u, &Bvec, m );
+    m->Blocal = Lgm_Magnitude( &Bvec );
 
     /*
      * Trace the field line for the givcen position.
@@ -137,6 +142,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
     double           sa, sa2, Sma, Smb, I, K;
 
+m->UseInterpRoutines = FALSE;
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
     m->Bm = m->Blocal/sa2; 

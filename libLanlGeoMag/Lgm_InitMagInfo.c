@@ -11,6 +11,7 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
    
     MagInfo = (Lgm_MagModelInfo *) calloc (1, sizeof(*MagInfo));
 
+    MagInfo->Bfield = Lgm_B_T89;
     MagInfo->InternalModel = LGM_IGRF;
 
     MagInfo->c     = Lgm_init_ctrans( 0 );
