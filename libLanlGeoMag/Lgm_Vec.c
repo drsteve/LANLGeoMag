@@ -176,7 +176,7 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
  *            u: Cartesian vector (units of whatever you used for r)
  *
  */
-void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c ) {
+void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *u ) {
 
     double  rCosLat;
 
@@ -184,9 +184,9 @@ void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c ) {
     Lon *= RadPerDeg;
     rCosLat = r*cos(Lat);
     
-    c->x = rCosLat*cos(Lon);
-    c->y = rCosLat*sin(Lon);
-    c->z = r*sin(Lat);
+    u->x = rCosLat*cos(Lon);
+    u->y = rCosLat*sin(Lon);
+    u->z = r*sin(Lat);
 
     return;
 }
