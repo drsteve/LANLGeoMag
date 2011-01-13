@@ -1,7 +1,7 @@
 '''Wrapper for DynamicMemory.h
 
 Generated with:
-ctypesgen.py -l/usr/local/lib/libLanlGeoMag.dylib /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_PhaseSpaceDensity.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_WGS84.h -o bla.py
+../../ctypesgen-read-only/ctypesgen.py -l/usr/local/lib/libLanlGeoMag.dylib /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_PhaseSpaceDensity.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/size.h -o Lgm_Wrap.py
 
 Do not modify this file.
 '''
@@ -4489,6 +4489,84 @@ if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'LgmSgp_gstime'):
     LgmSgp_gstime = _libs['/usr/local/lib/libLanlGeoMag.dylib'].LgmSgp_gstime
     LgmSgp_gstime.argtypes = [c_double]
     LgmSgp_gstime.restype = c_double
+
+# /usr/local/include/Lgm/size.h: 26
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_t_size'):
+    size_t_size = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_t_size
+    size_t_size.argtypes = []
+    size_t_size.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 27
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_MagModelInfo'):
+    size_MagModelInfo = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_MagModelInfo
+    size_MagModelInfo.argtypes = []
+    size_MagModelInfo.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 28
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_CTrans'):
+    size_CTrans = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_CTrans
+    size_CTrans.argtypes = []
+    size_CTrans.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 29
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_Vector'):
+    size_Vector = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_Vector
+    size_Vector.argtypes = []
+    size_Vector.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 30
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_DateTime'):
+    size_DateTime = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_DateTime
+    size_DateTime.argtypes = []
+    size_DateTime.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 31
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_gsl_interp_accel'):
+    size_gsl_interp_accel = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_gsl_interp_accel
+    size_gsl_interp_accel.argtypes = []
+    size_gsl_interp_accel.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 32
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_gsl_interp_type'):
+    size_gsl_interp_type = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_gsl_interp_type
+    size_gsl_interp_type.argtypes = []
+    size_gsl_interp_type.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 33
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_gsl_interp'):
+    size_gsl_interp = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_gsl_interp
+    size_gsl_interp.argtypes = []
+    size_gsl_interp.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 34
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_gsl_spline'):
+    size_gsl_spline = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_gsl_spline
+    size_gsl_spline.argtypes = []
+    size_gsl_spline.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 35
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_Lgm_OctreeData'):
+    size_Lgm_OctreeData = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_Lgm_OctreeData
+    size_Lgm_OctreeData.argtypes = []
+    size_Lgm_OctreeData.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 36
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_Lgm_OctreeCell'):
+    size_Lgm_OctreeCell = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_Lgm_OctreeCell
+    size_Lgm_OctreeCell.argtypes = []
+    size_Lgm_OctreeCell.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 37
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_pQueue'):
+    size_pQueue = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_pQueue
+    size_pQueue.argtypes = []
+    size_pQueue.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 38
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'size_Lgm_LeapSeconds'):
+    size_Lgm_LeapSeconds = _libs['/usr/local/lib/libLanlGeoMag.dylib'].size_Lgm_LeapSeconds
+    size_Lgm_LeapSeconds.argtypes = []
+    size_Lgm_LeapSeconds.restype = c_int
 
 # /usr/local/include/Lgm/Lgm_QuadPack.h: 2
 try:

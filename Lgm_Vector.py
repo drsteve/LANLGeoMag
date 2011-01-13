@@ -12,38 +12,11 @@ Vector class for Lgm
 import ctypes
 import itertools
 import copy
+from ctypes import pointer
 
-import Lgm
-from Lgm_Types import LgmDouble
-from _Lgm import lib
+from Lgm_Wrap import *
 
-class Lgm_Vector(ctypes.Structure):
-    """
-    Lgm_Vector class to wrap up the LanlGeoMag routines and add methods
-
-    @todo: partilly finished as an example
-
-    @ivar x: x-component of the vector
-    @type x: double
-    @ivar y: y-component of the vector
-    @type y: double
-    @ivar z: z-component of the vector
-    @type z: double
-
-    @todo: __eq__ forks vector==list but no others
-
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
-
-    @version: V1: 22-Dec-2010 (BAL)
-    """
-    @classmethod
-    def assign_fields(cls):
-        cls._fields_ = [ ( "x", LgmDouble ),
-            ("y", LgmDouble),
-            ("z", LgmDouble) ]
-
+class Lgm_Vector(Lgm_Vector):
     def __eq__(self, other):
         """
         if the components of a Vector are equal the vectors are equal
@@ -179,8 +152,8 @@ class Lgm_Vector(ctypes.Structure):
         @version: V1: 22-Dec-2010 (BAL)
         """
         if isinstance(other, Lgm_Vector): # an other vector
-            o_vec = Lgm_Vector()
-            lib.Lgm_VecAdd(o_vec, self, other)
+            o_vec = Lgm_Vector(0,0,0)
+            Lgm_VecAdd(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
         elif isinstance(other, (int, float, long)):
             x = self.x + other
@@ -207,8 +180,8 @@ class Lgm_Vector(ctypes.Structure):
         @version: V1: 22-Dec-2010 (BAL)
         """
         if isinstance(other, Lgm_Vector): # an other vector
-            o_vec = Lgm_Vector()
-            lib.Lgm_VecSub(o_vec, self, other)
+            o_vec = Lgm_Vector(0,0,0)
+            Lgm_VecSub(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
         elif isinstance(other, (int, float, long)):
             x = self.x - other
@@ -234,7 +207,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        if isinstance(other, Lgm_Vector): # an other vector
+        if isinstance(other, Lgm_Vector): # another vector
             return self.crossProduct(other)
         elif isinstance(other, (int, float, long)):
             x = self.x * other
@@ -289,8 +262,8 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        o_vec = Lgm_Vector()
-        lib.Lgm_CrossProduct(self, other, o_vec)
+        o_vec = Lgm_Vector(0,0,0)
+        Lgm_CrossProduct( pointer(self), pointer(other), pointer(o_vec) )
         return o_vec
 
     def magnitude(self):
@@ -306,7 +279,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        return lib.Lgm_Magnitude( self)
+        return Lgm_Magnitude( pointer(self) )
 
     def normalize(self):
         """
@@ -318,7 +291,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        lib.Lgm_NormalizeVector( self )
+        Lgm_NormalizeVector( pointer(self) )
 
     def dotProduct(self, other):
         """
@@ -326,7 +299,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @param other: other vector to cross prod (on the right)
         @type other: Lgm_Vector
-        @return: the cross product of the 2 vectors
+        @return: the dot product of the 2 vectors
         @rtype: Lgm_Vector
 
         @author: Brian Larsen
@@ -335,7 +308,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        return lib.Lgm_DotProduct(self, other)
+        return Lgm_DotProduct(pointer(self), pointer(other) )
 
     def scale(self, val):
         """
@@ -350,7 +323,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        lib.Lgm_ScaleVector( self, val)
+        Lgm_ScaleVector( pointer(self), val)
 
     def diffMag(self, other):
         """
@@ -367,7 +340,7 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        return lib.Lgm_VecDiffMag(self, other)
+        return Lgm_VecDiffMag(pointer(self), pointer(other) )
 
     def forceMagnitude(self, val):
         """
@@ -382,23 +355,20 @@ class Lgm_Vector(ctypes.Structure):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        lib.Lgm_ForceMagnitude(self, val)
+        Lgm_ForceMagnitude(pointer(self), val)
 
 def SphToCart(lat, lon, rad):
     """takes an input Lat, Lon, Rad and returns x, y, z"""
-    vec1 = Lgm_Vector()
+    vec1 = Lgm_Vector(0,0,0)
     try:
         if len(lat) != len(lon) != len(rad):
             raise(ValueError('All input must be the same length'))
     except TypeError:
-        lib.Lgm_SphToCartCoords(lat, lon, rad, vec1)
+        Lgm_SphToCartCoords(lat, lon, rad, pointer(vec1))
         return vec1
     else:
         ans = []
         for v1, v2, v3 in itertools.izip(lat, lon, rad):
-            lib.Lgm_SphToCartCoords(v1, v2, v3, vec1)
+            Lgm_SphToCartCoords(v1, v2, v3, pointer(vec1))
             ans.append(copy.copy(vec1))
         return ans
-
-
-Lgm_VectorP = ctypes.POINTER(Lgm_Vector)
