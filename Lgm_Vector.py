@@ -7,14 +7,13 @@ Vector class for Lgm
 
 @version: V1: 20-Dec-2010 (BAL)
 """
-
-
-import ctypes
 import itertools
 import copy
 from ctypes import pointer
 
-from Lgm_Wrap import *
+from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
+    Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
+    Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords
 
 class Lgm_Vector(Lgm_Vector):
     def __eq__(self, other):
@@ -152,7 +151,7 @@ class Lgm_Vector(Lgm_Vector):
         @version: V1: 22-Dec-2010 (BAL)
         """
         if isinstance(other, Lgm_Vector): # an other vector
-            o_vec = Lgm_Vector(0,0,0)
+            o_vec = Lgm_Vector(0, 0, 0)
             Lgm_VecAdd(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
         elif isinstance(other, (int, float, long)):
@@ -180,7 +179,7 @@ class Lgm_Vector(Lgm_Vector):
         @version: V1: 22-Dec-2010 (BAL)
         """
         if isinstance(other, Lgm_Vector): # an other vector
-            o_vec = Lgm_Vector(0,0,0)
+            o_vec = Lgm_Vector(0, 0, 0)
             Lgm_VecSub(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
         elif isinstance(other, (int, float, long)):
@@ -262,7 +261,7 @@ class Lgm_Vector(Lgm_Vector):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        o_vec = Lgm_Vector(0,0,0)
+        o_vec = Lgm_Vector(0, 0, 0)
         Lgm_CrossProduct( pointer(self), pointer(other), pointer(o_vec) )
         return o_vec
 
@@ -359,7 +358,7 @@ class Lgm_Vector(Lgm_Vector):
 
 def SphToCart(lat, lon, rad):
     """takes an input Lat, Lon, Rad and returns x, y, z"""
-    vec1 = Lgm_Vector(0,0,0)
+    vec1 = Lgm_Vector(0, 0, 0)
     try:
         if len(lat) != len(lon) != len(rad):
             raise(ValueError('All input must be the same length'))
