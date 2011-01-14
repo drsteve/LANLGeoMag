@@ -9,5 +9,3 @@ See Mike Henderon about LanlGeoMag and Brian Larsen about the python wrappers
 
 @version: V1: 06-Dec-2010 (BAL)
 """
-
-# from . import *
