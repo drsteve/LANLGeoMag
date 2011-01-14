@@ -9,13 +9,17 @@ Python implementation of the LanlGeoMag T89 Magnetic field model
 @version: V1: 23-Dec-2010 (BAL)
 """
 import datetime
+from ctypes import pointer
 
 import numpy as np
 
-from _Lgm import lib
+from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
+    Lgm_B_T89, Lgm_Vector
+
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+
 
 class Lgm_T89(object):
     """
@@ -50,15 +54,15 @@ class Lgm_T89(object):
                 raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
         self.Kp = Kp
 
-        if INTERNAL_MODEL not in (Lgm_MagModelInfo.LGM_CDIP,
-                                  Lgm_MagModelInfo.LGM_EDIP,
-                                  Lgm_MagModelInfo.LGM_IGRF) and \
+        if INTERNAL_MODEL not in (LGM_CDIP,
+                                  LGM_EDIP,
+                                  LGM_IGRF) and \
             INTERNAL_MODEL not in ('LGM_CDIP',
                                   'LGM_EDIP',
                                   'LGM_IGRF'):
             raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
         if isinstance(INTERNAL_MODEL, str):
-            self.INTERNAL_MODEL = Lgm_MagModelInfo.__getattribute__(INTERNAL_MODEL)
+            self.INTERNAL_MODEL = eval(INTERNAL_MODEL)
         else:
             self.INTERNAL_MODEL = INTERNAL_MODEL
 
@@ -87,10 +91,10 @@ class Lgm_T89(object):
             for v1, v2, v3 in zip(self._Vpos, self.time, self.Kp):
                 date = Lgm_CTrans.dateToDateLong(v2)
                 utc = Lgm_CTrans.dateToFPHours(v2)
-                lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c)
+                Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
                 B = Lgm_Vector.Lgm_Vector()
                 self._mmi.Kp = v3
-                retval = lib.Lgm_B_T89(v1, B, self._mmi)
+                retval = Lgm_B_T89(pointer(v1), pointer(B), pointer(self._mmi))
                 if retval != 1:
                     raise(RuntimeWarning('Odd return from Lgm_T89') )
                 ans.append(B)
@@ -98,10 +102,10 @@ class Lgm_T89(object):
         except TypeError:
             date = Lgm_CTrans.dateToDateLong(self.time)
             utc = Lgm_CTrans.dateToFPHours(self.time)
-            lib.Lgm_Set_Coord_Transforms( date, utc, self._mmi.c)
+            Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
             B = Lgm_Vector.Lgm_Vector()
             self._mmi.Kp = self.Kp
-            retval = lib.Lgm_B_T89(self._Vpos, B, self._mmi)
+            retval = Lgm_B_T89(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
             if retval != 1:
                 raise(RuntimeWarning('Odd return from Lgm_T89') )
             return B

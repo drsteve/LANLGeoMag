@@ -13,8 +13,11 @@ Test suite for the Lgm_T89 file
 import unittest
 import datetime
 import itertools
+import ctypes
 
 import numpy
+
+from Lgm_Wrap import LGM_CDIP
 
 import Lgm_T89
 import Lgm_Vector
@@ -37,7 +40,7 @@ class Lgm_T89_T89(unittest.TestCase):
         super(Lgm_T89_T89, self).tearDown()
 
     def test_T89(self):
-        """the T89 simple statis wrapper should work (regression)"""
+        """the T89 simple static wrapper should work (regression)"""
         self.assertEqual(Lgm_T89.T89(self.pos, self.dt, self.kp),
             [-18.97193562594128, -1.8611995170538265, 80.3933831714847])
         ans = [[-18.97193562594128, -1.8611995170538265, 80.3933831714847]*2]
@@ -86,11 +89,10 @@ class Lgm_T89Tests(unittest.TestCase):
             [-32.16112573540407, -1.8611995170538265, 60.078415300152216],
             [-45.379156657247805, -1.8611995170538265, 49.36315537639906] ]
         for i, kp in enumerate(range(6)):
-            a = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
-            B = a.calc_B()
-            self.assertAlmostEqual(ans[i][0], B.x)
-            self.assertAlmostEqual(ans[i][1], B.y)
-            self.assertAlmostEqual(ans[i][2], B.z)
+            B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
+            self.assertAlmostEqual(ans[i][0], B.B.x)
+            self.assertAlmostEqual(ans[i][1], B.B.y)
+            self.assertAlmostEqual(ans[i][2], B.B.z)
 
     def test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
