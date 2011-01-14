@@ -1,7 +1,7 @@
 '''Wrapper for DynamicMemory.h
 
 Generated with:
-../../ctypesgen-read-only/ctypesgen.py -l/usr/local/lib/libLanlGeoMag.dylib /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_PhaseSpaceDensity.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/size.h -o Lgm_Wrap.py
+/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/ctypesgen.py -l/usr/local/lib/libLanlGeoMag.dylib /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_PhaseSpaceDensity.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/size.h -o Lgm_Wrap.py
 
 Do not modify this file.
 '''
@@ -4604,7 +4604,7 @@ def EXPAND(x):
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 5
 try:
-    WGS84_A = 6378.137
+    WGS84_A = 6378.1369999999997
 except:
     pass
 
@@ -4622,67 +4622,67 @@ except:
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 8
 try:
-    WGS84_FINV = 298.2572229328697
+    WGS84_FINV = 298.25722293286969
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 10
 try:
-    WGS84_E2 = 0.00669437999014
+    WGS84_E2 = 0.0066943799901399998
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 11
 try:
-    WGS84_E = 0.08181919092890624
+    WGS84_E = 0.081819190928906244
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 12
 try:
-    WGS84_EP2 = 0.006739496756586903
+    WGS84_EP2 = 0.0067394967565869027
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 13
 try:
-    WGS84_EP = 0.08209443803685366
+    WGS84_EP = 0.082094438036853665
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 14
 try:
-    WGS84_A2 = 40680631.59076899
+    WGS84_A2 = 40680631.590768993
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 15
 try:
-    WGS84_B2 = 40408299.98408706
+    WGS84_B2 = 40408299.984087057
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 16
 try:
-    WGS84_A2mB2 = 272331.6066819355
+    WGS84_A2mB2 = 272331.60668193549
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 17
 try:
-    WGS84_E4 = 4.481472364144719e-05
+    WGS84_E4 = 4.4814723641447188e-05
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_WGS84.h: 18
 try:
-    WGS84_1mE2 = 0.993305619995739
+    WGS84_1mE2 = 0.99330561999573896
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 15
 try:
-    DegPerRad = 57.29577951308232
+    DegPerRad = 57.295779513082323
 except:
     pass
 
@@ -4694,37 +4694,37 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 17
 try:
-    RadPerArcSec = 4.84813681109536e-06
+    RadPerArcSec = 4.8481368110953598e-06
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 18
 try:
-    M_SQRTPI = 1.772453850905516
+    M_SQRTPI = 1.7724538509055161
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 19
 try:
-    M_SQRTPI_2 = 0.886226925452758
+    M_SQRTPI_2 = 0.88622692545275805
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 20
 try:
-    M_1_SQRTPI = 0.5641895835477563
+    M_1_SQRTPI = 0.56418958354775628
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 21
 try:
-    M_2PI = 6.283185307179586
+    M_2PI = 6.2831853071795862
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 22
 try:
-    M_OneThird = 0.3333333333333333
+    M_OneThird = 0.33333333333333331
 except:
     pass
 
@@ -4742,7 +4742,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 29
 try:
-    Re = 6378.137
+    Re = 6378.1369999999997
 except:
     pass
 
@@ -4754,7 +4754,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 35
 try:
-    LGM_GOLD = 1.618033988749895
+    LGM_GOLD = 1.6180339887498949
 except:
     pass
 
@@ -4778,7 +4778,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 40
 try:
-    LGM_FILL_VALUE = (-1e+31)
+    LGM_FILL_VALUE = (-9.9999999999999996e+30)
 except:
     pass
 
@@ -6338,19 +6338,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 11
 try:
-    LGM_ELECTRON_MASS = 9.10938188e-31
+    LGM_ELECTRON_MASS = 9.1093818800000006e-31
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 12
 try:
-    LGM_AMU = 1.660538e-27
+    LGM_AMU = 1.6605379999999998e-27
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 13
 try:
-    LGM_PROTON_MASS = (1.00794 * AMU)
+    LGM_PROTON_MASS = (1.0079400000000001 * AMU)
 except:
     pass
 
@@ -6374,7 +6374,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 17
 try:
-    LGM_EE = 1.6022e-19
+    LGM_EE = 1.6022000000000001e-19
 except:
     pass
 
@@ -6434,19 +6434,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 42
 try:
-    LGM_MAGSTEP_REDMAX = 1e-05
+    LGM_MAGSTEP_REDMAX = 1.0000000000000001e-05
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 43
 try:
-    LGM_MAGSTEP_REDMIN = 0.7
+    LGM_MAGSTEP_REDMIN = 0.69999999999999996
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 44
 try:
-    LGM_MAGSTEP_SCLMAX = 0.1
+    LGM_MAGSTEP_SCLMAX = 0.10000000000000001
 except:
     pass
 
@@ -6458,7 +6458,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 46
 try:
-    LGM_MAGSTEP_SAFE2 = 0.7
+    LGM_MAGSTEP_SAFE2 = 0.69999999999999996
 except:
     pass
 
@@ -6584,19 +6584,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 6
 try:
-    ELECTRON_MASS = 9.10938188e-31
+    ELECTRON_MASS = 9.1093818800000006e-31
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 7
 try:
-    AMU = 1.660538e-27
+    AMU = 1.6605379999999998e-27
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 8
 try:
-    PROTON_MASS = (1.00794 * AMU)
+    PROTON_MASS = (1.0079400000000001 * AMU)
 except:
     pass
 
@@ -6620,13 +6620,13 @@ except:
 
 # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 12
 try:
-    EE = 1.6022e-19
+    EE = 1.6022000000000001e-19
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 54
 try:
-    LGM_Ee0 = 0.51099891
+    LGM_Ee0 = 0.51099890999999997
 except:
     pass
 
@@ -6652,19 +6652,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 10
 try:
-    ELECTRON_MASS = 9.10938188e-31
+    ELECTRON_MASS = 9.1093818800000006e-31
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 11
 try:
-    AMU = 1.660538e-27
+    AMU = 1.6605379999999998e-27
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 12
 try:
-    PROTON_MASS = (1.00794 * AMU)
+    PROTON_MASS = (1.0079400000000001 * AMU)
 except:
     pass
 
@@ -6688,7 +6688,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 16
 try:
-    EE = 1.6022e-19
+    EE = 1.6022000000000001e-19
 except:
     pass
 
@@ -6700,7 +6700,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_PhaseSpaceDensity.h: 52
 try:
-    LGM_Ee0 = 0.51099891
+    LGM_Ee0 = 0.51099890999999997
 except:
     pass
 
@@ -6712,13 +6712,13 @@ except:
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 173
 try:
-    SGP_CK4 = 6.2098875e-07
+    SGP_CK4 = 6.2098875000000002e-07
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 174
 try:
-    SGP_E6A = 1e-06
+    SGP_E6A = 9.9999999999999995e-07
 except:
     pass
 
@@ -6730,13 +6730,13 @@ except:
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 176
 try:
-    SGP_S = 1.01222928
+    SGP_S = 1.0122292799999999
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 177
 try:
-    SGP_TOTHRD = 0.66666667
+    SGP_TOTHRD = 0.66666667000000002
 except:
     pass
 
@@ -6754,7 +6754,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 180
 try:
-    SGP_XKMPER = 6378.135
+    SGP_XKMPER = 6378.1350000000002
 except:
     pass
 
@@ -6772,31 +6772,31 @@ except:
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 183
 try:
-    SGP_DE2RA = 0.0174532925
+    SGP_DE2RA = 0.017453292499999998
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 184
 try:
-    SGP_PI = 3.14159265
+    SGP_PI = 3.1415926500000002
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 185
 try:
-    SGP_PIO2 = 1.57079633
+    SGP_PIO2 = 1.5707963300000001
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 186
 try:
-    SGP_TWOPI = 6.2831853
+    SGP_TWOPI = 6.2831853000000004
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 187
 try:
-    SGP_X3PIO2 = 4.71238898
+    SGP_X3PIO2 = 4.7123889800000001
 except:
     pass
 
