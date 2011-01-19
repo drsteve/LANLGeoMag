@@ -2751,6 +2751,36 @@ if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_LossConeHeight'
     Lgm_Set_LossConeHeight.argtypes = [POINTER(Lgm_MagModelInfo), c_double]
     Lgm_Set_LossConeHeight.restype = None
 
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 472
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_Lgm_B_igrf'):
+    Lgm_Set_Lgm_B_igrf = _libs['/usr/local/lib/libLanlGeoMag.dylib'].Lgm_Set_Lgm_B_igrf
+    Lgm_Set_Lgm_B_igrf.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_Lgm_B_igrf.restype = None
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 474
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_Lgm_B_T01S'):
+    Lgm_Set_Lgm_B_T01S = _libs['/usr/local/lib/libLanlGeoMag.dylib'].Lgm_Set_Lgm_B_T01S
+    Lgm_Set_Lgm_B_T01S.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_Lgm_B_T01S.restype = None
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 476
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_gm_B_TS04'):
+    Lgm_Set_gm_B_TS04 = _libs['/usr/local/lib/libLanlGeoMag.dylib'].Lgm_Set_gm_B_TS04
+    Lgm_Set_gm_B_TS04.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_gm_B_TS04.restype = None
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 478
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_Lgm_B_T89'):
+    Lgm_Set_Lgm_B_T89 = _libs['/usr/local/lib/libLanlGeoMag.dylib'].Lgm_Set_Lgm_B_T89
+    Lgm_Set_Lgm_B_T89.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_Lgm_B_T89.restype = None
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 480
+if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'Lgm_Set_Lgm_B_OP77'):
+    Lgm_Set_Lgm_B_OP77 = _libs['/usr/local/lib/libLanlGeoMag.dylib'].Lgm_Set_Lgm_B_OP77
+    Lgm_Set_Lgm_B_OP77.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_Lgm_B_OP77.restype = None
+
 # /usr/local/include/Lgm/Lgm_AE8_AP8.h: 28
 if hasattr(_libs['/usr/local/lib/libLanlGeoMag.dylib'], 'TRARA1'):
     TRARA1 = _libs['/usr/local/lib/libLanlGeoMag.dylib'].TRARA1
