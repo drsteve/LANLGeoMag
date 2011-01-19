@@ -4,12 +4,25 @@
 /*
  *  A convenience routine to set some default values
  */
-
+/*
+ * BAL 19Jan2011 split into 2 sections for python wrapping without the calloc
+ */
 Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
+    Lgm_MagModelInfo  *MagInfo;
+    MagInfo = Lgm_InitMagInfoCalloc();
+    Lgm_InitMagInfoDefaults(MagInfo);
+    return(MagInfo);
+}
+
+Lgm_MagModelInfo *Lgm_InitMagInfoCalloc( ) {
 
     Lgm_MagModelInfo  *MagInfo;
 
     MagInfo = (Lgm_MagModelInfo *) calloc (1, sizeof(*MagInfo));
+    return(MagInfo);
+}
+
+void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
     MagInfo->Bfield = Lgm_B_T89;
     MagInfo->InternalModel = LGM_IGRF;
@@ -39,8 +52,6 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
 
-
-
     /*
      * Set some default tolerances
      */
@@ -58,27 +69,19 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
     MagInfo->Lgm_Sb_Integrator_epsabs = 1e-3;
     MagInfo->Lgm_Sb_Integrator = DQAGP; // not changeable (yet...)
 
-
     MagInfo->Lgm_FindBmRadius_Tol = 1e-10;
     MagInfo->Lgm_FindShellLine_I_Tol = 1e-3;
     MagInfo->Lgm_TraceToMirrorPoint_Tol = 1e-7;
-
 
     /*
      * Bounce Loss Cone Height
      */
     MagInfo->Lgm_LossConeHeight = 100.0; // km above the Earth Ellipsoid.
 
-
-
     /*
      * Inits for OP77
      */
     MagInfo->OP77_TILTL = 99.0;
-
-
-    return MagInfo;
-
 }
 
 
