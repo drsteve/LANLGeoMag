@@ -24,7 +24,7 @@ typedef struct Lgm_MagEphemInfo {
     Lgm_LstarInfo   *LstarInfo;
     int             LstarQuality;
     int             SaveShellLines;
-    
+
     long int        Date;           //< Date in YYYYMMDD format
     double          UTC;            //< UTC in decimal hours
 
@@ -114,7 +114,7 @@ typedef struct Lgm_MagEphemInfo {
     double      **ShellMirror_Ss; // [MAX_PITCH_ANGLES][100]   south mirror locations (dist along FL)
 
     Lgm_Vector  **Shell_Bmin;     // [MAX_PITCH_ANGLES][100]   value of Bmin
-    Lgm_Vector  **Shell_Pmin;     // [MAX_PITCH_ANGLES][100]   Bmin points 
+    Lgm_Vector  **Shell_Pmin;     // [MAX_PITCH_ANGLES][100]   Bmin points
     Lgm_Vector  **Shell_GradI;    // [MAX_PITCH_ANGLES][100]   Gradient and Curvature Drift velocity at Pmin
     Lgm_Vector  **Shell_Vgc;      // [MAX_PITCH_ANGLES][100]   Gradient of I at Pmin
 
@@ -124,7 +124,7 @@ typedef struct Lgm_MagEphemInfo {
      * these are like the variables in the LstarInfo structure. Except they have an extra
      * dimension to hold pitch angle as well.
      */
-    int         **nFieldPnts;   // [MAX_PITCH_ANGLES][48]     
+    int         **nFieldPnts;   // [MAX_PITCH_ANGLES][48]
     double      ***s_gsm;       // [MAX_PITCH_ANGLES][48][1000]
     double      ***Bmag;        // [MAX_PITCH_ANGLES][48][1000]
     double      ***x_gsm;       // [MAX_PITCH_ANGLES][48][1000]
@@ -152,7 +152,12 @@ double Ek_to_mu_2( double Ek0, double Ek1, double alpha, double B );
 double  Ek_to_v( double Ek, int Species );
 //void ComputeFieldLineQuantities( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
 
+
+
+
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
+void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
+                                  int MaxPitchAngles, int Verbosity);
 void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
 
 void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
@@ -164,4 +169,3 @@ void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo
 /*
  *    $Id$
  */
-

@@ -9,18 +9,11 @@
  */
 Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
     Lgm_MagModelInfo  *MagInfo;
-    MagInfo = Lgm_InitMagInfoCalloc();
+    MagInfo = (Lgm_MagModelInfo *) calloc (1, sizeof(*MagInfo));
     Lgm_InitMagInfoDefaults(MagInfo);
     return(MagInfo);
 }
 
-Lgm_MagModelInfo *Lgm_InitMagInfoCalloc( ) {
-
-    Lgm_MagModelInfo  *MagInfo;
-
-    MagInfo = (Lgm_MagModelInfo *) calloc (1, sizeof(*MagInfo));
-    return(MagInfo);
-}
 
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 

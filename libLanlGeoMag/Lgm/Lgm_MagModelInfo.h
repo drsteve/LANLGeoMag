@@ -295,7 +295,6 @@ typedef struct Lgm_MagModelInfo {
 
 
 Lgm_MagModelInfo *Lgm_InitMagInfo( );
-Lgm_MagModelInfo *Lgm_InitMagInfoCalloc( );
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
 
 void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info );

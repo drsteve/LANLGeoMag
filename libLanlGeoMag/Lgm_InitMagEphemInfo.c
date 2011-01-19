@@ -7,8 +7,14 @@
  */
 
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
-
     Lgm_MagEphemInfo  *MagEphemInfo = (Lgm_MagEphemInfo *) calloc (1, sizeof(*MagEphemInfo));
+    Lgm_InitMagEphemInfoDefaults(MagEphemInfo, Verbosity, MaxPitchAngles);
+    return MagEphemInfo;
+}
+
+void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
+                                  int MaxPitchAngles, int Verbosity) {
+
     MagEphemInfo->LstarInfo = InitLstarInfo( Verbosity );
 
 
@@ -57,14 +63,6 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     LGM_ARRAY_1D( MagEphemInfo->LHilton,   MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->LMcIlwain, MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->Lstar,     MaxPitchAngles, double );
-
-
-
-    
-
-
-
-    return MagEphemInfo;
 
 }
 
@@ -342,4 +340,3 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
 /*
  *   $Id$
  */
-
