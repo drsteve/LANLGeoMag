@@ -18,11 +18,11 @@
 
 
 #ifndef TRUE
-#define TRUE 1 
+#define TRUE 1
 #endif
 
 #ifndef FALSE
-#define FALSE 0 
+#define FALSE 0
 #endif
 
 /*
@@ -125,7 +125,7 @@ typedef struct Lgm_MagModelInfo {
     double              BminusBcdip[LGM_MAX_INTERP_PNTS]; // magnitude of B minus magnitude of Cent. Dipole
     int                 nPnts;      // actual number of points defined
     double              ds;         // spacing in s (dist. along FL)
-                                    // this will help in seacrhing the 
+                                    // this will help in seacrhing the
                                     // arrays (e.g. for interpolation).
 
     Lgm_Vector      P_gsm;          //< S/C position in GSM
@@ -176,7 +176,7 @@ typedef struct Lgm_MagModelInfo {
     gsl_spline          *splinePx;  // spline object
     gsl_spline          *splinePy;  // spline object
     gsl_spline          *splinePz;  // spline object
-    
+
 
 
     /*
@@ -316,7 +316,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
 
-void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, double, int, double, 
+void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
@@ -326,7 +326,7 @@ int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double
 
 /*
  *  B_internal
- *  
+ *
  *  Function Prototypes for internal models
  */
 int Lgm_B_igrf(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
@@ -336,9 +336,9 @@ int Lgm_B_edip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 
 
 /*
- *  
+ *
  *  Function Prototypes for Olsen Pfitzer 1977  Model
- *  
+ *
  */
 int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m );
@@ -347,7 +347,7 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
 
 /*
  *  T87
- *  
+ *
  *  Function Prototypes for T87 model
  */
 int Lgm_B1_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
@@ -358,7 +358,7 @@ int Lgm_B_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 /*
  *  T89
- *  
+ *
  *  Function Prototypes for T89 model
  */
 int Lgm_BM_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
@@ -367,10 +367,10 @@ int Lgm_BRC_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_BC_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
- 
+
 /*
  *  T96MOD
- *  
+ *
  *  Function Prototypes for T96MOD model
  */
 int Lgm_B_T96MOD_MGH( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
@@ -381,7 +381,7 @@ void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *
 
 /*
  *  T01S
- *  
+ *
  *  Function Prototypes for TS04 model
  */
 int  Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
@@ -399,7 +399,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 /*
  *  TS04
- *  
+ *
  *  Function Prototypes for TS04 model
  */
 int  Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
@@ -415,9 +415,9 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 /*
  *  Computing B from scattered data -- (e.g. an irregular mesh)
- *  
+ *
  */
- 
+
 int Lgm_B_FromScatteredData( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 
 
@@ -452,7 +452,7 @@ int         SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info );
 double      Lgm_AlphaOfK( double K, Lgm_MagModelInfo *Info );
 int         Lgm_Init_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m );
 int         Lgm_Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_MagModelInfo *Info );
-//int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo ); 
+//int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 
 
 /*
@@ -466,6 +466,16 @@ void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
 void Lgm_Set_Octree_kNN_MaxDist( Lgm_MagModelInfo *m, double MaxDist );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
+
+/*
+ * Added for Python wrapping, the function pointer is hard to impossible to
+ * deal with setting
+ */
+void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_gm_B_TS04(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
 
 
 

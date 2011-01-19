@@ -8,7 +8,7 @@
 Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
 
     Lgm_MagModelInfo  *MagInfo;
-   
+
     MagInfo = (Lgm_MagModelInfo *) calloc (1, sizeof(*MagInfo));
 
     MagInfo->Bfield = Lgm_B_T89;
@@ -68,7 +68,7 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
      * Bounce Loss Cone Height
      */
     MagInfo->Lgm_LossConeHeight = 100.0; // km above the Earth Ellipsoid.
-    
+
 
 
     /*
@@ -115,7 +115,7 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
 
     /*
-     *  Now, copy the Lgm_CTrans struct properly. 
+     *  Now, copy the Lgm_CTrans struct properly.
      */
     t->c = Lgm_CopyCTrans( s->c );
 
@@ -175,6 +175,26 @@ void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double 
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight ) {
     m->Lgm_LossConeHeight = LossConeHeight;
     return;
+}
+
+void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_igrf;
+}
+
+void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_T01S;
+}
+
+void Lgm_Set_gm_B_TS04(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_TS04;
+}
+
+void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_T89;
+}
+
+void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_OP77;
 }
 
 

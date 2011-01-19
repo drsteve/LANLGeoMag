@@ -14,6 +14,8 @@
  *  V1 23Dec2010 (BAL)
  ******************************************************************************/
 
+#include "Lgm/size.h"
+
 #include <stddef.h>
 
 #include "Lgm/Lgm_MagModelInfo.h"
@@ -85,6 +87,3 @@ int size_Lgm_LeapSeconds(void) {
 int size_DateAndTime(void) {
     return sizeof(Lgm_DateAndTime);
 }*/
-
-
-
