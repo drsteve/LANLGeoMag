@@ -111,6 +111,8 @@ Bvec = Lgm_Vector.Lgm_Vector(0,0,0)
 #LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
 MagEphemInfo.LstarInfo.contents.mInfo.contents.Bfield(pointer(P), pointer(Bvec),
                                                       MagEphemInfo.LstarInfo.contents.mInfo)
+
+
 #Blocal = Lgm_Magnitude( &Bvec );
 Blocal = Bvec.magnitude()
 
