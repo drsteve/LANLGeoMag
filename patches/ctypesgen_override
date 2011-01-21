@@ -1,0 +1,15 @@
+This is a very long description of exactly why we're bothering blah blah
+
+Index: Python/Lgm_Wrap.py
+===================================================================
+--- Python.orig/Lgm_Wrap.py	2011-01-20 13:35:48.000000000 -0700
++++ Python/Lgm_Wrap.py	2011-01-20 13:41:24.000000000 -0700
+@@ -2141,7 +2141,7 @@
+ struct_Lgm_MagModelInfo._fields_ = [
+     ('c', POINTER(Lgm_CTrans)),
+     ('nFunc', c_long),
+-    ('Bfield', CFUNCTYPE(UNCHECKED(c_int), )),
++    ('Bfield', c_void_p),
+     ('SavePoints', c_int),
+     ('Hmax', c_double),
+     ('fp', POINTER(FILE)),
