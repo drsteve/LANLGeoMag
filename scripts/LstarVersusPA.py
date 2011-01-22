@@ -7,6 +7,7 @@ from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, TR
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
+import DataArray
 
 ans = {}
 
@@ -105,6 +106,8 @@ if Lgm_Trace(pointer(u), pointer(v1), pointer(v2), pointer(v3),
     # Get a simple measure of how big L is
     Lgm_Convert_Coords( pointer(v1), pointer(vv1), GSM_TO_SM,
                        MagEphemInfo.LstarInfo.contents.mInfo.contents.c );
+
+    1/0
 
     Lam = math.asin(vv1.z/vv1.magnitude())
     CosLam = math.cos(Lam)

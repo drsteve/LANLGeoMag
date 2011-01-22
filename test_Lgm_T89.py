@@ -70,7 +70,7 @@ class Lgm_T89Tests(unittest.TestCase):
     def test_pos2Lgm_Vector(self):
         """pos2Lgm_Vector should have known output"""
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp)
-        self.assertEqual(a.position, a._Vpos.tolist())
+        self.assertEqual(list(a['position']), a._Vpos.tolist())
         self.assertTrue(isinstance(a._Vpos, Lgm_Vector.Lgm_Vector))
         b = Lgm_T89.Lgm_T89(a._Vpos, self.dt, self.kp)
         self.assertEqual(a._Vpos, b._Vpos)
@@ -88,9 +88,9 @@ class Lgm_T89Tests(unittest.TestCase):
             [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
         for i, kp in enumerate(range(4)):
             B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
-            self.assertAlmostEqual(ans[i][0], B.B.x)
-            self.assertAlmostEqual(ans[i][1], B.B.y)
-            self.assertAlmostEqual(ans[i][2], B.B.z)
+            self.assertAlmostEqual(ans[i][0], B['B'].x)
+            self.assertAlmostEqual(ans[i][1], B['B'].y)
+            self.assertAlmostEqual(ans[i][2], B['B'].z)
 
     def test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
@@ -124,20 +124,20 @@ class Lgm_T89Tests(unittest.TestCase):
         """Lgm_T89 time agrument has checking"""
         self.assertRaises(TypeError, Lgm_T89.Lgm_T89, self.pos, 'bad', self.kp)
 
-    def test_intermal_model(self):
+    def test_internal_model(self):
         """Lgm_T89 internal_model agrument has checking"""
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL=4)
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL='bla')
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL=1)
-        self.assertEqual(a.INTERNAL_MODEL, 1)
+        self.assertEqual(a.attrs['internal_model'], 1)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_CDIP')
-        self.assertEqual(a.INTERNAL_MODEL, 0)
+        self.assertEqual(a.attrs['internal_model'], 0)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_EDIP')
-        self.assertEqual(a.INTERNAL_MODEL, 1)
+        self.assertEqual(a.attrs['internal_model'], 1)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_IGRF')
-        self.assertEqual(a.INTERNAL_MODEL, 2)
+        self.assertEqual(a.attrs['internal_model'], 2)
 
     def test_coord_system(self):
         """Lgm_T89 only inpout GSM for now (regression)"""
