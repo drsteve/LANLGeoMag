@@ -13,8 +13,11 @@ Test suite for the Lgm_T89 file
 import unittest
 import datetime
 import itertools
+import ctypes
 
 import numpy
+
+from Lgm_Wrap import LGM_CDIP
 
 import Lgm_T89
 import Lgm_Vector
@@ -37,10 +40,10 @@ class Lgm_T89_T89(unittest.TestCase):
         super(Lgm_T89_T89, self).tearDown()
 
     def test_T89(self):
-        """the T89 simple statis wrapper should work (regression)"""
+        """the T89 simple static wrapper should work (regression)"""
         self.assertEqual(Lgm_T89.T89(self.pos, self.dt, self.kp),
-            [-18.97193562594128, -1.8611995170538265, 80.3933831714847])
-        ans = [[-18.97193562594128, -1.8611995170538265, 80.3933831714847]*2]
+            [-18.976439213243122, -1.8653978086481349, 80.39310505873112])
+        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112]*2]
         val = Lgm_T89.T89([self.pos]*2, [self.dt]*2, [self.kp]*2)
         ansv = list(itertools.chain.from_iterable(ans))
         valv = list(itertools.chain.from_iterable(val))
@@ -67,7 +70,7 @@ class Lgm_T89Tests(unittest.TestCase):
     def test_pos2Lgm_Vector(self):
         """pos2Lgm_Vector should have known output"""
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp)
-        self.assertEqual(a.position, a._Vpos.tolist())
+        self.assertEqual(list(a['position']), a._Vpos.tolist())
         self.assertTrue(isinstance(a._Vpos, Lgm_Vector.Lgm_Vector))
         b = Lgm_T89.Lgm_T89(a._Vpos, self.dt, self.kp)
         self.assertEqual(a._Vpos, b._Vpos)
@@ -79,18 +82,15 @@ class Lgm_T89Tests(unittest.TestCase):
 
     def test_T89_1(self):
         """First simple in/out tests of T89 (regression)"""
-        ans = [[-18.97193562594128, -1.8611995170538265, 80.3933831714847],
-            [-20.828853435515278, -1.8611995170538265, 74.62222419125123 ],
-            [-22.558420054640656, -1.8611995170538265, 70.52457956754591],
-            [-26.412234393652312, -1.8611995170538265, 64.64506509634843],
-            [-32.16112573540407, -1.8611995170538265, 60.078415300152216],
-            [-45.379156657247805, -1.8611995170538265, 49.36315537639906] ]
-        for i, kp in enumerate(range(6)):
-            a = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
-            B = a.calc_B()
-            self.assertAlmostEqual(ans[i][0], B.x)
-            self.assertAlmostEqual(ans[i][1], B.y)
-            self.assertAlmostEqual(ans[i][2], B.z)
+        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
+            [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
+            [-22.562973770829664, -1.8653978086481349, 70.52430794391046],
+            [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
+        for i, kp in enumerate(range(4)):
+            B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
+            self.assertAlmostEqual(ans[i][0], B['B'].x)
+            self.assertAlmostEqual(ans[i][1], B['B'].y)
+            self.assertAlmostEqual(ans[i][2], B['B'].z)
 
     def test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
@@ -101,14 +101,12 @@ class Lgm_T89Tests(unittest.TestCase):
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt, [7, 0])
 
     def test_list_in(self):
-        """Make sure that list inputs work correctly"""
-        ans = [[-18.97193562594128, -1.8611995170538265, 80.3933831714847],
-            [-20.828853435515278, -1.8611995170538265, 74.62222419125123 ],
-            [-22.558420054640656, -1.8611995170538265, 70.52457956754591],
-            [-26.412234393652312, -1.8611995170538265, 64.64506509634843],
-            [-32.16112573540407, -1.8611995170538265, 60.078415300152216],
-            [-45.379156657247805, -1.8611995170538265, 49.36315537639906] ]
-        for i, kp in enumerate(range(6)):
+        """Make sure that list inputs work correctly (regression)"""
+        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
+            [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
+            [-22.562973770829664, -1.8653978086481349, 70.52430794391046],
+            [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
+        for i, kp in enumerate(range(4)):
             a = Lgm_T89.Lgm_T89([self.pos]*2, [self.dt]*2, [kp]*2)
             B = a.calc_B()
             B = [val.tolist() for val in B]
@@ -126,20 +124,20 @@ class Lgm_T89Tests(unittest.TestCase):
         """Lgm_T89 time agrument has checking"""
         self.assertRaises(TypeError, Lgm_T89.Lgm_T89, self.pos, 'bad', self.kp)
 
-    def test_intermal_model(self):
+    def test_internal_model(self):
         """Lgm_T89 internal_model agrument has checking"""
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL=4)
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL='bla')
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL=1)
-        self.assertEqual(a.INTERNAL_MODEL, 1)
+        self.assertEqual(a.attrs['internal_model'], 1)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_CDIP')
-        self.assertEqual(a.INTERNAL_MODEL, 0)
+        self.assertEqual(a.attrs['internal_model'], 0)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_EDIP')
-        self.assertEqual(a.INTERNAL_MODEL, 1)
+        self.assertEqual(a.attrs['internal_model'], 1)
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_IGRF')
-        self.assertEqual(a.INTERNAL_MODEL, 2)
+        self.assertEqual(a.attrs['internal_model'], 2)
 
     def test_coord_system(self):
         """Lgm_T89 only inpout GSM for now (regression)"""
