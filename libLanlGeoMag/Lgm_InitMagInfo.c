@@ -139,6 +139,58 @@ void Lgm_MagModelInfo_Set_Psw( double Psw, Lgm_MagModelInfo *m ) {
 void Lgm_MagModelInfo_Set_Kp( double Kp, Lgm_MagModelInfo *m ) {
     m->Kp = Kp;
 }
+void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int ExternalModel ){
+
+    m->InternalModel = InternalModel;
+    m->ExternalModel = ExternalModel;
+    
+    switch ( m->ExternalModel ) {
+
+        case LGM_EXTMODEL_NULL:
+                                /*
+                                 * This is a bit kludgey. If NULL is given
+                                 * assume the user wants only an internal
+                                 * field. I.e. set m->Bfield to be equal to the
+                                 * Internal model given.
+                                 */
+                                if ( InternalModel == LGM_CDIP ) {
+                                    m->Bfield = Lgm_B_cdip;
+                                } else if ( InternalModel == LGM_EDIP ) {
+                                    m->Bfield = Lgm_B_edip;
+                                } else {
+                                    m->Bfield = Lgm_B_igrf;
+                                }
+                                break;
+
+        case LGM_EXTMODEL_T87:
+                                m->Bfield = Lgm_B_T87;
+                                break;
+
+        case LGM_EXTMODEL_T89:
+                                m->Bfield = Lgm_B_T89;
+                                break;
+
+/*
+        case LGM_EXTMODEL_T96:
+                                m->Bfield = Lgm_B_T96;
+                                break;
+*/
+
+        case LGM_EXTMODEL_T01S:
+                                m->Bfield = Lgm_B_T01S;
+                                break;
+
+        case LGM_EXTMODEL_TS04:
+                                m->Bfield = Lgm_B_TS04;
+                                break;
+
+        case LGM_EXTMODEL_OP77:
+                                m->Bfield = Lgm_B_OP77;
+                                break;
+
+    }
+
+}
 
 /*
  * Some setters

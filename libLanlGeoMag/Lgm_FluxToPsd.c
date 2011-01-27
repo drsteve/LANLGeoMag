@@ -222,7 +222,7 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
 }
 
 /*
- * Destroy a Lgm_FluxPsd structure.
+ * Destroy a Lgm_FluxToPsd structure.
  */
 void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
@@ -392,7 +392,7 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
     for ( k=0; k<nK; k++ ){
         f->K[k] = K[k];
         f->AofK[k] = Lgm_AlphaOfK( f->K[k], mInfo );
-printf("f->K[k] = %g   f->AofK[k] = %g\n", f->K[k], f->AofK[k]);
+printf("f->K[k] = %g   f->AofK[k] = %g\n\n", f->K[k], f->AofK[k]);
     }
 
 return;

@@ -1,14 +1,14 @@
 CRRES
 1 20712U 90065  A 90362.07714058  .00001110 +00000-0 +10425-2 0 00835
 2 20712 018.2570 343.6531 7126488 317.9439 005.1830 02.43673536003801
-OutputFile:temp.txt
-ISO Start Date/Time:1991-01-01T04:05:00
-ISO End   Date/Time:1991-01-01T04:05:00
-Cadence in seconds:43200
+OutputFile:CRRES_MagEphem_v2.txt
+ISO Start Date/Time:1991-01-01T00:00:00
+ISO End   Date/Time:1991-01-01T00:00:00
+Cadence in seconds:900
 Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
 Dst:-20
-PitchAngles:18 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90
+PitchAngles:1 90
 Footpoint Height:100.0
 Colorize:False

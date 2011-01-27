@@ -20,6 +20,9 @@
  *   ( IGRF 11th generation (revised 2010) )
  *
  */
+#ifndef M_SQRT_3
+#define M_SQRT_3        1.7320508075688772935274463415058       /* sqrt(3)        */
+#endif
 
 static int   IGRF_nModels = 23;
 

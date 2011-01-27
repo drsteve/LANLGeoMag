@@ -71,6 +71,14 @@
 #define LGM_RELATIVE_JUMP_METHOD 0
 #define LGM_ABSOLUTE_JUMP_METHOD 1
 
+// External Mag models
+#define LGM_EXTMODEL_NULL   -1
+#define LGM_EXTMODEL_T87     0
+#define LGM_EXTMODEL_T89     1
+#define LGM_EXTMODEL_T96     2
+#define LGM_EXTMODEL_T01S    3
+#define LGM_EXTMODEL_TS04    4
+#define LGM_EXTMODEL_OP77    5
 
 typedef struct Lgm_MagModelInfo {
 
@@ -97,6 +105,7 @@ typedef struct Lgm_MagModelInfo {
      * Variable to control which internal model to use
      */
     int         InternalModel;          // Can be LGM_CDIP, LGM_EDIP or LGM_IGRF
+    int         ExternalModel;          // Can be from list above (e.g. LGM_EXTMODEL_T89)
 
 
 
@@ -468,6 +477,7 @@ void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
 void Lgm_Set_Octree_kNN_MaxDist( Lgm_MagModelInfo *m, double MaxDist );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
+void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int ExternalModel );
 
 /*
  * Added for Python wrapping, the function pointer is hard to impossible to
@@ -480,6 +490,11 @@ void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
 
 
+
+/*
+ * CD MAG coorfs to corrected Geomag.
+ */
+int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
 
 
 

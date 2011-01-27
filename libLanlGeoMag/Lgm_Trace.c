@@ -36,7 +36,7 @@
  *      LGM_OPEN_N_LOBE  (==2) if field line is northern lobe FL (v1 valid)
  *      LGM_OPEN_S_LOBE  (==3) if field line is southern lobe FL (v2 valid)
  *
- *      LGM_INSIDE_EARTH (==3) initial point is inside Earth (no points valid)
+ *      LGM_INSIDE_EARTH (==-1) initial point is inside Earth (no points valid)
  *
  *
  *  Changed June 13, 2008

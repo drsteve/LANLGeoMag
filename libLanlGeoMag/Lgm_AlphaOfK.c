@@ -64,7 +64,12 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      *  Set up low side of bracket.
      */
     a0 = 10.0;
+a0 = 5.0;
+a0 = 1.0;
+a0 = 0.1;
+
     f0 = Func( K, a0, m );
+printf("BRACK0: Func( %g, %g, m ) = %g\n", K, a0, f0 );
     if ( fabs(f0) < 1e-4 ) return( a0 );
 
 
@@ -72,7 +77,9 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      *  Set up high side of bracket.
      */
     a1 = 90.0;
+a1 = 80.0;
     f1 = Func( K, a1, m );
+printf("BRACK1: Func( %g, %g, m ) = %g\n", K, a1, f1 );
     if ( fabs(f1) < 1e-4 ) return( a1 );
 
 
@@ -81,7 +88,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      *  If the vals are not opposite signs, we dont have a proper bracket.
      */
     if ( f0*f1 > 0.0 ) {
-        printf("Lgm_AlphaOfK(): [a0:a1] = [%g: %g] does not bracket root?\n", a0, a1);
+        printf("Lgm_AlphaOfK(): [a0:a1] = [%g: %g] does not bracket root? Func(a0) = %g, Func(a1) = %g\n", a0, a1, f0, f1);
         return(-9e99);
     }
 
@@ -95,6 +102,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
         //a = (a1-a0)*GOLD + a0;
         a = (a1-a0)*0.5 + a0;
         f = Func( K, a, m );
+printf("Calling Func( %g, %g, m ) = %g\n", K, a, f );
 
         if ( fabs(a1-a0) < 1e-2 ) {
             done = TRUE;
@@ -171,11 +179,14 @@ m->UseInterpRoutines = FALSE;
              *  the mirror points.  If we dont do it, we could get
              *  slight differences due to it.
              */
+/*
             FreeSpline( m );
             AddNewPoint( 0.0, m->Bm, &m->Pm_South, m );
             AddNewPoint( Smb, m->Bm, &m->Pm_North, m );
             InitSpline( m );
+*/
 
+m->UseInterpRoutines = FALSE;
             if (  m->UseInterpRoutines ) {
 
                 /*
@@ -200,6 +211,7 @@ m->UseInterpRoutines = FALSE;
              */
             K = 3.16227766e-3*I*sqrt(m->Bm);
 
+printf("Kt, K = %g, %g    Kt-K = %g\n", Kt, K, Kt-K);
 
             /*
              *  return the diff

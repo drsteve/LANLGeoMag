@@ -1064,9 +1064,9 @@ void Lgm_InitIGRF( double g[13][13], double h[13][13], int N, int Flag, Lgm_CTra
          *   mixed up.) A better reference is Akasofu and Chapman [1972].
          *   Plus, I'm sure Jacobs' books are good on this too.
          */
-        Lx = -g[1][1]*g[2][0] + (g[1][1]*g[2][2] + h[1][1]*h[2][2] + g[1][0]*g[2][1])*sqrt(3.0);
-        Ly = -h[1][1]*g[2][0] + (g[1][1]*h[2][2] - h[1][1]*g[2][2] + g[1][0]*h[2][1])*sqrt(3.0);
-        Lz = 2.0*g[1][0]*g[2][0] + (g[1][1]*g[2][1] + h[1][1]*h[2][1])*sqrt(3.0);
+        Lx = -g[1][1]*g[2][0] + (g[1][1]*g[2][2] + h[1][1]*h[2][2] + g[1][0]*g[2][1])*M_SQRT_3;
+        Ly = -h[1][1]*g[2][0] + (g[1][1]*h[2][2] - h[1][1]*g[2][2] + g[1][0]*h[2][1])*M_SQRT_3;
+        Lz = 2.0*g[1][0]*g[2][0] + (g[1][1]*g[2][1] + h[1][1]*h[2][1])*M_SQRT_3;
         E  = (Lx*g[1][1] + Ly*h[1][1] + Lz*g[1][0])/(4.0*H02);
 
         c->ED_x0 = (Lx-g[1][1]*E)/(3.0*H02); // in units of Re
