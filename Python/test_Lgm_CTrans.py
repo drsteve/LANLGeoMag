@@ -18,9 +18,9 @@ import numpy
 
 import Lgm_CTrans
 import Lgm_Vector
-from Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans, \
-    Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, \
-    GSM_TO_SM, SM_TO_GSM
+from Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans
+from Lgm_Wrap import Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms
+from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, SM_TO_GSM
 
 class Lgm_CTransTests(unittest.TestCase):
     """
@@ -66,7 +66,8 @@ class Lgm_CTransTests(unittest.TestCase):
         self.assertAlmostEqual(-5.5352494753370127, Usm.x)
         self.assertAlmostEqual( 3.3999999999999995, Usm.y)
         self.assertAlmostEqual(-4.2674363786448328, Usm.z)
-        Lgm_Convert_Coords(Usm, Ugsm, SM_TO_GSM, c)
+        Lgm_Convert_Coords(ctypes.pointer(Usm), ctypes.pointer(Ugsm),
+                           SM_TO_GSM, ctypes.pointer(c))
         self.assertAlmostEqual(-6.6, Ugsm.x)
         self.assertAlmostEqual( 3.4, Ugsm.y)
         self.assertAlmostEqual(-2.3, Ugsm.z)
