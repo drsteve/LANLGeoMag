@@ -311,6 +311,10 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
 
+printf("Info->nPnts = %d\n", Info->nPnts);
+
+
+
 
     /*
      *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE

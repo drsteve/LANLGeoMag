@@ -156,6 +156,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Info->Hmax = 10.0;
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
+printf("44444444444444444444444444444: Height = %g\n", Height);
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
 
@@ -177,13 +178,33 @@ Info->Hmax = 0.10;
         Info->Bvecmin = Bvec;
         Info->Bmin = Lgm_Magnitude( &Bvec );
 
+        Info->Ellipsoid_Footprint_Pn = *v2;
+        Info->Bfield( v2, &Bvec, Info );
+        Info->Ellipsoid_Footprint_Bvecn = Bvec;
+        Info->Ellipsoid_Footprint_Bn    = Lgm_Magnitude( &Bvec );
+
+        Info->Ellipsoid_Footprint_Ps = *v1;
+        Info->Bfield( v1, &Bvec, Info );
+        Info->Ellipsoid_Footprint_Bvecs = Bvec;
+        Info->Ellipsoid_Footprint_Bs    = Lgm_Magnitude( &Bvec );
+
     } else if ( flag1 ) {
+
+        Info->Ellipsoid_Footprint_Ps = *v1;
+        Info->Bfield( v1, &Bvec, Info );
+        Info->Ellipsoid_Footprint_Bvecs = Bvec;
+        Info->Ellipsoid_Footprint_Bs    = Lgm_Magnitude( &Bvec );
 
 	    Lgm_Convert_Coords( v1, &w, GSM_TO_SM, Info->c );
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );
 
 
     } else if ( flag2 ) {
+
+        Info->Ellipsoid_Footprint_Pn = *v2;
+        Info->Bfield( v2, &Bvec, Info );
+        Info->Ellipsoid_Footprint_Bvecn = Bvec;
+        Info->Ellipsoid_Footprint_Bn    = Lgm_Magnitude( &Bvec );
 
 	    Lgm_Convert_Coords( v2, &w, GSM_TO_SM, Info->c );
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );

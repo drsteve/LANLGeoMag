@@ -368,8 +368,9 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
  */
 void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
-    int               k, m;
-    Lgm_MagModelInfo *mInfo;
+    int                 k, m;
+    double              AlphaEq, SinA;
+    Lgm_MagModelInfo    *mInfo;
 
     /*
      * Init mInfo
@@ -388,12 +389,25 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      * Transform the K's into Alpha's.
      * Save the results in the p structure.
      */
-    Lgm_Init_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
+    Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
     for ( k=0; k<nK; k++ ){
-        f->K[k] = K[k];
-        f->AofK[k] = Lgm_AlphaOfK( f->K[k], mInfo );
-printf("f->K[k] = %g   f->AofK[k] = %g\n\n", f->K[k], f->AofK[k]);
+        f->K[k]    = K[k];
+        AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+        SinA       = sqrt( mInfo->Blocal/mInfo->Bmin ) * sin( RadPerDeg*AlphaEq );
+        if ( AlphaEq > 0.0 ) {
+            if ( SinA <= 1.0 ) {
+                f->AofK[k] = DegPerRad*asin( SinA );
+            } else {
+                f->AofK[k] = -9e99;
+                printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+            }
+        } else {
+            f->AofK[k] = -9e99;
+            printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+        }
+printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
     }
+    Lgm_TearDown_AlphaOfK( mInfo );
 
 return;
 

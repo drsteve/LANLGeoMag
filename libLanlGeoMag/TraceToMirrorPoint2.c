@@ -39,7 +39,8 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_Convert_Coords( u, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
     if ( Height < Info->Lgm_LossConeHeight ) {
-        if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE \n", Info->Lgm_LossConeHeight );
+//        if ( Info->VerbosityLevel > 1 ) 
+printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE (Height = %g)\n", Info->Lgm_LossConeHeight, Height );
         return(-1); // below loss cone height -> particle is in loss cone!
     }
 
@@ -140,8 +141,9 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 	    Htry = fabs(0.2*(R-0.999999));
         if (Htry < 1e-12) done = TRUE;
 
-	    if ( Height < Info->Lgm_LossConeHeight ) {
-            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Mirror Height is below %g km -- LOSS CONE \n", Info->Lgm_LossConeHeight );
+	    if ( Height < 10.0 ) {
+//            if ( Info->VerbosityLevel > 1 ) 
+printf("Lgm_TraceToMirrorPoint: Current Height is below %g km -- ASSUMING LOSS CONE. (Height = %g) \n", 10.0, Hdid );
 	        return(-1); /* dropped below loss cone height -> particle is in loss cone! */
 	    }
 
@@ -191,6 +193,14 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     *v = Pb;
     *Sm = Sb;
 
+
+    Lgm_Convert_Coords( &v, &w, GSM_TO_WGS84, Info->c );
+    Lgm_WGS84_to_GeodHeight( &w, &Height );
+	if ( Height < Info->Lgm_LossConeHeight ) {
+//            if ( Info->VerbosityLevel > 1 ) 
+printf("Lgm_TraceToMirrorPoint: Final Height is below %g km -- ASSUMING LOSS CONE (Height = %g)\n", Info->Lgm_LossConeHeight, Height );
+	    return(-1); /* dropped below loss cone height -> particle is in loss cone! */
+	}
 
     return( 1 );
 

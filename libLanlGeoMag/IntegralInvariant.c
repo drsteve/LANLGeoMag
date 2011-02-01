@@ -140,6 +140,7 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
     a = mInfo->Sm_South;
     b = mInfo->Sm_North;
 
+
     /*
      *   set tolerances for QuadPack routines. 
      */

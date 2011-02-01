@@ -146,21 +146,25 @@ typedef struct Lgm_MagModelInfo {
     double          Bmin;           //< Value of |Bmin|
     double          Smin;           //< Distance from southern footpoint to Pmin along FL.
 
-    Lgm_Vector      Spherical_Footprint_Pn;   //< position of northern footpoint (at 120km)
-    double          Spherical_Footprint_Sn;   //< Distance along FL from southern foorpoint in Re
-    double          Spherical_Footprint_Bn;   //< Value of |B| at Footprint_Pn
+    Lgm_Vector      Spherical_Footprint_Pn;      //< position of northern footpoint (at 120km)
+    double          Spherical_Footprint_Sn;      //< Distance along FL from southern foorpoint in Re
+    double          Spherical_Footprint_Bn;      //< Value of |B| at Sph. Footprint_Pn
+    Lgm_Vector      Spherical_Footprint_Bvecn;   //< Value B of  at Sph. Footprint_Pn
 
-    Lgm_Vector      Spherical_Footprint_Ps;   //< position of southern footpoint (at 120km)
-    double          Spherical_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
-    double          Spherical_Footprint_Bs;   //< Value of |B| at Footprint_Ps
+    Lgm_Vector      Spherical_Footprint_Ps;      //< position of southern footpoint (at 120km)
+    double          Spherical_Footprint_Ss;      //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Spherical_Footprint_Bs;      //< Value of |B| at Sph. Footprint_Ps
+    Lgm_Vector      Spherical_Footprint_Bvecs;   //< Value B of  at Sph. Footprint_Ps
 
-    Lgm_Vector      Ellipsoid_Footprint_Pn;   //< position of northern footpoint (at 120km above surface of WGS84 ellipsoid)
-    double          Ellipsoid_Footprint_Sn;   //< Distance along FL from southern footpoint in Re
-    double          Ellipsoid_Footprint_Bn;   //< Value of |B| at Footprint_Pn
+    Lgm_Vector      Ellipsoid_Footprint_Pn;      //< position of northern footpoint (at 120km above surface of WGS84 ellipsoid)
+    double          Ellipsoid_Footprint_Sn;      //< Distance along FL from southern footpoint in Re
+    double          Ellipsoid_Footprint_Bn;      //< Value of |B| at Ellips. Footprint_Pn
+    Lgm_Vector      Ellipsoid_Footprint_Bvecn;   //< Value B of  at Ellips. Footprint_Pn
 
-    Lgm_Vector      Ellipsoid_Footprint_Ps;   //< position of southern footpoint (at 120km)
-    double          Ellipsoid_Footprint_Ss;   //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
-    double          Ellipsoid_Footprint_Bs;   //< Value of |B| at Footprint_Ps
+    Lgm_Vector      Ellipsoid_Footprint_Ps;      //< position of southern footpoint (at 120km)
+    double          Ellipsoid_Footprint_Ss;      //< Distance along FL from southern foorpoint in Re (i.e. this one is zero by definition)
+    double          Ellipsoid_Footprint_Bs;      //< Value of |B| at Ellips. Footprint_Ps
+    Lgm_Vector      Ellipsoid_Footprint_Bvecs;   //< Value B of  at Ellips. Footprint_Ps
 
     int             FieldLineType;  //< Field line type. (I.e., LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE)
 
@@ -461,7 +465,8 @@ double      IFromLBmM_McIlwain( double L, double Bm, double M );
 double      BofS( double s, Lgm_MagModelInfo *Info );
 int         SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info );
 double      Lgm_AlphaOfK( double K, Lgm_MagModelInfo *Info );
-int         Lgm_Init_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m );
+int         Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m );
+int         Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m );
 int         Lgm_Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_MagModelInfo *Info );
 //int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 
