@@ -188,8 +188,7 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
-//    m->Bm = m->Blocal/sa2; 
-m->Bm = m->Bmin/sa2; 
+    m->Bm = m->Bmin/sa2; 
 
 
     /*
@@ -200,8 +199,6 @@ m->Bm = m->Bmin/sa2;
      if ( Lgm_TraceToMirrorPoint( &(m->Pmin), &(m->Pm_South), &Sma, m->Bm, -1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) > 0 ) {
         if ( Lgm_TraceToMirrorPoint( &(m->Pm_South), &(m->Pm_North), &Smb, m->Bm,  1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) > 0 ) {
 
-m->UseInterpRoutines = FALSE;
-m->UseInterpRoutines = TRUE;
             
             /*
              *  Set the limits of integration. Also set tolerances for

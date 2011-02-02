@@ -774,6 +774,7 @@ char       *Lgm_StrToUpper( char *str, int nmax );
  * Leap Second Related  Routines
  */
 Lgm_DateTime *Lgm_DateTime_Create( int Year, int Month, int Day, double Time, int TimeSystem, Lgm_CTrans *c );
+void          Lgm_DateTime_Destroy( Lgm_DateTime *d );
 int           Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c );
 int           Lgm_LoadLeapSeconds( Lgm_CTrans *c );
 double        Lgm_GetLeapSeconds( double JD, Lgm_CTrans *c );

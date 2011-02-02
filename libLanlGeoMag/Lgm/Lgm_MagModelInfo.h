@@ -15,6 +15,7 @@
 #define RE                  (6378.135e3)        /* Earth Radius, m */
 #define LGM_CC              (2.99792458e8)      /* Speed of Light, m/s */
 #define LGM_EE              (1.6022e-19)        /* electron charge, C */
+#define nT_Per_Gauss        (1e5)               /* 1e5 nT == 1 Gauss */
 
 
 #ifndef TRUE

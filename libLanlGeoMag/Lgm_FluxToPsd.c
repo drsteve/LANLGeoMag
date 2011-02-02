@@ -27,7 +27,7 @@
  *          B -- Local magnetic field strength. ( nT )
  *
  *  Returns:
- *          First adiabatic invariant, Mu. ( MeV/nT )
+ *          First adiabatic invariant, Mu. ( MeV/G )
  */
 double  Lgm_Energy_to_Mu( double E, double a, double B ) {
 
@@ -38,7 +38,7 @@ double  Lgm_Energy_to_Mu( double E, double a, double B ) {
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
     
-    return( E*sa2/B );          // Mu = E*sin^2(Alpha)/B
+    return( E*sa2*nT_Per_Gauss/B ); // Mu = E*sin^2(Alpha)/B
     
 }
 
@@ -49,7 +49,7 @@ double  Lgm_Energy_to_Mu( double E, double a, double B ) {
  * Pitch Angle and the local B-field strength.
  *  
  *  Inputs:
- *          Mu -- Kinetic Energy of Particle.    ( MeV/nT )
+ *          Mu -- Kinetic Energy of Particle.    ( MeV/G )
  *          a  -- Pitch Angle of Particle.       ( Degrees )
  *          B  -- Local magnetic field strength. ( nT )
  *
@@ -60,12 +60,13 @@ double  Lgm_Mu_to_Energy( double Mu, double a, double B ) {
 
     double  sa, sa2;
 
+    if ( a < 0.0 ) return( -9e99 );
     
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
 
     if ( sa2 < 1e-12 ) return( 9e99 );
-    else return( Mu*B/sa2 );    // Mu = E*sin^2(Alpha)/B
+    else return( Mu*B/(sa2*nT_Per_Gauss) );    // Mu = E*sin^2(Alpha)/B
 
 
 }
@@ -214,7 +215,8 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
      */
     f->DumpDiagnostics = DumpDiagnostics;
 
-    f->Alloced = FALSE;
+    f->Alloced1 = FALSE;
+    f->Alloced2 = FALSE;
 
 
     return f;
@@ -226,11 +228,19 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
  */
 void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
-    if ( f->Alloced ) {
+    if ( f->Alloced1 ) {
         LGM_ARRAY_1D_FREE( f->E );
         LGM_ARRAY_1D_FREE( f->A );
         LGM_ARRAY_2D_FREE( f->FLUX_EA );
         LGM_ARRAY_2D_FREE( f->PSD_EA );
+    }
+
+    if ( f->Alloced2 ) {
+        LGM_ARRAY_1D_FREE( f->Mu );
+        LGM_ARRAY_1D_FREE( f->K );
+        LGM_ARRAY_1D_FREE( f->AofK );
+        LGM_ARRAY_2D_FREE( f->EofMu );
+        LGM_ARRAY_2D_FREE( f->PSD_MK );
     }
 
     free( f );
@@ -240,9 +250,9 @@ void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
 
 /*
- *  Lgm_FluxToPsd_SetFlux()
+ *  Lgm_FluxToPsd_SetDateTimeAndPos()
  *      
- *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *     
  *
  *  Inputs:
  */
@@ -279,7 +289,7 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
     /*
      * If arrays are already alloc'd, free them first
      */
-    if ( f->Alloced ) {
+    if ( f->Alloced1 ) {
         LGM_ARRAY_1D_FREE( f->E );
         LGM_ARRAY_1D_FREE( f->A );
         LGM_ARRAY_2D_FREE( f->FLUX_EA );
@@ -317,17 +327,19 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
     for (j=0; j<f->nA; j++) {
         for (i=0; i<f->nE; i++) {
             flux   = f->FLUX_EA[i][j];
+printf("E[%d] = %g\n", i, f->E[i]);
             p2c2   = Lgm_p2c2( f->E[i], LGM_Ee0 );
             fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
             f->PSD_EA[i][j] = fp; // PSD_EA is "PSD versus Energy and Pitch Angle".
-            f->PSD_EA[i][j] = p2c2;
+//            f->PSD_EA[i][j] = p2c2;
         }
+printf("\n\n");
     }
     if ( f->DumpDiagnostics ) {
         DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_EA.gif", f->nA, f->nE, f->PSD_EA );
     }
 
-    f->Alloced = TRUE;
+    f->Alloced1 = TRUE;
    
     return;
 
@@ -366,7 +378,7 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
  * 
  * 
  */
-void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
+void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
     int                 k, m;
     double              AlphaEq, SinA;
@@ -376,6 +388,17 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
      * Init mInfo
      */
     mInfo = Lgm_InitMagInfo();
+
+    /*
+     * If arrays are already alloc'd, free them first
+     */
+    if ( f->Alloced2 ) {
+        LGM_ARRAY_1D_FREE( f->Mu );
+        LGM_ARRAY_1D_FREE( f->K );
+        LGM_ARRAY_1D_FREE( f->AofK );
+        LGM_ARRAY_2D_FREE( f->EofMu );
+        LGM_ARRAY_2D_FREE( f->PSD_MK );
+    }
     
     f->nMu = nMu; 
     f->nK  = nK; 
@@ -385,11 +408,12 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
     LGM_ARRAY_2D( f->EofMu, f->nMu,  f->nK,  double );
 
     /*
-     * Copy K's into p structure.
+     * Copy K's into f structure.
      * Transform the K's into Alpha's.
-     * Save the results in the p structure.
+     * Save the results in the f structure.
      */
     Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
+    f->B = mInfo->Blocal;
     for ( k=0; k<nK; k++ ){
         f->K[k]    = K[k];
         AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo ); // Lgm_AlphaOfK() returns equatorial pitch angle.
@@ -399,52 +423,111 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double **PSD, double *Mu, int nMu, doubl
                 f->AofK[k] = DegPerRad*asin( SinA );
             } else {
                 f->AofK[k] = -9e99;
-                printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
             }
         } else {
             f->AofK[k] = -9e99;
-            printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+            //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
         }
-printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+        printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
     }
     Lgm_TearDown_AlphaOfK( mInfo );
 
-return;
 
     /*
-     * Copy Mu's into p structure.
+     * Copy Mu's into f structure.
      * Transform the Mu's into Emergy's.
-     * Save the results in the p structure.
+     * Save the results in the f structure.
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
      */
     for ( m=0; m<nK; m++ ){
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
-// NEED to set B somewhere.
-// Also, user needs to be able to set up B-field model.
             f->EofMu[m][k] = Lgm_Mu_to_Energy( f->Mu[m], f->AofK[k], f->B );
+            printf("f->Mu[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g\n", m, k, m, k, f->Mu[m], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
 
 
     /*
-     * Now, from the PSD[E][mu] array, get PSD at the E's and Alpha's we just computed.
+     * Now, from the PSD[E][a] array, get PSD at the E's and Alpha's we just computed.
      * The result will be the same as PSD at the given Mu's and K's
      * Transform the Mu's into Emergy's.
      */
+    LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nK; m++ ){
         for ( k=0; k<nK; k++ ){
-// NEED to create the Lgm_FluxPsd_GetPsdAtEandAlpha() function
-//            PSD[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+            f->PSD_MK[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
         }
     }
 
 
     Lgm_FreeMagInfo( mInfo );
 
+    f->Alloced2 = TRUE;
+
+    return;
+
 }
 
 
+
+/*
+ * The f structure should have an initialized PSD[E][a] array in it.
+ * This routine computes psd given a value of E and a.
+ */
+double  Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
+
+    int     j, i, i0, i1;
+    double  a0, a1, y0, y1, slp, *g, psd;
+
+    // if a < 0, we should return fill value.
+    if ( a < 0.0 ) return(-9e99);
+
+    /*
+     * Since pitch angle, a is bounded (here its constrained to be between 0
+     * and 90), we will interpolate on that first to produce a 1D array of
+     * f(E).
+     */
+    if ( a < f->A[0] ) {
+        i0 = 0; i1 = 1;
+    } else if ( a > f->A[f->nA - 1] ) {
+        i0 = f->nA - 2; i1 = f->nA - 1;
+    } else {
+        for (i=1; i<f->nA; i++) {
+            if ( a < f->A[i] ) {
+                i0 = i-1; i1 = i;
+                break;
+            }
+        }
+    }
+    printf("i0, i1 = %d %d\n", i0, i1);
+
+
+    // interpolate PA
+    LGM_ARRAY_1D( g, f->nE, double );
+printf("f->PSD_EA[4][0], f->PSD_EA[4][3] = %g %g \n", f->PSD_EA[4][0], f->PSD_EA[4][3]);
+    for (j=0; j<f->nE; ++j){
+        a0   = f->A[i0];
+        a1   = f->A[i1];
+        y0   = f->PSD_EA[j][i0];
+        y1   = f->PSD_EA[j][i1];
+        slp  = (y1-y0)/(a1-a0);
+        g[j] = slp*(a-a0) + y0;
+        printf("a = %g, g[%d] = %g\n", a, j, g[j]);
+    }
+
+
+    // interpolate/fit E
+    
+    
+
+    LGM_ARRAY_1D_FREE( g );
+
+
+    return( psd );
+
+}
 
 
 
@@ -686,7 +769,7 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
             } else {
                 uVal = (unsigned char)( (Val - Min)/(Max-Min)*255.0 );
             }
-            *(uImage + W*h + w) = uVal;
+            *(uImage + W*(H-1-h) + w) = uVal;
 
         }
     }

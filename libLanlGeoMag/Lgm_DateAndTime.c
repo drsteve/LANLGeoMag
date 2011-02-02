@@ -901,6 +901,9 @@ Lgm_DateTime *Lgm_DateTime_Create( int Year, int Month, int Day, double Time, in
     return(d);
 
 }
+void Lgm_DateTime_Destroy( Lgm_DateTime *d ) {
+    free( d );
+}
 
     
 
