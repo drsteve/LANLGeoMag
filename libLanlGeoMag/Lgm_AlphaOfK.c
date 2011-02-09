@@ -41,12 +41,9 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      * Trace the field line for the given position. This should be a fast
      * adaptive trace. I.e. -- no points are saved.
      */
-printf("m->Lgm_LossConeHeight = %g\n", m->Lgm_LossConeHeight);
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, m );
     s = m->Trace_s;
 
-printf("v1 = %g %g %g\n", v1.x, v1.y, v1.z );
-printf("v2 = %g %g %g\n", v2.x, v2.y, v2.z );
 
 
     /*

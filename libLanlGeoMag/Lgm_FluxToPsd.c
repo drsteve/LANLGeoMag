@@ -18,35 +18,45 @@
 
 
 /*
- * Returns First adiabatic invariant, Mu, given: Particle's kinetic energy,
- * Pitch Angle and the local B-field strength. (Mu is Eperp/B.)
+ * Returns relativisitic First adiabatic invariant, Mu, given: Particle's
+ * kinetic energy, Pitch Angle, the local B-field strength, and the particle's
+ * rest energy. (Mu is p_perp^2/(2*m0*B). Eperp/B non-rel.)
+ *
+ *  Since p^2c^2 = Ek^2 + 2EkE0
+ *  we have,
+ *      pperp^2/(2 m0 B) = p^2c^2/(2 m0 c^2 B) sin^2(alpha)
+ *                       = p^2c^2/(2 E0 B) * sa2
+ *                       = Ek/B(1+Ek/(2E0))*sa2
  *  
  *  Inputs:
- *          E -- Kinetic Energy of Particle.    ( MeV )
- *          a -- Pitch Angle of Particle.       ( Degrees )
- *          B -- Local magnetic field strength. ( nT )
+ *          Ek -- Kinetic Energy of Particle.    ( MeV )
+ *          E0 -- Rest mass of Particle.         ( MeV )
+ *          a  -- Pitch Angle of Particle.       ( Degrees )
+ *          B  -- Local magnetic field strength. ( nT )
  *
  *  Returns:
  *          First adiabatic invariant, Mu. ( MeV/G )
  */
-double  Lgm_Energy_to_Mu( double E, double a, double B ) {
+double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
-    double  sa, sa2;
+    double  sa, sa2, mu;
 
     if ( B <= 1e-12 ) return( 9e99 );
 
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
     
-    return( E*sa2*nT_Per_Gauss/B ); // Mu = E*sin^2(Alpha)/B
+    mu = Ek*(1.0+0.5*Ek/E0)*sa2*nT_Per_Gauss/B;
+    
+    return( mu ); 
     
 }
 
 
 
 /*
- * Returns Particle's Kinetic Energy, E, given: Particle's first invariant, Mu,
- * Pitch Angle and the local B-field strength.
+ * Returns Particle's Kinetic Energy, Ek, given: Particle's relativistic first
+ * invariant, Mu, Pitch Angle and the local B-field strength and rest energy.
  *  
  *  Inputs:
  *          Mu -- Kinetic Energy of Particle.    ( MeV/G )
@@ -56,17 +66,21 @@ double  Lgm_Energy_to_Mu( double E, double a, double B ) {
  *  Returns:
  *          First adiabatic invariant, Mu. ( MeV )
  */
-double  Lgm_Mu_to_Energy( double Mu, double a, double B ) {
+double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 
-    double  sa, sa2;
+    double  sa, sa2, Ek;
 
     if ( a < 0.0 ) return( -9e99 );
     
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
 
-    if ( sa2 < 1e-12 ) return( 9e99 );
-    else return( Mu*B/(sa2*nT_Per_Gauss) );    // Mu = E*sin^2(Alpha)/B
+    if ( sa2 < 1e-12 ) {
+        return( 9e99 );
+    } else {
+        Ek = sqrt( 2*E0*B*Mu/(sa2*nT_Per_Gauss) + E0*E0) - E0;
+        return( Ek );
+    }
 
 
 }
@@ -133,7 +147,8 @@ double  Lgm_v2overc2( double Ek, double E0 ) {
 
 
 /*
- * returns relativistic factor gamma = [ 1 - (v/c)^2 ]^(-1/2)
+ * Returns relativistic factor gamma = [ 1 - (v/c)^2 ]^(-1/2)
+ * Note that (v/c)^2 = Ek(Ek+2E0)/(Ek+E0)^2 (see above.)
  */
 double  Lgm_gamma( double Ek, double E0 ) {
     double  E = Ek + E0;
@@ -327,13 +342,10 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
     for (j=0; j<f->nA; j++) {
         for (i=0; i<f->nE; i++) {
             flux   = f->FLUX_EA[i][j];
-printf("E[%d] = %g\n", i, f->E[i]);
             p2c2   = Lgm_p2c2( f->E[i], LGM_Ee0 );
             fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
             f->PSD_EA[i][j] = fp; // PSD_EA is "PSD versus Energy and Pitch Angle".
-//            f->PSD_EA[i][j] = p2c2;
         }
-printf("\n\n");
     }
     if ( f->DumpDiagnostics ) {
         DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_EA.gif", f->nA, f->nE, f->PSD_EA );
@@ -439,11 +451,12 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, 
      * Transform the Mu's into Emergy's.
      * Save the results in the f structure.
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
+assumes electrons -- generalize this...
      */
     for ( m=0; m<nK; m++ ){
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
-            f->EofMu[m][k] = Lgm_Mu_to_Energy( f->Mu[m], f->AofK[k], f->B );
+            f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
             printf("f->Mu[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g\n", m, k, m, k, f->Mu[m], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
@@ -501,12 +514,11 @@ double  Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             }
         }
     }
-    printf("i0, i1 = %d %d\n", i0, i1);
+    //printf("i0, i1 = %d %d\n", i0, i1);
 
 
     // interpolate PA
     LGM_ARRAY_1D( g, f->nE, double );
-printf("f->PSD_EA[4][0], f->PSD_EA[4][3] = %g %g \n", f->PSD_EA[4][0], f->PSD_EA[4][3]);
     for (j=0; j<f->nE; ++j){
         a0   = f->A[i0];
         a1   = f->A[i1];
@@ -514,7 +526,7 @@ printf("f->PSD_EA[4][0], f->PSD_EA[4][3] = %g %g \n", f->PSD_EA[4][0], f->PSD_EA
         y1   = f->PSD_EA[j][i1];
         slp  = (y1-y0)/(a1-a0);
         g[j] = slp*(a-a0) + y0;
-        printf("a = %g, g[%d] = %g\n", a, j, g[j]);
+        //printf("a = %g, g[%d] = %g\n", a, j, g[j]);
     }
 
 
@@ -754,7 +766,7 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
         }
     }
 
-    printf("Min, Max = %g %g\n", Min, Max);
+    //printf("Min, Max = %g %g\n", Min, Max);
 
 
 

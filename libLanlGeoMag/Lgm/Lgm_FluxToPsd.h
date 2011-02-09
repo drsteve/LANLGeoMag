@@ -52,6 +52,7 @@ static unsigned char Rainbow2_Blu[] = { 0, 89, 93, 96, 99, 102, 106, 109, 113, 1
 
 
 #define LGM_Ee0     0.510998910  // Electron rest energy in MeV
+#define LGM_Ep0   938.27201323   // Proton rest energy in MeV
 
 typedef unsigned char byte; // needed for gif writer
 
@@ -137,8 +138,8 @@ double         Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd 
 
 
 void   DumpGif( char *Filename, int W, int H, double **Image );
-double Lgm_Energy_to_Mu( double E, double a, double B );
-double Lgm_Mu_to_Energy( double Mu, double a, double B );
+double Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 );
+double Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 );
 double Lgm_p2c2( double Ek, double E0 );
 double Lgm_v2overc2( double Ek, double E0 );
 double Lgm_gamma( double Ek, double E0 );

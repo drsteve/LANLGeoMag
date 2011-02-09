@@ -156,7 +156,6 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Info->Hmax = 10.0;
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
-printf("44444444444444444444444444444: Height = %g\n", Height);
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
 
