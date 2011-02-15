@@ -421,7 +421,7 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, 
 
     /*
      * Copy K's into f structure.
-     * Transform the K's into Alpha's.
+     * Transform the K's into Alpha's using Lgm_AlphaOfK().
      * Save the results in the f structure.
      */
     Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
@@ -448,7 +448,7 @@ void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, 
 
     /*
      * Copy Mu's into f structure.
-     * Transform the Mu's into Emergy's.
+     * Transform the Mu's into (Kinetic) Energies.
      * Save the results in the f structure.
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
 assumes electrons -- generalize this...
@@ -465,7 +465,6 @@ assumes electrons -- generalize this...
     /*
      * Now, from the PSD[E][a] array, get PSD at the E's and Alpha's we just computed.
      * The result will be the same as PSD at the given Mu's and K's
-     * Transform the Mu's into Emergy's.
      */
     LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nK; m++ ){
