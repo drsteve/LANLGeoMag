@@ -1,0 +1,1085 @@
+%!PS-Adobe-2.0
+%%Title: plot produced by mgh's plot program
+%%BoundingBox: 0 0 612 792
+%%Creator: Mike Henderson's plot program
+%%CreationDate: Wed Dec 31 17:00:00 1969
+%%EndComments
+250 dict begin
+/M { moveto }def  /RM { rmoveto }def
+/L { lineto }def  /RL { rlineto }def
+/S { show }def  /SW { stringwidth }def
+/R { rotate }def /T { translate } def  /NP { newpath } def
+.1 .1 scale
+2 setlinecap 0 setlinejoin
+% test for color capability
+/ColorPrinter {
+     statusdict begin
+     /processcolors where
+     { pop processcolors }{ 1 } ifelse
+     end
+     1 ne
+} def
+% Note that Ghostscript does not have processcolors in its statusdict
+% so check the product entry to see if we are using gs.
+/GS {
+     statusdict /product known {
+          statusdict /product get (Ghostscript) eq { true } { false } ifelse
+     } { false } ifelse
+} def
+/l1 { [] 0 setdash 0 setgray} def
+/l2 { [86] 0 setdash 0 setgray} def
+/l3 { [43 29 10 29] 0 setdash 0 setgray} def
+/l4 { [43] 0 setdash 0 setgray} def
+/l5 { [10] 0 setdash 0 setgray} def
+/l10 { [] 0 setdash 0.70 0.07 0.07 setrgbcolor} def
+/l11 { [] 0 setdash 0.00 0.70 0.07 setrgbcolor} def
+/l12 { [] 0 setdash 0.00 0.50 0.70 setrgbcolor} def
+/l13 { [] 0 setdash 0.50 0.16 0.73 setrgbcolor} def
+/l14 { [] 0 setdash 0.77 0.62 0.32 setrgbcolor} def
+/l15 { [] 0 setdash 0.77 0.42 0.00 setrgbcolor} def
+/bfcircle { /r exch def /y exch def /x exch def NP x y r 0 360 arc l1 fill }def
+/wfcircle { /r exch def /y exch def /x exch def NP x y r 0 360 arc gsave 1 setgray fill grestore l1 stroke}def
+/rgbfcircle { /bb exch def /gg exch def /rr exch def /r exch def /y exch def /x exch def NP x y r 0 360 arc gsave rr gg bb setrgbcolor fill grestore l1 stroke}def
+/circle { /r exch def /y exch def /x exch def NP x y r 0 360 arc l1 stroke }def
+/bfsquare { /r exch def /y exch def /x exch def NP x y M r neg r neg RM 0 r 2 mul RL r 2 mul 0 RL 0 r 2 mul neg RL r 2 mul neg 0 RL l1 fill }def
+/wfsquare { /r exch def /y exch def /x exch def NP x y M r neg r neg RM 0 r 2 mul RL r 2 mul 0 RL 0 r 2 mul neg RL r 2 mul neg 0 RL gsave 1 setgray fill grestore l1 stroke}def
+/square { /r exch def /y exch def /x exch def NP x y M r neg r neg RM 0 r 2 mul RL r 2 mul 0 RL 0 r 2 mul neg RL r 2 mul neg 0 RL l1 stroke }def
+/bfdiamond { /r exch def /y exch def /x exch def NP x y M /r2 r 2 div def r2 neg 0 RM r2 r RL r2 r neg RL r2 neg r neg RL r2 neg r RL l1 fill }def
+/wfdiamond { /r exch def /y exch def /x exch def NP x y M /r2 r 2 div def r2 neg 0 RM r2 r RL r2 r neg RL r2 neg r neg RL r2 neg r RL gsave 1 setgray fill grestore l1 stroke}def
+/diamond { /r exch def /y exch def /x exch def NP x y M /r2 r 2 div def r2 neg 0 RM r2 r RL r2 r neg RL r2 neg r neg RL r2 neg r RL l1 stroke }def
+/eex { /r exch def/y exch def /x exch def NP x y M r neg r neg RM r 2 mul r 2 mul RL r 2 mul neg 0 RM r 2 mul r 2 mul neg RL l1 stroke }def
+/cross { /r exch def /y exch def /x exch def NP x y M r neg 0 RM 0 r 2 mul RL r neg r neg RM 0 r 2 mul neg RL l1 stroke }def
+/asterisk { /r exch def /y exch def /x exch def
+/wedge { NP   0 0 M   1 0 T   15 R   0 15 sin T   0 0 15 sin -90 90 arc   closepath } def
+gsave x y T r r scale   1 1 6   { pop 0 setgray     gsave       wedge       gsave fill grestore     grestore     60 R    } for grestore } def
+/f1 { /p exch def /AvantGarde-Book findfont p scalefont setfont } def
+/f2 { /p exch def /AvantGarde-BookOblique findfont p scalefont setfont } def
+/f3 { /p exch def /AvantGarde-Demi findfont p scalefont setfont } def
+/f4 { /p exch def /AvantGarde-DemiOblique findfont p scalefont setfont } def
+/f5 { /p exch def /Bookman-Light findfont p scalefont setfont } def
+/f6 { /p exch def /Bookman-LightItalic findfont p scalefont setfont } def
+/f7 { /p exch def /Bookman-Demi findfont p scalefont setfont } def
+/f8 { /p exch def /Bookman-DemiItalic findfont p scalefont setfont } def
+/f9 { /p exch def /Charter-Roman findfont p scalefont setfont } def
+/f10 { /p exch def /Charter-Italic findfont p scalefont setfont } def
+/f11 { /p exch def /Charter-Bold findfont p scalefont setfont } def
+/f12 { /p exch def /Charter-BoldItalic findfont p scalefont setfont } def
+/f13 { /p exch def /Courier findfont p scalefont setfont } def
+/f14 { /p exch def /Courier-Italic findfont p scalefont setfont } def
+/f15 { /p exch def /Courier-Bold findfont p scalefont setfont } def
+/f16 { /p exch def /Courier-BoldItalic findfont p scalefont setfont } def
+/f17 { /p exch def /Helvetica findfont p scalefont setfont } def
+/f18 { /p exch def /Helvetica-Oblique findfont p scalefont setfont } def
+/f19 { /p exch def /Helvetica-Narrow findfont p scalefont setfont } def
+/f20 { /p exch def /Helvetica-Bold findfont p scalefont setfont } def
+/f21 { /p exch def /Helvetica-BoldOblique findfont p scalefont setfont } def
+/f22 { /p exch def /NewCenturySchlbk-Roman findfont p scalefont setfont } def
+/f23 { /p exch def /NewCenturySchlbk-Italic findfont p scalefont setfont } def
+/f24 { /p exch def /NewCenturySchlbk-Bold findfont p scalefont setfont } def
+/f25 { /p exch def /NewCenturySchlbk-BoldItalic findfont p scalefont setfont } def
+/f26 { /p exch def /Palatino-Roman findfont p scalefont setfont } def
+/f27 { /p exch def /Palatino-Italic findfont p scalefont setfont } def
+/f28 { /p exch def /Palatino-Bold findfont p scalefont setfont } def
+/f29 { /p exch def /Palatino-BoldItalic findfont p scalefont setfont } def
+/f30 { /p exch def /Symbol findfont p scalefont setfont } def
+/f31 { /p exch def /Times-Roman findfont p scalefont setfont } def
+/f32 { /p exch def /Times-Italic findfont p scalefont setfont } def
+/f33 { /p exch def /Times-Bold findfont p scalefont setfont } def
+/f34 { /p exch def /Times-BoldItalic findfont p scalefont setfont } def
+/f35 { /p exch def /ZapfChancery findfont p scalefont setfont } def
+/f36 { /p exch def /ZapfChancery-Oblique findfont p scalefont setfont } def
+/f37 { /p exch def /ZapfChancery-Bold findfont p scalefont setfont } def
+/f38 { /p exch def /ZapfDingbats findfont p scalefont setfont } def
+/f39 { /p exch def /Utopia-Regular findfont p scalefont setfont } def
+/f40 { /p exch def /Utopia-Italic findfont p scalefont setfont } def
+/f41 { /p exch def /Utopia-Bold findfont p scalefont setfont } def
+/f42 { /p exch def /Utopia-BoldItalic findfont p scalefont setfont } def
+/f43 { /p exch def /Hershey-Gothic-English findfont p scalefont setfont } def
+/f44 { /p exch def /Hershey-Gothic-English-Bold findfont p scalefont setfont } def
+/f45 { /p exch def /Hershey-Gothic-English-Oblique findfont p scalefont setfont } def
+/f46 { /p exch def /Hershey-Gothic-German findfont p scalefont setfont } def
+/f47 { /p exch def /Hershey-Gothic-German-Bold findfont p scalefont setfont } def
+/f48 { /p exch def /Hershey-Gothic-German-Oblique findfont p scalefont setfont } def
+/f49 { /p exch def /Hershey-Gothic-Italian findfont p scalefont setfont } def
+/f50 { /p exch def /Hershey-Gothic-Italian-Bold findfont p scalefont setfont } def
+/f51 { /p exch def /Hershey-Gothic-Italian-Oblique findfont p scalefont setfont } def
+/f52 { /p exch def /Hershey-Greek-Complex findfont p scalefont setfont } def
+/f53 { /p exch def /Hershey-Greek-Simplex findfont p scalefont setfont } def
+/f54 { /p exch def /Hershey-Plain findfont p scalefont setfont } def
+/f55 { /p exch def /Hershey-Plain-Bold findfont p scalefont setfont } def
+/f56 { /p exch def /Hershey-Plain-Oblique findfont p scalefont setfont } def
+/f57 { /p exch def /Hershey-Plain-Simplex findfont p scalefont setfont } def
+/f58 { /p exch def /Hershey-Plain-Simplex-Bold findfont p scalefont setfont } def
+/f59 { /p exch def /Hershey-Plain-Simplex-Bold-Oblique findfont p scalefont setfont } def
+/f60 { /p exch def /Hershey-Plain-Simplex-Oblique findfont p scalefont setfont } def
+/f61 { /p exch def /Hershey-Plain-Triplex findfont p scalefont setfont } def
+/f62 { /p exch def /Hershey-Plain-Triplex-Italic findfont p scalefont setfont } def
+/f63 { /p exch def /Hershey-Plain-Triplex-Bold findfont p scalefont setfont } def
+/f64 { /p exch def /Hershey-Plain-Triplex-Bold-Italic findfont p scalefont setfont } def
+/f65 { /p exch def /Hershey-Script-Complex findfont p scalefont setfont } def
+/f66 { /p exch def /Hershey-Script-Complex-Bold findfont p scalefont setfont } def
+/f67 { /p exch def /Hershey-Script-Complex-Oblique findfont p scalefont setfont } def
+/f68 { /p exch def /Hershey-Script-Simplex findfont p scalefont setfont } def
+/f69 { /p exch def /Hershey-Script-Simplex-Bold findfont p scalefont setfont } def
+/f70 { /p exch def /Hershey-Script-Simplex-Oblique findfont p scalefont setfont } def
+/f71 { /p exch def /Hershey-Symbol findfont p scalefont setfont } def
+/f72 { /p exch def /Tekton findfont p scalefont setfont } def
+/f73 { /p exch def /Isadora findfont p scalefont setfont } def
+/arrowdict 14 dict def arrowdict begin /mtrx matrix def end /arrow {arrowdict begin /headlength exch def /halfheadthickness exch 2 div def /halfthickness exch 2 div def /tipy exch def /tipx exch def /taily exch def /tailx exch def /dx tipx tailx sub def
+/dy tipy taily sub def /arrowlength dx dx mul dy dy mul add sqrt def /angle dy dx atan def /base arrowlength headlength sub def /savematrix mtrx currentmatrix def tailx taily T angle R 0 halfthickness neg M base halfthickness neg L base halfheadthickness neg L arrowlength 0 L base halfheadthickness L base halfthickness L 0 halfthickness L closepath savematrix setmatrix end } def
+NP
+1080 2880 M
+5400 2880 L
+12 setlinewidth
+l1 stroke
+NP
+1080 2880 M
+1080 2930 L
+8 setlinewidth
+l1 stroke
+NP
+1440 2880 M
+1440 2905 L
+8 setlinewidth
+l1 stroke
+NP
+1800 2880 M
+1800 2905 L
+8 setlinewidth
+l1 stroke
+NP
+1800 2880 M
+1800 2930 L
+8 setlinewidth
+l1 stroke
+NP
+2160 2880 M
+2160 2905 L
+8 setlinewidth
+l1 stroke
+NP
+2520 2880 M
+2520 2905 L
+8 setlinewidth
+l1 stroke
+NP
+2520 2880 M
+2520 2930 L
+8 setlinewidth
+l1 stroke
+NP
+2880 2880 M
+2880 2905 L
+8 setlinewidth
+l1 stroke
+NP
+3240 2880 M
+3240 2905 L
+8 setlinewidth
+l1 stroke
+NP
+3240 2880 M
+3240 2930 L
+8 setlinewidth
+l1 stroke
+NP
+3600 2880 M
+3600 2905 L
+8 setlinewidth
+l1 stroke
+NP
+3960 2880 M
+3960 2905 L
+8 setlinewidth
+l1 stroke
+NP
+3960 2880 M
+3960 2930 L
+8 setlinewidth
+l1 stroke
+NP
+4320 2880 M
+4320 2905 L
+8 setlinewidth
+l1 stroke
+NP
+4680 2880 M
+4680 2905 L
+8 setlinewidth
+l1 stroke
+NP
+4680 2880 M
+4680 2930 L
+8 setlinewidth
+l1 stroke
+NP
+5040 2880 M
+5040 2905 L
+8 setlinewidth
+l1 stroke
+NP
+5400 2880 M
+5400 2905 L
+8 setlinewidth
+l1 stroke
+NP
+5400 2880 M
+5400 2930 L
+8 setlinewidth
+l1 stroke
+144 f18 /s 0 def
+0 R
+/s s (0.0) SW pop add def
+0 R
+1080 2664 M
+000 R
+s 2 div neg 0 RM
+(0.0) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (0.5) SW pop add def
+0 R
+1800 2664 M
+000 R
+s 2 div neg 0 RM
+(0.5) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (1.0) SW pop add def
+0 R
+2520 2664 M
+000 R
+s 2 div neg 0 RM
+(1.0) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (1.5) SW pop add def
+0 R
+3240 2664 M
+000 R
+s 2 div neg 0 RM
+(1.5) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (2.0) SW pop add def
+0 R
+3960 2664 M
+000 R
+s 2 div neg 0 RM
+(2.0) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (2.5) SW pop add def
+0 R
+4680 2664 M
+000 R
+s 2 div neg 0 RM
+(2.5) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (3.0) SW pop add def
+0 R
+5400 2664 M
+000 R
+s 2 div neg 0 RM
+(3.0) S
+0 R
+4 setlinewidth
+144 f18 /s 0 def
+0 R
+/s s (Energy, MeV) SW pop add def
+0 R
+3240 2484 M
+000 R
+s 2 div neg 0 RM
+(Energy, MeV) S
+0 R
+NP
+1080 2880 M
+1080 5760 L
+12 setlinewidth
+l1 stroke
+NP
+1080 2880 M
+1130 2880 L
+8 setlinewidth
+l1 stroke
+NP
+1080 2880 M
+1105 2880 L
+8 setlinewidth
+l1 stroke
+NP
+1080 2923 M
+1105 2923 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3023 M
+1130 3023 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3023 M
+1105 3023 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3067 M
+1105 3067 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3167 M
+1130 3167 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3167 M
+1105 3167 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3211 M
+1105 3211 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3311 M
+1130 3311 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3311 M
+1105 3311 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3355 M
+1105 3355 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3455 M
+1130 3455 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3455 M
+1105 3455 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3499 M
+1105 3499 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3599 M
+1130 3599 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3599 M
+1105 3599 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3643 M
+1105 3643 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3743 M
+1130 3743 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3743 M
+1105 3743 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3787 M
+1105 3787 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3887 M
+1130 3887 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3887 M
+1105 3887 L
+8 setlinewidth
+l1 stroke
+NP
+1080 3931 M
+1105 3931 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4031 M
+1130 4031 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4031 M
+1105 4031 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4075 M
+1105 4075 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4175 M
+1130 4175 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4175 M
+1105 4175 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4219 M
+1105 4219 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4319 M
+1130 4319 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4319 M
+1105 4319 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4363 M
+1105 4363 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4463 M
+1130 4463 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4463 M
+1105 4463 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4507 M
+1105 4507 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4607 M
+1130 4607 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4607 M
+1105 4607 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4651 M
+1105 4651 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4751 M
+1130 4751 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4751 M
+1105 4751 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4795 M
+1105 4795 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4895 M
+1130 4895 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4895 M
+1105 4895 L
+8 setlinewidth
+l1 stroke
+NP
+1080 4939 M
+1105 4939 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5039 M
+1130 5039 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5039 M
+1105 5039 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5083 M
+1105 5083 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5183 M
+1130 5183 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5183 M
+1105 5183 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5227 M
+1105 5227 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5327 M
+1130 5327 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5327 M
+1105 5327 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5371 M
+1105 5371 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5471 M
+1130 5471 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5471 M
+1105 5471 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5515 M
+1105 5515 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5615 M
+1130 5615 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5615 M
+1105 5615 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5659 M
+1105 5659 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5759 M
+1130 5759 L
+8 setlinewidth
+l1 stroke
+3 setlinewidth
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 2980 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-32) SW pop add def
+0 R
+1022 3067 M
+000 R
+s neg 0 RM
+(-32) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3124 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-31) SW pop add def
+0 R
+1022 3211 M
+000 R
+s neg 0 RM
+(-31) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3268 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-30) SW pop add def
+0 R
+1022 3355 M
+000 R
+s neg 0 RM
+(-30) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3412 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-29) SW pop add def
+0 R
+1022 3499 M
+000 R
+s neg 0 RM
+(-29) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3556 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-28) SW pop add def
+0 R
+1022 3643 M
+000 R
+s neg 0 RM
+(-28) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3700 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-27) SW pop add def
+0 R
+1022 3787 M
+000 R
+s neg 0 RM
+(-27) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3844 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-26) SW pop add def
+0 R
+1022 3931 M
+000 R
+s neg 0 RM
+(-26) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 3988 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-25) SW pop add def
+0 R
+1022 4075 M
+000 R
+s neg 0 RM
+(-25) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4132 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-24) SW pop add def
+0 R
+1022 4219 M
+000 R
+s neg 0 RM
+(-24) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4420 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-22) SW pop add def
+0 R
+1022 4507 M
+000 R
+s neg 0 RM
+(-22) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4564 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-21) SW pop add def
+0 R
+1022 4651 M
+000 R
+s neg 0 RM
+(-21) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4708 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-20) SW pop add def
+0 R
+1022 4795 M
+000 R
+s neg 0 RM
+(-20) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4852 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-19) SW pop add def
+0 R
+1022 4939 M
+000 R
+s neg 0 RM
+(-19) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 4996 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-18) SW pop add def
+0 R
+1022 5083 M
+000 R
+s neg 0 RM
+(-18) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 5140 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-17) SW pop add def
+0 R
+1022 5227 M
+000 R
+s neg 0 RM
+(-17) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 5284 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-16) SW pop add def
+0 R
+1022 5371 M
+000 R
+s neg 0 RM
+(-16) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 5428 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-15) SW pop add def
+0 R
+1022 5515 M
+000 R
+s neg 0 RM
+(-15) S
+0 R
+144 f18 /s 0 def
+0 R
+/s s (10) SW pop add def
+0 R
+935 5572 M
+000 R
+s neg 0 RM
+(10) S
+0 R
+86 f18 /s 0 def
+0 R
+/s s (-14) SW pop add def
+0 R
+1022 5659 M
+000 R
+s neg 0 RM
+(-14) S
+0 R
+4 setlinewidth
+144 f18 /s 0 def
+90 R
+/s s (Y) SW pop add def
+-90 R
+522 4320 M
+090 R
+s 2 div neg 0 RM
+(Y) S
+-90 R
+NP
+5400 5760 M
+1080 5760 L
+12 setlinewidth
+l1 stroke
+NP
+1080 5760 M
+1080 5709 L
+8 setlinewidth
+l1 stroke
+NP
+1080 5760 M
+1080 5734 L
+8 setlinewidth
+l1 stroke
+NP
+1440 5760 M
+1440 5734 L
+8 setlinewidth
+l1 stroke
+NP
+1800 5760 M
+1800 5709 L
+8 setlinewidth
+l1 stroke
+NP
+1800 5760 M
+1800 5734 L
+8 setlinewidth
+l1 stroke
+NP
+2160 5760 M
+2160 5734 L
+8 setlinewidth
+l1 stroke
+NP
+2520 5760 M
+2520 5709 L
+8 setlinewidth
+l1 stroke
+NP
+2520 5760 M
+2520 5734 L
+8 setlinewidth
+l1 stroke
+NP
+2880 5760 M
+2880 5734 L
+8 setlinewidth
+l1 stroke
+NP
+3240 5760 M
+3240 5709 L
+8 setlinewidth
+l1 stroke
+NP
+3240 5760 M
+3240 5734 L
+8 setlinewidth
+l1 stroke
+NP
+3600 5760 M
+3600 5734 L
+8 setlinewidth
+l1 stroke
+NP
+3960 5760 M
+3960 5709 L
+8 setlinewidth
+l1 stroke
+NP
+3960 5760 M
+3960 5734 L
+8 setlinewidth
+l1 stroke
+NP
+4320 5760 M
+4320 5734 L
+8 setlinewidth
+l1 stroke
+NP
+4680 5760 M
+4680 5709 L
+8 setlinewidth
+l1 stroke
+NP
+4680 5760 M
+4680 5734 L
+8 setlinewidth
+l1 stroke
+NP
+5040 5760 M
+5040 5734 L
+8 setlinewidth
+l1 stroke
+NP
+5400 5760 M
+5400 5709 L
+8 setlinewidth
+l1 stroke
+3 setlinewidth
+NP
+5400 2880 M
+5400 5760 L
+12 setlinewidth
+l1 stroke
+newpath
+3 setlinewidth
+1 setlinewidth
+2 setlinecap 0 setlinejoin
+NP
+l1 1224 6004 M
+1224 6004 L
+1367 5894 L
+1511 5785 L
+1800 5568 L
+2231 5244 L
+2520 5029 L
+5400 2901 L
+stroke
+NP
+1224 6004 18 wfsquare
+NP
+1367 5894 18 wfsquare
+NP
+1511 5785 18 wfsquare
+NP
+1800 5568 18 wfsquare
+NP
+2231 5244 18 wfsquare
+NP
+2520 5029 18 wfsquare
+NP
+5400 2901 18 wfsquare
+stroke
+stroke
+end
+showpage
