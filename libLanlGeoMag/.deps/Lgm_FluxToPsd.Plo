@@ -17,12 +17,15 @@ Lgm_FluxToPsd.lo Lgm_FluxToPsd.o: Lgm_FluxToPsd.c ../config.h \
   /usr/include/architecture/i386/math.h Lgm/Lgm_FluxToPsd.h \
   Lgm/Lgm_DynamicMemory.h Lgm/Lgm_CTrans.h /usr/include/string.h \
   /usr/include/secure/_string.h Lgm/Lgm_Vec.h Lgm/Lgm_WGS84.h \
-  Lgm/Lgm_CTrans.h Lgm/Lgm_MagModelInfo.h Lgm/Lgm_QuadPack.h \
-  Lgm/Lgm_Octree.h /usr/local/include/gsl/gsl_errno.h \
-  /usr/include/errno.h /usr/include/sys/errno.h \
-  /usr/local/include/gsl/gsl_types.h /usr/local/include/gsl/gsl_spline.h \
-  /usr/local/include/gsl/gsl_interp.h /usr/local/include/gsl/gsl_inline.h \
-  Lgm/Lgm_DynamicMemory.h
+  Lgm/Lgm_MaxwellJuttner.h /usr/local/include/gsl/gsl_sf_bessel.h \
+  /usr/local/include/gsl/gsl_mode.h /usr/local/include/gsl/gsl_inline.h \
+  /usr/local/include/gsl/gsl_precision.h \
+  /usr/local/include/gsl/gsl_types.h \
+  /usr/local/include/gsl/gsl_sf_result.h Lgm/Lgm_CTrans.h \
+  Lgm/Lgm_MagModelInfo.h Lgm/Lgm_QuadPack.h Lgm/Lgm_Octree.h \
+  /usr/local/include/gsl/gsl_errno.h /usr/include/errno.h \
+  /usr/include/sys/errno.h /usr/local/include/gsl/gsl_spline.h \
+  /usr/local/include/gsl/gsl_interp.h Lgm/Lgm_DynamicMemory.h
 
 ../config.h:
 
@@ -104,6 +107,20 @@ Lgm/Lgm_Vec.h:
 
 Lgm/Lgm_WGS84.h:
 
+Lgm/Lgm_MaxwellJuttner.h:
+
+/usr/local/include/gsl/gsl_sf_bessel.h:
+
+/usr/local/include/gsl/gsl_mode.h:
+
+/usr/local/include/gsl/gsl_inline.h:
+
+/usr/local/include/gsl/gsl_precision.h:
+
+/usr/local/include/gsl/gsl_types.h:
+
+/usr/local/include/gsl/gsl_sf_result.h:
+
 Lgm/Lgm_CTrans.h:
 
 Lgm/Lgm_MagModelInfo.h:
@@ -118,12 +135,8 @@ Lgm/Lgm_Octree.h:
 
 /usr/include/sys/errno.h:
 
-/usr/local/include/gsl/gsl_types.h:
-
 /usr/local/include/gsl/gsl_spline.h:
 
 /usr/local/include/gsl/gsl_interp.h:
-
-/usr/local/include/gsl/gsl_inline.h:
 
 Lgm/Lgm_DynamicMemory.h:

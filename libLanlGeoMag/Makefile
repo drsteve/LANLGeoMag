@@ -34,8 +34,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-apple-darwin10.5.0
-host_triplet = x86_64-apple-darwin10.5.0
+build_triplet = x86_64-apple-darwin10.6.0
+host_triplet = x86_64-apple-darwin10.6.0
 subdir = libLanlGeoMag
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/lgm.pc.in
@@ -89,7 +89,7 @@ am_libLanlGeoMag_la_OBJECTS = Lgm_AlphaOfK.lo B_FromScatteredData.lo \
 	T01S.lo Tsyg_T01s.lo TS04.lo Tsyg2004.lo W.lo \
 	Lgm_InitMagEphemInfo.lo Lgm_AE8_AP8.lo OP77.lo \
 	OlsenPfitzerStatic.lo IsoTimeStringToDateTime.lo size.lo \
-	Lgm_FluxToPsd.lo xvgifwr2.lo
+	Lgm_FluxToPsd.lo xvgifwr2.lo praxis.lo
 libLanlGeoMag_la_OBJECTS = $(am_libLanlGeoMag_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -253,10 +253,10 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = x86_64-apple-darwin10.5.0
+build = x86_64-apple-darwin10.6.0
 build_alias = 
 build_cpu = x86_64
-build_os = darwin10.5.0
+build_os = darwin10.6.0
 build_vendor = apple
 builddir = .
 datadir = ${datarootdir}
@@ -264,10 +264,10 @@ datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = x86_64-apple-darwin10.5.0
+host = x86_64-apple-darwin10.6.0
 host_alias = 
 host_cpu = x86_64
-host_os = darwin10.5.0
+host_os = darwin10.6.0
 host_vendor = apple
 htmldir = ${docdir}
 includedir = /usr/local/include/Lgm
@@ -309,7 +309,7 @@ libLanlGeoMag_la_SOURCES = Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c D
                             Lgm_QuadPack.c Lgm_Cgm.c quicksort.c SbIntegral.c T87.c T89.c TraceLine.c TraceToMinBSurf.c  \
                             TraceToMinRdotB.c TraceToMirrorPoint2.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
-			                size.c Lgm_FluxToPsd.c xvgifwr2.c 
+			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c
 
 include_HEADERS = DynamicMemory.h
 EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
@@ -443,6 +443,7 @@ include ./$(DEPDIR)/TraceToSMEquat.Plo
 include ./$(DEPDIR)/Tsyg2004.Plo
 include ./$(DEPDIR)/Tsyg_T01s.Plo
 include ./$(DEPDIR)/W.Plo
+include ./$(DEPDIR)/praxis.Plo
 include ./$(DEPDIR)/quicksort.Plo
 include ./$(DEPDIR)/size.Plo
 include ./$(DEPDIR)/xvgifwr2.Plo
