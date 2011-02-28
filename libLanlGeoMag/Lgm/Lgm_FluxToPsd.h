@@ -3,6 +3,7 @@
 #include "Lgm_DynamicMemory.h"
 #include "Lgm_CTrans.h"
 #include "Lgm_Vec.h"
+#include "Lgm_MaxwellJuttner.h"
 static unsigned char Rainbow2_Red[] = { 0, 34, 35, 35, 36, 37, 38, 39, 39, 40, 40, 41,
 41, 42, 42, 42, 42, 42, 42, 42, 41, 41, 41, 40, 40, 39, 38, 38, 37, 37, 36, 35,
 35, 34, 33, 33, 32, 32, 31, 30, 30, 29, 28, 28, 27, 27, 26, 25, 25, 24, 24, 23,

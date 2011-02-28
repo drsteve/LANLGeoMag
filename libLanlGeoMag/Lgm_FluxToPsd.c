@@ -482,6 +482,13 @@ assumes electrons -- generalize this...
 
 }
 
+double Cost( double *x, int *data ){
+
+
+    return(0.0);
+
+}
+
 
 
 /*
@@ -530,11 +537,36 @@ double  Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
 
     // interpolate/fit E
+    // for now just do a linear interp.
+    // no lets try a fit...
+    double  in[10], out[7], x[3];
+    in[0] = 1e-8;
+    in[1] = in[2] = 1e-9; //Info->Praxis_Tolerance;
+    in[5] = 30000.0; //(double)Info->Praxis_Max_Function_Evals;
+    in[6] = 10.0; //Info->Praxis_Maximum_Step_Size;
+    in[7] = 10.0; //Info->Praxis_Bad_Scale_Paramater;
+    in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
+    in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
+    praxis( 2, x, (int *)g, Cost, in, out);
+printf("out[2] = %g\n", out[2]);
+
+FILE *fp;
+printf("E = %g\n", E);
+fp = fopen("data.txt", "w");
+for (j=0; j<f->nE; ++j){
+fprintf(fp, "%g %g\n", f->E[j], g[j]);
+}
+fclose(fp);
+    
+exit(0);
+    
+
     
     
 
     LGM_ARRAY_1D_FREE( g );
 
+printf("psd = %g\n", psd);
 
     return( psd );
 
@@ -751,6 +783,11 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
     unsigned char   *uImage, uVal;
     FILE            *fp_gif;
 
+    int             LogScale;
+
+    LogScale = FALSE;
+    LogScale = TRUE;
+
 
     // Determine Min/Max values...
     Min =  9e99;
@@ -758,14 +795,19 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
     for ( w=0; w<W; w++ ){
         for ( h=0; h<H; h++ ) {
 
-            Val = Image[h][w];
+            if ( LogScale ) {
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+            } else {
+                Val = Image[h][w];
+            }
             if (Val > Max) Max = Val;
             if ((Val < Min)&&(Val > -1e99)) Min = Val;
 
         }
     }
 
-    //printf("Min, Max = %g %g\n", Min, Max);
+    printf("Min, Max = %g %g\n", Min, Max);
+
 
 
 
@@ -774,7 +816,11 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
     for ( w=0; w<W; w++ ){
         for ( h=0; h<H; h++ ) {
 
-            Val = Image[h][w];
+            if ( LogScale ) {
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+            } else {
+                Val = Image[h][w];
+            }
             if ( Val < -1e99 ) {
                 uVal = 0;
             } else {
