@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/Lgm
+
+Name: LanlGeoMag
+Description: C-based library of routines for space physics applications. Includes high precision coordinate conversions, time conversions, magnetic field models, field line tracing, drift shell tracing, L* calculations, vector utilities, quaternion utilities, octree utilities, and more.
+URL: 
+Version: @PACKAGE_VERSION@
+Requires: gsl 
+Libs: -L${libdir} -lgsl -lgslcblas -lm  -fopenmp -lLanlGeoMag @LDFLAGS@
+Cflags: -I${includedir} -g -Wall -O3 -funroll-all-loops -ffast-math -fopenmp @CFLAGS@

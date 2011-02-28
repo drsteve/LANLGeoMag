@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+import datetime
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.mlab as mlab
+from numpy import *
+
+
+#f = open('/tmp/workfile', 'r')
+#
+
+f = open( "Time.dat", "r" )
+line  = ' '
+nPnts = 0
+Data = zeros([10, 19000], double)
+
+
+while line:
+    line = f.readline()
+    cols = line.split(',')
+    if len(cols) == 10:
+        n = len(cols)
+        for i in range(n):
+            Data[i][nPnts] = double( cols[i] )
+        nPnts = nPnts + 1
+print nPnts
+
+
+
+
+
+
+#plt.subplot(411)
+#plt.plot( Data[0][:nPnts-1], Data[8][:nPnts-1] )
+##plt.plot( Data[0][:nPnts-1], 10*Data[10][:nPnts-1] )
+#plt.title('Low Accuracy Method')
+#plt.xlabel('Julian Date')
+#plt.ylabel(r'$RA_{JPL}-RA_{LGM}$')
+
+
+    
+fig = plt.figure()
+fig.suptitle('Difference between TimeScales and TAI from 1962-2010', fontsize=32, fontweight='bold')
+fig.subplots_adjust(hspace=0.1)
+
+ax3 = fig.add_subplot(111, autoscale_on=False, xlim=(1962,2011), ylim=(-40.0, 40.0) )
+ax3.set_ylabel(r'Time-TAI (sec)', fontsize=28, fontweight='bold')
+ax3.set_xlabel(r'Year', fontsize=28, fontweight='bold')
+ax3.plot( Data[3][:nPnts-1], Data[6][:nPnts-1], linewidth=4 )
+
+ax5 = fig.add_subplot(111, autoscale_on=False, xlim=(1962,2011), ylim=(-40.0, 40.0) )
+ax5.plot( Data[3][:nPnts-1], Data[8][:nPnts-1], alpha=0.75, linewidth=4, color='blue' )
+
+ax4 = fig.add_subplot(111, autoscale_on=False, xlim=(1962,2011), ylim=(-40.0, 40.0) )
+ax4.plot( Data[3][:nPnts-1], Data[7][:nPnts-1], alpha=0.5, linewidth=4 )
+
+ax6 = fig.add_subplot(111, autoscale_on=False, xlim=(1962,2011), ylim=(-40.0, 40.0) )
+ax6.plot( Data[3][:nPnts-1], Data[9][:nPnts-1], linewidth=4, color='green' )
+
+
+for label in ax3.get_xticklabels() + ax3.get_yticklabels() +ax4.get_yticklabels()+ax5.get_yticklabels()+ax6.get_yticklabels():
+      label.set_fontsize(24)
+
+
+
+plt.show()
+

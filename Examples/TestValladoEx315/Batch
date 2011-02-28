@@ -1,0 +1,2 @@
+./TestValladoEx315 > Results.txt
+./TestValladoEx315 -noeop > Results_noeop.txt

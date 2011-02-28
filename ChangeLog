@@ -1,0 +1,42 @@
+2010-09-22  Mark Galassi  <markgalassi@lanl.gov>
+
+	* Makefile.am (EXTRA_DIST),
+	libLanlGeoMag/Makefile.am (EXTRA_DIST): now I add the files
+	individually instead of putting whole directories.  The problem
+	with whole directories is that the .svn directories also got put
+	there, which is not good.
+
+2010-08-12  Mark Galassi  <markgalassi@lanl.gov>
+
+	* libLanlGeoMag/dox: removed this directory from source control
+	since it is auto-generated.
+
+	* configure.ac: added the DX_INIT_DOXYGEN directives for doxygen.
+
+	* Makefile.am, aminclude.am: added including of aminclude.am which
+	has doxygen stuff in it.
+
+	* Makefile.in, */Makefile.in, */*/Makefile.in, configure,
+	config.sub, depcomp, aclocal.m4, autoscan, ltmain.sh, install-sh,
+	configure, config.guess: removed these files because they are
+	auto-generated.
+
+	* HACKING: introduced this file which gives developer
+	instructions.
+
+	* configure.ac (LGM_EOP_DATA_DIR), Makefile.am (AM_CPPFLAGS),
+	libLanlGeoMag/Makefile.am (AM_CPPFLAGS)
+	libLanlGeoMag/Lgm/Makefile.am (AM_CPPFLAGS): new approach to
+	compiling-in the LGM_EOP_DATA_DIR -- we use
+	-DDATADIR='"$(datadir)"' to get the correct prefix at "make" time,
+	and use that DATADIR in the config.h file.
+
+	* libLanlGeoMag/Lgm_CTrans.c: added including of config.h, and put
+	a #warning if we have to use the hard-coded LGM_EOP_DATA_DIR.
+
+	* libLanlGeoMag/Lgm_Vec.c: added #include <stlib.h> for calloc()
+
+	* configure.ac: added AC_CONFIG_MACRO_DIR as suggested by
+	autoreconf.
+
+	* Makefile.am (ACLOCAL_AMFLAGS): added this flag.

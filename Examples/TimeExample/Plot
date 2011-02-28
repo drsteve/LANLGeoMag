@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+import datetime
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.mlab as mlab
+from numpy import *
+
+
+#f = open('/tmp/workfile', 'r')
+#
+
+f = open( "Time.dat", "r" )
+line  = ' '
+nPnts = 0
+Data = zeros([10, 19000], double)
+
+
+while line:
+    line = f.readline()
+    cols = line.split(',')
+    if len(cols) == 10:
+        n = len(cols)
+        for i in range(n):
+            Data[i][nPnts] = double( cols[i] )
+        nPnts = nPnts + 1
+print nPnts
+
+
+fig = plt.figure()
+fig.suptitle('DUT1 and DAT from 1962-2010', fontsize=32, fontweight='bold')
+fig.subplots_adjust(hspace=0.1)
+
+ax1 = fig.add_subplot(211, autoscale_on=False, xlim=(1962,2011), ylim=(-0.9,0.9) )
+ax1.set_ylabel(r'DUT1 (sec)', fontsize=28, fontweight='bold')
+ax1.plot( Data[3][:nPnts-1], Data[4][:nPnts-1], linewidth=3 )
+
+ax2 = fig.add_subplot(212, autoscale_on=False, xlim=(1962,2011), ylim=(0.0,40.0) )
+ax2.set_ylabel(r'DAT (sec)', fontsize=28, fontweight='bold')
+ax2.set_xlabel(r'Year', fontsize=28, fontweight='bold')
+ax2.plot( Data[3][:nPnts-1], Data[5][:nPnts-1], linewidth=3, color='green' )
+
+
+for label in ax1.get_xticklabels() + ax1.get_yticklabels() +ax2.get_xticklabels()+ax2.get_yticklabels():
+      label.set_fontsize(24)
+
+
+plt.show()
+

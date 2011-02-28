@@ -1,0 +1,204 @@
+<html>
+<head>
+<title>
+NASA AP8/AE8 radiation models compiled for Win32
+</title>
+<meta name="Author" content="Alexey Nikolayevich Petrov, Gluk, Петров Алексей Николаевич">
+<meta name="Keywords" content="radiation belt, magnetosphere, nuclear physics, programming, fortran, AP8, AE8, models">
+<meta name="Generatos" content="Far Manager">
+<META HTTP-EQUIV="Content-type" CONTENT="text/html;charset=windows-1251">
+</head>
+<body bgcolor="#ddffff" text="black">
+<font face="verdana">
+<center>
+<a href="http://alexeypetrov.narod.ru/index.html" target="_top">На главную >>></a>
+</center>
+<h1>NASA AP8/AE8. Модели потоков протонов и электронов в радиационных поясах Земли.</h1> 
+<p><a href="#eng">English version</a>
+<p>Модель представляет собой программу, которая вычисляет всенаправленный
+интегральный или дифференциальный (по энергии) поток протонов или электронов,
+захваченных в магнитном поле Земли. Для нахождения потока надо задать
+энергию частицы, L, B/B0. Программа вычисляет потоки, интерполируя данные,
+полученные в реальных космических экспериментах, таким образом, модель
+явялется полуэмпирической.
+<p><a href="http://modelweb.gsfc.nasa.gov/models/trap.html">Сайт разработчика.</a>
+<p>Исходники модели на фортране скачаны с 
+<a href="ftp://nssdcftp.gsfc.nasa.gov/models/radiation_belt/radbelt/fortran_code">nssdcftp.gsfc.nasa.gov</a>
+<p>К сожалению, программа написана очень давно и скомпилировать ее довольно 
+сложно. Я перепробовал Salford Software FTN 95, Intel Fortran, но они 
+ругались на огромное количество синтаксических ошибок. Помог 
+WATCOM FORTRAN/77 Ver.1.4 на WindowsXP SP2.
+Однако, пришлось все равно исправить пару ошибок, которые он там увидел.
+<p>Оригинальная программа <u>radbelt</u>, написанная Dieter Bilitza интерактивная, т.е. она
+сначала задает множество вопросов - в каких точках мы хотим посчитать
+значение потока, согласно какой модели, в каком виде выдавать ответ, 
+писать ли его в файл или только на экран, после чего происходит расчет.
+Чаще всего расчет потока в одной-двух точках недостаточен, а желательно
+получить значения расчетного потока в большой области пространства, покрывающей
+все широты и долготы на определенной высоте. Поэтому программа, 
+предлагаемая на сайте НАСА не удобна. К счастью, <u>radbelt</u>
+представляет собой лишь интерфейс к библиотеке <u>trmfun</u>. После внимательного
+изучения программы <u>radbelt</u> мне удалось ее переписать так, чтобы она
+брала значения энергии и геомагнитных координат, параметры модели из файла 
+и выдавала значения потока в файл.
+<p>В начале работы программа спросит вас имя входного и имя выходного файла.
+<p>Стоит заранее предупредить, что в текущей директории не должно быть файла
+с тем же именем, что и выходной. Если вы хотите, чтобы старый файл с таким
+именем был удален, удаляйте его самостоятельно.
+<p>В файле, который подается на вход программе ap8ae8 должны быть записаны
+числа в следующем формате:
+
+<pre>
+<font face="courier">
+L      B/B0  MODEL  FLUXTYPE  E1    E2
+</font>
+</pre>
+
+<p>Пример:
+
+<pre>
+<font face="courier">
+1.15   2.5   1       1        0.5   0.7  
+</font>
+</pre>
+
+<p>Здесь: 
+
+<p>L - параметр МакИлвайна, 
+
+<p>B/B0 - отношение напряженности магн. поля в точке наблюдения и в вершине
+    силовой линии.
+
+<p>MODEL - одно из следующих целых чисел, модель потоков:<br>
+    1.   AP8MAX, protons, solar maximum<br>
+    2.   AP8MIN, protons, solar minimum<br>
+    3.   AE4MAX, electrons, solar maximum<br>
+    4.   AE4MIN, electrons, solar minimum<br>
+    5.   AEI7HI, electrons, high estimate<br>
+    6.   AEI7LO, electrons, low estimate<br>
+    7.   AE8MAX, electrons, solar maximum<br>
+    8.   AE8MIN, electrons, solar minimum<br>
+
+<p>FLUXTYPE - одно из следующих целых чисел, какой поток выводить:<br>
+    1 - интегральный<br>
+    2 - дифференциальный<br>
+
+<p>E1 - для интегрального потока - порог энергии (МэВ), выводится Flux(&gt;E1), <br>
+    для дифференциального - нижний порог энергии (МэВ), выводится Flux(E1&lt;E&lt;E2)
+
+<p>E2 - для интегрального потока параметр не учитывается, может быть любым<br>
+    для дифференциального - верхний порог энергии (МэВ), выводится Flux(E1&lt;E&lt;E2)
+
+<p>В результате работы программы создается файл такого формата:
+
+<pre>
+<font face="courier">
+L         B/B0      MODEL     FLUXTYPE  E1        E2         FLUX1 
+2.1500001 2.5000000 2.0000000 1.0000000 0.5000000 0.7000000  1.2473444E+006
+</font>
+</pre>
+
+<p>Здесь L, B/B0, MODEL, FLUXTYPE, E1, E2 такие же как и в входном файле,
+за исключением того, что целые числа представлены в виде числа с десятичной
+точкой.
+
+<p>Последний столбец FLUX1 означает значение потока, посчитанного по модели с
+соответствующим названием. Если требовался интегральный поток, то он дается
+в единицах 1/(см^2 с ср), дифференциальный в единицах 1/(см^2 с ср МэВ).
+
+<p><a href="ap8ae8.zip">Скачать программу</a>
+<hr>
+<p><a name="eng">
+<h1>NASA AP8/AE8. Modеls of proton and electron fluxes in the Earth's radiation belts.</h1> 
+<p>This software is the program that 
+ compute omnidirectional, integral, or differential (in energy) fluxes of 
+ electrons and protons trapped in Earth's radiation belts for specified energy, 
+ L-value, and B/B0 range. The fluxes are obtained by an interpolation procedure 
+ from the experimental data. The program 
+ allows the user to specify input parameters and options from file and 
+ generates flux tables that stored to file.
+<p>Program based on <u>radbelt</u> package that you can to download from the 
+<a href="http://modelweb.gsfc.nasa.gov/models/trap.html">developer site.</a>
+<p>Fortran source of <u>radbelt</u> can be downloaded from  
+<a href="ftp://nssdcftp.gsfc.nasa.gov/models/radiation_belt/radbelt/fortran_code">nssdcftp.gsfc.nasa.gov</a>
+<p>Unfortunately <u>radbelt</u> was written too long ago and it's too difficult
+to compile it. I tryed to use Salford Software FTN 95, Intel Fortran, but
+they tell me that there is a lot of syntaxic errors in program.
+WATCOM FORTRAN/77 Ver.1.4 on WindowsXP SP2 could compile this program
+after fixing two minor bugs.
+<p>Original program <u>radbelt</u>, written by Dieter Bilitza 
+is interactive, i.e. it asks a lot of questions - where we want to
+calculate flux, which model it have to use, to write ouput to file or to
+screen. After that program works. But the calculation of flux in 
+one-two point is not enough in most cases. And we need to find model flux
+in wide ranges of longitudes and latitudes on some altitude. For this 
+case NASA program is not useful. Fortunately <u>radbelt</u> is the
+interface fo <u>trmfun</u> library. After the thoughtfully investigation
+of program I rewrite it. Now program can take energy ranges, geomagnetic
+coordinates and model type from file and writes calculation to file.
+<p>In the beginning of working the program will ask you names of input 
+and output files.
+<p>It should be noticed that in your working directory had not to be 
+file with name of output file. If you want to the old file with that name 
+deleted you have to delete it yourself.
+
+<p>Input file should contains lines of following format:
+<pre>
+<font face="courier">
+L    B/B0  MODEL  FLUXTYPE  E1    E2
+</font>
+</pre>
+<p>Example:
+<pre>
+<font face="courier">
+2.15  2.5    2       1      0.5   0.7  
+</font>
+</pre>
+<p>Where: 
+
+<p>L - McIlwein parameter, 
+
+<p>B/B0 - fraction of magnetic field strength in the position of observer
+and in the position of field line top.
+
+<p>MODEL - one of following integer numbers, flux model:<br>
+    1   AP8MAX, protons, solar maximum<br>
+    2   AP8MIN, protons, solar minimum<br>
+    3   AE4MAX, electrons, solar maximum<br>
+    4   AE4MIN, electrons, solar minimum<br>
+    5   AEI7HI, electrons, high estimate<br>
+    6   AEI7LO, electrons, low estimate<br>
+    7   AE8MAX, electrons, solar maximum<br>
+    8   AE8MIN, electrons, solar minimum<br>
+
+<p>FLUXTYPE - one of following integer numbers, selection of flux type:
+    1 - integral
+    2 - differential
+
+<p>E1 - for integral flux - threshold of energy (MeV), to calculate Flux(&gt;E1), <br>
+for differential - lowest threshold of energy (MeV) to calculate Flux(E1&lt;E&lt;E2)
+
+<p>E2 - for integral flux program doesn't take this number into account<br>
+for differential - highest threshold of energy (MeV) to calculate Flux(E1&lt;E&lt;E2)
+
+<p>As the result of program work file of follwoing format will be generated:
+<pre>
+<font face="courier">
+L         B/B0      MODEL     FLUXTYPE  E1        E2         FLUX1 
+2.1500001 2.5000000 2.0000000 1.0000000 0.5000000 0.7000000  1.2473444E+006
+</font>
+</pre>
+
+<p>Where L, B/B0, MODEL, FLUXTYPE, E1, E2 are the same as in input file,
+but integer numbers obtain decimal part.
+
+<p>The last column FLUX1 means flux calculated using model of selected name.
+<p>Integral flux units are particles/(cm*cm*sec), 
+differential flux units are particles/(cm*cm*sec*MeV)
+<p><a href="ap8ae8.zip">Download program.</a>
+
+<center>
+<a href="http://alexeypetrov.narod.ru/index.html" target="_top">На главную >>></a>
+</center>
+</body>
+</html>

@@ -1,0 +1,119 @@
+T87.lo T87.o: T87.c Lgm/Lgm_MagModelInfo.h /usr/include/math.h \
+  /usr/include/architecture/i386/math.h /usr/include/sys/cdefs.h \
+  Lgm/Lgm_QuadPack.h /usr/include/stdlib.h /usr/include/Availability.h \
+  /usr/include/AvailabilityInternal.h /usr/include/_types.h \
+  /usr/include/sys/_types.h /usr/include/sys/cdefs.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h \
+  /usr/include/sys/wait.h /usr/include/sys/signal.h \
+  /usr/include/sys/appleapiopts.h /usr/include/machine/signal.h \
+  /usr/include/i386/signal.h /usr/include/i386/_structs.h \
+  /usr/include/sys/_structs.h /usr/include/machine/_structs.h \
+  /usr/include/mach/i386/_structs.h /usr/include/sys/resource.h \
+  /usr/include/machine/endian.h /usr/include/i386/endian.h \
+  /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
+  /usr/include/machine/types.h /usr/include/i386/types.h \
+  /usr/include/i386/_types.h /usr/include/stdio.h \
+  /usr/include/secure/_stdio.h /usr/include/secure/_common.h \
+  Lgm/Lgm_CTrans.h /usr/include/string.h /usr/include/secure/_string.h \
+  Lgm/Lgm_Vec.h Lgm/Lgm_WGS84.h Lgm/Lgm_Octree.h \
+  /usr/local/include/gsl/gsl_errno.h /usr/include/errno.h \
+  /usr/include/sys/errno.h /usr/local/include/gsl/gsl_types.h \
+  /usr/local/include/gsl/gsl_spline.h /usr/local/include/gsl/gsl_interp.h \
+  /usr/local/include/gsl/gsl_inline.h
+
+Lgm/Lgm_MagModelInfo.h:
+
+/usr/include/math.h:
+
+/usr/include/architecture/i386/math.h:
+
+/usr/include/sys/cdefs.h:
+
+Lgm/Lgm_QuadPack.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/Availability.h:
+
+/usr/include/AvailabilityInternal.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/sys/wait.h:
+
+/usr/include/sys/signal.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/machine/signal.h:
+
+/usr/include/i386/signal.h:
+
+/usr/include/i386/_structs.h:
+
+/usr/include/sys/_structs.h:
+
+/usr/include/machine/_structs.h:
+
+/usr/include/mach/i386/_structs.h:
+
+/usr/include/sys/resource.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/i386/endian.h:
+
+/usr/include/sys/_endian.h:
+
+/usr/include/libkern/_OSByteOrder.h:
+
+/usr/include/libkern/i386/_OSByteOrder.h:
+
+/usr/include/alloca.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/i386/types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/stdio.h:
+
+/usr/include/secure/_stdio.h:
+
+/usr/include/secure/_common.h:
+
+Lgm/Lgm_CTrans.h:
+
+/usr/include/string.h:
+
+/usr/include/secure/_string.h:
+
+Lgm/Lgm_Vec.h:
+
+Lgm/Lgm_WGS84.h:
+
+Lgm/Lgm_Octree.h:
+
+/usr/local/include/gsl/gsl_errno.h:
+
+/usr/include/errno.h:
+
+/usr/include/sys/errno.h:
+
+/usr/local/include/gsl/gsl_types.h:
+
+/usr/local/include/gsl/gsl_spline.h:
+
+/usr/local/include/gsl/gsl_interp.h:
+
+/usr/local/include/gsl/gsl_inline.h:
