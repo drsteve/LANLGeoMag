@@ -19,47 +19,55 @@ c = Lgm_CTrans.Lgm_CTrans()
 # this is the pitch angles to calculate
 Alpha = range(1, 90, 20)  # 1...89
 
+# required setup
 MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
 
 #// Date and UTC
 Date       = 19800625;
 UTC        = 19.0;
+# required setup
 Lgm_Set_Coord_Transforms( Date, UTC, pointer(c) );
 
 ans['Date'] = Date
 ans['UTC'] = UTC
 
+# location in **SM** coords
 Psm.x = -6.6
 Psm.y = 0.0
 Psm.z = 0.0
 
+# convert to **GSM**
 Lgm_Convert_Coords( pointer(Psm), pointer(P), SM_TO_GSM, pointer(c) );
 ans['PosSM'] = Psm.tolist()
 ans['PosGSM'] = P.tolist()
 
-
+# what does 3 mean?  Have to look at the C (or docs)
 MagEphemInfo.LstarQuality   = 3;
+# L* in ones place is L* in lots of places (for GPS set to False)
 MagEphemInfo.SaveShellLines = TRUE;
 MagEphemInfo.LstarInfo.contents.VerbosityLevel = 0;
 MagEphemInfo.LstarInfo.contents.mInfo.contents.VerbosityLevel = 0;
 
+# set Kp
 Kp = 1;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
 #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
+# decide which Field model to use
 Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
 
 ans['Field'] = {}
 ans['Field']['model'] = 'Lgm_B_OP77'
 ans['Field']['Kp'] = Kp
 
+# put Kp into the structure
 MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
 
+# another structure
 LstarInfo = Lgm_LstarInfo()
-
+# get its values from yet abother structure
 LstarInfo = MagEphemInfo.LstarInfo;
-
 
 # Save Date, UTC to MagEphemInfo structure
 MagEphemInfo.Date   = Date
@@ -72,13 +80,13 @@ MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
 # Set Tolerances
 SetLstarTolerances(MagEphemInfo.LstarQuality, MagEphemInfo.LstarInfo )
 
-# set coord transformation
+# set coord transformation *required*
 Lgm_Set_Coord_Transforms(Date, UTC, MagEphemInfo.LstarInfo.contents.mInfo.contents.c)
 
 # *  Blocal at sat location.
 MagEphemInfo.P = P
 
-Bvec = Lgm_Vector.Lgm_Vector(0,0,0)
+Bvec = Lgm_Vector.Lgm_Vector(0,0,0) # I like to initialize, probably not needed
 # Get B at the point in question
 MagEphemInfo.LstarInfo.contents.mInfo.contents.Bfield(pointer(P), pointer(Bvec),
                                                       MagEphemInfo.LstarInfo.contents.mInfo)
@@ -92,7 +100,7 @@ v1 = Lgm_Vector.Lgm_Vector(0,0,0)
 v2 = Lgm_Vector.Lgm_Vector(0,0,0)
 v3 = Lgm_Vector.Lgm_Vector(0,0,0)
 vv1 = Lgm_Vector.Lgm_Vector(0,0,0)
-TRACE_TOL = 1e-7
+TRACE_TOL = 1e-5  # this at 1e-7 looks way too tight!!!!
 
 #  Compute Field-related quantities for each Pitch Angle.
 
@@ -107,7 +115,6 @@ if Lgm_Trace(pointer(u), pointer(v1), pointer(v2), pointer(v3),
     Lgm_Convert_Coords( pointer(v1), pointer(vv1), GSM_TO_SM,
                        MagEphemInfo.LstarInfo.contents.mInfo.contents.c );
 
-    1/0
 
     Lam = math.asin(vv1.z/vv1.magnitude())
     CosLam = math.cos(Lam)
