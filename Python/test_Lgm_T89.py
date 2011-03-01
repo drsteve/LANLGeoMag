@@ -41,14 +41,12 @@ class Lgm_T89_T89(unittest.TestCase):
 
     def test_T89(self):
         """the T89 simple static wrapper should work (regression)"""
-        self.assertEqual(Lgm_T89.T89(self.pos, self.dt, self.kp),
+        numpy.testing.assert_array_almost_equal( Lgm_T89.T89(self.pos, self.dt, self.kp),
             [-18.976439213243122, -1.8653978086481349, 80.39310505873112])
-        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112]*2]
-        val = Lgm_T89.T89([self.pos]*2, [self.dt]*2, [self.kp]*2)
-        ansv = list(itertools.chain.from_iterable(ans))
-        valv = list(itertools.chain.from_iterable(val))
-        for i, val in enumerate(valv):
-            self.assertAlmostEqual(ansv[i], val)
+        ans = numpy.array([[-18.976439213243122, -1.8653978086481349, 80.39310505873112]*2])
+        numpy.testing.assert_array_almost_equal(Lgm_T89.T89([self.pos]*2,
+                                    [self.dt]*2,
+                                    [self.kp]*2) , ans.reshape(2,3))
 
 class Lgm_T89Tests(unittest.TestCase):
     """
