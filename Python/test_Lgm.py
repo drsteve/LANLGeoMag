@@ -20,6 +20,7 @@ from test_Lgm_CTrans import *
 from test_Lgm_MagModelInfo import *
 from test_Lgm_T89 import *
 from test_Lgm_Data import *
+from test_Lgm_Wrap import *
 # add others here as they exist
 
 
