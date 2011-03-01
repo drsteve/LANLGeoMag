@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <values.h>  // removed by BAL 28Feb2011, my mac doesn't have this header is it really needed?
-#include <float.h>
+#include <values.h>
 
 #ifdef LINUX
 #include <values.h>
