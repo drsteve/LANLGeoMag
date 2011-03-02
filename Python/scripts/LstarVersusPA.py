@@ -1,60 +1,65 @@
 import math
 from ctypes import pointer, c_double, c_int
+import datetime
 
 import numpy
 
-from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, TRUE, Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lstar
+from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lstar
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
 import DataArray
+import Closed_Field
+import Lgm_MagModelInfo
 
+# setup a poor mans data until gspdata is generalized
 ans = {}
 
+# date, this will be an input
+date = datetime.datetime(2010, 12, 12)
 
-Psm = Lgm_Vector.Lgm_Vector(0, 0, 0)
-P = Lgm_Vector.Lgm_Vector(0, 0, 0)
-c = Lgm_CTrans.Lgm_CTrans()
+# set Kp, this is an input
+Kp = 1;
+ans['Kp'] = Kp
 
-# this is the pitch angles to calculate
+# change datetime to Lgm Datelong and UTC
+datelong = Lgm_CTrans.dateToDateLong(date)
+utc = Lgm_CTrans.dateToFPHours(date)
+ans['Date'] = datelong
+ans['UTC'] = utc
+
+# setup a magmodelinfo
+mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
+
+# position, this will be an input (SM coords here)
+Psm = Lgm_Vector.Lgm_Vector(-6.6, 0, 0)
+
+# pitch angles to calculate, this will be an input
 Alpha = range(1, 90, 20)  # 1...89
 
 # required setup
 MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
 
-#// Date and UTC
-Date       = 19800625;
-UTC        = 19.0;
-# required setup
-Lgm_Set_Coord_Transforms( Date, UTC, pointer(c) );
-
-ans['Date'] = Date
-ans['UTC'] = UTC
-
-# location in **SM** coords
-Psm.x = -6.6
-Psm.y = 0.0
-Psm.z = 0.0
-
 # convert to **GSM**
-Lgm_Convert_Coords( pointer(Psm), pointer(P), SM_TO_GSM, pointer(c) );
+Pgsm = Lgm_Vector.Lgm_Vector()
+Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mmi.c )
 ans['PosSM'] = Psm.tolist()
-ans['PosGSM'] = P.tolist()
+ans['PosGSM'] = Pgsm.tolist()
 
 # what does 3 mean?  Have to look at the C (or docs)
 MagEphemInfo.LstarQuality   = 3;
+
 # L* in ones place is L* in lots of places (for GPS set to False)
-MagEphemInfo.SaveShellLines = TRUE;
+MagEphemInfo.SaveShellLines = False
 MagEphemInfo.LstarInfo.contents.VerbosityLevel = 0;
 MagEphemInfo.LstarInfo.contents.mInfo.contents.VerbosityLevel = 0;
 
-# set Kp
-Kp = 1;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
 #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
 #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
-# decide which Field model to use
+# decide which Field model to use, this is a keyword
 Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
 
 ans['Field'] = {}
@@ -64,14 +69,9 @@ ans['Field']['Kp'] = Kp
 # put Kp into the structure
 MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
 
-# another structure
-LstarInfo = Lgm_LstarInfo()
-# get its values from yet abother structure
-LstarInfo = MagEphemInfo.LstarInfo;
-
-# Save Date, UTC to MagEphemInfo structure
-MagEphemInfo.Date   = Date
-MagEphemInfo.UTC    = UTC
+# Save Date, UTC to MagEphemInfo structure ** is this needed?
+MagEphemInfo.Date   = datelong
+MagEphemInfo.UTC    = utc
 
 # Save nAlpha, and Alpha array to MagEphemInfo structure
 MagEphemInfo.nAlpha = len(Alpha)
@@ -80,31 +80,27 @@ MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
 # Set Tolerances
 SetLstarTolerances(MagEphemInfo.LstarQuality, MagEphemInfo.LstarInfo )
 
-# set coord transformation *required*
-Lgm_Set_Coord_Transforms(Date, UTC, MagEphemInfo.LstarInfo.contents.mInfo.contents.c)
+MagEphemInfo.LstarInfo.contents.mInfo.contents = mmi
 
 # *  Blocal at sat location.
-MagEphemInfo.P = P
+MagEphemInfo.P = Pgsm
 
 Bvec = Lgm_Vector.Lgm_Vector(0,0,0) # I like to initialize, probably not needed
 # Get B at the point in question
-MagEphemInfo.LstarInfo.contents.mInfo.contents.Bfield(pointer(P), pointer(Bvec),
+MagEphemInfo.LstarInfo.contents.mInfo.contents.Bfield(pointer(Pgsm), pointer(Bvec),
                                                       MagEphemInfo.LstarInfo.contents.mInfo)
 
 
 # save its magnitude in the structure
 MagEphemInfo.B = Bvec.magnitude()
 
-u=P
-v1 = Lgm_Vector.Lgm_Vector(0,0,0)
-v2 = Lgm_Vector.Lgm_Vector(0,0,0)
-v3 = Lgm_Vector.Lgm_Vector(0,0,0)
-vv1 = Lgm_Vector.Lgm_Vector(0,0,0)
-TRACE_TOL = 1e-5  # this at 1e-7 looks way too tight!!!!
-
-#  Compute Field-related quantities for each Pitch Angle.
+# check and see if the field line is closed before doing much work
+if Closed_Field.Closed_Field(Pgsm.tolist(), date ) == 'LGM_CLOSED':
+    print 'LGM_CLOSED'
 
 1/0
+
+#  Compute Field-related quantities for each Pitch Angle.
 
 if Lgm_Trace(pointer(u), pointer(v1), pointer(v2), pointer(v3),
           120, 0.01,
