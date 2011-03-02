@@ -104,6 +104,8 @@ TRACE_TOL = 1e-5  # this at 1e-7 looks way too tight!!!!
 
 #  Compute Field-related quantities for each Pitch Angle.
 
+1/0
+
 if Lgm_Trace(pointer(u), pointer(v1), pointer(v2), pointer(v3),
           120, 0.01,
           TRACE_TOL, MagEphemInfo.LstarInfo.contents.mInfo) == 1:
