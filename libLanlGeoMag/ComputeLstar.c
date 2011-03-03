@@ -19,7 +19,7 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  * set them qualitatively given a single "quality" value.
  */
 void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
-    
+
     if ( ( Quality < 0 ) || ( Quality > 8 ) ) {
         printf("%sSetLstarTolerances: Quality value (of %d) not in range [0, 8]. Setting to 5.%s\n", s->PreStr, Quality, s->PostStr );
         Quality = 5;
@@ -178,7 +178,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
     }
 
-    
+
     return;
 
 
@@ -202,8 +202,12 @@ Lgm_LstarInfo *InitLstarInfo( int VerbosityLevel ) {
      */
     LstarInfo->mInfo = Lgm_InitMagInfo( );
 
+    Lgm_InitLstarInfoDefaults(LstarInfo);
+    return(LstarInfo);
+}
 
 
+void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     /*
      *  Default Settings
      */
@@ -214,7 +218,6 @@ Lgm_LstarInfo *InitLstarInfo( int VerbosityLevel ) {
     LstarInfo->PostStr[0] = '\0';
 
     return LstarInfo;
-
 }
 
 
@@ -266,9 +269,6 @@ Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s ) {
 
 
     return( t );
-
-
-
 }
 
 
@@ -320,7 +320,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     PreStr = LstarInfo->PreStr;
     PostStr = LstarInfo->PostStr;
-    
+
 
 
     if (LstarInfo->VerbosityLevel > 0) {
@@ -468,7 +468,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     nLines = (int)(24.0/DeltaMLT + 0.5);
     for ( koffset=nk=k=0, MLT=MLT0; MLT<(MLT0+24.0-1e-10); MLT += DeltaMLT){
 
-	
+
 	    /*
 	     *  Try to predict what the next mlat should be so we can really
 	     *  narrow down the bracket.
@@ -525,7 +525,7 @@ delta = 5.0;
 
                 /*
                  * Perhaps our bracket was no good -- too narrow. Enlarge it.
-                 * Try double what we had. 
+                 * Try double what we had.
                  */
                 delta *= 2;
                 mlat0 = ((mlat-delta) >  0.0) ?  0.0 : (mlat-delta);
@@ -575,14 +575,14 @@ mlat0 = -30.0;
 	    }
 
         /*
-         * Save individual I values 
+         * Save individual I values
          */
         LstarInfo->I[k] = Ifound;
 
 
         MirrorMLT[k]  = MLT;
         MirrorMlat[k] = mlat;
-	
+
         if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat         = %g  \t Count = %d%s", PreStr, mlat, Count, PostStr ); fflush(stdout);
 
 
@@ -620,7 +620,7 @@ mlat0 = -30.0;
 
 
 
-	
+
 
         /*
          *  convert footpoint back to SM
@@ -736,7 +736,7 @@ M = ELECTRON_MASS; // kg
                 LstarInfo->mInfo->Hmax = 0.001;
                 if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Pn[k], &LstarInfo->Ellipsoid_Footprint_Pn[k], LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-7, LstarInfo->mInfo ) ) {
 
-                    LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s; 
+                    LstarInfo->Ellipsoid_Footprint_Sn[k] = LstarInfo->Spherical_Footprint_Sn[k] + LstarInfo->mInfo->Trace_s;
 
                 }
 
@@ -752,7 +752,7 @@ M = ELECTRON_MASS; // kg
              *  rtelativen to the southern spherical footpoint -- which is how
              *  the field line is defined that we are trying to save.
              */
-            //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ){ 
+            //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ){
             Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo );
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
@@ -793,7 +793,7 @@ M = ELECTRON_MASS; // kg
      */
 
 
-    /* 
+    /*
      *  sort arrays so they are monotonically increasing in MLT
      *  (needed for spline interp).
      */
@@ -803,11 +803,11 @@ M = ELECTRON_MASS; // kg
 
     /*
      *  Create new arrays that have the last two points repeated at the start
-     *  and the first two points repeated at the end. We have to add/subtract 
+     *  and the first two points repeated at the end. We have to add/subtract
      *  24 hours at the end/start. The repeated values ensure that the spline
 FIX
      *  will be periodic and continous around the globe.
-     */ 
+     */
 /*
     j = 0;
     for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]-24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
@@ -869,7 +869,7 @@ For debugging...
 
     gsl_interp_free( LstarInfo->pspline );
     gsl_interp_accel_free( LstarInfo->acc );
-    
+
 
     return(0);
 
@@ -878,20 +878,20 @@ For debugging...
 
 
 double MagFluxIntegrand( double Phi, _qpInfo *qpInfo ) {
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     double	MLT, mlat, c;
     Lgm_LstarInfo  *LstarInfo;
-                                                                                                                                                  
+
 
     MLT = Phi*DegPerRad/15.0;
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     /*
      *  Get pointer to our auxilliary data structure.
      */
     LstarInfo = (Lgm_LstarInfo *)qpInfo;
-                                                                                                                                                  
+
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
     //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
@@ -911,25 +911,25 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     int         key, neval, ier, limit, lenw, last, iwork[501];
     double      work[2001];
     _qpInfo     *qpInfo;
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     /*
      *  Type-cast our data structure to a generic type.
      *  The structure holds auzilliary info we need down
      *  in the function calls.
      */
     qpInfo = (_qpInfo *)LstarInfo;
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     /*
      *  Limits of integration.
      */
     a = 0.0;
     b = 2.0*M_PI;
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     /*
      *   set tolerances.
      */
@@ -939,7 +939,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     epsabs = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsrel;
 
 
-                                                                                                                                                  
+
     limit = 500; lenw = 4*limit; key = 6;
 /*
     iwork  = (int *) calloc( limit+1, sizeof(int) );
@@ -950,12 +950,12 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     free( iwork );
     free( work );
 */
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
-                                                                                                                                                  
+
     return( -result*LstarInfo->mInfo->c->M_cd/r );
-                                                                                                                                                  
+
 }
 
 
@@ -973,13 +973,13 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
  *  Lets integrate the real field. I.e. dont assume a dipole field
  */
 double LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) {
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     double	cl, sl, st, ct, sp, cp, Br, Bx, By, Bz, f;
     double	MLT, phi;
     Lgm_Vector	u, w, Bvec;
     Lgm_LstarInfo  *LstarInfo;
-                                                                                                                                                  
+
     /*
      *  Get pointer to our auxilliary data structure.
      */
@@ -993,7 +993,7 @@ phi = 15.0*(MLT-12.0)*RadPerDeg;
     u.z = sl;
     Lgm_Convert_Coords( &u, &w, SM_TO_GSM, LstarInfo->mInfo->c );
 
-    
+
     LstarInfo->mInfo->Bfield( &w, &Bvec, LstarInfo->mInfo );
     Lgm_Convert_Coords( &Bvec, &u, GSM_TO_SM, LstarInfo->mInfo->c );
     Bx = u.x; By = u.y; Bz = u.z;
@@ -1015,34 +1015,34 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     int         key, neval, ier, limit, lenw, last, iwork[501];
     double      work[2001], MLT, mlat;
     _qpInfo     *qpInfo;
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     /*
      *  Type-cast our data structure to a generic type.
      *  The structure holds auzilliary info we need down
      *  in the function calls.
      */
     qpInfo = (_qpInfo *)LstarInfo;
-                                                                                                                                                  
+
     /*
-     *  Get Latitude 
+     *  Get Latitude
      */
     MLT = LstarInfo->Phi*DegPerRad/15.0;
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
     //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
     mlat *= RadPerDeg;
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     /*
      *  Limits of integration for lambda integral.
      */
     a = mlat;
     b = M_PI/2.0;
 
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     /*
      *   set tolerances.
      */
@@ -1050,7 +1050,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     //epsrel = 1e-3;
     epsabs = LstarInfo->mInfo->Lgm_LambdaIntegral_Integrator_epsabs;
     epsrel = LstarInfo->mInfo->Lgm_LambdaIntegral_Integrator_epsrel;
-                                                                                                                                                  
+
     limit = 500; lenw = 4*limit; key = 6;
 /*
     iwork  = (int *) calloc( limit+1, sizeof(int) );
@@ -1061,19 +1061,19 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     free( iwork );
     free( work );
 */
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     return( result );
-                                                                                                                                                  
+
 }
 
 double MagFluxIntegrand2( double Phi, _qpInfo *qpInfo ) {
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     double	f;
     Lgm_LstarInfo  *LstarInfo;
-                                                                                                                                                  
+
     /*
      *  Get pointer to our auxilliary data structure.
      */
@@ -1093,31 +1093,31 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     int         key, neval, ier, limit, lenw, last, iwork[501];
     double      work[2001];
     _qpInfo     *qpInfo;
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     /*
      *  Type-cast our data structure to a generic type.
      *  The structure holds auzilliary info we need down
      *  in the function calls.
      */
     qpInfo = (_qpInfo *)LstarInfo;
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     /*
      *  Limits of integration.
      */
     a = 0.0;
     b = 2.0*M_PI;
-                                                                                                                                                  
-                                                                                                                                                  
-                                                                                                                                                  
+
+
+
     /*
      *   set tolerances.
      */
     epsabs = 0.0;
     epsrel = 1e-5;
-                                                                                                                                                  
+
     limit = 500; lenw = 4*limit; key = 6;
 /*
     iwork  = (int *) calloc( limit+1, sizeof(int) );
@@ -1128,12 +1128,12 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     free( iwork );
     free( work );
 */
-                                                                                                                                                  
-                                                                                                                                                  
+
+
     r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
-                                                                                                                                                  
+
     return( result/r );
-                                                                                                                                                  
+
 }
 
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta ) {
@@ -1174,10 +1174,10 @@ void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
 	        nk = k;
         }
 
-                                                                                                                                                                                                  
+
 	    Lgm_RatFunInt( MirrorMLT+koffset-1, MirrorMlat+koffset-1, nk, MLT, &pred_mlat1, &pred_delta_mlat1 );
         Lgm_PolFunInt( MirrorMLT+koffset-1, MirrorMlat+koffset-1, nk, MLT, &pred_mlat2, &pred_delta_mlat2 );
- 
+
        	/*
 	     *  Make certain we have sane predictions
 	     */
@@ -1194,12 +1194,12 @@ void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
             *pred_mlat = MirrorMlat[0];
             *pred_delta_mlat = 2.0;
         }
-                                                                                                                                                                                                      
+
         if ( ( *pred_mlat < 0.0) || ( *pred_mlat > 90.0 ) ){
             *pred_mlat = MirrorMlat[0];
             *pred_delta_mlat = 2.0;
             }
-                                                                                                                                                                                                      
+
         }
 
 
@@ -1210,7 +1210,7 @@ void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
         }
 
         if ( *delta < .2 ) *delta = 0.2;
-                                                                                                                                                                                                  
+
 
 }
 
@@ -1306,6 +1306,3 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
 /*
  *    $Id$
  */
-
-
-

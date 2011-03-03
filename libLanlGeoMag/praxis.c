@@ -6,7 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <values.h>
+
+// #include <values.h> // commented out BAL 3Mar2011 for float.h instead
+#include <float.h>
 
 #ifdef LINUX
 #include <values.h>
@@ -24,7 +26,7 @@
 
 
 
-/* 
+/*
  *  Some defines that may not be known
  *  by all gcc compilers...
  */
@@ -72,7 +74,7 @@ void praxis( int n, double *x, int *data, double (*funct)(double *, int *data), 
 #else
 	srand48(34084320);
 #endif
-	
+
 //	for (i=0; i<8; ++i) x[i+1] = (double)data->x[i];
 	d=allocate_real_vector(1,n);
 	y=allocate_real_vector(1,n);
@@ -338,7 +340,7 @@ void praxis( int n, double *x, int *data, double (*funct)(double *, int *data), 
 
 }
 
-void praxismin(j, nits, d2, x1, f1, fk, n, x, v, qa, qb, qc, qd0, qd1, q0, q1, nf, nl, 
+void praxismin(j, nits, d2, x1, f1, fk, n, x, v, qa, qb, qc, qd0, qd1, q0, q1, nf, nl,
 			fx, m2, m4, dmin, ldt, reltol, abstol, small, h, funct, data)
 int 	j;
 int 	nits;
@@ -453,19 +455,19 @@ int *data;
 
 double praxisflin(l, j, n, x, v, qa, qb, qc, qd0, qd1, q0, q1, nf, funct, data)
 
-double 	l; 
-int 	j; 
-int 	n; 
-double 	x[]; 
+double 	l;
+int 	j;
+int 	n;
+double 	x[];
 double 	**v;
-double 	*qa; 
-double 	*qb; 
-double 	*qc; 
-double 	qd0; 
-double 	qd1; 
-double 	q0[]; 
-double 	q1[]; 
-int 	*nf; 
+double 	*qa;
+double 	*qb;
+double 	*qc;
+double 	qd0;
+double 	qd1;
+double 	q0[];
+double 	q1[];
+int 	*nf;
 double  (*funct)(double *, int *);
 int     *data;
 
@@ -518,10 +520,10 @@ double 	**b;
 
 
 void dupvec(l, u, shift, a, b)
-int l; 
-int u; 
-int shift; 
-double a[]; 
+int l;
+int u;
+int shift;
+double a[];
 double b[];
 
 {
@@ -531,11 +533,11 @@ double b[];
 
 
 void elmveccol(l, u, i, a, b, x)
-int l; 
-int u; 
-int i; 
-double a[]; 
-double **b; 
+int l;
+int u;
+int i;
+double a[];
+double **b;
 double x;
 {
 	for (; l<=u; l++) a[l] += b[l][i]*x;
@@ -544,10 +546,10 @@ double x;
 
 
 void ichrowcol(l, u, i, j, a)
-int l; 
-int u; 
-int i; 
-int j; 
+int l;
+int u;
+int i;
+int j;
 double **a;
 {
 	double r;
@@ -795,7 +797,7 @@ double em[];
 	return n;
 }
 void free_real_vector(v, l)
-double *v; 
+double *v;
 int l;
 {
     free((char *) (v+l));
@@ -827,7 +829,7 @@ int u;
 	fprintf(stderr, "Memory allocation failure in allocate_real_vector\n");
 	exit(1);
     }
-   
+
     return(p-l);
 }
 
@@ -848,7 +850,7 @@ int uc;
         fprintf(stderr, "Memory allocation failure in allocate_real_matrix\n");
         exit(1);
     }
-    
+
     p -= lr;
 
     for (i=lr; i<=ur; i++){
@@ -863,7 +865,7 @@ int uc;
     return p;
 }
 
-    
+
 void rotcol(l, u, i, j, a, c, s)
 int l;
 int u;
