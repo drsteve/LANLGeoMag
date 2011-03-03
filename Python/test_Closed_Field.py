@@ -3,6 +3,8 @@
 import unittest
 import datetime
 
+import numpy
+
 import Closed_Field
 
 class Closed_FieldTests(unittest.TestCase):
@@ -14,7 +16,6 @@ class Closed_FieldTests(unittest.TestCase):
 
     @version: V1: 1-Mar-2011 (BAL)
     """
-
     def setUp(self):
         super(Closed_FieldTests, self).setUp()
         self.date = datetime.datetime(2010, 12, 12)
@@ -51,8 +52,18 @@ class Closed_FieldTests(unittest.TestCase):
         #'LGM_INSIDE_EARTH'
         #'LGM_TARGET_HEIGHT_UNREACHABLE'
 
+    def test_extended_out(self):
+        """Closed_Field extended_out flag should have known behaviour (regression)"""
+        data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
+        self.assertEqual(data[0], 'LGM_CLOSED')
+        numpy.testing.assert_array_almost_equal(data[1],
+                [0.766694374191256, 0.3403434887687581, -0.5738019260637667])
+        numpy.testing.assert_array_almost_equal(data[2],
+                [-0.061498543308585105, 0.39594651357843824, 0.93442754063146])
+        numpy.testing.assert_array_almost_equal(data[3],
+                [2.264111451438855, 2.8265536096003006, 1.142529362433734])
+        self.assertAlmostEqual(data[4], 3.4228596014742134)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-
