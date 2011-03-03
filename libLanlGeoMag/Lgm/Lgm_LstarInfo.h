@@ -14,8 +14,8 @@
 #define RE              (6378.135e3)        /* Earth Radius, m */
 #define CC              (2.99792458e8)      /* Speed of Light, m/s */
 #define EE              (1.6022e-19)        /* electron charge, C */
-                                                                                                                                                                                              
-                                                                                                                                                                                              
+
+
 
 
 
@@ -24,7 +24,7 @@ typedef struct Lgm_LstarInfo {
     double              KineticEnergy;  // Particle kinetic energy
     double              Mass;           // Particle mass
     double              PitchAngle;     // Particle Pitch Angle
-    double              LSimpleMax;     // Threshold for doing 
+    double              LSimpleMax;     // Threshold for doing
                                         // drift-shell calculation.
 
     Lgm_MagModelInfo	*mInfo;
@@ -42,7 +42,7 @@ typedef struct Lgm_LstarInfo {
     double      y_gsm[100][1000];
     double      z_gsm[100][1000];
 
-                                                                                                                                                                                        
+
     /*
      *  Variables to hold info on footprint of Drift Shell
      */
@@ -78,7 +78,7 @@ typedef struct Lgm_LstarInfo {
     Lgm_Vector          Pmin[100];
     Lgm_Vector          GradI[100];
     Lgm_Vector          Vgc[100];
-                                                                                                                                                  
+
     int                 nSplnPnts;
     double              xa[500], ya[500], y2[500];
 
@@ -116,6 +116,8 @@ typedef struct Lgm_LstarInfo {
 
 void        SetLstarTolerances( int Quality, Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo  *InitLstarInfo( int VerbosityLevel );
+void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
+
 void FreeLstarInfo( Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );
 
@@ -142,6 +144,5 @@ double      AngVelInv( double Phi );
 #endif
 
 /*
- *    $Id: Lgm_LstarInfo.h 89 2010-12-21 18:47:45Z mgh $
+ *    $Id: Lgm_LstarInfo.h 152 2011-03-03 21:51:14Z balarsen $
  */
-
