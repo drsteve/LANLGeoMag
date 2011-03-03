@@ -20,9 +20,9 @@ from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
-import Lgm_Data
+from spacepy import datamodel
 
-class T89_Data(Lgm_Data.Lgm_Data):
+class T89_Data(datamodel.SpaceData):
     """
     Class to store data and attributes
 
@@ -35,7 +35,7 @@ class T89_Data(Lgm_Data.Lgm_Data):
     def __init__(self, pos, time, Kp,
                  coord_system, INTERNAL_MODEL,):
         self.attrs = {}
-        self['position'] = Lgm_Data.DataArray(pos)
+        self['position'] = datamodel.dmarray(pos)
         self['position'].attrs['Units'] = 'Re'
         self['position'].attrs['System'] = coord_system
         #self.attrs['internal_model'] = INTERNAL_MODEL
