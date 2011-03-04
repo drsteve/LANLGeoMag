@@ -4,6 +4,7 @@ import datetime
 import LstarVersusPA
 import spacepy.toolbox as tb
 from pylab import *
+import socket
 
 now = datetime.datetime.now
 
@@ -47,5 +48,8 @@ boxplot(data, notch=1, positions=range(9))
 ax = gca()
 ax.set_xlabel('Quality number')
 ax.set_ylabel('Run time')
-ax.set_title('RBSP2 LstarVersusPA Calcs 4Mar2011')
+ax.set_title(socket.gethostname() + ' LstarVersusPA Calcs ' +
+             str(datetime.datetime.now().month) + '-' +
+             str(datetime.datetime.now().day) +
+             '-' + str(datetime.datetime.now().year))
 draw()
