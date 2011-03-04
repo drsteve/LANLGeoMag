@@ -2,17 +2,30 @@
 
 import subprocess
 import sys
+import glob
+import shutil
 
-if sys.platform == 'darwin':
-    subprocess.call(['ctypesgen.py',
-                     '-l/usr/local/lib/libLanlGeoMag.dylib',
-                     '/usr/local/include/Lgm/*.h',
-                     '--no-macro-warnings',
-                     '-o', 'OSX_Lgm_Wrap.py'])
-else:
+headers = glob.glob('/usr/local/include/Lgm/*.h')
+
+try:
     subprocess.call(['ctypesgen.py',
                      '-L/usr/local/lib/',
-                     '/usr/local/include/Lgm/*.h',
+                     '-llibLanlGeoMag.dylib',
                      '--no-macro-warnings',
+                     '-o', 'OSX_Lgm_Wrap.py.bak'] +
+                     headers)
+    subprocess.call(['ctypesgen.py',
+                     '-L/usr/local/lib/',
                      '-llibLanlGeoMag.so',
-                     '-o Linux_Lgm_Wrap.py'])
+                     '--no-macro-warnings',
+                     '-o', 'LIN_Lgm_Wrap.py.bak'] +
+                     headers)
+except OSError:
+    print("ctyoesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
+else:
+    if sys.platform == 'darwin':
+        shutil.copy('OSX_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
+    elif 'linux' in sys.platform:
+        shutil.copy('LIN_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
+    else:
+        raise(OSError("You are using an OS that I don't understand, sorry you are on your own"))
