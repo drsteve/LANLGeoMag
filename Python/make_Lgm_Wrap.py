@@ -24,8 +24,8 @@ except OSError:
     print("ctyoesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
 else:
     if sys.platform == 'darwin':
-        shutil.move('OSX_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
+        shutil.copy('OSX_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
     elif 'linux' in sys.platform:
-        shutil.move('LIN_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
+        shutil.copy('LIN_Lgm_Wrap.py.bak', 'Lgm_Wrap.py')
     else:
         raise(OSError("You are using an OS that I don't understand, sorry you are on your own"))
