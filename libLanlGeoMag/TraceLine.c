@@ -311,7 +311,7 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
 
-printf("Info->nPnts = %d\n", Info->nPnts);
+//printf("Info->nPnts = %d\n", Info->nPnts);
 
 
 

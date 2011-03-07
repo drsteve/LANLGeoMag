@@ -7,8 +7,8 @@
 #define USE_FOUR_POINT  1
 #define USE_TWO_POINT   2
 
-//#define DIFF_SCHEME     USE_TWO_POINT
-#define DIFF_SCHEME     USE_FOUR_POINT
+#define DIFF_SCHEME     USE_TWO_POINT
+//#define DIFF_SCHEME     USE_FOUR_POINT
 
 
 
@@ -338,7 +338,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector  u, Pa, Pb;
-    double  H, h, a, b, Sa, Sb, I, f[6], r;
+    double  H, h, a, b, SS, Sa, Sb, I, f[6], r;
     int     i, N;
     
 
@@ -356,9 +356,9 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
     /*
      *  Set h to a smallish value
      */
-    h = 5e-2;
+//    h = 5e-2;
     h = 0.1;
-    h = 0.2;
+//    h = 0.2;
 
 
     switch ( DIFF_SCHEME ) {
@@ -375,15 +375,14 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
 
     // User should set these?
+    mInfo->Lgm_I_Integrator        = DQAGS;
     mInfo->Lgm_I_Integrator_epsabs = 0.0;
-    mInfo->Lgm_I_Integrator_epsrel = 1e-7;
-//            mInfo2->FirstCall = TRUE;
+    mInfo->Lgm_I_Integrator_epsrel = 1e-5;
 
     
     /* X-component */
     mInfo->UseInterpRoutines = 1;
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdx: h = %g\n", h);
-printf("\t\tComputing dIdx: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -391,46 +390,34 @@ printf("\t\tComputing dIdx: h = %g\n", h);
             u = *v0; H = (double)i*h; u.x += H;
 
             /*
-             * Trace to northern mirror point
+             * Trace to southern mirror point
              */
-            //printf("A. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
-                 * Trace to southern mirror point
+                 * Trace to northern mirror point
                  */
-                //printf("B. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
-Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
-                    mInfo->Sm_South = 0.0;
-                    mInfo->Sm_North = Sa;
+                    mInfo->Hmax = SS/200.0;
+                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
-                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
-                    mInfo->FirstCall = TRUE;
-                    mInfo->Lgm_n_I_integrand_Calls = 0;
+                    AddNewPoint( SS,  mInfo->Bm, &Pb, mInfo );
                     InitSpline( mInfo );
-mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
-mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
-mInfo->Lgm_n_I_integrand_Calls    = 0;
+
+                    mInfo->Lgm_I_integrand_S         = 0.0;
+                    mInfo->Lgm_I_integrand_FirstCall = TRUE;
+                    mInfo->Lgm_n_I_integrand_Calls   = 0;
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = SS;
                     I = Iinv_interped( mInfo  );
+
                     if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-                    printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
+
                     FreeSpline( mInfo );
 
-//                    a = 0.0; b = Sa+Sb;
-//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
-//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
-//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
-//
-//                    mInfo->FirstCall = TRUE;
-//                    mInfo->Lgm_n_I_integrand_Calls = 0;
-//                    I = Iinv( mInfo );
-                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
 
                 } else {
@@ -461,7 +448,6 @@ mInfo->Lgm_n_I_integrand_Calls    = 0;
 
     /* Y-component */
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdy: h = %g\n", h);
-printf("\t\tComputing dIdy: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -469,46 +455,32 @@ printf("\t\tComputing dIdy: h = %g\n", h);
             u = *v0; H = (double)i*h; u.y += H;
 
             /*
-             * Trace to northern mirror point
+             * Trace to southern mirror point
              */
-            //printf("C. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
-                 * Trace to southern mirror point
+                 * Trace to northern mirror point
                  */
-                //printf("D. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
-                    r  = Lgm_Magnitude( &mInfo->Pm_North );
-//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
-Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
-                    mInfo->Sm_South = 0.0;
-                    mInfo->Sm_North = Sa;
+                    r  = Lgm_Magnitude( &Pb );
+                    mInfo->Hmax = SS/200.0;
+                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
-                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
+                    AddNewPoint( SS,  mInfo->Bm, &Pb, mInfo );
                     InitSpline( mInfo );
-                    mInfo->Lgm_n_I_integrand_Calls = 0;
-                    InitSpline( mInfo );
-mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
-mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
-mInfo->Lgm_n_I_integrand_Calls    = 0;
-                    I = Iinv_interped( mInfo  );
-                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
-                    FreeSpline( mInfo );
-//                    a = 0.0; b = Sa+Sb;
-//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
-//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
-//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
-//
-//                    mInfo->FirstCall = TRUE;
-//                    mInfo->Lgm_n_I_integrand_Calls = 0;
-//                    I = Iinv( mInfo );
-//                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
+                    mInfo->Lgm_I_integrand_S         = 0.0;
+                    mInfo->Lgm_I_integrand_FirstCall = TRUE;
+                    mInfo->Lgm_n_I_integrand_Calls   = 0;
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = SS;
+                    I = Iinv_interped( mInfo  );
+
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    FreeSpline( mInfo );
 
                 } else {
                     printf("\t\tMirror point below %g km in Southern Hemisphere\n", mInfo->Lgm_LossConeHeight);
@@ -537,7 +509,6 @@ printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Call
 
     /* Z-component */
     if (mInfo->VerbosityLevel > 0) printf("\t\tComputing dIdz: h = %g\n", h);
-printf("\t\tComputing dIdz: h = %g\n", h);
     for (i=-N; i<=N; ++i){
 
         if (i!=0) { // dont need the center value in our difference scheme
@@ -545,46 +516,32 @@ printf("\t\tComputing dIdz: h = %g\n", h);
             u = *v0; H = (double)i*h; u.z += H;
 
             /*
-             * Trace to northern mirror point
+             * Trace to southern mirror point
              */
-            //printf("E. Lgm_TraceToMirrorPoint\n");
-            if ( Lgm_TraceToMirrorPoint( &u, &Pb, &Sb, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                 /*
-                 * Trace to southern mirror point
+                 * Trace to northern mirror point
                  */
-                //printf("F. Lgm_TraceToMirrorPoint\n");
-                if ( Lgm_TraceToMirrorPoint( &u, &Pa, &Sa, mInfo->Bm, -1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
+                if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
-                    r  = Lgm_Magnitude( &mInfo->Pm_North );
-//                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*Sa-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
-Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, Sa/200.0, 1.0, 1e-7, FALSE, mInfo );
-                    mInfo->Sm_South = 0.0;
-                    mInfo->Sm_North = Sa;
+                    r  = Lgm_Magnitude( &Pb );
+                    mInfo->Hmax = SS/200.0;
+                    Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
-                    AddNewPoint( Sa,  mInfo->Bm, &Pb, mInfo );
+                    AddNewPoint( SS,  mInfo->Bm, &Pb, mInfo );
                     InitSpline( mInfo );
-                    mInfo->Lgm_n_I_integrand_Calls = 0;
-                    InitSpline( mInfo );
-mInfo->Lgm_I_integrand_S         = 0.0;                                                                                            
-mInfo->Lgm_I_integrand_FirstCall = TRUE;                                                                                           
-mInfo->Lgm_n_I_integrand_Calls    = 0;
-                    I = Iinv_interped( mInfo  );
-                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
-//                    if (VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  PreStr, I, I-I0, b, mInfo->Lgm_n_I_integrand_Calls, PostStr );
-                    FreeSpline( mInfo );
-//                    a = 0.0; b = Sa+Sb;
-//                    mInfo->Pm_South = Pa; mInfo->Sm_South = a;
-//                    mInfo->Pm_North = Pb; mInfo->Sm_North = b;
-//                    if (mInfo->VerbosityLevel > 2) printf("\t\tComputing Integral Invariant. Limits of integration are: [a,b] = [%g,%g]\n", a, b);
-//
-//                    mInfo->FirstCall = TRUE;
-//                    mInfo->Lgm_n_I_integrand_Calls = 0;
-//                    I = Iinv( mInfo );
-//                    if (mInfo->VerbosityLevel > 2) printf("\t\tI = %g   ", I);
-//                    if (mInfo->VerbosityLevel > 2) printf("Lgm_n_I_integrand_Calls = %d\n", mInfo->Lgm_n_I_integrand_Calls );
 
+                    mInfo->Lgm_I_integrand_S         = 0.0;
+                    mInfo->Lgm_I_integrand_FirstCall = TRUE;
+                    mInfo->Lgm_n_I_integrand_Calls   = 0;
+                    mInfo->Sm_South = 0.0;
+                    mInfo->Sm_North = SS;
+                    I = Iinv_interped( mInfo  );
+
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    FreeSpline( mInfo );
 
                 } else {
                     printf("\t\tMirror point below %g km in Southern Hemisphere\n", mInfo->Lgm_LossConeHeight);
@@ -610,7 +567,6 @@ printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Call
         GradI->z = (f[2] - f[0])/(2.0*h);
     }
 
-    //printf("\t\tGrad_I = %g %g %g\n", GradI->x, GradI->y, GradI->z);
 
     return(0);
 
@@ -625,4 +581,3 @@ printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Call
 /*
  *    $Id$
  */
-
