@@ -311,7 +311,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
 
-//printf("Info->nPnts = %d\n", Info->nPnts);
 
 
 
@@ -323,11 +322,11 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
      * 
      */
     if ( AddBminPoint ) {
-printf("1) ADDING NEW POINT\n");
-// MUST ADD Bcdip for this too!
+        printf("1) ADDING NEW POINT\n");
+        // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
-//printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
+    //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
 
