@@ -30,7 +30,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     double	    Rlc, R, Fa, Fb, F;
     double	    Ra, Rb, Height;
     Lgm_Vector	w, Pa, Pb, P, Bvec;
-    int		    done, reset;
+    int		    done, FoundBracket, reset;
 
 
     /*
@@ -39,8 +39,8 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_Convert_Coords( u, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
     if ( Height < Info->Lgm_LossConeHeight ) {
-//        if ( Info->VerbosityLevel > 1 ) 
-printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE (Height = %g)\n", Info->Lgm_LossConeHeight, Height );
+        if ( Info->VerbosityLevel > 1 ) 
+        printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         return(-1); // below loss cone height -> particle is in loss cone!
     }
 
@@ -97,6 +97,7 @@ printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE (Heig
     P     = Pa;
 
     done  = FALSE;
+    FoundBracket = FALSE;
     reset = TRUE;
     while ( !done ) {
 
@@ -124,6 +125,7 @@ printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE (Heig
 	        return(-2);
 	    } else if ( F > 0.0 ) { /* not >= because we want to explore at least a step beyond */
 	        done = TRUE;
+            FoundBracket = TRUE;
 	        Pb = P;
 	        Rb = R;
   	        Fb = F;
@@ -141,14 +143,17 @@ printf("Lgm_TraceToMirrorPoint: Initial Height is below %g km -- LOSS CONE (Heig
 	    Htry = fabs(0.2*(R-0.999999));
         if (Htry < 1e-12) done = TRUE;
 
-	    if ( Height < 10.0 ) {
-//            if ( Info->VerbosityLevel > 1 ) 
-printf("Lgm_TraceToMirrorPoint: Current Height is below %g km -- ASSUMING LOSS CONE. (Height = %g) \n", 10.0, Hdid );
+	    if ( Height < Info->Lgm_LossConeHeight ) {
+            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
 	        return(-1); /* dropped below loss cone height -> particle is in loss cone! */
-	    }
+	    } 
 
     }
 
+    if ( !FoundBracket ) {
+        if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Bracket not found.\n");
+        return(-2); /* We have gone as far as we could without finding a bracket. Bail out. */
+    }
 
 
     /*
@@ -197,8 +202,7 @@ printf("Lgm_TraceToMirrorPoint: Current Height is below %g km -- ASSUMING LOSS C
     Lgm_Convert_Coords( &v, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
 	if ( Height < Info->Lgm_LossConeHeight ) {
-//            if ( Info->VerbosityLevel > 1 ) 
-printf("Lgm_TraceToMirrorPoint: Final Height is below %g km -- ASSUMING LOSS CONE (Height = %g)\n", Info->Lgm_LossConeHeight, Height );
+        if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
 	    return(-1); /* dropped below loss cone height -> particle is in loss cone! */
 	}
 
@@ -208,7 +212,7 @@ printf("Lgm_TraceToMirrorPoint: Final Height is below %g km -- ASSUMING LOSS CON
 
 
 /*
- *   $Id: TraceToMirrorPoint2.c 141 2011-02-01 16:09:15Z mgh $
+ *   $Id: TraceToMirrorPoint2.c 155 2011-03-08 19:22:29Z mgh $
  */
 
 

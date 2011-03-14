@@ -348,6 +348,7 @@ int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double
 int Lgm_B_igrf(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 int Lgm_B_cdip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 int Lgm_B_edip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
+int Lgm_B_JensenCain1960(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 
 
 
@@ -509,5 +510,5 @@ int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *Cg
 
 
 /*
- *  $Id: Lgm_MagModelInfo.h 142 2011-02-02 17:09:07Z mgh $
+ *  $Id: Lgm_MagModelInfo.h 157 2011-03-14 18:52:06Z mgh $
  */

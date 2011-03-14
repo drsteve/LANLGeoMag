@@ -107,12 +107,19 @@ int main( int argc, char *argv[] ){
     printf("Colorize        = %d\n", Colorize);
     //exit(0);
     if ( nAlpha > 0 ){
+printf("********** nAlpha = %d\n", nAlpha);
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
     } else {
         // doesnt seem to like allocating zero size...
         MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
     }
+i = 0;
+int nn = 0;
+printf("MagEphemInfo = %p\n", MagEphemInfo);
+printf("MagEphemInfo->Shell_Bmin = %p\n", MagEphemInfo->Shell_Bmin);
+printf("MagEphemInfo->Shell_Bmin[%d][%d] = %g %g %g\n", i, nn, MagEphemInfo->Shell_Bmin[i][nn].x, MagEphemInfo->Shell_Bmin[i][nn].y, MagEphemInfo->Shell_Bmin[i][nn].z);                                                                                                      
 
+//exit(0);
     /*
      * Remove any extraneous newline and/or linefeeds at the end of the strings.
      * Probably not needed, but TLEs may have non-linux terminating characters...
@@ -128,6 +135,7 @@ int main( int argc, char *argv[] ){
 
     // Settings for Lstar calcs
     MagEphemInfo->ComputeVgc = TRUE;
+MagEphemInfo->ComputeVgc = FALSE;
     MagEphemInfo->LstarQuality = 2;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 10.0;

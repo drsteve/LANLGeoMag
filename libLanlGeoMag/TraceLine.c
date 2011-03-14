@@ -311,7 +311,6 @@ print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
 
 
 
-printf("Info->nPnts = %d\n", Info->nPnts);
 
 
 
@@ -323,11 +322,11 @@ printf("Info->nPnts = %d\n", Info->nPnts);
      * 
      */
     if ( AddBminPoint ) {
-printf("1) ADDING NEW POINT\n");
-// MUST ADD Bcdip for this too!
+        printf("1) ADDING NEW POINT\n");
+        // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
-//printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
+    //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
 
@@ -968,5 +967,5 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 
 
 /*
- *   $Id: TraceLine.c 141 2011-02-01 16:09:15Z mgh $
+ *   $Id: TraceLine.c 155 2011-03-08 19:22:29Z mgh $
  */
