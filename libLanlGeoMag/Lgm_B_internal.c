@@ -15,6 +15,11 @@ int Lgm_B_edip(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo) {
     return(1);
 }
 
+int Lgm_B_JensenCain1960(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo) {
+    Lgm_B_JensenCain1960_ctrans( v, B, MagInfo->c );
+    return(1);
+}
+
 /*
- *   $Id: Lgm_B_internal.c 45 2010-10-01 20:43:29Z mgh $
+ *   $Id: Lgm_B_internal.c 157 2011-03-14 18:52:06Z mgh $
  */

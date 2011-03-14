@@ -8,7 +8,8 @@
 
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     Lgm_MagEphemInfo  *MagEphemInfo = (Lgm_MagEphemInfo *) calloc (1, sizeof(*MagEphemInfo));
-    Lgm_InitMagEphemInfoDefaults(MagEphemInfo, Verbosity, MaxPitchAngles);
+    Lgm_InitMagEphemInfoDefaults(MagEphemInfo, MaxPitchAngles, Verbosity );
+    printf("MagEphemInfo = %p\n", MagEphemInfo);
     return MagEphemInfo;
 }
 
@@ -338,5 +339,5 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
 
 
 /*
- *   $Id: Lgm_InitMagEphemInfo.c 136 2011-01-19 22:14:26Z balarsen $
+ *   $Id: Lgm_InitMagEphemInfo.c 154 2011-03-07 21:32:21Z mgh $
  */

@@ -86,9 +86,9 @@ class Lgm_T89Tests(unittest.TestCase):
             [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
         for i, kp in enumerate(range(4)):
             B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
-            self.assertAlmostEqual(ans[i][0], B['B'].x)
-            self.assertAlmostEqual(ans[i][1], B['B'].y)
-            self.assertAlmostEqual(ans[i][2], B['B'].z)
+            self.assertAlmostEqual(ans[i][0], B['B'].x, 5)
+            self.assertAlmostEqual(ans[i][1], B['B'].y, 5)
+            self.assertAlmostEqual(ans[i][2], B['B'].z, 5)
 
     def test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
@@ -111,7 +111,7 @@ class Lgm_T89Tests(unittest.TestCase):
             Bv = list(itertools.chain.from_iterable(B))
             Av = list(itertools.chain.from_iterable([ans[i]]*2))
             for i, val in enumerate(Bv):
-                self.assertAlmostEqual(Av[i], val)
+                self.assertAlmostEqual(Av[i], val, 5)
         self.assertEqual(len(B), 2)
 
     def test_pos_checking(self):

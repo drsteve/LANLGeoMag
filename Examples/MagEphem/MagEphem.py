@@ -374,7 +374,7 @@ else:
 
     # Cadence
     if options.Delta_ISO == None:
-        print 'Must provide a cadence or time increment via -c option\n'
+        print 'Must provide a cadence or time increment via -d option\n'
         parser.print_help()
         exit()
     else:

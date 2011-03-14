@@ -838,6 +838,7 @@ double        Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
 void    Lgm_B_igrf_ctrans(Lgm_Vector *, Lgm_Vector *, Lgm_CTrans *);
 void    Lgm_B_cdip_ctrans(Lgm_Vector *, Lgm_Vector *, Lgm_CTrans *);
 void    Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c);
+void    Lgm_B_JensenCain1960_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c);
 
 
 /*
@@ -861,11 +862,18 @@ void   Lgm_InitK( double K[13][13], int N );
 void   Lgm_InitS( double S[13][13], int N );
 
 
+/*
+ *  Additional Sph Harmonic models
+ */
+void    Lgm_InitSphHarm( int Model, double g[13][13], double h[13][13], int N, int Flag, Lgm_CTrans *c );
+void    Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
+void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
+
 
 
 
 #endif
 
 /*
- *  $Id: Lgm_CTrans.h 142 2011-02-02 17:09:07Z mgh $
+ *  $Id: Lgm_CTrans.h 157 2011-03-14 18:52:06Z mgh $
  */
