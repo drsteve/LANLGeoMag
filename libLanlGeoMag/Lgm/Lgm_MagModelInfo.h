@@ -348,6 +348,7 @@ int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double
 int Lgm_B_igrf(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 int Lgm_B_cdip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 int Lgm_B_edip(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
+int Lgm_B_JensenCain1960(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *);
 
 
 

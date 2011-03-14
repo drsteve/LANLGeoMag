@@ -1372,6 +1372,56 @@ void Lgm_B_igrf_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
 
 }
 
+void Lgm_B_JensenCain1960_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
+
+    double  st, ct, sp, cp;
+    double  B_r, B_theta, B_phi;
+    double  r, theta, phi;
+    Lgm_Vector  w, Bgeo;
+
+
+    /*
+     *  Convert Coords to GEO
+     */
+    Lgm_Convert_Coords( v, &w, GSM_TO_WGS84, c );
+
+
+    /* 
+     *  compute GEO (WGS84) geocentric speherical coords. (r, theta, phi)  theta is colat
+     */
+    r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z ); 
+    theta = acos( w.z / r );
+    phi   = atan2(w.y, w.x);
+
+
+    st    = sin( theta ); ct    = cos( theta );
+    sp    = sin( phi );   cp    = cos( phi );
+
+
+    /*
+     *   Compute spherical components of B in GEO (WGS84)
+     */
+    w.x = r; w.y = theta; w.z = phi;
+    Lgm_JensenCain1960( &w, &Bgeo, c );
+    B_r = Bgeo.x; B_theta = Bgeo.y; B_phi = Bgeo.z;
+
+
+
+    /*
+     *  Convert Bgeo to cartesian
+     */
+    Bgeo.x = B_r*st*cp + B_theta*ct*cp - B_phi*sp;
+    Bgeo.y = B_r*st*sp + B_theta*ct*sp + B_phi*cp;
+    Bgeo.z = B_r*ct    - B_theta*st;
+
+    /*
+     *  Convert Coords to GSM
+     */
+    Lgm_Convert_Coords( &Bgeo, B, WGS84_TO_GSM, c );
+
+
+}
+
 
 
 void Lgm_B_cdip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {

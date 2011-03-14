@@ -3,7 +3,7 @@
 
 
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.59])
 AC_INIT([LanlGeoMag], [1.5.8], [mghenderson@lanl.gov])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
