@@ -1,3 +1,11 @@
+
+"""
+Class to compute Lstar from position, date, and pitch angle
+for a given Kp and Bfield model
+
+see: LstarVersusPA.LstarVersusPA
+"""
+
 from __future__ import division
 
 import math
@@ -149,7 +157,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
         ans[pa] = {}
-        ans[pa]['Lm'] = datamodel.dmarray([Lsimple])
+        ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
 
     if trace != 'LGM_CLOSED':
         for pa in Alpha:
