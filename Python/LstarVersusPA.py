@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 
 import math
@@ -9,7 +10,7 @@ import numpy
 from spacepy import datamodel
 import spacepy.toolbox as tb
 
-from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lstar, Lgm_Set_Lgm_B_T89
+from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lstar, Lgm_Set_Lgm_B_T89, LFromIBmM_Hilton, LFromIBmM_McIlwain
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
@@ -144,7 +145,9 @@ def LstarVersusPA(pos, date, alpha = 90,
     MagEphemInfo.B = Bvec.magnitude()
 
     # check and see if the field line is closed before doing much work
+    #timenow = datetime.datetime.now()
     trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(Pgsm.tolist(), date , extended_out=True)
+    #print('Closed_Field check took %s' % (datetime.datetime.now()-timenow))
 
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
@@ -191,7 +194,17 @@ def LstarVersusPA(pos, date, alpha = 90,
         # Compute L*
         if Lsimple < LstarThres:
             Ls_vec = Lgm_Vector.Lgm_Vector(*southern)  # not sure why Mike used this in example
+            #timenow = datetime.datetime.now()
             LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo) # maybe should be position
+            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(MagEphemInfo.LstarInfo.contents.I[0]),
+                                                c_double(MagEphemInfo.Bm[i]),
+                                                c_double(MagEphemInfo.LstarInfo.contents.mInfo.contents.c.contents.M_cd))
+            ans[pa]['LHilton'] = MagEphemInfo.LHilton.contents.value
+            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(MagEphemInfo.LstarInfo.contents.I[0]),
+                                                c_double(MagEphemInfo.Bm[i]),
+                                                c_double(MagEphemInfo.LstarInfo.contents.mInfo.contents.c.contents.M_cd))
+            ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
+            #print('Lstar call took %s' % (datetime.datetime.now()-timenow))
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
             elif LS_Flag == -1: # mirror below nothern hemisphere mirror alt
@@ -206,6 +219,7 @@ def LstarVersusPA(pos, date, alpha = 90,
             ## pull all this good extra info into numpy arrays
             ans[pa]['ShellI'] = datamodel.dmarray(numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.I)],
                 dtype=c_double, buffer=MagEphemInfo.LstarInfo.contents.I) ) # outside loop should take first?? as I for the positon?
+                
             if extended_out:
                 ans[pa]['ShellEllipsoidFootprint_Pn'] = \
                     numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Pn),
