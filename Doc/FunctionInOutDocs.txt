@@ -1,0 +1,22 @@
+
+
+
+T89.c
+====
+Lgm_B_T89
+Inputs:
+	- Lgm_Vector			*V
+	- Lgm_MagModelInfo 	*Info
+Outputs:
+	- Lgm_Vector			*B
+Modifed in place Lgm_MagModelInfo:
+	- 
+Required in Lgm_MagModelInfo
+	 ->Kp
+	 ->c->sin_phi
+	 ->c->cos_phi
+	 ->c->tan_phi
+	 ->InternalModel
+
+
+
