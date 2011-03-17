@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import unittest
 import datetime
@@ -29,9 +30,9 @@ class Closed_FieldTests(unittest.TestCase):
                           [1,2,3], self.date, coord_system='SM')
 
     def test_field_model(self):
-        """only Lgm_B_OP77 is implemented now"""
+        """only Lgm_B_OP77 and Lgm_B_T89 is implemented now"""
         self.assertRaises(NotImplementedError, Closed_Field.Closed_Field,
-                          [1,2,3], self.date, bfield='Lgm_B_T89')
+                          [1,2,3], self.date, bfield='Lgm_B_T96')
 
     def test_position(self):
         """position must be an iterable"""
@@ -57,12 +58,12 @@ class Closed_FieldTests(unittest.TestCase):
         data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
         numpy.testing.assert_array_almost_equal(data[1],
-                [0.766694374191256, 0.3403434887687581, -0.5738019260637667])
+                [ 0.76423848,  0.33852444, -0.57259682]) #[0.766694374191256, 0.3403434887687581, -0.5738019260637667])
         numpy.testing.assert_array_almost_equal(data[2],
-                [-0.061498543308585105, 0.39594651357843824, 0.93442754063146])
+                [-0.06200753,  0.39418681,  0.93172254]) #[-0.061498543308585105, 0.39594651357843824, 0.93442754063146])
         numpy.testing.assert_array_almost_equal(data[3],
                 [2.264111451438855, 2.8265536096003006, 1.142529362433734])
-        self.assertAlmostEqual(data[4], 3.4228596014742134)
+        self.assertAlmostEqual(data[4], 3.431896012113655) #3.4228596014742134)
 
 
 if __name__ == '__main__':

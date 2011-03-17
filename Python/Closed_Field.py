@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 
 """
@@ -8,7 +9,7 @@ import math
 
 from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE
 from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
-from Lgm_Wrap import Lgm_B_OP77, Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms
+from Lgm_Wrap import Lgm_B_OP77, Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
 from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
 import Lgm_Vector
 import Lgm_MagModelInfo
@@ -30,39 +31,66 @@ def _simpleL(position, MagModelInfo):
     return LSimple
 
 
-# I belive the position is in GSM, check with Mike
-def Closed_Field(position, date,
-                 height=120,
-                 tol1=0.01, tol2=1e-7,
-                 bfield='Lgm_B_OP77', coord_system='GSM',
-                 extended_out = False,
-                 **params):
-    # input checking
-    if coord_system != 'GSM':
-        raise(NotImplementedError('Different coord systems are not yet ready to use') )
-    # could consider a Lgm_MagModelInfo param to use an existing one
-    mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-    if bfield == 'Lgm_B_OP77':
-        Lgm_Set_Lgm_B_OP77( pointer(mmi) )
-    else:
-        raise(NotImplementedError('Only Lgm_B_OP77 implented so far'))
-
-    datelong = Lgm_CTrans.dateToDateLong(date)
-    utc = Lgm_CTrans.dateToFPHours(date)
-    Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
-
-    try:
-        position = Lgm_Vector.Lgm_Vector(*position)
-    except TypeError:
-        raise(TypeError('position must be an iterable') )
+# BAL: I belive the position is in GSM, check with Mike
+def Closed_Field(*args, **kwargs):
+    '''TODO: Need docstring'''
+    defaults = {'height': 100,
+                'tol1': 0.01,
+                'tol2': 1e-7,
+                'bfield': 'Lgm_B_OP77',
+                'coord_system': 'GSM',
+                'extended_out': False}
+    
+    #replace missing kwargs with defaults
+    for dkey in defaults:
+        if dkey not in kwargs:
+            kwargs[dkey] = defaults[dkey]
+    
     northern = Lgm_Vector.Lgm_Vector()
     southern = Lgm_Vector.Lgm_Vector()
     minB = Lgm_Vector.Lgm_Vector()
-
-    ans = Lgm_Trace(pointer(position),
+    #check for call w/ Lgm_MagModelInfo
+    if len(args) == 1:
+        MagEphemInfo = args[0]
+        mmi = MagEphemInfo.LstarInfo.contents.mInfo
+        dum = [MagEphemInfo.P.x, MagEphemInfo.P.y, MagEphemInfo.P.z]
+        position = Lgm_Vector.Lgm_Vector(*dum)
+        ans = Lgm_Trace(pointer(position),
                     pointer(northern),
                     pointer(southern),
-                    pointer(minB), height, tol1, tol2, pointer(mmi) )
+                    pointer(minB), kwargs['height'], kwargs['tol1'], kwargs['tol2'], mmi )
+        L = _simpleL(northern, mmi.contents)
+    elif len(args) == 2:
+        # input checking
+        if kwargs['coord_system'] != 'GSM':
+            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+        # could consider a Lgm_MagModelInfo param to use an existing one
+        mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+        if kwargs['bfield'] == 'Lgm_B_OP77':
+            Lgm_Set_Lgm_B_OP77( pointer(mmi) )
+        elif kwargs['bfield'] == 'Lgm_B_T89':
+            Lgm_Set_Lgm_B_T89( pointer(mmi) )
+        else:
+            raise(NotImplementedError('Only Lgm_B_OP77 and Lgm_B_T89 implented so far'))
+
+        datelong = Lgm_CTrans.dateToDateLong(args[1])
+        utc = Lgm_CTrans.dateToFPHours(args[1])
+        Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
+
+        try:
+            position = Lgm_Vector.Lgm_Vector(*args[0])
+        except TypeError:
+            raise(TypeError('position must be an iterable') )
+            
+        ans = Lgm_Trace(pointer(position),
+                    pointer(northern),
+                    pointer(southern),
+                    pointer(minB), kwargs['height'], kwargs['tol1'], kwargs['tol2'], pointer(mmi) )
+        L = _simpleL(northern, mmi)
+        
+    else:
+        raise(RuntimeError('Incorrect number of arguments specified'))
+
     if ans == LGM_OPEN_IMF:
         retstr = 'LGM_OPEN_IMF'
     elif ans == LGM_CLOSED:
@@ -75,8 +103,7 @@ def Closed_Field(position, date,
         retstr = 'LGM_INSIDE_EARTH'
     elif ans == LGM_TARGET_HEIGHT_UNREACHABLE:
         retstr = 'LGM_TARGET_HEIGHT_UNREACHABLE'
-    if extended_out:
-        L = _simpleL(northern, mmi)
+    if kwargs['extended_out']:
         return retstr, northern.tolist(), southern.tolist(), minB.tolist(), L
     else:
         return retstr
