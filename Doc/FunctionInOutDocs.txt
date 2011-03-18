@@ -1,200 +1,473 @@
-
+Last Update:
+18-Mar-2011 BAL
 
 
 T89.c
 ====
-int Lgm_B_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) 
+int Lgm_B_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info )
 Inputs:
-	- Lgm_Vector			
-	- Lgm_MagModelInfo 
+    - Lgm_Vector
+    - Lgm_MagModelInfo
 Outputs:
-	- Lgm_Vector		
-	- int (1)
+    - Lgm_Vector
+    - int (1)
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 Required in Lgm_MagModelInfo
-	 ->Kp
-	 ->c->sin_phi
-	 ->c->cos_phi
-	 ->c->tan_phi
-	 ->InternalModel
+     ->Kp
+     ->c->sin_phi
+     ->c->cos_phi
+     ->c->tan_phi
+     ->InternalModel
 
 OP77.c
 =====
 int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *m )
 Inputs:
-	- Lgm_Vector
+    - Lgm_Vector
 
-	- Lgm_MagModelInfo
+    - Lgm_MagModelInfo
 Outputs:
-	- Lgm_Vector 
-	- int (1)
+    - Lgm_Vector
+    - int (1)
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 Required in Lgm_MagModelInfo
-	 ->c
-	 ->c->psi
-	 ->nFunc
-	 ->InternalModel
+     ->c
+     ->c->psi
+     ->nFunc
+     ->InternalModel
 
 Lgm_Trace.c
 ========
 int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info )
 Inputs:
-	- Lgm_Vector
-	- Lgm_Vector
-	- Lgm_Vector
-	- Lgm_Vector 
-	- double
-	- double
-	- double
-	- Lgm_MagModelInfo
+    - Lgm_Vector
+    - Lgm_Vector
+    - Lgm_Vector
+    - Lgm_Vector
+    - double
+    - double
+    - double
+    - Lgm_MagModelInfo
 Outputs:
-	-
+    -
 Modifed in place Lgm_MagModelInfo:
-	->Hmax
-	->Smin
-	->Bmin
-	->Pmin
-	->Bvecmin
-	->Ellipsoid_Footprint_Pn
-	->Bfield
-       	->Ellipsoid_Footprint_Bvecn
-       	->Ellipsoid_Footprint_Bn
-	->Ellipsoid_Footprint_Ps
-	->Ellipsoid_Footprint_Bvec
-	->Ellipsoid_Footprint_Bs
-	->d2B_ds2
-	->Sb0
-	->Ellipsoid_Footprint_Bvecs
+    ->Hmax
+    ->Smin
+    ->Bmin
+    ->Pmin
+    ->Bvecmin
+    ->Ellipsoid_Footprint_Pn
+    ->Bfield
+           ->Ellipsoid_Footprint_Bvecn
+           ->Ellipsoid_Footprint_Bn
+    ->Ellipsoid_Footprint_Ps
+    ->Ellipsoid_Footprint_Bvec
+    ->Ellipsoid_Footprint_Bs
+    ->d2B_ds2
+    ->Sb0
+    ->Ellipsoid_Footprint_Bvecs
 Required in Lgm_MagModelInfo
-	 ->Bfield
-	 ->c
+     ->Bfield
+     ->c
 
 W.c
 ===========
 void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], int nk )
 Inputs:
-	- int
-	- double *
-	- double *
-	- double *
-	- int
+    - int
+    - double *
+    - double *
+    - double *
+    - int
 Outputs:
-	- double *
+    - double *
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 
 
 vec.c
 ====
 void Lgm_CrossProduct(Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *c)
 Inputs:
-	- Lgm_Vector
-	- Lgm_Vector
+    - Lgm_Vector
+    - Lgm_Vector
 Outputs:
-	- Lgm_Vector
+    - Lgm_Vector
 
 double Lgm_DotProduct(Lgm_Vector *a, Lgm_Vector *b)
 Inputs:
-	- Lgm_Vector
-	- Lgm_Vector
+    - Lgm_Vector
+    - Lgm_Vector
 Outputs:
-	- double
+    - double
 
 double Lgm_NormalizeVector(Lgm_Vector *a)
 Inputs:
-	- Lgm_Vector (modified in place)
+    - Lgm_Vector (modified in place)
 Outputs:
-	- double
+    - double
 Modifed in place
-	- Lgm_Vector
+    - Lgm_Vector
 
 void Lgm_ScaleVector(Lgm_Vector *a, double value)
 Inputs:
-	- Lgm_Vector (modifed in place)
-	- double 
+    - Lgm_Vector (modifed in place)
+    - double
 Modifed in place
-	- Lgm_Vector
+    - Lgm_Vector
 
-double Lgm_Magnitude( Lgm_Vector *a) 
+double Lgm_Magnitude( Lgm_Vector *a)
 Inputs:
-	- Lgm_Vector
+    - Lgm_Vector
 Outputs:
-	- double
+    - double
 
 void Lgm_ForceMagnitude(Lgm_Vector *a, double mag)
 Inputs:
-	- Lgm_Vector (modifed in place)
-	- double 
+    - Lgm_Vector (modifed in place)
+    - double
 Modifed in place
-	- Lgm_Vector
+    - Lgm_Vector
 
 void Lgm_MatTimesVec(double A[3][3], Lgm_Vector *V, Lgm_Vector *Result)
 Inputs:
-	- double **
-	- Lgm_Vector (modifed in place)
+    - double **
+    - Lgm_Vector (modifed in place)
 Output
-	- Lgm_Vector
+    - Lgm_Vector
 
-void Lgm_MatTimeMat( double A[3][3], double B[3][3], double Result[3][3] ) 
+void Lgm_MatTimeMat( double A[3][3], double B[3][3], double Result[3][3] )
 Inputs:
-	- double **
-	-  double **
+    - double **
+    -  double **
 Output
-	-  double **
+    -  double **
 
 
 TraceToSMEquat.c
 ============
 int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelInfo *Info )
 Inputs:
-	- Lgm_Vector
-	- double
-	- Lgm_MagModelInfo
+    - Lgm_Vector
+    - double
+    - Lgm_MagModelInfo
 Outputs:
-	- Lgm_Vector
+    - Lgm_Vector
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 Required in Lgm_MagModelInfo
-	 ->c
-	 ->Bfield
-	 ->OpenLimit_xMax
-	 ->OpenLimit_yMax
-	 ->OpenLimit_zMax
-	 ->OpenLimit_xMin
-	 ->OpenLimit_yMin
-	 ->OpenLimit_zMin
+     ->c
+     ->Bfield
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
 
 
 TraceToMirrorPoint2.c
 ==============
 int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info )
 Inputs:
-	- Lgm_Vector
-	- double
-	- double
-	- double
-	- Lgm_MagModelInfo
+    - Lgm_Vector
+    - double
+    - double
+    - double
+    - Lgm_MagModelInfo
 Outputs:
-	-Lgm_Vector
-	- double *
-	- int(1)
+    -Lgm_Vector
+    - double *
+    - int(1)
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 Required in Lgm_MagModelInfo
-	 ->c
-	 ->Lgm_LossConeHeight
-	 ->VerbosityLevel
-	 ->Hmax
-	 ->Bfield
-	 ->OpenLimit_xMax
-	 ->OpenLimit_yMax
-	 ->OpenLimit_zMax
-	 ->OpenLimit_xMin
-	 ->OpenLimit_yMin
-	 ->OpenLimit_zMin
+     ->c
+     ->Lgm_LossConeHeight
+     ->VerbosityLevel
+     ->Hmax
+     ->Bfield
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
 
+
+TraceToMinRdotB.c
+============
+int Lgm_TraceToMinRdotB( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_Vector
+    - double
+    - Lgm_MagModelInfo
+Outputs:
+    - Lgm_Vector
+    - int (1)
+Modifed in place Lgm_MagModelInfo:
+    -
+Required in Lgm_MagModelInfo
+     ->Bfield
+     ->c
+
+
+TraceToMinBSurf.c
+============
+int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_Vector
+    - double
+    - double
+    - Lgm_MagModelInfo
+Outputs:
+    - Lgm_Vector
+Modifed in place Lgm_MagModelInfo:
+    - Trace_s
+Required in Lgm_MagModelInfo
+     ->Bfield
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
+
+
+TraceToEarth.c
+==========
+int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double tol, Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_Vector
+    - double
+    - double
+    - double
+    - Lgm_MagModelInfo
+Outputs:
+    - Lgm_Vector
+    - int (1)
+Modifed in place Lgm_MagModelInfo:
+    -
+Required in Lgm_MagModelInfo
+     ->SavePoints
+     ->fp
+     ->Hmax
+     ->Bfield
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
+
+
+TraceLine.c
+========
+int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_Vector
+    - double
+    - double
+    - double
+    - double
+    - int
+    - Lgm_MagModelInfo
+Outputs:
+    - Lgm_Vector
+    - int (1)
+Modifed in place Lgm_MagModelInfo:
+    ->s
+    ->Px
+    ->Py
+    ->Pz
+    ->Bvec
+    ->Bmag
+    ->BminusBcdip
+    ->nPnts
+    ->ds
+Required in Lgm_MagModelInfo
+    ->Hmax
+    ->Bfield
+    ->Bmag
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
+     ->Smin
+     ->Pmin
+     ->Bmin
+
+int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_Vector
+    - double
+    - double
+    - double
+    - double
+    - double
+    - int
+    - Lgm_MagModelInfo
+Outputs:
+    - Lgm_Vector
+    - int (1)
+Modifed in place Lgm_MagModelInfo:
+    ->s
+    ->Px
+    ->Py
+    ->Pz
+    ->Bvec
+    ->Bmag
+    ->BminusBcdip
+    ->nPnts
+    ->ds
+ Required in Lgm_MagModelInfo
+    ->Hmax
+    ->Bfield
+     ->OpenLimit_xMax
+     ->OpenLimit_yMax
+     ->OpenLimit_zMax
+     ->OpenLimit_xMin
+     ->OpenLimit_yMin
+     ->OpenLimit_zMin
+     ->Smin
+     ->Pmin
+     ->Bmin
+
+void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info )
+Inputs:
+    - double
+    - double
+    - Lgm_Vector
+    - Lgm_MagModelInfo (modified in place)
+Outputs:
+    -
+Modifed in place Lgm_MagModelInfo:
+    ->s
+    ->Px
+    ->Py
+    ->Pz
+    ->Bmag
+    ->BminusBcdip
+
+void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info )
+Inputs:
+    - double
+    - double
+    - Lgm_Vector
+    - Lgm_MagModelInfo (modified in place)
+Outputs:
+    -
+Modifed in place Lgm_MagModelInfo:
+    ->s
+    ->Px
+    ->Py
+    ->Pz
+    ->Bmag
+    ->BminusBcdip
+Required in Lgm_MagModelInfo
+     ->nPnts
+     ->s
+
+void InitSpline( Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_MagModelInfo (modified in place)
+Outputs:
+    -
+Modifed in place Lgm_MagModelInfo:
+    ->acc
+    ->accPx
+    ->accPy
+    ->accPz
+    ->spline
+    ->splinePx
+    ->splinePy
+    ->splinePz
+Required in Lgm_MagModelInfo
+     ->nPnts
+     ->s
+
+void FreeSpline( Lgm_MagModelInfo *Info )
+Inputs:
+    - Lgm_MagModelInfo (modified in place)
+Outputs:
+    -
+Modifed in place Lgm_MagModelInfo:
+    ->
+Required in Lgm_MagModelInfo
+    ->acc
+    ->accPx
+    ->accPy
+    ->accPz
+    ->spline
+    ->splinePx
+    ->splinePy
+    ->splinePz
+
+double  BofS( double s, Lgm_MagModelInfo *Info )
+Inputs:
+    - double
+    - Lgm_MagModelInfo
+Outputs:
+    - double
+Modifed in place Lgm_MagModelInfo:
+    ->
+Required in Lgm_MagModelInfo
+    ->accPx
+    ->accPy
+    ->accPz
+    ->splinePx
+    ->splinePy
+    ->splinePz
+    ->s
+    ->nPnts
+    ->ds
+    ->imin1
+    ->imin2
+    ->Smin
+    ->Bmin
+    ->Bmag
+
+int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info )
+Inputs:
+    - double
+    - double *
+    - Lgm_MagModelInfo
+Outputs:
+    - double *
+    - int (1)
+Modifed in place Lgm_MagModelInfo:
+    ->
+Required in Lgm_MagModelInfo
+    ->nPnts
+    ->Smin
+    ->s
+    ->Bmag
+
+
+OlsenPfitzerStatic.c
+=============
+void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m )
+Inputs:
+    - double *
+    - double
+    - Lgm_MagModelInfo
+Outputs:
+    - double *
+Modifed in place Lgm_MagModelInfo:
+    ->OP77_TILTL
+    ->OP77_TT
+    ->OP77_A
+    ->OP77_B
+    ->OP77_C
+    ->OP77_D
+    ->OP77_E
+    ->OP77_F
+ Required in Lgm_MagModelInfo
+    ->OP77_TILTL
 
 
 
@@ -206,10 +479,10 @@ Required in Lgm_MagModelInfo
 
 
 Inputs:
-	- 
+    -
 Outputs:
-	-
+    -
 Modifed in place Lgm_MagModelInfo:
-	- 
+    -
 Required in Lgm_MagModelInfo
-	 ->
+     ->
