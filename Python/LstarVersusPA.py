@@ -120,10 +120,10 @@ def LstarVersusPA(pos, date, alpha = 90,
         Lgm_Set_Lgm_B_T89( MagEphemInfo.LstarInfo.contents.mInfo )
     else:
         raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
-
-    # put Kp into the structure
+    
+    # put Kp into the structureww
+    MagEphemInfo.LstarInfo.contents.mInfo.contents = mmi #TODO: Check me out
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
-
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
     MagEphemInfo.UTC    = utc
@@ -133,10 +133,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
 
     # Set Tolerances
-    SetLstarTolerances(MagEphemInfo.LstarQuality, MagEphemInfo.LstarInfo )
-
-    MagEphemInfo.LstarInfo.contents.mInfo.contents = mmi
-
+    SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
     # *  Blocal at sat location.
     MagEphemInfo.P = Pgsm
 
@@ -154,9 +151,9 @@ def LstarVersusPA(pos, date, alpha = 90,
 
     # check and see if the field line is closed before doing much work
     #timenow = datetime.datetime.now()
-    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(Pgsm.tolist(), date , extended_out=True)
+    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(MagEphemInfo, extended_out=True) #Pgsm.tolist(), date , bfield=Bfield, extended_out=True)
     #print('Closed_Field check took %s' % (datetime.datetime.now()-timenow))
-
+    
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
         ans[pa] = {}
@@ -202,7 +199,6 @@ def LstarVersusPA(pos, date, alpha = 90,
         # Compute L*
         if Lsimple < LstarThres:
             Ls_vec = Lgm_Vector.Lgm_Vector(*southern)  # not sure why Mike used this in example
-            #timenow = datetime.datetime.now()
             LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo) # maybe should be position
             MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(MagEphemInfo.LstarInfo.contents.I[0]),
                                                 c_double(MagEphemInfo.Bm[i]),
@@ -212,7 +208,6 @@ def LstarVersusPA(pos, date, alpha = 90,
                                                 c_double(MagEphemInfo.Bm[i]),
                                                 c_double(MagEphemInfo.LstarInfo.contents.mInfo.contents.c.contents.M_cd))
             ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
-            #print('Lstar call took %s' % (datetime.datetime.now()-timenow))
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
             elif LS_Flag == -1: # mirror below nothern hemisphere mirror alt
@@ -283,4 +278,8 @@ def LstarVersusPA(pos, date, alpha = 90,
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-    ans = LstarVersusPA([-4.2, 0, 0], date, alpha = 90, Kp = 2, coord_system='SM')
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='GSM', Bfield = 'Lgm_B_T89', LstarQuality = 0)
+    #print ans[90]['LHilton']
+    #print ans[90]['LMcIlwain']
+    #print ans[90]['Lstar']
+    #print ans[90]['Lsimple']
