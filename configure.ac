@@ -16,10 +16,19 @@ AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
 
-DX_INIT_DOXYGEN($PACKAGE_NAME, libLanlGeoMag/Doxyfile)
+
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+if test -z "$DOXYGEN";
+   then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
+fi
+
+AM_CONDITIONAL([HAVE_DOXYGEN],
+[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
+
 DX_HTML_FEATURE(ON)
 DX_MAN_FEATURE(ON)
 DX_PDF_FEATURE(ON)
+DX_INIT_DOXYGEN(LanlGeoMag, "libLanlGeoMag/Doxyfile")
 
 dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
@@ -72,11 +81,12 @@ AC_TYPE_SIZE_T
 AM_PROG_CC_C_O
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
+#AC_FUNC_MALLOC
+#AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memset pow sqrt strstr])
 
 AC_CONFIG_FILES([Makefile
+                 docs/Makefile
                  libLanlGeoMag/Lgm/Makefile
                  libLanlGeoMag/Makefile
                  libLanlGeoMag/EopData/GetEopFiles

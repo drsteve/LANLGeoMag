@@ -18,13 +18,16 @@
 # setting man3_MANS to the list of man pages generated and then adding the
 # dependency:
 #
-#   $(man3_MANS): doxygen-doc
+# $(man3_MANS): doxygen-doc
+$(man3_MANS): doxygen-doc
+
 #
 # This will cause make to run doxygen and generate all the documentation.
 #
 # The following variable is intended for use in Makefile.am:
 #
-# DX_CLEANFILES = everything to clean.
+DX_CLEANFILES = everything to clean.
+
 #
 # This is usually added to MOSTLYCLEANFILES.
 

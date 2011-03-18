@@ -127,6 +127,10 @@ parser.add_option("-d", "--Delta",  dest="Delta_ISO",
                         help="Time increment in ISO format",
                         metavar="HH:MM:SS")
 
+parser.add_option("-q", "--Quality",    dest="Quality",  
+                        help="Quality parameter for L* calculations [0-8]. Default is 3.",
+                        metavar="QUALITY")
+
 parser.add_option("-c", "--Colorize",   action="store_true", dest="Colorize", 
                         help="Print messages out in different colors when running multi-threaded.")
 
@@ -350,6 +354,14 @@ else:
         parser.print_help()
         exit()
 
+    if options.Quality != None:
+        Quality = int(options.Quality)
+        if (Quality < 0): Quality = 0
+        if (Quality > 8): Quality = 8
+    else:
+        Quality = 3
+
+
     # Start Date/Time
     if options.Start_ISO == None:
         print 'Must provide a start date/time via -s option\n'
@@ -426,6 +438,7 @@ else:
             f.write('PitchAngles:'+PA_Str+'\n')
             f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
             f.write('Colorize:'+str(Colorize)+'\n')
+            f.write('Quality:'+str(Quality)+'\n')
             f.close()
 
             #exit()

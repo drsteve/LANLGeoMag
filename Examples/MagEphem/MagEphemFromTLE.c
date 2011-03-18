@@ -40,7 +40,7 @@ int main( int argc, char *argv[] ){
     char            *OutputFile  = "output.txt";
     char            OutputFilename[1024];
     char            IntModel[20], ExtModel[20], opt, ColorizeStr[20];
-    int             AppendMode, UseEop, Colorize;
+    int             AppendMode, UseEop, Colorize, Quality;
     FILE            *fp;
     FILE            *fp_MagEphem;
 
@@ -84,6 +84,7 @@ int main( int argc, char *argv[] ){
         } else {
             Colorize = FALSE;
         }
+        fscanf( fp, "%*[^:]:%d", &Quality );
         StartDate = sY*10000 + sM*100 + sD;
         StartUT   = sh + sm/60.0 + ss/3600.0;
         EndDate   = eY*10000 + eM*100 + eD;
@@ -105,6 +106,7 @@ int main( int argc, char *argv[] ){
     printf("Dst             = %g\n", Dst);
     printf("FootpointHeight = %g\n", FootpointHeight);
     printf("Colorize        = %d\n", Colorize);
+    printf("Quality         = %d\n", Quality);
     //exit(0);
     if ( nAlpha > 0 ){
 printf("********** nAlpha = %d\n", nAlpha);
@@ -136,7 +138,7 @@ printf("MagEphemInfo->Shell_Bmin[%d][%d] = %g %g %g\n", i, nn, MagEphemInfo->She
     // Settings for Lstar calcs
     MagEphemInfo->ComputeVgc = TRUE;
 MagEphemInfo->ComputeVgc = FALSE;
-    MagEphemInfo->LstarQuality = 2;
+    MagEphemInfo->LstarQuality = Quality;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 10.0;
     MagEphemInfo->LstarInfo->VerbosityLevel = 0;
