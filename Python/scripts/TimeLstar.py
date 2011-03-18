@@ -8,7 +8,7 @@ import socket
 
 now = datetime.datetime.now
 
-pos = [4,0,0]
+pos = [-4.2,1,1]
 date = datetime.datetime(2010, 12, 1)
 
 
@@ -25,7 +25,7 @@ for qual in range(9):
     for n in range(20):
         print qual, n
         t0 = now()
-        ans = LstarVersusPA.LstarVersusPA(pos, date, LstarQuality=qual)
+        ans = LstarVersusPA.LstarVersusPA(pos, date, LstarQuality=qual, Bfield = 'Lgm_B_T89')
         t1 = now()
         results[qual]['time'].append((t1-t0).seconds + (t1-t0).microseconds/1000000)
         results[qual]['Lm'].append(ans[90]['Lm'])
@@ -52,4 +52,6 @@ ax.set_title(socket.gethostname() + ' LstarVersusPA Calcs ' +
              str(datetime.datetime.now().month) + '-' +
              str(datetime.datetime.now().day) +
              '-' + str(datetime.datetime.now().year))
-draw()
+#draw()
+dstr = datetime.datetime.now().strftime('%d%b%Y')
+savefig('TimeLstar_Coelacanth_'+ +'.png')
