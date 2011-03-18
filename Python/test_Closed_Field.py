@@ -44,7 +44,7 @@ class Closed_FieldTests(unittest.TestCase):
         self.assertEqual(Closed_Field.Closed_Field([1,2,2], self.date), 'LGM_CLOSED')
         self.assertEqual(Closed_Field.Closed_Field([1,0,0], self.date), 'LGM_INSIDE_EARTH')
         self.assertEqual(Closed_Field.Closed_Field([1,1,10], self.date), 'LGM_OPEN_N_LOBE')
-        self.assertEqual(Closed_Field.Closed_Field([1,1,9], self.date), 'LGM_CLOSED')
+        self.assertEqual(Closed_Field.Closed_Field([1,1,9], self.date), 'LGM_OPEN_N_LOBE')
         # need to find some tests that hit the rest of the options
         #'LGM_OPEN_IMF'
         #'LGM_CLOSED'
@@ -58,12 +58,12 @@ class Closed_FieldTests(unittest.TestCase):
         data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
         numpy.testing.assert_array_almost_equal(data[1],
-                [ 0.76423848,  0.33852444, -0.57259682])
+                [-0.06195473,  0.39503837,  0.9313725 ])
         numpy.testing.assert_array_almost_equal(data[2],
-                [-0.06200753,  0.39418681,  0.93172254])
+                [ 0.76662888,  0.33533055, -0.57131527])
         numpy.testing.assert_array_almost_equal(data[3],
-                [2.264111451438855, 2.8265536096003006, 1.142529362433734])
-        self.assertAlmostEqual(data[4], 3.431896012113655)
+                [ 2.2794347 ,  2.80962392,  1.12454746])
+        self.assertAlmostEqual(data[4], 3.7346417307338116)
 
 
 if __name__ == '__main__':
