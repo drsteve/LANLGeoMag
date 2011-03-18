@@ -195,11 +195,12 @@ def LstarVersusPA(pos, date, alpha = 90,
 
         MagEphemInfo.LstarInfo.contents.PitchAngle = pa
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
-
+        print(MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm)
         # Compute L*
         if Lsimple < LstarThres:
-            Ls_vec = Lgm_Vector.Lgm_Vector(*southern)  # not sure why Mike used this in example
-            LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo) # maybe should be position
+            Ls_vec = Lgm_Vector.Lgm_Vector(*minB) 
+            
+            LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
             MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(MagEphemInfo.LstarInfo.contents.I[0]),
                                                 c_double(MagEphemInfo.Bm[i]),
                                                 c_double(MagEphemInfo.LstarInfo.contents.mInfo.contents.c.contents.M_cd))
@@ -278,7 +279,7 @@ def LstarVersusPA(pos, date, alpha = 90,
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='GSM', Bfield = 'Lgm_B_T89', LstarQuality = 0)
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 0)
     #print ans[90]['LHilton']
     #print ans[90]['LMcIlwain']
     #print ans[90]['Lstar']
