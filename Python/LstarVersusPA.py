@@ -195,7 +195,6 @@ def LstarVersusPA(pos, date, alpha = 90,
 
         MagEphemInfo.LstarInfo.contents.PitchAngle = pa
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
-        print(MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm)
         # Compute L*
         if Lsimple < LstarThres:
             Ls_vec = Lgm_Vector.Lgm_Vector(*minB) 
