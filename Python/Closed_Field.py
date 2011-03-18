@@ -5,7 +5,7 @@ from __future__ import division
 perform tracing to see if a file line is closed
 """
 from ctypes import pointer
-import math
+import math, numpy
 
 from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE
 from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
@@ -37,7 +37,8 @@ def Closed_Field(*args, **kwargs):
     defaults = {'height': 100,
                 'tol1': 0.01,
                 'tol2': 1e-7,
-                'bfield': 'Lgm_B_OP77',
+                'bfield': 'Lgm_B_T89',
+                'Kp': 2,
                 'coord_system': 'GSM',
                 'extended_out': False}
     
@@ -52,16 +53,12 @@ def Closed_Field(*args, **kwargs):
     #check for call w/ Lgm_MagModelInfo
     if len(args) == 1:
         MagEphemInfo = args[0]
-        mmi = MagEphemInfo.LstarInfo.contents.mInfo
+        mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
         dum = [MagEphemInfo.P.x, MagEphemInfo.P.y, MagEphemInfo.P.z]
         position = Lgm_Vector.Lgm_Vector(*dum)
-        ans = Lgm_Trace(pointer(position),
-                    pointer(northern),
-                    pointer(southern),
-                    pointer(minB), kwargs['height'], kwargs['tol1'], kwargs['tol2'], mmi )
-        L = _simpleL(northern, mmi.contents)
     elif len(args) == 2:
         # input checking
+        #position = 
         if kwargs['coord_system'] != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
         # could consider a Lgm_MagModelInfo param to use an existing one
@@ -69,6 +66,7 @@ def Closed_Field(*args, **kwargs):
         if kwargs['bfield'] == 'Lgm_B_OP77':
             Lgm_Set_Lgm_B_OP77( pointer(mmi) )
         elif kwargs['bfield'] == 'Lgm_B_T89':
+            mmi.Kp = kwargs['Kp']
             Lgm_Set_Lgm_B_T89( pointer(mmi) )
         else:
             raise(NotImplementedError('Only Lgm_B_OP77 and Lgm_B_T89 implented so far'))
@@ -80,21 +78,21 @@ def Closed_Field(*args, **kwargs):
         try:
             position = Lgm_Vector.Lgm_Vector(*args[0])
         except TypeError:
-            raise(TypeError('position must be an iterable') )
-            
-        ans = Lgm_Trace(pointer(position),
-                    pointer(northern),
-                    pointer(southern),
-                    pointer(minB), kwargs['height'], kwargs['tol1'], kwargs['tol2'], pointer(mmi) )
-        L = _simpleL(northern, mmi)
-        
+            raise(TypeError('position must be an iterable') )        
     else:
         raise(RuntimeError('Incorrect number of arguments specified'))
+    
+    ans = Lgm_Trace(pointer(position),
+            pointer(southern),
+            pointer(northern),
+            pointer(minB), kwargs['height'], kwargs['tol1'], kwargs['tol2'], pointer(mmi) )
 
+    L = numpy.nan #default to this is field not closed
     if ans == LGM_OPEN_IMF:
         retstr = 'LGM_OPEN_IMF'
     elif ans == LGM_CLOSED:
-        retstr = 'LGM_CLOSED'
+        retstr = 'LGM_CLOSED'                             
+        L = _simpleL(northern, mmi)
     elif ans == LGM_OPEN_N_LOBE:
         retstr = 'LGM_OPEN_N_LOBE'
     elif ans == LGM_OPEN_S_LOBE:
