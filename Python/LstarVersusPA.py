@@ -220,10 +220,12 @@ def LstarVersusPA(pos, date, alpha = 90,
             # Save results to the MagEphemInfo structure.
             MagEphemInfo.nShellPoints[i] = MagEphemInfo.LstarInfo.contents.nPnts
             ## pull all this good extra info into numpy arrays
-            ans[pa]['ShellI'] = datamodel.dmarray(numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.I)],
-                dtype=c_double, buffer=MagEphemInfo.LstarInfo.contents.I) ) # outside loop should take first?? as I for the positon?
+            ans[pa]['I'] = datamodel.dmarray(MagEphemInfo.LstarInfo.contents.I[0]) 
                 
             if extended_out:
+                ans[pa]['ShellI'] = \
+                    datamodel.dmarray(numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.I)],
+                                            dtype=c_double, buffer=MagEphemInfo.LstarInfo.contents.I) )
                 ans[pa]['ShellEllipsoidFootprint_Pn'] = \
                     numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Pn),
                                             dtype=c_double,
