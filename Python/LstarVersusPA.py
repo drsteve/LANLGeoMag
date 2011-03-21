@@ -97,13 +97,11 @@ def LstarVersusPA(pos, date, alpha = 90,
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
-    
+
     # decide which field model to use, this is a keyword
     if Bfield == 'Lgm_B_OP77':
-        print('Using OP77')
         Lgm_Set_Lgm_B_OP77( mmi.c )
     elif Bfield == 'Lgm_B_T89':
-        print('Using T89')
         Lgm_Set_Lgm_B_T89( mmi.c )
     else:
         raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
@@ -125,7 +123,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
-    
+
     # decide which field model to use, this is a keyword
     if Bfield == 'Lgm_B_OP77':
         Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
@@ -133,7 +131,7 @@ def LstarVersusPA(pos, date, alpha = 90,
         Lgm_Set_Lgm_B_T89( MagEphemInfo.LstarInfo.contents.mInfo )
     else:
         raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
-    
+
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
@@ -210,7 +208,7 @@ def LstarVersusPA(pos, date, alpha = 90,
             Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
 
             LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
-            
+
             lstarinf = MagEphemInfo.LstarInfo.contents #shortcut
             MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I[0]),
                                                 c_double(MagEphemInfo.Bm[i]),
@@ -232,7 +230,7 @@ def LstarVersusPA(pos, date, alpha = 90,
             # Save results to the MagEphemInfo structure.
             MagEphemInfo.nShellPoints[i] = lstarinf.nPnts
             ## pull all this good extra info into numpy arrays
-            ans[pa]['I'] = datamodel.dmarray(lstarinf.I[0]) 
+            ans[pa]['I'] = datamodel.dmarray(lstarinf.I[0])
 
             if extended_out:
                 ans[pa]['ShellI'] = \
