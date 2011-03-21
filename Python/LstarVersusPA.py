@@ -294,7 +294,6 @@ def LstarVersusPA(pos, date, alpha = 90,
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-<<<<<<< HEAD
     ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
     print('Lgm_B_T89 Kp=4')
     print ans[90]['LHilton']
@@ -322,7 +321,3 @@ if __name__ == '__main__':
     print ans[90]['LMcIlwain']
     print ans[90]['Lstar']
     print ans[90]['Lsimple']
-=======
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 0)
-    print ans['Bcalc']
->>>>>>> cleanup
