@@ -68,7 +68,7 @@ class Lgm_T89Tests(unittest.TestCase):
     def test_pos2Lgm_Vector(self):
         """pos2Lgm_Vector should have known output"""
         a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp)
-        self.assertEqual(list(a['position']), a._Vpos.tolist())
+        self.assertEqual(list(a['Position']), a._Vpos.tolist())
         self.assertTrue(isinstance(a._Vpos, Lgm_Vector.Lgm_Vector))
         b = Lgm_T89.Lgm_T89(a._Vpos, self.dt, self.kp)
         self.assertEqual(a._Vpos, b._Vpos)
