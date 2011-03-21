@@ -239,7 +239,7 @@ def LstarVersusPA(pos, date, alpha = 90,
                     datamodel.dmarray(numpy.ctypeslib.ndarray([len(lstarinf.I)],
                                             dtype=c_double, buffer=lstarinf.I) )
                 ans[pa]['ShellEllipsoidFootprint_Pn'] = \
-                    numpy.ctypeslib.ndarray(len(Mlstarinf.Ellipsoid_Footprint_Pn),
+                    numpy.ctypeslib.ndarray(len(lstarinf.Ellipsoid_Footprint_Pn),
                                             dtype=c_double,
                                             buffer=lstarinf.Ellipsoid_Footprint_Pn)
                 ans[pa]['ShellEllipsoidFootprint_Ps'] = \
@@ -287,35 +287,35 @@ def LstarVersusPA(pos, date, alpha = 90,
                                              len(lstarinf.z_gsm[0])],
                                             dtype=c_double,
                                             buffer=lstarinf.z_gsm)
-                delT = datetime.datetime.now() - tnow()
+                delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.total_seconds()
 
     return ans
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
     print('Lgm_B_T89 Kp=4')
     print ans[90]['LHilton']
     print ans[90]['LMcIlwain']
     print ans[90]['Lstar']
     print ans[90]['Lsimple']
 
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
     print('Lgm_B_T89 Kp=5')
     print ans[90]['LHilton']
     print ans[90]['LMcIlwain']
     print ans[90]['Lstar']
     print ans[90]['Lsimple']
 
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
     print('Lgm_B_OP77 Kp=4')
     print ans[90]['LHilton']
     print ans[90]['LMcIlwain']
     print ans[90]['Lstar']
     print ans[90]['Lsimple']
 
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
     print('Lgm_B_OP77 Kp=6')
     print ans[90]['LHilton']
     print ans[90]['LMcIlwain']
