@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Test suite for the LstarVersusPA
@@ -39,8 +40,8 @@ class LstarVersusPA_Tests(unittest.TestCase):
     def testLgm_B_T89_2(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = LstarVersusPA.LstarVersusPA([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.17724847477, ans[90]['LHilton'])
-        self.assertAlmostEqual(5.17742158538, ans[90]['LMcIlwain'])
+        self.assertAlmostEqual(5.17724847477, ans[90]['LHilton'], places=6)
+        self.assertAlmostEqual(5.17742158538, ans[90]['LMcIlwain'], places=6)
         self.assertAlmostEqual(4.35534221, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.46755074, ans[90]['Lsimple'][0])
 
