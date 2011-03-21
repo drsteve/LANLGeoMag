@@ -42,7 +42,6 @@ class Lstar_Data(datamodel.SpaceData):
     def __init__(self, *args, **kwargs):
         super(Lstar_Data, self).__init__(*args, **kwargs)
         self['position'] = {}
-        #self['Bcalc'] = datamodel.dmarray([])
 
     def __repr__(self):
         tb.dictree(self, verbose=True, attrs=True)
@@ -53,7 +52,7 @@ def LstarVersusPA(pos, date, alpha = 90,
                   Bfield = 'Lgm_B_OP77',
                   LstarThres = 10.0,  # beyond this Lsimple don't compute Lstar
                   extended_out = False,
-                  LstarQuality = 3, ):
+                  LstarQuality = 3):
 
     # setup a datamodel object to hold the answer
     ans = Lstar_Data()
