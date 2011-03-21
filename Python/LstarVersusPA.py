@@ -275,7 +275,7 @@ def LstarVersusPA(pos, date, alpha = 90,
                                             dtype=c_double,
                                             buffer=MagEphemInfo.LstarInfo.contents.z_gsm)
                 delT = datetime.datetime.now() - tnow()
-                ans[pa].attrs['Calc_Time'] = delT.total_seconds()
+                ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
 
     return ans
 
