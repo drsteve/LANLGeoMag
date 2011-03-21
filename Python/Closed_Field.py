@@ -58,7 +58,6 @@ def Closed_Field(*args, **kwargs):
         position = Lgm_Vector.Lgm_Vector(*dum)
     elif len(args) == 2:
         # input checking
-        #position = 
         if kwargs['coord_system'] != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
         # could consider a Lgm_MagModelInfo param to use an existing one
