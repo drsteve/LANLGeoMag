@@ -64,8 +64,17 @@ def LstarVersusPA(pos, date, alpha = 90,
     else:
         ans['Epoch'] = datamodel.dmarray([date])
 
-    # setup a magmodelinfo
-    mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+    # pitch angles to calculate
+    try:
+        Alpha = list(alpha)
+    except TypeError:
+        Alpha = [alpha]
+
+    # required setup
+    MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
+
+    # setup a shortcut to MagModelInfo
+    mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
     Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
 
     # convert to **GSM**
@@ -91,16 +100,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     # TODO maybe add some Kp checking
     ans['Kp'] = datamodel.dmarray([Kp])
 
-    # pitch angles to calculate
-    try:
-        Alpha = list(alpha)
-    except TypeError:
-        Alpha = [alpha]
-
-    # required setup
-    MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
-
-    # what does 3 mean?  Have to look at the C (or docs)
+    # Set the LstarQuality, TODO add a comment here on what each does
     MagEphemInfo.LstarQuality = LstarQuality;
 
     # L* in one place is L* in lots of places (for GPS set to False)
@@ -120,9 +120,7 @@ def LstarVersusPA(pos, date, alpha = 90,
         Lgm_Set_Lgm_B_T89( MagEphemInfo.LstarInfo.contents.mInfo )
     else:
         raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
-    
-    # put Kp into the structureww
-    MagEphemInfo.LstarInfo.contents.mInfo.contents = mmi #TODO: Check me out
+
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
@@ -134,7 +132,7 @@ def LstarVersusPA(pos, date, alpha = 90,
 
     # Set Tolerances
     SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
-    # *  Blocal at sat location.
+    # *  Blocal at sat location
     MagEphemInfo.P = Pgsm
 
     Bvec = Lgm_Vector.Lgm_Vector()
@@ -153,7 +151,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     #timenow = datetime.datetime.now()
     trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(MagEphemInfo, extended_out=True) #Pgsm.tolist(), date , bfield=Bfield, extended_out=True)
     #print('Closed_Field check took %s' % (datetime.datetime.now()-timenow))
-    
+
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
         ans[pa] = {}
@@ -174,6 +172,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     # LOOP OVER PITCH ANGLES
     for i, pa in enumerate(Alpha):
 
+        tnow = datetime.datetime.now()
         PreStr = MagEphemInfo.LstarInfo.contents.PreStr
         PostStr = MagEphemInfo.LstarInfo.contents.PostStr
 
@@ -197,8 +196,8 @@ def LstarVersusPA(pos, date, alpha = 90,
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
         # Compute L*
         if Lsimple < LstarThres:
-            Ls_vec = Lgm_Vector.Lgm_Vector(*minB) 
-            
+            Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
+
             LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
             MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(MagEphemInfo.LstarInfo.contents.I[0]),
                                                 c_double(MagEphemInfo.Bm[i]),
@@ -220,8 +219,8 @@ def LstarVersusPA(pos, date, alpha = 90,
             # Save results to the MagEphemInfo structure.
             MagEphemInfo.nShellPoints[i] = MagEphemInfo.LstarInfo.contents.nPnts
             ## pull all this good extra info into numpy arrays
-            ans[pa]['I'] = datamodel.dmarray(MagEphemInfo.LstarInfo.contents.I[0]) 
-                
+            ans[pa]['I'] = datamodel.dmarray(MagEphemInfo.LstarInfo.contents.I[0])
+
             if extended_out:
                 ans[pa]['ShellI'] = \
                     datamodel.dmarray(numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.I)],
@@ -275,13 +274,37 @@ def LstarVersusPA(pos, date, alpha = 90,
                                              len(MagEphemInfo.LstarInfo.contents.z_gsm[0])],
                                             dtype=c_double,
                                             buffer=MagEphemInfo.LstarInfo.contents.z_gsm)
+                delT = datetime.datetime.now() - tnow()
+                ans[pa].attrs['Calc_Time'] = delT.total_seconds()
 
     return ans
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 0)
-    #print ans[90]['LHilton']
-    #print ans[90]['LMcIlwain']
-    #print ans[90]['Lstar']
-    #print ans[90]['Lsimple']
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
+    print('Lgm_B_T89 Kp=4')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
+    print('Lgm_B_T89 Kp=5')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
+    print('Lgm_B_OP77 Kp=4')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = LstarVersusPA([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
+    print('Lgm_B_OP77 Kp=6')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']

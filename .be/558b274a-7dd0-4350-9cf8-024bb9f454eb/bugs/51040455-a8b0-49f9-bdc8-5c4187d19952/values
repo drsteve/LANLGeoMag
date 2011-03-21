@@ -7,7 +7,7 @@ reporter: Brian Larsen <balarsen@lanl.gov>
 severity: minor
 
 
-status: open
+status: fixed
 
 
 summary: ShellI is not understood
