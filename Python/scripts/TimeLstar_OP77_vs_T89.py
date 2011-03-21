@@ -13,6 +13,9 @@ now = datetime.datetime.now
 pos = [-4,0,0]
 date = datetime.datetime(2010, 12, 1)
 
+print('*'*50)
+print("Something is wrong here with the plotting, don't run me")
+print('*'*50)
 
 results = {}
 

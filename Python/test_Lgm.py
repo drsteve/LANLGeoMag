@@ -25,6 +25,7 @@ from test_Lgm_Data import *
 from test_Lgm_Wrap import *
 from test_Closed_Field import *
 from test_LstarVersusPA import *
+from test_Lgm_OP77 import *
 # add others here as they exist
 
 if __name__ == '__main__':
