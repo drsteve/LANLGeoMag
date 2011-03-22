@@ -3,8 +3,6 @@
 import unittest
 import ctypes
 
-import numpy
-
 import Lgm_Vector
 
 class Lgm_VecTests(unittest.TestCase):
