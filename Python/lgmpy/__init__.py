@@ -13,8 +13,10 @@ See Mike Henderon about LanlGeoMag and Brian Larsen about the python wrappers
 __all__ = ['Lstar', 'Closed_Field', 'Lgm_T89', 'Lgm_OP77']
 
 # Expose definitions from modules in this package.
-from lgmpy import Closed_Field, Lgm_OP77, MagData, Lgm_T89, Lgm_CTrans, Lgm_MagEphemInfo
-from lgmpy import Lgm_Wrap, Lgm_MagModelInfo,  Lstar
+from lgmpy.Closed_Field import Closed_Field
+from Lgm_OP77 import OP77
+from Lgm_T89 import T89
+from lgmpy.Lstar import get_Lstar
 
 #package info
 __version__ = '0.1dev'
