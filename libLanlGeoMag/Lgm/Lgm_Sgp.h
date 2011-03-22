@@ -278,8 +278,3 @@ void LgmSgp_dsinit( int whichconst, double cosim, double emsq, double argpo,
 double LgmSgp_gstime( double jdut1 );
 
 #endif
-
-/*
- *    $Id: Lgm_Sgp.h 46 2010-10-01 20:46:59Z mgh $
- */
-

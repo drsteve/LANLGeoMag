@@ -45,7 +45,3 @@ int Lgm_B_T96MOD_MGH( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo ) 
     return(1);
 
 }
-
-/*
- *   $Id: T96_MOD_MGH.c 45 2010-10-01 20:43:29Z mgh $
- */

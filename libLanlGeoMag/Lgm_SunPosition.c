@@ -149,10 +149,3 @@ void Lgm_SunPosition( double T, double *l, double *r, double *b ) {
 
 }
 
-
-
-
-/*
- *   $Id: Lgm_SunPosition.c 45 2010-10-01 20:43:29Z mgh $
- */
-

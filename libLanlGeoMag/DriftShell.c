@@ -2,40 +2,29 @@
 #include "Lgm/Lgm_LstarInfo.h"
 
 
-
 /*
  *   FindShellLine
  *   -------------
- *  
- *   Find the field line that has the given I and Bm values at the specified MLT.
- *   On return
+ */
+
+
+//! Find the field line that has the given I and Bm values at the specified MLT.
+/**
+ *            \param[in]        I0          the value of the integral invariant, I,  for the desired drift shell.
+ *            \param[out]       Ifound      the value of the integral invariant, I,  that was actually found for this shell line.
+ *            \param[in]        Bm          the value of the mirror field strength for the desired drift shell.
+ *            \param[in]        MLT         magnetic local time meridian in which to search for shell field line.
+ *            \param[in,out]    mlat        an initial guess for the magnetic latitude of the mirror pointat which.
+ *            \param[in,out]    rad         the geocentric radial distance of the mirror point (at which B=Bm).
+ *            \param[in]        mlat0       lower end of mlat bracket to search over.
+ *            \param[in]        mlat1       upper end of mlat bracket to search over.
+ *            \param[in,out]    LstarInfo   A properly initialized Lgm_LstarInfo structure.
  *
- *      Inputs:
- *
- *          I0   - the value of the integral invariant for the desired drift shell
- *            Bm   - the value of the mirror field for the desired drift shell 
- *            MLT  - magnetic local time meridian in which to search for shell field line.
- *            mlat - an initial guess for the magnetic latitude of the mirror pointat which 
- *
- *      Outputs:
- *
- *            mlat - the magnetic latitude of the mirror point (at which B=Bm)
- *            rad  - the geocentric radial distance of the mirror point (at which B=Bm)
- *        
- *
- *      Return Value:
- *
- *            1 - normal exit. Field line found with acceptable accuracy.
- *            0 - no field line could be found
- *
- *      Influential Parameters:
- *
- *            List here - 
+ *            \return 1 - normal exit. Field line found with acceptable accuracy.
+ *            \return 0 - no field line could be found
  *
  */
-int FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, Lgm_LstarInfo *LstarInfo ) {
-
-
+int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector    u, w, Pm_North;
     double        a, b, c, d, D, I, r, Phi, cl, sl, SS, mlat_min=0.0, Dmin;
     int            done, FoundValidI;
@@ -296,13 +285,26 @@ FoundValidI = -4;
 
 
 
-/*
- *  This routine is used in the above routine. For the given MLT and mlat, it locates the vertical
- *  radius where the field strength is equal to the specified mirror field strength, Bm. It assumes
- *  that r will be between 120km (altitude) and 20Re (geocentric).
- *  
- *  Need to add error handling for cases where we cant find a radius. This could happen if the actual
- *  radius lies outside of the assumed bracket. E.g., could drop below 120km.
+/** Find radius of specified Bm for a given MLT and mlat.
+ *
+ *  This routine is used by FindShellLine(). For the given MLT and mlat, it
+ *  locates the vertical
+ *  radius where the field strength is equal to the specified mirror field
+ *  strength, Bm. 
+ *                                                                                                                                                                                                               
+ *  Need to add error handling for cases where we cant find a radius. This
+ *  could happen if the actual radius lies outside of the assumed bracket.
+ *  E.g., could drop below Loss Cone height.         
+ *
+ *            \param[in]        Bm          the value of the mirror field strength for the desired drift shell.
+ *            \param[in]        MLT         magnetic local time.
+ *            \param[in]        mlat        magnetic latitude.
+ *            \param[out]       rad         the geocentric radial distance of the mirror point (at which B=Bm).
+ *            \param[in]        tol         Tolerance.
+ *            \param[in,out]    LstarInfo   A properly initialized Lgm_LstarInfo structure.
+ *
+ *            \return 1 - normal exit. Bm value found.
+ *            \return 0 - no Bm value found.
  *
  */
 int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo ) {
@@ -433,9 +435,9 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
             done = TRUE;
             FoundValidBm = TRUE;
         } else if ( fabs(d) < tol ) {
-        done = TRUE;
-        printf("%sFindBmRadius: Warning, BmRadius converged before Bm (might not have found proper Bm)%s\n", LstarInfo->PreStr, LstarInfo->PostStr );
-        FoundValidBm = TRUE; // not really true 
+            done = TRUE;
+            printf("%sFindBmRadius: Warning, BmRadius converged before Bm (might not have found proper Bm)%s\n", LstarInfo->PreStr, LstarInfo->PostStr );
+            FoundValidBm = TRUE; // not really true 
         } else if ( D > 0.0 ){
             a = b;
         } else {
@@ -460,10 +462,4 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     return( FoundValidBm );
 
 }
-
-
-    
-/*
- *    $Id: DriftShell.c 59 2010-11-22 23:10:44Z mgh $
- */
 

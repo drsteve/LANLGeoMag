@@ -55,8 +55,3 @@ int dqpsrt(int limit, int last, int *maxerr, double *ermax, double elist[],
 
 #endif 
 
-
-/*
- *    $Id: Lgm_QuadPack.h 46 2010-10-01 20:46:59Z mgh $
- */
-

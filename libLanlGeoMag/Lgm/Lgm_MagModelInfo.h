@@ -507,8 +507,3 @@ int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *Cg
 
 
 #endif
-
-
-/*
- *  $Id: Lgm_MagModelInfo.h 157 2011-03-14 18:52:06Z mgh $
- */

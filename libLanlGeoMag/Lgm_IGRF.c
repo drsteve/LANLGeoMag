@@ -1177,7 +1177,3 @@ void Lgm_RatFunInt( double *xa, double *ya, int n, double x, double *y, double *
     return;
 
 }
-
-/*
- *   $Id: Lgm_IGRF.c 139 2011-01-27 21:01:34Z mgh $
- */

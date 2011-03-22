@@ -266,11 +266,3 @@ void Lgm_QuatCombineQuats( double Q1[4], double Q2[4], double Q[4] ) {
 
 
 
-
-
-
-
-/*
- *   $Id: Lgm_Quat.c 45 2010-10-01 20:43:29Z mgh $
- */
-

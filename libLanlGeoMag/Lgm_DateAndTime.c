@@ -1455,17 +1455,3 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 }
 
-
-
-
-
-
-
-
-
-
-
-/*
- *   $Id: Lgm_DateAndTime.c 142 2011-02-02 17:09:07Z mgh $ 
- */
-

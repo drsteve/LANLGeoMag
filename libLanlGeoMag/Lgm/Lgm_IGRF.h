@@ -682,8 +682,3 @@ static double IGRF_h[23][13][13] = {
 
 
 #endif
-
-/*
- *    $Id: Lgm_IGRF.h 157 2011-03-14 18:52:06Z mgh $
- */
-

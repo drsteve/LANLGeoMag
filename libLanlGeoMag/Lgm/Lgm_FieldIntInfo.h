@@ -64,8 +64,3 @@ double      IFromLBmM_McIlwain( double L, double Bm, double M );
 
 
 
-
-/*
- *    $Id: Lgm_FieldIntInfo.h 46 2010-10-01 20:46:59Z mgh $
- */
-

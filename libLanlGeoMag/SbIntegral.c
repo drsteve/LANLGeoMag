@@ -279,8 +279,3 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
 
 
 
-
-/*
- *   $Id: SbIntegral.c 89 2010-12-21 18:47:45Z mgh $
- */
-

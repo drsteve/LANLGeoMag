@@ -19,7 +19,3 @@ int Lgm_B_JensenCain1960(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo
     Lgm_B_JensenCain1960_ctrans( v, B, MagInfo->c );
     return(1);
 }
-
-/*
- *   $Id: Lgm_B_internal.c 157 2011-03-14 18:52:06Z mgh $
- */

@@ -32,7 +32,3 @@ void        Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c
 
 
 #endif
-
-/*
- *  $Id: Lgm_Vec.h 129 2011-01-12 16:35:03Z mgh $
- */

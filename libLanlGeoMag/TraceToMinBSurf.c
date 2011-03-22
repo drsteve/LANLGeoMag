@@ -230,6 +230,3 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 }
 
 
-/*
- *   $Id: TraceToMinBSurf.c 45 2010-10-01 20:43:29Z mgh $
- */

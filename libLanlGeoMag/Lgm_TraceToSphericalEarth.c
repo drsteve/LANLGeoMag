@@ -325,7 +325,3 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     return( 1 );
 
 }
-
-/*
- *   $Id: Lgm_TraceToSphericalEarth.c 45 2010-10-01 20:43:29Z mgh $
- */

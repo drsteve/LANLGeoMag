@@ -75,8 +75,3 @@ void    Lgm_unset_eop( Lgm_EopOne *eop, Lgm_CTrans *c );
 
 
 #endif
-
-/*
- *    $Id: Lgm_Eop.h 46 2010-10-01 20:46:59Z mgh $
- */
-

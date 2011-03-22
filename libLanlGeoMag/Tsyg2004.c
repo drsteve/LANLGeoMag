@@ -3027,8 +3027,3 @@ void    DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY,
     return;
 
 }
-
-
-/*
- *   $Id: Tsyg2004.c 45 2010-10-01 20:43:29Z mgh $
- */

@@ -1304,7 +1304,3 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
 
 
 
-
-/*
- *    $Id: ComputeLstar.c 155 2011-03-08 19:22:29Z mgh $
- */

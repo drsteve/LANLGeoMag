@@ -51,7 +51,3 @@ void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], in
 
 }
 
-
-/*
- *   $Id: W.c 45 2010-10-01 20:43:29Z mgh $
- */

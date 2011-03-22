@@ -143,7 +143,3 @@ printf("B: Sa, Sb, P = %g %g    (%g, %g, %g)   Htry = %f\n", Sa, Sb, P.x, P.y, P
 
 }
 
-
-/*
- *   $Id: TraceToMinRdotB.c 45 2010-10-01 20:43:29Z mgh $
- */

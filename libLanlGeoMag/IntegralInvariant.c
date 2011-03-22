@@ -12,9 +12,7 @@
 
 
 
-
-
-/*
+/**
  *   This routine evaluates the "integral invariant, I" from mirror point to
  *   mirror point. Instead of tracing the whole field line, this version allows
  *   the Quadpack integration routine to evaluate B(s). The hope is that this
@@ -40,6 +38,36 @@
  *  I think these are now all reentrant.
  *
  */
+ /*    \f[
+ *       I = \int_{sm_{south}}^{sm_{north}}
+ *             \left\{
+ *                1 - {B(s)\over Bm}
+ *             \right\}^{1/2} ds
+ *    \f]
+ *
+ *
+ *      @param mInfo    A properly initialized Lgm_MagModelInfo structure.
+ *
+ *      @return         I, The integral invariant.
+ *
+ *
+ *   The routine needs the following values set properly in the mInfo structure;
+ *      - mInfo->Sm_South
+ *      - mInfo->Sm_North
+ *      - mInfo->Lgm_I_Integrator_epsabs
+ *      - mInfo->Lgm_I_Integrator_epsrel
+ *      - mInfo->Lgm_I_Integrator
+ *      - other things too (model info etc...)
+ *
+ *  On exit, the following will be set;
+ *      - mInfo->Lgm_n_I_integrand_Calls
+ *      - other things...
+ *
+ *
+ *
+ *
+ */
+
 double Iinv( Lgm_MagModelInfo *mInfo ) {
 
 
@@ -117,6 +145,30 @@ double Iinv( Lgm_MagModelInfo *mInfo ) {
 
 }
 
+
+/**
+ *   This routine evaluates the "integral invariant, I" from southern mirror
+ *   point to northern mirror point. The whole field line must have been
+ *   pre-traced using TraceLine() first. The resulting pre-traced field line
+ *   and its spline approximation is stored in the mInfo structure that is
+ *   passed to this routine.
+ *   
+ *   The integral is as follows:
+ *    \f[
+ *       I = \int_{sm_{south}}^{sm_{north}}
+ *             \left\{
+ *                1 - {B(s)\over Bm}
+ *             \right\}^{1/2} ds
+ *    \f]
+ *
+ *
+ *      @param mInfo    A properly initialized Lgm_MagModelInfo structure.
+ *
+ *      @return         I, The integral invariant.
+ *
+ *
+ *
+ */
 double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
 
     double	a, b;
@@ -576,8 +628,3 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
 
 
-
-
-/*
- *    $Id: IntegralInvariant.c 154 2011-03-07 21:32:21Z mgh $
- */

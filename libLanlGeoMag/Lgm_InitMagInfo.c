@@ -248,7 +248,3 @@ void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo) {
 
 
 
-
-/*
- *   $Id: Lgm_InitMagInfo.c 139 2011-01-27 21:01:34Z mgh $
- */

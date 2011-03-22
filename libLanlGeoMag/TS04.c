@@ -63,7 +63,3 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
 }
 
-
-/*
- *   $Id: TS04.c 45 2010-10-01 20:43:29Z mgh $
- */

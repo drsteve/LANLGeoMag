@@ -338,7 +338,3 @@ printf("HOW DID I GET HERE? P = \n");
 
 }
 
-
-/*
- *   $Id: MagStep.c 45 2010-10-01 20:43:29Z mgh $
- */

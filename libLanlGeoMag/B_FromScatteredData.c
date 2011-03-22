@@ -723,8 +723,3 @@ kgot++;
     return( 1 );
 
 }
-
-
-/*
- *    $Id: B_FromScatteredData.c 45 2010-10-01 20:43:29Z mgh $
- */

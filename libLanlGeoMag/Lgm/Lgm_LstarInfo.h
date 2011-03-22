@@ -142,7 +142,3 @@ double      AngVelInv( double Phi );
 
 
 #endif
-
-/*
- *    $Id: Lgm_LstarInfo.h 152 2011-03-03 21:51:14Z balarsen $
- */

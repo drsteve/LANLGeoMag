@@ -5732,13 +5732,3 @@ double  Lgm_AE8_AP8_FluxFromPos( Lgm_Vector *u, int MODEL, int FLUXTYPE, double 
 }
 
 
-
-
-
-
-
-
-/*
- *     $Id: Lgm_AE8_AP8.c 45 2010-10-01 20:43:29Z mgh $
- */
-

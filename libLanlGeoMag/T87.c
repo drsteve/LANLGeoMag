@@ -356,8 +356,3 @@ int Lgm_B_T87( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     return(1);
 
 }
-
-
-/*
- *   $Id: T87.c 45 2010-10-01 20:43:29Z mgh $
- */

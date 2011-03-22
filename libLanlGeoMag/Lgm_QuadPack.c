@@ -1615,9 +1615,3 @@ double d1mach( int i ) {
 
 }
 
-
-
-/*
- *   $Id: Lgm_QuadPack.c 45 2010-10-01 20:43:29Z mgh $
- */
-

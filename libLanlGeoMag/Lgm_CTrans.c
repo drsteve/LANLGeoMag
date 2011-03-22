@@ -2102,13 +2102,3 @@ char *Lgm_StrToUpper( char *str, int nmax ) {
     return( str );
 }
 
-
-
-
-
-
-
-
-/*
- *   $Id: Lgm_CTrans.c 157 2011-03-14 18:52:06Z mgh $
- */

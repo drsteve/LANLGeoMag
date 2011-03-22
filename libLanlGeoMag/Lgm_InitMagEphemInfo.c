@@ -336,8 +336,3 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
 
 
 }
-
-
-/*
- *   $Id: Lgm_InitMagEphemInfo.c 154 2011-03-07 21:32:21Z mgh $
- */

@@ -96,8 +96,3 @@ void Lgm_MatTimeMat( double A[3][3], double B[3][3], double Result[3][3] ) {
     }
 
 }
-
-
-/*
- *   $Id: vec.c 45 2010-10-01 20:43:29Z mgh $
- */

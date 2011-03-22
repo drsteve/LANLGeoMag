@@ -190,8 +190,3 @@ void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *u ) {
 
     return;
 }
-
-
-/*
- *   $Id: Lgm_Vec.c 132 2011-01-12 16:54:04Z mgh $
- */

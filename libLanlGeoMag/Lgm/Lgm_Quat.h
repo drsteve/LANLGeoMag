@@ -32,8 +32,3 @@ void    Lgm_QuatCombineQuats( double Q1[4], double Q2[4], double Q[4] );
 
 
 #endif
-
-/*
- *    $Id: Lgm_Quat.h 46 2010-10-01 20:46:59Z mgh $
- */
-

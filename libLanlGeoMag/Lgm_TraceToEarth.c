@@ -320,7 +320,3 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
     return( 1 );
 
 }
-
-/*
- *   $Id: Lgm_TraceToEarth.c 45 2010-10-01 20:43:29Z mgh $
- */

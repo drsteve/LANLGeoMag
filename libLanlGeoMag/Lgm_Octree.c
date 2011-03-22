@@ -810,9 +810,3 @@ Lgm_OctreeCell *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectData
 
 }
 
-
-
-/*
- *   $Id: Lgm_Octree.c 45 2010-10-01 20:43:29Z mgh $
- */
-

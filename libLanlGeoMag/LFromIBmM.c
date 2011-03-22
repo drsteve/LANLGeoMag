@@ -222,9 +222,3 @@ double	IFromLBmM_McIlwain( double L, double Bm, double M ) {
 
 
 }
-
-
-/*
- *     $Id: LFromIBmM.c 45 2010-10-01 20:43:29Z mgh $
- */
-

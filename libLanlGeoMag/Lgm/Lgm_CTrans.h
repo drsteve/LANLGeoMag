@@ -874,6 +874,3 @@ void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 
 #endif
 
-/*
- *  $Id: Lgm_CTrans.h 157 2011-03-14 18:52:06Z mgh $
- */

@@ -250,7 +250,3 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
 
 }
-
-/*
- *    $Id: Lgm_AlphaOfK.c 143 2011-02-09 22:09:13Z mgh $
- */

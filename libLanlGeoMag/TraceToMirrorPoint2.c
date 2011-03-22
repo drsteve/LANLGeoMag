@@ -210,9 +210,3 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 }
 
-
-/*
- *   $Id: TraceToMirrorPoint2.c 155 2011-03-08 19:22:29Z mgh $
- */
-
-

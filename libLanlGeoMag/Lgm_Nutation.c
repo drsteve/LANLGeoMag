@@ -248,9 +248,3 @@ void Lgm_Nutation( double T_TT, double nTerms, double *dPsi, double *dEps ) {
     *dEps = EpsSum*0.0001;
 
 }
-
-
-/*
- *   $Id: Lgm_Nutation.c 45 2010-10-01 20:43:29Z mgh $
- */
-

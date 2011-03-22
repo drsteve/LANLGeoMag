@@ -2091,8 +2091,3 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
 } // end sgp4
 
 
-
-/*
- *   $Id: Lgm_Sgp.c 65 2010-11-24 17:48:59Z mgh $
- */
-

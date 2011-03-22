@@ -434,8 +434,3 @@ int Lgm_ReadNgaEopp( Lgm_NgaEopp *e, int Verbosity ) {
     return(1);
 
 }
-
-/*
- *   $Id: Lgm_Eop.c 45 2010-10-01 20:43:29Z mgh $
- */
-
