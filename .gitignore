@@ -5,3 +5,16 @@ htmlcov*
 html*
 build*
 .pc
+*.m4
+*Makefile.in
+*.guess
+*.komodoproject
+config.h*
+config.log
+config.status
+config.sub
+docs/Doxyfile
+docs/Makefile
+install-sh
+libLanlGeoMag/.deps/
+Makefile

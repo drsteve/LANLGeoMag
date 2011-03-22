@@ -14,12 +14,7 @@ Test suite for the LstarVersusPA
 import unittest
 import datetime
 
-import numpy
-
 import Lstar
-from Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans
-from Lgm_Wrap import Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms
-from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, SM_TO_GSM
 
 class Lstar_Tests(unittest.TestCase):
     def setUp(self):

@@ -13,11 +13,8 @@ Test suite for the Lgm_T89 file
 import unittest
 import datetime
 import itertools
-import ctypes
 
 import numpy
-
-from Lgm_Wrap import LGM_CDIP
 
 import Lgm_T89
 import Lgm_Vector

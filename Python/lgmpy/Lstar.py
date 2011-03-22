@@ -19,15 +19,15 @@ from spacepy import datamodel
 import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
-    Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, \
-    GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lgm_Set_Lgm_B_T89, \
+    Lgm_Set_Lgm_B_OP77, SetLstarTolerances, \
+    RadPerDeg, Lgm_Set_Lgm_B_T89, \
     LFromIBmM_Hilton, LFromIBmM_McIlwain
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
 import Closed_Field
-import Lgm_MagModelInfo
+
 
 
 class Lstar_Data(datamodel.SpaceData):

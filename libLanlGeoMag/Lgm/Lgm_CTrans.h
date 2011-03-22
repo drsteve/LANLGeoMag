@@ -40,7 +40,7 @@
 #define LGM_ERROR       -1      // generic error flag
 #define LGM_FILL_VALUE (-1e31)  // Value to flag undefined or bad data
 
-#define  LGM_JD_J2000   2451545.0 // Julian Date of J2000 ( i.e. 12:00:00 TT on Jan 1 2000 (or 2000 Jan 1.5 TT ) ) 
+#define  LGM_JD_J2000   2451545.0 // Julian Date of J2000 ( i.e. 12:00:00 TT on Jan 1 2000 (or 2000 Jan 1.5 TT ) )
 #define  LGM_JD_GPS0    2444245.0 // Julian Date of introduction of GPS time. (0h, Jan 6, 1980)
 #define  LGM_JD_TAI0    2436205.0 // Julian Date of introduction of TAI time. (0h, Jan 1, 1958)
 
@@ -59,7 +59,7 @@
 
 
 /*
- * Definition of Coordinate Systems. 
+ * Definition of Coordinate Systems.
  * We follow the International Astronomical Union 1976/FK-5 conventions
  * (IAU-76/FK5). E.g. see Vallado, "Fundamentals of Astrodynamics and
  * Applications" Third Edition, 2007.  The newer IAU-2000 theory has similar
@@ -71,9 +71,9 @@
 #define ICRF2000_COORDS 1   //!<  aka International Celestial Reference Frame (ICRF)
 #define GEI2000_COORDS  1   //!<  aka GEI (Geocentric Equatorial Inertial) at Epoch J2000
                             //!<
-                            //!<      Z-axis - parallel to mean rot axis of Earth 
+                            //!<      Z-axis - parallel to mean rot axis of Earth
                             //!<               at fixed epoch J2000
-                            //!<      X-axis - points to direction of mean vernal 
+                            //!<      X-axis - points to direction of mean vernal
                             //!<               equinox at the fixed epoch J2000
                             //!<      Y-axis - completes right handed system
                             //!<
@@ -100,7 +100,7 @@
                             //!< Transformation between TOD and MOD
                             //!<      Utod = Rx( -(Eps+dEps) )Rz(-dPsi)Rx(Eps) Umod
 
-#define TEME_COORDS     4   //!< True Equator, Mean Equinox (of Date). 
+#define TEME_COORDS     4   //!< True Equator, Mean Equinox (of Date).
                             //!<
                             //!< This is a hybrid system using true equat., but
                             //!< mean equinox.  This is the system that the
@@ -170,7 +170,7 @@
 
 #define EDMAG_COORDS   10   // Eccentric Dipole Coords (true dipole is offset from center)
 
-#define CDMAG_COORDS   11   // Centered Dipole Coords 
+#define CDMAG_COORDS   11   // Centered Dipole Coords
 
 
 
@@ -181,7 +181,7 @@
  * is the starting coordinate system and END is the desired ending coordinate
  * system the START_TO_END encodes the desired transformation.
  */
-#define EME2000_TO_EME2000      101 
+#define EME2000_TO_EME2000      101
 #define EME2000_TO_ICRF2000     101
 #define EME2000_TO_GEI2000      101
 #define EME2000_TO_MOD          102
@@ -197,7 +197,7 @@
 #define EME2000_TO_EDMAG        110
 #define EME2000_TO_CDMAG        111
 
-#define ICRF2000_TO_EME2000     101 
+#define ICRF2000_TO_EME2000     101
 #define ICRF2000_TO_ICRF2000    101
 #define ICRF2000_TO_GEI2000     101
 #define ICRF2000_TO_MOD         102
@@ -213,7 +213,7 @@
 #define ICRF2000_TO_EDMAG       110
 #define ICRF2000_TO_CDMAG       111
 
-#define GEI2000_TO_EME2000      101 
+#define GEI2000_TO_EME2000      101
 #define GEI2000_TO_ICRF2000     101
 #define GEI2000_TO_GEI2000      101
 #define GEI2000_TO_MOD          102
@@ -437,14 +437,14 @@ typedef struct Lgm_LeapSeconds {
 
 typedef struct Lgm_DateTime {
 
-    long int    Date;       //!< In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int 
+    long int    Date;       //!< In basic ISO format (YYYYMMDD or YYYYDDD) Represented as a single long int
 
     int         Year;       //!< 4-digit year
 
     int         Month;      //!< [1-12]
 
     int         Day;        //!< Day Of Month [1-31]
-    
+
     int         Doy;        //!< Day Of Year [1-31]
 
     double      Time;       //!< Decimal value of time in hours
@@ -521,7 +521,7 @@ typedef struct Lgm_CTrans {
                                      * only available retrospectively.  We set
                                      * this value to 0.0 by default. Thus in
                                      * the absence of EOP data, we assume its
-                                     * initial value.  
+                                     * initial value.
                                      * Units: Decimal seconds
                                      */
 
@@ -572,13 +572,13 @@ typedef struct Lgm_CTrans {
 
 
     double      gmst;               /**<
-                                      *  Greenwich Mean Sidereal Time 
-                                      * units: in radians 
+                                      *  Greenwich Mean Sidereal Time
+                                      * units: in radians
                                       */
 
     double      gast;               /**<
                                       *  Greenwich Apparent Sidereal Time
-                                      * Units: in radians 
+                                      * Units: in radians
                                       */
 
 
@@ -589,14 +589,14 @@ typedef struct Lgm_CTrans {
                                       */
 
     double      epsilon;            /**<
-                                     *  Mean Obliquity of the Ecliptic 
-                                     * (in radians) 
+                                     *  Mean Obliquity of the Ecliptic
+                                     * (in radians)
                                      */
 
     double      epsilon_true;       /**<
-                                     *  True Obliquity of the Ecliptic 
+                                     *  True Obliquity of the Ecliptic
                                      *  \f$\epsilon_{true} = \epsilon + dEps\f$
-                                     * (in radians) 
+                                     * (in radians)
                                      */
 
     double      eccentricity;       /**< Eccentricity of Earth-Sun orbit */
@@ -693,7 +693,7 @@ typedef struct Lgm_CTrans {
     double      Acdmag_to_wgs84[3][3];
 
 
-    
+
     /*
      *  These variables are needed to make IGRF Calls reentrant/thread-safe.
      */
@@ -717,6 +717,8 @@ typedef struct Lgm_CTrans {
 void        Lgm_free_ctrans( Lgm_CTrans *c );
 Lgm_CTrans  *Lgm_init_ctrans( int );
 Lgm_CTrans  *Lgm_CopyCTrans( Lgm_CTrans *s );
+void        Lgm_ctransDefaults(Lgm_CTrans *, int);
+
 
 void        Lgm_Radec_to_Cart( double, double, Lgm_Vector * );
 double      Lgm_angle2pi( double );
@@ -823,7 +825,7 @@ double        Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 
 
-//double      Lgm_UTC_to_TT( double 
+//double      Lgm_UTC_to_TT( double
 //double      Lgm_TT_to_UTC( double JD, double TT, Lgm_LeapSeconds *l );
 //double      Lgm_TT_to_TDB( double JD, double TT, Lgm_LeapSeconds *l );
 //double      Lgm_TDB_to_TT( double JD, double TDB, Lgm_LeapSeconds *l );
@@ -873,4 +875,3 @@ void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 
 
 #endif
-

@@ -11,13 +11,12 @@ transformations in Lgm
 
 from __future__ import division
 
-import math
+from ctypes import pointer
 
 import numpy
 import spacepy.toolbox as tb
 
-import Lgm_Vector
-from Lgm_Wrap import Lgm_CTrans
+from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults
 
 
 class Lgm_Coords(list):
@@ -43,22 +42,10 @@ class Lgm_Coords(list):
         self.system = system
         self[:] = inval
 
-
 class Lgm_CTrans(Lgm_CTrans):
-    def __init__(self):
-        self.nNutationTerms = 106;
-
-         #
-         #  Initialize Earth Orientation Parameters to defaults They can be
-         #  over-ridden later with actual values.  This allows users to use the
-         #  less accurate defaults if EOP data is unavailable or not
-         #  needed/desired.
-         #
-        self.DUT1  = 0.0# ; // seconds
-        self.xp    = 0.0#; // radians
-        self.yp    = 0.0#; // radians
-        self.ddPsi = 0.0#; // radians
-        self.ddEps = 0.0#; // radians
+    def __init__(self, Verbose=False):
+        # initialize to the values set in c so we don't have to mainitain two places
+        Lgm_ctransDefaults(pointer(self), Verbose)
 
 def dateToDateLong(inval):
     """
@@ -100,7 +87,7 @@ def dateToFPHours(inval):
                 return numpy.array(lst)
             else:
                 return lst
-    except:
+    except TypeError:
         return inval.hour + inval.minute/60 + \
                                     inval.second/60/60 + \
                                     inval.microsecond/60/60/1000000

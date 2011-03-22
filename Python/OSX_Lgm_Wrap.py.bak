@@ -1129,271 +1129,277 @@ if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_CopyCTrans'):
     Lgm_CopyCTrans.argtypes = [POINTER(Lgm_CTrans)]
     Lgm_CopyCTrans.restype = POINTER(Lgm_CTrans)
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 721
+# /usr/local/include/Lgm/Lgm_CTrans.h: 720
+if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_ctransDefaults'):
+    Lgm_ctransDefaults = _libs['libLanlGeoMag.dylib'].Lgm_ctransDefaults
+    Lgm_ctransDefaults.argtypes = [POINTER(Lgm_CTrans), c_int]
+    Lgm_ctransDefaults.restype = None
+
+# /usr/local/include/Lgm/Lgm_CTrans.h: 723
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Radec_to_Cart'):
     Lgm_Radec_to_Cart = _libs['libLanlGeoMag.dylib'].Lgm_Radec_to_Cart
     Lgm_Radec_to_Cart.argtypes = [c_double, c_double, POINTER(Lgm_Vector)]
     Lgm_Radec_to_Cart.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 722
+# /usr/local/include/Lgm/Lgm_CTrans.h: 724
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_angle2pi'):
     Lgm_angle2pi = _libs['libLanlGeoMag.dylib'].Lgm_angle2pi
     Lgm_angle2pi.argtypes = [c_double]
     Lgm_angle2pi.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 723
+# /usr/local/include/Lgm/Lgm_CTrans.h: 725
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_angle360'):
     Lgm_angle360 = _libs['libLanlGeoMag.dylib'].Lgm_angle360
     Lgm_angle360.argtypes = [c_double]
     Lgm_angle360.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 725
+# /usr/local/include/Lgm/Lgm_CTrans.h: 727
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_LeapYear'):
     Lgm_LeapYear = _libs['libLanlGeoMag.dylib'].Lgm_LeapYear
     Lgm_LeapYear.argtypes = [c_int]
     Lgm_LeapYear.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 727
+# /usr/local/include/Lgm/Lgm_CTrans.h: 729
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_JDN'):
     Lgm_JDN = _libs['libLanlGeoMag.dylib'].Lgm_JDN
     Lgm_JDN.argtypes = [c_int, c_int, c_int]
     Lgm_JDN.restype = c_long
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 729
+# /usr/local/include/Lgm/Lgm_CTrans.h: 731
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_JD'):
     Lgm_JD = _libs['libLanlGeoMag.dylib'].Lgm_JD
     Lgm_JD.argtypes = [c_int, c_int, c_int, c_double, c_int, POINTER(Lgm_CTrans)]
     Lgm_JD.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 730
+# /usr/local/include/Lgm/Lgm_CTrans.h: 732
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_JD_to_Date'):
     Lgm_JD_to_Date = _libs['libLanlGeoMag.dylib'].Lgm_JD_to_Date
     Lgm_JD_to_Date.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_JD_to_Date.restype = c_long
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 731
+# /usr/local/include/Lgm/Lgm_CTrans.h: 733
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Date_to_JD'):
     Lgm_Date_to_JD = _libs['libLanlGeoMag.dylib'].Lgm_Date_to_JD
     Lgm_Date_to_JD.argtypes = [c_long, c_double, POINTER(Lgm_CTrans)]
     Lgm_Date_to_JD.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 732
+# /usr/local/include/Lgm/Lgm_CTrans.h: 734
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_jd_to_ymdh'):
     Lgm_jd_to_ymdh = _libs['libLanlGeoMag.dylib'].Lgm_jd_to_ymdh
     Lgm_jd_to_ymdh.argtypes = [c_double, POINTER(c_long), POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_jd_to_ymdh.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 733
+# /usr/local/include/Lgm/Lgm_CTrans.h: 735
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_DayOfYear'):
     Lgm_DayOfYear = _libs['libLanlGeoMag.dylib'].Lgm_DayOfYear
     Lgm_DayOfYear.argtypes = [c_int, c_int, c_int, POINTER(Lgm_CTrans)]
     Lgm_DayOfYear.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 735
+# /usr/local/include/Lgm/Lgm_CTrans.h: 737
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_MJD'):
     Lgm_MJD = _libs['libLanlGeoMag.dylib'].Lgm_MJD
     Lgm_MJD.argtypes = [c_int, c_int, c_int, c_double, c_int, POINTER(Lgm_CTrans)]
     Lgm_MJD.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 736
+# /usr/local/include/Lgm/Lgm_CTrans.h: 738
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_MJD_to_Date'):
     Lgm_MJD_to_Date = _libs['libLanlGeoMag.dylib'].Lgm_MJD_to_Date
     Lgm_MJD_to_Date.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_MJD_to_Date.restype = c_long
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 737
+# /usr/local/include/Lgm/Lgm_CTrans.h: 739
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_mjd_to_ymdh'):
     Lgm_mjd_to_ymdh = _libs['libLanlGeoMag.dylib'].Lgm_mjd_to_ymdh
     Lgm_mjd_to_ymdh.argtypes = [c_double, POINTER(c_long), POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_mjd_to_ymdh.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 739
+# /usr/local/include/Lgm/Lgm_CTrans.h: 741
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_hour24'):
     Lgm_hour24 = _libs['libLanlGeoMag.dylib'].Lgm_hour24
     Lgm_hour24.argtypes = [c_double]
     Lgm_hour24.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 740
+# /usr/local/include/Lgm/Lgm_CTrans.h: 742
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_kepler'):
     Lgm_kepler = _libs['libLanlGeoMag.dylib'].Lgm_kepler
     Lgm_kepler.argtypes = [c_double, c_double]
     Lgm_kepler.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 741
+# /usr/local/include/Lgm/Lgm_CTrans.h: 743
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Set_Coord_Transforms'):
     Lgm_Set_Coord_Transforms = _libs['libLanlGeoMag.dylib'].Lgm_Set_Coord_Transforms
     Lgm_Set_Coord_Transforms.argtypes = [c_long, c_double, POINTER(Lgm_CTrans)]
     Lgm_Set_Coord_Transforms.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 742
+# /usr/local/include/Lgm/Lgm_CTrans.h: 744
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Convert_Coords'):
     Lgm_Convert_Coords = _libs['libLanlGeoMag.dylib'].Lgm_Convert_Coords
     Lgm_Convert_Coords.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), c_int, POINTER(Lgm_CTrans)]
     Lgm_Convert_Coords.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 743
+# /usr/local/include/Lgm/Lgm_CTrans.h: 745
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_IsValidDate'):
     Lgm_IsValidDate = _libs['libLanlGeoMag.dylib'].Lgm_IsValidDate
     Lgm_IsValidDate.argtypes = [c_long]
     Lgm_IsValidDate.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 744
+# /usr/local/include/Lgm/Lgm_CTrans.h: 746
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Doy'):
     Lgm_Doy = _libs['libLanlGeoMag.dylib'].Lgm_Doy
     Lgm_Doy.argtypes = [c_long, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
     Lgm_Doy.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 745
+# /usr/local/include/Lgm/Lgm_CTrans.h: 747
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UT_to_hmsms'):
     Lgm_UT_to_hmsms = _libs['libLanlGeoMag.dylib'].Lgm_UT_to_hmsms
     Lgm_UT_to_hmsms.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
     Lgm_UT_to_hmsms.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 746
+# /usr/local/include/Lgm/Lgm_CTrans.h: 748
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UT_to_HMS'):
     Lgm_UT_to_HMS = _libs['libLanlGeoMag.dylib'].Lgm_UT_to_HMS
     Lgm_UT_to_HMS.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int)]
     Lgm_UT_to_HMS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 747
+# /usr/local/include/Lgm/Lgm_CTrans.h: 749
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UT_to_HMSd'):
     Lgm_UT_to_HMSd = _libs['libLanlGeoMag.dylib'].Lgm_UT_to_HMSd
     Lgm_UT_to_HMSd.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_UT_to_HMSd.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 748
+# /usr/local/include/Lgm/Lgm_CTrans.h: 750
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_D_to_DMS'):
     Lgm_D_to_DMS = _libs['libLanlGeoMag.dylib'].Lgm_D_to_DMS
     Lgm_D_to_DMS.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int)]
     Lgm_D_to_DMS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 749
+# /usr/local/include/Lgm/Lgm_CTrans.h: 751
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_D_to_DMSd'):
     Lgm_D_to_DMSd = _libs['libLanlGeoMag.dylib'].Lgm_D_to_DMSd
     Lgm_D_to_DMSd.argtypes = [c_double, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_double)]
     Lgm_D_to_DMSd.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 750
+# /usr/local/include/Lgm/Lgm_CTrans.h: 752
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_HMS'):
     Lgm_Print_HMS = _libs['libLanlGeoMag.dylib'].Lgm_Print_HMS
     Lgm_Print_HMS.argtypes = [c_double]
     Lgm_Print_HMS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 751
+# /usr/local/include/Lgm/Lgm_CTrans.h: 753
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_HMSd'):
     Lgm_Print_HMSd = _libs['libLanlGeoMag.dylib'].Lgm_Print_HMSd
     Lgm_Print_HMSd.argtypes = [c_double]
     Lgm_Print_HMSd.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 752
+# /usr/local/include/Lgm/Lgm_CTrans.h: 754
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_HMSdp'):
     Lgm_Print_HMSdp = _libs['libLanlGeoMag.dylib'].Lgm_Print_HMSdp
     Lgm_Print_HMSdp.argtypes = [c_double, c_int, c_int]
     Lgm_Print_HMSdp.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 753
+# /usr/local/include/Lgm/Lgm_CTrans.h: 755
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_DMS'):
     Lgm_Print_DMS = _libs['libLanlGeoMag.dylib'].Lgm_Print_DMS
     Lgm_Print_DMS.argtypes = [c_double]
     Lgm_Print_DMS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 754
+# /usr/local/include/Lgm/Lgm_CTrans.h: 756
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_DMSd'):
     Lgm_Print_DMSd = _libs['libLanlGeoMag.dylib'].Lgm_Print_DMSd
     Lgm_Print_DMSd.argtypes = [c_double]
     Lgm_Print_DMSd.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 755
+# /usr/local/include/Lgm/Lgm_CTrans.h: 757
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GetCurrentJD'):
     Lgm_GetCurrentJD = _libs['libLanlGeoMag.dylib'].Lgm_GetCurrentJD
     Lgm_GetCurrentJD.argtypes = [POINTER(Lgm_CTrans)]
     Lgm_GetCurrentJD.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 756
+# /usr/local/include/Lgm/Lgm_CTrans.h: 758
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GetCurrentMJD'):
     Lgm_GetCurrentMJD = _libs['libLanlGeoMag.dylib'].Lgm_GetCurrentMJD
     Lgm_GetCurrentMJD.argtypes = [POINTER(Lgm_CTrans)]
     Lgm_GetCurrentMJD.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 757
+# /usr/local/include/Lgm/Lgm_CTrans.h: 759
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_SunPosition'):
     Lgm_SunPosition = _libs['libLanlGeoMag.dylib'].Lgm_SunPosition
     Lgm_SunPosition.argtypes = [c_double, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     Lgm_SunPosition.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 758
+# /usr/local/include/Lgm/Lgm_CTrans.h: 760
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GLATLON_TO_CDMLATLONMLT'):
     Lgm_GLATLON_TO_CDMLATLONMLT = _libs['libLanlGeoMag.dylib'].Lgm_GLATLON_TO_CDMLATLONMLT
     Lgm_GLATLON_TO_CDMLATLONMLT.argtypes = [c_double, c_double, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_CTrans)]
     Lgm_GLATLON_TO_CDMLATLONMLT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 759
+# /usr/local/include/Lgm/Lgm_CTrans.h: 761
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GLATLON_TO_EDMLATLONMLT'):
     Lgm_GLATLON_TO_EDMLATLONMLT = _libs['libLanlGeoMag.dylib'].Lgm_GLATLON_TO_EDMLATLONMLT
     Lgm_GLATLON_TO_EDMLATLONMLT.argtypes = [c_double, c_double, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_CTrans)]
     Lgm_GLATLON_TO_EDMLATLONMLT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 760
+# /usr/local/include/Lgm/Lgm_CTrans.h: 762
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_CDMAG_to_R_MLAT_MLON_MLT'):
     Lgm_CDMAG_to_R_MLAT_MLON_MLT = _libs['libLanlGeoMag.dylib'].Lgm_CDMAG_to_R_MLAT_MLON_MLT
     Lgm_CDMAG_to_R_MLAT_MLON_MLT.argtypes = [POINTER(Lgm_Vector), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_CTrans)]
     Lgm_CDMAG_to_R_MLAT_MLON_MLT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 761
+# /usr/local/include/Lgm/Lgm_CTrans.h: 763
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_R_MLAT_MLT_to_CDMAG'):
     Lgm_R_MLAT_MLT_to_CDMAG = _libs['libLanlGeoMag.dylib'].Lgm_R_MLAT_MLT_to_CDMAG
     Lgm_R_MLAT_MLT_to_CDMAG.argtypes = [c_double, c_double, c_double, POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_R_MLAT_MLT_to_CDMAG.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 762
+# /usr/local/include/Lgm/Lgm_CTrans.h: 764
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_EDMAG_to_R_MLAT_MLON_MLT'):
     Lgm_EDMAG_to_R_MLAT_MLON_MLT = _libs['libLanlGeoMag.dylib'].Lgm_EDMAG_to_R_MLAT_MLON_MLT
     Lgm_EDMAG_to_R_MLAT_MLON_MLT.argtypes = [POINTER(Lgm_Vector), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_CTrans)]
     Lgm_EDMAG_to_R_MLAT_MLON_MLT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 763
+# /usr/local/include/Lgm/Lgm_CTrans.h: 765
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_R_MLAT_MLT_to_EDMAG'):
     Lgm_R_MLAT_MLT_to_EDMAG = _libs['libLanlGeoMag.dylib'].Lgm_R_MLAT_MLT_to_EDMAG
     Lgm_R_MLAT_MLT_to_EDMAG.argtypes = [c_double, c_double, c_double, POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_R_MLAT_MLT_to_EDMAG.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 764
+# /usr/local/include/Lgm/Lgm_CTrans.h: 766
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_WGS84_to_GEOD'):
     Lgm_WGS84_to_GEOD = _libs['libLanlGeoMag.dylib'].Lgm_WGS84_to_GEOD
     Lgm_WGS84_to_GEOD.argtypes = [POINTER(Lgm_Vector), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     Lgm_WGS84_to_GEOD.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 765
+# /usr/local/include/Lgm/Lgm_CTrans.h: 767
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_WGS84_to_GeodHeight'):
     Lgm_WGS84_to_GeodHeight = _libs['libLanlGeoMag.dylib'].Lgm_WGS84_to_GeodHeight
     Lgm_WGS84_to_GeodHeight.argtypes = [POINTER(Lgm_Vector), POINTER(c_double)]
     Lgm_WGS84_to_GeodHeight.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 766
+# /usr/local/include/Lgm/Lgm_CTrans.h: 768
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GEOD_to_WGS84'):
     Lgm_GEOD_to_WGS84 = _libs['libLanlGeoMag.dylib'].Lgm_GEOD_to_WGS84
     Lgm_GEOD_to_WGS84.argtypes = [c_double, c_double, c_double, POINTER(Lgm_Vector)]
     Lgm_GEOD_to_WGS84.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 767
+# /usr/local/include/Lgm/Lgm_CTrans.h: 769
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Nutation'):
     Lgm_Nutation = _libs['libLanlGeoMag.dylib'].Lgm_Nutation
     Lgm_Nutation.argtypes = [c_double, c_double, POINTER(c_double), POINTER(c_double)]
     Lgm_Nutation.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 768
+# /usr/local/include/Lgm/Lgm_CTrans.h: 770
 if hasattr(_libs['libLanlGeoMag.dylib'], 'IsoTimeStringToDateTime'):
     IsoTimeStringToDateTime = _libs['libLanlGeoMag.dylib'].IsoTimeStringToDateTime
     IsoTimeStringToDateTime.argtypes = [String, POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     IsoTimeStringToDateTime.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 769
+# /usr/local/include/Lgm/Lgm_CTrans.h: 771
 if hasattr(_libs['libLanlGeoMag.dylib'], 'MonthStrToNum'):
     MonthStrToNum = _libs['libLanlGeoMag.dylib'].MonthStrToNum
     MonthStrToNum.argtypes = [String]
     MonthStrToNum.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 770
+# /usr/local/include/Lgm/Lgm_CTrans.h: 772
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_StrToLower'):
     Lgm_StrToLower = _libs['libLanlGeoMag.dylib'].Lgm_StrToLower
     Lgm_StrToLower.argtypes = [String, c_int]
@@ -1403,7 +1409,7 @@ if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_StrToLower'):
         Lgm_StrToLower.restype = String
         Lgm_StrToLower.errcheck = ReturnString
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 771
+# /usr/local/include/Lgm/Lgm_CTrans.h: 773
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_StrToUpper'):
     Lgm_StrToUpper = _libs['libLanlGeoMag.dylib'].Lgm_StrToUpper
     Lgm_StrToUpper.argtypes = [String, c_int]
@@ -1413,199 +1419,199 @@ if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_StrToUpper'):
         Lgm_StrToUpper.restype = String
         Lgm_StrToUpper.errcheck = ReturnString
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 776
+# /usr/local/include/Lgm/Lgm_CTrans.h: 778
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_DateTime_Create'):
     Lgm_DateTime_Create = _libs['libLanlGeoMag.dylib'].Lgm_DateTime_Create
     Lgm_DateTime_Create.argtypes = [c_int, c_int, c_int, c_double, c_int, POINTER(Lgm_CTrans)]
     Lgm_DateTime_Create.restype = POINTER(Lgm_DateTime)
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 777
+# /usr/local/include/Lgm/Lgm_CTrans.h: 779
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_DateTime_Destroy'):
     Lgm_DateTime_Destroy = _libs['libLanlGeoMag.dylib'].Lgm_DateTime_Destroy
     Lgm_DateTime_Destroy.argtypes = [POINTER(Lgm_DateTime)]
     Lgm_DateTime_Destroy.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 778
+# /usr/local/include/Lgm/Lgm_CTrans.h: 780
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Make_UTC'):
     Lgm_Make_UTC = _libs['libLanlGeoMag.dylib'].Lgm_Make_UTC
     Lgm_Make_UTC.argtypes = [c_long, c_double, POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_Make_UTC.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 779
+# /usr/local/include/Lgm/Lgm_CTrans.h: 781
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_LoadLeapSeconds'):
     Lgm_LoadLeapSeconds = _libs['libLanlGeoMag.dylib'].Lgm_LoadLeapSeconds
     Lgm_LoadLeapSeconds.argtypes = [POINTER(Lgm_CTrans)]
     Lgm_LoadLeapSeconds.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 780
+# /usr/local/include/Lgm/Lgm_CTrans.h: 782
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GetLeapSeconds'):
     Lgm_GetLeapSeconds = _libs['libLanlGeoMag.dylib'].Lgm_GetLeapSeconds
     Lgm_GetLeapSeconds.argtypes = [c_double, POINTER(Lgm_CTrans)]
     Lgm_GetLeapSeconds.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 781
+# /usr/local/include/Lgm/Lgm_CTrans.h: 783
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_IsLeapSecondDay'):
     Lgm_IsLeapSecondDay = _libs['libLanlGeoMag.dylib'].Lgm_IsLeapSecondDay
     Lgm_IsLeapSecondDay.argtypes = [c_long, POINTER(c_double), POINTER(Lgm_CTrans)]
     Lgm_IsLeapSecondDay.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 782
+# /usr/local/include/Lgm/Lgm_CTrans.h: 784
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UTC_to_TAI'):
     Lgm_UTC_to_TAI = _libs['libLanlGeoMag.dylib'].Lgm_UTC_to_TAI
     Lgm_UTC_to_TAI.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_UTC_to_TAI.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 783
+# /usr/local/include/Lgm/Lgm_CTrans.h: 785
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TAI_to_UTC'):
     Lgm_TAI_to_UTC = _libs['libLanlGeoMag.dylib'].Lgm_TAI_to_UTC
     Lgm_TAI_to_UTC.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TAI_to_UTC.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 784
+# /usr/local/include/Lgm/Lgm_CTrans.h: 786
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TT_to_TAI'):
     Lgm_TT_to_TAI = _libs['libLanlGeoMag.dylib'].Lgm_TT_to_TAI
     Lgm_TT_to_TAI.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TT_to_TAI.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 785
+# /usr/local/include/Lgm/Lgm_CTrans.h: 787
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TAI_to_TT'):
     Lgm_TAI_to_TT = _libs['libLanlGeoMag.dylib'].Lgm_TAI_to_TT
     Lgm_TAI_to_TT.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TAI_to_TT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 786
+# /usr/local/include/Lgm/Lgm_CTrans.h: 788
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TT_to_TDB'):
     Lgm_TT_to_TDB = _libs['libLanlGeoMag.dylib'].Lgm_TT_to_TDB
     Lgm_TT_to_TDB.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TT_to_TDB.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 787
+# /usr/local/include/Lgm/Lgm_CTrans.h: 789
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TDB_to_TT'):
     Lgm_TDB_to_TT = _libs['libLanlGeoMag.dylib'].Lgm_TDB_to_TT
     Lgm_TDB_to_TT.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TDB_to_TT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 788
+# /usr/local/include/Lgm/Lgm_CTrans.h: 790
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UTC_to_TT'):
     Lgm_UTC_to_TT = _libs['libLanlGeoMag.dylib'].Lgm_UTC_to_TT
     Lgm_UTC_to_TT.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_UTC_to_TT.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 789
+# /usr/local/include/Lgm/Lgm_CTrans.h: 791
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TT_to_UTC'):
     Lgm_TT_to_UTC = _libs['libLanlGeoMag.dylib'].Lgm_TT_to_UTC
     Lgm_TT_to_UTC.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TT_to_UTC.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 790
+# /usr/local/include/Lgm/Lgm_CTrans.h: 792
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TAI_to_GPS'):
     Lgm_TAI_to_GPS = _libs['libLanlGeoMag.dylib'].Lgm_TAI_to_GPS
     Lgm_TAI_to_GPS.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TAI_to_GPS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 791
+# /usr/local/include/Lgm/Lgm_CTrans.h: 793
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GPS_to_TAI'):
     Lgm_GPS_to_TAI = _libs['libLanlGeoMag.dylib'].Lgm_GPS_to_TAI
     Lgm_GPS_to_TAI.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_GPS_to_TAI.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 792
+# /usr/local/include/Lgm/Lgm_CTrans.h: 794
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UTC_to_GPS'):
     Lgm_UTC_to_GPS = _libs['libLanlGeoMag.dylib'].Lgm_UTC_to_GPS
     Lgm_UTC_to_GPS.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_UTC_to_GPS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 793
+# /usr/local/include/Lgm/Lgm_CTrans.h: 795
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GPS_to_UTC'):
     Lgm_GPS_to_UTC = _libs['libLanlGeoMag.dylib'].Lgm_GPS_to_UTC
     Lgm_GPS_to_UTC.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_GPS_to_UTC.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 794
+# /usr/local/include/Lgm/Lgm_CTrans.h: 796
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_DateTime'):
     Lgm_Print_DateTime = _libs['libLanlGeoMag.dylib'].Lgm_Print_DateTime
     Lgm_Print_DateTime.argtypes = [Lgm_DateTime, c_int, c_int]
     Lgm_Print_DateTime.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 795
+# /usr/local/include/Lgm/Lgm_CTrans.h: 797
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_DateTimeToString'):
     Lgm_DateTimeToString = _libs['libLanlGeoMag.dylib'].Lgm_DateTimeToString
     Lgm_DateTimeToString.argtypes = [String, Lgm_DateTime, c_int, c_int]
     Lgm_DateTimeToString.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 796
+# /usr/local/include/Lgm/Lgm_CTrans.h: 798
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Print_SimpleTime'):
     Lgm_Print_SimpleTime = _libs['libLanlGeoMag.dylib'].Lgm_Print_SimpleTime
     Lgm_Print_SimpleTime.argtypes = [POINTER(Lgm_DateTime), c_int, String]
     Lgm_Print_SimpleTime.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 798
+# /usr/local/include/Lgm/Lgm_CTrans.h: 800
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_DayOfWeek'):
     Lgm_DayOfWeek = _libs['libLanlGeoMag.dylib'].Lgm_DayOfWeek
     Lgm_DayOfWeek.argtypes = [c_int, c_int, c_int, String]
     Lgm_DayOfWeek.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 799
+# /usr/local/include/Lgm/Lgm_CTrans.h: 801
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_JDNofWeek1'):
     Lgm_JDNofWeek1 = _libs['libLanlGeoMag.dylib'].Lgm_JDNofWeek1
     Lgm_JDNofWeek1.argtypes = [c_int]
     Lgm_JDNofWeek1.restype = c_long
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 800
+# /usr/local/include/Lgm/Lgm_CTrans.h: 802
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_MaxWeekNumber'):
     Lgm_MaxWeekNumber = _libs['libLanlGeoMag.dylib'].Lgm_MaxWeekNumber
     Lgm_MaxWeekNumber.argtypes = [c_int]
     Lgm_MaxWeekNumber.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 801
+# /usr/local/include/Lgm/Lgm_CTrans.h: 803
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_ISO_WeekNumber'):
     Lgm_ISO_WeekNumber = _libs['libLanlGeoMag.dylib'].Lgm_ISO_WeekNumber
     Lgm_ISO_WeekNumber.argtypes = [c_int, c_int, c_int, POINTER(c_int)]
     Lgm_ISO_WeekNumber.restype = c_int
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 802
+# /usr/local/include/Lgm/Lgm_CTrans.h: 804
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_ISO_YearWeekDow_to_Date'):
     Lgm_ISO_YearWeekDow_to_Date = _libs['libLanlGeoMag.dylib'].Lgm_ISO_YearWeekDow_to_Date
     Lgm_ISO_YearWeekDow_to_Date.argtypes = [c_int, c_int, c_int, POINTER(c_long), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
     Lgm_ISO_YearWeekDow_to_Date.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 803
+# /usr/local/include/Lgm/Lgm_CTrans.h: 805
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_RemapTime'):
     Lgm_RemapTime = _libs['libLanlGeoMag.dylib'].Lgm_RemapTime
     Lgm_RemapTime.argtypes = [c_double, c_double]
     Lgm_RemapTime.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 805
+# /usr/local/include/Lgm/Lgm_CTrans.h: 807
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GPS_to_GpsSeconds'):
     Lgm_GPS_to_GpsSeconds = _libs['libLanlGeoMag.dylib'].Lgm_GPS_to_GpsSeconds
     Lgm_GPS_to_GpsSeconds.argtypes = [POINTER(Lgm_DateTime)]
     Lgm_GPS_to_GpsSeconds.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 806
+# /usr/local/include/Lgm/Lgm_CTrans.h: 808
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GpsSeconds_to_GPS'):
     Lgm_GpsSeconds_to_GPS = _libs['libLanlGeoMag.dylib'].Lgm_GpsSeconds_to_GPS
     Lgm_GpsSeconds_to_GPS.argtypes = [c_double, POINTER(Lgm_DateTime)]
     Lgm_GpsSeconds_to_GPS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 807
+# /usr/local/include/Lgm/Lgm_CTrans.h: 809
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_GpsSeconds_to_UTC'):
     Lgm_GpsSeconds_to_UTC = _libs['libLanlGeoMag.dylib'].Lgm_GpsSeconds_to_UTC
     Lgm_GpsSeconds_to_UTC.argtypes = [c_double, POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_GpsSeconds_to_UTC.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 808
+# /usr/local/include/Lgm/Lgm_CTrans.h: 810
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UTC_to_GpsSeconds'):
     Lgm_UTC_to_GpsSeconds = _libs['libLanlGeoMag.dylib'].Lgm_UTC_to_GpsSeconds
     Lgm_UTC_to_GpsSeconds.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_UTC_to_GpsSeconds.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 810
+# /usr/local/include/Lgm/Lgm_CTrans.h: 812
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TAI_to_TaiSeconds'):
     Lgm_TAI_to_TaiSeconds = _libs['libLanlGeoMag.dylib'].Lgm_TAI_to_TaiSeconds
     Lgm_TAI_to_TaiSeconds.argtypes = [POINTER(Lgm_DateTime)]
     Lgm_TAI_to_TaiSeconds.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 811
+# /usr/local/include/Lgm/Lgm_CTrans.h: 813
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TaiSeconds_to_GPS'):
         continue
@@ -1614,19 +1620,19 @@ for _lib in _libs.itervalues():
     Lgm_TaiSeconds_to_GPS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 812
+# /usr/local/include/Lgm/Lgm_CTrans.h: 814
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TaiSeconds_to_UTC'):
     Lgm_TaiSeconds_to_UTC = _libs['libLanlGeoMag.dylib'].Lgm_TaiSeconds_to_UTC
     Lgm_TaiSeconds_to_UTC.argtypes = [c_double, POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TaiSeconds_to_UTC.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 813
+# /usr/local/include/Lgm/Lgm_CTrans.h: 815
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_UTC_to_TaiSeconds'):
     Lgm_UTC_to_TaiSeconds = _libs['libLanlGeoMag.dylib'].Lgm_UTC_to_TaiSeconds
     Lgm_UTC_to_TaiSeconds.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_UTC_to_TaiSeconds.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 816
+# /usr/local/include/Lgm/Lgm_CTrans.h: 818
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'TAISecondsSinceJ2000'):
         continue
@@ -1635,7 +1641,7 @@ for _lib in _libs.itervalues():
     TAISecondsSinceJ2000.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 817
+# /usr/local/include/Lgm/Lgm_CTrans.h: 819
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'UTCDaysSinceJ2000'):
         continue
@@ -1644,139 +1650,139 @@ for _lib in _libs.itervalues():
     UTCDaysSinceJ2000.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 819
+# /usr/local/include/Lgm/Lgm_CTrans.h: 821
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_TDBSecSinceJ2000'):
     Lgm_TDBSecSinceJ2000 = _libs['libLanlGeoMag.dylib'].Lgm_TDBSecSinceJ2000
     Lgm_TDBSecSinceJ2000.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_CTrans)]
     Lgm_TDBSecSinceJ2000.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 838
+# /usr/local/include/Lgm/Lgm_CTrans.h: 840
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_B_igrf_ctrans'):
     Lgm_B_igrf_ctrans = _libs['libLanlGeoMag.dylib'].Lgm_B_igrf_ctrans
     Lgm_B_igrf_ctrans.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_B_igrf_ctrans.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 839
+# /usr/local/include/Lgm/Lgm_CTrans.h: 841
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_B_cdip_ctrans'):
     Lgm_B_cdip_ctrans = _libs['libLanlGeoMag.dylib'].Lgm_B_cdip_ctrans
     Lgm_B_cdip_ctrans.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_B_cdip_ctrans.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 840
+# /usr/local/include/Lgm/Lgm_CTrans.h: 842
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_B_edip_ctrans'):
     Lgm_B_edip_ctrans = _libs['libLanlGeoMag.dylib'].Lgm_B_edip_ctrans
     Lgm_B_edip_ctrans.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_B_edip_ctrans.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 841
+# /usr/local/include/Lgm/Lgm_CTrans.h: 843
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_B_JensenCain1960_ctrans'):
     Lgm_B_JensenCain1960_ctrans = _libs['libLanlGeoMag.dylib'].Lgm_B_JensenCain1960_ctrans
     Lgm_B_JensenCain1960_ctrans.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_B_JensenCain1960_ctrans.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 847
+# /usr/local/include/Lgm/Lgm_CTrans.h: 849
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_Factorial'):
     Lgm_Factorial = _libs['libLanlGeoMag.dylib'].Lgm_Factorial
     Lgm_Factorial.argtypes = [c_int]
     Lgm_Factorial.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 848
+# /usr/local/include/Lgm/Lgm_CTrans.h: 850
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitIGRF'):
     Lgm_InitIGRF = _libs['libLanlGeoMag.dylib'].Lgm_InitIGRF
     Lgm_InitIGRF.argtypes = [(c_double * 13) * 13, (c_double * 13) * 13, c_int, c_int, POINTER(Lgm_CTrans)]
     Lgm_InitIGRF.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 849
+# /usr/local/include/Lgm/Lgm_CTrans.h: 851
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitPnm'):
     Lgm_InitPnm = _libs['libLanlGeoMag.dylib'].Lgm_InitPnm
     Lgm_InitPnm.argtypes = [c_double, c_double, (c_double * 13) * 13, (c_double * 13) * 13, (c_double * 13) * 13, c_int, POINTER(Lgm_CTrans)]
     Lgm_InitPnm.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 850
+# /usr/local/include/Lgm/Lgm_CTrans.h: 852
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitTrigmp'):
     Lgm_InitTrigmp = _libs['libLanlGeoMag.dylib'].Lgm_InitTrigmp
     Lgm_InitTrigmp.argtypes = [c_double, c_double, POINTER(c_double), POINTER(c_double), c_int]
     Lgm_InitTrigmp.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 851
+# /usr/local/include/Lgm/Lgm_CTrans.h: 853
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_PolFunInt'):
     Lgm_PolFunInt = _libs['libLanlGeoMag.dylib'].Lgm_PolFunInt
     Lgm_PolFunInt.argtypes = [POINTER(c_double), POINTER(c_double), c_int, c_double, POINTER(c_double), POINTER(c_double)]
     Lgm_PolFunInt.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 852
+# /usr/local/include/Lgm/Lgm_CTrans.h: 854
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_RatFunInt'):
     Lgm_RatFunInt = _libs['libLanlGeoMag.dylib'].Lgm_RatFunInt
     Lgm_RatFunInt.argtypes = [POINTER(c_double), POINTER(c_double), c_int, c_double, POINTER(c_double), POINTER(c_double)]
     Lgm_RatFunInt.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 853
+# /usr/local/include/Lgm/Lgm_CTrans.h: 855
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_IGRF'):
     Lgm_IGRF = _libs['libLanlGeoMag.dylib'].Lgm_IGRF
     Lgm_IGRF.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_IGRF.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 854
+# /usr/local/include/Lgm/Lgm_CTrans.h: 856
 if hasattr(_libs['libLanlGeoMag.dylib'], '_Lgm_IGRF'):
     _Lgm_IGRF = _libs['libLanlGeoMag.dylib']._Lgm_IGRF
     _Lgm_IGRF.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     _Lgm_IGRF.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 855
+# /usr/local/include/Lgm/Lgm_CTrans.h: 857
 if hasattr(_libs['libLanlGeoMag.dylib'], '_Lgm_IGRF2'):
     _Lgm_IGRF2 = _libs['libLanlGeoMag.dylib']._Lgm_IGRF2
     _Lgm_IGRF2.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     _Lgm_IGRF2.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 856
+# /usr/local/include/Lgm/Lgm_CTrans.h: 858
 if hasattr(_libs['libLanlGeoMag.dylib'], '_Lgm_IGRF3'):
     _Lgm_IGRF3 = _libs['libLanlGeoMag.dylib']._Lgm_IGRF3
     _Lgm_IGRF3.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     _Lgm_IGRF3.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 857
+# /usr/local/include/Lgm/Lgm_CTrans.h: 859
 if hasattr(_libs['libLanlGeoMag.dylib'], '_Lgm_IGRF4'):
     _Lgm_IGRF4 = _libs['libLanlGeoMag.dylib']._Lgm_IGRF4
     _Lgm_IGRF4.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     _Lgm_IGRF4.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 859
+# /usr/local/include/Lgm/Lgm_CTrans.h: 861
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitdPnm'):
     Lgm_InitdPnm = _libs['libLanlGeoMag.dylib'].Lgm_InitdPnm
     Lgm_InitdPnm.argtypes = [(c_double * 13) * 13, (c_double * 13) * 13, c_int, POINTER(Lgm_CTrans)]
     Lgm_InitdPnm.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 860
+# /usr/local/include/Lgm/Lgm_CTrans.h: 862
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitSqrtFuncs'):
     Lgm_InitSqrtFuncs = _libs['libLanlGeoMag.dylib'].Lgm_InitSqrtFuncs
     Lgm_InitSqrtFuncs.argtypes = [(c_double * 13) * 13, (c_double * 13) * 13, c_int]
     Lgm_InitSqrtFuncs.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 861
+# /usr/local/include/Lgm/Lgm_CTrans.h: 863
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitK'):
     Lgm_InitK = _libs['libLanlGeoMag.dylib'].Lgm_InitK
     Lgm_InitK.argtypes = [(c_double * 13) * 13, c_int]
     Lgm_InitK.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 862
+# /usr/local/include/Lgm/Lgm_CTrans.h: 864
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitS'):
     Lgm_InitS = _libs['libLanlGeoMag.dylib'].Lgm_InitS
     Lgm_InitS.argtypes = [(c_double * 13) * 13, c_int]
     Lgm_InitS.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 868
+# /usr/local/include/Lgm/Lgm_CTrans.h: 870
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitSphHarm'):
     Lgm_InitSphHarm = _libs['libLanlGeoMag.dylib'].Lgm_InitSphHarm
     Lgm_InitSphHarm.argtypes = [c_int, (c_double * 13) * 13, (c_double * 13) * 13, c_int, c_int, POINTER(Lgm_CTrans)]
     Lgm_InitSphHarm.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 869
+# /usr/local/include/Lgm/Lgm_CTrans.h: 871
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_JensenCain1960'):
     Lgm_JensenCain1960 = _libs['libLanlGeoMag.dylib'].Lgm_JensenCain1960
     Lgm_JensenCain1960.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
     Lgm_JensenCain1960.restype = None
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 870
+# /usr/local/include/Lgm/Lgm_CTrans.h: 872
 if hasattr(_libs['libLanlGeoMag.dylib'], '_Lgm_JensenCain1960'):
     _Lgm_JensenCain1960 = _libs['libLanlGeoMag.dylib']._Lgm_JensenCain1960
     _Lgm_JensenCain1960.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_CTrans)]
@@ -3633,7 +3639,7 @@ for _lib in _libs.itervalues():
     AngVelInv.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 class struct_Lgm_MagEphemInfo(Structure):
     pass
 
@@ -3786,9 +3792,9 @@ struct_Lgm_MagEphemInfo._fields_ = [
     ('Lstar', POINTER(c_double)),
 ]
 
-Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 148
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 143
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_1'):
         continue
@@ -3797,7 +3803,7 @@ for _lib in _libs.itervalues():
     j_to_fp_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 149
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 144
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_2'):
         continue
@@ -3806,7 +3812,7 @@ for _lib in _libs.itervalues():
     j_to_fp_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 150
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 145
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_mu_1'):
         continue
@@ -3815,7 +3821,7 @@ for _lib in _libs.itervalues():
     Ek_to_mu_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 151
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 146
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_mu_2'):
         continue
@@ -3824,7 +3830,7 @@ for _lib in _libs.itervalues():
     Ek_to_mu_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 152
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 147
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_v'):
         continue
@@ -3833,31 +3839,31 @@ for _lib in _libs.itervalues():
     Ek_to_v.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 153
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitMagEphemInfo'):
     Lgm_InitMagEphemInfo = _libs['libLanlGeoMag.dylib'].Lgm_InitMagEphemInfo
     Lgm_InitMagEphemInfo.argtypes = [c_int, c_int]
     Lgm_InitMagEphemInfo.restype = POINTER(Lgm_MagEphemInfo)
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 159
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 154
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_InitMagEphemInfoDefaults'):
     Lgm_InitMagEphemInfoDefaults = _libs['libLanlGeoMag.dylib'].Lgm_InitMagEphemInfoDefaults
     Lgm_InitMagEphemInfoDefaults.argtypes = [POINTER(Lgm_MagEphemInfo), c_int, c_int]
     Lgm_InitMagEphemInfoDefaults.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 161
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 156
 if hasattr(_libs['libLanlGeoMag.dylib'], 'Lgm_FreeMagEphemInfo'):
     Lgm_FreeMagEphemInfo = _libs['libLanlGeoMag.dylib'].Lgm_FreeMagEphemInfo
     Lgm_FreeMagEphemInfo.argtypes = [POINTER(Lgm_MagEphemInfo)]
     Lgm_FreeMagEphemInfo.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 163
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
 if hasattr(_libs['libLanlGeoMag.dylib'], 'ReadMagEphemInfoStruct'):
     ReadMagEphemInfoStruct = _libs['libLanlGeoMag.dylib'].ReadMagEphemInfoStruct
     ReadMagEphemInfoStruct.argtypes = [String, POINTER(c_int), POINTER(Lgm_MagEphemInfo)]
     ReadMagEphemInfoStruct.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 164
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 159
 if hasattr(_libs['libLanlGeoMag.dylib'], 'WriteMagEphemInfoStruct'):
     WriteMagEphemInfoStruct = _libs['libLanlGeoMag.dylib'].WriteMagEphemInfoStruct
     WriteMagEphemInfoStruct.argtypes = [String, c_int, POINTER(Lgm_MagEphemInfo)]
@@ -6827,7 +6833,7 @@ Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 1
 
 Lgm_LstarInfo = struct_Lgm_LstarInfo # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
 
-Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 
