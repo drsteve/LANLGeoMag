@@ -11,22 +11,8 @@
 //#define DIFF_SCHEME     USE_FOUR_POINT
 
 
-
-
-
 /*
- *   This routine evaluates the "integral invariant, I" from mirror point to
- *   mirror point. Instead of tracing the whole field line, this version allows
- *   the Quadpack integration routine to evaluate B(s). The hope is that this
- *   will decrease the amount of tracing needed to evaluate the integral. It may
- *   very well be slower than tracing the whole line and then doing the integral,
- *   but we'll try this for comparison ... The other obvious way to do it is to
- *   pre-trace the FL and then interpolate the points in some manner. I'm hoping
- *   that combining dqags and Bulirsch-Stoer (which are both extrapolation methods)
- *   that we'll get a speedup.
- *   
- *   The integral is as follows:
- *
+ * Does the Iinv integrtal;
  *
  *                          / sm_north       
  *                         |                 [                ] (1/2)
@@ -40,6 +26,51 @@
  *  I think these are now all reentrant.
  *
  */
+
+
+
+/**
+ *   This routine evaluates the "integral invariant, I" from mirror point to
+ *   mirror point. Instead of tracing the whole field line, this version allows
+ *   the Quadpack integration routine to evaluate B(s). The hope is that this
+ *   will decrease the amount of tracing needed to evaluate the integral. It may
+ *   very well be slower than tracing the whole line and then doing the integral,
+ *   but we'll try this for comparison ... The other obvious way to do it is to
+ *   pre-trace the FL and then interpolate the points in some manner. I'm hoping
+ *   that combining dqags and Bulirsch-Stoer (which are both extrapolation methods)
+ *   that we'll get a speedup.
+ *   
+ *   The integral is as follows:
+ *    \f[
+ *       I = \int_{sm_{south}}^{sm_{north}}
+ *             \left\{
+ *                1 - {B(s)\over Bm}
+ *             \right\}^{1/2} ds
+ *    \f]
+ *
+ *
+ *      @param mInfo    A properly initialized Lgm_MagModelInfo structure.
+ *
+ *      @return         I, The integral invariant.
+ *
+ *
+ *   The routine needs the following values set properly in the mInfo structure;
+ *      - mInfo->Sm_South
+ *      - mInfo->Sm_North
+ *      - mInfo->Lgm_I_Integrator_epsabs
+ *      - mInfo->Lgm_I_Integrator_epsrel
+ *      - mInfo->Lgm_I_Integrator
+ *      - other things too (model info etc...)
+ *
+ *  On exit, the following will be set;
+ *      - mInfo->Lgm_n_I_integrand_Calls
+ *      - other things...
+ *
+ *
+ *
+ *
+ */
+
 double Iinv( Lgm_MagModelInfo *mInfo ) {
 
 
@@ -117,6 +148,29 @@ double Iinv( Lgm_MagModelInfo *mInfo ) {
 
 }
 
+/**
+ *   This routine evaluates the "integral invariant, I" from southern mirror
+ *   point to northern mirror point. The whole field line must have been
+ *   pre-traced using TraceLine() first. The resulting pre-traced field line
+ *   and its spline approximation is stored in the mInfo structure that is
+ *   passed to this routine.
+ *   
+ *   The integral is as follows:
+ *    \f[
+ *       I = \int_{sm_{south}}^{sm_{north}}
+ *             \left\{
+ *                1 - {B(s)\over Bm}
+ *             \right\}^{1/2} ds
+ *    \f]
+ *
+ *
+ *      @param mInfo    A properly initialized Lgm_MagModelInfo structure.
+ *
+ *      @return         I, The integral invariant.
+ *
+ *
+ *
+ */
 double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
 
     double	a, b;
