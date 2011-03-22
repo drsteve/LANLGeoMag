@@ -14,5 +14,5 @@ setup(name='lgmpy',
       description='Python wrapper for Lgm',
       author='Brian Larsen',
       author_email='balarsen@lanl.gov',
-      packages=['.']
+      packages=['lgmpy']
      )
