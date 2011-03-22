@@ -463,6 +463,8 @@ double      LFromIBmM_Hilton( double I, double Bm, double M );
 double      IFromLBmM_Hilton( double L, double Bm, double M );
 double      LFromIBmM_McIlwain( double I, double Bm, double M );
 double      IFromLBmM_McIlwain( double L, double Bm, double M );
+double      Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo );
+
 
 double      BofS( double s, Lgm_MagModelInfo *Info );
 int         SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info );
