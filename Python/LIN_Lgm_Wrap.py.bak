@@ -1204,7 +1204,16 @@ for _lib in _libs.itervalues():
     Lgm_CopyCTrans.restype = POINTER(Lgm_CTrans)
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 721
+# /usr/local/include/Lgm/Lgm_CTrans.h: 720
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_ctransDefaults'):
+        continue
+    Lgm_ctransDefaults = _lib.Lgm_ctransDefaults
+    Lgm_ctransDefaults.argtypes = [POINTER(Lgm_CTrans), c_int]
+    Lgm_ctransDefaults.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_CTrans.h: 723
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Radec_to_Cart'):
         continue
@@ -1213,7 +1222,7 @@ for _lib in _libs.itervalues():
     Lgm_Radec_to_Cart.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 722
+# /usr/local/include/Lgm/Lgm_CTrans.h: 724
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_angle2pi'):
         continue
@@ -1222,7 +1231,7 @@ for _lib in _libs.itervalues():
     Lgm_angle2pi.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 723
+# /usr/local/include/Lgm/Lgm_CTrans.h: 725
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_angle360'):
         continue
@@ -1231,7 +1240,7 @@ for _lib in _libs.itervalues():
     Lgm_angle360.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 725
+# /usr/local/include/Lgm/Lgm_CTrans.h: 727
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_LeapYear'):
         continue
@@ -1240,7 +1249,7 @@ for _lib in _libs.itervalues():
     Lgm_LeapYear.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 727
+# /usr/local/include/Lgm/Lgm_CTrans.h: 729
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_JDN'):
         continue
@@ -1249,7 +1258,7 @@ for _lib in _libs.itervalues():
     Lgm_JDN.restype = c_long
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 729
+# /usr/local/include/Lgm/Lgm_CTrans.h: 731
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_JD'):
         continue
@@ -1258,7 +1267,7 @@ for _lib in _libs.itervalues():
     Lgm_JD.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 730
+# /usr/local/include/Lgm/Lgm_CTrans.h: 732
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_JD_to_Date'):
         continue
@@ -1267,7 +1276,7 @@ for _lib in _libs.itervalues():
     Lgm_JD_to_Date.restype = c_long
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 731
+# /usr/local/include/Lgm/Lgm_CTrans.h: 733
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Date_to_JD'):
         continue
@@ -1276,7 +1285,7 @@ for _lib in _libs.itervalues():
     Lgm_Date_to_JD.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 732
+# /usr/local/include/Lgm/Lgm_CTrans.h: 734
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_jd_to_ymdh'):
         continue
@@ -1285,7 +1294,7 @@ for _lib in _libs.itervalues():
     Lgm_jd_to_ymdh.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 733
+# /usr/local/include/Lgm/Lgm_CTrans.h: 735
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DayOfYear'):
         continue
@@ -1294,7 +1303,7 @@ for _lib in _libs.itervalues():
     Lgm_DayOfYear.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 735
+# /usr/local/include/Lgm/Lgm_CTrans.h: 737
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MJD'):
         continue
@@ -1303,7 +1312,7 @@ for _lib in _libs.itervalues():
     Lgm_MJD.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 736
+# /usr/local/include/Lgm/Lgm_CTrans.h: 738
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MJD_to_Date'):
         continue
@@ -1312,7 +1321,7 @@ for _lib in _libs.itervalues():
     Lgm_MJD_to_Date.restype = c_long
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 737
+# /usr/local/include/Lgm/Lgm_CTrans.h: 739
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_mjd_to_ymdh'):
         continue
@@ -1321,7 +1330,7 @@ for _lib in _libs.itervalues():
     Lgm_mjd_to_ymdh.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 739
+# /usr/local/include/Lgm/Lgm_CTrans.h: 741
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_hour24'):
         continue
@@ -1330,7 +1339,7 @@ for _lib in _libs.itervalues():
     Lgm_hour24.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 740
+# /usr/local/include/Lgm/Lgm_CTrans.h: 742
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_kepler'):
         continue
@@ -1339,7 +1348,7 @@ for _lib in _libs.itervalues():
     Lgm_kepler.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 741
+# /usr/local/include/Lgm/Lgm_CTrans.h: 743
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Coord_Transforms'):
         continue
@@ -1348,7 +1357,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Coord_Transforms.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 742
+# /usr/local/include/Lgm/Lgm_CTrans.h: 744
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Convert_Coords'):
         continue
@@ -1357,7 +1366,7 @@ for _lib in _libs.itervalues():
     Lgm_Convert_Coords.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 743
+# /usr/local/include/Lgm/Lgm_CTrans.h: 745
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_IsValidDate'):
         continue
@@ -1366,7 +1375,7 @@ for _lib in _libs.itervalues():
     Lgm_IsValidDate.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 744
+# /usr/local/include/Lgm/Lgm_CTrans.h: 746
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Doy'):
         continue
@@ -1375,7 +1384,7 @@ for _lib in _libs.itervalues():
     Lgm_Doy.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 745
+# /usr/local/include/Lgm/Lgm_CTrans.h: 747
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UT_to_hmsms'):
         continue
@@ -1384,7 +1393,7 @@ for _lib in _libs.itervalues():
     Lgm_UT_to_hmsms.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 746
+# /usr/local/include/Lgm/Lgm_CTrans.h: 748
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UT_to_HMS'):
         continue
@@ -1393,7 +1402,7 @@ for _lib in _libs.itervalues():
     Lgm_UT_to_HMS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 747
+# /usr/local/include/Lgm/Lgm_CTrans.h: 749
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UT_to_HMSd'):
         continue
@@ -1402,7 +1411,7 @@ for _lib in _libs.itervalues():
     Lgm_UT_to_HMSd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 748
+# /usr/local/include/Lgm/Lgm_CTrans.h: 750
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_D_to_DMS'):
         continue
@@ -1411,7 +1420,7 @@ for _lib in _libs.itervalues():
     Lgm_D_to_DMS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 749
+# /usr/local/include/Lgm/Lgm_CTrans.h: 751
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_D_to_DMSd'):
         continue
@@ -1420,7 +1429,7 @@ for _lib in _libs.itervalues():
     Lgm_D_to_DMSd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 750
+# /usr/local/include/Lgm/Lgm_CTrans.h: 752
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_HMS'):
         continue
@@ -1429,7 +1438,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_HMS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 751
+# /usr/local/include/Lgm/Lgm_CTrans.h: 753
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_HMSd'):
         continue
@@ -1438,7 +1447,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_HMSd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 752
+# /usr/local/include/Lgm/Lgm_CTrans.h: 754
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_HMSdp'):
         continue
@@ -1447,7 +1456,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_HMSdp.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 753
+# /usr/local/include/Lgm/Lgm_CTrans.h: 755
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_DMS'):
         continue
@@ -1456,7 +1465,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_DMS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 754
+# /usr/local/include/Lgm/Lgm_CTrans.h: 756
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_DMSd'):
         continue
@@ -1465,7 +1474,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_DMSd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 755
+# /usr/local/include/Lgm/Lgm_CTrans.h: 757
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GetCurrentJD'):
         continue
@@ -1474,7 +1483,7 @@ for _lib in _libs.itervalues():
     Lgm_GetCurrentJD.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 756
+# /usr/local/include/Lgm/Lgm_CTrans.h: 758
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GetCurrentMJD'):
         continue
@@ -1483,7 +1492,7 @@ for _lib in _libs.itervalues():
     Lgm_GetCurrentMJD.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 757
+# /usr/local/include/Lgm/Lgm_CTrans.h: 759
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_SunPosition'):
         continue
@@ -1492,7 +1501,7 @@ for _lib in _libs.itervalues():
     Lgm_SunPosition.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 758
+# /usr/local/include/Lgm/Lgm_CTrans.h: 760
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GLATLON_TO_CDMLATLONMLT'):
         continue
@@ -1501,7 +1510,7 @@ for _lib in _libs.itervalues():
     Lgm_GLATLON_TO_CDMLATLONMLT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 759
+# /usr/local/include/Lgm/Lgm_CTrans.h: 761
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GLATLON_TO_EDMLATLONMLT'):
         continue
@@ -1510,7 +1519,7 @@ for _lib in _libs.itervalues():
     Lgm_GLATLON_TO_EDMLATLONMLT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 760
+# /usr/local/include/Lgm/Lgm_CTrans.h: 762
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_CDMAG_to_R_MLAT_MLON_MLT'):
         continue
@@ -1519,7 +1528,7 @@ for _lib in _libs.itervalues():
     Lgm_CDMAG_to_R_MLAT_MLON_MLT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 761
+# /usr/local/include/Lgm/Lgm_CTrans.h: 763
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_R_MLAT_MLT_to_CDMAG'):
         continue
@@ -1528,7 +1537,7 @@ for _lib in _libs.itervalues():
     Lgm_R_MLAT_MLT_to_CDMAG.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 762
+# /usr/local/include/Lgm/Lgm_CTrans.h: 764
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_EDMAG_to_R_MLAT_MLON_MLT'):
         continue
@@ -1537,7 +1546,7 @@ for _lib in _libs.itervalues():
     Lgm_EDMAG_to_R_MLAT_MLON_MLT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 763
+# /usr/local/include/Lgm/Lgm_CTrans.h: 765
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_R_MLAT_MLT_to_EDMAG'):
         continue
@@ -1546,7 +1555,7 @@ for _lib in _libs.itervalues():
     Lgm_R_MLAT_MLT_to_EDMAG.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 764
+# /usr/local/include/Lgm/Lgm_CTrans.h: 766
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_WGS84_to_GEOD'):
         continue
@@ -1555,7 +1564,7 @@ for _lib in _libs.itervalues():
     Lgm_WGS84_to_GEOD.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 765
+# /usr/local/include/Lgm/Lgm_CTrans.h: 767
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_WGS84_to_GeodHeight'):
         continue
@@ -1564,7 +1573,7 @@ for _lib in _libs.itervalues():
     Lgm_WGS84_to_GeodHeight.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 766
+# /usr/local/include/Lgm/Lgm_CTrans.h: 768
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GEOD_to_WGS84'):
         continue
@@ -1573,7 +1582,7 @@ for _lib in _libs.itervalues():
     Lgm_GEOD_to_WGS84.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 767
+# /usr/local/include/Lgm/Lgm_CTrans.h: 769
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Nutation'):
         continue
@@ -1582,7 +1591,7 @@ for _lib in _libs.itervalues():
     Lgm_Nutation.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 768
+# /usr/local/include/Lgm/Lgm_CTrans.h: 770
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'IsoTimeStringToDateTime'):
         continue
@@ -1591,7 +1600,7 @@ for _lib in _libs.itervalues():
     IsoTimeStringToDateTime.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 769
+# /usr/local/include/Lgm/Lgm_CTrans.h: 771
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'MonthStrToNum'):
         continue
@@ -1600,7 +1609,7 @@ for _lib in _libs.itervalues():
     MonthStrToNum.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 770
+# /usr/local/include/Lgm/Lgm_CTrans.h: 772
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_StrToLower'):
         continue
@@ -1613,7 +1622,7 @@ for _lib in _libs.itervalues():
         Lgm_StrToLower.errcheck = ReturnString
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 771
+# /usr/local/include/Lgm/Lgm_CTrans.h: 773
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_StrToUpper'):
         continue
@@ -1626,7 +1635,7 @@ for _lib in _libs.itervalues():
         Lgm_StrToUpper.errcheck = ReturnString
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 776
+# /usr/local/include/Lgm/Lgm_CTrans.h: 778
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DateTime_Create'):
         continue
@@ -1635,7 +1644,7 @@ for _lib in _libs.itervalues():
     Lgm_DateTime_Create.restype = POINTER(Lgm_DateTime)
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 777
+# /usr/local/include/Lgm/Lgm_CTrans.h: 779
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DateTime_Destroy'):
         continue
@@ -1644,7 +1653,7 @@ for _lib in _libs.itervalues():
     Lgm_DateTime_Destroy.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 778
+# /usr/local/include/Lgm/Lgm_CTrans.h: 780
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Make_UTC'):
         continue
@@ -1653,7 +1662,7 @@ for _lib in _libs.itervalues():
     Lgm_Make_UTC.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 779
+# /usr/local/include/Lgm/Lgm_CTrans.h: 781
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_LoadLeapSeconds'):
         continue
@@ -1662,7 +1671,7 @@ for _lib in _libs.itervalues():
     Lgm_LoadLeapSeconds.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 780
+# /usr/local/include/Lgm/Lgm_CTrans.h: 782
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GetLeapSeconds'):
         continue
@@ -1671,7 +1680,7 @@ for _lib in _libs.itervalues():
     Lgm_GetLeapSeconds.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 781
+# /usr/local/include/Lgm/Lgm_CTrans.h: 783
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_IsLeapSecondDay'):
         continue
@@ -1680,7 +1689,7 @@ for _lib in _libs.itervalues():
     Lgm_IsLeapSecondDay.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 782
+# /usr/local/include/Lgm/Lgm_CTrans.h: 784
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UTC_to_TAI'):
         continue
@@ -1689,7 +1698,7 @@ for _lib in _libs.itervalues():
     Lgm_UTC_to_TAI.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 783
+# /usr/local/include/Lgm/Lgm_CTrans.h: 785
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TAI_to_UTC'):
         continue
@@ -1698,7 +1707,7 @@ for _lib in _libs.itervalues():
     Lgm_TAI_to_UTC.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 784
+# /usr/local/include/Lgm/Lgm_CTrans.h: 786
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TT_to_TAI'):
         continue
@@ -1707,7 +1716,7 @@ for _lib in _libs.itervalues():
     Lgm_TT_to_TAI.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 785
+# /usr/local/include/Lgm/Lgm_CTrans.h: 787
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TAI_to_TT'):
         continue
@@ -1716,7 +1725,7 @@ for _lib in _libs.itervalues():
     Lgm_TAI_to_TT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 786
+# /usr/local/include/Lgm/Lgm_CTrans.h: 788
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TT_to_TDB'):
         continue
@@ -1725,7 +1734,7 @@ for _lib in _libs.itervalues():
     Lgm_TT_to_TDB.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 787
+# /usr/local/include/Lgm/Lgm_CTrans.h: 789
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TDB_to_TT'):
         continue
@@ -1734,7 +1743,7 @@ for _lib in _libs.itervalues():
     Lgm_TDB_to_TT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 788
+# /usr/local/include/Lgm/Lgm_CTrans.h: 790
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UTC_to_TT'):
         continue
@@ -1743,7 +1752,7 @@ for _lib in _libs.itervalues():
     Lgm_UTC_to_TT.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 789
+# /usr/local/include/Lgm/Lgm_CTrans.h: 791
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TT_to_UTC'):
         continue
@@ -1752,7 +1761,7 @@ for _lib in _libs.itervalues():
     Lgm_TT_to_UTC.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 790
+# /usr/local/include/Lgm/Lgm_CTrans.h: 792
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TAI_to_GPS'):
         continue
@@ -1761,7 +1770,7 @@ for _lib in _libs.itervalues():
     Lgm_TAI_to_GPS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 791
+# /usr/local/include/Lgm/Lgm_CTrans.h: 793
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GPS_to_TAI'):
         continue
@@ -1770,7 +1779,7 @@ for _lib in _libs.itervalues():
     Lgm_GPS_to_TAI.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 792
+# /usr/local/include/Lgm/Lgm_CTrans.h: 794
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UTC_to_GPS'):
         continue
@@ -1779,7 +1788,7 @@ for _lib in _libs.itervalues():
     Lgm_UTC_to_GPS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 793
+# /usr/local/include/Lgm/Lgm_CTrans.h: 795
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GPS_to_UTC'):
         continue
@@ -1788,7 +1797,7 @@ for _lib in _libs.itervalues():
     Lgm_GPS_to_UTC.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 794
+# /usr/local/include/Lgm/Lgm_CTrans.h: 796
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_DateTime'):
         continue
@@ -1797,7 +1806,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_DateTime.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 795
+# /usr/local/include/Lgm/Lgm_CTrans.h: 797
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DateTimeToString'):
         continue
@@ -1806,7 +1815,7 @@ for _lib in _libs.itervalues():
     Lgm_DateTimeToString.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 796
+# /usr/local/include/Lgm/Lgm_CTrans.h: 798
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Print_SimpleTime'):
         continue
@@ -1815,7 +1824,7 @@ for _lib in _libs.itervalues():
     Lgm_Print_SimpleTime.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 798
+# /usr/local/include/Lgm/Lgm_CTrans.h: 800
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DayOfWeek'):
         continue
@@ -1824,7 +1833,7 @@ for _lib in _libs.itervalues():
     Lgm_DayOfWeek.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 799
+# /usr/local/include/Lgm/Lgm_CTrans.h: 801
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_JDNofWeek1'):
         continue
@@ -1833,7 +1842,7 @@ for _lib in _libs.itervalues():
     Lgm_JDNofWeek1.restype = c_long
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 800
+# /usr/local/include/Lgm/Lgm_CTrans.h: 802
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MaxWeekNumber'):
         continue
@@ -1842,7 +1851,7 @@ for _lib in _libs.itervalues():
     Lgm_MaxWeekNumber.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 801
+# /usr/local/include/Lgm/Lgm_CTrans.h: 803
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_ISO_WeekNumber'):
         continue
@@ -1851,7 +1860,7 @@ for _lib in _libs.itervalues():
     Lgm_ISO_WeekNumber.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 802
+# /usr/local/include/Lgm/Lgm_CTrans.h: 804
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_ISO_YearWeekDow_to_Date'):
         continue
@@ -1860,7 +1869,7 @@ for _lib in _libs.itervalues():
     Lgm_ISO_YearWeekDow_to_Date.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 803
+# /usr/local/include/Lgm/Lgm_CTrans.h: 805
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_RemapTime'):
         continue
@@ -1869,7 +1878,7 @@ for _lib in _libs.itervalues():
     Lgm_RemapTime.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 805
+# /usr/local/include/Lgm/Lgm_CTrans.h: 807
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GPS_to_GpsSeconds'):
         continue
@@ -1878,7 +1887,7 @@ for _lib in _libs.itervalues():
     Lgm_GPS_to_GpsSeconds.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 806
+# /usr/local/include/Lgm/Lgm_CTrans.h: 808
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GpsSeconds_to_GPS'):
         continue
@@ -1887,7 +1896,7 @@ for _lib in _libs.itervalues():
     Lgm_GpsSeconds_to_GPS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 807
+# /usr/local/include/Lgm/Lgm_CTrans.h: 809
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GpsSeconds_to_UTC'):
         continue
@@ -1896,7 +1905,7 @@ for _lib in _libs.itervalues():
     Lgm_GpsSeconds_to_UTC.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 808
+# /usr/local/include/Lgm/Lgm_CTrans.h: 810
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UTC_to_GpsSeconds'):
         continue
@@ -1905,7 +1914,7 @@ for _lib in _libs.itervalues():
     Lgm_UTC_to_GpsSeconds.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 810
+# /usr/local/include/Lgm/Lgm_CTrans.h: 812
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TAI_to_TaiSeconds'):
         continue
@@ -1914,7 +1923,7 @@ for _lib in _libs.itervalues():
     Lgm_TAI_to_TaiSeconds.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 811
+# /usr/local/include/Lgm/Lgm_CTrans.h: 813
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TaiSeconds_to_GPS'):
         continue
@@ -1923,7 +1932,7 @@ for _lib in _libs.itervalues():
     Lgm_TaiSeconds_to_GPS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 812
+# /usr/local/include/Lgm/Lgm_CTrans.h: 814
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TaiSeconds_to_UTC'):
         continue
@@ -1932,7 +1941,7 @@ for _lib in _libs.itervalues():
     Lgm_TaiSeconds_to_UTC.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 813
+# /usr/local/include/Lgm/Lgm_CTrans.h: 815
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_UTC_to_TaiSeconds'):
         continue
@@ -1941,7 +1950,7 @@ for _lib in _libs.itervalues():
     Lgm_UTC_to_TaiSeconds.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 816
+# /usr/local/include/Lgm/Lgm_CTrans.h: 818
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'TAISecondsSinceJ2000'):
         continue
@@ -1950,7 +1959,7 @@ for _lib in _libs.itervalues():
     TAISecondsSinceJ2000.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 817
+# /usr/local/include/Lgm/Lgm_CTrans.h: 819
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'UTCDaysSinceJ2000'):
         continue
@@ -1959,7 +1968,7 @@ for _lib in _libs.itervalues():
     UTCDaysSinceJ2000.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 819
+# /usr/local/include/Lgm/Lgm_CTrans.h: 821
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TDBSecSinceJ2000'):
         continue
@@ -1968,7 +1977,7 @@ for _lib in _libs.itervalues():
     Lgm_TDBSecSinceJ2000.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 838
+# /usr/local/include/Lgm/Lgm_CTrans.h: 840
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_igrf_ctrans'):
         continue
@@ -1977,7 +1986,7 @@ for _lib in _libs.itervalues():
     Lgm_B_igrf_ctrans.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 839
+# /usr/local/include/Lgm/Lgm_CTrans.h: 841
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_cdip_ctrans'):
         continue
@@ -1986,7 +1995,7 @@ for _lib in _libs.itervalues():
     Lgm_B_cdip_ctrans.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 840
+# /usr/local/include/Lgm/Lgm_CTrans.h: 842
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_edip_ctrans'):
         continue
@@ -1995,7 +2004,7 @@ for _lib in _libs.itervalues():
     Lgm_B_edip_ctrans.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 841
+# /usr/local/include/Lgm/Lgm_CTrans.h: 843
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_JensenCain1960_ctrans'):
         continue
@@ -2004,7 +2013,7 @@ for _lib in _libs.itervalues():
     Lgm_B_JensenCain1960_ctrans.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 847
+# /usr/local/include/Lgm/Lgm_CTrans.h: 849
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Factorial'):
         continue
@@ -2013,7 +2022,7 @@ for _lib in _libs.itervalues():
     Lgm_Factorial.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 848
+# /usr/local/include/Lgm/Lgm_CTrans.h: 850
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitIGRF'):
         continue
@@ -2022,7 +2031,7 @@ for _lib in _libs.itervalues():
     Lgm_InitIGRF.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 849
+# /usr/local/include/Lgm/Lgm_CTrans.h: 851
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitPnm'):
         continue
@@ -2031,7 +2040,7 @@ for _lib in _libs.itervalues():
     Lgm_InitPnm.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 850
+# /usr/local/include/Lgm/Lgm_CTrans.h: 852
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitTrigmp'):
         continue
@@ -2040,7 +2049,7 @@ for _lib in _libs.itervalues():
     Lgm_InitTrigmp.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 851
+# /usr/local/include/Lgm/Lgm_CTrans.h: 853
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_PolFunInt'):
         continue
@@ -2049,7 +2058,7 @@ for _lib in _libs.itervalues():
     Lgm_PolFunInt.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 852
+# /usr/local/include/Lgm/Lgm_CTrans.h: 854
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_RatFunInt'):
         continue
@@ -2058,7 +2067,7 @@ for _lib in _libs.itervalues():
     Lgm_RatFunInt.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 853
+# /usr/local/include/Lgm/Lgm_CTrans.h: 855
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_IGRF'):
         continue
@@ -2067,7 +2076,7 @@ for _lib in _libs.itervalues():
     Lgm_IGRF.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 854
+# /usr/local/include/Lgm/Lgm_CTrans.h: 856
 for _lib in _libs.itervalues():
     if not hasattr(_lib, '_Lgm_IGRF'):
         continue
@@ -2076,7 +2085,7 @@ for _lib in _libs.itervalues():
     _Lgm_IGRF.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 855
+# /usr/local/include/Lgm/Lgm_CTrans.h: 857
 for _lib in _libs.itervalues():
     if not hasattr(_lib, '_Lgm_IGRF2'):
         continue
@@ -2085,7 +2094,7 @@ for _lib in _libs.itervalues():
     _Lgm_IGRF2.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 856
+# /usr/local/include/Lgm/Lgm_CTrans.h: 858
 for _lib in _libs.itervalues():
     if not hasattr(_lib, '_Lgm_IGRF3'):
         continue
@@ -2094,7 +2103,7 @@ for _lib in _libs.itervalues():
     _Lgm_IGRF3.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 857
+# /usr/local/include/Lgm/Lgm_CTrans.h: 859
 for _lib in _libs.itervalues():
     if not hasattr(_lib, '_Lgm_IGRF4'):
         continue
@@ -2103,7 +2112,7 @@ for _lib in _libs.itervalues():
     _Lgm_IGRF4.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 859
+# /usr/local/include/Lgm/Lgm_CTrans.h: 861
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitdPnm'):
         continue
@@ -2112,7 +2121,7 @@ for _lib in _libs.itervalues():
     Lgm_InitdPnm.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 860
+# /usr/local/include/Lgm/Lgm_CTrans.h: 862
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitSqrtFuncs'):
         continue
@@ -2121,7 +2130,7 @@ for _lib in _libs.itervalues():
     Lgm_InitSqrtFuncs.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 861
+# /usr/local/include/Lgm/Lgm_CTrans.h: 863
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitK'):
         continue
@@ -2130,7 +2139,7 @@ for _lib in _libs.itervalues():
     Lgm_InitK.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 862
+# /usr/local/include/Lgm/Lgm_CTrans.h: 864
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitS'):
         continue
@@ -2139,7 +2148,7 @@ for _lib in _libs.itervalues():
     Lgm_InitS.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 868
+# /usr/local/include/Lgm/Lgm_CTrans.h: 870
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitSphHarm'):
         continue
@@ -2148,7 +2157,7 @@ for _lib in _libs.itervalues():
     Lgm_InitSphHarm.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 869
+# /usr/local/include/Lgm/Lgm_CTrans.h: 871
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_JensenCain1960'):
         continue
@@ -2157,7 +2166,7 @@ for _lib in _libs.itervalues():
     Lgm_JensenCain1960.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_CTrans.h: 870
+# /usr/local/include/Lgm/Lgm_CTrans.h: 872
 for _lib in _libs.itervalues():
     if not hasattr(_lib, '_Lgm_JensenCain1960'):
         continue
@@ -4443,7 +4452,7 @@ for _lib in _libs.itervalues():
     AngVelInv.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 class struct_Lgm_MagEphemInfo(Structure):
     pass
 
@@ -4596,9 +4605,9 @@ struct_Lgm_MagEphemInfo._fields_ = [
     ('Lstar', POINTER(c_double)),
 ]
 
-Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 148
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 143
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_1'):
         continue
@@ -4607,7 +4616,7 @@ for _lib in _libs.itervalues():
     j_to_fp_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 149
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 144
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_2'):
         continue
@@ -4616,7 +4625,7 @@ for _lib in _libs.itervalues():
     j_to_fp_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 150
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 145
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_mu_1'):
         continue
@@ -4625,7 +4634,7 @@ for _lib in _libs.itervalues():
     Ek_to_mu_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 151
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 146
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_mu_2'):
         continue
@@ -4634,7 +4643,7 @@ for _lib in _libs.itervalues():
     Ek_to_mu_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 152
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 147
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_v'):
         continue
@@ -4643,7 +4652,7 @@ for _lib in _libs.itervalues():
     Ek_to_v.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 153
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitMagEphemInfo'):
         continue
@@ -4652,7 +4661,7 @@ for _lib in _libs.itervalues():
     Lgm_InitMagEphemInfo.restype = POINTER(Lgm_MagEphemInfo)
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 159
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 154
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitMagEphemInfoDefaults'):
         continue
@@ -4661,7 +4670,7 @@ for _lib in _libs.itervalues():
     Lgm_InitMagEphemInfoDefaults.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 161
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 156
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_FreeMagEphemInfo'):
         continue
@@ -4670,7 +4679,7 @@ for _lib in _libs.itervalues():
     Lgm_FreeMagEphemInfo.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 163
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'ReadMagEphemInfoStruct'):
         continue
@@ -4679,7 +4688,7 @@ for _lib in _libs.itervalues():
     ReadMagEphemInfoStruct.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 164
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 159
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'WriteMagEphemInfoStruct'):
         continue
@@ -7787,7 +7796,7 @@ Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 1
 
 Lgm_LstarInfo = struct_Lgm_LstarInfo # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
 
-Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 142
+Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 

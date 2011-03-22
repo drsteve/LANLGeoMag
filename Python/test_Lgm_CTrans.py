@@ -63,9 +63,9 @@ class Lgm_CTransTests(unittest.TestCase):
         Lgm_Set_Coord_Transforms(Date, UTC, ctypes.pointer(c))
         Lgm_Convert_Coords(ctypes.pointer(Ugsm), ctypes.pointer(Usm),
                            GSM_TO_SM, ctypes.pointer(c))
-        self.assertAlmostEqual(-5.5352494753370127, Usm.x)
-        self.assertAlmostEqual( 3.3999999999999995, Usm.y)
-        self.assertAlmostEqual(-4.2674363786448328, Usm.z)
+        self.assertAlmostEqual(-5.5352494753370127, Usm.x, places=5)
+        self.assertAlmostEqual( 3.3999999999999995, Usm.y, places=5)
+        self.assertAlmostEqual(-4.2674363786448328, Usm.z, places=5)
         Lgm_Convert_Coords(ctypes.pointer(Usm), ctypes.pointer(Ugsm),
                            SM_TO_GSM, ctypes.pointer(c))
         self.assertAlmostEqual(-6.6, Ugsm.x)

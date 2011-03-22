@@ -16,7 +16,7 @@
 
 void Lgm_free_ctrans( Lgm_CTrans *c ) {
 
-    
+
 
     free( c->l.LeapSecondDates );
     free( c->l.LeapSecondJDs );
@@ -27,18 +27,11 @@ void Lgm_free_ctrans( Lgm_CTrans *c ) {
 }
 
 
-Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
-
-    Lgm_CTrans  	*c;
-   
-    c = (Lgm_CTrans *) calloc (1, sizeof(*c));
-    
+void Lgm_ctransDefaults(Lgm_CTrans *c, int Verbose) {
     /*
-     * Load Leap Seconds Stuff 
+     * Load Leap Seconds Stuff
      */
     Lgm_LoadLeapSeconds( c );
-
-
 
     c->Verbose     = Verbose;
 
@@ -52,12 +45,22 @@ Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
      *  over-ridden later with actual values.  This allows users to use the
      *  less accurate defaults if EOP data is unavailable or not
      *  needed/desired.
-     */  
+     */
     c->DUT1  = 0.0; // seconds
     c->xp    = 0.0; // radians
     c->yp    = 0.0; // radians
     c->ddPsi = 0.0; // radians
     c->ddEps = 0.0; // radians
+
+}
+
+
+Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
+
+    Lgm_CTrans  	*c;
+
+    c = (Lgm_CTrans *) calloc (1, sizeof(*c));
+    Lgm_ctransDefaults(c, Verbose);
 
     return c;
 
@@ -94,7 +97,7 @@ Lgm_CTrans *Lgm_CopyCTrans( Lgm_CTrans *s ) {
     memcpy( t, s, sizeof(Lgm_CTrans) );
 
     /*
-     *  Now, copy the LeapSeconds stuff properly (they were dyn. allocated). 
+     *  Now, copy the LeapSeconds stuff properly (they were dyn. allocated).
      *  (memcpy's args are (dest, src, size))
      */
     n = t->l.nLeapSecondDates = s->l.nLeapSecondDates;
@@ -181,7 +184,7 @@ long int Lgm_JD_to_Date(double jd, int *ny, int *nm, int *nd, double *UT) {
     double      F;
 
     jd += 0.5;
-    
+
     I = (int)jd;
     F = jd - (double)I;
 
@@ -200,7 +203,7 @@ long int Lgm_JD_to_Date(double jd, int *ny, int *nm, int *nd, double *UT) {
     G = (int)( ((double)C-(double)E)/30.6001 );
 
     /*
-     *  Day of month 
+     *  Day of month
      */
     *nd = C - E - (int)( 30.6001*G );
     *UT = 24.0*F;
@@ -309,7 +312,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->UTC.fYear = (double)c->UTC.Year + ((double)c->UTC.Doy - 1.0 + c->UTC.Time/24.0)/(365.0 + (double)Lgm_LeapYear(c->UTC.Year));
 
     // set DAT
-    c->DAT        = Lgm_GetLeapSeconds( c->UTC.JD, c ); 
+    c->DAT        = Lgm_GetLeapSeconds( c->UTC.JD, c );
 
 
 
@@ -320,13 +323,13 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->UT1      = c->UTC; // initially make DateTime structures the same
     c->UT1.Time = c->UTC.Time + c->DUT1/3600.0;
     c->UT1.JD   = Lgm_JD( c->UT1.Year, c->UT1.Month, c->UT1.Day, c->UT1.Time, LGM_TIME_SYS_UT1, c );
-    c->UT1.Date = Lgm_JD_to_Date( c->UT1.JD, &c->UT1.Year, &c->UT1.Month, &c->UT1.Day, &Time ); 
+    c->UT1.Date = Lgm_JD_to_Date( c->UT1.JD, &c->UT1.Year, &c->UT1.Month, &c->UT1.Day, &Time );
     c->UT1.Time = Lgm_hour24( c->UT1.Time ); // Keep the time we had rather than gettingm it back from Lgm_JD_to_Date(). This limits roundoff error
     c->UT1.T    = (c->UT1.JD - 2451545.0)/36525.0;
     T_UT1       = c->UT1.T;
     T2_UT1      = T_UT1*T_UT1;
     T3_UT1      = T_UT1*T2_UT1;
-    
+
 
     /*
      * Set TAI values
@@ -337,7 +340,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->TAI.Date = Lgm_JD_to_Date( c->TAI.JD, &c->TAI.Year, &c->TAI.Month, &c->TAI.Day, &Time );
     c->TAI.Time = Lgm_hour24( c->TAI.Time ); // Keep the time we had rather than gettingm it back from Lgm_JD_to_Date(). This limits roundoff error
     c->TAI.T    = (c->TAI.JD - 2451545.0)/36525.0;
-    
+
 
     /*
      * Set TT values
@@ -360,7 +363,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
 
 
-    /* 
+    /*
      *  Compute Greenwich Mean Sidereal Time (gmst)
      *  T0 = number of Julian centuries since 2000 January 1.5 to 0h on the date we are interested in.
      *  T  = number of Julian centuries since 2000 January 1.5 to the UT on the date we are interested in.
@@ -368,8 +371,8 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
      */
     c->gmst = fmod( (67310.54841 + (876600.0*3600.0 + 8640184.812866)*T_UT1  + 0.093104*T2_UT1 - 6.2e-6*T3_UT1)/3600.0, 24.0);
     gmst    = c->gmst*15.0*RadPerDeg; // convert to radians for ease later on
-    
-    
+
+
 
 
 
@@ -380,7 +383,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
      *
      *   Construct Transformation Matrix from MOD to GSE  systems
      *
-     * 
+     *
      *   First compute:
      *          mean ecliptic longitude of sun at epoch TU (varep)
      *          elciptic longitude of perigee at epoch TU (varpi)
@@ -427,14 +430,14 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
     c->lambda_sun = lambnew;
 
-	
+
     /*
      *  Compute distance from earth to the sun
      */
     r0 = 1.495985e8;  /* in km */
     earth_sun_distance  = r0*(1-eccen*eccen)/(1.0 + eccen*cos(nu))/Re;
     c->earth_sun_dist = earth_sun_distance;
-	
+
 
     /*
      * Compute Right Ascension and Declination of the Sun
@@ -460,12 +463,12 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     	c->RA_sun_ha  = RA;  // high accuracy RA
     	c->DEC_sun_ha = DEC; // high accuracy DEC
     }
-    
+
 
 
 
     /*
-     * Compute Precession angles to go from J2000 Epoch (we call this GEI here) to Mean Of Date (MOD) system.  
+     * Compute Precession angles to go from J2000 Epoch (we call this GEI here) to Mean Of Date (MOD) system.
      * Mean of Date has corrections for precession, but not nutation.
      * (e.g. see "Reduction for Precession -- rigorous formulae" in Astronomical Almanac 2004 page B18)
      */
@@ -504,13 +507,13 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     Lgm_Nutation( c->TT.T, c->nNutationTerms, &(c->dPsi), &(c->dEps) ); // does 106-term nutation series
     c->dPsi += c->ddPsi;    // apply EOP corrections (arcsec)
     c->dEps += c->ddEps;    // apply EOP corrections (arcsec)
-    // Equation of the equinoxes EQ_Eq 
+    // Equation of the equinoxes EQ_Eq
     c->EQ_Eq = c->dPsi*cos(epsilon) + 0.00264*sin( c->OmegaMoon*RadPerDeg ) + 0.000063*sin( 2.0*c->OmegaMoon*RadPerDeg ); // arcsec
     // true obliquity of ecliptic
     c->epsilon_true = c->dEps + c->epsilon;  // arcsec
 //printf("c->epsilon_true/3600.0 = %15.10lf\n", c->epsilon_true/3600.0);
 //printf("c->dEps/3600.0 + c->epsilon/3600.0 = %15.10lf\n", c->dEps/3600.0 + c->epsilon/3600.0);
-    tmp = c->dPsi*RadPerArcSec;           sdp = sin( tmp ); cdp = cos( tmp ); 
+    tmp = c->dPsi*RadPerArcSec;           sdp = sin( tmp ); cdp = cos( tmp );
     tmp = c->epsilon*RadPerArcSec;        se  = sin( tmp ); ce  = cos( tmp );
     tmp = c->epsilon_true*RadPerArcSec;   set = sin( tmp ); cet = cos( tmp );
     c->Atod_to_mod[0][0] =  cdp;    c->Atod_to_mod[1][0] = sdp*cet;              c->Atod_to_mod[2][0] = set*sdp;
@@ -521,12 +524,12 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
             c->Amod_to_tod[i][j] = c->Atod_to_mod[j][i];
         }
     }
-    
 
 
 
-    
-    
+
+
+
     /*
      * Set up transformation between PEF and TOD
      * Need to compute True (Aparent?) Sidereal Time GAST
@@ -540,15 +543,15 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->Apef_to_tod[0][0] =  cs; c->Apef_to_tod[1][0] = -sn; c->Apef_to_tod[2][0] = 0.0;
     c->Apef_to_tod[0][1] =  sn; c->Apef_to_tod[1][1] =  cs; c->Apef_to_tod[2][1] = 0.0;
     c->Apef_to_tod[0][2] = 0.0; c->Apef_to_tod[1][2] = 0.0; c->Apef_to_tod[2][2] = 1.0;
-    
-    
+
+
 
 
 
 
     /*
      * Set up transformation between TOD and TEME
-     * Utod = Rz( dPsiCosEps ) Uteme 
+     * Utod = Rz( dPsiCosEps ) Uteme
      *    CHECK THIS. Do we use Full equation of equinoxes???
      *    OR just dPsi*cos( eps )????
      */
@@ -574,7 +577,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
       c->Ateme_to_pef[0][0] =  cs; c->Ateme_to_pef[1][0] =  sn; c->Ateme_to_pef[2][0] = 0.0;
       c->Ateme_to_pef[0][1] = -sn; c->Ateme_to_pef[1][1] =  cs; c->Ateme_to_pef[2][1] = 0.0;
       c->Ateme_to_pef[0][2] = 0.0; c->Ateme_to_pef[1][2] = 0.0; c->Ateme_to_pef[2][2] = 1.0;
-    
+
       c->Apef_to_teme[0][0] =  cs; c->Apef_to_teme[1][0] = -sn; c->Apef_to_teme[2][0] = 0.0;
       c->Apef_to_teme[0][1] =  sn; c->Apef_to_teme[1][1] =  cs; c->Apef_to_teme[2][1] = 0.0;
       c->Apef_to_teme[0][2] = 0.0; c->Apef_to_teme[1][2] = 0.0; c->Apef_to_teme[2][2] = 1.0;
@@ -582,11 +585,11 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
 
 
-    
+
 
     /*
      * Set up transformation between WGS84 and PEF
-     * Uwgs84 = Ry( -xp )Rz( -yp ) Upef 
+     * Uwgs84 = Ry( -xp )Rz( -yp ) Upef
      */
     sxp = sin( c->xp*RadPerArcSec ); cxp = cos( c->xp*RadPerArcSec );
     syp = sin( c->yp*RadPerArcSec ); cyp = cos( c->yp*RadPerArcSec );
@@ -634,22 +637,22 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     Vmoon = 0.6583*sin(2.0*(Lmoon_p*RadPerDeg - lambnew));
     Lmoon_pp = Lmoon_p + Vmoon;
     Nmoon_p = Nmoon - 0.16*sin(M);
-    LambdaMoon = atan2( sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*cos(Imoon*RadPerDeg), 
+    LambdaMoon = atan2( sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*cos(Imoon*RadPerDeg),
 			cos((Lmoon_pp - Nmoon_p)*RadPerDeg) ) + Nmoon_p*RadPerDeg;
     BetaMoon = asin(sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*sin(Imoon*RadPerDeg));
-    RA_Moon  = Lgm_angle360(atan2(sin(LambdaMoon)*cos(epsilon)-tan(BetaMoon)*sin(epsilon), 
+    RA_Moon  = Lgm_angle360(atan2(sin(LambdaMoon)*cos(epsilon)-tan(BetaMoon)*sin(epsilon),
 		cos(LambdaMoon))*DegPerRad);
     DEC_Moon = asin( sin(BetaMoon)*cos(epsilon) + cos(BetaMoon)*sin(epsilon)*sin(LambdaMoon))*DegPerRad;
     c->RA_moon = RA_Moon;
     c->DEC_moon = DEC_Moon;
 
- 
+
     /*
      * Compute Phase of the Moon
      */
     c->MoonPhase = 0.5*(1.0 - cos(Lmoon_pp*RadPerDeg - lambnew));
-  
-    
+
+
     /*
      * Compute Earth-Moon distance
      */
@@ -690,7 +693,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->Agse_to_mod[0][1] = S.y, c->Agse_to_mod[1][1] = Y.y, c->Agse_to_mod[2][1] = K.y;
     c->Agse_to_mod[0][2] = S.z, c->Agse_to_mod[1][2] = Y.z, c->Agse_to_mod[2][2] = K.z;
 
-	
+
 
 
 
@@ -716,12 +719,12 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
 
     /*
-     *   Construct Transformation Matrix from MOD to GSM 
+     *   Construct Transformation Matrix from MOD to GSM
      *
      *   First compute the location of the earths D axis based on IGRF
      *   coefficients. Note: we compute Dhat as thoughj it were sticking out of the north
      *   hemisphere. It really goes out the south, but its less confusing this way...
-     *   
+     *
      */
     c->CD_gcolat = gclat*DegPerRad;
     c->CD_glon   = glon*DegPerRad;
@@ -734,10 +737,10 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     Dmod.y = sin(gmst)*D.x + cos(gmst)*D.y;
     Dmod.z = D.z;
 
-    // Compute Ygsm axis in MOD system 
+    // Compute Ygsm axis in MOD system
     Lgm_CrossProduct(&Dmod, &S, &Y);
 
-    //  Normalize the Y vector 
+    //  Normalize the Y vector
     Lgm_NormalizeVector(&Y);
 
     //  Compute Zgsm axis in MOD system
@@ -746,7 +749,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->Amod_to_gsm[0][0] = S.x, c->Amod_to_gsm[1][0] = S.y, c->Amod_to_gsm[2][0] = S.z;
     c->Amod_to_gsm[0][1] = Y.x, c->Amod_to_gsm[1][1] = Y.y, c->Amod_to_gsm[2][1] = Y.z;
     c->Amod_to_gsm[0][2] = Z.x, c->Amod_to_gsm[1][2] = Z.y, c->Amod_to_gsm[2][2] = Z.z;
-	
+
     c->Agsm_to_mod[0][0] = S.x, c->Agsm_to_mod[1][0] = Y.x, c->Agsm_to_mod[2][0] = Z.x;
     c->Agsm_to_mod[0][1] = S.y, c->Agsm_to_mod[1][1] = Y.y, c->Agsm_to_mod[2][1] = Z.y;
     c->Agsm_to_mod[0][2] = S.z, c->Agsm_to_mod[1][2] = Y.z, c->Agsm_to_mod[2][2] = Z.z;
@@ -765,7 +768,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     Dgsm.x = c->Amod_to_gsm[0][0]*Dmod.x + c->Amod_to_gsm[1][0]*Dmod.y + c->Amod_to_gsm[2][0]*Dmod.z;
     Dgsm.y = c->Amod_to_gsm[0][1]*Dmod.x + c->Amod_to_gsm[1][1]*Dmod.y + c->Amod_to_gsm[2][1]*Dmod.z;
     Dgsm.z = c->Amod_to_gsm[0][2]*Dmod.x + c->Amod_to_gsm[1][2]*Dmod.y + c->Amod_to_gsm[2][2]*Dmod.z;
-		
+
     spsi       = sqrt( Dgsm.x*Dgsm.x + Dgsm.y*Dgsm.y );
     psi        = asin( spsi );
     psi       *= ( Dgsm.x < 0.0 ) ? -1.0 : 1.0;
@@ -782,7 +785,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     c->Agsm_to_sm[0][1] = 0.0,        c->Agsm_to_sm[1][1] = 1.0, c->Agsm_to_sm[2][1] =  0.0;
     c->Agsm_to_sm[0][2] = c->sin_psi, c->Agsm_to_sm[1][2] = 0.0, c->Agsm_to_sm[2][2] =  c->cos_psi;
     Lgm_Transpose( c->Agsm_to_sm, c->Asm_to_gsm );
-	
+
 
     /*
      *  Now do WGS84 (i.e. GEO) <-> CDMAG
@@ -816,10 +819,10 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 /*
     for (j=0; j<3; ++j){
         for (i=0; i<3; ++i){
-            c->Agsm_to_gse[i][j] = c->Amod_to_gse[0][j]*c->Amod_to_gsm[0][i] 
+            c->Agsm_to_gse[i][j] = c->Amod_to_gse[0][j]*c->Amod_to_gsm[0][i]
                                     + c->Amod_to_gse[1][j]*c->Amod_to_gsm[1][i]
                                     + c->Amod_to_gse[2][j]*c->Amod_to_gsm[2][i];
-            c->Agse_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Amod_to_gse[0][i] 
+            c->Agse_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Amod_to_gse[0][i]
                                     + c->Amod_to_gsm[1][j]*c->Amod_to_gse[1][i]
                                     + c->Amod_to_gsm[2][j]*c->Amod_to_gse[2][i];
         }
@@ -836,10 +839,10 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 /*
     for (j=0; j<3; ++j){
         for (i=0; i<3; ++i){
-            c->Agsm_to_wgs84[i][j] = c->Amod_to_wgs84[0][j]*c->Agsm_to_mod[i][0] 
+            c->Agsm_to_wgs84[i][j] = c->Amod_to_wgs84[0][j]*c->Agsm_to_mod[i][0]
                                     + c->Amod_to_wgs84[1][j]*c->Agsm_to_mod[i][1]
                                     + c->Amod_to_wgs84[2][j]*c->Agsm_to_mod[i][2];
-            c->Awgs84_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Awgs84_to_mod[i][0] 
+            c->Awgs84_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Awgs84_to_mod[i][0]
                                     + c->Amod_to_gsm[1][j]*c->Awgs84_to_mod[i][1]
                                     + c->Amod_to_gsm[2][j]*c->Awgs84_to_mod[i][2];
         }
@@ -849,7 +852,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
 
     /*
-     *  Construct Transformation Matricies between  WGS84 and MOD 
+     *  Construct Transformation Matricies between  WGS84 and MOD
      *  and between WGS84 and GEI
      */
     Lgm_MatTimesMat( c->Apef_to_tod, c->Awgs84_to_pef, Tmp );
@@ -875,7 +878,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
         printf("    TT = TAI+32.184s  = %8ld  %.14lf ( ", c->TT.Date,  c->TT.Time);  Lgm_Print_HMSdp( c->TT.Time,  TRUE, 8 ); printf(" )\n");
         printf("    TDB               = %8ld  %.14lf ( ", c->TDB.Date, c->TDB.Time); Lgm_Print_HMSdp( c->TDB.Time, TRUE, 8 ); printf(" )\n");
 
-        printf("    DUT1 = UT1-UTC    = %.7lf seconds\n", c->DUT1); 
+        printf("    DUT1 = UT1-UTC    = %.7lf seconds\n", c->DUT1);
         printf("    DAT  = TAI-UTC    = %.7lf seconds\n", c->DAT);
         printf("    JD (UTC)          = %.12lf\n", c->UTC.JD);
         printf("    JD (UT1)          = %.12lf\n", c->UT1.JD);
@@ -941,7 +944,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 	printf("\n");
 	printf("High Accuracy Position of Sun:\n");
         printf("    lambda_sun_ha   = %15lf  ( ",  c->lambda_sun_ha*DegPerRad ); Lgm_Print_DMSd( c->lambda_sun_ha*DegPerRad );  printf(" )\n");
-        printf("    r_sun_ha        = %15lf Re\n", c->r_sun_ha );  
+        printf("    r_sun_ha        = %15lf Re\n", c->r_sun_ha );
         printf("    beta_sun_ha     = %14g   ( ",  c->beta_sun_ha*DegPerRad );   Lgm_Print_DMSd( c->beta_sun_ha*DegPerRad );    printf(" )\n");
         printf("    RA_sun  (MOD)   = %15lf  ( ",  c->RA_sun_ha);      Lgm_Print_HMSd( c->RA_sun_ha/15.0 ); printf(" )\n");
         printf("    DEC_sun (MOD)   = %15lf  ( ",  c->DEC_sun_ha);     Lgm_Print_DMSd( c->DEC_sun_ha );     printf(" )\n");
@@ -956,7 +959,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
         DEC_gei = asin( u_gei.z )*DegPerRad;
         printf("    RA_sun  (J2000) = %15lf  ( ",  RA_gei);      Lgm_Print_HMSd( RA_gei/15.0 ); printf(" )\n");
         printf("    DEC_sun (J2000) = %15lf  ( ",  DEC_gei);     Lgm_Print_DMSd( DEC_gei );     printf(" )\n");
-	
+
 
 	printf("\n");
 	printf("Sun vector and Ecliptic Pole in GEI2000:\n");
@@ -988,7 +991,7 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
         printf("    ED_y0             = %lf  Re  (%lf km)\n", c->ED_y0, c->ED_y0*Re);
         printf("    ED_z0             = %lf  Re  (%lf km)\n", c->ED_z0, c->ED_z0*Re);
 
-    
+
 	printf("\n");
 	printf("Transformation Matrices:\n");
         printf("                        [ %15.8lf  %15.8lf  %15.8lf ]\n",   c->Amod_to_gse[0][0], c->Amod_to_gse[1][0], c->Amod_to_gse[2][0]);
@@ -1092,7 +1095,7 @@ void Lgm_Convert_Coords(Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c) {
     int 	    inflag, outflag;
 
     /*
-     *  Figure out what system the input coords are in 
+     *  Figure out what system the input coords are in
      *  and what system the output coords should be in...
      */
     inflag = (int)((float)flag/100.0);
@@ -1220,7 +1223,7 @@ void Lgm_Convert_Coords(Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c) {
             break;
         }
 
-	
+
 }
 
 
@@ -1256,7 +1259,7 @@ void Lgm_WGS84_to_GEOD( Lgm_Vector *uin, double *GeodLat, double *GeodLong, doub
     Lgm_Vector u;
     double  r, r2, z2, F, G, G2, G3, c, s, tt, tt2, P;
     double  Q, ro, U, V, zo;
-    
+
     u = *uin;
     Lgm_ScaleVector( &u, WGS84_A ); // convert to km
 
@@ -1271,14 +1274,14 @@ void Lgm_WGS84_to_GEOD( Lgm_Vector *uin, double *GeodLat, double *GeodLong, doub
     tt = s + 1.0/s + 1.0; tt2 = tt*tt;
     P = F/( 3.0*tt2*G2 );
 
-    Q = sqrt( 1.0 + 2.0*WGS84_E4*P ); 
+    Q = sqrt( 1.0 + 2.0*WGS84_E4*P );
     ro = -(WGS84_E2*P*r)/(1.0+Q) + sqrt( (0.5*WGS84_A2)*(1.0+1.0/Q) - (WGS84_1mE2*P*z2)/(Q*(1.0+Q)) - 0.5*P*r2 );
 
     tt = (r - WGS84_E2*ro); tt2 = tt*tt;
     U   = sqrt( tt2 + z2 );
     V   = sqrt( tt2 + WGS84_1mE2*z2 );
     zo  = (WGS84_B2*u.z)/(WGS84_A*V);
- 
+
     *GeodLat    = DegPerRad*atan( (u.z + WGS84_EP2*zo)/r );  // geodetic latitude
     *GeodLong   =  DegPerRad*atan2( u.y, u.x );              // geodetic longitude (same as GEO)
     *GeodHeight = U*( 1.0 - WGS84_B2/(WGS84_A*V));           // geodetic height (km)
@@ -1290,7 +1293,7 @@ void Lgm_WGS84_to_GeodHeight( Lgm_Vector *uin, double *GeodHeight ) {
     Lgm_Vector u;
     double  r, r2, z2, F, G, G2, G3, c, s, tt, tt2, P;
     double  Q, ro, U, V, zo;
-    
+
     u = *uin;
     Lgm_ScaleVector( &u, WGS84_A ); // convert to km
 
@@ -1305,14 +1308,14 @@ void Lgm_WGS84_to_GeodHeight( Lgm_Vector *uin, double *GeodHeight ) {
     tt = s + 1.0/s + 1.0; tt2 = tt*tt;
     P = F/( 3.0*tt2*G2 );
 
-    Q = sqrt( 1.0 + 2.0*WGS84_E4*P ); 
+    Q = sqrt( 1.0 + 2.0*WGS84_E4*P );
     ro = -(WGS84_E2*P*r)/(1.0+Q) + sqrt( (0.5*WGS84_A2)*(1.0+1.0/Q) - (WGS84_1mE2*P*z2)/(Q*(1.0+Q)) - 0.5*P*r2 );
 
     tt = (r - WGS84_E2*ro); tt2 = tt*tt;
     U   = sqrt( tt2 + z2 );
     V   = sqrt( tt2 + WGS84_1mE2*z2 );
     zo  = (WGS84_B2*u.z)/(WGS84_A*V);
- 
+
     *GeodHeight = U*( 1.0 - WGS84_B2/(WGS84_A*V));           // geodetic height (km)
 }
 
@@ -1320,7 +1323,7 @@ void Lgm_WGS84_to_GeodHeight( Lgm_Vector *uin, double *GeodHeight ) {
 
 /*
  *  These rotuines are included here, just because its trivial
- *  to do it here. 
+ *  to do it here.
  */
 void Lgm_B_igrf_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
 
@@ -1336,10 +1339,10 @@ void Lgm_B_igrf_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     Lgm_Convert_Coords( v, &w, GSM_TO_WGS84, c );
 
 
-    /* 
+    /*
      *  compute GEO (WGS84) geocentric speherical coords. (r, theta, phi)  theta is colat
      */
-    r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z ); 
+    r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z );
     theta = acos( w.z / r );
     phi   = atan2(w.y, w.x);
 
@@ -1386,10 +1389,10 @@ void Lgm_B_JensenCain1960_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     Lgm_Convert_Coords( v, &w, GSM_TO_WGS84, c );
 
 
-    /* 
+    /*
      *  compute GEO (WGS84) geocentric speherical coords. (r, theta, phi)  theta is colat
      */
-    r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z ); 
+    r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z );
     theta = acos( w.z / r );
     phi   = atan2(w.y, w.x);
 
@@ -1435,25 +1438,25 @@ void Lgm_B_cdip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
 
     M = c->M_cd;
 
-    /* 
-     *  compute SM coords from GSM coords 
+    /*
+     *  compute SM coords from GSM coords
      */
     x_sm = v->x*c->cos_psi - v->z*c->sin_psi;
     y_sm = v->y;
     z_sm = v->x*c->sin_psi + v->z*c->cos_psi;
 
 
-    /* 
-     *  convert x_sm, y_sm, and, z_sm to spherical coords. 
+    /*
+     *  convert x_sm, y_sm, and, z_sm to spherical coords.
      */
     rho   = sqrt(x_sm*x_sm + y_sm*y_sm + z_sm*z_sm);
     phi   = atan2(y_sm, x_sm);
     theta = acos(z_sm / rho);
 
 
-    /* 
+    /*
      *  compute centered dipole field in spherical coords
-     *  i.e. (B_rho, B_theta, B_phi) 
+     *  i.e. (B_rho, B_theta, B_phi)
      */
     rho2     = rho*rho;
     rho3     = rho*rho2;
@@ -1466,16 +1469,16 @@ void Lgm_B_cdip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     B_theta  = -1.0*M*st/rho3;
 
 
-    /* 
+    /*
      *   Transform (B_rho, B_theta, B_phi) -> (B_xsm, B_ysm, B_zsm)  (still SM)
      */
     Bsm.x = B_rho*st*cp + B_theta*ct*cp;
     Bsm.y = B_rho*st*sp + B_theta*ct*sp;
     Bsm.z = B_rho*ct    - B_theta*st;
-                                                                                                                                                                             
 
-    /* 
-     *  Transform (B_xsm, B_ysm, B_zsm) -> (B_x, B_y, B_z) i.e. trans. to GSM 
+
+    /*
+     *  Transform (B_xsm, B_ysm, B_zsm) -> (B_x, B_y, B_z) i.e. trans. to GSM
      */
     B->x =  Bsm.x*c->cos_psi + Bsm.z*c->sin_psi;
     B->y =  Bsm.y;
@@ -1497,15 +1500,15 @@ void Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
 
     M = c->M_cd;
 
-    /* 
-     *  compute SM coords from GSM coords 
+    /*
+     *  compute SM coords from GSM coords
      */
     x_sm = v->x*c->cos_psi - v->z*c->sin_psi;
     y_sm = v->y;
     z_sm = v->x*c->sin_psi + v->z*c->cos_psi;
 
 
-    /* 
+    /*
      *  compute ED coords from SM coords  (i.e. offset the dipole)
      */
     x_ed = x_sm - c->ED_x0;
@@ -1513,17 +1516,17 @@ void Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     z_ed = z_sm - c->ED_z0;
 
 
-    /* 
-     *  convert to spherical coords. 
+    /*
+     *  convert to spherical coords.
      */
     rho   = sqrt(x_ed*x_ed + y_ed*y_ed + z_ed*z_ed);
     phi   = atan2(y_ed, x_ed);
     theta = acos(z_ed / rho);
 
 
-    /* 
+    /*
      *  compute centered dipole field in spherical coords
-     *  i.e. (B_rho, B_theta, B_phi) 
+     *  i.e. (B_rho, B_theta, B_phi)
      */
     rho2     = rho*rho;
     rho3     = rho*rho2;
@@ -1536,16 +1539,16 @@ void Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     B_theta  = -1.0*M*st/rho3;
 
 
-    /* 
+    /*
      *   Transform (B_rho, B_theta, B_phi) -> (B_xsm, B_ysm, B_zsm)  (still SM)
      */
     Bsm.x = B_rho*st*cp + B_theta*ct*cp;
     Bsm.y = B_rho*st*sp + B_theta*ct*sp;
     Bsm.z = B_rho*ct    - B_theta*st;
-                                                                                                                                                                             
 
-    /* 
-     *  Transform (B_xsm, B_ysm, B_zsm) -> (B_x, B_y, B_z) i.e. trans. to GSM 
+
+    /*
+     *  Transform (B_xsm, B_ysm, B_zsm) -> (B_x, B_y, B_z) i.e. trans. to GSM
      */
     B->x =  Bsm.x*c->cos_psi + Bsm.z*c->sin_psi;
     B->y =  Bsm.y;
@@ -1720,8 +1723,8 @@ void Lgm_D_to_DMS( double D, int *DD, int *MM, int *SS ) {
         *MM = 0;
         ++(*DD);
     }
-    
-	
+
+
 
 
     *DD *= sgn;   // put sign back onto whole degrees part only
@@ -1848,7 +1851,7 @@ void Lgm_Print_HMSd( double d ){
     if (MM==60)  { MM=0; ++HH; }
     if (sgn<0) printf("-%02d\u02b0 %02d\u1d50 %02d\u02e2.%03d", HH, MM, SS, MS);
     else       printf(" %02d\u02b0 %02d\u1d50 %02d\u02e2.%03d", HH, MM, SS, MS);
-    
+
 }
 
 // types out degrees/arc-minutes/arc-seconds with unicode characters.
@@ -1886,13 +1889,13 @@ void Lgm_CDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, doubl
     w     = *u; // copy vector -- so we dont normalize original
     *R    = Lgm_NormalizeVector( &w );
     *MLAT = asin( u->z/(*R) )*DegPerRad;
-    
+
     // Find Longitude of Sun vector in CDMAG coords.
     // And the Long thats 180deg. from it. (Because thats what MLT is reckoned from).
     Lgm_Convert_Coords( &(c->Sun), &v, MOD_TO_CDMAG, c );
     SunMlon = atan2( v.y, v.x )*DegPerRad; // in range -180 to 180
     SunMlon += 180.0; // in range 0 to 360
-    
+
     // Find Longitude of input vector in CDMAG coords.
     *MLON = atan2( u->y, u->x )*DegPerRad; // in range -180 to 180
     if (*MLON < 0.0)  *MLON += 360.0;       // puts into range 0 to 360
@@ -1904,12 +1907,12 @@ void Lgm_CDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, doubl
 
 
 /*
- * returns cartesian vector in CDMAG coords. 
+ * returns cartesian vector in CDMAG coords.
  *  MLT in decimal hours.
  *  MLON in degrees.
  *  MLAT in degrees.
  *  R in Re
- *  
+ *
  */
 void Lgm_R_MLAT_MLT_to_CDMAG( double R, double MLAT, double MLT, Lgm_Vector *u, Lgm_CTrans *c ) {
 
@@ -1926,7 +1929,7 @@ void Lgm_R_MLAT_MLT_to_CDMAG( double R, double MLAT, double MLT, Lgm_Vector *u, 
     phi = Mlon * RadPerDeg;
     the = MLAT*RadPerDeg;
     ct  = cos( the );
-   
+
 
     u->x = R*cos( phi )*ct;
     u->y = R*sin( phi )*ct;
@@ -1948,13 +1951,13 @@ void Lgm_EDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, doubl
     w     = *u; // copy vector -- so we dont normalize original
     *R    = Lgm_NormalizeVector( &w );
     *MLAT = asin( u->z/(*R) )*DegPerRad;
-    
+
     // Find Longitude of Sun vector in CDMAG coords.
     // And the Long thats 180deg. from it. (Because thats what MLT is reckoned from).
     Lgm_Convert_Coords( &(c->Sun), &v, MOD_TO_EDMAG, c );
     SunMlon = atan2( v.y, v.x )*DegPerRad; // in range -180 to 180
     SunMlon += 180.0; // in range 0 to 360
-    
+
     // Find Longitude of input vector in CDMAG coords.
     *MLON = atan2( u->y, u->x )*DegPerRad; // in range -180 to 180
     if (*MLON < 0.0)  *MLON += 360.0;       // puts into range 0 to 360
@@ -1965,7 +1968,7 @@ void Lgm_EDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, doubl
 }
 
 /*
- * returns cartesian vector in EDMAG coords. 
+ * returns cartesian vector in EDMAG coords.
  *  	R in Re.
  *  	MLAT in degrees.
  *  	MLT in decimal hours.
@@ -1985,7 +1988,7 @@ void Lgm_R_MLAT_MLT_to_EDMAG( double R, double MLAT, double MLT, Lgm_Vector *u, 
     phi = Mlon * RadPerDeg;
     the = MLAT*RadPerDeg;
     ct  = cos( the );
-   
+
 
     u->x = R*cos( phi )*ct;
     u->y = R*sin( phi )*ct;
@@ -2083,10 +2086,10 @@ int MonthStrToNum( char *str ) {
 char *Lgm_StrToLower( char *str, int nmax ) {
     int  n = 0;
     char *p = str;
-    while ( (p != '\0' ) && (n<nmax) ){ 
-	    *p = (unsigned char)tolower(*p); 
-	    ++p; 
-	    ++n; 
+    while ( (p != '\0' ) && (n<nmax) ){
+	    *p = (unsigned char)tolower(*p);
+	    ++p;
+	    ++n;
 	}
     return( str );
 }
@@ -2094,11 +2097,10 @@ char *Lgm_StrToLower( char *str, int nmax ) {
 char *Lgm_StrToUpper( char *str, int nmax ) {
     int  n = 0;
     char *p = str;
-    while ( (p != '\0' ) && (n<nmax) ){ 
-	    *p = (unsigned char)toupper(*p); 
-	    ++p; 
-	    ++n; 
+    while ( (p != '\0' ) && (n<nmax) ){
+	    *p = (unsigned char)toupper(*p);
+	    ++p;
+	    ++n;
 	}
     return( str );
 }
-
