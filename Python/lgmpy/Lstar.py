@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+Class to compute Lstar from position, date, and pitch angle
+for a given Kp and Bfield model
+
+see: Lstar.get_Lstar
+"""
+
 from __future__ import division
 
 import math
@@ -9,12 +18,16 @@ import numpy
 from spacepy import datamodel
 import spacepy.toolbox as tb
 
-from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, Lgm_Set_Lgm_B_OP77, Lgm_LstarInfo, SetLstarTolerances, Lgm_Trace, GSM_TO_SM, WGS84_A, RadPerDeg, NewTimeLstarInfo, Lstar, Lgm_Set_Lgm_B_T89
+from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
+    Lgm_Set_Lgm_B_OP77, SetLstarTolerances, \
+    RadPerDeg, Lgm_Set_Lgm_B_T89, \
+    LFromIBmM_Hilton, LFromIBmM_McIlwain
+from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
 import Closed_Field
-import Lgm_MagModelInfo
+
 
 
 class Lstar_Data(datamodel.SpaceData):
@@ -27,21 +40,20 @@ class Lstar_Data(datamodel.SpaceData):
 
     @version: V1: 03-Mar-2011 (BAL)
     """
-    def __init__(self):
-        self.attrs = {} # dpes spacedata do this?  Maybe should
+    def __init__(self, *args, **kwargs):
+        super(Lstar_Data, self).__init__(*args, **kwargs)
         self['position'] = {}
-        #self['Bcalc'] = datamodel.dmarray([])
 
     def __repr__(self):
         tb.dictree(self, verbose=True, attrs=True)
         return ''
 
-def LstarVersusPA(pos, date, alpha = 90,
+def get_Lstar(pos, date, alpha = 90,
                   Kp = 2, coord_system='GSM',
                   Bfield = 'Lgm_B_OP77',
                   LstarThres = 10.0,  # beyond this Lsimple don't compute Lstar
                   extended_out = False,
-                  LstarQuality = 3, ):
+                  LstarQuality = 3):
 
     # setup a datamodel object to hold the answer
     ans = Lstar_Data()
@@ -55,8 +67,17 @@ def LstarVersusPA(pos, date, alpha = 90,
     else:
         ans['Epoch'] = datamodel.dmarray([date])
 
-    # setup a magmodelinfo
-    mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+    # pitch angles to calculate
+    try:
+        Alpha = list(alpha)
+    except TypeError:
+        Alpha = [alpha]
+
+    # required setup
+    MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
+
+    # setup a shortcut to MagModelInfo
+    mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
     Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
 
     # convert to **GSM**
@@ -78,20 +99,19 @@ def LstarVersusPA(pos, date, alpha = 90,
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
 
+    # decide which field model to use, this is a keyword
+    if Bfield == 'Lgm_B_OP77':
+        Lgm_Set_Lgm_B_OP77( mmi.c )
+    elif Bfield == 'Lgm_B_T89':
+        Lgm_Set_Lgm_B_T89( mmi.c )
+    else:
+        raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
+
     # save Kp
     # TODO maybe add some Kp checking
     ans['Kp'] = datamodel.dmarray([Kp])
 
-    # pitch angles to calculate
-    try:
-        Alpha = list(alpha)
-    except TypeError:
-        Alpha = [alpha]
-
-    # required setup
-    MagEphemInfo = Lgm_MagEphemInfo.Lgm_MagEphemInfo(len(Alpha), 0)
-
-    # what does 3 mean?  Have to look at the C (or docs)
+    # Set the LstarQuality, TODO add a comment here on what each does
     MagEphemInfo.LstarQuality = LstarQuality;
 
     # L* in one place is L* in lots of places (for GPS set to False)
@@ -104,6 +124,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
+
     # decide which field model to use, this is a keyword
     if Bfield == 'Lgm_B_OP77':
         Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
@@ -112,9 +133,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     else:
         raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
 
-    # put Kp into the structure
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
-
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
     MagEphemInfo.UTC    = utc
@@ -124,11 +143,8 @@ def LstarVersusPA(pos, date, alpha = 90,
     MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
 
     # Set Tolerances
-    SetLstarTolerances(MagEphemInfo.LstarQuality, MagEphemInfo.LstarInfo )
-
-    MagEphemInfo.LstarInfo.contents.mInfo.contents = mmi
-
-    # *  Blocal at sat location.
+    SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
+    # *  Blocal at sat location
     MagEphemInfo.P = Pgsm
 
     Bvec = Lgm_Vector.Lgm_Vector()
@@ -144,12 +160,12 @@ def LstarVersusPA(pos, date, alpha = 90,
     MagEphemInfo.B = Bvec.magnitude()
 
     # check and see if the field line is closed before doing much work
-    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(Pgsm.tolist(), date , extended_out=True)
+    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(MagEphemInfo, extended_out=True)
 
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
-        ans[pa] = {}
-        ans[pa]['Lm'] = datamodel.dmarray([Lsimple])
+        ans[pa] = datamodel.SpaceData()
+        ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
 
     if trace != 'LGM_CLOSED':
         for pa in Alpha:
@@ -166,6 +182,7 @@ def LstarVersusPA(pos, date, alpha = 90,
     # LOOP OVER PITCH ANGLES
     for i, pa in enumerate(Alpha):
 
+        tnow = datetime.datetime.now()
         PreStr = MagEphemInfo.LstarInfo.contents.PreStr
         PostStr = MagEphemInfo.LstarInfo.contents.PostStr
 
@@ -187,78 +204,118 @@ def LstarVersusPA(pos, date, alpha = 90,
 
         MagEphemInfo.LstarInfo.contents.PitchAngle = pa
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
-
         # Compute L*
         if Lsimple < LstarThres:
-            Ls_vec = Lgm_Vector.Lgm_Vector(*southern)  # not sure why Mike used this in example
-            LS_Flag = Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo) # maybe should be position
+            Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
+
+            LS_Flag = Lgm_Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
+
+            lstarinf = MagEphemInfo.LstarInfo.contents #shortcut
+            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I[0]),
+                                                c_double(MagEphemInfo.Bm[i]),
+                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            ans[pa]['LHilton'] = MagEphemInfo.LHilton.contents.value
+            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(lstarinf.I[0]),
+                                                c_double(MagEphemInfo.Bm[i]),
+                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
             elif LS_Flag == -1: # mirror below nothern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'N_LOSS'})
             elif LS_Flag == 0: # valid calc
-                ans[pa]['Lstar'] = datamodel.dmarray([MagEphemInfo.LstarInfo.contents.LS], attrs={'info':'GOOD'}) # want better word?
+                ans[pa]['Lstar'] = datamodel.dmarray([lstarinf.LS], attrs={'info':'GOOD'}) # want better word?
 
-            MagEphemInfo.Lstar[i] = MagEphemInfo.LstarInfo.contents.LS
+            MagEphemInfo.Lstar[i] = lstarinf.LS
 
             # Save results to the MagEphemInfo structure.
-            MagEphemInfo.nShellPoints[i] = MagEphemInfo.LstarInfo.contents.nPnts
+            MagEphemInfo.nShellPoints[i] = lstarinf.nPnts
             ## pull all this good extra info into numpy arrays
-            ans[pa]['ShellI'] = datamodel.dmarray(numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.I)],
-                dtype=c_double, buffer=MagEphemInfo.LstarInfo.contents.I) ) # outside loop should take first?? as I for the positon?
+            ans[pa]['I'] = datamodel.dmarray(lstarinf.I[0])
+
             if extended_out:
+                ans[pa]['ShellI'] = \
+                    datamodel.dmarray(numpy.ctypeslib.ndarray([len(lstarinf.I)],
+                                            dtype=c_double, buffer=lstarinf.I) )
                 ans[pa]['ShellEllipsoidFootprint_Pn'] = \
-                    numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Pn),
+                    numpy.ctypeslib.ndarray(len(lstarinf.Ellipsoid_Footprint_Pn),
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Pn)
+                                            buffer=lstarinf.Ellipsoid_Footprint_Pn)
                 ans[pa]['ShellEllipsoidFootprint_Ps'] = \
-                    numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Ps),
+                    numpy.ctypeslib.ndarray(len(lstarinf.Ellipsoid_Footprint_Ps),
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.Ellipsoid_Footprint_Ps)
+                                            buffer=lstarinf.Ellipsoid_Footprint_Ps)
 
                 ans[pa]['ShellMirror_Pn'] = \
-                    numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Mirror_Pn),
+                    numpy.ctypeslib.ndarray(len(lstarinf.Mirror_Pn),
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.Mirror_Pn)
+                                            buffer=lstarinf.Mirror_Pn)
                 ans[pa]['ShellMirror_Ps'] = \
-                    numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.Mirror_Ps),
+                    numpy.ctypeslib.ndarray(len(lstarinf.Mirror_Ps),
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.Mirror_Ps)
-                ans[pa]['ShellMirror_Ss'] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Sm_South
-                ans[pa]['ShellMirror_Sn'] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Sm_North
+                                            buffer=lstarinf.Mirror_Ps)
+                ans[pa]['ShellMirror_Ss'] = lstarinf.mInfo.contents.Sm_South
+                ans[pa]['ShellMirror_Sn'] = lstarinf.mInfo.contents.Sm_North
                 ans[pa]['nFieldPnts'] = \
-                    numpy.ctypeslib.ndarray(len(MagEphemInfo.LstarInfo.contents.nFieldPnts),
+                    numpy.ctypeslib.ndarray(len(lstarinf.nFieldPnts),
                                             dtype=c_int,
-                                            buffer=MagEphemInfo.LstarInfo.contents.nFieldPnts)
+                                            buffer=lstarinf.nFieldPnts)
 
                 ans[pa]['s_gsm'] = \
-                    numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.s_gsm),
-                                             len(MagEphemInfo.LstarInfo.contents.s_gsm[0])],
+                    numpy.ctypeslib.ndarray([len(lstarinf.s_gsm),
+                                             len(lstarinf.s_gsm[0])],
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.s_gsm)
+                                            buffer=lstarinf.s_gsm)
                 ans[pa]['Bmag'] = \
-                    numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.Bmag),
-                                             len(MagEphemInfo.LstarInfo.contents.Bmag[0])],
+                    numpy.ctypeslib.ndarray([len(lstarinf.Bmag),
+                                             len(lstarinf.Bmag[0])],
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.Bmag)
+                                            buffer=lstarinf.Bmag)
                 ans[pa]['x_gsm'] = \
-                    numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.x_gsm),
-                                             len(MagEphemInfo.LstarInfo.contents.x_gsm[0])],
+                    numpy.ctypeslib.ndarray([len(lstarinf.x_gsm),
+                                             len(lstarinf.x_gsm[0])],
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.x_gsm)
+                                            buffer=lstarinf.x_gsm)
                 ans[pa]['y_gsm'] = \
-                    numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.y_gsm),
-                                             len(MagEphemInfo.LstarInfo.contents.y_gsm[0])],
+                    numpy.ctypeslib.ndarray([len(lstarinf.y_gsm),
+                                             len(lstarinf.y_gsm[0])],
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.y_gsm)
+                                            buffer=lstarinf.y_gsm)
                 ans[pa]['z_gsm'] = \
-                    numpy.ctypeslib.ndarray([len(MagEphemInfo.LstarInfo.contents.z_gsm),
-                                             len(MagEphemInfo.LstarInfo.contents.z_gsm[0])],
+                    numpy.ctypeslib.ndarray([len(lstarinf.z_gsm),
+                                             len(lstarinf.z_gsm[0])],
                                             dtype=c_double,
-                                            buffer=MagEphemInfo.LstarInfo.contents.z_gsm)
-
+                                            buffer=lstarinf.z_gsm)
+                delT = datetime.datetime.now() - tnow
+                ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
     return ans
 
 if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
-    ans = LstarVersusPA([-4.2, 0, 0], date, alpha = 90, Kp = 2, coord_system='SM')
+    ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
+    print('Lgm_B_T89 Kp=4')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
+    print('Lgm_B_T89 Kp=5')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
+    print('Lgm_B_OP77 Kp=4')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']
+
+    ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
+    print('Lgm_B_OP77 Kp=6')
+    print ans[90]['LHilton']
+    print ans[90]['LMcIlwain']
+    print ans[90]['Lstar']
+    print ans[90]['Lsimple']

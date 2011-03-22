@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import unittest
-import ctypes
-
-import numpy
 
 import Lgm_Wrap
 

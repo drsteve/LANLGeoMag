@@ -143,7 +143,7 @@ void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int 
 
     m->InternalModel = InternalModel;
     m->ExternalModel = ExternalModel;
-    
+
     switch ( m->ExternalModel ) {
 
         case LGM_EXTMODEL_NULL:

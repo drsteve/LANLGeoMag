@@ -9,7 +9,7 @@ import math, numpy
 
 from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE
 from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
-from Lgm_Wrap import Lgm_B_OP77, Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
+from Lgm_Wrap import Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
 from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
 import Lgm_Vector
 import Lgm_MagModelInfo
@@ -41,12 +41,12 @@ def Closed_Field(*args, **kwargs):
                 'Kp': 2,
                 'coord_system': 'GSM',
                 'extended_out': False}
-    
+
     #replace missing kwargs with defaults
     for dkey in defaults:
         if dkey not in kwargs:
             kwargs[dkey] = defaults[dkey]
-    
+
     northern = Lgm_Vector.Lgm_Vector()
     southern = Lgm_Vector.Lgm_Vector()
     minB = Lgm_Vector.Lgm_Vector()
@@ -77,10 +77,10 @@ def Closed_Field(*args, **kwargs):
         try:
             position = Lgm_Vector.Lgm_Vector(*args[0])
         except TypeError:
-            raise(TypeError('position must be an iterable') )        
+            raise(TypeError('position must be an iterable') )
     else:
         raise(RuntimeError('Incorrect number of arguments specified'))
-    
+
     ans = Lgm_Trace(pointer(position),
             pointer(southern),
             pointer(northern),
@@ -90,7 +90,7 @@ def Closed_Field(*args, **kwargs):
     if ans == LGM_OPEN_IMF:
         retstr = 'LGM_OPEN_IMF'
     elif ans == LGM_CLOSED:
-        retstr = 'LGM_CLOSED'                             
+        retstr = 'LGM_CLOSED'
         L = _simpleL(northern, mmi)
     elif ans == LGM_OPEN_N_LOBE:
         retstr = 'LGM_OPEN_N_LOBE'
