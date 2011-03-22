@@ -18,13 +18,7 @@
  *                      Date:
  *                       UTC:
  *                         u:  Input position vector in GSM
- *                    nAlpha:  Number of Pitch Angles to compute
- *                     Alpha:  Pitch Angles to compute
- *                   Quality:  Quality factor (0-8)
- *
- *      Input/OutPut Variables:
- *
- *              MagEphemInfo:  Structure used to input and output parameters/settings/results to/from routine.
+ *                     Alpha:  Pitch Angle to compute L for
  *
  */
 void Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, Lgm_MagModelInfo *mInfo ) {
