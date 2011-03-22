@@ -11,13 +11,11 @@ transformations in Lgm
 
 from __future__ import division
 
-import math
 from ctypes import pointer
 
 import numpy
 import spacepy.toolbox as tb
 
-import Lgm_Vector
 from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults
 
 
@@ -89,7 +87,7 @@ def dateToFPHours(inval):
                 return numpy.array(lst)
             else:
                 return lst
-    except:
+    except TypeError:
         return inval.hour + inval.minute/60 + \
                                     inval.second/60/60 + \
                                     inval.microsecond/60/60/1000000
