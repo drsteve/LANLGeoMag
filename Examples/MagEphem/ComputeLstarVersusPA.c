@@ -57,6 +57,8 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
     for (i=0; i<MagEphemInfo->nAlpha; i++) MagEphemInfo->Alpha[i] = Alpha[i];
 
     // Set Tolerances
+printf("Quality = %d\n", Quality);
+printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
     SetLstarTolerances( MagEphemInfo->LstarQuality, LstarInfo );
 
 

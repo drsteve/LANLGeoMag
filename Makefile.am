@@ -1,9 +1,9 @@
 #include $(top_srcdir)/aminclude.am
 
 if HAVE_CHECK
-SUBDIRS = libLanlGeoMag . tests
+SUBDIRS = libLanlGeoMag docs . tests
 else
-SUBDIRS = libLanlGeoMag
+SUBDIRS = libLanlGeoMag docs
 endif
 
 ALL_EXAMPLE_FILES = $(shell cat example_file_list)
