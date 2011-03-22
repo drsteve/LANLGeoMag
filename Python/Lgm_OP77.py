@@ -1,39 +1,40 @@
 """
-Python implementation of the LanlGeoMag T89 Magnetic field model
+Python implementation of the LanlGeoMag OP77 Magnetic field model
 
 
 @author: Brian Larsen
 @organization: LANL
 @contact: balarsen@lanl.gov
 
-@version: V1: 23-Dec-2010 (BAL)
+@version: V1: 21-Mar-2011 (BAL)
 """
 import datetime
 from ctypes import pointer
 
 import numpy as np
 
-import MagData
 from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
-    Lgm_B_T89
+    Lgm_B_OP77
+
+import MagData
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
 
-class Lgm_T89(MagData.MagData):
+class Lgm_OP77(MagData.MagData):
     """
-    Python implementation of the LanlGeoMag T89 Magnetic field model
+    Python implementation of the LanlGeoMag OP77 Magnetic field model
 
     @author: Brian Larsen
     @organization: LANL
     @contact: balarsen@lanl.gov
 
-    @version: V1: 23-Dec-2010 (BAL)
+    @version: V1: 21-Mar-2011 (BAL)
     """
-    def __init__(self, pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
-        # pos must be a Lgm_Vector or list of Lgm_Vectors
-        super(Lgm_T89, self).__init__(Position=pos, Epoch=time, Kp=Kp, coord_system = coord_system, INTERNAL_MODEL=INTERNAL_MODEL,)
+    def __init__(self, pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
+        super(Lgm_OP77, self).__init__(Position=pos, Epoch=time, coord_system = coord_system, INTERNAL_MODEL=INTERNAL_MODEL,)
 
+        # pos must be a Lgm_Vector or list of Lgm_Vectors
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
             not isinstance(pos, list):
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
@@ -43,14 +44,6 @@ class Lgm_T89(MagData.MagData):
         if not isinstance(time, datetime.datetime) and \
             not isinstance(time, list):
             raise(TypeError('time must be a datetime or list of datetime') )
-
-        try:
-            for val in Kp:
-                if val < 0 or val > 5:
-                    raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
-        except TypeError:
-            if Kp < 0 or Kp > 5:
-                raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
 
         if INTERNAL_MODEL not in (LGM_CDIP,
                                   LGM_EDIP,
@@ -71,32 +64,25 @@ class Lgm_T89(MagData.MagData):
 
         # either they are all one elemet or they are compatible lists no 1/2 way
         try:
-            if len(self._Vpos) != len(self['Kp']) or \
-                len(self._Vpos) != len(self['Epoch']) or \
-                len(self['Epoch']) != len(self['Kp']):
+            if len(self._Vpos) != len(self['Epoch']):
                 raise(ValueError('Inputs must be the same length, scalars or lists'))
         except TypeError:
-            if isinstance(self._Vpos, list) and not isinstance(self['Kp'], list) \
-                and not isinstance(self['Epoch'], list):
-                    raise(ValueError('Inputs must be the same length, scalars or lists'))
+            if isinstance(self._Vpos, list) and not isinstance(self['Epoch'], list):
+                raise(ValueError('Inputs must be the same length, scalars or lists'))
 
-        #self.data = T89_Data(pos, time, Kp, coord_system, INTERNAL_MODEL)
         self['B'] = self.calc_B()
-        #self['B'].attrs['Units'] = 'nT'
-        #self['B'].attrs['System'] = 'GSM'
 
     def calc_B(self):
         try:
             ans = []
-            for v1, v2, v3 in zip(self._Vpos, self['Epoch'], self['Kp']):
+            for v1, v2 in zip(self._Vpos, self['Epoch'], ):
                 date = Lgm_CTrans.dateToDateLong(v2)
                 utc = Lgm_CTrans.dateToFPHours(v2)
                 Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
                 B = Lgm_Vector.Lgm_Vector()
-                self._mmi.Kp = v3
-                retval = Lgm_B_T89(pointer(v1), pointer(B), pointer(self._mmi))
+                retval = Lgm_B_OP77(pointer(v1), pointer(B), pointer(self._mmi))
                 if retval != 1:
-                    raise(RuntimeWarning('Odd return from Lgm_T89') )
+                    raise(RuntimeWarning('Odd return from OP77.c') )
                 ans.append(B)
             return ans
         except TypeError:
@@ -104,10 +90,9 @@ class Lgm_T89(MagData.MagData):
             utc = Lgm_CTrans.dateToFPHours(self['Epoch'])
             Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
             B = Lgm_Vector.Lgm_Vector()
-            self._mmi.Kp = self['Kp']
-            retval = Lgm_B_T89(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
+            retval = Lgm_B_OP77(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
             if retval != 1:
-                raise(RuntimeWarning('Odd return from Lgm_T89') )
+                raise(RuntimeWarning('Odd return from OP77.c') )
             return B
 
     def _pos2Lgm_Vector(self, pos):
@@ -123,17 +108,15 @@ class Lgm_T89(MagData.MagData):
         if isinstance(pos, np.ndarray):
             raise(NotImplementedError('Only lists can be input for position now') )
 
-def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
+def OP77(pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """
     Easy wrapper to just return values without having to create an instance of
-    Lgm_T89
+    Lgm_OP77
 
     @param pos: a list of 3 element lists of positions in coord_system system
     @type pos: list
     @param time: a datetime or list of datetime objects
     @type time: (list, datetime)
-    @param Kp: the Kp value for T89 (0,1,2,3,4,5)
-    @type Kp: int
 
     @keyword coord_system: the name of the coord system to use (or Lgm number)
     @type coord_system: (str, int)
@@ -147,9 +130,9 @@ def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     @organization: LANL
     @contact: balarsen@lanl.gov
 
-    @version: V1: 11-Jan-2011 (BAL)
+    @version: V1: 21-Mar-2011 (BAL)
     """
-    a = Lgm_T89(pos, time, Kp, coord_system = coord_system,
+    a = Lgm_OP77(pos, time, coord_system = coord_system,
                         INTERNAL_MODEL=INTERNAL_MODEL)
     try:
         ans = [val.tolist() for val in a['B']]
