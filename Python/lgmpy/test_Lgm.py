@@ -22,7 +22,6 @@ from test_Lgm_Vector import *
 from test_Lgm_CTrans import *
 from test_Lgm_MagModelInfo import *
 from test_Lgm_T89 import *
-from test_Lgm_Data import *
 from test_Lgm_Wrap import *
 from test_Closed_Field import *
 from test_Lstar import *
