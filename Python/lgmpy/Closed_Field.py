@@ -63,10 +63,11 @@ def Closed_Field(*args, **kwargs):
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
         # could consider a Lgm_MagModelInfo param to use an existing one
         mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+        mmi.Kp = kwargs['Kp']
         try:
-            Bfield_dict[kwargs['bfield']](MagEphemInfo.LstarInfo.contents.mInfo)
+            Bfield_dict[kwargs['bfield']](pointer(mmi))
         except KeyError:
-            raise(NotImplementedError("Only Bfield='OP77, T89' currently supported"))
+            raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
 
         datelong = Lgm_CTrans.dateToDateLong(args[1])
         utc = Lgm_CTrans.dateToFPHours(args[1])
