@@ -100,12 +100,8 @@ def get_Lstar(pos, date, alpha = 90,
         raise(NotImplementedError("Only GSM or SM input currently supported"))
 
     # decide which field model to use, this is a keyword
-    if Bfield == 'Lgm_B_OP77':
-        Lgm_Set_Lgm_B_OP77( mmi.c )
-    elif Bfield == 'Lgm_B_T89':
-        Lgm_Set_Lgm_B_T89( mmi.c )
-    else:
-        raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
+    Bfield_dict = {'Lgm_B_OP77': Lgm_Set_Lgm_B_OP77,
+                   'Lgm_B_T89': Lgm_Set_Lgm_B_T89}
 
     # save Kp
     # TODO maybe add some Kp checking
@@ -125,13 +121,11 @@ def get_Lstar(pos, date, alpha = 90,
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
 
-    # decide which field model to use, this is a keyword
-    if Bfield == 'Lgm_B_OP77':
-        Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
-    elif Bfield == 'Lgm_B_T89':
-        Lgm_Set_Lgm_B_T89( MagEphemInfo.LstarInfo.contents.mInfo )
-    else:
-        raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
+    ## decide which field model to use, this is a keyword
+    try:
+        Bfield_dict[Bfield](MagEphemInfo.LstarInfo.contents.mInfo)
+    except KeyError:
+        raise(NotImplementedError("Only Bfield='OP77, T89' currently supported"))
 
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
