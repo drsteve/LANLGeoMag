@@ -22,12 +22,11 @@
  *            \param[in]        Alpha       Pitch angle to compute L for. In degrees.
  *            \param[in]        Type        Flag to indicate which alogorithm to use (0=original McIlwain; else use Hilton's formula).
  *            \param[out]       I           The integral invariant, I that was computed along the way.
- *            \param[out]       Bm          The mirror magnwetic field value, Bm that was computed along the way.
+ *            \param[out]       Bm          The mirror magnetic field value, Bm that was computed along the way.
  *            \param[out]       M           The dipole magnetic moment used to compute L = f(I, Bm, M)
  *            \param[in,out]    mInfo       Properly initialized Lgm_MagModelInfo structure. (A number of otherm usefull things will have been set in mInfo).
  *
- *            \return 1 - normal exit. Field line found with acceptable accuracy.
- *            \return 0 - no field line could be found
+ *            \return           L           McIlwain L-shell parameter (a dimensioless number).
  *
  */
 double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo ) {
