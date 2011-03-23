@@ -89,7 +89,8 @@ class Lvalue_Tests(unittest.TestCase):
     def test_L_cdip(self):
         LH = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='Hilton', coord_system='SM')
         LM = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='McIlwain', coord_system='SM')
-        self.assertAlmostEqual(LH['L'], LM['L'], places=6)
+        self.assertAlmostEqual(LH['L'], 6.00000, places=6)
+        self.assertAlmostEqual(LM['L'], 6.00000, places=6)
 
 if __name__ == '__main__':
     unittest.main()
