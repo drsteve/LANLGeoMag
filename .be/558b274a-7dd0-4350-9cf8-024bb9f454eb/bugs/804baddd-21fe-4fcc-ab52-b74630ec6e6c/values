@@ -10,7 +10,7 @@ reporter: Brian Larsen <balarsen@lanl.gov>
 severity: minor
 
 
-status: open
+status: fixed
 
 
 summary: Lgm_CTrans gets defaults from python not C
