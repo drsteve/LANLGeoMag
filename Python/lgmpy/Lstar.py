@@ -27,7 +27,7 @@ import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
 import Closed_Field
-
+from _Bfield_dict import Bfield_dict
 
 
 class Lstar_Data(datamodel.SpaceData):
@@ -98,10 +98,6 @@ def get_Lstar(pos, date, alpha = 90,
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
-
-    # decide which field model to use, this is a keyword
-    Bfield_dict = {'Lgm_B_OP77': Lgm_Set_Lgm_B_OP77,
-                   'Lgm_B_T89': Lgm_Set_Lgm_B_T89}
 
     # save Kp
     # TODO maybe add some Kp checking

@@ -16,8 +16,9 @@ from ctypes import pointer, c_double
 import numpy
 from spacepy import datamodel
 
-from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, Lgm_McIlwain_L, Lgm_Set_Lgm_B_OP77, Lgm_Set_Lgm_B_T89
+from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L, Lgm_Set_Lgm_B_OP77, Lgm_Set_Lgm_B_T89
 from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+from _Bfield_dict import Bfield_dict
 
 def LatLon2GSM(lat, lon, rad, time):
     XYZ = Lgm_Vector.SphToCart(lat, lon, rad)
@@ -53,16 +54,13 @@ def Lvalue(*args, **kwargs):
                 'method': 'Hilton',
                 'Kp': 2,
                 'coord_system': 'GSM'}
-    
-    Bfield_dict = {'Lgm_B_OP77': Lgm_Set_Lgm_B_OP77,
-                   'Lgm_B_T89': Lgm_Set_Lgm_B_T89}
 
     #replace missing kwargs with defaults
     for dkey in defaults:
         if dkey not in kwargs:
             kwargs[dkey] = defaults[dkey]
     
-    method_dict = {'Hilton': 1, 'McIlwain': 0}
+    method_dict = {'Hilton': 1, 'McIlwain': 0} 
     
     # change datetime to Lgm Datelong and UTC
     mInfo = Lgm_MagModelInfo.Lgm_MagModelInfo()
@@ -80,10 +78,17 @@ def Lvalue(*args, **kwargs):
     #else:
         #ans['Epoch'] = datamodel.dmarray([args[1]])
     
+    if kwargs['coord_system'] == 'SM':
+        Psm = Lgm_Vector.Lgm_Vector(*args[0])
+        Pgsm = Lgm_Vector.Lgm_Vector()
+        Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mInfo.c )
+    else:
+        Pgsm = Lgm_Vector.Lgm_Vector(*args[0])
+    
     Iout = c_double()
     Bm = c_double()
     M = c_double()
-    Pgsm = Lgm_Vector.Lgm_Vector(*args[0])
+     
     ans = Lgm_McIlwain_L(datelong, utc, pointer(Pgsm), kwargs['alpha'], 
                             method_dict[kwargs['method']],
                             pointer(Iout), pointer(Bm), pointer(M),
