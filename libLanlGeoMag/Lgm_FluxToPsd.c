@@ -10,32 +10,38 @@
 #include "Lgm/Lgm_DynamicMemory.h"
 
 
-/*
- *  Routines for converting Flux <-> PSD.
- */
+
+// Routines for converting between Flux and Phase Space Denisty
 
 
 
 
-/*
- * Returns relativisitic First adiabatic invariant, Mu, given: Particle's
- * kinetic energy, Pitch Angle, the local B-field strength, and the particle's
- * rest energy. (Mu is p_perp^2/(2*m0*B). Eperp/B non-rel.)
+
+/**
+ *     Computes relativisitic first adiabatic invariant, \f$\mu\f$, given: Particle's
+ *     kinetic energy \f$E_k\f$, Pitch Angle \f$\alpha\f$, the local B-field strength \f$B\f$, and the
+ *     particle's rest energy \f$E_\circ\f$. The relationship is:
  *
- *  Since p^2c^2 = Ek^2 + 2EkE0
- *  we have,
- *      pperp^2/(2 m0 B) = p^2c^2/(2 m0 c^2 B) sin^2(alpha)
- *                       = p^2c^2/(2 E0 B) * sa2
- *                       = Ek/B(1+Ek/(2E0))*sa2
- *  
- *  Inputs:
- *          Ek -- Kinetic Energy of Particle.    ( MeV )
- *          E0 -- Rest mass of Particle.         ( MeV )
- *          a  -- Pitch Angle of Particle.       ( Degrees )
- *          B  -- Local magnetic field strength. ( nT )
+ *      \f[\mu = {p_\perp^2\over 2 m_\circ B}\f].
  *
- *  Returns:
- *          First adiabatic invariant, Mu. ( MeV/G )
+ *      Since, 
+ *
+ *            \f[ p^2c^2 = E_k^2 + 2 E_k E_\circ \f]
+ *
+ *      we have,
+ *
+ *          \f{eqnarray*}{
+ *              \mu = {p_\perp^2 \over 2 m_\circ B } &=& {p^2c^2\over (2 m_\circ c^2 B)} \sin^2(\alpha) \\
+ *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
+ *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
+ *          \f}
+ *      
+ *      \param[in]        Ek    Kinetic Energy of Particle.    <b>( MeV )</b>
+ *      \param[in]        E0    Rest mass of Particle.         <b>( MeV )</b>
+ *      \param[in]        a     Pitch Angle of Particle.       <b>( Degrees )</b>
+ *      \param[in]        B     Local magnetic field strength. <b>( nT )</b>
+ *
+ *      \return           First adiabatic invariant, Mu. <b>( MeV/G )</b>
  */
 double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
@@ -54,17 +60,15 @@ double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
 
 
-/*
+/**
  * Returns Particle's Kinetic Energy, Ek, given: Particle's relativistic first
  * invariant, Mu, Pitch Angle and the local B-field strength and rest energy.
  *  
- *  Inputs:
- *          Mu -- Kinetic Energy of Particle.    ( MeV/G )
- *          a  -- Pitch Angle of Particle.       ( Degrees )
- *          B  -- Local magnetic field strength. ( nT )
+ *        \param[in]  Mu Kinetic Energy of Particle.    <b>( MeV/G )</b>
+ *        \param[in]  a  Pitch Angle of Particle.       <b>( Degrees )</b>
+ *        \param[in]  B  Local magnetic field strength. <b>( nT )</b>
  *
- *  Returns:
- *          First adiabatic invariant, Mu. ( MeV )
+ *        \return     First adiabatic invariant, Mu. <b>( MeV )</b>
  */
 double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 
@@ -86,59 +90,74 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 }
 
 
-/*
- * Compute p^2c^2 given a particle's kinetic energy and rest energy.
+/**
+ * Compute \f$ p^2c^2 \f$  given a particle's kinetic energy and rest energy.
  *
  *  Some relativistic equations:
  *  
  *  With,
- *      m     = Particle mass.
- *      m0    = Particle rest mass.
- *      v     = Particle speed.
- *      c     = Speed of Light.
- *      gamma = (1-v^2/c^2)^(-1/2).
+ *          \f{eqnarray*}{
+ *                  m       &=& \mbox{Particle mass.}\\
+ *                  m_\circ &=& \mbox{Particle rest mass.}\\
+ *                  v       &=& \mbox{Particle speed.}\\
+ *                  c       &=& \mbox{Speed of Light.}\\
+ *                  \gamma  &=& (1-v^2/c^2)^{-1/2}.\\
  *
- *      m = m0 gamma = m0 (1-v^2/c^2)^(-1/2)
+ *          \f}
+ *
+ *      \f[ 
+ *          m = m_\circ \gamma = m_\circ (1-v^2/c^2)^{-1/2} 
+ *      \f]
  *
  *  Rearrange this to get,
- *      (mc^2)^2 = (m0c^2)^ + p^2c^2
+ *      \f[ 
+ *          (mc^2)^2 = (m_\circ c^2)^ + p^2c^2
+ *      \f]
  *
  *  With,
- *      E  = mc^2  = Total Energy of particle
- *      E0 = m0c^2 = Rest Energy of particle
- *      p  = relativistic momentum of particle
+ *          \f{eqnarray*}{
+ *              E  = mc^2             &=& \mbox{Total Energy of particle} \\
+ *              E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
+ *              p                     &=& \mbox{relativistic momentum of particle}
+ *          \f}
  *
  *  this is,
- *      E^2 = E0^2 + (pc)^2
+ *      \f[ 
+ *          E^2 = E_\circ^2 + (pc)^2
+ *      \f]
  *  
  *  so, 
- *      (pc)^2  = E^2 - E0^2
+ *      \f[ 
+ *          p^2c^2  = E^2 - E_\circ^2
+ *      \f]
  *  
- *  Let E = Ek+E0 (kinetic energy + rest energy). Then,
- *      p^2c^2  = (Ek+E0)^2 - E0^2
- *              = Ek (Ek+2E0)
+ *  Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
+ *          \f{eqnarray*}{
+ *              p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
+ *                      &=& E_k (E_k+2E_\circ)
+ *          \f}
  *  
  *
- *  Inputs:
- *          E  -- Kinetic Energy of Particle.    ( MeV )
- *          E0 -- Rest energy of Particle.       ( MeV )
+ *      \param[in]    E    Kinetic Energy of Particle.    <b>( MeV )</b>
+ *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.       <b>( MeV )</b>
  *
- *  Returns:
- *          p^2c^2 = Ek(Ek+2E0) ( MeV^2 )
+ *      \return       p2c2 (\f$ = p^2c^2 = E_k(E_k+2E_\circ)\f$)     <b>( MeV^2 )</b>
  */
 double  Lgm_p2c2( double Ek, double E0 ) {
     return( Ek*(Ek+2.0*E0) );    // p^2c^2 in units of MeV^2
 }
 
 
-/*
- * returns (v/c)^2
+/**
+ * returns \f$ (v/c)^2 \f$ as a function of Ek and E0 using the following relation,
  *
- *  (v/c)^2 = m^2v^2/(m^2c^2) 
- *          = m^2v^2c^2/(m^2c^4) 
- *          = p^2c^2/(m^2c^4) 
- *          = p^2c^2/E^2
- *          = Ek(Ek+2E0)/(Ek+E0)^2
+ *          \f{eqnarray*}{
+ *              (v/c)^2 &=& m^2v^2/(m^2c^2) \\
+ *                      &=& m^2v^2c^2/(m^2c^4) \\
+ *                      &=& p^2c^2/(m^2c^4) \\
+ *                      &=& p^2c^2/E^2 \\
+ *                      &=& {E_k(E_k+2E_\circ) \over (E_k+E_\circ)^2}
+ *          \f}
  */
 double  Lgm_v2overc2( double Ek, double E0 ) {
     double  E = Ek + E0;
@@ -146,9 +165,9 @@ double  Lgm_v2overc2( double Ek, double E0 ) {
 }
 
 
-/*
- * Returns relativistic factor gamma = [ 1 - (v/c)^2 ]^(-1/2)
- * Note that (v/c)^2 = Ek(Ek+2E0)/(Ek+E0)^2 (see above.)
+/**
+ *   Returns relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$
+ *   Note that \f$ (v/c)^2 = E_k(E_k+2E_\circ)/(E_k+E_\circ)^2 \f$ (see Lgm_v2overc2().)
  */
 double  Lgm_gamma( double Ek, double E0 ) {
     double  E = Ek + E0;
@@ -156,26 +175,27 @@ double  Lgm_gamma( double Ek, double E0 ) {
 }
 
 
-/*
- * Convert differential flux to phase space density.
+/**
+ *  Convert differential flux to phase space density.
  *
  *  The basic relationship is;
- *      f = j/p^2
+ *      \f[
+ *      f = {j \over p^2}
+ *      \f]
  *
- *  Multiply top and bottom by c^2 gives,
- *      f = (j c^2)/(p^2c^2)
- *      f = j/c * c^3/(p^2c^2)
+ *  Multiply top and bottom by \f$ c^2 \f$ gives,
+ *      \f{eqnarray*}{
+ *          f &=& {j c^2 \over p^2c^2 } \\
+ *          f &=& { j\over c } {c^3 \over (p^2c^2)}
+ *      \f}
  *  
- *  Reason for making it c^3 is that the final units become,
- *  c^3 cm^-3 MeV^-3 or (c/cm/MeV)^3
+ *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
+ *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
  *
- * -------------------------------------------------------------
- *  Inputs:
- *          j    -- Differential Flux in units of #/cm^2/s/sr/MeV
- *          p2c2 -- (pc)^2 in units of Mev^2
+ *     \param[in]     j    Differential Flux in units of <b>#/cm^2/s/sr/MeV</b>
+ *     \param[in]     p2c2 (\f$ = p^2 c^2\f$) in units of <b>Mev^2</b>
  *  
- *  Output:
- *          Phase space density in units of (c/cm/MeV)^3
+ *      \return       f, Phase space density in units of <b>(c/cm/MeV)^3</b>
  *  
  */
 double Lgm_DiffFluxToPsd( double j, double p2c2 ){
@@ -185,26 +205,28 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
 
 
 
-/*
+/**
  * Convert phase space density to differential flux.
  *
  *  The basic relationship is;
+ *      \f[
  *      f = j/p^2
+ *      \f]
  *
- *  Multiply top and bottom by c^2 gives,
- *      f = (j c^2)/(p^2c^2)
- *      f = j/c * c^3/(p^2c^2)
+ *  Multiply top and bottom by \f$ c^2 \f$ gives,
+ *      \f{eqnarray*}{
+ *          f &=& {j c^2 \over p^2c^2 } \\
+ *          f &=& { j\over c } {c^3 \over (p^2c^2)}
+ *      \f}
+ *  
+ *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
+ *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
  *
- *  Reason for making it c^3 is that the final units become,
- *  c^3 cm^-3 MeV^-3 or (c/cm/MeV)^3
- *
- * -------------------------------------------------------------
- *  Inputs:
- *          f    -- Phase space density in units of (c/cm/MeV)^3
- *          p2c2 -- (pc)^2 in units of Mev^2
- *
- *  Output:
- *          Differential Flux in units of #/cm^2/s/sr/MeV
+ *     \param[in]     f    Phase space density in units of <b>(c/cm/MeV)^3</b>
+ *     \param[in]     p2c2 (\f$ = p^2 c^2\f$) in units of  <b>Mev^2</b>
+ *  
+ *      \return       j, Differential Flux in units of     <b>#/cm^2/s/sr/MeV</b>
+
  *
  */
 double Lgm_PsdToDiffFlux( double f, double p2c2 ){
@@ -213,7 +235,7 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
 
 
 
-/*
+/**
  * Create a calloc'd Lgm_FluxToPsd structure.
  */
 Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
@@ -238,7 +260,7 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
 
 }
 
-/*
+/**
  * Destroy a Lgm_FluxToPsd structure.
  */
 void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
@@ -264,12 +286,13 @@ void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 }
 
 
-/*
- *  Lgm_FluxToPsd_SetDateTimeAndPos()
+/**
+ *  Set Date/Time and position in the Lgm_FluxToPsd structure.
  *      
  *     
- *
- *  Inputs:
+ *      \param[in]          d   Date/Time of measurement.
+ *      \param[in]          u   Position of measurment.
+ *      \param[in,out]      f   Lgm_FluxToPsd sturcture.
  */
 void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f ) {
 
@@ -279,19 +302,17 @@ void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxTo
 }
 
 
-/*
- *  Lgm_FluxToPsd_SetFlux()
- *      
+/**
  *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
  *
- *  Inputs:
- *                 Flux: 2D array containing the differential flux values as a function of energy and pitch angle.
- *                    E: 1D array containing the energy values implied by the first index of Flux[][] array.
- *                    A: 1D array containing the pitch angles values implied by the second index of Flux[][] array.
- *                   nE: number of energies.
- *                   nA: number of pitch angles.
- *                    v: Spacecraft position
- *      DumpDiagnostics: Flag to switch on/off diagnostic output.
+ *    \param[in]      Flux             2D array containing the differential flux values as a function of energy and pitch angle.
+ *    \param[in]      E                1D array containing the energy values implied by the first index of Flux[][] array.
+ *    \param[in]      A                1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *    \param[in]      nE               number of energies.
+ *    \param[in]      nA               number of pitch angles.
+ *    \param[in]      v                Spacecraft position
+ *    \param[in]      DumpDiagnostics  Flag to switch on/off diagnostic output.
+ *    \param[in,out]  f                Lgm_FluxToPsd sturcture.
  *
  */
 void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
@@ -360,7 +381,7 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
 
 
 
-/*
+/**
  *  The routine Lgm_FluxPsd_SetFlux() gives us an  array of f(E, Alpha).  BUT,
  *  what we really need in the end is f( mu, K ). Although mu is easy to
  *  compute, it is dependant on both E and Alpha. K is only dependant upon
@@ -491,7 +512,7 @@ double Cost( double *x, int *data ){
 
 
 
-/*
+/**
  * The f structure should have an initialized PSD[E][a] array in it.
  * This routine computes psd given a value of E and a.
  */
@@ -601,7 +622,7 @@ printf("psd = %g\n", psd);
 
 
 
-/*
+/**
  * Routine to increase the size of an image smoothly. Uses an area-weighting
  * interpolation scheme.
  */
@@ -776,6 +797,9 @@ if ((j==189)&&(k==118)) {
 
 }
 
+/**
+ *   Routine to write out a GIF image
+ */
 void DumpGif( char *Filename, int W, int H, double **Image ){
 
     double           Val, Min, Max;
