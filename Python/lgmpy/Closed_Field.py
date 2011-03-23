@@ -14,6 +14,7 @@ from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
 import Lgm_Vector
 import Lgm_MagModelInfo
 import Lgm_CTrans
+from _Bfield_dict import Bfield_dict
 
 def _simpleL(position, MagModelInfo):
     """
@@ -62,13 +63,10 @@ def Closed_Field(*args, **kwargs):
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
         # could consider a Lgm_MagModelInfo param to use an existing one
         mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-        if kwargs['bfield'] == 'Lgm_B_OP77':
-            Lgm_Set_Lgm_B_OP77( pointer(mmi) )
-        elif kwargs['bfield'] == 'Lgm_B_T89':
-            mmi.Kp = kwargs['Kp']
-            Lgm_Set_Lgm_B_T89( pointer(mmi) )
-        else:
-            raise(NotImplementedError('Only Lgm_B_OP77 and Lgm_B_T89 implented so far'))
+        try:
+            Bfield_dict[kwargs['bfield']](MagEphemInfo.LstarInfo.contents.mInfo)
+        except KeyError:
+            raise(NotImplementedError("Only Bfield='OP77, T89' currently supported"))
 
         datelong = Lgm_CTrans.dateToDateLong(args[1])
         utc = Lgm_CTrans.dateToFPHours(args[1])

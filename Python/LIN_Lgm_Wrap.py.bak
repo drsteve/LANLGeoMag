@@ -2850,36 +2850,42 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_cdip'):
     Lgm_Set_Lgm_B_cdip.restype = None
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 496
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_edip'):
+    Lgm_Set_Lgm_B_edip = _libs['libLanlGeoMag.so'].Lgm_Set_Lgm_B_edip
+    Lgm_Set_Lgm_B_edip.argtypes = [POINTER(Lgm_MagModelInfo)]
+    Lgm_Set_Lgm_B_edip.restype = None
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 497
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_igrf'):
     Lgm_Set_Lgm_B_igrf = _libs['libLanlGeoMag.so'].Lgm_Set_Lgm_B_igrf
     Lgm_Set_Lgm_B_igrf.argtypes = [POINTER(Lgm_MagModelInfo)]
     Lgm_Set_Lgm_B_igrf.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 497
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 498
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_T01S'):
     Lgm_Set_Lgm_B_T01S = _libs['libLanlGeoMag.so'].Lgm_Set_Lgm_B_T01S
     Lgm_Set_Lgm_B_T01S.argtypes = [POINTER(Lgm_MagModelInfo)]
     Lgm_Set_Lgm_B_T01S.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 498
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 499
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_gm_B_TS04'):
     Lgm_Set_gm_B_TS04 = _libs['libLanlGeoMag.so'].Lgm_Set_gm_B_TS04
     Lgm_Set_gm_B_TS04.argtypes = [POINTER(Lgm_MagModelInfo)]
     Lgm_Set_gm_B_TS04.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 499
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 500
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_T89'):
     Lgm_Set_Lgm_B_T89 = _libs['libLanlGeoMag.so'].Lgm_Set_Lgm_B_T89
     Lgm_Set_Lgm_B_T89.argtypes = [POINTER(Lgm_MagModelInfo)]
     Lgm_Set_Lgm_B_T89.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 500
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 501
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Set_Lgm_B_OP77'):
     Lgm_Set_Lgm_B_OP77 = _libs['libLanlGeoMag.so'].Lgm_Set_Lgm_B_OP77
     Lgm_Set_Lgm_B_OP77.argtypes = [POINTER(Lgm_MagModelInfo)]
     Lgm_Set_Lgm_B_OP77.restype = None
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 507
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 508
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_CDMAG_TO_CGM'):
     Lgm_CDMAG_TO_CGM = _libs['libLanlGeoMag.so'].Lgm_CDMAG_TO_CGM
     Lgm_CDMAG_TO_CGM.argtypes = [POINTER(Lgm_Vector), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_MagModelInfo)]

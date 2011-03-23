@@ -19,8 +19,7 @@ from spacepy import datamodel
 import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
-    Lgm_Set_Lgm_B_OP77, SetLstarTolerances, \
-    RadPerDeg, Lgm_Set_Lgm_B_T89, \
+    SetLstarTolerances, RadPerDeg, \
     LFromIBmM_Hilton, LFromIBmM_McIlwain
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector

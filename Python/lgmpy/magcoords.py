@@ -16,8 +16,9 @@ from ctypes import pointer, c_double
 import numpy
 from spacepy import datamodel
 
-from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L, Lgm_Set_Lgm_B_OP77, Lgm_Set_Lgm_B_T89
-from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
+from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+from .Lstar import Lstar_Data
 from _Bfield_dict import Bfield_dict
 
 def LatLon2GSM(lat, lon, rad, time):
@@ -88,7 +89,6 @@ def Lvalue(*args, **kwargs):
     Iout = c_double()
     Bm = c_double()
     M = c_double()
-     
     ans = Lgm_McIlwain_L(datelong, utc, pointer(Pgsm), kwargs['alpha'], 
                             method_dict[kwargs['method']],
                             pointer(Iout), pointer(Bm), pointer(M),
