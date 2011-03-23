@@ -120,7 +120,7 @@ def get_Lstar(pos, date, alpha = 90,
     try:
         Bfield_dict[Bfield](MagEphemInfo.LstarInfo.contents.mInfo)
     except KeyError:
-        raise(NotImplementedError("Only Bfield='OP77, T89' currently supported"))
+        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
 
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?

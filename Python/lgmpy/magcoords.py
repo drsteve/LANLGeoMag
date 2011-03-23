@@ -16,9 +16,16 @@ from ctypes import pointer, c_double
 import numpy
 from spacepy import datamodel
 
-from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
-from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
-from .Lstar import Lstar_Data
+try:
+    #this block makes sure the tests in working directory run on local files not installed versions
+    from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
+    from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+    from .Lstar import Lstar_Data
+except:
+    from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
+    from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+    from lgmpy.Lstar import Lstar_Data
+    
 from _Bfield_dict import Bfield_dict
 
 def LatLon2GSM(lat, lon, rad, time):
@@ -69,7 +76,7 @@ def Lvalue(*args, **kwargs):
     try:
         Bfield_dict[kwargs['Bfield']](pointer(mInfo))
     except KeyError:
-        raise(NotImplementedError("Only Bfield='OP77, T89' currently supported"))
+        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
     try:
         datelong = Lgm_CTrans.dateToDateLong(args[1])
         utc = Lgm_CTrans.dateToFPHours(args[1])
