@@ -11,7 +11,7 @@
 
 
 
-// Routines for converting between Flux and Phase Space Denisty
+// Routines for converting between Flux and Phase Space Density
 
 
 
@@ -42,6 +42,9 @@
  *      \param[in]        B     Local magnetic field strength. <b>( nT )</b>
  *
  *      \return           First adiabatic invariant, Mu. <b>( MeV/G )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  */
 double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
@@ -237,6 +240,12 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
 
 /**
  * Create a calloc'd Lgm_FluxToPsd structure.
+ *
+ *  \param[in] DumpDiagnostics  Boolean flag to turn on/off dumping of diagnostics.
+ *  \return    A pointer to an allocated and initialized Lgm_FluxToPsd stucture.
+ *
+ *  You must destroy this with Lgm_FreeFluxToPsd() when you are done.
+ *
  */
 Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
 
@@ -262,6 +271,9 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
 
 /**
  * Destroy a Lgm_FluxToPsd structure.
+ *
+ *  \param f  Pointer to the allocated Lgm_FluxToPsd structure that you want to destroy.
+ *
  */
 void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
@@ -305,14 +317,12 @@ void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxTo
 /**
  *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
  *
- *    \param[in]      Flux             2D array containing the differential flux values as a function of energy and pitch angle.
- *    \param[in]      E                1D array containing the energy values implied by the first index of Flux[][] array.
- *    \param[in]      A                1D array containing the pitch angles values implied by the second index of Flux[][] array.
- *    \param[in]      nE               number of energies.
- *    \param[in]      nA               number of pitch angles.
- *    \param[in]      v                Spacecraft position
- *    \param[in]      DumpDiagnostics  Flag to switch on/off diagnostic output.
- *    \param[in,out]  f                Lgm_FluxToPsd sturcture.
+ *    \param[in]      J                 2D array containing the differential flux values as a function of energy and pitch angle.
+ *    \param[in]      E                 1D array containing the energy values implied by the first index of Flux[][] array.
+ *    \param[in]      nE                number of energies.
+ *    \param[in]      A                 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *    \param[in]      nA                number of pitch angles.
+ *    \param[in,out]  f                 Lgm_FluxToPsd sturcture.
  *
  */
 void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {

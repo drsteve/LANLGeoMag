@@ -18,7 +18,7 @@
 /**
  *            \param[in]        Date        Date in format (e.g. 20101231). 
  *            \param[in]        UTC         Universal Time (Coordinated) in decimal hours (e.g. 23.5).
- *            \param[in]        u           Position to compute L-shell.
+ *            \param[in]        u           Position (in GSM) to compute L-shell.
  *            \param[in]        Alpha       Pitch angle to compute L for. In degrees.
  *            \param[in]        Type        Flag to indicate which alogorithm to use (0=original McIlwain; else use Hilton's formula).
  *            \param[out]       I           The integral invariant, I that was computed along the way.

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "Lgm/Lgm_MagModelInfo.h"
-/*
+/**
  *  Ported to C by Michael G. Henderson Spetember 17, 2010.
  *
  *  VERSION 11/01/76
@@ -130,6 +130,10 @@
  *     FOR MORE INFORMATION CALL OR WRITE K. A. PFITZER OR W. P. OLSON
  *     AT MCDONNEL DOUGLAS ASTRONAUTICS CO. 5301 BOLSA AVE,  HUNTINGTON
  *     CALIF.,  PHONE (714) 896-3231.
+ *
+ *
+ *  \warning   The code artificially bails out with zero field when r<2 and when r>15 Re. This may cause discontinuities that can cause trouble.
+ *
  */
 
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m ) {
