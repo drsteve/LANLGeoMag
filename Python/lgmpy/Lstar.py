@@ -19,15 +19,14 @@ from spacepy import datamodel
 import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
-    Lgm_Set_Lgm_B_OP77, SetLstarTolerances, \
-    RadPerDeg, Lgm_Set_Lgm_B_T89, \
+    SetLstarTolerances, RadPerDeg, \
     LFromIBmM_Hilton, LFromIBmM_McIlwain
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagEphemInfo
 import Closed_Field
-
+from _Bfield_dict import Bfield_dict
 
 
 class Lstar_Data(datamodel.SpaceData):
@@ -99,14 +98,6 @@ def get_Lstar(pos, date, alpha = 90,
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
 
-    # decide which field model to use, this is a keyword
-    if Bfield == 'Lgm_B_OP77':
-        Lgm_Set_Lgm_B_OP77( mmi.c )
-    elif Bfield == 'Lgm_B_T89':
-        Lgm_Set_Lgm_B_T89( mmi.c )
-    else:
-        raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
-
     # save Kp
     # TODO maybe add some Kp checking
     ans['Kp'] = datamodel.dmarray([Kp])
@@ -125,13 +116,11 @@ def get_Lstar(pos, date, alpha = 90,
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     #MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
 
-    # decide which field model to use, this is a keyword
-    if Bfield == 'Lgm_B_OP77':
-        Lgm_Set_Lgm_B_OP77( MagEphemInfo.LstarInfo.contents.mInfo )
-    elif Bfield == 'Lgm_B_T89':
-        Lgm_Set_Lgm_B_T89( MagEphemInfo.LstarInfo.contents.mInfo )
-    else:
-        raise(NotImplementedError("Only Bfield='Lgm_B_OP77, Lgm_B_T89' currently supported"))
+    ## decide which field model to use, this is a keyword
+    try:
+        Bfield_dict[Bfield](MagEphemInfo.LstarInfo.contents.mInfo)
+    except KeyError:
+        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
 
     MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?

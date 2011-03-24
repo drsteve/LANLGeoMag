@@ -14,7 +14,7 @@ Test suite for the LstarVersusPA
 import unittest
 import datetime
 
-import Lstar
+import Lstar, magcoords
 
 class Lstar_Tests(unittest.TestCase):
     def setUp(self):
@@ -70,7 +70,27 @@ class Lstar_Data_Tests(unittest.TestCase):
         self.assertTrue(hasattr(a, 'attrs'))
         self.assertTrue(a['position'] == {})
 
+class Lvalue_Tests(unittest.TestCase):
+    def setUp(self):
+        super(Lvalue_Tests, self).setUp()
+        self.date = datetime.datetime(2010, 10, 12)
 
+    def tearDown(self):
+        super(Lvalue_Tests, self).tearDown()
+
+    def testL_B_T89_(self):
+        """Test that Lvalue code returns same value of L returned by Lstar"""
+        ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='GSM', Bfield = 'Lgm_B_T89', LstarQuality = 3)
+        ans2 = magcoords.Lvalue([-4.2, 1, 1], self.date, alpha=90, Kp=4, Bfield = 'Lgm_B_T89', method='Hilton')
+        ans3 = magcoords.Lvalue([-4.2, 1, 1], self.date, alpha=90, Kp=4, Bfield = 'Lgm_B_T89', method='McIlwain')
+        self.assertAlmostEqual(ans2['L'], ans[90]['LHilton'], places=3)
+        self.assertAlmostEqual(ans3['L'], ans[90]['LMcIlwain'], places=3)
+        
+    def test_L_cdip(self):
+        LH = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='Hilton', coord_system='SM')
+        LM = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='McIlwain', coord_system='SM')
+        self.assertAlmostEqual(LH['L'], 6.00000, places=6)
+        self.assertAlmostEqual(LM['L'], 6.00000, places=6)
 
 if __name__ == '__main__':
     unittest.main()

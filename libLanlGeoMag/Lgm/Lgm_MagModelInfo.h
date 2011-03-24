@@ -492,6 +492,8 @@ void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int 
  * Added for Python wrapping, the function pointer is hard to impossible to
  * deal with setting
  */
+void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_gm_B_TS04(Lgm_MagModelInfo *MagInfo);

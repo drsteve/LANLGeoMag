@@ -245,6 +245,12 @@ void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_OP77;
 }
 
+void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_CDIP;
+    MagInfo->Bfield = Lgm_B_cdip;
+}
 
-
-
+void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_EDIP;
+    MagInfo->Bfield = Lgm_B_edip;
+}
