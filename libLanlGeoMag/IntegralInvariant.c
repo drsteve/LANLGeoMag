@@ -10,6 +10,21 @@
 #define DIFF_SCHEME     USE_TWO_POINT
 //#define DIFF_SCHEME     USE_FOUR_POINT
 
+/*
+ *  Computes the following integral
+ *
+ *
+ *                          / sm_north       
+ *                         |                 [                ] (1/2)
+ *                         |	             [	      B(s)    ]
+ *                 I  =    |                 [ 1 -  --------  ]  	ds
+ *                         |                 [         Bm     ]
+ *                         |                 [                ]
+ *                        / sm_south
+ *                       
+ *
+ *
+ */
 
 
 /**
@@ -25,45 +40,35 @@
  *   
  *   The integral is as follows:
  *
- *
- *                          / sm_north       
- *                         |                 [                ] (1/2)
- *                         |	             [	      B(s)    ]
- *                 I  =    |                 [ 1 -  --------  ]  	ds
- *                         |                 [         Bm     ]
- *                         |                 [                ]
- *                        / sm_south
- *                       
- *
- *  I think these are now all reentrant.
- *
- */
- /*    \f[
- *       I = \int_{sm_{south}}^{sm_{north}}
- *             \left\{
- *                1 - {B(s)\over Bm}
- *             \right\}^{1/2} ds
- *    \f]
+ *      \f[
+ *          I = \int_{sm_{south}}^{sm_{north}}
+ *              \left\{
+ *                  1 - {B(s)\over Bm}
+ *              \right\}^{1/2} ds
+ *      \f]
  *
  *
- *      @param mInfo    A properly initialized Lgm_MagModelInfo structure.
- *
- *      @return         I, The integral invariant.
  *
  *
- *   The routine needs the following values set properly in the mInfo structure;
- *      - mInfo->Sm_South
- *      - mInfo->Sm_North
- *      - mInfo->Lgm_I_Integrator_epsabs
- *      - mInfo->Lgm_I_Integrator_epsrel
- *      - mInfo->Lgm_I_Integrator
- *      - other things too (model info etc...)
+ *      \param[in,out]  mInfo    A properly initialized Lgm_MagModelInfo structure.
  *
- *  On exit, the following will be set;
- *      - mInfo->Lgm_n_I_integrand_Calls
- *      - other things...
+ *      \return         I, The integral invariant.
  *
  *
+ *      \note
+ *           - The routine needs the following values set properly in the mInfo structure;
+ *              - mInfo->Sm_South
+ *              - mInfo->Sm_North
+ *              - mInfo->Lgm_I_Integrator_epsabs
+ *              - mInfo->Lgm_I_Integrator_epsrel
+ *              - mInfo->Lgm_I_Integrator
+ *              - other things too (model info etc...)
+ *      \note
+ *          - On exit, the following will be set;
+ *              - mInfo->Lgm_n_I_integrand_Calls
+ *              - other things...
+ *      \note
+ *          - I think these are now all reentrant.
  *
  *
  */

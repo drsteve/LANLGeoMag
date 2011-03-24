@@ -244,10 +244,10 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
  *  \param[in] DumpDiagnostics  Boolean flag to turn on/off dumping of diagnostics.
  *  \return    A pointer to an allocated and initialized Lgm_FluxToPsd stucture.
  *
- *  You must destroy this with Lgm_FreeFluxToPsd() when you are done.
+ *  You must destroy this with Lgm_F2P_FreeFluxToPsd() when you are done.
  *
  */
-Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
+Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
 
     Lgm_FluxToPsd *f;
 
@@ -275,7 +275,7 @@ Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics ) {
  *  \param f  Pointer to the allocated Lgm_FluxToPsd structure that you want to destroy.
  *
  */
-void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
+void Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
     if ( f->Alloced1 ) {
         LGM_ARRAY_1D_FREE( f->E );
@@ -306,7 +306,7 @@ void Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
  *      \param[in]          u   Position of measurment.
  *      \param[in,out]      f   Lgm_FluxToPsd sturcture.
  */
-void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f ) {
 
     f->DateTime = *d;
     f->Position = *u;
@@ -325,7 +325,7 @@ void Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxTo
  *    \param[in,out]  f                 Lgm_FluxToPsd sturcture.
  *
  */
-void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
 
     
     int     i, j;
@@ -392,36 +392,48 @@ void Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lg
 
 
 /**
- *  The routine Lgm_FluxPsd_SetFlux() gives us an  array of f(E, Alpha).  BUT,
- *  what we really need in the end is f( mu, K ). Although mu is easy to
- *  compute, it is dependant on both E and Alpha. K is only dependant upon
- *  Alpha, but on the other hand K is not so easy to compute from Alpha.
+ *  Computes Phase Space Density at user-supplied constant values of \f$\mu\f$
+ *  and K.
+ *
+ *  This routine ( Lgm_FluxPsd_GetPsdAtConstMusAndKs() ) must operate on a
+ *  pre-initialized Lgm_FluxToPsd structure.  The routine Lgm_FluxToPsd_SetFlux()
+ *  is used to add differential flux data/info to an Lgm_FluxToPsd structure
+ *  and it also converts the differential flux to Phase Space Density at
+ *  constant E and \f$\alpha\f$ (i.e. it computes \f$ f(E, \alpha) \f$ ).
+ *
+ *  However, what we really want is Phase Space Density at constant \f$\mu and
+ *  K\f$ (i.e. we want \f$f( \mu, K )\f$). Although \f$mu\f$ is easy to
+ *  compute, it is dependant on both E and \f$\alpha\f$. K is only dependant
+ *  upon \f$\alpha\f$, but on the other hand K is not so easy to compute from
+ *  \f$\alpha\f$.
  * 
- *  Note that f( E, a ) is the same as f( E(mu, a(K)), a(K) ). Thus, for a
- *  given mu and K, we can figure out what E and a they correspond to and then
- *  we can just use the f(E, a) array to compute the desired f values. The
- *  steps are;
+ *  To perform the calculation we note that \f$f( E, \alpha )\f$ is the same as
+ *  \f$f( E(\mu, \alpha(K)), \alpha(K) )\f$. Thus, for a given \f$\mu\f$ and K,
+ *  we can figure out what E and \f$\alpha\f$ they correspond to and then we
+ *  can just use the \f$f(E, \alpha)\f$ array to compute the desired f values.
+ *  The steps are;
  *
- *      1. For each K, compute Alpha(K). We already have this routine ( AlphaOfK() ).
+ *      - For each K, compute \f$\alpha(K)\f$. This is done with the routine
+ *        Lgm_AlphaOfK().
  *
- *      2. Then we compute E from Alpha and the given mu and Alpha values.
+ *      - Then we compute E from \f$\alpha\f$ and the given mu and Alpha
+ *        values.
  *
- *      3. Then just look up f(E,Alpha) from the array (interp or fit or whatever).
+ *      - Then we look up \f$f(E, \alpha)\f$ from the array (interp or fit or
+ *        whatever).
  *
- *  Inputs:
- *          nMu -- Number of Mu values
- *           Mu -- 1-D array of Mu values
- *           nK -- Number of K values
- *            K -- 1-D array of K values
+ *      \param[in]      nMu     Number of Mu values
+ *      \param[in]      Mu      1-D array of Mu values
+ *      \param[in]      nK      Number of K values
+ *      \param[in]      K       1-D array of K values
+ *      \param[in,out]  f       A properly pre-initialized Lgm_FluxToPsd structure.
  *
- *  Outputs:
- *          PSD -- 2-D array of f(Mu, K). The user must alloc memory for this array.
- * 
- *  Usage:
- * 
+ *      \author     Mike Henderson
+ *      \date       2011
+ *      \warning    Still working on this code. It is not finished.
  * 
  */
-void Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
     int                 k, m;
     double              AlphaEq, SinA;
@@ -500,7 +512,7 @@ assumes electrons -- generalize this...
     LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nK; m++ ){
         for ( k=0; k<nK; k++ ){
-            f->PSD_MK[m][k] =  Lgm_FluxPsd_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+            f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
         }
     }
 
@@ -526,7 +538,7 @@ double Cost( double *x, int *data ){
  * The f structure should have an initialized PSD[E][a] array in it.
  * This routine computes psd given a value of E and a.
  */
-double  Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
+double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
     int     j, i, i0, i1;
     double  a0, a1, y0, y1, slp, *g, psd;

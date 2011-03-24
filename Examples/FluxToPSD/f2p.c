@@ -7,7 +7,7 @@ int main( ) {
     Lgm_CTrans     *c = Lgm_init_ctrans( 0 );
     Lgm_DateTime   *d;
     Lgm_Vector      u;
-    Lgm_FluxToPsd  *f2p = Lgm_CreateFluxToPsd(1);
+    Lgm_FluxToPsd  *f2p = Lgm_F2P_CreateFluxToPsd(1);
 
     double          **J, *E, *A;
     int             nE, nA, i, j;
@@ -18,11 +18,12 @@ int main( ) {
     double          f, p2c2, df, sa;
 
 
-
-    //  Set date/time and position
+    /*
+     * Set date/time and position
+     */
     d = Lgm_DateTime_Create( 2001, 1, 1, 0.0, LGM_TIME_SYS_UTC, c );
     u.x = -6.6; u.y =  0.0; u.z =  0.0;
-    Lgm_FluxToPsd_SetDateTimeAndPos( d, &u, f2p );
+    Lgm_F2P_SetDateTimeAndPos( d, &u, f2p );
     Lgm_DateTime_Destroy( d );
 
 
@@ -52,12 +53,15 @@ int main( ) {
             J[i][j] = sa*sa*df;       // sin^2() modulation
         }
     }
-    Lgm_FluxToPsd_SetFlux( J, E, nE, A, nA, f2p );
+
+    // Add diff. flux data/info to f2p structure.
+    Lgm_F2P_SetFlux( J, E, nE, A, nA, f2p ); 
 
 
 
     /*
-     *  Compute F(mu, K)
+     *  Choose a set of Mu's and K's 
+     *  and compute Phase Space Density at these constant Mu's and K's
      */
     nMu = 18;
     nK  = 18;
@@ -65,7 +69,7 @@ int main( ) {
     LGM_ARRAY_1D( K, nK, double );
     for (i=0; i<nMu; i++) Mu[i] = 100.0 + 100.0*i;
     K[0] = 0.01; for (j=1; j<nK; j++) K[j] = K[j-1]*2.0;
-    Lgm_FluxPsd_GetPsdAtConstMusAndKs( Mu, nMu, K, nK, f2p );
+    Lgm_F2P_GetPsdAtConstMusAndKs( Mu, nMu, K, nK, f2p );
     
     
 
@@ -77,7 +81,7 @@ int main( ) {
 
 
     Lgm_free_ctrans( c );
-    Lgm_FreeFluxToPsd( f2p );
+    Lgm_F2P_FreeFluxToPsd( f2p );
 
     return(0);
 }

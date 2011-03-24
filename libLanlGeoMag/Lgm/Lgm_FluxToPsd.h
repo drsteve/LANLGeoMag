@@ -126,12 +126,12 @@ typedef struct Lgm_FluxToPsd {
 
 
 
-Lgm_FluxToPsd *Lgm_CreateFluxToPsd( int DumpDiagnostics );
-void           Lgm_FreeFluxToPsd( Lgm_FluxToPsd *f );
-void           Lgm_FluxToPsd_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
-void           Lgm_FluxToPsd_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
-void           Lgm_FluxPsd_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p );
-double         Lgm_FluxPsd_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f );
+Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics );
+void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
+void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
+void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
+void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p );
+double         Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f );
 
 
 
