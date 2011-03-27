@@ -64,13 +64,13 @@ int main( ) {
      *  Choose a set of Mu's and K's 
      *  and compute Phase Space Density at these constant Mu's and K's
      */
-    nMu = 18;
-    nK  = 18;
+    nMu = 36;
+    nK  = 36;
     LGM_ARRAY_1D( Mu, nMu, double );
     LGM_ARRAY_1D( K, nK, double );
-    for (i=0; i<nMu; i++) Mu[i] = 100.0 + 100.0*i;
+    for (i=0; i<nMu; i++) Mu[i] = 100.0 + 100.0*i/2.0;
 //    K[0] = 0.01; for (j=1; j<nK; j++) K[j] = K[j-1]*2.0;
-for (j=0; j<nK; j++) K[nK-1-j] = 1.0 + (double)j;
+for (j=0; j<nK; j++) K[nK-1-j] = 1.0 + (double)j*.5;
     Lgm_F2P_GetPsdAtConstMusAndKs( Mu, nMu, K, nK, f2p );
     
     

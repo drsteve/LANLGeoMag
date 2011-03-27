@@ -543,7 +543,7 @@ For now we will just go with the defaults.
         #pragma omp for schedule(dynamic, 1)
         for ( k=0; k<nK; k++ ){
 
-            mInfo2 = Lgm_CopyMagInfo( mInfo );
+            mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
 
             f->K[k]    = K[k];
             AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
@@ -561,7 +561,7 @@ For now we will just go with the defaults.
             }
             printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
-            Lgm_FreeMagInfo( mInfo2 );
+            Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
             
 
         }

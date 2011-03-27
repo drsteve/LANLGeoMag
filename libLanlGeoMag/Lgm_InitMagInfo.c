@@ -83,6 +83,7 @@ void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info ) {
 
     Lgm_free_ctrans( Info->c );
     free( Info );
+//what about any splines that may have been alloc'd?
 
 }
 
@@ -111,6 +112,7 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
 
     /*
+     *  t->c and s->c now point at the same thing. We dont want that.
      *  Now, copy the Lgm_CTrans struct properly.
      */
     t->c = Lgm_CopyCTrans( s->c );
@@ -118,9 +120,15 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
     /*
      *  Lets also assume that GSL interp stuff should be NULL
+     *  This routine wont yet properly copy over the spline stuff. 
+     *  Need to be careful if you want an independent copy of that stuff...
+     *  BE careful free these things in copies -- it'll free them for all other copies too.
      */
     //t->acc    = (gsl_interp_accel *)NULL;
     //t->spline = (gsl_spline *)NULL;
+
+    // octree stuff is also not copied correctly...
+
 
     return( t );
 

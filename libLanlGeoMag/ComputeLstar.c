@@ -217,7 +217,6 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
 
-    return LstarInfo;
 }
 
 
@@ -415,6 +414,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
 
                 }
+                Ifound = I;
 
 
 
@@ -468,7 +468,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     nLines = (int)(24.0/DeltaMLT + 0.5);
-    for ( koffset=nk=k=0, MLT=MLT0; MLT<(MLT0+24.0-1e-10); MLT += DeltaMLT){
+    for ( k=0, MLT=MLT0; MLT<(MLT0+24.0-1e-10); MLT += DeltaMLT){
 
 
 	    /*
@@ -512,7 +512,8 @@ delta = 5.0;
 	     *  enlarge the search.
     	 */
 	    done2 = FALSE; FoundShellLine = FALSE; Count = 0;
-	    while ( !done2 ) {
+	    //while ( !done2 && (k > 0) ) {
+	    while ( !done2  ) {
 
 	        if ( Count == 0 ) {
 
@@ -576,6 +577,12 @@ mlat0 = -30.0;
             }
 	    }
 
+
+
+
+        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat         = %g  \t Count = %d%s", PreStr, mlat, Count, PostStr ); fflush(stdout);
+
+
         /*
          * Save individual I values
          */
@@ -584,8 +591,6 @@ mlat0 = -30.0;
 
         MirrorMLT[k]  = MLT;
         MirrorMlat[k] = mlat;
-
-        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat         = %g  \t Count = %d%s", PreStr, mlat, Count, PostStr ); fflush(stdout);
 
 
         /*
