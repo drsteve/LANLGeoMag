@@ -512,8 +512,8 @@ delta = 5.0;
 	     *  enlarge the search.
     	 */
 	    done2 = FALSE; FoundShellLine = FALSE; Count = 0;
-	    //while ( !done2 && (k > 0) ) {
-	    while ( !done2  ) {
+	    while ( !done2 && (k > 0) ) {
+	    //while ( !done2  ) {
 
 	        if ( Count == 0 ) {
 
