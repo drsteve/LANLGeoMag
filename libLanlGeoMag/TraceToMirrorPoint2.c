@@ -20,6 +20,8 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include <omp.h>
 
+#define LC_TOL  0.99    // Allow height to be as low as .99*Lgm_LossConeHeight, before we call it "in the loss cone"
+
 
 
 int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info ) {
@@ -38,7 +40,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      */
     Lgm_Convert_Coords( u, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
-    if ( Height < Info->Lgm_LossConeHeight ) {
+    if ( Height < LC_TOL*Info->Lgm_LossConeHeight ) {
         if ( Info->VerbosityLevel > 1 ) 
         printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         return(-1); // below loss cone height -> particle is in loss cone!
@@ -143,8 +145,10 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 	    Htry = fabs(0.2*(R-0.999999));
         if (Htry < 1e-12) done = TRUE;
 
-	    if ( Height < Info->Lgm_LossConeHeight ) {
-            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
+//	    if ( Height < Info->Lgm_LossConeHeight ) {
+	    if ( Height < 0.0 ) {
+//            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
+            if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth. (Height = %g) \n", Height );
 	        return(-1); /* dropped below loss cone height -> particle is in loss cone! */
 	    } 
 
@@ -190,6 +194,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
 
+
     /*
      *  Take average of endpoints as final answer
      */
@@ -199,9 +204,9 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     *Sm = Sb;
 
 
-    Lgm_Convert_Coords( &v, &w, GSM_TO_WGS84, Info->c );
+    Lgm_Convert_Coords( v, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
-	if ( Height < Info->Lgm_LossConeHeight ) {
+	if ( Height < LC_TOL*Info->Lgm_LossConeHeight ) {
         if ( Info->VerbosityLevel > 1 ) printf("Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
 	    return(-1); /* dropped below loss cone height -> particle is in loss cone! */
 	}

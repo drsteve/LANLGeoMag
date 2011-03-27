@@ -398,6 +398,7 @@ else:
     a = int(SatNum/1000)
 
 
+    start = time.time()
     for t in range(s,e,delta):
         dt    = datetime.datetime.fromtimestamp(t)
         iso   = dt.isoformat()
@@ -448,9 +449,14 @@ else:
         #
         if Append:
             os.system('./MagEphemFromTLE -a')
+            
         else:
             os.system('./MagEphemFromTLE')
             Append = True
+
+        end = time.time()
+        elapsed= end - start
+        print "Elapsed Time: ", elapsed, "seconds"
             
         
 

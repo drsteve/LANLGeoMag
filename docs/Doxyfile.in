@@ -37,7 +37,7 @@ PROJECT_NUMBER         = @PACKAGE_VERSION@
 # for a project that appears at the top of each page and should give viewer
 # a quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "An extensive C extensive library for; Coordinate system definitions and transformations; Magnetic field model calculations; Magnetic field line tracing; Adiabatic invariant calculations; and more."
+PROJECT_BRIEF          = "An extensive C library for; Space Physics coordinate system transformations; Magnetic field model calculations; Magnetic field line tracing; Adiabatic invariant calculations; and more."
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is 
 # included in the documentation. The maximum height of the logo should not 

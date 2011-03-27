@@ -11,6 +11,17 @@
 
 
 
+
+typedef struct _FitData { 
+
+    int     n;
+    double  *E;
+    double  *g;
+
+} _FitData;
+
+
+
 // Routines for converting between Flux and Phase Space Density
 
 
@@ -18,6 +29,9 @@
 
 
 /**
+ *  \brief
+ *     Computes relativisitic first adiabatic invariant.
+ *  \details
  *     Computes relativisitic first adiabatic invariant, \f$\mu\f$, given: Particle's
  *     kinetic energy \f$E_k\f$, Pitch Angle \f$\alpha\f$, the local B-field strength \f$B\f$, and the
  *     particle's rest energy \f$E_\circ\f$. The relationship is:
@@ -36,12 +50,12 @@
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
  *          \f}
  *      
- *      \param[in]        Ek    Kinetic Energy of Particle.    <b>( MeV )</b>
- *      \param[in]        E0    Rest mass of Particle.         <b>( MeV )</b>
- *      \param[in]        a     Pitch Angle of Particle.       <b>( Degrees )</b>
- *      \param[in]        B     Local magnetic field strength. <b>( nT )</b>
+ *      \param[in]      Ek  Kinetic Energy of Particle.     <b>( MeV )</b>
+ *      \param[in]      a   Pitch Angle of Particle.        <b>( Degrees )</b>
+ *      \param[in]      B   Local magnetic field strength.  <b>( nT )</b>
+ *      \param[in]      E0  Rest mass of Particle.          <b>( MeV )</b>
  *
- *      \return           First adiabatic invariant, Mu. <b>( MeV/G )</b>
+ *      \return         First adiabatic invariant, Mu.      <b>( MeV/G )</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
@@ -64,14 +78,20 @@ double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
 
 /**
- * Returns Particle's Kinetic Energy, Ek, given: Particle's relativistic first
- * invariant, Mu, Pitch Angle and the local B-field strength and rest energy.
+ * Returns Particle's Kinetic Energy, \f$E_k\f$, given: Particle's relativistic
+ * first invariant, \f$\alpha\f$, Pitch Angle \f$\alpha\f$ and the local
+ * B-field strength and rest energy. This is the inverse of Lgm_Ek_to_Mu(). See
+ * description of Lgm_Ek_to_Mu() for more details on the equations used.
  *  
- *        \param[in]  Mu Kinetic Energy of Particle.    <b>( MeV/G )</b>
- *        \param[in]  a  Pitch Angle of Particle.       <b>( Degrees )</b>
- *        \param[in]  B  Local magnetic field strength. <b>( nT )</b>
+ *      \param[in]      Mu  First adiabatic invariant.      <b>( MeV/G )</b>
+ *      \param[in]      a   Pitch Angle of Particle.        <b>( Degrees )</b>
+ *      \param[in]      B   Local magnetic field strength.  <b>( nT )</b>
+ *      \param[in]      E0  Rest mass of Particle.          <b>( MeV )</b>
  *
- *        \return     First adiabatic invariant, Mu. <b>( MeV )</b>
+ *      \return         First adiabatic invariant, Mu.      <b>( MeV )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  */
 double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 
@@ -141,10 +161,13 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f}
  *  
  *
- *      \param[in]    E    Kinetic Energy of Particle.    <b>( MeV )</b>
- *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.       <b>( MeV )</b>
+ *      \param[in]      Ek (\f$ = E_k) \f$  Kinetic Energy of Particle.   <b>( MeV )</b>
+ *      \param[in]      E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
  *
- *      \return       p2c2 (\f$ = p^2c^2 = E_k(E_k+2E_\circ)\f$)     <b>( MeV^2 )</b>
+ *      \return         p2c2 (\f$ = p^2c^2 = E_k(E_k+2E_\circ)\f$)        <b>( MeV^2 )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  */
 double  Lgm_p2c2( double Ek, double E0 ) {
     return( Ek*(Ek+2.0*E0) );    // p^2c^2 in units of MeV^2
@@ -152,7 +175,7 @@ double  Lgm_p2c2( double Ek, double E0 ) {
 
 
 /**
- * returns \f$ (v/c)^2 \f$ as a function of Ek and E0 using the following relation,
+ * Returns \f$ (v/c)^2 \f$ as a function of \f$E_k\f$ and \f$E_\circ\f$ using the following relation,
  *
  *          \f{eqnarray*}{
  *              (v/c)^2 &=& m^2v^2/(m^2c^2) \\
@@ -161,6 +184,14 @@ double  Lgm_p2c2( double Ek, double E0 ) {
  *                      &=& p^2c^2/E^2 \\
  *                      &=& {E_k(E_k+2E_\circ) \over (E_k+E_\circ)^2}
  *          \f}
+ *
+ *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( MeV )</b>
+ *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
+ *
+ *      \return       v2overc2 (\f$ = v^2/c^2)\f$)                      <b>( dimensionless )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  */
 double  Lgm_v2overc2( double Ek, double E0 ) {
     double  E = Ek + E0;
@@ -171,6 +202,14 @@ double  Lgm_v2overc2( double Ek, double E0 ) {
 /**
  *   Returns relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$
  *   Note that \f$ (v/c)^2 = E_k(E_k+2E_\circ)/(E_k+E_\circ)^2 \f$ (see Lgm_v2overc2().)
+ *
+ *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( MeV )</b>
+ *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
+ *
+ *      \return       gamma (\f$ = [ 1 - (v/c)^2 ]^{-1/2} \f$)          <b>( dimensionless )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  */
 double  Lgm_gamma( double Ek, double E0 ) {
     double  E = Ek + E0;
@@ -186,19 +225,24 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *      f = {j \over p^2}
  *      \f]
  *
- *  Multiply top and bottom by \f$ c^2 \f$ gives,
+ *  Multiplying the top and bottom by \f$ c^2 \f$ gives,
  *      \f{eqnarray*}{
  *          f &=& {j c^2 \over p^2c^2 } \\
  *          f &=& { j\over c } {c^3 \over (p^2c^2)}
  *      \f}
  *  
  *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
- *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
+ *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm}
+ *  \mbox{MeV}\right]^3 \f$. These are the standard GEM phase space density
+ *  units.
  *
- *     \param[in]     j    Differential Flux in units of <b>#/cm^2/s/sr/MeV</b>
- *     \param[in]     p2c2 (\f$ = p^2 c^2\f$) in units of <b>Mev^2</b>
+ *      \param[in]      j               Differential Flux in units of   <b>#/cm^2/s/sr/MeV</b>
+ *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of             <b>Mev^2</b>
  *  
- *      \return       f, Phase space density in units of <b>(c/cm/MeV)^3</b>
+ *      \return         f, Phase space density in units of              <b>(c/cm/MeV)^3</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  *  
  */
 double Lgm_DiffFluxToPsd( double j, double p2c2 ){
@@ -225,26 +269,30 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
  *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
  *
- *     \param[in]     f    Phase space density in units of <b>(c/cm/MeV)^3</b>
- *     \param[in]     p2c2 (\f$ = p^2 c^2\f$) in units of  <b>Mev^2</b>
+ *      \param[in]      f    Phase space density in units of    <b>(c/cm/MeV)^3</b>
+ *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of     <b>Mev^2</b>
  *  
- *      \return       j, Differential Flux in units of     <b>#/cm^2/s/sr/MeV</b>
-
+ *      \return         j, Differential Flux in units of        <b>#/cm^2/s/sr/MeV</b>
  *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *  
  */
 double Lgm_PsdToDiffFlux( double f, double p2c2 ){
-    return( f*2.9979e10/p2c2 ); // j in units of #/cm^2/s/sr/MeV
+    return( f*2.9979e10*p2c2 ); // j in units of #/cm^2/s/sr/MeV
 }
 
 
 
 /**
- * Create a calloc'd Lgm_FluxToPsd structure.
+ *  Returns ma pointer to a dynamically allocated Lgm_FluxToPsd structure.
+ *  User must destroy this with Lgm_F2P_FreeFluxToPsd() when done.
  *
- *  \param[in] DumpDiagnostics  Boolean flag to turn on/off dumping of diagnostics.
- *  \return    A pointer to an allocated and initialized Lgm_FluxToPsd stucture.
+ *      \param[in]      DumpDiagnostics  Boolean flag to turn on/off dumping of diagnostics.
+ *      \return         A pointer to an allocated and initialized Lgm_FluxToPsd stucture.
  *
- *  You must destroy this with Lgm_F2P_FreeFluxToPsd() when you are done.
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  *
  */
 Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
@@ -270,9 +318,13 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
 }
 
 /**
- * Destroy a Lgm_FluxToPsd structure.
+ * Destroy a dynamically allocated Lgm_FluxToPsd structure. (E.g. one that was
+ * created by Lgm_F2P_CreateFluxToPsd().)
  *
- *  \param f  Pointer to the allocated Lgm_FluxToPsd structure that you want to destroy.
+ *      \param          f  Pointer to the allocated Lgm_FluxToPsd structure that you want to destroy.
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  *
  */
 void Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
@@ -302,9 +354,13 @@ void Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
  *  Set Date/Time and position in the Lgm_FluxToPsd structure.
  *      
  *     
- *      \param[in]          d   Date/Time of measurement.
- *      \param[in]          u   Position of measurment.
- *      \param[in,out]      f   Lgm_FluxToPsd sturcture.
+ *      \param[in]      d   Date/Time of measurement.
+ *      \param[in]      u   Position of measurment (in GSM).
+ *      \param[in,out]  f   Lgm_FluxToPsd sturcture.
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
  */
 void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f ) {
 
@@ -317,12 +373,15 @@ void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f
 /**
  *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
  *
- *    \param[in]      J                 2D array containing the differential flux values as a function of energy and pitch angle.
- *    \param[in]      E                 1D array containing the energy values implied by the first index of Flux[][] array.
- *    \param[in]      nE                number of energies.
- *    \param[in]      A                 1D array containing the pitch angles values implied by the second index of Flux[][] array.
- *    \param[in]      nA                number of pitch angles.
- *    \param[in,out]  f                 Lgm_FluxToPsd sturcture.
+ *      \param[in]      J                 2D array containing the differential flux values as a function of energy and pitch angle.
+ *      \param[in]      E                 1D array containing the energy values implied by the first index of Flux[][] array.
+ *      \param[in]      nE                number of energies.
+ *      \param[in]      A                 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *      \param[in]      nA                number of pitch angles.
+ *      \param[in,out]  f                 Lgm_FluxToPsd sturcture.
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
  *
  */
 void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
@@ -441,6 +500,10 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
     /*
      * Init mInfo
+This is no good! How does user define mag model etc...?
+I think there needs to be a Lgm_MagModelInfo struct in f
+Then add a routine to set stuff up in there. Or just use the ones we have already....
+For now we will just go with the defaults.
      */
     mInfo = Lgm_InitMagInfo();
 
@@ -455,6 +518,9 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
         LGM_ARRAY_2D_FREE( f->PSD_MK );
     }
     
+    /*
+     * Alloc arrays
+     */
     f->nMu = nMu; 
     f->nK  = nK; 
     LGM_ARRAY_1D( f->Mu,    f->nMu, double );
@@ -462,16 +528,19 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
     LGM_ARRAY_1D( f->AofK,  f->nK,  double );
     LGM_ARRAY_2D( f->EofMu, f->nMu,  f->nK,  double );
 
+
     /*
-     * Copy K's into f structure.
+     * Copy K's (given in the arguments) into f structure.
      * Transform the K's into Alpha's using Lgm_AlphaOfK().
      * Save the results in the f structure.
      */
+
     Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
     f->B = mInfo->Blocal;
     for ( k=0; k<nK; k++ ){
         f->K[k]    = K[k];
         AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+printf("AlphaEq = %g\n", AlphaEq);
         SinA       = sqrt( mInfo->Blocal/mInfo->Bmin ) * sin( RadPerDeg*AlphaEq );
         if ( AlphaEq > 0.0 ) {
             if ( SinA <= 1.0 ) {
@@ -490,17 +559,17 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
 
     /*
-     * Copy Mu's into f structure.
+     * Copy Mu's (given in the arguments) into f structure.
      * Transform the Mu's into (Kinetic) Energies.
      * Save the results in the f structure.
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
 assumes electrons -- generalize this...
      */
-    for ( m=0; m<nK; m++ ){
+    for ( m=0; m<nMu; m++ ){
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
             f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
-            printf("f->Mu[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g\n", m, k, m, k, f->Mu[m], f->AofK[k], f->B, f->EofMu[m][k]);
+            printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
 
@@ -510,13 +579,18 @@ assumes electrons -- generalize this...
      * The result will be the same as PSD at the given Mu's and K's
      */
     LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
-    for ( m=0; m<nK; m++ ){
+    for ( m=0; m<nMu; m++ ){
         for ( k=0; k<nK; k++ ){
             f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
         }
     }
 
+    if ( f->DumpDiagnostics ) {
+        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_MK.gif", f->nK, f->nMu, f->PSD_MK );
+    }
 
+
+// FIX this... The create and destroy of this should not be in here...
     Lgm_FreeMagInfo( mInfo );
 
     f->Alloced2 = TRUE;
@@ -525,10 +599,44 @@ assumes electrons -- generalize this...
 
 }
 
-double Cost( double *x, int *data ){
+double  Model( double *x, double E ) {
+
+    double  n, T, val;
+
+    n = pow( 10.0,  x[1] );
+    T = fabs( x[2] );
+
+    val = Lgm_MaxJut( n, T, E, LGM_Ee0 );
+
+    return( val );
+
+}
+
+double Cost( double *x, void *data ){
+
+    _FitData    *FitData;
+    int         i;
+    double      g_model, d, sum;
+
+    if ( (x[1] > 2.0) || ( x[1] < -30.0) ) return( 9e99 );
+    if ( (fabs( x[2] ) > 1000.0) || (fabs( x[2] ) < 1.0) ) return( 9e99 );
+
+    FitData = (_FitData *)data; 
+
+    for ( sum = 0.0, i=0; i<FitData->n; ++i ){
 
 
-    return(0.0);
+        g_model = Model( x, FitData->E[i] );
+        d = FitData->g[i] - g_model;
+
+        sum += d*d;
+if (isinf(sum)) printf("INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+if (isnan(sum)) printf("NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+
+    }
+
+
+    return( sum );
 
 }
 
@@ -540,11 +648,15 @@ double Cost( double *x, int *data ){
  */
 double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
-    int     j, i, i0, i1;
-    double  a0, a1, y0, y1, slp, *g, psd;
+    int         j, i, i0, i1;
+    double      a0, a1, y0, y1, slp, psd;
+    _FitData    *FitData;
 
     // if a < 0, we should return fill value.
     if ( a < 0.0 ) return(-9e99);
+
+    FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
+
 
     /*
      * Since pitch angle, a is bounded (here its constrained to be between 0
@@ -567,18 +679,22 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
 
     // interpolate PA
-    LGM_ARRAY_1D( g, f->nE, double );
+    FitData->n = f->nE;
+    LGM_ARRAY_1D( FitData->E, FitData->n, double );
+    LGM_ARRAY_1D( FitData->g, FitData->n, double );
     for (j=0; j<f->nE; ++j){
         a0   = f->A[i0];
         a1   = f->A[i1];
         y0   = f->PSD_EA[j][i0];
         y1   = f->PSD_EA[j][i1];
         slp  = (y1-y0)/(a1-a0);
-        g[j] = slp*(a-a0) + y0;
-        //printf("a = %g, g[%d] = %g\n", a, j, g[j]);
+        FitData->g[j] = slp*(a-a0) + y0;
+        FitData->E[j] = f->E[j];
+        //printf("a = %g, FitData->g[%d] = %g\n", a, j, FitData->g[j]);
     }
 
 
+        
     // interpolate/fit E
     // for now just do a linear interp.
     // no lets try a fit...
@@ -590,26 +706,42 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     in[7] = 10.0; //Info->Praxis_Bad_Scale_Paramater;
     in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
     in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
-    praxis( 2, x, (int *)g, Cost, in, out);
+    x[0] = 0.0;
+    x[1] = -2.0;
+    x[2] = 300.0;
+    praxis( 2, x, (void *)FitData, Cost, in, out);
+/*
+printf("out[0] = %g\n", out[0]);
+printf("out[1] = %g\n", out[1]);
 printf("out[2] = %g\n", out[2]);
+printf("out[3] = %g\n", out[3]);
+printf("out[4] = %g\n", out[4]);
+printf("out[5] = %g\n", out[5]);
+printf("out[6] = %g\n", out[6]);
+printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
 
 FILE *fp;
 printf("E = %g\n", E);
 fp = fopen("data.txt", "w");
 for (j=0; j<f->nE; ++j){
-fprintf(fp, "%g %g\n", f->E[j], g[j]);
+fprintf(fp, "%g %g\n", f->E[j], FitData->g[j]);
 }
 fclose(fp);
     
 exit(0);
+*/
     
 
+    psd = Model( x,  E );
+
+printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
     
     
 
-    LGM_ARRAY_1D_FREE( g );
+    LGM_ARRAY_1D_FREE( FitData->E );
+    LGM_ARRAY_1D_FREE( FitData->g );
+    free( FitData );
 
-printf("psd = %g\n", psd);
 
     return( psd );
 

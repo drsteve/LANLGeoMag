@@ -640,7 +640,7 @@ mlat0 = -30.0;
          * If SaveShellLines is set true, then retrace the FL and save the
          * whole FL.  Note that since we appear to only have the north
          * footpoint, we start there and trace to south. So lets pack them in
-         * the the saved arrays backwards so that they go from south to north.
+         * the saved arrays backwards so that they go from south to north.
          */
         if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
             Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );

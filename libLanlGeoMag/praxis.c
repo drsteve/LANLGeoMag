@@ -59,7 +59,7 @@
 
 
 
-void praxis( int n, double *x, int *data, double (*funct)(double *, int *data), double *in, double *out) {
+void praxis( int n, double *x, int *data, double (*funct)(double *, void *data), double *in, double *out) {
 
 	int illc,i,j,k,k2,nl,maxf,nf,kl,kt,ktm,emergency;
 	double s,sl,dn,dmin,fx,f1,lds,ldt,sf,df,qf1,qd0,qd1,qa,qb,qc,m2,m4,
@@ -369,7 +369,7 @@ double 	reltol;
 double 	abstol;
 double 	small;
 double 	h;
-double   (*funct)(double *, int *data);
+double   (*funct)(double *, void *data);
 int *data;
 
 
@@ -468,7 +468,7 @@ double 	qd1;
 double 	q0[];
 double 	q1[];
 int 	*nf;
-double  (*funct)(double *, int *);
+double  (*funct)(double *, void *);
 int     *data;
 
 {

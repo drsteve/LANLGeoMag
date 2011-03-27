@@ -486,20 +486,18 @@ typedef struct Lgm_CTrans {
 
     int               Verbose;
 
-    Lgm_LeapSeconds   l;            /**<
-                                     * Structure containing Leap Second Info
-                                     */
+    Lgm_LeapSeconds   l;            //!< Structure containing Leap Second Info
 
-    Lgm_DateTime     UT1;           /**<
-                                     * UT is the mean solar time at Greenwich.
-                                     * UT0 is a version of UT that uses data
-                                     * from many different ground stations.
-                                     * UT1 is a version of UT0 in which
-                                     * corrections for polar motion have been
-                                     * made so that time is independant of
-                                     * observing location. There is also a UT2,
-                                     * but we wont use UT0 or UT2 here.
-                                     * Units: Decimal hours
+    Lgm_DateTime     UT1;           //!< A corrected version of UT0.
+                                    /**< UT is the mean solar time at Greenwich.
+                                     *   UT0 is a version of UT that uses data
+                                     *   from many different ground stations.
+                                     *   UT1 is a version of UT0 in which
+                                     *   corrections for polar motion have been
+                                     *   made so that time is independant of
+                                     *   observing location. There is also a UT2,
+                                     *   but we wont use UT0 or UT2 here.
+                                     *   Units: Decimal hours
                                      */
 
     Lgm_DateTime     UTC;           /**<
@@ -542,7 +540,7 @@ typedef struct Lgm_CTrans {
                                       */
 
     double          DAT;             /**<
-                                      *  Difference between UTC and TAI.
+                                      reateFluxToPsd
                                       *     DAT = TAI - UTC
                                       * DAT is essentially the number of leap seconds
                                       * and are an integral number of whole seconds.

@@ -11,13 +11,23 @@
 
 
 
-double Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
+double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
 
 
 
-/*
- * Do initial setup for AlphaOfK(). This involves setting time and doing an
- * initial field trace to get m->Pmin set up properly.
+/**
+ *  Do initial setup for AlphaOfK(). This involves setting time and doing an
+ *  initial field trace to get m->Pmin set up properly.
+ *
+ *      \param[in]      d   Date/Time to use.
+ *      \param[in]      u   Position (in GSM) to use.
+ *      \param[in,out]  m   A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *      \returns        TraceFlag, the flag retuend by the Lgm_Trace() call.
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
  */
 int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
 
@@ -66,16 +76,38 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
 }
 
 
-int  Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m ) {
+/**
+ *  Clean up the setup we did in Lgm_Setup_AlphaOfK().
+ *
+ *      \param[in,out]  m   A Lgm_MagModelInfo structure that has had an InitSpline() performed on it.
+ *
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
+ */
+void  Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m ) {
 
     FreeSpline( m );
 
 }
 
 
-/*
+/**
  *   This routine returns the pitch angle that corresponds to a given value of K
- *   K = sqrt(Bm)I
+ *   \f$ K = I \sqrt{B_m}\f$.
+ *
+ *      \param[in]      K   The value of the second invariant, K        <b> ( Re G^(1/2) )</b>
+ *      \param[in,out]  m   A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *      \returns        Pitch angle, \f$\alpha\f$ implied by K          <b> ( Degrees )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
+ *      \note           You must have setup the Lgm_MagModelInfo structure
+ *                      properly first. Then you need to call Lgm_Setup_AlphaOfK() before you
+ *                      call this routine.
  *
  */
 double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
@@ -100,10 +132,8 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
     } else {
         B = m->Ellipsoid_Footprint_Bn;
     }
-    B -= 1.0; // decrease by 1nT so we dont go below LC height.
     a0 = DegPerRad*asin( sqrt( m->Bmin/B ) );
-
-    f0 = Func( K, a0, m );
+    f0 = Lgm_AlphaOfK_Func( K, a0, m );
     if ( fabs(f0) < 1e-4 ) return( a0 );
 
 
@@ -112,17 +142,17 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      *  Set up high side of bracket. A PA of 90Deg. is as high as you can get.
      *  And this should give I=0, so no need to compute I
      */
-    a1 = 90.0;
+    a1 = 80.0;
     f1 = K - 0.0;
+    f1 = Lgm_AlphaOfK_Func( K, a1, m );
     if ( fabs(f1) < 1e-4 ) return( a1 );
-
 
 
     /*
      *  If the vals are not opposite signs, we dont have a proper bracket.
      */
     if ( f0*f1 > 0.0 ) {
-        if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): [a0:a1] = [%g: %g] does not bracket root? Func( %g, %g ) = %g, Func( %g, %g ) = %g\n", a0, a1, K, a0, f0, K, a1, f1);
+        if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): [a0:a1] = [%g: %g] does not bracket root? Lgm_AlphaOfK_Func( %g, %g ) = %g, Lgm_AlphaOfK_Func( %g, %g ) = %g\n", a0, a1, K, a0, f0, K, a1, f1);
         return(-9e99);
     }
 
@@ -135,7 +165,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
          */
         //a = (a1-a0)*GOLD + a0;
         a = (a1-a0)*0.5 + a0;
-        f = Func( K, a, m );
+        f = Lgm_AlphaOfK_Func( K, a, m );
 
         if ( fabs(a1-a0) < 1e-2 ) {
             done = TRUE;
@@ -169,17 +199,30 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
 }
 
 
-/*
- *  This function returns the difference between
- *  the target K and the K(Alpha). I.e.;
+/**
+ *  This internal function returns the difference between the target K and the
+ *  K(Alpha). Its the quanity whose zero we are trying to find. I.e., we are
+ *  trying to find the Alpha that makes;
  *
- *      Func = K - K(Alpha)
+ *      Func = K - K(Alpha) = 0
  *
- *  On a plot of f(Alpha) vs Alpha, the value starts out
- *  negative for low pitch angles and crosses zero at some
- *  PA, then goes positive. 
+ *  On a plot of f(Alpha) vs Alpha, the value starts out negative for low pitch
+ *  angles and crosses zero at some PA, then goes positive. 
+ *
+ *      \param[in]      Kt              The target value of the second invariant, K        <b> ( Re G^(1/2) )</b>
+ *      \param[in]      Alpha           The pitch angle to compute Kt-K(Alpha) for         <b> ( Degrees )</b>
+ *      \param[in,out]  m               A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *      \returns        difference between Kt and K(Alpha).                                 <b> ( Re G^(1/2) )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
+ *      \note           This is an internal routine that the user probably should not call. 
+ *                      (Perhaps an exception could be if you wanted to know the final difference 
+ *                      follwoing a call to Lgm_AlphaOfK().)
  */
-double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
+double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
     double           sa, sa2, Sma, Smb, I, K;
 
@@ -188,13 +231,14 @@ double Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
     m->Bm = m->Bmin/sa2; 
 
 
+
     /*
      * Trace from Bmin point up to northern mirror point and down to
      * southern mirror point. Sma and Smb are the distances along
      * (i.e. up and down) the FL from the Bmin point.
      */
-     if ( Lgm_TraceToMirrorPoint( &(m->Pmin), &(m->Pm_South), &Sma, m->Bm, -1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) > 0 ) {
-        if ( Lgm_TraceToMirrorPoint( &(m->Pm_South), &(m->Pm_North), &Smb, m->Bm,  1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) > 0 ) {
+     if ( Lgm_TraceToMirrorPoint( &(m->Pmin), &(m->Pm_South), &Sma, m->Bm, -1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) >= 0 ) {
+        if ( Lgm_TraceToMirrorPoint( &(m->Pm_South), &(m->Pm_North), &Smb, m->Bm,  1.0, m->Lgm_TraceToMirrorPoint_Tol, m ) >= 0 ) {
 
             
             /*

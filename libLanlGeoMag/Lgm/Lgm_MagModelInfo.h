@@ -470,7 +470,7 @@ double      BofS( double s, Lgm_MagModelInfo *Info );
 int         SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info );
 double      Lgm_AlphaOfK( double K, Lgm_MagModelInfo *Info );
 int         Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m );
-int         Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m );
+void        Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m );
 int         Lgm_Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_MagModelInfo *Info );
 //int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 
