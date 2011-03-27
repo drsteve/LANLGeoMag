@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 #include "Lgm/Lgm_FluxToPsd.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
@@ -496,7 +497,7 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
     int                 k, m;
     double              AlphaEq, SinA;
-    Lgm_MagModelInfo    *mInfo;
+    Lgm_MagModelInfo    *mInfo, *mInfo2;
 
     /*
      * Init mInfo
@@ -537,23 +538,33 @@ For now we will just go with the defaults.
 
     Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
     f->B = mInfo->Blocal;
-    for ( k=0; k<nK; k++ ){
-        f->K[k]    = K[k];
-        AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo ); // Lgm_AlphaOfK() returns equatorial pitch angle.
-printf("AlphaEq = %g\n", AlphaEq);
-        SinA       = sqrt( mInfo->Blocal/mInfo->Bmin ) * sin( RadPerDeg*AlphaEq );
-        if ( AlphaEq > 0.0 ) {
-            if ( SinA <= 1.0 ) {
-                f->AofK[k] = DegPerRad*asin( SinA );
+    {
+        #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+        #pragma omp for schedule(dynamic, 1)
+        for ( k=0; k<nK; k++ ){
+
+            mInfo2 = Lgm_CopyMagInfo( mInfo );
+
+            f->K[k]    = K[k];
+            AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+            SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
+            if ( AlphaEq > 0.0 ) {
+                if ( SinA <= 1.0 ) {
+                    f->AofK[k] = DegPerRad*asin( SinA );
+                } else {
+                    f->AofK[k] = -9e99;
+                    //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                }
             } else {
                 f->AofK[k] = -9e99;
-                //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
             }
-        } else {
-            f->AofK[k] = -9e99;
-            //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+            printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+
+            Lgm_FreeMagInfo( mInfo2 );
+            
+
         }
-        printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
     }
     Lgm_TearDown_AlphaOfK( mInfo );
 
@@ -626,12 +637,13 @@ double Cost( double *x, void *data ){
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
 
 
-        g_model = Model( x, FitData->E[i] );
-        d = FitData->g[i] - g_model;
+        g_model = log10( Model( x, FitData->E[i] ) );
+        d = log10( FitData->g[i] ) - g_model;
 
         sum += d*d;
-if (isinf(sum)) printf("INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
-if (isnan(sum)) printf("NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+        //sum += fabs(d);
+if (isinf(sum)) printf("Cost, INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+if (isnan(sum)) printf("Cost, NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
 
     }
 
@@ -708,7 +720,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
     x[0] = 0.0;
     x[1] = -2.0;
-    x[2] = 300.0;
+    x[2] = 200.0;
     praxis( 2, x, (void *)FitData, Cost, in, out);
 /*
 printf("out[0] = %g\n", out[0]);
@@ -732,6 +744,7 @@ exit(0);
 */
     
 
+x[2] = 200.0;
     psd = Model( x,  E );
 
 printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
