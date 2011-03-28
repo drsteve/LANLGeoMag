@@ -224,7 +224,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
  */
 double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
-    double           sa, sa2, Sma, Smb, I, K;
+    double           rat, sa, sa2, Sma, Smb, I, K;
 
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
@@ -258,7 +258,17 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
                 m->Sm_North = Smb;
             }
 
-            if (  m->UseInterpRoutines ) {
+
+            if ( Smb <= 1e-6 ) {
+                                                                                                                                                                                                                 
+                rat = m->Bmin/m->Bm;
+                if ((1.0-rat) < 0.0) {
+                    I = 0.0;
+                } else {
+                    I = Smb*sqrt(1.0 - m->Bmin/m->Bm);
+                }
+
+            } else if (  m->UseInterpRoutines ) {
 
                 /*
                  *  Do interped I integral.

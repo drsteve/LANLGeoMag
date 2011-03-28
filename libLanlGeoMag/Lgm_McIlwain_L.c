@@ -32,7 +32,7 @@
 double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector      v1, v2, v3, Bvec;
-    double          B, sa, sa2, Blocal, dSa, dSb, r, SS, L;
+    double          rat, B, sa, sa2, Blocal, dSa, dSb, r, SS, L;
 
     *I  = -9e99;
     *Bm = -9e99;
@@ -105,7 +105,16 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                 mInfo->Sm_South = 0.0;
                 mInfo->Sm_North = SS;
 
-                if ( mInfo->UseInterpRoutines ) {
+                if ( SS <= 1e-6 ) {
+
+                    rat = mInfo->Bmin/mInfo->Bm;
+                    if ((1.0-rat) < 0.0) {
+                        *I = 0.0;
+                    } else {
+                        *I = SS*sqrt(1.0 - rat);
+                    }
+
+                } else if ( mInfo->UseInterpRoutines ) {
                     Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
                     AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );

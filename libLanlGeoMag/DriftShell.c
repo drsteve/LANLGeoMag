@@ -26,8 +26,8 @@
  */
 int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector    u, w, Pm_North;
-    double        a, b, c, d, D, I, r, Phi, cl, sl, SS, mlat_min=0.0, Dmin;
-    int            done, FoundValidI;
+    double        rat, a, b, c, d, D, I, r, Phi, cl, sl, SS, mlat_min=0.0, Dmin;
+    int           done, FoundValidI;
 
 
     /*
@@ -116,9 +116,14 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              LstarInfo->mInfo->Hmax = 0.1;
              if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
 
-                if ( SS < 1e-6 ) {
-
-                    I = 0.0;
+                if ( SS <= 1e-6 ) {
+                                                                                                                                                                                                                 
+                    rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
+                    if ((1.0-rat) < 0.0) {
+                        I = 0.0;
+                    } else {
+                        I = SS*sqrt(1.0 - rat);
+                    }
 
                 } else {
                     

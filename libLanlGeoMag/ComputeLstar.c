@@ -309,7 +309,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
     int		done2, Count, FoundShellLine;
-    double	B, dSa, dSb, smax, SS, L, Hmax;
+    double	rat, B, dSa, dSb, smax, SS, L, Hmax;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[500], MirrorMlat_Old[500];
@@ -389,7 +389,16 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 LstarInfo->mInfo->Sm_South = 0.0;
                 LstarInfo->mInfo->Sm_North = SS;
 
-                if ( LstarInfo->mInfo->UseInterpRoutines ) {
+                if ( SS <= 1e-6 ) {
+                                                                                                                                                                                                                 
+                    rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
+                    if ((1.0-rat) < 0.0) {
+                        I = 0.0;
+                    } else {
+                        I = SS*sqrt(1.0 - rat);
+                    }                                                                                                                                                                                           
+                                                       
+                } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
                     Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
