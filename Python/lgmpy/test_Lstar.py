@@ -27,34 +27,34 @@ class Lstar_Tests(unittest.TestCase):
     def testLgm_B_T89_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.02624236376, ans[90]['LHilton'])
-        self.assertAlmostEqual(5.02636496111, ans[90]['LMcIlwain'])
-        self.assertAlmostEqual(4.44658097, ans[90]['Lstar'][0])
+        self.assertAlmostEqual(5.02320512, ans[90]['LHilton'])
+        self.assertAlmostEqual(5.02332627, ans[90]['LMcIlwain'])
+        self.assertAlmostEqual(4.44428332, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.80944453, ans[90]['Lsimple'][0])
 
     def testLgm_B_T89_2(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.17724847477, ans[90]['LHilton'], places=6)
-        self.assertAlmostEqual(5.17742158538, ans[90]['LMcIlwain'], places=6)
-        self.assertAlmostEqual(4.35534221, ans[90]['Lstar'][0])
+        self.assertAlmostEqual(5.17317697, ans[90]['LHilton'], places=6)
+        self.assertAlmostEqual(5.17334804, ans[90]['LMcIlwain'], places=6)
+        self.assertAlmostEqual(4.35283590, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.46755074, ans[90]['Lsimple'][0])
 
     def testLgm_B_OP77_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
-        self.assertAlmostEqual(4.85874360104, ans[90]['LHilton'])
-        self.assertAlmostEqual(4.8588254004, ans[90]['LMcIlwain'])
-        self.assertAlmostEqual(4.55655149, ans[90]['Lstar'][0])
+        self.assertAlmostEqual(4.85646725, ans[90]['LHilton'])
+        self.assertAlmostEqual(4.85654807, ans[90]['LMcIlwain'])
+        self.assertAlmostEqual(4.55863046, ans[90]['Lstar'][0])
         self.assertAlmostEqual(6.29265777, ans[90]['Lsimple'][0])
 
     def testLgm_B_OP77_2(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         # should be no change with Kp
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
-        self.assertAlmostEqual(4.85874360104, ans[90]['LHilton'])
-        self.assertAlmostEqual(4.8588254004, ans[90]['LMcIlwain'])
-        self.assertAlmostEqual(4.55655149, ans[90]['Lstar'][0])
+        self.assertAlmostEqual(4.85646725, ans[90]['LHilton'])
+        self.assertAlmostEqual(4.85654807, ans[90]['LMcIlwain'])
+        self.assertAlmostEqual(4.55863046, ans[90]['Lstar'][0])
         self.assertAlmostEqual(6.29265777, ans[90]['Lsimple'][0])
 
 class Lstar_Data_Tests(unittest.TestCase):
@@ -83,8 +83,8 @@ class Lvalue_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='GSM', Bfield = 'Lgm_B_T89', LstarQuality = 3)
         ans2 = magcoords.Lvalue([-4.2, 1, 1], self.date, alpha=90, Kp=4, Bfield = 'Lgm_B_T89', method='Hilton')
         ans3 = magcoords.Lvalue([-4.2, 1, 1], self.date, alpha=90, Kp=4, Bfield = 'Lgm_B_T89', method='McIlwain')
-        self.assertAlmostEqual(ans2['L'], ans[90]['LHilton'], places=3)
-        self.assertAlmostEqual(ans3['L'], ans[90]['LMcIlwain'], places=3)
+        self.assertAlmostEqual(ans2['L'], ans[90]['LHilton'], places=5)
+        self.assertAlmostEqual(ans3['L'], ans[90]['LMcIlwain'], places=5)
         
     def test_L_cdip(self):
         LH = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='Hilton', coord_system='SM')

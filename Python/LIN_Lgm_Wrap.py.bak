@@ -4227,7 +4227,7 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TDB_to_UTC'):
 
 byte = c_ubyte # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 58
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 class struct_Lgm_FluxToPsd(Structure):
     pass
 
@@ -4251,6 +4251,7 @@ struct_Lgm_FluxToPsd.__slots__ = [
     'PSD_MK',
     'Alloced2',
     'DumpDiagnostics',
+    'Extrapolate',
 ]
 struct_Lgm_FluxToPsd._fields_ = [
     ('nE', c_int),
@@ -4272,89 +4273,90 @@ struct_Lgm_FluxToPsd._fields_ = [
     ('PSD_MK', POINTER(POINTER(c_double))),
     ('Alloced2', c_int),
     ('DumpDiagnostics', c_int),
+    ('Extrapolate', c_int),
 ]
 
-Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 129
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 130
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_CreateFluxToPsd'):
     Lgm_F2P_CreateFluxToPsd = _libs['libLanlGeoMag.so'].Lgm_F2P_CreateFluxToPsd
     Lgm_F2P_CreateFluxToPsd.argtypes = [c_int]
     Lgm_F2P_CreateFluxToPsd.restype = POINTER(Lgm_FluxToPsd)
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 130
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 131
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_FreeFluxToPsd'):
     Lgm_F2P_FreeFluxToPsd = _libs['libLanlGeoMag.so'].Lgm_F2P_FreeFluxToPsd
     Lgm_F2P_FreeFluxToPsd.argtypes = [POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_FreeFluxToPsd.restype = None
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 131
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 132
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_SetFlux'):
     Lgm_F2P_SetFlux = _libs['libLanlGeoMag.so'].Lgm_F2P_SetFlux
     Lgm_F2P_SetFlux.argtypes = [POINTER(POINTER(c_double)), POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_SetFlux.restype = None
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 132
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 133
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_SetDateTimeAndPos'):
     Lgm_F2P_SetDateTimeAndPos = _libs['libLanlGeoMag.so'].Lgm_F2P_SetDateTimeAndPos
     Lgm_F2P_SetDateTimeAndPos.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_Vector), POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_SetDateTimeAndPos.restype = None
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 133
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 134
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_GetPsdAtConstMusAndKs'):
     Lgm_F2P_GetPsdAtConstMusAndKs = _libs['libLanlGeoMag.so'].Lgm_F2P_GetPsdAtConstMusAndKs
     Lgm_F2P_GetPsdAtConstMusAndKs.argtypes = [POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_GetPsdAtConstMusAndKs.restype = None
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 134
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 135
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_GetPsdAtEandAlpha'):
     Lgm_F2P_GetPsdAtEandAlpha = _libs['libLanlGeoMag.so'].Lgm_F2P_GetPsdAtEandAlpha
     Lgm_F2P_GetPsdAtEandAlpha.argtypes = [c_double, c_double, POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_GetPsdAtEandAlpha.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 141
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
 if hasattr(_libs['libLanlGeoMag.so'], 'DumpGif'):
     DumpGif = _libs['libLanlGeoMag.so'].DumpGif
     DumpGif.argtypes = [String, c_int, c_int, POINTER(POINTER(c_double))]
     DumpGif.restype = None
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 143
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Ek_to_Mu'):
     Lgm_Ek_to_Mu = _libs['libLanlGeoMag.so'].Lgm_Ek_to_Mu
     Lgm_Ek_to_Mu.argtypes = [c_double, c_double, c_double, c_double]
     Lgm_Ek_to_Mu.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 143
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 144
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Mu_to_Ek'):
     Lgm_Mu_to_Ek = _libs['libLanlGeoMag.so'].Lgm_Mu_to_Ek
     Lgm_Mu_to_Ek.argtypes = [c_double, c_double, c_double, c_double]
     Lgm_Mu_to_Ek.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 144
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 145
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_p2c2'):
     Lgm_p2c2 = _libs['libLanlGeoMag.so'].Lgm_p2c2
     Lgm_p2c2.argtypes = [c_double, c_double]
     Lgm_p2c2.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 145
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 146
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_v2overc2'):
     Lgm_v2overc2 = _libs['libLanlGeoMag.so'].Lgm_v2overc2
     Lgm_v2overc2.argtypes = [c_double, c_double]
     Lgm_v2overc2.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 146
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 147
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_gamma'):
     Lgm_gamma = _libs['libLanlGeoMag.so'].Lgm_gamma
     Lgm_gamma.argtypes = [c_double, c_double]
     Lgm_gamma.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 147
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 148
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_PsdToDiffFlux'):
     Lgm_PsdToDiffFlux = _libs['libLanlGeoMag.so'].Lgm_PsdToDiffFlux
     Lgm_PsdToDiffFlux.argtypes = [c_double, c_double]
     Lgm_PsdToDiffFlux.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 148
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 149
 if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_DiffFluxToPsd'):
     Lgm_DiffFluxToPsd = _libs['libLanlGeoMag.so'].Lgm_DiffFluxToPsd
     Lgm_DiffFluxToPsd.argtypes = [c_double, c_double]
@@ -6959,7 +6961,7 @@ Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
 
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 
-Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
 Lgm_FieldIntInfo = struct_Lgm_FieldIntInfo # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 48
 

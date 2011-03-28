@@ -5106,7 +5106,7 @@ for _lib in _libs.itervalues():
 
 byte = c_ubyte # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 58
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 class struct_Lgm_FluxToPsd(Structure):
     pass
 
@@ -5130,6 +5130,7 @@ struct_Lgm_FluxToPsd.__slots__ = [
     'PSD_MK',
     'Alloced2',
     'DumpDiagnostics',
+    'Extrapolate',
 ]
 struct_Lgm_FluxToPsd._fields_ = [
     ('nE', c_int),
@@ -5151,11 +5152,12 @@ struct_Lgm_FluxToPsd._fields_ = [
     ('PSD_MK', POINTER(POINTER(c_double))),
     ('Alloced2', c_int),
     ('DumpDiagnostics', c_int),
+    ('Extrapolate', c_int),
 ]
 
-Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 129
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 130
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_CreateFluxToPsd'):
         continue
@@ -5164,7 +5166,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_CreateFluxToPsd.restype = POINTER(Lgm_FluxToPsd)
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 130
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 131
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_FreeFluxToPsd'):
         continue
@@ -5173,7 +5175,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_FreeFluxToPsd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 131
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 132
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_SetFlux'):
         continue
@@ -5182,7 +5184,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_SetFlux.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 132
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 133
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_SetDateTimeAndPos'):
         continue
@@ -5191,7 +5193,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_SetDateTimeAndPos.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 133
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 134
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_GetPsdAtConstMusAndKs'):
         continue
@@ -5200,7 +5202,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_GetPsdAtConstMusAndKs.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 134
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 135
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_GetPsdAtEandAlpha'):
         continue
@@ -5209,7 +5211,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_GetPsdAtEandAlpha.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 141
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'DumpGif'):
         continue
@@ -5218,7 +5220,7 @@ for _lib in _libs.itervalues():
     DumpGif.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 143
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Ek_to_Mu'):
         continue
@@ -5227,7 +5229,7 @@ for _lib in _libs.itervalues():
     Lgm_Ek_to_Mu.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 143
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 144
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Mu_to_Ek'):
         continue
@@ -5236,7 +5238,7 @@ for _lib in _libs.itervalues():
     Lgm_Mu_to_Ek.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 144
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 145
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_p2c2'):
         continue
@@ -5245,7 +5247,7 @@ for _lib in _libs.itervalues():
     Lgm_p2c2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 145
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 146
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_v2overc2'):
         continue
@@ -5254,7 +5256,7 @@ for _lib in _libs.itervalues():
     Lgm_v2overc2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 146
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 147
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_gamma'):
         continue
@@ -5263,7 +5265,7 @@ for _lib in _libs.itervalues():
     Lgm_gamma.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 147
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 148
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_PsdToDiffFlux'):
         continue
@@ -5272,7 +5274,7 @@ for _lib in _libs.itervalues():
     Lgm_PsdToDiffFlux.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 148
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 149
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DiffFluxToPsd'):
         continue
@@ -7967,7 +7969,7 @@ Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
 
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 
-Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 125
+Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
 Lgm_FieldIntInfo = struct_Lgm_FieldIntInfo # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 48
 
