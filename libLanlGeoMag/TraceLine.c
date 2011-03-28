@@ -343,6 +343,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     int		    done, reset, n, SavePnt;
 
 
+    if (MinDist < 1e-6) MinDist = 0.0;
 
 
     Pa.x = Pa.y = Pa.z = 0.0;
