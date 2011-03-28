@@ -164,16 +164,14 @@ void Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] ) {
 }
 
 
-/*
+/**
  * Convert Spherical-Polar coords to Cartesian
  *
- * Inputs:
- *          Lat: Latitude in Spherical Polar - Degrees
- *          Lon: Longitude in Spherical Polar - Degrees
- *            r: Geocentric Radius in Spherical Polar
+ *          \param[in] Lat Latitude in Spherical Polar - Degrees
+ *          \param[in] Lon: Longitude in Spherical Polar - Degrees
+ *          \param[in] r: Geocentric Radius in Spherical Polar
  *
- * Output:
- *            u: Cartesian vector (units of whatever you used for r)
+ *          \param[out] u: Cartesian vector (units of whatever you used for r)
  *
  */
 void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *u ) {
@@ -187,6 +185,41 @@ void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *u ) {
     u->x = rCosLat*cos(Lon);
     u->y = rCosLat*sin(Lon);
     u->z = r*sin(Lat);
+
+    return;
+}
+
+
+/**
+ * Convert Cartesian to Spherical-Polar coords
+ *
+ *          \param[in] u: Cartesian vector (units of whatever you used for r)
+ *
+ *          \param[out] Lat Latitude in Spherical Polar - Degrees
+ *          \param[out] Lon: Longitude in Spherical Polar - Degrees
+ *          \param[out] r: Geocentric Radius in Spherical Polar
+ *
+ */
+void Lgm_CartToSphCoords( Lgm_Vector *u, double *Lat, double *Lon, double *r) {
+
+    double sq, x2, y2, z2;
+    
+    x2 = u->x * u->x;
+    y2 = u->y * u->y;
+    z2 = u->z * u->z;
+    
+    *r = sqrt(x2 + y2 + z2);
+    sq = sqrt(x2 + y2);
+    
+    //take care of the poles
+    if ((x2+y2 <= 1e-8)) {
+        *Lon = 0.0;
+        *Lat = (u->z < 0.0) ? -90.0 : 90.0;
+    }
+    else {
+        *Lon = atan2(u->y,u->x)*DegPerRad;
+        *Lat = 90.0 - atan2(sq, u->z)*DegPerRad;
+    }
 
     return;
 }

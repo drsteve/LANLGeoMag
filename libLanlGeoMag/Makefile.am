@@ -15,7 +15,7 @@ else
     CRONDIR = /etc/periodic/daily
 endif
 
-AM_CFLAGS = -fopenmp
+AM_CFLAGS = -fopenmp -lgomp
 
 lib_LTLIBRARIES          = libLanlGeoMag.la
 libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \

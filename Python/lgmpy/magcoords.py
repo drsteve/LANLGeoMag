@@ -18,11 +18,13 @@ from spacepy import datamodel
 
 try:
     #this block makes sure the tests in working directory run on local files not installed versions
-    from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
+    from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
+    from .Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from .Lstar import Lstar_Data
 except:
-    from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, WGS84_TO_GSM, SM_TO_GSM, Lgm_McIlwain_L
+    from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
+    from Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from lgmpy.Lstar import Lstar_Data
     
@@ -39,6 +41,72 @@ def LatLon2GSM(lat, lon, rad, time):
     return Ugsm.tolist()
 
 
+def coordTrans(*args):
+    ''' Convert coordinates between almost any system using LanlGeoMag
+    
+    Input arguments:
+    ----------------
+    position - [list] a three element vector of positions in input coord system
+    time -  [datetime] a datimetime object representing the time at the desired conversion
+    system_in - [str] a string giving the acronym for the input coordinate system
+    system_out - [str] a string giving the acronym for the desired output coordinate system
+    
+    Example:
+    --------
+    >>> import datetime
+    >>> coordTrans([-4,0,0], datetime.datetime(2009,1,1),'SM','GSM')
+    [-3.608026916281573, 2.5673907444456745e-16, -1.7268878861662329]
+    >>> coordTrans([-3.608026916281573, 2.5673907444456745e-16, 
+        -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','SM')
+    [-3.9999999999999991, 4.0592529337857286e-16, 8.8817841970012523e-16]
+    
+    '''
+    conv_dict = {'SM_GSM': SM_TO_GSM,
+                 'GSM_SM': GSM_TO_SM,
+                 'WGS84_GSM': WGS84_TO_GSM,
+                 'GSM_WGS84': GSM_TO_WGS84,
+                 'GSM_GSE': GSM_TO_GSE,
+                 'GSE_GSM': GSE_TO_GSM}
+    
+    def doConversion(pos_in, to_str, cdict, cTrans):
+        try:
+            Pin = Lgm_Vector.Lgm_Vector(*pos_in)
+        except:
+            Pin = pos_in
+        Pout = Lgm_Vector.Lgm_Vector()
+        Lgm_Convert_Coords( pointer(Pin), pointer(Pout), cdict[to_str], cTrans )      
+        return Pout
+    
+    #change args to named vars to make easier to process different input types
+    pos_in = args[0]
+    time_in = args[1]
+    in_sys = args[2]
+    out_sys = args[3]
+    
+    # change datetime to Lgm Datelong and UTC
+    mInfo = Lgm_MagModelInfo.Lgm_MagModelInfo()
+    try:
+        datelong = Lgm_CTrans.dateToDateLong(time_in)
+        utc = Lgm_CTrans.dateToFPHours(time_in)
+        Lgm_Set_Coord_Transforms( datelong, utc, mInfo.c) # dont need pointer as it is one
+    except AttributeError:
+        raise(TypeError("Date must be a datetime object"))
+    
+    to_str = in_sys+'_'+out_sys
+
+    ## do this as WGS uses cartesian but needs to be converted from desired spherical input
+    if 'WGS' in in_sys:
+        XYZ = Lgm_Vector.SphToCart(*pos_in)
+        SPH = Lgm_Vector.Lgm_Vector(XYZ.x,XYZ.y, XYZ.z)
+        Pout = doConversion(SPH, to_str, cdict=conv_dict, cTrans=mInfo.c)
+    else:
+        Pout = doConversion(pos_in, to_str, conv_dict, mInfo.c)
+    
+    if 'WGS' in out_sys:
+        nlat, nlon, nrad = Lgm_Vector.CartToSph(*Pout.tolist())
+        Pout = Lgm_Vector.Lgm_Vector(nlat, nlon, nrad)
+    
+    return Pout.tolist()
 
 def Lvalue(*args, **kwargs):
     '''
