@@ -395,7 +395,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector  u, Pa, Pb;
-    double  H, h, a, b, SS, Sa, Sb, I, f[6], r;
+    double  rat, H, h, a, b, SS, Sa, Sb, I, f[6], r;
     int     i, N;
     
 
@@ -469,7 +469,18 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                     mInfo->Lgm_n_I_integrand_Calls   = 0;
                     mInfo->Sm_South = 0.0;
                     mInfo->Sm_North = SS;
-                    I = Iinv_interped( mInfo  );
+                    if ( SS <= 1e-5 ) {
+                        // if FL length is small, use an approx expression for I
+                        rat = mInfo->Bmin/mInfo->Bm;
+                        if ((1.0-rat) < 0.0) {
+                            I = 0.0;
+                        } else {
+                            // Eqn 2.66b in Roederer
+                            I = SS*sqrt(1.0 - rat);
+                        }
+                    } else {
+                        I = Iinv_interped( mInfo  );
+                    }
 
                     if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
 
@@ -534,7 +545,18 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                     mInfo->Lgm_n_I_integrand_Calls   = 0;
                     mInfo->Sm_South = 0.0;
                     mInfo->Sm_North = SS;
-                    I = Iinv_interped( mInfo  );
+                    if ( SS <= 1e-5 ) {
+                        // if FL length is small, use an approx expression for I
+                        rat = mInfo->Bmin/mInfo->Bm;
+                        if ((1.0-rat) < 0.0) {
+                            I = 0.0;
+                        } else {
+                            // Eqn 2.66b in Roederer
+                            I = SS*sqrt(1.0 - rat);
+                        }
+                    } else {
+                        I = Iinv_interped( mInfo  );
+                    }
 
                     if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
                     FreeSpline( mInfo );
@@ -595,7 +617,18 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                     mInfo->Lgm_n_I_integrand_Calls   = 0;
                     mInfo->Sm_South = 0.0;
                     mInfo->Sm_North = SS;
-                    I = Iinv_interped( mInfo  );
+                    if ( SS <= 1e-5 ) {
+                        // if FL length is small, use an approx expression for I
+                        rat = mInfo->Bmin/mInfo->Bm;
+                        if ((1.0-rat) < 0.0) {
+                            I = 0.0;
+                        } else {
+                            // Eqn 2.66b in Roederer
+                            I = SS*sqrt(1.0 - rat);
+                        }
+                    } else {
+                        I = Iinv_interped( mInfo  );
+                    }
 
                     if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
                     FreeSpline( mInfo );

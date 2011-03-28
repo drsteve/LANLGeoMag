@@ -105,12 +105,14 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                 mInfo->Sm_South = 0.0;
                 mInfo->Sm_North = SS;
 
-                if ( SS <= 1e-6 ) {
+                if ( SS <= 1e-5 ) {
 
+                    // if FL length is small, use an approx expression for I
                     rat = mInfo->Bmin/mInfo->Bm;
                     if ((1.0-rat) < 0.0) {
                         *I = 0.0;
                     } else {
+                        // Eqn 2.66b in Roederer
                         *I = SS*sqrt(1.0 - rat);
                     }
 

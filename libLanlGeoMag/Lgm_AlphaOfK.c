@@ -259,12 +259,13 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
             }
 
 
-            if ( Smb <= 1e-6 ) {
-                                                                                                                                                                                                                 
+            if ( Smb <= 1e-5 ) {
+                // if FL length is small, use an approx expression for I
                 rat = m->Bmin/m->Bm;
                 if ((1.0-rat) < 0.0) {
                     I = 0.0;
                 } else {
+                    // Eqn 2.66b in Roederer
                     I = Smb*sqrt(1.0 - m->Bmin/m->Bm);
                 }
 

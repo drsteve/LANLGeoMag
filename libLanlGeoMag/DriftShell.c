@@ -116,12 +116,13 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              LstarInfo->mInfo->Hmax = 0.1;
              if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
 
-                if ( SS <= 1e-6 ) {
-                                                                                                                                                                                                                 
+                if ( SS <= 1e-5 ) {
+                    // if FL length is small, use an approx expression for I
                     rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
                     if ((1.0-rat) < 0.0) {
                         I = 0.0;
                     } else {
+                        // Eqn 2.66b in Roederer
                         I = SS*sqrt(1.0 - rat);
                     }
 
