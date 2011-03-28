@@ -1016,6 +1016,7 @@ void Lgm_InitIGRF( double g[13][13], double h[13][13], int N, int Flag, Lgm_CTra
 
         } else {
 
+
             /*
              * extrapolation 
              */
@@ -1027,10 +1028,16 @@ void Lgm_InitIGRF( double g[13][13], double h[13][13], int N, int Flag, Lgm_CTra
 
         }
 
+        if ( j1 >= IGRF_nModels ){
+            j1 = IGRF_nModels-1;
+            j0 = j1-1;
+        }
+
         for (n=0; n<=N; ++n){
             for (m=0; m<=n; ++m){
                 g0 = IGRF_g[j0][n][m]; g1 = IGRF_g[j1][n][m];
                 h0 = IGRF_h[j0][n][m]; h1 = IGRF_h[j1][n][m];
+
                 y0 = IGRF_epoch[j0];   y1 = IGRF_epoch[j1];
                 gs = (g1-g0)/(y1-y0);  hs = (h1-h0)/(y1-y0);
             

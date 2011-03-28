@@ -226,7 +226,7 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
     } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 
         /*
-         *  Use DQAGS
+         *  Use DQK21
          */
         dqk21(I_integrand_interped, qpInfo, a, b, &result, &abserr, &resabs, &resasc);
 

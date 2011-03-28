@@ -310,6 +310,8 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
      */
     f->DumpDiagnostics = DumpDiagnostics;
 
+    f->Extrapolate = TRUE;
+
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;
 
@@ -482,11 +484,12 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *      - Then we look up \f$f(E, \alpha)\f$ from the array (interp or fit or
  *        whatever).
  *
- *      \param[in]      nMu     Number of Mu values
- *      \param[in]      Mu      1-D array of Mu values
- *      \param[in]      nK      Number of K values
- *      \param[in]      K       1-D array of K values
- *      \param[in,out]  f       A properly pre-initialized Lgm_FluxToPsd structure.
+ *      \param[in]      nMu         Number of Mu values
+ *      \param[in]      Mu          1-D array of Mu values
+ *      \param[in]      nK          Number of K values
+ *      \param[in]      K           1-D array of K values
+ *      \param[in]      Extrapolate Turns on/off extrapolation capability
+ *      \param[in,out]  f           A properly pre-initialized Lgm_FluxToPsd structure.
  *
  *      \author     Mike Henderson
  *      \date       2011
@@ -592,7 +595,13 @@ assumes electrons -- generalize this...
     LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nMu; m++ ){
         for ( k=0; k<nK; k++ ){
-            f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+            if ( f->Extrapolate ){
+                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+            } else if ((f->EofMu[m][k] >= f->E[0])&&(f->EofMu[m][k] <= f->E[f->nE-1])){
+                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+            } else {
+                f->PSD_MK[m][k] = 0.0;
+            }
         }
     }
 

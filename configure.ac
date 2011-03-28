@@ -22,13 +22,18 @@ if test -z "$DOXYGEN";
    then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
 fi
 
-AM_CONDITIONAL([HAVE_DOXYGEN],
-[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
+#AM_CONDITIONAL([HAVE_DOXYGEN],
+#[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
 
-DX_HTML_FEATURE(ON)
-DX_MAN_FEATURE(ON)
-DX_PDF_FEATURE(ON)
-DX_INIT_DOXYGEN(LanlGeoMag, "libLanlGeoMag/Doxyfile")
+DX_HTML_FEATURE(ON)                                                                                                                                                                                              
+DX_CHM_FEATURE(OFF)                                                                                                                                                                                              
+DX_CHI_FEATURE(OFF)                                                                                                                                                                                              
+DX_MAN_FEATURE(ON)                                                                                                                                                                                               
+DX_RTF_FEATURE(OFF)                                                                                                                                                                                              
+DX_XML_FEATURE(OFF)                                                                                                                                                                                              
+DX_PDF_FEATURE(ON)                                                                                                                                                                                               
+DX_PS_FEATURE(OFF) 
+DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile)
 
 dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
@@ -85,7 +90,6 @@ AM_PROG_CC_C_O
 AC_CHECK_FUNCS([floor memset pow sqrt strstr])
 
 AC_CONFIG_FILES([Makefile
-                 docs/Makefile
                  libLanlGeoMag/Lgm/Makefile
                  libLanlGeoMag/Makefile
                  libLanlGeoMag/EopData/GetEopFiles

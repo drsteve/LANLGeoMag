@@ -119,6 +119,7 @@ typedef struct Lgm_FluxToPsd {
      * Other things..
      */
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
+    int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
 
 
 
