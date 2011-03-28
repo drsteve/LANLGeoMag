@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Vector class for Lgm
 
@@ -9,11 +10,11 @@ Vector class for Lgm
 """
 import itertools
 import copy
-from ctypes import pointer
+from ctypes import pointer, c_double
 
 from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
-    Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords
+    Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords
 
 class Lgm_Vector(Lgm_Vector):
     def __eq__(self, other):
@@ -370,4 +371,21 @@ def SphToCart(lat, lon, rad):
         for v1, v2, v3 in itertools.izip(lat, lon, rad):
             Lgm_SphToCartCoords(v1, v2, v3, pointer(vec1))
             ans.append(copy.copy(vec1))
+        return ans
+        
+def CartToSph(x, y, z):
+    """takes an input x, y, z and returns Lat, Lon, Rad"""
+    vec1 = Lgm_Vector(x, y, z)
+    lat, lon, rad = c_double(), c_double(), c_double()
+    try:
+        if len(x) != len(y) != len(z):
+            raise(ValueError('All input must be the same length'))
+    except TypeError:
+        Lgm_CartToSphCoords(pointer(vec1), pointer(lat), pointer(lon), pointer(rad))
+        return lat.value, lon.value, rad.value
+    else:
+        ans = []
+        for v1, v2, v3 in itertools.izip(x, y, z):
+            Lgm_SphToCartCoords(pointer(vec1), pointer(v1), pointer(v2), pointer(v3))
+            ans.append(copy.copy([lat.value, lon.value, rad.value]))
         return ans
