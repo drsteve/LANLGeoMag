@@ -27,7 +27,7 @@ int main(){
         
         mInfo->Bfield = Lgm_B_cdip;
         
-        for (a=90.0; a<=90.0; a+= 5.0){
+        for (a=5.0; a<=90.0; a+= 5.0){
             L = Lgm_McIlwain_L( Date, UTC, &v, a, 0, &I, &Bm, &M, mInfo );
             printf("Pitch Angle: %g    McIlwain L  = %.10g   ( I, Bm, M = %g %g %g )   Delta = %g\n", a, L, I, Bm, M, Ltarget-L);
         }

@@ -157,7 +157,9 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
         /*
          *  McIlwain L, via McIlwain's original tables or via Hilton approx.
          */
-        if ( Type == 0 ) {
+        if ( *I < 0.0 ){
+            L = -9e99;
+        } else if ( Type == 0 ) {
             L = LFromIBmM_McIlwain( *I, *Bm, *M );
         } else {
             L = LFromIBmM_Hilton( *I, *Bm, *M );
