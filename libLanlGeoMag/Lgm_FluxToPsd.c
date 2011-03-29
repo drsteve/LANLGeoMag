@@ -651,8 +651,14 @@ double Cost( double *x, void *data ){
 
         sum += d*d;
         //sum += fabs(d);
-if (isinf(sum)) printf("Cost, INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
-if (isnan(sum)) printf("Cost, NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+if (isinf(sum)) {
+    printf("Cost, INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+    return( 9e99 );
+}
+if (isnan(sum)) {
+    printf("Cost, NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+    return( 9e99 );
+}
 
     }
 
@@ -753,7 +759,7 @@ exit(0);
 */
     
 
-x[2] = 200.0;
+//x[2] = 200.0;
     psd = Model( x,  E );
 
 printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);

@@ -1,21 +1,24 @@
 Instructions for developers who use the source code repository
 **************************************************************
 
-SVN repository
+GIT repository
 ==============
 
 Initial checkout:
 
-svn co svn+ssh://YOUR_LOGIN@svn.isr.lanl.gov/n/svn/LanlGeoMag/trunk LanlGeoMag
+git clone ssh://YOUR_SCHEME_LOGIN@sueno.lanl.gov:/n/projects/lanl/LanlGeoMag.git
+
 cd LanlGeoMag
 
 Later updates:
 
-svn update
+git pull
 
 Committing your work:
 
-svn commit
+git commit -a
+git pull
+git push
 
 
 Compiling
@@ -29,3 +32,8 @@ autoreconf -i
 Every time:
 
 make
+
+
+Installing
+==========
+sudo make install
