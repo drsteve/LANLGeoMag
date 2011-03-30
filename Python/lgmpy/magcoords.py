@@ -18,28 +18,27 @@ from spacepy import datamodel
 
 try:
     #this block makes sure the tests in working directory run on local files not installed versions
+    #TODO: I don't like this -- so how can this be done better????
     from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from .Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
+    from .Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from .Lstar import Lstar_Data
 except:
     from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
+    from Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from lgmpy.Lstar import Lstar_Data
     
 from _Bfield_dict import Bfield_dict
 
-def LatLon2GSM(lat, lon, rad, time):
-    XYZ = Lgm_Vector.SphToCart(lat, lon, rad)
-    c = Lgm_CTrans.Lgm_CTrans()
-    Ugsm = Lgm_Vector.Lgm_Vector(0,0,0)
-    Ull = Lgm_Vector.Lgm_Vector(XYZ.x,XYZ.y, XYZ.z)
-    Lgm_Set_Coord_Transforms(Lgm_CTrans.dateToDateLong(time),
-                    Lgm_CTrans.dateToFPHours(time), pointer(c))
-    Lgm_Convert_Coords(pointer(Ull), pointer(Ugsm), WGS84_TO_GSM, pointer(c))  # maybe this is just GEO
-    return Ugsm.tolist()
-
+conv_dict = {'SM_GSM': SM_TO_GSM,
+                 'GSM_SM': GSM_TO_SM,
+                 'WGS84_GSM': WGS84_TO_GSM,
+                 'GSM_WGS84': GSM_TO_WGS84,
+                 'WGS84_GSE': WGS84_TO_GSE,
+                 'GSE_WGS84': GSE_TO_WGS84,
+                 'GSM_GSE': GSM_TO_GSE,
+                 'GSE_GSM': GSE_TO_GSM}
 
 def coordTrans(*args):
     ''' Convert coordinates between almost any system using LanlGeoMag
@@ -60,15 +59,12 @@ def coordTrans(*args):
         -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','SM')
     [-3.9999999999999991, 4.0592529337857286e-16, 8.8817841970012523e-16]
     
+    
+    TODO: extend interface to get necessary args from a MagModel or cTrans structure
     '''
-    conv_dict = {'SM_GSM': SM_TO_GSM,
-                 'GSM_SM': GSM_TO_SM,
-                 'WGS84_GSM': WGS84_TO_GSM,
-                 'GSM_WGS84': GSM_TO_WGS84,
-                 'GSM_GSE': GSM_TO_GSE,
-                 'GSE_GSM': GSE_TO_GSM}
     
     def doConversion(pos_in, to_str, cdict, cTrans):
+        if to_str not in cdict: raise NotImplementedError('Coordinate transform not implemented')
         try:
             Pin = Lgm_Vector.Lgm_Vector(*pos_in)
         except:
@@ -112,18 +108,7 @@ def Lvalue(*args, **kwargs):
     '''
     Calling syntax: Lvalue(pos, datetime, )
     
-    \param[in]        Date        Date in format (e.g. 20101231). 
-    \param[in]        UTC         Universal Time (Coordinated) in decimal hours (e.g. 23.5).
-    \param[in]        u           Position to compute L-shell.
-    \param[in]        Alpha       Pitch angle to compute L for. In degrees.
-    \param[in]        Type        Flag to indicate which alogorithm to use (0=original McIlwain; else use Hilton's formula).
-    \param[out]       I           The integral invariant, I that was computed along the way.
-    \param[out]       Bm          The mirror magnetic field value, Bm that was computed along the way.
-    \param[out]       M           The dipole magnetic moment used to compute L = f(I, Bm, M)
-    \param[in,out]    mInfo       Properly initialized Lgm_MagModelInfo structure. (A number of otherm usefull things will have been set in mInfo).
-    
-    \return           L           McIlwain L-shell parameter (a dimensioless number).
-    
+    TODO: Add docstring
     '''
     defaults = {'alpha': 90,
                 'Bfield': 'Lgm_B_T89',
@@ -154,10 +139,15 @@ def Lvalue(*args, **kwargs):
     #else:
         #ans['Epoch'] = datamodel.dmarray([args[1]])
     
-    if kwargs['coord_system'] == 'SM':
-        Psm = Lgm_Vector.Lgm_Vector(*args[0])
+    if kwargs['coord_system'] != 'GSM':
+        Pin = Lgm_Vector.Lgm_Vector(*args[0])
         Pgsm = Lgm_Vector.Lgm_Vector()
-        Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mInfo.c )
+        conv_str = kwargs['coord_system']+'_GSM'
+        try:
+            #TODO: Fix this so it uses the (generalized) coordTrans function above
+            Lgm_Convert_Coords( pointer(Pin), pointer(Pgsm), conv_dict[conv_str], mInfo.c )
+        except:
+            raise NotImplementedError('Coordinate system not implemented')
     else:
         Pgsm = Lgm_Vector.Lgm_Vector(*args[0])
     
@@ -169,5 +159,7 @@ def Lvalue(*args, **kwargs):
                             pointer(Iout), pointer(Bm), pointer(M),
                             pointer(mInfo))
                             
+    #TODO: decide on format for output -- perhaps use datamodel and have method as attribute?
+    #maybe only return I for extended_out flag=True
     return {'L': ans, 'I': Iout.value}
     
