@@ -498,7 +498,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  */
 void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
-    int                 k, m;
+    int                 k, m, DoIt;
     double              AlphaEq, SinA;
     Lgm_MagModelInfo    *mInfo, *mInfo2;
 
@@ -510,6 +510,7 @@ Then add a routine to set stuff up in there. Or just use the ones we have alread
 For now we will just go with the defaults.
      */
     mInfo = Lgm_InitMagInfo();
+mInfo->Bfield = Lgm_B_cdip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -562,7 +563,7 @@ For now we will just go with the defaults.
                 f->AofK[k] = -9e99;
                 //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
             }
-            printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+//            printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
             
@@ -583,7 +584,7 @@ assumes electrons -- generalize this...
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
             f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
-            printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
+//            printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
 
@@ -595,13 +596,32 @@ assumes electrons -- generalize this...
     LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nMu; m++ ){
         for ( k=0; k<nK; k++ ){
-            if ( f->Extrapolate ){
-                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
-            } else if ((f->EofMu[m][k] >= f->E[0])&&(f->EofMu[m][k] <= f->E[f->nE-1])){
+            DoIt = FALSE;
+
+            if ( f->Extrapolate > 2 ){ // extrapolate above and below
+
+                DoIt = TRUE;
+
+            } else if ( f->Extrapolate == 2) {
+
+                if (f->EofMu[m][k] >= f->E[0] ) DoIt = TRUE; // extrapolate above
+
+            } else if ( f->Extrapolate == 1) {
+
+                if (f->EofMu[m][k] <= f->E[f->nE-1] ) DoIt = TRUE; // extrapolate below
+
+            } else if ( f->Extrapolate == 0) {
+
+                if ((f->EofMu[m][k] >= f->E[0])&&(f->EofMu[m][k] <= f->E[f->nE-1])) DoIt = TRUE; // interp only
+
+            }
+
+            if (DoIt) {
                 f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
             } else {
                 f->PSD_MK[m][k] = 0.0;
             }
+
         }
     }
 
@@ -643,6 +663,7 @@ double Cost( double *x, void *data ){
 
     FitData = (_FitData *)data; 
 
+
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
 
 
@@ -652,11 +673,12 @@ double Cost( double *x, void *data ){
         sum += d*d;
         //sum += fabs(d);
 if (isinf(sum)) {
-    printf("Cost, INF: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+//    printf("Cost, INF: g_model, g = %g %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], log10( FitData->g[i] ), x[1], x[2]);
     return( 9e99 );
 }
 if (isnan(sum)) {
-    printf("Cost, NaN: g_model, g = %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], x[1], x[2]);
+//    printf("Cost, NaN: g_model, g = %g %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], log10( FitData->g[i] ), x[1], x[2]);
+//    printf("FitData->n = %d\n", FitData->n);
     return( 9e99 );
 }
 
@@ -715,9 +737,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
         y0   = f->PSD_EA[j][i0];
         y1   = f->PSD_EA[j][i1];
         slp  = (y1-y0)/(a1-a0);
-        FitData->g[j] = slp*(a-a0) + y0;
+        FitData->g[j] = slp*(a-a1) + y1;
+if (FitData->g[j] < 0.0) FitData->g[j] = y0;
         FitData->E[j] = f->E[j];
-        //printf("a = %g, FitData->g[%d] = %g\n", a, j, FitData->g[j]);
+//        printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
     }
 
 
@@ -762,7 +785,7 @@ exit(0);
 //x[2] = 200.0;
     psd = Model( x,  E );
 
-printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+//printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
     
     
 
@@ -1012,7 +1035,7 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
         }
     }
 
-    printf("Min, Max = %g %g\n", Min, Max);
+//    printf("Min, Max = %g %g\n", Min, Max);
 
 
 
