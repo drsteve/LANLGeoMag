@@ -167,8 +167,9 @@ def get_Lstar(pos, date, alpha = 90,
     #  Save field-related quantities for each Pitch Angle.
     MagEphemInfo.Pmin = Lgm_Vector.Lgm_Vector(*minB)
     MagEphemInfo.Bmin = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bmin
-    ans[pa]['Bmin'] = datamodel.dmarray(minB, attrs={'units':'nT'})
-    ans[pa]['Bmin'].attrs['coord_system'] = 'GSM'
+    ans[pa]['Pmin'] = datamodel.dmarray(minB, attrs={'units':'R_E'})
+    ans[pa]['Pmin'].attrs['coord_system'] = 'GSM'
+    ans[pa]['Bmin'] = datamodel.dmarray(MagEphemInfo.Bmin, attrs={'units':'nT'})
 
     # LOOP OVER PITCH ANGLES
     for i, pa in enumerate(Alpha):
