@@ -2,7 +2,7 @@
 from __future__ import division
 
 import datetime
-import LstarVersusPA
+from lgmpy import Lstar
 import spacepy.toolbox as tb
 from pylab import *
 import socket
@@ -26,7 +26,7 @@ for qual in range(9):
     for n in range(20):
         print qual, n
         t0 = now()
-        ans = LstarVersusPA.LstarVersusPA(pos, date, LstarQuality=qual, Bfield = 'Lgm_B_T89')
+        ans = Lstar.get_Lstar(pos, date, LstarQuality=qual, Bfield = 'Lgm_B_T89')
         t1 = now()
         results[qual]['time'].append((t1-t0).seconds + (t1-t0).microseconds/1000000)
         results[qual]['Lsimple'].append(ans[90]['Lsimple'])

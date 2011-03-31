@@ -50,9 +50,11 @@ class Lstar_Data(datamodel.SpaceData):
 def get_Lstar(pos, date, alpha = 90,
                   Kp = 2, coord_system='GSM',
                   Bfield = 'Lgm_B_OP77',
-                  LstarThres = 10.0,  # beyond this Lsimple don't compute Lstar
+                  LstarThresh = 10.0,  # beyond this Lsimple don't compute Lstar
                   extended_out = False,
                   LstarQuality = 3):
+    '''TODO: Add docstring
+    '''
 
     # setup a datamodel object to hold the answer
     ans = Lstar_Data()
@@ -155,10 +157,10 @@ def get_Lstar(pos, date, alpha = 90,
     for pa in Alpha:
         ans[pa] = datamodel.SpaceData()
         ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
+        #sets up nans in case of Lstar failure
+        ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
 
     if trace != 'LGM_CLOSED':
-        for pa in Alpha:
-            ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
         return ans
         # if this is not LGM_CLOSED then don't both with any pitch angle?  true?
 
@@ -194,7 +196,7 @@ def get_Lstar(pos, date, alpha = 90,
         MagEphemInfo.LstarInfo.contents.PitchAngle = pa
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
         # Compute L*
-        if Lsimple < LstarThres:
+        if Lsimple < LstarThresh:
             Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
 
             LS_Flag = Lgm_Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
@@ -221,6 +223,7 @@ def get_Lstar(pos, date, alpha = 90,
             MagEphemInfo.nShellPoints[i] = lstarinf.nPnts
             ## pull all this good extra info into numpy arrays
             ans[pa]['I'] = datamodel.dmarray(lstarinf.I[0])
+            ans[pa]['MLT'] = datamodel.dmarray(lstarinf.MLT[0])
 
             if extended_out:
                 ans[pa]['ShellI'] = \
@@ -277,6 +280,7 @@ def get_Lstar(pos, date, alpha = 90,
                                             buffer=lstarinf.z_gsm)
                 delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
+                
     return ans
 
 if __name__ == '__main__':
