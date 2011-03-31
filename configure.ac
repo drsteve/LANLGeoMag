@@ -4,7 +4,7 @@
 
 
 AC_PREREQ([2.59])
-AC_INIT([LanlGeoMag], [1.5.9], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag], [1.5.10], [mghenderson@lanl.gov])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG([C])
@@ -25,13 +25,13 @@ fi
 #AM_CONDITIONAL([HAVE_DOXYGEN],
 #[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
 
-DX_HTML_FEATURE(ON)                                                                                                                                                                                              
+DX_HTML_FEATURE(OFF)                                                                                                                                                                                              
 DX_CHM_FEATURE(OFF)                                                                                                                                                                                              
 DX_CHI_FEATURE(OFF)                                                                                                                                                                                              
-DX_MAN_FEATURE(ON)                                                                                                                                                                                               
+DX_MAN_FEATURE(OFF)                                                                                                                                                                                               
 DX_RTF_FEATURE(OFF)                                                                                                                                                                                              
 DX_XML_FEATURE(OFF)                                                                                                                                                                                              
-DX_PDF_FEATURE(ON)                                                                                                                                                                                               
+DX_PDF_FEATURE(OFF)                                                                                                                                                                                               
 DX_PS_FEATURE(OFF) 
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile)
 
