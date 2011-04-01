@@ -510,7 +510,7 @@ Then add a routine to set stuff up in there. Or just use the ones we have alread
 For now we will just go with the defaults.
      */
     mInfo = Lgm_InitMagInfo();
-mInfo->Bfield = Lgm_B_cdip;
+//mInfo->Bfield = Lgm_B_edip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -563,7 +563,7 @@ mInfo->Bfield = Lgm_B_cdip;
                 f->AofK[k] = -9e99;
                 //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
             }
-//            printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+            //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
             
@@ -584,7 +584,7 @@ assumes electrons -- generalize this...
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
             f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
-//            printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
+            //printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
 
@@ -713,8 +713,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
      * f(E).
      */
     if ( a < f->A[0] ) {
+        return(-9e99);
         i0 = 0; i1 = 1;
     } else if ( a > f->A[f->nA - 1] ) {
+        return(-9e99);
         i0 = f->nA - 2; i1 = f->nA - 1;
     } else {
         for (i=1; i<f->nA; i++) {
@@ -784,6 +786,7 @@ exit(0);
 
 //x[2] = 200.0;
     psd = Model( x,  E );
+    //psd = (double)a;
 
 //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
     
@@ -1007,7 +1010,7 @@ if ((j==189)&&(k==118)) {
  */
 void DumpGif( char *Filename, int W, int H, double **Image ){
 
-    double           Val, Min, Max;
+    double           Val, Min, Max, dVal;
     int              w, h;
     unsigned char   *uImage, uVal;
     FILE            *fp_gif;
@@ -1053,7 +1056,8 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
             if ( Val < -1e99 ) {
                 uVal = 0;
             } else {
-                uVal = (unsigned char)( (Val - Min)/(Max-Min)*255.0 );
+                dVal = (Val - Min)/(Max-Min)*255.0;
+                uVal = (dVal > 255.0) ? 255 : (unsigned char)dVal;
             }
             *(uImage + W*(H-1-h) + w) = uVal;
 
