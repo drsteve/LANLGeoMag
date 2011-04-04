@@ -142,7 +142,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      *  Set up high side of bracket. A PA of 90Deg. is as high as you can get.
      *  And this should give I=0, so no need to compute I
      */
-    a1 = 80.0;
+    a1 = 90.0;
     f1 = K - 0.0;
     f1 = Lgm_AlphaOfK_Func( K, a1, m );
     if ( fabs(f1) < 1e-4 ) return( a1 );
@@ -163,8 +163,8 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
         /*
          * compute a new PA to test
          */
-        //a = (a1-a0)*GOLD + a0;
-        a = (a1-a0)*0.5 + a0;
+        a = (a1-a0)*GOLD + a0;
+        //a = (a1-a0)*0.5 + a0;
         f = Lgm_AlphaOfK_Func( K, a, m );
 
         if ( fabs(a1-a0) < 1e-2 ) {
@@ -191,6 +191,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      * Take the midpoint of the remaining bracket range as the answer.
      */
     a = 0.5*(a0+a1);
+
 
     return( a );
 
@@ -226,6 +227,9 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
     double           rat, sa, sa2, Sma, Smb, I, K;
 
+
+    if ( fabs( Alpha - 90.0 ) < 1e-5 ) return( Kt - 0.0 );
+
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
     m->Bm = m->Bmin/sa2; 
@@ -250,13 +254,6 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
              *  Iinv_interped routines, we better figure out what [a,b] should
              *  be.
              */
-            if ( m->UseInterpRoutines ) {
-                m->Sm_South = m->Smin - Sma;
-                m->Sm_North = m->Smin + Smb;
-            } else {
-                m->Sm_South = 0.0;
-                m->Sm_North = Smb;
-            }
 
 
             if ( Smb <= 1e-5 ) {
@@ -274,6 +271,11 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
                 /*
                  *  Do interped I integral.
                  */
+                m->Sm_South = m->Smin - Sma;
+                m->Sm_North = m->Sm_South + Smb;
+//printf("m->Smin = %g    Sma, Smb = %g %g\n", m->Smin, Sma, Smb );
+//printf("m->Sm_South = %g    m->Sm_North = %g\n", m->Sm_South, m->Sm_North );
+//exit(0);
                 I = Iinv_interped( m );
                 // Compute K(Alpha) (units of G^1/2 Re)
                 K = 3.16227766e-3*I*sqrt(m->Bm);
@@ -284,6 +286,8 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
                 /*
                  *  Do full blown I integral. 
                  */
+                m->Sm_South = 0.0;
+                m->Sm_North = Smb;
                 I = Iinv( m );
                 // Compute K(Alpha) (units of G^1/2 Re)
                 K = 3.16227766e-3*I*sqrt(m->Bm);

@@ -19,30 +19,67 @@
 #include "Lgm/Lgm_WGS84.h"
 
 
-/*
- *  Attempt to trace to Earth in both directions.
- *  If the field line is closed, then also trace to equatorial plane.
+/**
+ *  This routine attempts to trace to the Earth (from the input position) in both
+ *  directions along the field line.  If the field line is closed (meaning
+ *  that we hit the Earth in both directions), then the routine will also
+ *  trace to the minimum-B point.
  *  
- *      v1 is northern footprint (at 120 km)
- *      v2 is southern footprint (at 120 km)
- *      v3 is equatorial crossing point  (Minimum B)
+ *  This is a convenience routine that calls the routines Lgm_TraceToEarth()
+ *  and Lgm_TraceToMinBSurf() (and performs some aditional calculations also).
+ *  Note that the routine Lgm_TraceToEarth() traces to a height above the WGS84
+ *  ellipsoid. Thus the target height here ( the input parameter Height ) is
+ *  the geodetic height above the WGS84 ellipsoid. If you want to trace to a
+ *  spherical representation of the Earth, use Lgm_TraceToSphericalEarth()
+ *  instead.
  *  
  *  
- *  Return values. Function returns:
+ *      \param[in]       u     Input position vector in GSM coordinates.
+ *      \param[out]     v1     Southern footpoint (where field line crosses the given geodetic height in the south) in GSM coordinates.
+ *      \param[out]     v2     Northern footpoint (where field line crosses the given geodetic height in the north) in GSM coordinates.
+ *      \param[out]     v3     Minimum B point along the field line in GSM coordinates.
+ *      \param[in]      Height The altitude (in km) above the WGS84 ellispoid (i.e. geodetic height) used to define what we mean by the footpoint altitude.
+ *      \param[in]      TOL1   Tolerance for tracing to the Earth.
+ *      \param[in]      TOL2   Tolerance for tracing to the Min-B point.
+ *      \param[in,out]  Info   Properly initialized/configured Lgm_MagModelInfo structure.
  *  
- *  
- *      LGM_OPEN_IMF     (==0) if field line is open at both ends (i.e. an IMF FL)
- *      LGM_CLOSED       (==1) if field line is closed (v1, v2, v3 all valid)
- *      LGM_OPEN_N_LOBE  (==2) if field line is northern lobe FL (v1 valid)
- *      LGM_OPEN_S_LOBE  (==3) if field line is southern lobe FL (v2 valid)
+ *      \return 
+ *          - LGM_OPEN_IMF     ( = 0 ) if field line is open at both ends (i.e. an IMF FL). In this case, nonem of the v1, v2, v3 values are valid.
+ *          - LGM_CLOSED       ( = 1 ) if field line is closed. In this case all of the v1, v2, v3 are valid.
+ *          - LGM_OPEN_N_LOBE  ( = 2 ) if field line is northern lobe FL (v2 valid).
+ *          - LGM_OPEN_S_LOBE  ( = 3 ) if field line is southern lobe FL (v1 valid).
+ *          - LGM_INSIDE_EARTH ( = -1 ) initial point is inside Earth (no points valid).
+ *          - LGM_TARGET_HEIGHT_UNREACHABLE ( = -2 ) field line never got above the target height (no points valid).
  *
- *      LGM_INSIDE_EARTH (==-1) initial point is inside Earth (no points valid)
+ *
+ *  Upon return, the following elements of the Info structure will be set or changed;
+ *      - Hmax (maximum step size used for tracing. Not really useful to the user.)
+ *      - Pmin. Position of Bmin along the field line. In Re relative to GSM coord system. (Same as v3.)
+ *      - Smin. Distance from southern footpoint to Pmin along the FL. (in Re).
+ *      - Bvecmin. The GSM components of the magnetic field vector at Pmin. Units are nT.
+ *      - Bmin. The magnitude of Bvecmin. Units of nT.
+ *      - Ellipsoid_Footprint_Pn. GSM position of northern footpoint. (Same as v2.)
+ *      - Ellipsoid_Footprint_Bvecn. GSM components of the magnetic field vector at Ellipsoid_Footprint_Pn. Units of nT.
+ *      - Ellipsoid_Footprint_Bn. Magnitude of Ellipsoid_Footprint_Bvecn. Units of nT.
+ *      - Ellipsoid_Footprint_Ps. GSM position of southern footpoint. (Same as v1.)
+ *      - Ellipsoid_Footprint_Bvecs. GSM components of the magnetic field vector at Ellipsoid_Footprint_Ps. Units of nT.
+ *      - Ellipsoid_Footprint_Bs. Magnitude of Ellipsoid_Footprint_Bvecs. Units of nT.
+ *      - d2B_ds2. Second derivative of B wrt s at Pmin. Units of nT/Re/Re.
+ *      - Sb0. Approximation for the Sb integral for nearly equatorially mirroring particles. Units of Re. See eqn 2.13b in Roederer.
  *
  *
- *  Changed June 13, 2008
- *      Added TOL1 and TOL2 args. They wer hard set at 0.01 and 1e-7
- *  Changed October 14, 2008
- *      Added Height argument.  (Height is height in km above Earth to stop at)
+ *
+ *
+ *
+ *
+ *  Changes:
+ *      - April 1, 2011
+ *          Added doxygen documenation.
+ *      - June 13, 2008
+ *          Added TOL1 and TOL2 args. They were hard set at 0.01 and 1e-7
+ *      - October 14, 2008
+ *          Added Height argument.  (Height is height in km above Earth to stop at)
+ *
  *  Original version quite old (early 90's?)
  *  
  */
