@@ -641,12 +641,16 @@ assumes electrons -- generalize this...
 
 double  Model( double *x, double E ) {
 
-    double  n, T, val;
+    double  n1, T1, n2, T2, val;
 
-    n = pow( 10.0,  x[1] );
-    T = fabs( x[2] );
+    n1 = pow( 10.0,  x[1] );
+    T1 = fabs( x[2] );
 
-    val = Lgm_MaxJut( n, T, E, LGM_Ee0 );
+    n2 = pow( 10.0,  x[3] );
+    T2 = fabs( x[4] );
+
+    val = Lgm_MaxJut( n1, T1, E, LGM_Ee0 )
+            + Lgm_MaxJut( n2, T2, E, LGM_Ee0 );
 
     return( val );
 
@@ -660,6 +664,8 @@ double Cost( double *x, void *data ){
 
     if ( (x[1] > 2.0) || ( x[1] < -30.0) ) return( 9e99 );
     if ( (fabs( x[2] ) > 1000.0) || (fabs( x[2] ) < 1.0) ) return( 9e99 );
+    if ( (x[3] > 2.0) || ( x[3] < -30.0) ) return( 9e99 );
+    if ( (fabs( x[4] ) > 1000.0) || (fabs( x[4] ) < 1.0) ) return( 9e99 );
 
     FitData = (_FitData *)data; 
 
@@ -750,7 +756,7 @@ if (FitData->g[j] < 0.0) FitData->g[j] = y0;
     // interpolate/fit E
     // for now just do a linear interp.
     // no lets try a fit...
-    double  in[10], out[7], x[3];
+    double  in[10], out[7], x[5];
     in[0] = 1e-8;
     in[1] = in[2] = 1e-9; //Info->Praxis_Tolerance;
     in[5] = 30000.0; //(double)Info->Praxis_Max_Function_Evals;
@@ -759,9 +765,11 @@ if (FitData->g[j] < 0.0) FitData->g[j] = y0;
     in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
     in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
     x[0] = 0.0;
-    x[1] = -2.0;
-    x[2] = 200.0;
-    praxis( 2, x, (void *)FitData, Cost, in, out);
+    x[1] = -1.0;
+    x[2] = 25.0;
+    x[3] = -2.0;
+    x[4] = 200.0;
+    praxis( 4, x, (void *)FitData, Cost, in, out);
 /*
 printf("out[0] = %g\n", out[0]);
 printf("out[1] = %g\n", out[1]);
@@ -785,6 +793,7 @@ exit(0);
     
 
 //x[2] = 200.0;
+printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
     psd = Model( x,  E );
     //psd = (double)a;
 
