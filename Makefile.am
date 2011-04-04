@@ -4,7 +4,7 @@ else
 SUBDIRS = libLanlGeoMag 
 endif
 
-ALL_EXAMPLE_FILES = $(shell cat example_file_list)
+#ALL_EXAMPLE_FILES = $(shell cat example_file_list)
 ALL_DOC_FILES = Doc/GSM.png Doc/CoordFig.eps Doc/GSM_SM_FIG.svg \
 	Doc/Geodetic.png Doc/CoordFig2.svg Doc/CoordFig.svg Doc/GSM_SM_FIG.png \
 	Doc/SM.png Doc/SunPosition.png Doc/SunPosition.eps \
@@ -22,8 +22,8 @@ if DX_COND_man
 # You'd probably want to post-process man pages and installed the patched                                                                                                                                        
 # versions.                                                                                                                                                                                                      
 
-dist_man1_MANS = @DX_DOCDIR@/man/man1/doxample.c.1                                                                                                                                                               
-$(dist_man1_MANS): doxygen-doc                                                                                                                                                                                   
+#dist_man1_MANS = @DX_DOCDIR@/man/man1/doxample.c.1                                                                                                                                                               
+#$(dist_man1_MANS): doxygen-doc                                                                                                                                                                                   
 
 endif                                           
 
