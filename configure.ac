@@ -28,7 +28,7 @@ fi
 DX_HTML_FEATURE(ON)                                                                                                                                                                                              
 DX_CHM_FEATURE(OFF)                                                                                                                                                                                              
 DX_CHI_FEATURE(OFF)                                                                                                                                                                                              
-DX_MAN_FEATURE(ON)                                                                                                                                                                                               
+DX_MAN_FEATURE(OFF)                                                                                                                                                                                               
 DX_RTF_FEATURE(OFF)                                                                                                                                                                                              
 DX_XML_FEATURE(OFF)                                                                                                                                                                                              
 DX_PDF_FEATURE(ON)                                                                                                                                                                                               
@@ -49,6 +49,7 @@ CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 dnl Add LDFLAGS for gsl
 dnl GSL_LDFLAGS=-lgsl 
 GSL_LDFLAGS=-lgsl
+LDFLAGS=${LDFLAGS}\ ${GSL_LDFLAGS}
 GSLCBLAS_LDFLAGS=-lgslcblas
 LDFLAGS=${LDFLAGS}\ ${GSLCBLAS_LDFLAGS}
 

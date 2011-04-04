@@ -18,3 +18,5 @@ docs/Makefile
 install-sh
 libLanlGeoMag/.deps/
 Makefile
+*.o
+*.lo
