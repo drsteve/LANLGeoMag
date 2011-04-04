@@ -37,8 +37,8 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
         self.assertAlmostEqual(5.17317697, ans[90]['LHilton'], places=6)
         self.assertAlmostEqual(5.17334804, ans[90]['LMcIlwain'], places=6)
-        self.assertAlmostEqual(4.35283590, ans[90]['Lstar'][0])
-        self.assertAlmostEqual(5.46755074, ans[90]['Lsimple'][0])
+        self.assertAlmostEqual(4.35283590, ans[90]['Lstar'][0], places=6)
+        self.assertAlmostEqual(5.46755074, ans[90]['Lsimple'][0], places=6)
 
     def testLgm_B_OP77_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
@@ -85,7 +85,7 @@ class Lvalue_Tests(unittest.TestCase):
         ans3 = magcoords.Lvalue([-4.2, 1, 1], self.date, alpha=90, Kp=4, Bfield = 'Lgm_B_T89', method='McIlwain')
         self.assertAlmostEqual(ans2['L'], ans[90]['LHilton'], places=5)
         self.assertAlmostEqual(ans3['L'], ans[90]['LMcIlwain'], places=5)
-        
+
     def test_L_cdip(self):
         LH = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='Hilton', coord_system='SM')
         LM = magcoords.Lvalue([-6, 0, 0], self.date, alpha=90, Bfield='Lgm_B_cdip', method='McIlwain', coord_system='SM')
