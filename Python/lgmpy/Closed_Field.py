@@ -54,7 +54,10 @@ def Closed_Field(*args, **kwargs):
     #check for call w/ Lgm_MagModelInfo
     if len(args) == 1:
         MagEphemInfo = args[0]
-        mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
+        try:
+            mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
+        except AttributeError:
+            raise(RuntimeError('Incorrect arguments specified'))
         dum = [MagEphemInfo.P.x, MagEphemInfo.P.y, MagEphemInfo.P.z]
         position = Lgm_Vector.Lgm_Vector(*dum)
     elif len(args) == 2:

@@ -38,6 +38,11 @@ class Lgm_CTransTests(unittest.TestCase):
     def tearDown(self):
         super(Lgm_CTransTests, self).tearDown()
 
+    def test_ctrans_input(self):
+        """Lgm_CTrans tests some inputs"""
+        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], units='km')
+        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], system='bad')
+
     def test_sizeLgm_CTrans(self):
         """Lgm_CTrans c and python must have same size"""
         #print("c: %d" % (size_CTrans()) )

@@ -24,6 +24,11 @@ class Closed_FieldTests(unittest.TestCase):
     def tearDown(self):
         super(Closed_FieldTests, self).tearDown()
 
+    def test_input_checking(self):
+        """Closed_Field does input params count checking"""
+        self.assertRaises(RuntimeError, Closed_Field.Closed_Field, '')
+        self.assertRaises(RuntimeError, Closed_Field.Closed_Field, '', '', '')
+
     def test_coord_system(self):
         """Only GSM is implemented thus far"""
         self.assertRaises(NotImplementedError, Closed_Field.Closed_Field,
