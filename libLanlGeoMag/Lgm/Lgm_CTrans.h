@@ -134,32 +134,32 @@
                             //!<      (Theta is true sidereal time; Theta = Mean Theta + Eqn or Equinoxes)
 
 
-#define WGS84_COORDS    6   // World Geodetic System 1984 (WGS84)
-#define IRTF_COORDS     6   // ( aka International Terrestrial Reference Frame)
-#define GEO_COORDS      6   // ( aka "GEO" coords -- my term )
-                            // (WGS84 and ITRF are not *exactly* the same, but
-                            // supposedly agree at the cm level and within
-                            // uncertainties of WGS84 are often considered to
-                            // be equivelant)
-                            //
-                            // This is a truely Earth-fixed system. It's Z-axis
-                            // is the true International Reference Pole and
-                            // Meridian. And these are fixed in the crust of
-                            // the Earth.  To go from PEF to WGS84, you need to
-                            // know the angular offsets of the true pole from
-                            // the PEF pole. These angle,  (xp and yp) are part
-                            // of the so-called Earth-Observing-Parameters
-                            // (EOP). They cant be predicted ahead of time, so
-                            // we often just assume they are zero.  Ignoring
-                            // them can introduce offsets on the ground of
-                            // about 10m or so. The WGS84 system is the sytem
-                            // that most GPS equipment uses(check?). Note also
-                            // that geodetic latitude is defined differently
-                            // from geocenteric latitude due to the flattening
-                            // of the Earth in the z-direction. If the EOP values
-                            // are not applied then WGS84 is same as PEF.
-                            // Transformation:
-                            //      Uwgs84 = Ry(-xp)Rz(-yp) Upef
+#define WGS84_COORDS    6   //!< World Geodetic System 1984 (WGS84)
+#define ITRF_COORDS     6   //!< ( aka International Terrestrial Reference Frame)
+#define GEO_COORDS      6   //!< ( aka "GEO" coords -- my term )
+                            //!< (WGS84 and ITRF are not *exactly* the same, but
+                            //!< supposedly agree at the cm level and within
+                            //!< uncertainties of WGS84 are often considered to
+                            //!< be equivelant)
+                            //!<
+                            //!< This is a truely Earth-fixed system. It's Z-axis
+                            //!< is the true International Reference Pole and
+                            //!< Meridian. And these are fixed in the crust of
+                            //!< the Earth.  To go from PEF to WGS84, you need to
+                            //!< know the angular offsets of the true pole from
+                            //!< the PEF pole. These angle,  (xp and yp) are part
+                            //!< of the so-called Earth-Observing-Parameters
+                            //!< (EOP). They cant be predicted ahead of time, so
+                            //!< we often just assume they are zero.  Ignoring
+                            //!< them can introduce offsets on the ground of
+                            //!< about 10m or so. The WGS84 system is the sytem
+                            //!< that most GPS equipment uses(check?). Note also
+                            //!< that geodetic latitude is defined differently
+                            //!< from geocenteric latitude due to the flattening
+                            //!< of the Earth in the z-direction. If the EOP values
+                            //!< are not applied then WGS84 is same as PEF.
+                            //!< Transformation:
+                            //!<      Uwgs84 = Ry(-xp)Rz(-yp) Upef
 
 
 #define GSE_COORDS      7   // Geocentric Solar Ecliptic (mean of date quantities?)
