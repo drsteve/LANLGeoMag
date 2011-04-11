@@ -114,8 +114,12 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              //LstarInfo->mInfo->Hmax = 10.0;
              //LstarInfo->mInfo->Hmax = 0.1;
              LstarInfo->mInfo->Hmax = 0.1;
+//printf("SS = %g\n", SS );
              if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
-
+//printf("SS = %g\n", SS );
+//printf("Pn = %g %g %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z);
+//printf("Ps = %g %g %g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z);
+//exit(0);
                 if ( SS <= 1e-5 ) {
                     // if FL length is small, use an approx expression for I
                     rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;

@@ -342,6 +342,9 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
     int		    done, reset, n, SavePnt;
 
+//printf("*************************\n");
+//printf("*************************\n");
+//printf("*************************\n");
 
     if (MinDist < 1e-5) MinDist = 0.0;
 
@@ -392,7 +395,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     ++n;
 
     if (n > LGM_MAX_INTERP_PNTS){
-	print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+	    print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     }
 
 
@@ -415,7 +418,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
 
         R = Lgm_Magnitude( &P );
 	    F =  R - R0;
-//printf( "R, R0, F, Htry  = %g %g %g %g\n", R, R0, F, Htry);
+//printf( "P = %g %g %g    R, R0, F, Htry  = %g %g %g %g    ss, MinDist = %g %g\n", P.x, P.y, P.z, R, R0, F, Htry, ss, MinDist);
 
 	    if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin) 
 	        || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {

@@ -238,7 +238,7 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
                 Info->Lgm_MagStep_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_eps_old = -1.0;
 printf("HOW DID I GET HERE? P = \n");
-//exit(0);
+exit(0);
                 return(-1);
             }
 

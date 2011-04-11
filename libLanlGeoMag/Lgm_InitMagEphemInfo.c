@@ -9,7 +9,7 @@
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     Lgm_MagEphemInfo  *MagEphemInfo = (Lgm_MagEphemInfo *) calloc (1, sizeof(*MagEphemInfo));
     Lgm_InitMagEphemInfoDefaults(MagEphemInfo, MaxPitchAngles, Verbosity );
-    printf("MagEphemInfo = %p\n", MagEphemInfo);
+    //printf("MagEphemInfo = %p\n", MagEphemInfo);
     return MagEphemInfo;
 }
 

@@ -139,7 +139,7 @@
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m ) {
 
     int     I, J, K, Jp1, II, JJ, KK, IJK;
-    double  X, Y, Z, X2, Y2, Z2, R2;
+    double  X, Y, Z, X2, Y2, Z2, R2, MYFAC;
     double  BX, BY, BZ, CON, EXPR, XB, YEXB, ZEYEXB;
 
     static int ITA[]  =  { -99,  2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 1};
@@ -254,12 +254,15 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
      * IF DISTANCE TOO LARGE TAKE ERROR EXIT
      */
     if ( R2 > 225.0 ) {
-        //printf("OlsenPfitzerStatic: ( X, Y, Z ) = ( %10.3g, %10.3g, %10.3g ) IS OUTSIDE THE VALID REGION--POWER SERIES DIVERGES BFIELD IS SET TO ZERO\n", X, Y, Z);
-        BF[1] = 0.0;
-        BF[2] = 0.0;
-        BF[3] = 0.0;
-        return;
+        MYFAC = R2*R2*R2/11390625.0; // Kludge to avoid power series from blowing up at large R2
+//        printf("OlsenPfitzerStatic: ( X, Y, Z ) = ( %10.3g, %10.3g, %10.3g ) BX, BY, BZ = %g %g %g IS OUTSIDE THE VALID REGION--POWER SERIES DIVERGES BFIELD IS SET TO ZERO\n", X, Y, Z, BX, BY, BZ );
+//        BF[1] = 0.0;
+//        BF[2] = 0.0;
+//        BF[3] = 0.0;
+//        return;
     }
+/*
+*/
 
 
     /*
@@ -381,6 +384,14 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
     BF[1] = BX*CON;
     BF[2] = BY*CON;
     BF[3] = BZ*CON;
+
+    if ( R2 > 225.0 ) {
+        // Kuldge to avoid divering power series. MYFAC has an R^6 in the demon.
+        BF[1] = BX/MYFAC;
+        BF[2] = BY/MYFAC;
+        BF[3] = BZ/MYFAC;
+        //printf("OlsenPfitzerStatic: ( X, Y, Z ) = ( %10.3g, %10.3g, %10.3g ) BX, BY, BZ = %g %g %g IS OUTSIDE THE VALID REGION--POWER SERIES DIVERGES BFIELD IS SET TO ZERO\n", X, Y, Z, BX, BY, BZ );
+    }
 
 
     return;

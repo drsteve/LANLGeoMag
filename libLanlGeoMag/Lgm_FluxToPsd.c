@@ -793,7 +793,7 @@ exit(0);
     
 
 //x[2] = 200.0;
-printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
+//printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
     psd = Model( x,  E );
     //psd = (double)a;
 

@@ -64,7 +64,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     /*
      *  Blocal at sat location.
      */
-    MagEphemInfo->P_gsm = *u;
+    MagEphemInfo->P = *u;
     LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
@@ -75,7 +75,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
      */
     if ( Lgm_Trace( u, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo->mInfo ) == 1 ) {
 
-        MagEphemInfo->Pmin_gsm = v3;
+        MagEphemInfo->Pmin = v3;
         MagEphemInfo->Bmin     = LstarInfo->mInfo->Bmin;
 
 
@@ -98,8 +98,8 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
              *  will use 8 threads to do the loop in parallel. Be very careful what gets 
              *  set private here -- the threads must not interfere with each other.
              */
-            #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk)
-            #pragma omp for schedule(dynamic, 1)
+//            #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk)
+//            #pragma omp for schedule(dynamic, 1)
             for ( i=0; i<MagEphemInfo->nAlpha; i++ ){  // LOOP OVER PITCH ANGLES
 
                 
@@ -148,8 +148,8 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
                         MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
-                        MagEphemInfo->ShellFootprint_Pn[i][nn] = LstarInfo2->Footprint_Pn[nn];
-                        MagEphemInfo->ShellFootprint_Ps[i][nn] = LstarInfo2->Footprint_Ps[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Pn[i][nn] = LstarInfo2->Ellipsoid_Footprint_Pn[nn];
+                        MagEphemInfo->ShellEllipsoidFootprint_Ps[i][nn] = LstarInfo2->Ellipsoid_Footprint_Ps[nn];
                         MagEphemInfo->ShellMirror_Pn[i][nn]    = LstarInfo2->Mirror_Pn[nn];
                         MagEphemInfo->ShellMirror_Ps[i][nn]    = LstarInfo2->Mirror_Ps[nn];
                         MagEphemInfo->ShellMirror_Ss[i][nn]    = LstarInfo2->mInfo->Sm_South;
