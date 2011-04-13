@@ -421,7 +421,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
         }
     }
     if ( f->DumpDiagnostics ) {
-        DumpGif( "Lgm_FluxToPsd_SetFlux_FLUX_EA.gif", f->nA, f->nE, f->FLUX_EA );
+        DumpGif( "Lgm_FluxToPsd_SetFlux_FLUX_EA", f->nA, f->nE, f->FLUX_EA );
     }
 
 
@@ -441,7 +441,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
         }
     }
     if ( f->DumpDiagnostics ) {
-        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_EA.gif", f->nA, f->nE, f->PSD_EA );
+        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_EA", f->nA, f->nE, f->PSD_EA );
     }
 
     f->Alloced1 = TRUE;
@@ -626,7 +626,7 @@ assumes electrons -- generalize this...
     }
 
     if ( f->DumpDiagnostics ) {
-        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_MK.gif", f->nK, f->nMu, f->PSD_MK );
+        DumpGif( "Lgm_FluxToPsd_SetFlux_PSD_MK", f->nK, f->nMu, f->PSD_MK );
     }
 
 
@@ -1017,12 +1017,12 @@ if ((j==189)&&(k==118)) {
 /**
  *   Routine to write out a GIF image
  */
-void DumpGif( char *Filename, int W, int H, double **Image ){
+void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
     double           Val, Min, Max, dVal;
     int              w, h;
-    unsigned char   *uImage, uVal;
-    FILE            *fp_gif;
+    unsigned char   *uImage, uVal, Filename[1024];
+    FILE            *fp_gif, *fp_info;
 
     int             LogScale;
 
@@ -1047,8 +1047,13 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
         }
     }
 
-//    printf("Min, Max = %g %g\n", Min, Max);
+    printf("Min, Max = %g %g\n", Min, Max);
 
+    sprintf( Filename, "%s.info", FilenameBase);
+    fp_info = fopen( Filename, "w" );
+    fprintf( fp_info, "Min: %g\n", Min );
+    fprintf( fp_info, "Max: %g\n", Max );
+    fclose( fp_info );
 
 
 
@@ -1073,6 +1078,7 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
         }
     }
 
+    sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
     WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
     fclose(fp_gif);
@@ -1080,6 +1086,20 @@ void DumpGif( char *Filename, int W, int H, double **Image ){
     free( uImage );
 
 
+
+    // dump a colorbar image
+    W = 10; H = 256;
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+            *(uImage + W*(H-1-h) + w) = h;
+        }
+    }
+    sprintf( Filename, "%s_Bar.gif", FilenameBase);
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    fclose(fp_gif);
+    free( uImage );
 
 }
 

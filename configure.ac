@@ -25,14 +25,14 @@ fi
 #AM_CONDITIONAL([HAVE_DOXYGEN],
 #[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
 
-DX_HTML_FEATURE(ON)                                                                                                                                                                                              
-DX_CHM_FEATURE(OFF)                                                                                                                                                                                              
-DX_CHI_FEATURE(OFF)                                                                                                                                                                                              
-DX_MAN_FEATURE(OFF)                                                                                                                                                                                               
-DX_RTF_FEATURE(OFF)                                                                                                                                                                                              
-DX_XML_FEATURE(OFF)                                                                                                                                                                                              
-DX_PDF_FEATURE(ON)                                                                                                                                                                                               
-DX_PS_FEATURE(OFF) 
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(ON)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(ON)
+DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile)
 
 dnl Add LDFLAGS for embedded perl
@@ -53,7 +53,7 @@ LDFLAGS=${LDFLAGS}\ ${GSL_LDFLAGS}
 GSLCBLAS_LDFLAGS=-lgslcblas
 LDFLAGS=${LDFLAGS}\ ${GSLCBLAS_LDFLAGS}
 
-OPENMP_LDFLAGS=-fopenmp -lgomp
+OPENMP_LDFLAGS="-fopenmp -lgomp"
 LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 
 
