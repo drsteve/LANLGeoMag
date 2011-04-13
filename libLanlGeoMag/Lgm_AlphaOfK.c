@@ -201,34 +201,20 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
 
 
 /**
- *  This internal function returns the difference between the target K and the
- *  K(Alpha). Its the quanity whose zero we are trying to find. I.e., we are
- *  trying to find the Alpha that makes;
+ *  This internal function returns K(Alpha).
  *
- *      Func = K - K(Alpha) = 0
- *
- *  On a plot of f(Alpha) vs Alpha, the value starts out negative for low pitch
- *  angles and crosses zero at some PA, then goes positive. 
- *
- *      \param[in]      Kt              The target value of the second invariant, K        <b> ( Re G^(1/2) )</b>
  *      \param[in]      Alpha           The pitch angle to compute Kt-K(Alpha) for         <b> ( Degrees )</b>
  *      \param[in,out]  m               A properly initialized and configured Lgm_MagModelInfo structure.
  *
- *      \returns        difference between Kt and K(Alpha).                                 <b> ( Re G^(1/2) )</b>
+ *      \returns        K(Alpha).                                 <b> ( Re G^(1/2) )</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
  *
- *      \note           This is an internal routine that the user probably should not call. 
- *                      (Perhaps an exception could be if you wanted to know the final difference 
- *                      follwoing a call to Lgm_AlphaOfK().)
  */
-double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
+double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
 
-    double           rat, sa, sa2, Sma, Smb, I, K;
-
-
-    if ( fabs( Alpha - 90.0 ) < 1e-5 ) return( Kt - 0.0 );
+    double  rat, sa, sa2, Sma, Smb, I, K;
 
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
@@ -297,9 +283,9 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
 
             /*
-             *  return the diff
+             *  return K
              */
-            return( Kt - K );
+            return( K );
 
 
         }
@@ -307,5 +293,51 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
      return( -9e99 );
 
+
+}
+
+/**
+ *  This internal function returns the difference between the target K and the
+ *  K(Alpha). Its the quanity whose zero we are trying to find. I.e., we are
+ *  trying to find the Alpha that makes;
+ *
+ *      Func = K - K(Alpha) = 0
+ *
+ *  On a plot of f(Alpha) vs Alpha, the value starts out negative for low pitch
+ *  angles and crosses zero at some PA, then goes positive. 
+ *
+ *      \param[in]      Kt              The target value of the second invariant, K        <b> ( Re G^(1/2) )</b>
+ *      \param[in]      Alpha           The pitch angle to compute Kt-K(Alpha) for         <b> ( Degrees )</b>
+ *      \param[in,out]  m               A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *      \returns        difference between Kt and K(Alpha).                                 <b> ( Re G^(1/2) )</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ *
+ *      \note           This is an internal routine that the user probably should not call. 
+ *                      (Perhaps an exception could be if you wanted to know the final difference 
+ *                      follwoing a call to Lgm_AlphaOfK().)
+ */
+double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
+
+    double K;
+
+    if ( fabs( Alpha - 90.0 ) < 1e-5 ) return( Kt - 0.0 );
+
+    K = Lgm_KofAlpha( Alpha, m );
+
+    if ( K < 0.0 ) {
+
+        return( -9e99 );
+
+    } else {
+
+        /*
+         *  return the diff
+         */
+        return( Kt - K );
+
+    }
 
 }
