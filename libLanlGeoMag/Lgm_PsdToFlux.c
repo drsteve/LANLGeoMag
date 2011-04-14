@@ -1,17 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <omp.h>
-#include "Lgm/Lgm_FluxToPsd.h"
-#include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_MagModelInfo.h"
-#include "Lgm/Lgm_DynamicMemory.h"
-
-
-
 /**
  *  Returns a pointer to a dynamically allocated Lgm_PsdToFlux structure.
  *  User must destroy this with Lgm_P2F_FreePsdToFlux() when done.
@@ -241,12 +227,10 @@ For now we will just go with the defaults.
      * Transform the A's into K's using Lgm_KofAlpha().
      * Save the results in the p structure.
      */
-
-//FIX
-Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
+    Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
     {
-        #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+        #pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
         #pragma omp for schedule(dynamic, 1)
         for ( k=0; k<nA; k++ ){
 
@@ -261,8 +245,7 @@ Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
 
         }
     }
-//FIX
-Lgm_TearDown_AlphaOfK( mInfo );
+    Lgm_TearDown_AlphaOfK( mInfo );
 
 
     /*
@@ -311,6 +294,7 @@ assumes electrons -- generalize this...
 
             if (DoIt) {
                 p->PSD_EA[m][k]  = Lgm_P2F_GetPsdAtMuAndK( p->MuofE[m][k], p->KofA[k], p->A[k], p );
+                // Now do conversion from units of PSD to Flux
                 p2c2 = Lgm_p2c2( p->E[m], LGM_Ee0 );
                 p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
             } else {
@@ -337,8 +321,10 @@ assumes electrons -- generalize this...
 
 
 /**
- * The p structure should have an initialized PSD[Mu][K] array in it.
- * This routine computes psd given a value of Mu and K. (Need Alpha also).
+ * The p structure should have an initialized PSD[Mu][K] array in it (i.e. as
+ * added by Lgm_P2F_SetPsd()).  This routine computes psd from this array given
+ * arbitrary values of Mu and K. (Alpha is also needed here, because we need to
+ * convert some Mu's to to Energie's long the way).
  */
 double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p ) {
 
@@ -346,7 +332,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     double      K0, K1, y0, y1, slp, psd;
     _FitData    *FitData;
 
-    // if a < 0, we should return fill value.
+    // if K < 0, we should return fill value.
     if ( K < 0.0 ) return(-9e99);
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
@@ -383,7 +369,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         y1   = p->PSD_MK[j][i1];
         slp  = (y1-y0)/(K1-K0);
         FitData->g[j] = slp*(K-K1) + y1;
-if (FitData->g[j] < 0.0) FitData->g[j] = y0;
+        if (FitData->g[j] < 0.0) FitData->g[j] = y0; // probably shouldnt be in the fit at all!?
         FitData->E[j] = Lgm_Mu_to_Ek( p->Mu[j], A, p->B, LGM_Ee0 );
 //        printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
     }
