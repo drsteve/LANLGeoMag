@@ -126,7 +126,76 @@ typedef struct Lgm_FluxToPsd {
 } Lgm_FluxToPsd;
 
 
+typedef struct Lgm_PsdToFlux {
 
+
+    /*
+     * Params for PSD versus Mu and K.
+     */
+    int          nMu;                //!< Number of mu bins in PSD array.
+
+    double       *Mu;                //!< Array of mu values in PSD array.
+
+    int          nK;                //!< Number of K bins in PSD array.
+
+    double       *K;                //!< Array of K values in PSD array.
+
+    double       **PSD_MK;          //!< Array of PSD versus Mu and K, PSD[Mu][K].
+
+    int          Alloced1;          //!< If true, the arrays are alloced.
+
+
+
+    /*
+     * Intermediate quantities needed.
+     */
+    Lgm_DateTime DateTime;         //!< Date/Time of measurment.
+
+    Lgm_Vector   Position;         //!< Position of measurment.
+
+    double       *KofA;            //!< Array of K values that are implied by the Alpha values. Size is nA.
+
+    double       **MuofE;          //!< Array of Mu values that are implied by the E, Alpha and B values. Size is nMu by nK.
+
+    double       B;                //!< Magnetic field strength.
+
+
+    /*
+     * Params for PSD versus Mu and K
+     */
+    int          nE;               //!< Number of Energy bins in desired PSD(E,Alpha) array.
+
+    double       *E;               //!< Array of Energy values in desired PSD(E,Alpha) array.
+
+    int          nA;                //!< Number of Alpha bins in desired PSD(E,Alpha) array.
+
+    double       *A;                //!< Array of Alpha values in desired PSD(E,Alpha) array.
+
+
+    double       **PSD_EA;          //!< Array of PSD versus Energy and Alpha,  PSD[E][Alpha].
+
+    double       **FLUX_EA;         //!< Array of FLUX versus Energy and Alpha,  FLUX[E][Alpha].
+
+    int          Alloced2;          //!< If true, the arrays are alloced.
+
+    
+
+
+
+
+    /*
+     * Other things..
+     */
+    int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
+    int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
+
+
+
+} Lgm_PsdToFlux;
+
+
+
+// Flux -> PSD routines
 Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics );
 void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
@@ -134,6 +203,14 @@ void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_Fl
 void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p );
 double         Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f );
 
+
+// PSD -> Flux routines
+Lgm_PsdToFlux  *Lgm_P2F_CreatePsdToFlux( int DumpDiagnostics );
+void            Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p );
+void            Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p );
+void            Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p );
+void            Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, Lgm_PsdToFlux *p );
+double          Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p );
 
 
 

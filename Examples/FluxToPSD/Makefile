@@ -8,7 +8,7 @@ MuTest: MuTest.c
 f2p: f2p.c
 	gcc f2p.c `pkg-config --cflags --libs lgm` -o f2p
 
-f2p_v2: f2p_v2.c
+f2p_v2: f2p_v2.c DumpSvg.c
 	gcc f2p_v2.c DumpSvg.c `pkg-config --cflags --libs lgm` -o f2p_v2
 
 clean:
