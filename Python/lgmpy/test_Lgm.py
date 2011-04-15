@@ -26,6 +26,7 @@ from test_Lgm_Wrap import *
 from test_Closed_Field import *
 from test_Lstar import *
 from test_Lgm_OP77 import *
+from test_magcoords import *
 # add others here as they exist
 
 if __name__ == '__main__':
