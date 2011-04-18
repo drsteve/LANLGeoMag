@@ -1879,6 +1879,9 @@ void Lgm_Print_DMSd( double d ){
 
 /*
  *  Given Cartesian CDMAG vector, convert to R, MLAT, MLON, MLT
+ *  Note: MLT is defined to be the difference (in hours) between the magnetic
+ *  longitude of the point in question and the magnetic longitude of the
+ *  anti-solar point. Its coord system dependent.
  */
 void Lgm_CDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, double *MLON, double *MLT, Lgm_CTrans *c ) {
 
