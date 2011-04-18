@@ -19,8 +19,8 @@ from spacepy import datamodel
 import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
-    SetLstarTolerances, RadPerDeg, \
-    LFromIBmM_Hilton, LFromIBmM_McIlwain
+    SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
+    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
@@ -99,7 +99,16 @@ def get_Lstar(pos, date, alpha = 90,
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
-
+    
+    Pwgs = Lgm_Vector.Lgm_Vector()
+    Pmlt = Lgm_Vector.Lgm_Vector()
+    Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, mmi.c )
+    Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, mmi.c )
+    R, MLat, MLon, MLT = c_double(), c_double(), c_double(), c_double(),
+    Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon), 
+        pointer(MLT), mmi.c)
+    ans['MLT'] = datamodel.dmarray(MLT.value, attrs={'coord_system': 'EDMAG'})
+    
     # save Kp
     # TODO maybe add some Kp checking
     ans['Kp'] = datamodel.dmarray([Kp])
@@ -159,6 +168,8 @@ def get_Lstar(pos, date, alpha = 90,
         ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
         #sets up nans in case of Lstar failure
         ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
+        ans[pa]['Bmin'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
+        ans[pa]['Bmirror'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
 
     if trace != 'LGM_CLOSED':
         return ans
@@ -224,7 +235,6 @@ def get_Lstar(pos, date, alpha = 90,
             MagEphemInfo.nShellPoints[i] = lstarinf.nPnts
             ## pull all this good extra info into numpy arrays
             ans[pa]['I'] = datamodel.dmarray(lstarinf.I[0])
-            ans[pa]['MLT'] = datamodel.dmarray(lstarinf.MLT[0])
 
             if extended_out:
                 ans[pa]['ShellI'] = \
