@@ -1952,13 +1952,13 @@ void Lgm_EDMAG_to_R_MLAT_MLON_MLT( Lgm_Vector *u, double *R, double *MLAT, doubl
     *R    = Lgm_NormalizeVector( &w );
     *MLAT = asin( u->z/(*R) )*DegPerRad;
 
-    // Find Longitude of Sun vector in CDMAG coords.
+    // Find Longitude of Sun vector in EDMAG coords.
     // And the Long thats 180deg. from it. (Because thats what MLT is reckoned from).
     Lgm_Convert_Coords( &(c->Sun), &v, MOD_TO_EDMAG, c );
     SunMlon = atan2( v.y, v.x )*DegPerRad; // in range -180 to 180
     SunMlon += 180.0; // in range 0 to 360
 
-    // Find Longitude of input vector in CDMAG coords.
+    // Find Longitude of input vector in EDMAG coords.
     *MLON = atan2( u->y, u->x )*DegPerRad; // in range -180 to 180
     if (*MLON < 0.0)  *MLON += 360.0;       // puts into range 0 to 360
 
@@ -1978,7 +1978,7 @@ void Lgm_R_MLAT_MLT_to_EDMAG( double R, double MLAT, double MLT, Lgm_Vector *u, 
     Lgm_Vector  v;
     double 	Mlon, SunMlon, phi, the, ct;
 
-    // Find Longitude of Sun vector in CDMAG coords.
+    // Find Longitude of Sun vector in EDMAG coords.
     // And the Long thats 180deg. from it. (Because thats what MLT is reckoned from).
     Lgm_Convert_Coords( &(c->Sun), &v, MOD_TO_EDMAG, c );
     SunMlon = atan2( v.y, v.x )*DegPerRad; // in range -180 to 180
