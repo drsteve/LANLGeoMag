@@ -1,0 +1,8 @@
+The configure on OSX to use the openmp that is in Lgm required that the 64 bit xcode is installed.  Get xcode4 (http://asus.lanl.gov/html/sucs.php).
+
+Then at least on RBSP2 I have to specify a lib path in ./configure to make it work.
+./configure LDFLAGS="-L/usr/local/lib/x86_64"
+
+
+
+
