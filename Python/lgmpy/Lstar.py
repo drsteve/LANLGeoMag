@@ -167,6 +167,7 @@ def get_Lstar(pos, date, alpha = 90,
         ans[pa] = datamodel.SpaceData()
         ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
         #sets up nans in case of Lstar failure
+        ans[pa]['I'] = datamodel.dmarray(numpy.nan)
         ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
         ans[pa]['Bmin'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
         ans[pa]['Bmirror'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
