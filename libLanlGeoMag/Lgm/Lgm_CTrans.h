@@ -33,9 +33,9 @@
 #define AU              149.5978700e6   // Astronomical Unit in km
 
 
-#define LGM_GOLD        1.61803398874989484820  // Phi -- Golden ratio
-#define LGM_1O_GOLD     0.61803398874989484820  // 1/Phi
-#define LGM_1M_1O_GOLD  0.38196601125010515180  // 1-1/Phi
+#define LGM_GOLD                1.61803398874989484820  // Phi -- Golden ratio
+#define LGM_1_OVER_GOLD         0.61803398874989484820  // 1/Phi
+#define LGM_1_MINUS_1_OVER_GOLD 0.38196601125010515180  // 1-1/Phi
 
 #define LGM_ERROR       -1      // generic error flag
 #define LGM_FILL_VALUE (-1e31)  // Value to flag undefined or bad data

@@ -78,7 +78,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
             if (mInfo->VerbosityLevel > 0) {
                 printf("\n\tMin-B  Point Location, Pmin (Re):      < %g, %g, %g >\n", mInfo->Pmin.x, mInfo->Pmin.y, mInfo->Pmin.z );
-                printf("\tMirror Point Location, Pm_South (Re):      < %g, %g, %g >\n", mInfo->Pm_South.x, mInfo->Pm_South.y, mInfo->Pm_South.z );
+                printf("\tMirror Point Location, Pm_South (Re):      < %g, %g, %g >  |Pm_South| = %g\n", mInfo->Pm_South.x, mInfo->Pm_South.y, mInfo->Pm_South.z, Lgm_Magnitude(&mInfo->Pm_South) );
                 mInfo->Bfield( &mInfo->Pm_South, &Bvec, mInfo );
                 B = Lgm_Magnitude( &Bvec );
                 printf("\tMag. Field Strength, Bm at Pm_South (nT):  %g     (mInfo->Bm = %g)\n", B, mInfo->Bm );
@@ -86,11 +86,12 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
 
 
-            if ( Lgm_TraceToMirrorPoint( &(mInfo->Pm_South), &(mInfo->Pm_North), &dSb, mInfo->Bm,  1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) >= 0 ) {
+            //if ( Lgm_TraceToMirrorPoint( &(mInfo->Pm_South), &(mInfo->Pm_North), &dSb, mInfo->Bm,  1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) >= 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &(mInfo->Pmin), &(mInfo->Pm_North), &dSb, mInfo->Bm,  1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) >= 0 ) {
 
                 if (mInfo->VerbosityLevel > 0) {
                     printf("\n\tMin-B  Point Location, Pmin (Re):      < %g, %g, %g >\n", mInfo->Pmin.x, mInfo->Pmin.y, mInfo->Pmin.z );
-                    printf("\tMirror Point Location, Pm_North (Re):      < %g, %g, %g >\n", mInfo->Pm_North.x, mInfo->Pm_North.y, mInfo->Pm_North.z );
+                    printf("\tMirror Point Location, Pm_North (Re):      < %g, %g, %g >  |Pm_North| = %g\n", mInfo->Pm_North.x, mInfo->Pm_North.y, mInfo->Pm_North.z, Lgm_Magnitude(&mInfo->Pm_North) );
                     mInfo->Bfield( &mInfo->Pm_North, &Bvec, mInfo );
                     B = Lgm_Magnitude( &Bvec );
                     printf("\tMag. Field Strength, Bm at Pm_North (nT):  %g     (mInfo->Bm = %g)\n", B, mInfo->Bm );
@@ -99,9 +100,12 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                 /*
                  *  Set the limits of integration. Define s=0 at the sourthern mirror point. Then, sm_North will just be dSb
                  */
-                SS = dSb;
+                //SS = dSb;
+                SS = dSa+dSb;
+//printf("dSa, dSb, SS = %g %g %g\n", dSa, dSb, SS);
                 mInfo->Hmax = SS/200.0;
                 r  = Lgm_Magnitude( &mInfo->Pm_North );
+//printf("mInfo->Pm_North = %g %g %g    r = %g\n", mInfo->Pm_North.x, mInfo->Pm_North.y, mInfo->Pm_North.z, r);
                 mInfo->Sm_South = 0.0;
                 mInfo->Sm_North = SS;
 
@@ -143,6 +147,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
         }
 
+//printf("********************************************** I = %g, Sm_South, Sm_North = %g %g\n", *I, 0.0, SS);
 
 
         /*

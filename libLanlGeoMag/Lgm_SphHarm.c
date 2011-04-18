@@ -18,7 +18,39 @@
 #define TINY 1.0e-25
 #include <omp.h>
 
+double Lgm_fac1( int n ){                                                                                                                                                                            
+    int     i;                                                                                                                                                                                 
+    double  f;                                                                                                                                                                                 
+    if (n<=0)return(1.0);                                                                                                                                                                            
+    for (f=1.0, i=2; i<=n; i++) f *= i;                                                                                                                                                              
+    return(f);                                                                                                                                                                                     
+}                                                                                                                                                                                                  
+                                                                                                                                                                                                   
+double Lgm_fac2( int n ){                                                                                                                                                                            
+    int     i;                                                                                                                                                                                 
+    double  f;                                                                                                                                                                                 
+    if (n<=0)return(1.0);                                                                                                                                                                            
+    for (f=1.0, i=1; i<=n; i += 2) f *= i;                                                                                                                                                           
+    return(f);                                                                                                                                                                                     
+}                                                                                                                                                                                                  
+                                                                                                                                                                                                   
+double Lgm_kdelta( int i, int j ) {                                                                                                                                                                        
+    if ( i==j ) return( 1.0 );                                                                                                                                                                       
+    else return( 0.0 );                                                                                                                                                                              
+}                           
 
+void  Lgm_GaussToSchmidtSemiNorm( int n, int m, double c_gauss, double *c_schmidt, double *Snm ) {
+    double f1 = Lgm_fac1(n-m);
+    *Snm = Lgm_fac2( 2*n-1 )/f1 * sqrt( (2.0-Lgm_kdelta(m,0))*f1/Lgm_fac1(n+m) );
+    *c_schmidt = c_gauss/(*Snm);
+    return;
+}
+void  Lgm_SchmidtSemiNormToGauss( int n, int m, double c_schmidt, double *c_gauss, double *Snm ) {
+    double f1 = Lgm_fac1(n-m);
+    *Snm = Lgm_fac2( 2*n-1 )/f1 * sqrt( (2.0-Lgm_kdelta(m,0))*f1/Lgm_fac1(n+m) );
+    *c_gauss = c_schmidt * *Snm;
+    return;
+}
 
 
 
