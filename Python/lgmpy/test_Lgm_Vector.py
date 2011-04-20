@@ -2,8 +2,32 @@
 
 import unittest
 import ctypes
+import numpy as np
 
 import Lgm_Vector
+
+class Lgm_VecClassMethodTests(unittest.TestCase):
+    """
+    Tests related to Lgm_Vector class methods
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 20-Apr-2011 (BAL)
+    """
+    def setUp(self):
+        super(Lgm_VecClassMethodTests, self).setUp()
+
+    def tearDown(self):
+        super(Lgm_VecClassMethodTests, self).tearDown()
+
+    def test_CartToSph(self):
+        """CartToSph shuld give known output for known input"""
+        np.testing.assert_array_equal(Lgm_Vector.CartToSph(1,0,0), (0.0, 0.0, 1.0))
+
+    def test_CartToSph_raises(self):
+        """CartToSph does input checking"""
+        self.assertRaises(ValueError,Lgm_Vector.CartToSph, [1,1], 0, 0  )
 
 class Lgm_VecTests(unittest.TestCase):
     """
@@ -14,7 +38,6 @@ class Lgm_VecTests(unittest.TestCase):
 
     @version: V1: 20-Dec-2010 (BAL)
     """
-
     def setUp(self):
         super(Lgm_VecTests, self).setUp()
 

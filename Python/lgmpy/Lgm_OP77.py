@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Python implementation of the LanlGeoMag OP77 Magnetic field model
 
@@ -34,11 +35,11 @@ class Lgm_OP77(MagData.MagData):
     def __init__(self, pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
         super(Lgm_OP77, self).__init__(Position=pos, Epoch=time, coord_system = coord_system, INTERNAL_MODEL=INTERNAL_MODEL,)
 
-        # pos must be a Lgm_Vector or list of Lgm_Vectors
-        if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
-            not isinstance(pos, list):
+        # pos must be an Lgm_Vector or list or sensible ndarray
+        try:
+            self._Vpos = self._pos2Lgm_Vector(pos)
+        except:
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
-        self._Vpos = self._pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
@@ -98,6 +99,8 @@ class Lgm_OP77(MagData.MagData):
     def _pos2Lgm_Vector(self, pos):
         if isinstance(pos, Lgm_Vector.Lgm_Vector):
             return pos
+        if isinstance(pos, np.ndarray):
+            pos = pos.tolist()
         if isinstance(pos, list):
             Vpos = []
             for val in pos:
@@ -105,8 +108,6 @@ class Lgm_OP77(MagData.MagData):
                     return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
                 Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
             return Vpos
-        if isinstance(pos, np.ndarray):
-            raise(NotImplementedError('Only lists can be input for position now') )
 
 def OP77(pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """

@@ -20,12 +20,12 @@ try:
     #this block makes sure the tests in working directory run on local files not installed versions
     #TODO: I don't like this -- so how can this be done better????
     from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from .Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
+    from .Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from .Lstar import Lstar_Data
 except:
     from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from Lgm_Wrap import WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
+    from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
     from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
     from lgmpy.Lstar import Lstar_Data
     
@@ -38,7 +38,8 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'WGS84_GSE': WGS84_TO_GSE,
                  'GSE_WGS84': GSE_TO_WGS84,
                  'GSM_GSE': GSM_TO_GSE,
-                 'GSE_GSM': GSE_TO_GSM}
+                 'GSE_GSM': GSE_TO_GSM,
+                 'TEME_WGS84': TEME_TO_WGS84}
 
 def coordTrans(*args):
     ''' Convert coordinates between almost any system using LanlGeoMag
@@ -114,7 +115,8 @@ def Lvalue(*args, **kwargs):
                 'Bfield': 'Lgm_B_T89',
                 'method': 'Hilton',
                 'Kp': 2,
-                'coord_system': 'GSM'}
+                'coord_system': 'GSM',
+                'extended_out': False}
 
     #replace missing kwargs with defaults
     for dkey in defaults:
@@ -158,8 +160,12 @@ def Lvalue(*args, **kwargs):
                             method_dict[kwargs['method']],
                             pointer(Iout), pointer(Bm), pointer(M),
                             pointer(mInfo))
-                            
+
     #TODO: decide on format for output -- perhaps use datamodel and have method as attribute?
     #maybe only return I for extended_out flag=True
-    return {'L': ans, 'I': Iout.value}
+    if kwargs['extended_out']:
+        return {'L': ans, 'I': Iout.value, 'Bmin': mInfo.Bmin, 'Blocal': mInfo.Blocal, 
+                'Bmirr': mInfo.Bm, 'M': M.value}
+    else:
+        return {'L': ans, 'I': Iout.value}
     

@@ -51,7 +51,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
     mInfo->P_gsm = *u;
     mInfo->Bfield( u, &Bvec, mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
-
+    mInfo->Blocal = Blocal;
 
     /*
      * Set Pitch Angle, sin(Alpha), sin^2(Alpha), and Bmirror
