@@ -133,6 +133,8 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector          Bvec[LGM_MAX_INTERP_PNTS]; // 3D B-field vector   (in GSM)
     double              Bmag[LGM_MAX_INTERP_PNTS]; // magnitude of B
     double              BminusBcdip[LGM_MAX_INTERP_PNTS]; // magnitude of B minus magnitude of Cent. Dipole
+    double              MaxDiv;     // Dont subdivide the FL length with steps bigger than this.
+    int                 nDivs;      // Number of divisions of FL length to try to make (actual number of points defined may be different as MAxDiv mux be respected.)
     int                 nPnts;      // actual number of points defined
     double              ds;         // spacing in s (dist. along FL)
                                     // this will help in seacrhing the
@@ -192,7 +194,6 @@ typedef struct Lgm_MagModelInfo {
     gsl_spline          *splinePz;  // spline object
 
 
-
     /*
      *  Other stuff
      */
@@ -244,6 +245,8 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_Sb_Integrator_epsabs;
 
 
+
+
     /*
      * Variables to control MagFlux integration
      */
@@ -268,6 +271,8 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_FindBmRadius_Tol;
     double      Lgm_FindShellLine_I_Tol;
     double      Lgm_TraceToMirrorPoint_Tol;
+    double		Lgm_TraceToEarth_Tol;    // tolerance for deciding when you have converged to a footpoint. (Even for low Tol, the points obtained should still be on the FL to high precision.)
+    double		Lgm_TraceToBmin_Tol;     // tolerance for deciding when you have converged to the Bmin point along a FL. (Even for low Tol, the points obtained should still be on the FL to high precision.)
 
 
 
