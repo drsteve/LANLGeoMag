@@ -361,11 +361,14 @@ def SphToCart(lat, lon, rad):
     """takes an input Lat, Lon, Rad and returns x, y, z"""
     vec1 = Lgm_Vector(0, 0, 0)
     try:
-        if len(lat) != len(lon) != len(rad):
-            raise(ValueError('All input must be the same length'))
+        assert type(lat) == type(lon) == type(rad)
+        llat, llon, lrad = len(lat), len(lon), len(rad)
+        assert llat == llon == lrad
     except TypeError:
         Lgm_SphToCartCoords(lat, lon, rad, pointer(vec1))
         return vec1
+    except AssertionError:
+        raise(ValueError('All input must be the same length and type'))
     else:
         ans = []
         for v1, v2, v3 in itertools.izip(lat, lon, rad):
@@ -375,17 +378,21 @@ def SphToCart(lat, lon, rad):
         
 def CartToSph(x, y, z):
     """takes an input x, y, z and returns Lat, Lon, Rad"""
-    vec1 = Lgm_Vector(x, y, z)
     lat, lon, rad = c_double(), c_double(), c_double()
     try:
-        if len(x) != len(y) != len(z):
-            raise(ValueError('All input must be the same length'))
+        assert type(x) == type(y) == type(z)
+        lx, ly, lz = len(x), len(y), len(z)
+        assert lx == ly == lz
     except TypeError:
+        vec1 = Lgm_Vector(x, y, z)
         Lgm_CartToSphCoords(pointer(vec1), pointer(lat), pointer(lon), pointer(rad))
         return lat.value, lon.value, rad.value
+    except AssertionError:
+        raise(ValueError('All input must be the same length and type'))
     else:
         ans = []
         for v1, v2, v3 in itertools.izip(x, y, z):
-            Lgm_SphToCartCoords(pointer(vec1), pointer(v1), pointer(v2), pointer(v3))
+            vec1 = Lgm_Vector(v1, v2, v3)
+            Lgm_CartToSphCoords(pointer(vec1), pointer(lat), pointer(lon), pointer(rad))
             ans.append(copy.copy([lat.value, lon.value, rad.value]))
         return ans
