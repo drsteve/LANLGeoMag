@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Test suite for the Lgm_OP77 file
@@ -69,8 +70,6 @@ class Lgm_OP77Tests(unittest.TestCase):
         # above tested thought __init__ below is raw
         self.assertEqual(a._pos2Lgm_Vector([1, 2, 3]),
                          Lgm_Vector.Lgm_Vector(1, 2, 3) )
-        self.assertRaises(NotImplementedError, a._pos2Lgm_Vector,
-                          numpy.array([1, 2, 3]))
 
     def test_OP77_1(self):
         """First simple in/out tests of OP77 (regression)"""

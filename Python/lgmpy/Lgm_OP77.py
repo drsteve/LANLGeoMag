@@ -35,13 +35,11 @@ class Lgm_OP77(MagData.MagData):
     def __init__(self, pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
         super(Lgm_OP77, self).__init__(Position=pos, Epoch=time, coord_system = coord_system, INTERNAL_MODEL=INTERNAL_MODEL,)
 
-        # pos must be a Lgm_Vector or list of Lgm_Vectors
-        if not isinstance(pos, Lgm_Vector.Lgm_Vector):# and \
-            #not isinstance(pos, list):
-            try:
-                self._Vpos = self._pos2Lgm_Vector(pos)
-            except:
-                raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+        # pos must be an Lgm_Vector or list or sensible ndarray
+        try:
+            self._Vpos = self._pos2Lgm_Vector(pos)
+        except:
+            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
