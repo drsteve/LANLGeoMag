@@ -22,6 +22,30 @@ from Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans
 from Lgm_Wrap import Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms
 from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, SM_TO_GSM
 
+class Lgm_CoordsTests(unittest.TestCase):
+    """
+    Tests related to Lgm_CTrans.Lgm_Coords
+    @author: Brian Larsen
+    @organization: LANL
+    @contact: balarsen@lanl.gov
+
+    @version: V1: 20-Dec-2010 (BAL)
+    """
+    def setUp(self):
+        super(Lgm_CoordsTests, self).setUp()
+
+    def tearDown(self):
+        super(Lgm_CoordsTests, self).tearDown()
+
+    def test_init(self):
+        """Lgm_Coords does some input checking"""
+        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], units='km')
+        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], system='bad')
+        self.assertRaises(ValueError, Lgm_CTrans.Lgm_Coords, [0.1, 0.5, 0.6])
+        coords = Lgm_CTrans.Lgm_Coords([1, 2, 3])
+        self.assertEqual(coords[:], [1,2,3])
+        self.assertEqual(coords.system, 'GSM') # with will catch a default change
+
 class Lgm_CTransTests(unittest.TestCase):
     """
     Tests related to Lgm_CTrans
@@ -31,17 +55,11 @@ class Lgm_CTransTests(unittest.TestCase):
 
     @version: V1: 20-Dec-2010 (BAL)
     """
-
     def setUp(self):
         super(Lgm_CTransTests, self).setUp()
 
     def tearDown(self):
         super(Lgm_CTransTests, self).tearDown()
-
-    def test_ctrans_input(self):
-        """Lgm_CTrans tests some inputs"""
-        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], units='km')
-        self.assertRaises(NotImplementedError, Lgm_CTrans.Lgm_Coords, [1, 2, 3], system='bad')
 
     def test_sizeLgm_CTrans(self):
         """Lgm_CTrans c and python must have same size"""

@@ -34,7 +34,7 @@ class Lgm_Coords(list):
             raise(NotImplementedError('So far only one 3 element list is supported as input' ) )
         if units != 'Re':
             raise(NotImplementedError('Only Re units supoorted so far' ) )
-        if tb.hypot(*inval) < 1.0:
+        if inval[0] < 1 and inval[1] < 1 and inval[2] < 1:
             raise(ValueError('Invalid position'))
         if system != 'GSM':
             raise(NotImplementedError('Only GSM coordinated supoorted so far' ) )
