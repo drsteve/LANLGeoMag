@@ -21,6 +21,7 @@
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
 
+void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks);
 
 /*
  *  Menu Bar stuff
@@ -1554,6 +1555,66 @@ _GLUfuncptr errorCallback(GLenum errorCode) {
 }
 
 
+static MaterialProp mat_blue_trans = {
+  {0.0, 0.06, 0.1, 0.5},
+  {0.0, 0.34, 0.7038, 0.5},
+  {0.50196078, 0.50196078, 0.50196078, 0.5},
+  0.25
+};
+
+//void SolidCone(GLdouble base, GLdouble height, GLint slices, GLint stacks) {
+void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks) {
+
+    double      RotAng, height, base;
+    Lgm_Vector  v, z, RotAxis;
+
+printf("u = %g %g %g\n", u->x, u->y, u->z);
+    v = *u;
+
+    z.x = 0.0; z.y = 0.0; z.z = 1.0;
+printf("z = %g %g %g\n", z.x, z.y, z.z);
+
+    height = Lgm_NormalizeVector( &v );
+    base   = height*tan( RadPerDeg*0.5*Fov );
+    RotAng = -DegPerRad*acos( v.z );
+    Lgm_CrossProduct( &v, &z, &RotAxis );
+    Lgm_NormalizeVector( &RotAxis );
+
+printf("height, base, RotAng = %g %g %g\n", height, base, RotAng);
+
+//        glPushMatrix();
+//        gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
+//        glTranslatef( 0.0, 0.0, 2.0 );
+//        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+
+//        glPopMatrix();
+
+//    glBegin(GL_LINE_LOOP);
+    GLUquadricObj* quadric = gluNewQuadric();
+        gluQuadricCallback(quadric, GLU_ERROR, (_GLUfuncptr) errorCallback);
+        gluQuadricDrawStyle(quadric, GLU_FILL); /* smooth shaded */
+        gluQuadricNormals(quadric, GLU_SMOOTH);
+//    gluQuadricDrawStyle(quadric, GLU_LINE);
+        glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_trans.ambient);
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_trans.diffuse);
+        glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_trans.specular);
+        glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_trans.shininess * 128.0);
+
+    
+
+    glPushMatrix();
+
+    glTranslatef( 0.0, 0.0, 1.0 );
+    glRotatef( RotAng, RotAxis.x, RotAxis.y, RotAxis.z );
+
+    gluCylinder(quadric, base, 0, height, slices, stacks );
+
+    glPopMatrix();
+
+//    gluDeleteQuadric(quadric);
+//    glEnd();
+}
+
 void CreateZPSAxes( ) {
 
     GLUquadricObj   *qobj;
@@ -2575,6 +2636,19 @@ void CreateSats() {
                     }
                 glEnd();
 
+for (i=0; i<Group->nSat; i++){
+if ( (!strstr(Group->Sat[i].TLE.Name, " R/B") && !strstr(Group->Sat[i].TLE.Name, " DEB")) && Group->DrawSatellites ){ // Satellites
+glEnable(GL_LIGHTING);
+//glEnable(GL_BLEND);
+//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
+printf("Group->Sat[%d] = %g %g %g\n", i, Group->Sat[i].x, Group->Sat[i].y, Group->Sat[i].z );
+Ugsm.x = Group->Sat[i].x; Ugsm.y = Group->Sat[i].y; Ugsm.z = Group->Sat[i].z;
+SolidCone( &Ugsm, 30.0, 240, 1 );
+//glDisable(GL_BLEND);
+glDisable(GL_LIGHTING);
+}
+}
+
             }
 
             g = g->Next;
@@ -2951,9 +3025,11 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
         }
 
 
+
         glDisable(GL_BLEND);
         glEnable(GL_LIGHTING);
         glDepthMask( GL_TRUE );
+
     glEndList( );
 
     free(s);

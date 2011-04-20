@@ -386,7 +386,7 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
     BF[3] = BZ*CON;
 
     if ( R2 > 225.0 ) {
-        // Kuldge to avoid divering power series. MYFAC has an R^6 in the demon.
+        // Kuldge to avoid diverging power series. MYFAC has an R^6 in the demon.
         BF[1] = BX/MYFAC;
         BF[2] = BY/MYFAC;
         BF[3] = BZ/MYFAC;

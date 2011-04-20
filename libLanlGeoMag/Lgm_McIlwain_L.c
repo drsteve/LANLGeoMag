@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define TRACE_TOL   1e-7
 
 /*
  *   Lgm_McIlwain_L
@@ -65,7 +64,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
     /*
      *  First do a trace to identify the FL type and some of its critical points.
      */
-    if ( Lgm_Trace( u, &v1, &v2, &v3, mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, mInfo ) == LGM_CLOSED ) {
+    if ( Lgm_Trace( u, &v1, &v2, &v3, mInfo->Lgm_LossConeHeight, mInfo->Lgm_TraceToEarth_Tol, mInfo->Lgm_TraceToBmin_Tol, mInfo ) == LGM_CLOSED ) {
 
         /*
          * Trace from Bmin point up to northern mirror point and down to
@@ -103,7 +102,8 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                 //SS = dSb;
                 SS = dSa+dSb;
 //printf("dSa, dSb, SS = %g %g %g\n", dSa, dSb, SS);
-                mInfo->Hmax = SS/200.0;
+                mInfo->Hmax = SS/(double)mInfo->nDivs;
+                if ( mInfo->Hmax > mInfo->MaxDiv ) mInfo->Hmax = mInfo->MaxDiv;
                 r  = Lgm_Magnitude( &mInfo->Pm_North );
 //printf("mInfo->Pm_North = %g %g %g    r = %g\n", mInfo->Pm_North.x, mInfo->Pm_North.y, mInfo->Pm_North.z, r);
                 mInfo->Sm_South = 0.0;
@@ -121,7 +121,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                     }
 
                 } else if ( mInfo->UseInterpRoutines ) {
-                    Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
+                    Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo );
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
                     AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );
                     InitSpline( mInfo );

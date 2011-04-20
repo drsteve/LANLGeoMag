@@ -65,6 +65,17 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_FindBmRadius_Tol = 1e-10;
     MagInfo->Lgm_FindShellLine_I_Tol = 1e-3;
     MagInfo->Lgm_TraceToMirrorPoint_Tol = 1e-7;
+    MagInfo->Lgm_TraceToEarth_Tol = 1e-7;
+    MagInfo->Lgm_TraceToBmin_Tol  = 1e-7;
+
+
+
+    /*
+     * Step sizes for pre-tracing routines (e.g. TraceLine() type routines that
+     * save quantities into arrays for later use in interp schemes).
+     */
+    MagInfo->MaxDiv = 0.1;
+    MagInfo->nDivs  = 200;
 
     /*
      * Bounce Loss Cone Height
