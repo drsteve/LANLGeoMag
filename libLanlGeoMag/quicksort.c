@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "Lgm/quicksort.h"
 #define SWAP(a,b) temp=(a);(a)=(b);(b)=temp;
 #define M	7
 #define NSTACK 2001
@@ -145,8 +146,25 @@ void quicksort2(  unsigned long n, double *arr, double *brr ) {
             }
         }
     }
-
-
-
 }
 
+
+/*
+ * An implementation of bubbleSort in case a user wants bubbleSort instead of quicksort
+ * BAL - 20Apr2011
+ */
+void bubbleSort(unsigned long n, double *arr)
+{
+  long i, j, temp;
+
+  for (i=(n-1); i>0; i--) /* loop over first element */
+  {
+    for (j=1; j<=i; j++) /* loop over second element */
+    {
+      if (arr[j-1] > arr[j])
+      {
+        SWAP(arr[j-1],arr[j])
+      }
+    }
+  }
+}
