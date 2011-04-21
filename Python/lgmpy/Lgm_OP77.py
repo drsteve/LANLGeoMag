@@ -38,6 +38,7 @@ class Lgm_OP77(MagData.MagData):
         # pos must be an Lgm_Vector or list or sensible ndarray
         try:
             self._Vpos = self._pos2Lgm_Vector(pos)
+            assert self._Vpos
         except:
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
 
@@ -56,7 +57,6 @@ class Lgm_OP77(MagData.MagData):
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
-
 
         if coord_system != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
