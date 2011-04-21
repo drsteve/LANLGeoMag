@@ -24,10 +24,14 @@ class Lgm_VecClassMethodTests(unittest.TestCase):
     def test_CartToSph(self):
         """CartToSph shuld give known output for known input"""
         np.testing.assert_array_equal(Lgm_Vector.CartToSph(1,0,0), (0.0, 0.0, 1.0))
+        np.testing.assert_array_equal(Lgm_Vector.CartToSph([1,1],[0,0],[0,0]), [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]])
 
     def test_CartToSph_raises(self):
         """CartToSph does input checking"""
-        self.assertRaises(ValueError,Lgm_Vector.CartToSph, [1,1], 0, 0  )
+        self.assertRaises(ValueError, Lgm_Vector.CartToSph, [1,1], 0, 0  )
+        self.assertRaises(ValueError, Lgm_Vector.CartToSph, 1.0, 0, 0  )
+        self.assertRaises(ValueError, Lgm_Vector.CartToSph, [1.0, 1.0], [0], [0]  )
+
 
 class Lgm_VecTests(unittest.TestCase):
     """
