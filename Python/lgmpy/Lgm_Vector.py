@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Vector class for Lgm
+Overview
+--------
+Vector classes used in LanlGeoMag
 
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
+This is a wrapper class for the C-structure and associated functions that
+operate on the vectors.  There is full coverage for <, >, ==, +, -. /.
 
-@version: V1: 20-Dec-2010 (BAL)
+All the operations are done in the underlying C library (even thorugh that is
+silly for much of this).
+
+
+Unittest coverage
+-----------------
+This module has full unitest coverage, see test_Lgm_Vector.py
+
+Authors
+-------
+Brian Larsen - LANL
 """
 import itertools
 import copy
@@ -244,6 +255,18 @@ class Lgm_Vector(Lgm_Vector):
     def tolist(self):
         """
         change an Lgm_Vector to a list
+
+        Returns
+        -------
+        out : list
+            the contents of the Lgm_Vector changed into a list
+
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.tolist()
+        [1.0, 2.0, 3.0]
         """
         return [self.x, self.y, self.z]
 
@@ -251,16 +274,23 @@ class Lgm_Vector(Lgm_Vector):
         """
         compute the cross product of two vectors
 
-        @param other: other vector to cross prod (on the right)
-        @type other: Lgm_Vector
-        @return: the cross product of the 2 vectors
-        @rtype: Lgm_Vector
+        Parameters
+        ----------
+        other : other Lgm_Vector to cross prod (on the right)
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
+        Returns
+        -------
+        out : the cross product of the 2 vectors (Lgm_Vector)
 
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.crossProduct(dat)
+        [0.0, 0.0, 0.0]
+        >>> dat2 = Lgm_Vector.Lgm_Vector(3,2,1)
+        >>> dat.crossProduct(dat2)
+        [-4.0, 8.0, -4.0]
         """
         o_vec = Lgm_Vector(0, 0, 0)
         Lgm_CrossProduct( pointer(self), pointer(other), pointer(o_vec) )
@@ -268,28 +298,34 @@ class Lgm_Vector(Lgm_Vector):
 
     def magnitude(self):
         """
-        return the magnitude of the vector
+        Find the magnitude of a vector
 
-        @return: Magnitude of the vector
-        @rtype: double
+        Returns
+        -------
+        out : double
+            A double value that is the magnitude of the vector
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
-
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.magnitude()
+        3.7416573867739413
         """
         return Lgm_Magnitude( pointer(self) )
 
     def normalize(self):
         """
-        Normalize the vector in place
+        Normalize the vector in place. Replaces the contents of self.
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.normalize()
+        >>> print(dat)
+        [0.2672612419124244, 0.5345224838248488, 0.8017837257372732]
 
-        @version: V1: 22-Dec-2010 (BAL)
         """
         Lgm_NormalizeVector( pointer(self) )
 
@@ -297,31 +333,41 @@ class Lgm_Vector(Lgm_Vector):
         """
         compute the dot product of two vectors
 
-        @param other: other vector to cross prod (on the right)
-        @type other: Lgm_Vector
-        @return: the dot product of the 2 vectors
-        @rtype: Lgm_Vector
+        Parameters
+        ----------
+        other : other Lgm_Vector to dot product
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
+        Returns
+        -------
+        out : the dot product of the 2 vectors (double)
 
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.dotProduct(dat)
+        14
+        >>> dat2 = Lgm_Vector.Lgm_Vector(3,2,1)
+        >>> dat.dotProduct(dat2)
+        10.0
         """
         return Lgm_DotProduct(pointer(self), pointer(other) )
 
     def scale(self, val):
         """
-        Scale a vector by a scalar
+        Scale a vector by a scalar and replace self
 
-        @param val: the value to scale the vector by
-        @type val: (int, long, float)
+        Parameters
+        ----------
+        val : the value to scale the vector by (int, long, float)
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
-
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.scale(10)
+        >>> print(dat)
+        [10.0, 20.0, 30.0]
         """
         Lgm_ScaleVector( pointer(self), val)
 
@@ -329,16 +375,21 @@ class Lgm_Vector(Lgm_Vector):
         """
         Find Magnitude of difference between to vectors
 
-        @param other: other vector to compare
-        @type other: Lgm_Vector
-        @return: difference in magnitudes
-        @rtype: float
+        Parameters
+        ----------
+        other : another Lgm_Vector
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
+        Returns
+        -------
+        out : the difference in magnitude (double)
 
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat2 = Lgm_Vector.Lgm_Vector(3,2,1)
+        >>> dat.diffMag(dat2)
+        2.8284271247461903
         """
         return Lgm_VecDiffMag(pointer(self), pointer(other) )
 
@@ -346,19 +397,36 @@ class Lgm_Vector(Lgm_Vector):
         """
         Force the vector to have a given magnitude inplace
 
-        @param val: the value for the new magnitude
-        @type val: (int, long, float)
+        Parameters
+        ----------
+        val : the magnitude of the vector
 
-        @author: Brian Larsen
-        @organization: LANL
-        @contact: balarsen@lanl.gov
-
-        @version: V1: 22-Dec-2010 (BAL)
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.forceMagnitude(10)
+        >>> print(dat)
+        [2.6726124191242437, 5.3452248382484875, 8.017837257372731]
         """
         Lgm_ForceMagnitude(pointer(self), val)
 
 def SphToCart(lat, lon, rad):
-    """takes an input Lat, Lon, Rad and returns x, y, z"""
+    """
+    takes an input Lat, Lon, Rad and returns x, y, z
+
+    Parameters
+    ----------
+    lat : latitude (deg)
+    lon : longitude (deg)
+    rad : radius (Re)
+
+    Returns
+    -------
+    out : Lgm_Vector
+        A Lgm_Vector in Cartestian coords
+    """
+
     vec1 = Lgm_Vector(0, 0, 0)
     try:
         assert type(lat) == type(lon) == type(rad)
@@ -375,9 +443,24 @@ def SphToCart(lat, lon, rad):
             Lgm_SphToCartCoords(v1, v2, v3, pointer(vec1))
             ans.append(copy.copy(vec1))
         return ans
-        
+
 def CartToSph(x, y, z):
-    """takes an input x, y, z and returns Lat, Lon, Rad"""
+    """
+    takes an input x, y, z and returns Lat, Lon, Rad
+
+    Parameters
+    ----------
+    x : x coordinate (Re)
+    y : y coordinate (Re)
+    z : z coordinate (Re)
+
+    Returns
+    -------
+    lat : output latitude (deg)
+    lon : output longitude (deg)
+    rad : output radius (Re)
+    """
+
     lat, lon, rad = c_double(), c_double(), c_double()
     try:
         assert type(x) == type(y) == type(z)
