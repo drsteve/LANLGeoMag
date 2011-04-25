@@ -23,6 +23,17 @@ Classes
 
    Lgm_Vector
    Lstar
+   Closed_Field
+   Lgm_CTrans
+   Lgm_MagEphemInfo
+   Lgm_MagModelInfo
+   Lgm_OP77
+   Lgm_T89
+   Lgm_Wrap
+   magcoords
+   MagData
+
+
 
 TODO List
 =========
