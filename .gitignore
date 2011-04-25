@@ -3,7 +3,6 @@
 .coverage
 htmlcov*
 html*
-build*
 .pc
 *.m4
 *Makefile.in
@@ -17,6 +16,5 @@ docs/Doxyfile
 docs/Makefile
 install-sh
 libLanlGeoMag/.deps/
-Makefile
 *.o
 *.lo
