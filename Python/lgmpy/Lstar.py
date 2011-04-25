@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Class to compute Lstar from position, date, and pitch angle
-for a given Kp and Bfield model
+Overview
+--------
+Class to compute Lstar using LanlGeoMag
 
-see: Lstar.get_Lstar
+This class computes Lstar, I, and other quantities for simple magnetic field models
+  - eventaully this will work wuth more complicated models as well, the C already does
+
+
+Unittest coverage
+-----------------
+This module has ``in progress`` unittest coverage, main functionality is tested
+
+Authors
+-------
+Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL
 """
 
 from __future__ import division
@@ -31,13 +42,28 @@ from _Bfield_dict import Bfield_dict
 
 class Lstar_Data(datamodel.SpaceData):
     """
-    Class to store data and attributes
+    Class to store Lstar data and associated attributes
+        - this class is a dictionary of numpy arrays that have attributes
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Examples
+    ========
+    >>> import spacepy.datamodel as dm
+    >>> from lgmpy import Lstar
+    >>> dat = Lstar.Lstar_Data()
+    >>> dat.attrs['Author'] = 'John Doe'
+    >>> dat['position'] = dm.dmarray([1,2,3], attrs={'system':'GSM'})
+    >>> print(dat)
+    +
+    :|____Author (str [8])
+    |____position (spacepy.datamodel.dmarray (3,))
+        :|____system (str [3])
+    ...
 
-    @version: V1: 03-Mar-2011 (BAL)
+    See Also
+    ========
+      - spacepy.datamodel.Spacedata
+      - spacepy.datamodel.dmarray
+
     """
     def __init__(self, *args, **kwargs):
         super(Lstar_Data, self).__init__(*args, **kwargs)
@@ -47,14 +73,186 @@ class Lstar_Data(datamodel.SpaceData):
         tb.dictree(self, verbose=True, attrs=True)
         return ''
 
-def get_Lstar(pos, date, alpha = 90,
+def get_Lstar(pos, date, alpha = 90.,
                   Kp = 2, coord_system='GSM',
                   Bfield = 'Lgm_B_OP77',
                   LstarThresh = 10.0,  # beyond this Lsimple don't compute Lstar
                   extended_out = False,
                   LstarQuality = 3):
-    '''TODO: Add docstring
-    '''
+    """
+    This method does all the work for the calculation of Lstar.
+
+    There are many options to set and a lot of output.  We have tried to describe
+    it well here but certainly have missed something, if you can't understand something
+    please contach the authors.
+
+    Parameters
+    ==========
+    pos : list or array
+        The position that Lstar should be calculated for
+    date : datetime
+        The date and time that Lstar should be calculated for
+    alpha : float, optional
+        Local pitch angle at ``pos`` to calculate Lstar, default (90)
+    Kp : int, optional
+        The Kp intex to pass to the magnetic field model, used in T89, ignoted
+        in OP77, default (2)
+    coord_system : str, optional
+        The coordinate system of the input position, default (GSM)
+    Bfield : str, optional
+        The Magnetic field model to use for the calculation, default (Lgm_B_T89)
+    LstarThresh : float, optional
+        The calculation computes a simple L value and does not calcualtion Lstar
+        if simple L is beyond this, default (10)
+    extended_out : bool, optional
+        Keyword that enables the output of significantly more information into
+        the Lstar_Data output, default (False).  The extra information allows
+        the points along the Lstar trace to be used since Lstar is the same at
+        each point along the trace.
+    LstarQuality : int
+        The quality flag for the integrators in the calculation, this can have
+        serious imact on run speed and Lstar value
+
+    Returns
+    =======
+    out : Lstar_Data
+        Returns a datamodel object that comtains all the information for the run.
+        See examples for the contets of this object for extended_out=False and True
+
+    Examples
+    ========
+    >>> from lgmpy import Lstar
+    >>> import datetime
+    >>> dat = Lstar.get_Lstar([1,2,0], datetime.datetime(2000, 1, 2), extended_out=False)
+    >>> print(dat)
+    +
+    |____90.0 (spacepy.datamodel.SpaceData [8])
+         |____Bmin (spacepy.datamodel.dmarray ())
+             :|____units (str [2])
+         |____Bmirror (spacepy.datamodel.dmarray ())
+             :|____coord_system (str [3])
+             :|____units (str [2])
+         |____I (spacepy.datamodel.dmarray ())
+         |____LHilton (float)
+         |____LMcIlwain (float)
+         |____Lsimple (spacepy.datamodel.dmarray (1,))
+         |____Lstar (spacepy.datamodel.dmarray (1,))
+             :|____info (str [4])
+         |____Pmin (spacepy.datamodel.dmarray (3,))
+             :|____coord_system (str [3])
+             :|____units (str [3])
+    |____Bcalc (spacepy.datamodel.dmarray (3,))
+        :|____Kp (int)
+        :|____coord_system (str [3])
+        :|____model (str [10])
+        :|____units (str [2])
+    |____Epoch (spacepy.datamodel.dmarray (1,))
+    |____Kp (spacepy.datamodel.dmarray (1,))
+    |____MLT (spacepy.datamodel.dmarray ())
+        :|____coord_system (str [5])
+    |____position (dict [1])
+         |____GSM (spacepy.datamodel.dmarray (3,))
+             :|____units (str [2])
+    ...
+
+    The data object is a dictionary with keys:
+        - 90.0 : this is the pitch angle specified (multiple can be specified)
+            - Bmin : the minimum B for that pitch angle and position
+            - BMirror : the position of the mirror point for that position
+            - I : the I value for that position
+            - LHilton : L value calcualtioed with the Hilton approximation
+            - LMcIlwain: L values calculated wioth the McIlwain formula
+            - Lsimple : a simple L value
+            - Lstar : the valule of Lstar for that position and pitch angle
+            - Pmin : TODO what is Pmin?
+        - Bcalc : information about the magnetif field model
+        - Epoch : the time of the calcuation
+        - Kp : Kp used for the calculation
+        - MLT : MLT value for the position and coord_system
+        - position : the position of the calculation
+            - GSM : the value in this system, if conversons are done thwy all apprer here
+
+    >>> from lgmpy import Lstar
+    >>> import datetime
+    >>> dat = Lstar.get_Lstar([1,2,0], datetime.datetime(2000, 1, 2), extended_out=True)
+    >>> print(dat)
+    +
+    |____90.0 (spacepy.datamodel.SpaceData [21])
+        :|____Calc_Time (float)
+         |____Bmag (numpy.ndarray (100, 1000))
+         |____Bmin (spacepy.datamodel.dmarray ())
+             :|____units (str [2])
+         |____Bmirror (spacepy.datamodel.dmarray ())
+             :|____coord_system (str [3])
+             :|____units (str [2])
+         |____I (spacepy.datamodel.dmarray ())
+         |____LHilton (float)
+         |____LMcIlwain (float)
+         |____Lsimple (spacepy.datamodel.dmarray (1,))
+         |____Lstar (spacepy.datamodel.dmarray (1,))
+             :|____info (str [4])
+         |____Pmin (spacepy.datamodel.dmarray (3,))
+             :|____coord_system (str [3])
+             :|____units (str [3])
+         |____ShellEllipsoidFootprint_Pn (numpy.ndarray (100,))
+         |____ShellEllipsoidFootprint_Ps (numpy.ndarray (100,))
+         |____ShellI (spacepy.datamodel.dmarray (100,))
+         |____ShellMirror_Pn (numpy.ndarray (100,))
+         |____ShellMirror_Ps (numpy.ndarray (100,))
+         |____ShellMirror_Sn (float)
+         |____ShellMirror_Ss (float)
+         |____nFieldPnts (numpy.ndarray (100,))
+         |____s_gsm (numpy.ndarray (100, 1000))
+         |____x_gsm (numpy.ndarray (100, 1000))
+         |____y_gsm (numpy.ndarray (100, 1000))
+         |____z_gsm (numpy.ndarray (100, 1000))
+    |____Bcalc (spacepy.datamodel.dmarray (3,))
+        :|____Kp (int)
+        :|____coord_system (str [3])
+        :|____model (str [10])
+        :|____units (str [2])
+    |____Epoch (spacepy.datamodel.dmarray (1,))
+    |____Kp (spacepy.datamodel.dmarray (1,))
+    |____MLT (spacepy.datamodel.dmarray ())
+        :|____coord_system (str [5])
+    |____position (dict [1])
+         |____GSM (spacepy.datamodel.dmarray (3,))
+             :|____units (str [2])
+    ...
+
+    The data object is a dictionary with keys:
+        - 90.0 : this is the pitch angle specified (multiple can be specified)
+            - Calc_Time : the clock time that the calculation took to run
+            - Bmag : the magnitude of B along the Lstar trace
+            - Bmin : the minimum B for that pitch angle and position
+            - BMirror : the position of the mirror point for that position
+            - I : the I value for that position
+            - LHilton : L value calcualtioed with the Hilton approximation
+            - LMcIlwain: L values calculated wioth the McIlwain formula
+            - Lsimple : a simple L value
+            - Lstar : the valule of Lstar for that position and pitch angle
+            - Pmin : TODO what am I?
+            - ShellEllipsoidFootprint_Pn : TODO what am I?
+            - ShellEllipsoidFootprint_Ps : TODO what am I?
+            - ShellI : TODO what am I?
+            - ShellMirror_Pn : TODO what am I?
+            - ShellMirror_Ps : TODO what am I?
+            - ShellMirror_Sn : TODO what am I?
+            - ShellMirror_Ss : TODO what am I?
+            - nFieldPnts : TODO what am I?
+            - s_gsm : TODO what am I?
+            - x_gsm : TODO what am I?
+            - y_gsm : TODO what am I?
+            - z_gsm : TODO what am I?
+        - Bcalc : information about the magnetif field model
+        - Epoch : the time of the calcuation
+        - Kp : Kp used for the calculation
+        - MLT : MLT value for the position and coord_system
+        - position : the position of the calculation
+            - GSM : the value in this system, if conversons are done thwy all apprer here
+
+
+    """
 
     # setup a datamodel object to hold the answer
     ans = Lstar_Data()
@@ -99,28 +297,28 @@ def get_Lstar(pos, date, alpha = 90,
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
         raise(NotImplementedError("Only GSM or SM input currently supported"))
-    
+
     Pwgs = Lgm_Vector.Lgm_Vector()
     Pmlt = Lgm_Vector.Lgm_Vector()
     Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, mmi.c )
     Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, mmi.c )
     R, MLat, MLon, MLT = c_double(), c_double(), c_double(), c_double(),
-    Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon), 
+    Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon),
         pointer(MLT), mmi.c)
     ans['MLT'] = datamodel.dmarray(MLT.value, attrs={'coord_system': 'EDMAG'})
-    
+
     # save Kp
     # TODO maybe add some Kp checking
     ans['Kp'] = datamodel.dmarray([Kp])
 
     # Set the LstarQuality, TODO add a comment here on what each does
-    MagEphemInfo.LstarQuality = LstarQuality;
+    MagEphemInfo.LstarQuality = LstarQuality
 
     # L* in one place is L* in lots of places (for GPS set to False)
     MagEphemInfo.SaveShellLines = extended_out
     # TODO maybe not hardcoded, but for now its fine
-    MagEphemInfo.LstarInfo.contents.VerbosityLevel = 0;
-    MagEphemInfo.LstarInfo.contents.mInfo.contents.VerbosityLevel = 0;
+    MagEphemInfo.LstarInfo.contents.VerbosityLevel = 0
+    MagEphemInfo.LstarInfo.contents.mInfo.contents.VerbosityLevel = 0
 
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
@@ -194,7 +392,7 @@ def get_Lstar(pos, date, alpha = 90,
         # *** not sure I fully understand this chunk, B at the mirror point*****
         # Set Pitch Angle, sin, sin^2, and Bmirror
         sa = math.sin( pa*RadPerDeg )
-        sa2 = sa*sa;
+        sa2 = sa*sa
 
         # print("{0}Computing L* for Pitch Angle: Alpha[{1}] = {2} Date: {3}   UTC: {4}   Lsimple = {5:4.3}{6}\n").format(PreStr, i, MagEphemInfo.Alpha[i], date, utc, Lsimple, PostStr )
 
@@ -292,7 +490,7 @@ def get_Lstar(pos, date, alpha = 90,
                                             buffer=lstarinf.z_gsm)
                 delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
-                
+
     return ans
 
 if __name__ == '__main__':

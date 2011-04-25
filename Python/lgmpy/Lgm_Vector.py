@@ -7,7 +7,7 @@ Vector classes used in LanlGeoMag
 This is a wrapper class for the C-structure and associated functions that
 operate on the vectors.  There is full coverage for <, >, ==, +, -. /.
 
-All the operations are done in the underlying C library (even thorugh that is
+All the operations are done in the underlying C library (even though that is
 silly for much of this).
 
 
@@ -17,7 +17,7 @@ This module has full unitest coverage, see test_Lgm_Vector.py
 
 Authors
 -------
-Brian Larsen - LANL
+Brian Larsen (Python), Mike Henderson (C) - LANL
 """
 import itertools
 import copy
@@ -310,7 +310,7 @@ class Lgm_Vector(Lgm_Vector):
         >>> from lgmpy import Lgm_Vector
         >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
         >>> dat.magnitude()
-        3.7416573867739413
+        3.74165738...
         """
         return Lgm_Magnitude( pointer(self) )
 
@@ -321,11 +321,11 @@ class Lgm_Vector(Lgm_Vector):
         Examples
         --------
         >>> from lgmpy import Lgm_Vector
+        >>> import numpy as np
         >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
         >>> dat.normalize()
         >>> print(dat)
-        [0.2672612419124244, 0.5345224838248488, 0.8017837257372732]
-
+        [0.26726124..., 0.53452248..., 0.801783725...]
         """
         Lgm_NormalizeVector( pointer(self) )
 
@@ -346,7 +346,7 @@ class Lgm_Vector(Lgm_Vector):
         >>> from lgmpy import Lgm_Vector
         >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
         >>> dat.dotProduct(dat)
-        14
+        14.0
         >>> dat2 = Lgm_Vector.Lgm_Vector(3,2,1)
         >>> dat.dotProduct(dat2)
         10.0
@@ -407,7 +407,7 @@ class Lgm_Vector(Lgm_Vector):
         >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
         >>> dat.forceMagnitude(10)
         >>> print(dat)
-        [2.6726124191242437, 5.3452248382484875, 8.017837257372731]
+        [2.672612..., 5.3452248..., 8.0178372...]
         """
         Lgm_ForceMagnitude(pointer(self), val)
 
@@ -419,12 +419,21 @@ def SphToCart(lat, lon, rad):
     ----------
     lat : latitude (deg)
     lon : longitude (deg)
-    rad : radius (Re)
+    rad : radius (Distance units)
 
     Returns
     -------
     out : Lgm_Vector
-        A Lgm_Vector in Cartestian coords
+        A Lgm_Vector in Cartestian coords same units as the input
+
+    Examples
+    --------
+    >>> from lgmpy import Lgm_Vector
+    >>> Lgm_Vector.SphToCart(0,0,1)
+    [1.0, 0.0, 0.0]
+
+    >>> Lgm_Vector.SphToCart(45., 45., 1.)
+    [0.5000000..., 0.5, 0.70710678...]
     """
 
     vec1 = Lgm_Vector(0, 0, 0)
@@ -450,15 +459,25 @@ def CartToSph(x, y, z):
 
     Parameters
     ----------
-    x : x coordinate (Re)
-    y : y coordinate (Re)
-    z : z coordinate (Re)
+    x : x coordinate (Distance unit)
+    y : y coordinate (Distance unit)
+    z : z coordinate (Distance unit
 
     Returns
     -------
     lat : output latitude (deg)
     lon : output longitude (deg)
-    rad : output radius (Re)
+    rad : output radius (Distance unit)
+
+    Examples
+    --------
+    >>> from lgmpy import Lgm_Vector
+    >>> Lgm_Vector.CartToSph(0,0,1)
+    (90.0, 0.0, 1.0)
+
+    >>> import math
+    >>> Lgm_Vector.CartToSph(math.sqrt(2),0.,math.sqrt(2))
+    (45.0, 0.0, 2.0)
     """
 
     lat, lon, rad = c_double(), c_double(), c_double()

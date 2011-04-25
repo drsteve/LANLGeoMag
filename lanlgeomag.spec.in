@@ -1,0 +1,64 @@
+%define debug_package %{nil}
+
+%define name		@PACKAGE@
+%define version 	@VERSION@
+%define release		@PKG_RELEASE@
+## make sure you define _topdir as $HOME/rpmbuild in your .rpmmacros
+#%global buildroot	%{_topdir}/BUILDROOT
+
+Summary:		lanlgeomag -- lanlgeomag software collection
+License:		Copyright (C) 2010, LANS LLC, all rights reserved.
+Name: 			%{name}
+Version: 		%{version}
+Release: 		%{release}%{?dist}
+Provides:               lanlgeomag
+Requires:               perl
+Source: 		%{name}-%{version}.tar.gz
+Prefix: 		/usr
+Group: 			Applications/Science
+Provides:		lanlgeomag
+Buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
+buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
+
+%description
+The GNU wget program downloads files from the Internet using the command-line.
+
+%prep
+mkdir -p %{_topdir}/BUILD %{_topdir}/BUILDROOT
+echo "name is" "%{name}"
+echo "version is" "%{version}"
+echo "_isa is" "%{_isa}"
+echo "_arch is" "%{_arch}"
+echo "__isa_name is" "%{__isa_name}"
+echo "__isa_bits is" "%{__isa_bits}"
+%setup -q
+
+%build
+#./configure --prefix=/usr --disable-doxygen-html --disable-doxygen-pdf
+./configure --prefix=/usr
+make
+
+%install
+#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
+#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT
+echo _topdir is %{_topdir}
+echo RPM_BUILD_ROOT is $RPM_BUILD_ROOT
+echo buildroot is %{buildroot}
+echo _builddir is %{_builddir}
+#make prefix=${RPM_BUILD_ROOT}/usr install
+%makeinstall
+make prefix=${RPM_BUILD_ROOT}/usr install-html
+#make install-man
+#make doxygen-doc
+#mkdir -p %{buildroot}/share/doc/%{name}
+#cp -p doxygen-doc/lanlgeomag.pdf %{buildroot}/share/doc/%{name}
+
+%clean
+/bin/rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+#%doc README HACKING NEWS COPYING
+#/home/markgalassi/rpmbuild/BUILDROOT/usr/*
+/usr/*
+#/usr/share/doc/lanlgeomag*
