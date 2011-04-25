@@ -527,8 +527,8 @@ void    _Lgm_IGRF3( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 void    _Lgm_IGRF4( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
-    double          st, ct, sp, cp, t;
-    double          val, val2, Cmp[13], Smp[13], f2[13], rinv, Pnn[13], dPnn[13];
+    double          st, ct, sp, cp, t, gnm, hnm, Knm;
+    double          val, val2, val3, Cmp_m, Smp_m, Cmp[13], Smp[13], f2[13], rinv, Pnn[13], dPnn[13];
     int             N;
     register double P_n_m, P_nm1_m, P_nm1_mm1, P_nm2_m;
     register double dP_n_m, dP_nm1_m, dP_nm1_mm1, dP_nm2_m;
@@ -641,20 +641,26 @@ void    _Lgm_IGRF4( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
         for ( n=m; n<= N; ++n ) {
 
+            gnm = c->Lgm_IGRF_g[n][m];
+            hnm = c->Lgm_IGRF_h[n][m];
+
             if ( n != m ) {
-                P_n_m = ct*P_nm1_m - c->Lgm_IGRF_K[n][m]*P_nm2_m;
-                dP_n_m = ct*dP_nm1_m - st*P_nm1_m - c->Lgm_IGRF_K[n][m]*dP_nm2_m;
+                Knm = c->Lgm_IGRF_K[n][m];
+                P_n_m = ct*P_nm1_m - Knm*P_nm2_m;
+                dP_n_m = ct*dP_nm1_m - st*P_nm1_m - Knm*dP_nm2_m;
                 P_nm2_m  = P_nm1_m;  P_nm1_m  = P_n_m;
                 dP_nm2_m = dP_nm1_m; dP_nm1_m = dP_n_m;
             }
                     
             if ( n > 0 ){
-                val = c->Lgm_IGRF_g[n][m]*Cmp[m] + c->Lgm_IGRF_h[n][m]*Smp[m];
+                Cmp_m = Cmp[m]; Smp_m = Smp[m];
+                val = gnm*Cmp_m + hnm*Smp_m;
                 val2 = c->Lgm_IGRF_S[n][m]*f2[n];
+                val3 = val2 * val;
 
-                B_r     += (val2 * (double)(n+1)*val*P_n_m);
-                B_theta += (val2 * val*dP_n_m);
-                B_phi   += (val2 * (double)m*(-c->Lgm_IGRF_g[n][m]*Smp[m] + c->Lgm_IGRF_h[n][m]*Cmp[m])*P_n_m);
+                B_r     += (val3*(n+1)*P_n_m);
+                B_theta += (val3*dP_n_m);
+                B_phi   += (val2 * m*(-gnm*Smp_m + hnm*Cmp_m)*P_n_m);
             }
         
         }
