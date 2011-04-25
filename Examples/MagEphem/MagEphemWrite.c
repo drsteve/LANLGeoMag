@@ -55,9 +55,8 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#\n");
 
 
-    fprintf( fp, "# \"DependVarInfo\": {\n");
     if ( m->nAlpha > 0 ) {
-        fprintf( fp, "#             \"Alpha\": { \"DESCRIPTION\": \"Pitch Angles.\",\n");
+        fprintf( fp, "#  \"Alpha\":                  { \"TITLE\": \"Pitch Angles.\",\n");
         fprintf( fp, "#                              \"LABEL\": \"Pitch Angle\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                             \"VALUES\": [ ");
@@ -71,354 +70,394 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%g Deg.\", ", m->Alpha[i] );
         fprintf(fp, "\"%g Deg.\" ],\n", m->Alpha[i] ); 
-
-        fprintf( fp, "#                              \"UNITS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Degrees\", " );
-        fprintf(fp, "\"Degrees\" ],\n" );
-        fprintf( fp, "#                          \"VALID_MIN\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, " 0.0, " );
-        fprintf(fp, " 0.0 ],\n" );
-        fprintf( fp, "#                          \"VALID_MAX\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "90.0, " );
-        fprintf(fp, "90.0 ],\n" );
-        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+        fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+        fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
         fprintf( fp, "#\n");
     }
-    fprintf( fp, "# },\n");
     fprintf( fp, "#\n");
 
 
-
-
-    fprintf( fp, "# \"ColumnVarInfo\": {\n");
-    fprintf( fp, "#          \"DateTime\": { \"DESCRIPTION\": \"The date and time in ISO 8601 compliant format.\",\n");
+    fprintf( fp, "#  \"DateTime\":               { \"TITLE\": \"The date and time in ISO 8601 compliant format.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Time\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ] },\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"UTC\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d },\n", nCol++);
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Date\": { \"DESCRIPTION\": \"The date. In YYYMMDD format.\",\n");
+    fprintf( fp, "#  \"Date\":                   { \"TITLE\": \"The date. In YYYMMDD format.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Date\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ] },\n", nCol++);
+    fprintf( fp, "#                       \"START_COLUMN\": %d },\n", nCol++);
     fprintf( fp, "#\n");
-    fprintf( fp, "#               \"DOY\": { \"DESCRIPTION\": \"Ordinal Day of Year.\",\n");
+    fprintf( fp, "#  \"DOY\":                    { \"TITLE\": \"Ordinal Day of Year.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Day Of Year\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Days\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ 0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 366 ] },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Days\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": 0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 366 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#               \"UTC\": { \"DESCRIPTION\": \"Universal Time (Coordinated). In decimal hours.\",\n");
+    fprintf( fp, "#  \"UTC\":                    { \"TITLE\": \"Universal Time (Coordinated). In decimal hours.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"UTC\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Hours\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ 0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 24.0 ] },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 24.0 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#        \"JulianDate\": { \"DESCRIPTION\": \"Julian Date. In decimal days.\",\n");
+
+
+
+
+    fprintf( fp, "#  \"JulianDate\":             { \"TITLE\": \"Julian Date. In decimal days.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Julian Date\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Days\" ] },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Days\" },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"GpsTime\": { \"DESCRIPTION\": \"Number of SI seconds since 0h Jan 6, 1980.\",\n");
+
+
+    fprintf( fp, "#  \"GpsTime\":                { \"TITLE\": \"Number of SI seconds since 0h Jan 6, 1980.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Gps Time\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Seconds\" ] },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Seconds\" },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Rgeo\": { \"DESCRIPTION\":  \"Geocentric Geographic position vector of S/C.\",\n");
+
+    fprintf( fp, "#  \"Rgeo\":                   { \"TITLE\":  \"Geocentric Geographic position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgeo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_geo\", \"Ry_geo\", \"Rz_geo\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#             \"Rgeod\": { \"DESCRIPTION\":  \"Geodetic Geographic position vector of S/C (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
+
+    fprintf( fp, "#  \"Rgeod\":                  { \"TITLE\":  \"Geodetic Geographic position vector of S/C (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgeod\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Rgeod_lat\", \"Rgeod_long\", \"Rgeod_height\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -2.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  2.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Rgsm\": { \"DESCRIPTION\":  \"Geocentric Solar Magnetospheric position vector of S/C.\",\n");
+    fprintf( fp, "#  \"Rgsm\":                  { \"TITLE\":  \"Geocentric Solar Magnetospheric position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_gsm\", \"Ry_gsm\", \"Rz_gsm\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#               \"Rsm\": { \"DESCRIPTION\":  \"Geocentric Solar Magnetic position vector of S/C.\",\n");
+    fprintf( fp, "#  \"Rsm\":                  { \"TITLE\":  \"Geocentric Solar Magnetic position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_sm\", \"Ry_sm\", \"Rz_sm\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Rgei\": { \"DESCRIPTION\":  \"Geocentric Equatorial Inertial position vector of S/C.\",\n");
+    fprintf( fp, "#  \"Rgei\":                  { \"TITLE\":  \"Geocentric Equatorial Inertial position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgei\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_gei\", \"Ry_gei\", \"Rz_gei\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#              \"Rgse\": { \"DESCRIPTION\":  \"Geocentric Solar Ecliptic position vector of S/C.\",\n");
+    fprintf( fp, "#  \"Rgse\":                  { \"TITLE\":  \"Geocentric Solar Ecliptic position vector of S/C.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Rgse\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_gse\", \"Ry_gse\", \"Rz_gse\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -1000.0, -1000.0, -1000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  1000.0, 1000.0, 1000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
 
-    fprintf( fp, "#          \"IntModel\": { \"DESCRIPTION\":  \"Internal magnetic field model.\",\n");
+    fprintf( fp, "#  \"IntModel\":               { \"TITLE\":  \"Internal magnetic field model.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Internal Magnetic Field Model\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Dimensionless\" ],\n");
-    fprintf( fp, "#                               \"ENUM\": [ \"CDIP\", \"EDIP\", \"IGRF\" ],\n");
-    fprintf( fp, "#                         \"FILL_VALUE\": \"N/A\" },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                               \"ENUM\": [ \"CDIP\", \"EDIP\", \"IGRF\" ]  },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#          \"ExtModel\": { \"DESCRIPTION\":  \"External magnetic field model.\",\n");
+    fprintf( fp, "#  \"ExtModel\":               { \"TITLE\":  \"External magnetic field model.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"External Magnetic Field Model\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Dimensionless\" ],\n");
-    fprintf( fp, "#                               \"ENUM\": [ \"OP77\", \"T87\", \"T89\" ],\n");
-    fprintf( fp, "#                         \"FILL_VALUE\": \"N/A\" },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                               \"ENUM\": [ \"OP77\", \"T87\", \"T89\" ]  },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#                \"Kp\": { \"DESCRIPTION\":  \"Kp index value.\",\n");
+    fprintf( fp, "#  \"Kp\":                     { \"TITLE\":  \"Kp index value.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Kp\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Dimensionless\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ 0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 9.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 9.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#               \"Dst\": { \"DESCRIPTION\":  \"Dst index value.\",\n");
+    fprintf( fp, "#  \"Dst\":                    { \"TITLE\":  \"Dst index value.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Dst\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -10000.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 10000.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -10000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  10000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#           \"Bsc_gsm\": { \"DESCRIPTION\":  \"Magnetic field vector at S/C (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Bsc_gsm\":                { \"TITLE\":  \"Magnetic field vector at S/C (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bsc_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bsc_gsm_x\", \"Bsc_gsm_y\", \"Bsc_gsm_z\", \"|Bsc_gsm|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -50000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#     \"FieldLineType\": { \"DESCRIPTION\":  \"Description of the type of field line the S/C is on.,\n");
+    fprintf( fp, "#  \"FieldLineType\":          { \"TITLE\":  \"Description of the type of field line the S/C is on.,\n");
     fprintf( fp, "#                                         Can be one of 4 types:\n");
     fprintf( fp, "#                                             LGM_CLOSED      - FL hits Earth at both ends.\n");
     fprintf( fp, "#                                             LGM_OPEN_N_LOBE - FL is an OPEN field line rooted in the Northern polar cap.\n");
     fprintf( fp, "#                                             LGM_OPEN_S_LOBE - FL is an OPEN field line rooted in the Southern polar cap.\n");
     fprintf( fp, "#                                             LGM_OPEN_IMF    - FL does not hit Earth at eitrher end.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Field Line Type\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++);
-    fprintf( fp, "#                              \"UNITS\": [ \"Dimensionless\" ],\n");
-    fprintf( fp, "#                               \"ENUM\": [ \"LGM_CLOSED\", \"LGM_OPEN_N_LOBE\", \"LGM_OPEN_S_LOBE\", \"LGM_OPEN_IMF\" ],\n");
-    fprintf( fp, "#                         \"FILL_VALUE\": \"N/A\" },\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                               \"ENUM\": [ \"LGM_CLOSED\", \"LGM_OPEN_N_LOBE\", \"LGM_OPEN_S_LOBE\", \"LGM_OPEN_IMF\" ]  },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Pfn_geo\": { \"DESCRIPTION\":  \"Location of Northern Footpoint (in GEO coords).\",\n");
+
+    fprintf( fp, "#  \"Pfn_geo\":                { \"TITLE\":  \"Location of Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pfn_geo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Pfn_geo_x\", \"Pfn_geo_y\", \"Pfn_geo_z\"],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0, -2.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0,  2.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -2.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  2.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Pfn_gsm\": { \"DESCRIPTION\":  \"Location of Northern Footpoint (in GSM coords).\",\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    fprintf( fp, "#  \"Pfn_gsm\":                { \"TITLE\":  \"Location of Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0, -2.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0,  2.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -2.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  2.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#          \"Pfn_geod\": { \"DESCRIPTION\":  \"Location of Northern Footpoint (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
+    fprintf( fp, "#  \"Pfn_geod\":                { \"TITLE\":  \"Location of Northern Footpoint (in Geodetic coords - (Latitude, Longitude)).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pfn_geod\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_geod_lat\", \"Pfn_geod_lon\", \"Pfn_geod_height\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
+    fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_geod_lat\", \"Pfn_geod_lon\" ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -360.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  360.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Bfn_geo\": { \"DESCRIPTION\":  \"Magnetic field vector at Northern Footpoint (in GEO coords).\",\n");
+    fprintf( fp, "#  \"Pfn_geod_height\":        { \"TITLE\":  \"Location of Northern Footpoint (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_height\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"km\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
+    fprintf( fp, "#  \"Bfn_geo\":                { \"TITLE\":  \"Magnetic field vector at Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bfn_geo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_geo_x\", \"Bfn_geo_y\", \"Bfn_geo_z\", \"|Bfn_geo|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -50000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Bfn_gsm\": { \"DESCRIPTION\":  \"Magnetic field vector at Northern Footpoint (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Bfn_gsm\":                { \"TITLE\":  \"Magnetic field vector at Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bfn_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_gsm_x\", \"Bfn_gsm_y\", \"Bfn_gsm_z\", \"|Bfn_gsm|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -50000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "# \"Loss_Cone_Alpha_n\": { \"DESCRIPTION\":  \"Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ).\",\n");
+    fprintf( fp, "#  \"Loss_Cone_Alpha_n\":      { \"TITLE\":  \"Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Loss_Cone_Alpha_n\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++ );
-    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [  0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 90.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
 
-    fprintf( fp, "#           \"Pfs_geo\": { \"DESCRIPTION\":  \"Location of Southern Footpoint (in GEO coords).\",\n");
+
+
+
+
+
+
+
+
+
+    fprintf( fp, "#  \"Pfs_geo\":                { \"TITLE\":  \"Location of Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pfs_geo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geo_x\", \"Pfs_geo_y\", \"Pfs_geo_z\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0, -2.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0,  2.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -2.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  2.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Pfs_gsm\": { \"DESCRIPTION\":  \"Location of Southern Footpoint (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Pfs_gsm\":                { \"TITLE\":  \"Location of Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0, -2.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0,  2.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -2.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  2.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#          \"Pfs_geod\": { \"DESCRIPTION\":  \"Location of Southern Footpoint (in Geodetic coords - (Latitude, Longitude, Height)).\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geod_lat\", \"Pfs_geod_long\", \"Pfs_geod_height\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\", \"Degrees\", \"km\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -2.0, -2.0,    0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  2.0,  2.0, 1000.0 ],\n");
+    fprintf( fp, "#  \"Pfs_geod\":               { \"TITLE\":  \"Location of Southern Footpoint (in Geodetic coords - (Latitude, Longitude)).\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod\",\n");
+    fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geod_lat\", \"Pfs_geod_long\" ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -360.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  360.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Bfs_geo\": { \"DESCRIPTION\":  \"Magnetic field vector at Southern Footpoint (in GEO coords).\",\n");
+    fprintf( fp, "#  \"Pfs_geod_height\":        { \"TITLE\":  \"Location of Southern Footpoint (in Geodetic coords - (Height)).\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_height\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"km\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
+    fprintf( fp, "#  \"Bfs_geo\":                { \"TITLE\":  \"Magnetic field vector at Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bfs_geo\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_geo_x\", \"Bfs_geo_y\", \"Bfs_geo_z\", \"|Bfs_geo|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -60000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  60000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#           \"Bfs_gsm\": { \"DESCRIPTION\":  \"Magnetic field vector at Southern Footpoint (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Bfs_gsm\":                { \"TITLE\":  \"Magnetic field vector at Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bfs_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_gsm_x\", \"Bfs_gsm_y\", \"Bfs_gsm_z\", \"|Bfs_gsm|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -60000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  60000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "# \"Loss_Cone_Alpha_s\": { \"DESCRIPTION\":  \"Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ).\",\n");
+    fprintf( fp, "#  \"Loss_Cone_Alpha_s\":      { \"TITLE\":  \"Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Loss_Cone_Alpha_s\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++ );
-    fprintf( fp, "#                              \"UNITS\": [ \"Degrees\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [  0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 90.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#          \"Pmin_gsm\": { \"DESCRIPTION\":  \"Location of minimum-|B| point (in GSM coords).\",\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    fprintf( fp, "#  \"Pmin_gsm\":               { \"TITLE\":  \"Location of minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d ],\n", nCol, nCol+1, nCol+2 ); nCol += 3;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pmin_gsm_x\", \"Pmin_gsm_y\", \"Pmin_gsm_z\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [  \"Re\", \"Re\", \"Re\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -200.0, -200.0, -200.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  200.0,  200.0,  200.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -200.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  200.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#          \"Bmin_gsm\": { \"DESCRIPTION\":  \"B-field at minimum-|B| point (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Bmin_gsm\":               { \"TITLE\":  \"B-field at minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Bmin_gsm\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d, %d, %d, %d ],\n", nCol, nCol+1, nCol+2, nCol+3 ); nCol += 4;
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bmin_gsm_x\", \"Bmin_gsm_y\", \"Bmin_gsm_z\", \"|Bmin_gsm|\" ],\n");
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\", \"nT\", \"nT\", \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [ -50000.0, -50000.0, -50000.0,     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [  50000.0,  50000.0,  50000.0, 50000.0 ],\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\": -50000.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\":  50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
 
-    fprintf( fp, "#            \"M_used\": { \"DESCRIPTION\":  \"The magnetic dipole moment that was used to convert magnetic flux to L*. In units of nT.\",\n");
+    fprintf( fp, "#  \"M_used\":                 { \"TITLE\":  \"The magnetic dipole moment that was used to convert magnetic flux to L*. In units of nT.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"M_used\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++ );
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 50000.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#             \"M_ref\": { \"DESCRIPTION\":  \"The fixed reference magnetic dipole moment for converting magnetic flux to L*. In units of nT.\",\n");
+    fprintf( fp, "#  \"M_ref\":                  { \"TITLE\":  \"The fixed reference magnetic dipole moment for converting magnetic flux to L*. In units of nT.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"M_used\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++ );
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 50000.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 50000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
-    fprintf( fp, "#            \"M_igrf\": { \"DESCRIPTION\":  \"Time-dependant magnetic dipole moment (probably shouldn't be used for converting magnetic flux to L*, but it sometimes is). In units of nT.\",\n");
+    fprintf( fp, "#  \"M_igrf\":                 { \"TITLE\":  \"Time-dependant magnetic dipole moment (probably shouldn't be used for converting magnetic flux to L*, but it sometimes is). In units of nT.\",\n");
     fprintf( fp, "#                              \"LABEL\": \"M_used\",\n");
-    fprintf( fp, "#                          \"DIMENSION\": [],\n");
-    fprintf( fp, "#                            \"COLUMNS\": [ %d ],\n", nCol++ );
-    fprintf( fp, "#                              \"UNITS\": [ \"nT\" ],\n");
-    fprintf( fp, "#                          \"VALID_MIN\": [     0.0 ],\n");
-    fprintf( fp, "#                          \"VALID_MAX\": [ 50000.0 ],\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+    fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
+    fprintf( fp, "#                          \"VALID_MAX\": 50000.0,\n");
     if ( m->nAlpha > 0 ){
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     } else {
@@ -431,145 +470,65 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
 
 
     if ( m->nAlpha > 0 ) {
-        fprintf( fp, "#                \"L*\": { \"DESCRIPTION\": \"Generalized Roederer L-shell value.\",\n");
-        fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#  \"L*\":                     { \"TITLE\": \"Generalized Roederer L-shell value.\",\n");
         fprintf( fp, "#                              \"LABEL\": \"L*\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
-
-        fprintf( fp, "#                            \"COLUMNS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-        fprintf(fp, "%d ],\n", i+nCol ); 
-
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L*(%g)\", ", m->Alpha[i] );
         fprintf(fp, "\"L*(%g)\" ],\n", m->Alpha[i] ); 
-
-        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-
-        fprintf( fp, "#                              \"UNITS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-        fprintf(fp, "\"Dimensionless\" ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MIN\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
-        fprintf(fp, "1.0 ],\n");
-
-        fprintf( fp, "#                          \"VALID_MAX\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-        fprintf(fp, "1000.0 ],\n" );
-
-        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
-
-        fprintf( fp, "#\n");
-        nCol += m->nAlpha;
-
-
-
-
-
-
-        fprintf( fp, "#                 \"L\": { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\": \"1.0\",\n");
+        fprintf( fp, "#                          \"VALID_MAX\": \"1000.0\",\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+        fprintf( fp, "#  \"L\":                      { \"TITLE\": \"McIlwain L-shell value.\",\n");
         fprintf( fp, "#                              \"LABEL\": \"L\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
-
-        fprintf( fp, "#                            \"COLUMNS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-        fprintf(fp, "%d ],\n", i+nCol ); 
-
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L(%g)\", ", m->Alpha[i] );
-        fprintf(fp, "\"L(%g)\" ],\n", m->Alpha[i] ); 
-
-        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-
-        fprintf( fp, "#                              \"UNITS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-        fprintf(fp, "\"Dimensionless\" ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MIN\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1.0, " );
-        fprintf(fp, "1.0 ],\n");
-
-        fprintf( fp, "#                          \"VALID_MAX\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-        fprintf(fp, "1000.0 ],\n" );
-
+        fprintf(fp, "\"L*(%g)\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\": \"1.0\",\n");
+        fprintf( fp, "#                          \"VALID_MAX\": \"1000.0\",\n");
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
         fprintf( fp, "#\n");
-        nCol += m->nAlpha;
 
-
-
-
-        fprintf( fp, "#                \"Bm\": { \"DESCRIPTION\": \"Magnetic field ftrength at mirror points for each pitch angle.\",\n");
-        fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+        fprintf( fp, "#  \"Bm\":                     { \"TITLE\": \"Magnetic field ftrength at mirror points for each pitch angle.\",\n");
         fprintf( fp, "#                              \"LABEL\": \"Bm\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
-        fprintf( fp, "#                            \"COLUMNS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-        fprintf(fp, "%d ],\n", i+nCol ); 
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Bm(%g)\", ", m->Alpha[i] );
-        fprintf(fp, "\"Bm(%g)\" ],\n", m->Alpha[i] ); 
-        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-        fprintf( fp, "#                          \"VALID_MIN\": 1.0,\n");
-        fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
-        fprintf( fp, "#                              \"UNITS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Dimensionless\", " );
-        fprintf(fp, "\"Dimensionless\" ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MIN\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
-        fprintf(fp, "0.0 ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MAX\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "50000.0, " );
-        fprintf(fp, "50000.0 ],\n" );
-
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"L*(%g)\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\": \"0.0\",\n");
+        fprintf( fp, "#                          \"VALID_MAX\": \"1000.0\",\n");
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
         fprintf( fp, "#\n");
-        nCol += m->nAlpha;
 
-
-
-
-
-        fprintf( fp, "#                 \"I\": { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
-        fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+        fprintf( fp, "#  \"I\":                      { \"TITLE\": \"Integral invariant for each pitch angle.\",\n");
         fprintf( fp, "#                              \"LABEL\": \"I\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
-
-        fprintf( fp, "#                            \"COLUMNS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "%d, ", i+nCol );
-        fprintf(fp, "%d ],\n", i+nCol ); 
-
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I(%g)\", ", m->Alpha[i] );
-        fprintf(fp, "\"I(%g)\" ],\n", m->Alpha[i] ); 
-
-        fprintf( fp, "#                          \"DependsOn\": \"Alpha\",\n");
-
-        fprintf( fp, "#                              \"UNITS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Re\", " );
-        fprintf(fp, "\"Re\" ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MIN\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "0.0, " );
-        fprintf(fp, "0.0 ],\n" );
-
-        fprintf( fp, "#                          \"VALID_MAX\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "1000.0, " );
-        fprintf(fp, "1000.0 ],\n" );
-
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L(%g)\", ", m->Alpha[i] );
+        fprintf(fp, "\"L*(%g)\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+        fprintf( fp, "#                          \"VALID_MIN\": \"1.0\",\n");
+        fprintf( fp, "#                          \"VALID_MAX\": \"1000.0\",\n");
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
-        nCol += m->nAlpha;
+        fprintf( fp, "#\n");
+
     }
 
 
-
-
-    fprintf( fp, "# }\n");
     fprintf( fp, "# } end JSON\n");
     fprintf( fp, "#\n");
     fprintf( fp, "#\n");

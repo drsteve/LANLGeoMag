@@ -6,7 +6,7 @@ GIT repository
 
 Initial checkout:
 
-git clone ssh://YOUR_SCHEME_LOGIN@sueno.lanl.gov:/n/projects/lanl/LanlGeoMag.git
+git clone YOUR_SCHEME_LOGIN@sueno.lanl.gov:/n/projects/lanl/LanlGeoMag.git
 
 cd LanlGeoMag
 
