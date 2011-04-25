@@ -6,7 +6,7 @@ GIT repository
 
 Initial checkout:
 
-git clone ssh://YOUR_SCHEME_LOGIN@sueno.lanl.gov:/n/projects/lanl/LanlGeoMag.git
+git clone ssh://YOUR_SCHEME_LOGIN@svn.isr.lanl.gov/n/projects/lanl/LanlGeoMag.git
 
 cd LanlGeoMag
 
@@ -37,3 +37,32 @@ make
 Installing
 ==========
 sudo make install
+
+
+Release engineering
+===================
+
+Example: you want to freeze and release version 1.5.12.  The
+convention is that we use tags with the name v1.5.12
+
+Developer actions
+.................
+
+The developer takes these steps:
+
+* Commit all final changes and sure that the code passes "make
+  distcheck"
+
+* Set the new version in configure.ac with AC_INIT(... , [1.5.12] , ...)
+
+* Update the NEWS file with a list of user-visible or API changes
+
+* Tag the repository with
+
+git tag -a v1.5.12
+git commit -m "tagged release v1.5.12"
+git push --tags
+
+* Then move to the "development" version v1.5.12+ by editing
+  configure.ac and NEWS and putting AC_INIT(... , [1.5.12] , ...)
+
