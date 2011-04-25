@@ -15,7 +15,7 @@ import unittest
 import datetime
 import itertools
 
-import numpy
+import numpy as np
 
 import Lgm_OP77
 import Lgm_Vector
@@ -38,11 +38,12 @@ class Lgm_OP77_OP77(unittest.TestCase):
 
     def test_OP77(self):
         """the OP77 simple static wrapper should work (regression)"""
-        numpy.testing.assert_array_almost_equal( Lgm_OP77.OP77(self.pos, self.dt, ),
+        np.testing.assert_array_almost_equal( Lgm_OP77.OP77(self.pos, self.dt, ),
             [-18.399869809240773, -1.8653978151945658, 85.951037824012488])
-        ans = numpy.array([[-18.399869809240773, -1.8653978151945658, 85.951037824012488]*2])
-        numpy.testing.assert_array_almost_equal(Lgm_OP77.OP77([self.pos]*2,
+        ans = np.array([[-18.399869809240773, -1.8653978151945658, 85.951037824012488]*2])
+        np.testing.assert_array_almost_equal(Lgm_OP77.OP77([self.pos]*2,
                                     [self.dt]*2), ans.reshape(2,3))
+
 
 class Lgm_OP77Tests(unittest.TestCase):
     """
@@ -73,9 +74,9 @@ class Lgm_OP77Tests(unittest.TestCase):
 
     def test_OP77_1(self):
         """First simple in/out tests of OP77 (regression)"""
-        ans = numpy.array([-18.399869809240773, -1.8653978151945658, 85.951037824012488])
+        ans = np.array([-18.399869809240773, -1.8653978151945658, 85.951037824012488])
         B = Lgm_OP77.Lgm_OP77(self.pos, self.dt)
-        numpy.testing.assert_array_almost_equal(ans, numpy.array(B['B'].tolist()))
+        np.testing.assert_array_almost_equal(ans, np.array(B['B'].tolist()))
 
     def test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""
@@ -122,8 +123,17 @@ class Lgm_OP77Tests(unittest.TestCase):
         self.assertRaises(ValueError, Lgm_OP77.Lgm_OP77,
                           [self.pos, self.pos], self.dt, )
 
+    def test_exceptions(self):
+        """the OP77 __init__ does some input checking"""
+        self.assertRaises(TypeError, Lgm_OP77.Lgm_OP77, 'bad pos', self.dt)
+        self.assertRaises(ValueError, Lgm_OP77.Lgm_OP77, [self.pos]*2, [self.dt])
 
-
+    def test_pos2Lgm_Vector(self):
+        """_pos2Lgm_Vector should have known behavour"""
+        a = Lgm_OP77.Lgm_OP77([1,2,3], datetime.datetime(2005, 8, 31, 9, 0, 0))
+        self.assertEqual(a._pos2Lgm_Vector([2,3,4]), Lgm_Vector.Lgm_Vector(2., 3., 4.))
+        self.assertEqual(a._pos2Lgm_Vector(Lgm_Vector.Lgm_Vector(2., 3., 4.)), Lgm_Vector.Lgm_Vector(2., 3., 4.))
+        self.assertEqual(a._pos2Lgm_Vector(np.array([2.,3.,4.])), Lgm_Vector.Lgm_Vector(2., 3., 4.))
 
 if __name__ == '__main__':
     unittest.main()
