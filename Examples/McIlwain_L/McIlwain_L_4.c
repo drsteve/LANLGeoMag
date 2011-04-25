@@ -17,10 +17,10 @@ int main(){
     mInfo->Bfield = Lgm_B_JensenCain1960;
     mInfo->Bfield = Lgm_B_igrf;
     mInfo->VerbosityLevel = 0;
-    mInfo->MaxDiv = 0.1;
+//    mInfo->MaxDiv = 0.1;
 
-    mInfo->Lgm_I_Integrator = DQAGS;
-    mInfo->nDivs  = 200.0;
+//    mInfo->Lgm_I_Integrator = DQAGS;
+//    mInfo->nDivs  = 200.0;
 //    mInfo->Lgm_TraceToBmin_Tol = 1e-2;
 //    mInfo->Lgm_TraceToEarth_Tol = 1e-1;
 //    mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-5;
