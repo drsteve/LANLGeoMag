@@ -22,6 +22,7 @@ Classes
    :maxdepth: 2
 
    Lgm_Vector
+   Lstar
 
 TODO List
 =========
