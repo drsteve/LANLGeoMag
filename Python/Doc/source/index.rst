@@ -7,6 +7,7 @@
 lgmpy Reference
 ###############
 
+
 :Release: |version|
 :Date: |today|
 
@@ -14,11 +15,18 @@ lgmpy Reference
 
 This reference manual describes the useage and behavor of the Python wrapper for LanlGeoMag
 
+Classes
+=======
+
 .. toctree::
    :maxdepth: 2
 
    Lgm_Vector
 
+TODO List
+=========
+
+.. todolist::
 
 
 Indices and tables

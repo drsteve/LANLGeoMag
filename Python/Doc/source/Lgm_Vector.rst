@@ -3,6 +3,7 @@
 ##########
 Lgm_Vector
 ##########
+
 .. currentmodule:: lgmpy
 
 .. automodule:: lgmpy.Lgm_Vector
