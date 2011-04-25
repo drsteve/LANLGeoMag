@@ -1,12 +1,12 @@
 """
+Overview
+--------
 Lgm_CTrans module, this contains the necessary code for coordinate
 transformations in Lgm
 
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 20-Dec-2010 (BAL)
+    Authors
+    -------
+    Brian Larsen - LANL
 """
 
 from __future__ import division
@@ -23,28 +23,48 @@ class Lgm_Coords(list):
     """
     Base class for coordinate transforms
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ----------
+    inval : list
+        3-element list containing a position
+    system : str, optional
+        coordinate system of the input, default='GSM'
+    units : str, optional
+        units of the position, default=Re
 
-    @version: V1: 18-Jan-2011 (BAL)
+    Returns
+    -------
+    out : Lgm_Coords class
     """
     def __init__(self, inval, system='GSM', units='Re'):
         if len(inval) != 3 and not isinstance(inval, list):
             raise(NotImplementedError('So far only one 3 element list is supported as input' ) )
         if units != 'Re':
-            raise(NotImplementedError('Only Re units supoorted so far' ) )
+            raise(NotImplementedError('Only Re units supported so far' ) )
         if inval[0] < 1 and inval[1] < 1 and inval[2] < 1:
             raise(ValueError('Invalid position'))
         if system != 'GSM':
-            raise(NotImplementedError('Only GSM coordinated supoorted so far' ) )
+            raise(NotImplementedError('Only GSM coordinated supported so far' ) )
 
         self.system = system
         self[:] = inval
 
 class Lgm_CTrans(Lgm_CTrans):
+    """
+    Class to wrap the C structure Lgm_CTrans.  Default values are filled by the
+    library
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        switch to the C library on verbose
+
+    Returns
+    -------
+    out : Lgm_CTrans class
+    """
     def __init__(self, Verbose=False):
-        # initialize to the values set in c so we don't have to mainitain two places
+        # initialize to the values set in c so we don't have to maintain two places
         Lgm_ctransDefaults(pointer(self), Verbose)
 
 def dateToDateLong(inval):
@@ -52,11 +72,22 @@ def dateToDateLong(inval):
     convert a python date or datetime object to a Date (long) object that
     LanlGeoMag Likes to use
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ----------
+    inval : datetime, ndarray
+        datetime object to change to a long (or an array of datetimes to change)
 
-    @version: V1: 04-Jan-2011 (BAL)
+    Returns
+    -------
+    out : long, list
+        long or list of longs corresponding to the datetime
+
+    Examples
+    --------
+    >>> from lgmpy import Lgm_CTrans
+    >>> import datetime
+    >>> Lgm_CTrans.dateToDateLong(datetime.datetime(2000, 12, 13))
+    20001213L
     """
     try:
         if len(inval) > 1:
@@ -72,11 +103,27 @@ def dateToFPHours(inval):
     convert a python datetime object to a Floating point hours (double) object that
     LanlGeoMag Likes to use
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ----------
+    inval : datetime, ndarray
+        datetime object to change to floating point hours
+        (or an array of datetimes to change)
 
-    @version: V1: 06-Jan-2011 (BAL)
+    Returns
+    -------
+    out : float, list
+        floating point hours or a list of fp hours
+
+    Examples
+    --------
+    >>> from lgmpy import Lgm_CTrans
+    >>> import datetime
+    >>> Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 13))
+    0.0
+    >>> Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 13, 12))
+    12.0
+    >>> Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 13, 12, 30))
+    12.5
     """
     try:
         if len(inval) > 1:

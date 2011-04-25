@@ -21,7 +21,8 @@ Classes
 .. toctree::
    :maxdepth: 2
 
-   Lgm_Vector
+   MagData
+   magcoords
    Lstar
    Closed_Field
    Lgm_CTrans
@@ -30,8 +31,7 @@ Classes
    Lgm_OP77
    Lgm_T89
    Lgm_Wrap
-   magcoords
-   MagData
+   Lgm_Vector
 
 
 

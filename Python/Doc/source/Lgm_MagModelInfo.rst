@@ -1,10 +1,10 @@
 
 
 ################
-Lgm_MagMoidelInfo
+Lgm_MagModelInfo
 ################
 
 .. currentmodule:: lgmpy
 
-.. automodule:: lgmpy.Lgm_MagMoidelInfo
+.. automodule:: lgmpy.Lgm_MagModelInfo
     :members:
