@@ -14,7 +14,7 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 
 
-void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn, 
+void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *b0, Lgm_Vector *v, double H, int n, double sgn, 
          int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ) {
 
     int            m;
@@ -36,12 +36,11 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
 
 
     /*
-     *  Do initial Euler step to get z1.
+     *  Do initial Euler step to get z1. We get b0 from the arg list (its computed once).
      */
-    (*Mag)(&z0, &B, Info); Lgm_NormalizeVector(&B);
-    z1.x = z0.x + h*B.x; 
-    z1.y = z0.y + h*B.y; 
-    z1.z = z0.z + h*B.z;
+    z1.x = z0.x + h*b0->x; 
+    z1.y = z0.y + h*b0->y; 
+    z1.z = z0.z + h*b0->z;
     
 
     /*
@@ -153,27 +152,34 @@ void Lgm_RatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
  *
  *
  */
-// NOT thread safe?
+// NOT thread safe? I think it probably is...
 int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale, 
           double Htry, double *Hdid, double *Hnext, 
           double eps, double sgn, double *s, int *reset,
           int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
 
-    Lgm_Vector        u_save, v, uerr, e;
-    int                q, k, kk, km=0, n;
-    int                reduction, done;
+    Lgm_Vector        u0, b0, v, uerr, e;
+    int               q, k, kk, km=0, n;
+    int               reduction, done;
     double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1];
     double            eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
 //static int        Info->Lgm_MagStep_FirstTimeThrough=TRUE, Info->Lgm_MagStep_kmax, Info->Lgm_MagStep_kopt;
 //static double   Info->Lgm_MagStep_eps_old=-1.0, Info->Lgm_MagStep_snew;
 //static double   A[JMAX+1], Info->Lgm_MagStep_alpha[IMAX+1][IMAX+1];
     /*
-     *  This sequence seems to be pretty good in general. The "1" seems to be
-     *  really essential to speed things up (on some test runsa, its almost a factor of
-     *  (2 slower without it!).
+     *  For years, we ran with this seq;
+     *
+     *      static int     Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
+     *
+     *  but, some tests show this is more efficient;
+     *
+     *      static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
+     *  
+     *  Ratio of required func calls (for the test I did) was about 1.6
      */
-    static int     Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
+    static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
+
 
 
 
@@ -215,7 +221,8 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
 
 
     H = Htry;
-    u_save = *u;
+    u0 = *u;
+    (*Mag)(&u0, &b0, Info); Lgm_NormalizeVector(&b0);
     if ( (*s != Info->Lgm_MagStep_snew) || (H != *Hnext) || ( *reset ) ) {
         Info->Lgm_MagStep_snew = 0.0;
         *s   = 0.0;
@@ -238,14 +245,13 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
                 Info->Lgm_MagStep_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_eps_old = -1.0;
 printf("HOW DID I GET HERE? P = \n");
-exit(0);
                 return(-1);
             }
 
             n  = Seq[k];
             n2 = (double)(n*n);
             h2 = H*H;
-            Lgm_ModMid( &u_save, &v, H, n, sgn, Mag, Info );
+            Lgm_ModMid( &u0, &b0, &v, H, n, sgn, Mag, Info );
             sss = h2/n2;
             Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
             

@@ -152,8 +152,9 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
                 /*
                  *  Compute L* 
                  */
-                LstarInfo2 = Lgm_CopyLstarInfo( LstarInfo3 );
-                if ( LSimple < LstarInfo2->LSimpleMax ){
+                if ( LSimple < LstarInfo3->LSimpleMax ){
+
+                    LstarInfo2 = Lgm_CopyLstarInfo( LstarInfo3 );
 
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
@@ -221,12 +222,16 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
 //printf("LstarInfo2->nFieldPnts[%d] = %d\n", nn, LstarInfo2->nFieldPnts[nn]);
                     }
 
+                    FreeLstarInfo( LstarInfo2 );
 
                 } else {
-                    printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo2->LSimpleMax );
+                    printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo3->LSimpleMax );
+                    MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
+                    MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+                    MagEphemInfo->nShellPoints[i] = 0;
+                    
                 }
 
-                FreeLstarInfo( LstarInfo2 );
 
                 FreeLstarInfo( LstarInfo3 );
             }

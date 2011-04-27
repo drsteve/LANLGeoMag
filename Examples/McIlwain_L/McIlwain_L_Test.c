@@ -27,6 +27,10 @@ int main(){
     L = Lgm_McIlwain_L( Date, UTC, &u, a, 1, &I, &Bm, &M, mInfo );
     printf("Pitch Angle: %g    McIlwain L  = %.15lf   ( I, Bm, M = %.15g %g %g )\n", a, L, I, Bm, M);
 
+    
+    Lgm_FreeMagInfo( mInfo );                                                                                                                                                                                                              
+    Lgm_free_ctrans( c );         
+
 
 
     return(0);

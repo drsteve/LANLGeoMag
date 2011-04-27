@@ -37,7 +37,7 @@
 #define     LGM_TARGET_HEIGHT_UNREACHABLE -2
 
 
-#define 	LGM_MAGSTEP_KMAX	9
+#define 	LGM_MAGSTEP_KMAX	16
 #define 	LGM_MAGSTEP_IMAX	(LGM_MAGSTEP_KMAX+1)
 #define 	LGM_MAGSTEP_JMAX	(LGM_MAGSTEP_KMAX+2)
 #define 	LGM_MAGSTEP_REDMAX 	1.0e-5
@@ -337,7 +337,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
 
-void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, double, int, double,
+void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
