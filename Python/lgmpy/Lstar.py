@@ -169,6 +169,8 @@ def get_Lstar(pos, date, alpha = 90,
         #sets up nans in case of Lstar failure
         ans[pa]['I'] = datamodel.dmarray(numpy.nan)
         ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
+        ans[pa]['LMcIlwain'] = datamodel.dmarray(numpy.nan)
+        ans[pa]['LHilton'] = datamodel.dmarray(numpy.nan)
         ans[pa]['Bmin'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
         ans[pa]['Bmirror'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
 
