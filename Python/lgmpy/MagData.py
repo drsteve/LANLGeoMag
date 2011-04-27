@@ -1,12 +1,17 @@
 """
+Overview
+--------
 Data model for magnetic field data
 
 
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
+Unittest coverage
+-----------------
+This module has full unittest coverage.
 
-@version: V1: 21-Mar-2011 (BAL)
+Authors
+-------
+Brian Larsen - LANL
+
 """
 import numpy as np
 import spacepy.toolbox as tb
@@ -17,11 +22,16 @@ class MagData(datamodel.SpaceData):
     """
     Class to store data and attributes
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ==========
+    args : arguments, optional
+        passed directly to datamodel.SpaceData
+    kwargs : keyword arguments, optional
+        passed directly to datamodel.SpaceData
 
-    @version: V1: 21-Mar-2011 (BAL)
+    See Also
+    ========
+    spacepy.datamodel.SpaceData
     """
     def __init__(self, *args, **kwargs):
         super(MagData, self).__init__(*args, **kwargs)

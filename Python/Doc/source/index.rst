@@ -7,6 +7,7 @@
 lgmpy Reference
 ###############
 
+
 :Release: |version|
 :Date: |today|
 
@@ -14,11 +15,30 @@ lgmpy Reference
 
 This reference manual describes the useage and behavor of the Python wrapper for LanlGeoMag
 
+Classes
+=======
+
 .. toctree::
    :maxdepth: 2
 
+   MagData
+   magcoords
+   Lstar
+   Closed_Field
+   Lgm_CTrans
+   Lgm_MagEphemInfo
+   Lgm_MagModelInfo
+   Lgm_OP77
+   Lgm_T89
+   Lgm_Wrap
    Lgm_Vector
 
+
+
+TODO List
+=========
+
+.. todolist::
 
 
 Indices and tables

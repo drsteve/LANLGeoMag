@@ -50,12 +50,9 @@ class Closed_FieldTests(unittest.TestCase):
         self.assertEqual(Closed_Field.Closed_Field([1,0,0], self.date), 'LGM_INSIDE_EARTH')
         self.assertEqual(Closed_Field.Closed_Field([1,1,10], self.date), 'LGM_OPEN_N_LOBE')
         self.assertEqual(Closed_Field.Closed_Field([1,1,9], self.date), 'LGM_OPEN_N_LOBE')
-        # need to find some tests that hit the rest of the options
-        #'LGM_OPEN_IMF'
-        #'LGM_CLOSED'
-        #'LGM_OPEN_N_LOBE'
-        #'LGM_OPEN_S_LOBE'
-        #'LGM_INSIDE_EARTH'
+        self.assertEqual(Closed_Field.Closed_Field([12,1,9], self.date), 'LGM_OPEN_IMF')
+        self.assertEqual(Closed_Field.Closed_Field([4,1,-9], self.date), 'LGM_OPEN_S_LOBE')
+        # still haven't testing this one
         #'LGM_TARGET_HEIGHT_UNREACHABLE'
 
     def test_extended_out(self):
