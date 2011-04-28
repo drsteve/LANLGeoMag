@@ -64,8 +64,8 @@ class Closed_FieldTests(unittest.TestCase):
         numpy.testing.assert_array_almost_equal(data[2],
                 [ 0.76662888,  0.33533055, -0.57131527])
         numpy.testing.assert_array_almost_equal(data[3],
-                [ 2.2794347 ,  2.80962392,  1.12454746])
-        self.assertAlmostEqual(data[4], 3.7346417307338116)
+                [ 2.27943343,  2.80962207,  1.12454683])
+        self.assertAlmostEqual(data[4], 3.7346408022895408)
 
 
 if __name__ == '__main__':
