@@ -31,29 +31,19 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     /*
      * Write Header
      */
-//    fprintf( fp, "# Spacecraft:  %s\n", Spacecraft );
-//    fprintf( fp, "# Field Model:  %s\n", MagModel );
-//    fprintf( fp, "# nAlpha:  %d; Alphas: ", m->nAlpha ); for (i=0; i<m->nAlpha; i++) fprintf(fp, " %g", m->Alpha[i]); fprintf( fp, ";   Units: Degrees\n");
-//    fprintf( fp, "#\n");
-//    fprintf( fp, "# File Contents    :  Magnetic Empherii for spacecraft trajectory.\n");
-//    fprintf( fp, "# File Created at  :  %02d:%02d:%02d UTC  %s %02d %4d\n", HH, MM, SS, sMonth[Month], Day, Year );
-//    fprintf( fp, "# File Created by  :  %s\n", UserName );
-//    fprintf( fp, "# File Created on  :  %s\n", Machine );
-//    fprintf( fp, "# File Fmt Version :  %s\n", "" );
-//    fprintf( fp, "#\n");
     int nCol = 0;
-//    fprintf( fp, "# Description of Variables:\n");
-//    fprintf( fp, "# begin JSON {\n");
     fprintf( fp, "# {\n");
+    fprintf( fp, "#  \"Spacecraft\":       { \"DESCRIPTION\": \"Spacecraft identifier.\",\n");
+    fprintf( fp, "#                        \"COMMON_NAME\": \"%s\",\n", Spacecraft);
+    fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
+    fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
+    fprintf( fp, "#  },\n");
 
-//    fprintf( fp, "# \"GlobalVarInfo\": {\n");
-//    fprintf( fp, "#        \"Spacecraft\": {  \"CommonName\": \"%s\",\n", Spacecraft );
-//    fprintf( fp, "#                           \"IdNumber\": \"%d\",\n",   IdNumber );
-//    fprintf( fp, "#                           \"IntDesig\": \"%s\" }\n",  IntDesig );
-//    fprintf( fp, "#\n");
-//    fprintf( fp, "# },\n");
-//    fprintf( fp, "#\n");
-
+    fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents.\",\n");
+    fprintf( fp, "#                       \"CreationTime\": \"%02d:%02d:%02d UTC  %s %02d %4d\",\n", HH, MM, SS, sMonth[Month], Day, Year);
+    fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
+    fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
+    fprintf( fp, "#  },\n");
 
     if ( m->nAlpha > 0 ) {
         fprintf( fp, "#  \"Alpha\":            { \"DESCRIPTION\": \"Pitch Angles.\",\n");
@@ -145,7 +135,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rx_geo\", \"Ry_geo\", \"Rz_geo\" ],\n");
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rgeo_x\", \"Rgeo_y\", \"Rgeo_z\" ],\n");
     fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgeo!Ix!N ,  R!IE\", \"Rgeo!Iy!N ,  R!IE\", \"Rgeo!Iz!N ,  R!IE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
