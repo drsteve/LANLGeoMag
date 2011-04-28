@@ -1,7 +1,11 @@
-'''Wrapper for size.h
+'''Wrapper for Lgm_WGS84.h
 
 Generated with:
+<<<<<<< Updated upstream
 /usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.so --no-macro-warnings -o LIN_Lgm_Wrap.py.bak /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_SphHarm.h
+=======
+/usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.so --no-macro-warnings -o LIN_Lgm_Wrap.py.bak /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/quicksort.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_SphHarm.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h
+>>>>>>> Stashed changes
 
 Do not modify this file.
 '''
@@ -1973,7 +1977,7 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_InitOctree'):
     Lgm_InitOctree.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), c_ulong, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     Lgm_InitOctree.restype = POINTER(Lgm_OctreeCell)
 
-# /usr/include/gsl/gsl_interp.h: 46
+# /usr/local/include/gsl/gsl_interp.h: 46
 class struct_anon_28(Structure):
     pass
 
@@ -1988,9 +1992,9 @@ struct_anon_28._fields_ = [
     ('hit_count', c_size_t),
 ]
 
-gsl_interp_accel = struct_anon_28 # /usr/include/gsl/gsl_interp.h: 46
+gsl_interp_accel = struct_anon_28 # /usr/local/include/gsl/gsl_interp.h: 46
 
-# /usr/include/gsl/gsl_interp.h: 61
+# /usr/local/include/gsl/gsl_interp.h: 61
 class struct_anon_29(Structure):
     pass
 
@@ -2017,9 +2021,9 @@ struct_anon_29._fields_ = [
     ('free', CFUNCTYPE(UNCHECKED(None), POINTER(None))),
 ]
 
-gsl_interp_type = struct_anon_29 # /usr/include/gsl/gsl_interp.h: 61
+gsl_interp_type = struct_anon_29 # /usr/local/include/gsl/gsl_interp.h: 61
 
-# /usr/include/gsl/gsl_interp.h: 71
+# /usr/local/include/gsl/gsl_interp.h: 71
 class struct_anon_30(Structure):
     pass
 
@@ -2038,9 +2042,9 @@ struct_anon_30._fields_ = [
     ('state', POINTER(None)),
 ]
 
-gsl_interp = struct_anon_30 # /usr/include/gsl/gsl_interp.h: 71
+gsl_interp = struct_anon_30 # /usr/local/include/gsl/gsl_interp.h: 71
 
-# /usr/include/gsl/gsl_spline.h: 44
+# /usr/local/include/gsl/gsl_spline.h: 44
 class struct_anon_31(Structure):
     pass
 
@@ -2057,7 +2061,7 @@ struct_anon_31._fields_ = [
     ('size', c_size_t),
 ]
 
-gsl_spline = struct_anon_31 # /usr/include/gsl/gsl_spline.h: 44
+gsl_spline = struct_anon_31 # /usr/local/include/gsl/gsl_spline.h: 44
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 308
 class struct_Lgm_MagModelInfo(Structure):
@@ -2897,6 +2901,7 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_CDMAG_TO_CGM'):
     Lgm_CDMAG_TO_CGM.argtypes = [POINTER(Lgm_Vector), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(Lgm_MagModelInfo)]
     Lgm_CDMAG_TO_CGM.restype = c_int
 
+<<<<<<< Updated upstream
 # /usr/local/include/Lgm/size.h: 26
 if hasattr(_libs['libLanlGeoMag.so'], 'size_t_size'):
     size_t_size = _libs['libLanlGeoMag.so'].size_t_size
@@ -2975,6 +2980,8 @@ if hasattr(_libs['libLanlGeoMag.so'], 'size_Lgm_LeapSeconds'):
     size_Lgm_LeapSeconds.argtypes = []
     size_Lgm_LeapSeconds.restype = c_int
 
+=======
+>>>>>>> Stashed changes
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
 class struct_Lgm_LstarInfo(Structure):
     pass
@@ -3260,6 +3267,48 @@ for _lib in _libs.itervalues():
     AngVelInv.restype = c_double
     break
 
+# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 28
+if hasattr(_libs['libLanlGeoMag.so'], 'TRARA1'):
+    TRARA1 = _libs['libLanlGeoMag.so'].TRARA1
+    TRARA1.argtypes = [POINTER(c_int), POINTER(c_int), c_double, c_double, POINTER(c_double), POINTER(c_double), c_int]
+    TRARA1.restype = None
+
+# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 29
+if hasattr(_libs['libLanlGeoMag.so'], 'TRARA2'):
+    TRARA2 = _libs['libLanlGeoMag.so'].TRARA2
+    TRARA2.argtypes = [POINTER(c_int), c_int, c_int, c_double]
+    TRARA2.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 30
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_AE8_AP8_Flux'):
+    Lgm_AE8_AP8_Flux = _libs['libLanlGeoMag.so'].Lgm_AE8_AP8_Flux
+    Lgm_AE8_AP8_Flux.argtypes = [c_double, c_double, c_int, c_int, c_double, c_double]
+    Lgm_AE8_AP8_Flux.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 31
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_AE8_AP8_FluxFromPos'):
+    Lgm_AE8_AP8_FluxFromPos = _libs['libLanlGeoMag.so'].Lgm_AE8_AP8_FluxFromPos
+    Lgm_AE8_AP8_FluxFromPos.argtypes = [POINTER(Lgm_Vector), c_int, c_int, c_double, c_double, POINTER(Lgm_MagModelInfo)]
+    Lgm_AE8_AP8_FluxFromPos.restype = c_double
+
+# /usr/local/include/Lgm/quicksort.h: 3
+if hasattr(_libs['libLanlGeoMag.so'], 'quicksort'):
+    quicksort = _libs['libLanlGeoMag.so'].quicksort
+    quicksort.argtypes = [c_ulong, POINTER(c_double)]
+    quicksort.restype = None
+
+# /usr/local/include/Lgm/quicksort.h: 5
+if hasattr(_libs['libLanlGeoMag.so'], 'quicksort2'):
+    quicksort2 = _libs['libLanlGeoMag.so'].quicksort2
+    quicksort2.argtypes = [c_ulong, POINTER(c_double), POINTER(c_double)]
+    quicksort2.restype = None
+
+# /usr/local/include/Lgm/quicksort.h: 7
+if hasattr(_libs['libLanlGeoMag.so'], 'bubbleSort'):
+    bubbleSort = _libs['libLanlGeoMag.so'].bubbleSort
+    bubbleSort.argtypes = [c_ulong, POINTER(c_double)]
+    bubbleSort.restype = None
+
 # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 class struct_Lgm_MagEphemInfo(Structure):
     pass
@@ -3490,222 +3539,227 @@ if hasattr(_libs['libLanlGeoMag.so'], 'WriteMagEphemInfoStruct'):
     WriteMagEphemInfoStruct.argtypes = [String, c_int, POINTER(Lgm_MagEphemInfo)]
     WriteMagEphemInfoStruct.restype = None
 
-# /usr/local/include/Lgm/Lgm_MaxwellJuttner.h: 13
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_MaxJut'):
-    Lgm_MaxJut = _libs['libLanlGeoMag.so'].Lgm_MaxJut
-    Lgm_MaxJut.argtypes = [c_double, c_double, c_double, c_double]
-    Lgm_MaxJut.restype = c_double
+# /usr/local/include/Lgm/Lgm_Quat.h: 13
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_NormalizeQuat'):
+    Lgm_NormalizeQuat = _libs['libLanlGeoMag.so'].Lgm_NormalizeQuat
+    Lgm_NormalizeQuat.argtypes = [POINTER(c_double)]
+    Lgm_NormalizeQuat.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_MaxwellJuttner.h: 14
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Maxwellian'):
-    Lgm_Maxwellian = _libs['libLanlGeoMag.so'].Lgm_Maxwellian
-    Lgm_Maxwellian.argtypes = [c_double, c_double, c_double, c_double]
-    Lgm_Maxwellian.restype = c_double
+# /usr/local/include/Lgm/Lgm_Quat.h: 14
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_MatrixTrace'):
+    Lgm_MatrixTrace = _libs['libLanlGeoMag.so'].Lgm_MatrixTrace
+    Lgm_MatrixTrace.argtypes = [(c_double * 3) * 3]
+    Lgm_MatrixTrace.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 26
-class struct_Lgm_NgaEopp(Structure):
-    pass
+# /usr/local/include/Lgm/Lgm_Quat.h: 15
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_MatrixToQuat'):
+    Lgm_MatrixToQuat = _libs['libLanlGeoMag.so'].Lgm_MatrixToQuat
+    Lgm_MatrixToQuat.argtypes = [(c_double * 3) * 3, POINTER(c_double)]
+    Lgm_MatrixToQuat.restype = None
 
-struct_Lgm_NgaEopp.__slots__ = [
-    'ta',
-    'A',
-    'B',
-    'C1',
-    'C2',
-    'D1',
-    'D2',
-    'P1',
-    'P2',
-    'E',
-    'F',
-    'G1',
-    'G2',
-    'H1',
-    'H2',
-    'Q1',
-    'Q2',
-    'tb',
-    'I',
-    'J',
-    'K1',
-    'K2',
-    'K3',
-    'K4',
-    'L1',
-    'L2',
-    'L3',
-    'L4',
-    'R1',
-    'R2',
-    'R3',
-    'R4',
-    'dat',
-    'EOPPWk',
-    'teff',
-]
-struct_Lgm_NgaEopp._fields_ = [
-    ('ta', c_double),
-    ('A', c_double),
-    ('B', c_double),
-    ('C1', c_double),
-    ('C2', c_double),
-    ('D1', c_double),
-    ('D2', c_double),
-    ('P1', c_double),
-    ('P2', c_double),
-    ('E', c_double),
-    ('F', c_double),
-    ('G1', c_double),
-    ('G2', c_double),
-    ('H1', c_double),
-    ('H2', c_double),
-    ('Q1', c_double),
-    ('Q2', c_double),
-    ('tb', c_double),
-    ('I', c_double),
-    ('J', c_double),
-    ('K1', c_double),
-    ('K2', c_double),
-    ('K3', c_double),
-    ('K4', c_double),
-    ('L1', c_double),
-    ('L2', c_double),
-    ('L3', c_double),
-    ('L4', c_double),
-    ('R1', c_double),
-    ('R2', c_double),
-    ('R3', c_double),
-    ('R4', c_double),
-    ('dat', c_int),
-    ('EOPPWk', c_int),
-    ('teff', c_int),
-]
+# /usr/local/include/Lgm/Lgm_Quat.h: 16
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Quat_To_Matrix'):
+    Lgm_Quat_To_Matrix = _libs['libLanlGeoMag.so'].Lgm_Quat_To_Matrix
+    Lgm_Quat_To_Matrix.argtypes = [c_double * 4, (c_double * 3) * 3]
+    Lgm_Quat_To_Matrix.restype = None
 
-Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
+# /usr/local/include/Lgm/Lgm_Quat.h: 17
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatToAxisAngle'):
+    Lgm_QuatToAxisAngle = _libs['libLanlGeoMag.so'].Lgm_QuatToAxisAngle
+    Lgm_QuatToAxisAngle.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(Lgm_Vector)]
+    Lgm_QuatToAxisAngle.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 45
-class struct_Lgm_Eop(Structure):
-    pass
+# /usr/local/include/Lgm/Lgm_Quat.h: 18
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_AxisAngleToQuat'):
+    Lgm_AxisAngleToQuat = _libs['libLanlGeoMag.so'].Lgm_AxisAngleToQuat
+    Lgm_AxisAngleToQuat.argtypes = [POINTER(Lgm_Vector), c_double, POINTER(c_double)]
+    Lgm_AxisAngleToQuat.restype = None
 
-struct_Lgm_Eop.__slots__ = [
-    'Size',
-    'nEopVals',
-    'Verbosity',
-    'Date',
-    'MJD',
-    'xp',
-    'yp',
-    'DUT1',
-    'LOD',
-    'dPsi',
-    'dEps',
-    'dX',
-    'dY',
-    'DAT',
-]
-struct_Lgm_Eop._fields_ = [
-    ('Size', c_long),
-    ('nEopVals', c_long),
-    ('Verbosity', c_int),
-    ('Date', POINTER(c_long)),
-    ('MJD', POINTER(c_double)),
-    ('xp', POINTER(c_double)),
-    ('yp', POINTER(c_double)),
-    ('DUT1', POINTER(c_double)),
-    ('LOD', POINTER(c_double)),
-    ('dPsi', POINTER(c_double)),
-    ('dEps', POINTER(c_double)),
-    ('dX', POINTER(c_double)),
-    ('dY', POINTER(c_double)),
-    ('DAT', POINTER(c_double)),
-]
+# /usr/local/include/Lgm/Lgm_Quat.h: 19
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatRotateVector'):
+    Lgm_QuatRotateVector = _libs['libLanlGeoMag.so'].Lgm_QuatRotateVector
+    Lgm_QuatRotateVector.argtypes = [POINTER(c_double), POINTER(Lgm_Vector), POINTER(Lgm_Vector)]
+    Lgm_QuatRotateVector.restype = None
 
-Lgm_Eop = struct_Lgm_Eop # /usr/local/include/Lgm/Lgm_Eop.h: 45
+# /usr/local/include/Lgm/Lgm_Quat.h: 20
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatMagnitude'):
+    Lgm_QuatMagnitude = _libs['libLanlGeoMag.so'].Lgm_QuatMagnitude
+    Lgm_QuatMagnitude.argtypes = [POINTER(c_double)]
+    Lgm_QuatMagnitude.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 63
-class struct_Lgm_EopOne(Structure):
-    pass
+# /usr/local/include/Lgm/Lgm_Quat.h: 21
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecLength'):
+    Lgm_QuatVecLength = _libs['libLanlGeoMag.so'].Lgm_QuatVecLength
+    Lgm_QuatVecLength.argtypes = [POINTER(c_double)]
+    Lgm_QuatVecLength.restype = c_double
 
-struct_Lgm_EopOne.__slots__ = [
-    'Date',
-    'JD',
-    'MJD',
-    'UTC',
-    'xp',
-    'yp',
-    'DUT1',
-    'LOD',
-    'dPsi',
-    'dEps',
-    'dX',
-    'dY',
-    'DAT',
-]
-struct_Lgm_EopOne._fields_ = [
-    ('Date', c_long),
-    ('JD', c_double),
-    ('MJD', c_double),
-    ('UTC', c_double),
-    ('xp', c_double),
-    ('yp', c_double),
-    ('DUT1', c_double),
-    ('LOD', c_double),
-    ('dPsi', c_double),
-    ('dEps', c_double),
-    ('dX', c_double),
-    ('dY', c_double),
-    ('DAT', c_double),
-]
+# /usr/local/include/Lgm/Lgm_Quat.h: 22
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecDot'):
+    Lgm_QuatVecDot = _libs['libLanlGeoMag.so'].Lgm_QuatVecDot
+    Lgm_QuatVecDot.argtypes = [POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecDot.restype = c_double
 
-Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
+# /usr/local/include/Lgm/Lgm_Quat.h: 23
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecZero'):
+    Lgm_QuatVecZero = _libs['libLanlGeoMag.so'].Lgm_QuatVecZero
+    Lgm_QuatVecZero.argtypes = [POINTER(c_double)]
+    Lgm_QuatVecZero.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 65
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_init_eop'):
-    Lgm_init_eop = _libs['libLanlGeoMag.so'].Lgm_init_eop
-    Lgm_init_eop.argtypes = [c_int]
-    Lgm_init_eop.restype = POINTER(Lgm_Eop)
+# /usr/local/include/Lgm/Lgm_Quat.h: 24
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecSet'):
+    Lgm_QuatVecSet = _libs['libLanlGeoMag.so'].Lgm_QuatVecSet
+    Lgm_QuatVecSet.argtypes = [POINTER(c_double), c_double, c_double, c_double]
+    Lgm_QuatVecSet.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 66
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_destroy_eop'):
-    Lgm_destroy_eop = _libs['libLanlGeoMag.so'].Lgm_destroy_eop
-    Lgm_destroy_eop.argtypes = [POINTER(Lgm_Eop)]
-    Lgm_destroy_eop.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 25
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecAdd'):
+    Lgm_QuatVecAdd = _libs['libLanlGeoMag.so'].Lgm_QuatVecAdd
+    Lgm_QuatVecAdd.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecAdd.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 67
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_read_eop'):
-    Lgm_read_eop = _libs['libLanlGeoMag.so'].Lgm_read_eop
-    Lgm_read_eop.argtypes = [POINTER(Lgm_Eop)]
-    Lgm_read_eop.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 26
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecSub'):
+    Lgm_QuatVecSub = _libs['libLanlGeoMag.so'].Lgm_QuatVecSub
+    Lgm_QuatVecSub.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecSub.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 68
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_NgaEoppPred'):
-    Lgm_NgaEoppPred = _libs['libLanlGeoMag.so'].Lgm_NgaEoppPred
-    Lgm_NgaEoppPred.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_NgaEopp)]
-    Lgm_NgaEoppPred.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 27
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecCopy'):
+    Lgm_QuatVecCopy = _libs['libLanlGeoMag.so'].Lgm_QuatVecCopy
+    Lgm_QuatVecCopy.argtypes = [POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecCopy.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 69
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_ReadNgaEopp'):
-    Lgm_ReadNgaEopp = _libs['libLanlGeoMag.so'].Lgm_ReadNgaEopp
-    Lgm_ReadNgaEopp.argtypes = [POINTER(Lgm_NgaEopp), c_int]
-    Lgm_ReadNgaEopp.restype = c_int
+# /usr/local/include/Lgm/Lgm_Quat.h: 28
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecScale'):
+    Lgm_QuatVecScale = _libs['libLanlGeoMag.so'].Lgm_QuatVecScale
+    Lgm_QuatVecScale.argtypes = [POINTER(c_double), c_double]
+    Lgm_QuatVecScale.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 70
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_get_eop_at_JD'):
-    Lgm_get_eop_at_JD = _libs['libLanlGeoMag.so'].Lgm_get_eop_at_JD
-    Lgm_get_eop_at_JD.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_Eop)]
-    Lgm_get_eop_at_JD.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 29
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecNormalize'):
+    Lgm_QuatVecNormalize = _libs['libLanlGeoMag.so'].Lgm_QuatVecNormalize
+    Lgm_QuatVecNormalize.argtypes = [POINTER(c_double)]
+    Lgm_QuatVecNormalize.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 71
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_set_eop'):
-    Lgm_set_eop = _libs['libLanlGeoMag.so'].Lgm_set_eop
-    Lgm_set_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
-    Lgm_set_eop.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 30
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecCross'):
+    Lgm_QuatVecCross = _libs['libLanlGeoMag.so'].Lgm_QuatVecCross
+    Lgm_QuatVecCross.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecCross.restype = None
 
-# /usr/local/include/Lgm/Lgm_Eop.h: 72
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_unset_eop'):
-    Lgm_unset_eop = _libs['libLanlGeoMag.so'].Lgm_unset_eop
-    Lgm_unset_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
-    Lgm_unset_eop.restype = None
+# /usr/local/include/Lgm/Lgm_Quat.h: 31
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatCombineQuats'):
+    Lgm_QuatCombineQuats = _libs['libLanlGeoMag.so'].Lgm_QuatCombineQuats
+    Lgm_QuatCombineQuats.argtypes = [c_double * 4, c_double * 4, c_double * 4]
+    Lgm_QuatCombineQuats.restype = None
+
+# /usr/local/include/Lgm/size.h: 26
+if hasattr(_libs['libLanlGeoMag.so'], 'size_t_size'):
+    size_t_size = _libs['libLanlGeoMag.so'].size_t_size
+    size_t_size.argtypes = []
+    size_t_size.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 27
+if hasattr(_libs['libLanlGeoMag.so'], 'size_MagModelInfo'):
+    size_MagModelInfo = _libs['libLanlGeoMag.so'].size_MagModelInfo
+    size_MagModelInfo.argtypes = []
+    size_MagModelInfo.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 28
+if hasattr(_libs['libLanlGeoMag.so'], 'size_CTrans'):
+    size_CTrans = _libs['libLanlGeoMag.so'].size_CTrans
+    size_CTrans.argtypes = []
+    size_CTrans.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 29
+if hasattr(_libs['libLanlGeoMag.so'], 'size_Vector'):
+    size_Vector = _libs['libLanlGeoMag.so'].size_Vector
+    size_Vector.argtypes = []
+    size_Vector.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 30
+if hasattr(_libs['libLanlGeoMag.so'], 'size_DateTime'):
+    size_DateTime = _libs['libLanlGeoMag.so'].size_DateTime
+    size_DateTime.argtypes = []
+    size_DateTime.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 31
+if hasattr(_libs['libLanlGeoMag.so'], 'size_gsl_interp_accel'):
+    size_gsl_interp_accel = _libs['libLanlGeoMag.so'].size_gsl_interp_accel
+    size_gsl_interp_accel.argtypes = []
+    size_gsl_interp_accel.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 32
+if hasattr(_libs['libLanlGeoMag.so'], 'size_gsl_interp_type'):
+    size_gsl_interp_type = _libs['libLanlGeoMag.so'].size_gsl_interp_type
+    size_gsl_interp_type.argtypes = []
+    size_gsl_interp_type.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 33
+if hasattr(_libs['libLanlGeoMag.so'], 'size_gsl_interp'):
+    size_gsl_interp = _libs['libLanlGeoMag.so'].size_gsl_interp
+    size_gsl_interp.argtypes = []
+    size_gsl_interp.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 34
+if hasattr(_libs['libLanlGeoMag.so'], 'size_gsl_spline'):
+    size_gsl_spline = _libs['libLanlGeoMag.so'].size_gsl_spline
+    size_gsl_spline.argtypes = []
+    size_gsl_spline.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 35
+if hasattr(_libs['libLanlGeoMag.so'], 'size_Lgm_OctreeData'):
+    size_Lgm_OctreeData = _libs['libLanlGeoMag.so'].size_Lgm_OctreeData
+    size_Lgm_OctreeData.argtypes = []
+    size_Lgm_OctreeData.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 36
+if hasattr(_libs['libLanlGeoMag.so'], 'size_Lgm_OctreeCell'):
+    size_Lgm_OctreeCell = _libs['libLanlGeoMag.so'].size_Lgm_OctreeCell
+    size_Lgm_OctreeCell.argtypes = []
+    size_Lgm_OctreeCell.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 37
+if hasattr(_libs['libLanlGeoMag.so'], 'size_pQueue'):
+    size_pQueue = _libs['libLanlGeoMag.so'].size_pQueue
+    size_pQueue.argtypes = []
+    size_pQueue.restype = c_int
+
+# /usr/local/include/Lgm/size.h: 38
+if hasattr(_libs['libLanlGeoMag.so'], 'size_Lgm_LeapSeconds'):
+    size_Lgm_LeapSeconds = _libs['libLanlGeoMag.so'].size_Lgm_LeapSeconds
+    size_Lgm_LeapSeconds.argtypes = []
+    size_Lgm_LeapSeconds.restype = c_int
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 63
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_fac1'):
+    Lgm_fac1 = _libs['libLanlGeoMag.so'].Lgm_fac1
+    Lgm_fac1.argtypes = [c_int]
+    Lgm_fac1.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 64
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_fac2'):
+    Lgm_fac2 = _libs['libLanlGeoMag.so'].Lgm_fac2
+    Lgm_fac2.argtypes = [c_int]
+    Lgm_fac2.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 65
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_kdelta'):
+    Lgm_kdelta = _libs['libLanlGeoMag.so'].Lgm_kdelta
+    Lgm_kdelta.argtypes = [c_int, c_int]
+    Lgm_kdelta.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 66
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_GaussToSchmidtSemiNorm'):
+    Lgm_GaussToSchmidtSemiNorm = _libs['libLanlGeoMag.so'].Lgm_GaussToSchmidtSemiNorm
+    Lgm_GaussToSchmidtSemiNorm.argtypes = [c_int, c_int, c_double, POINTER(c_double), POINTER(c_double)]
+    Lgm_GaussToSchmidtSemiNorm.restype = None
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 67
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_SchmidtSemiNormToGauss'):
+    Lgm_SchmidtSemiNormToGauss = _libs['libLanlGeoMag.so'].Lgm_SchmidtSemiNormToGauss
+    Lgm_SchmidtSemiNormToGauss.argtypes = [c_int, c_int, c_double, POINTER(c_double), POINTER(c_double)]
+    Lgm_SchmidtSemiNormToGauss.restype = None
 
 # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 class struct__SgpTLE(Structure):
@@ -4159,71 +4213,17 @@ if hasattr(_libs['libLanlGeoMag.so'], 'LgmSgp_gstime'):
     LgmSgp_gstime.argtypes = [c_double]
     LgmSgp_gstime.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 44
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_LoadLeapSeconds'):
-    Lgm_LoadLeapSeconds = _libs['libLanlGeoMag.so'].Lgm_LoadLeapSeconds
-    Lgm_LoadLeapSeconds.argtypes = [POINTER(Lgm_LeapSeconds)]
-    Lgm_LoadLeapSeconds.restype = c_int
+# /usr/local/include/Lgm/Lgm_MaxwellJuttner.h: 13
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_MaxJut'):
+    Lgm_MaxJut = _libs['libLanlGeoMag.so'].Lgm_MaxJut
+    Lgm_MaxJut.argtypes = [c_double, c_double, c_double, c_double]
+    Lgm_MaxJut.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 45
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_GetLeapSeconds'):
-    Lgm_GetLeapSeconds = _libs['libLanlGeoMag.so'].Lgm_GetLeapSeconds
-    Lgm_GetLeapSeconds.argtypes = [c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_GetLeapSeconds.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 46
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_IsLeapSecondDay'):
-    Lgm_IsLeapSecondDay = _libs['libLanlGeoMag.so'].Lgm_IsLeapSecondDay
-    Lgm_IsLeapSecondDay.argtypes = [c_long, POINTER(Lgm_LeapSeconds)]
-    Lgm_IsLeapSecondDay.restype = c_int
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 47
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_UTC_to_TAI'):
-    Lgm_UTC_to_TAI = _libs['libLanlGeoMag.so'].Lgm_UTC_to_TAI
-    Lgm_UTC_to_TAI.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_UTC_to_TAI.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 48
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TAI_to_UTC'):
-    Lgm_TAI_to_UTC = _libs['libLanlGeoMag.so'].Lgm_TAI_to_UTC
-    Lgm_TAI_to_UTC.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_TAI_to_UTC.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 49
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_UTC_to_TT'):
-    Lgm_UTC_to_TT = _libs['libLanlGeoMag.so'].Lgm_UTC_to_TT
-    Lgm_UTC_to_TT.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_UTC_to_TT.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 50
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TT_to_UTC'):
-    Lgm_TT_to_UTC = _libs['libLanlGeoMag.so'].Lgm_TT_to_UTC
-    Lgm_TT_to_UTC.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_TT_to_UTC.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 51
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TT_to_TDB'):
-    Lgm_TT_to_TDB = _libs['libLanlGeoMag.so'].Lgm_TT_to_TDB
-    Lgm_TT_to_TDB.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_TT_to_TDB.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 52
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TDB_to_TT'):
-    Lgm_TDB_to_TT = _libs['libLanlGeoMag.so'].Lgm_TDB_to_TT
-    Lgm_TDB_to_TT.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_TDB_to_TT.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 53
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_UTC_to_TDB'):
-    Lgm_UTC_to_TDB = _libs['libLanlGeoMag.so'].Lgm_UTC_to_TDB
-    Lgm_UTC_to_TDB.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_UTC_to_TDB.restype = c_double
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 54
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_TDB_to_UTC'):
-    Lgm_TDB_to_UTC = _libs['libLanlGeoMag.so'].Lgm_TDB_to_UTC
-    Lgm_TDB_to_UTC.argtypes = [c_double, c_double, POINTER(Lgm_LeapSeconds)]
-    Lgm_TDB_to_UTC.restype = c_double
+# /usr/local/include/Lgm/Lgm_MaxwellJuttner.h: 14
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Maxwellian'):
+    Lgm_Maxwellian = _libs['libLanlGeoMag.so'].Lgm_Maxwellian
+    Lgm_Maxwellian.argtypes = [c_double, c_double, c_double, c_double]
+    Lgm_Maxwellian.restype = c_double
 
 byte = c_ubyte # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 58
 
@@ -4314,6 +4314,7 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_F2P_GetPsdAtEandAlpha'):
     Lgm_F2P_GetPsdAtEandAlpha.argtypes = [c_double, c_double, POINTER(Lgm_FluxToPsd)]
     Lgm_F2P_GetPsdAtEandAlpha.restype = c_double
 
+<<<<<<< Updated upstream
 # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
 if hasattr(_libs['libLanlGeoMag.so'], 'DumpGif'):
     DumpGif = _libs['libLanlGeoMag.so'].DumpGif
@@ -4415,66 +4416,91 @@ if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecLength'):
     Lgm_QuatVecLength = _libs['libLanlGeoMag.so'].Lgm_QuatVecLength
     Lgm_QuatVecLength.argtypes = [POINTER(c_double)]
     Lgm_QuatVecLength.restype = c_double
+=======
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 208
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_CreatePsdToFlux'):
+    Lgm_P2F_CreatePsdToFlux = _libs['libLanlGeoMag.so'].Lgm_P2F_CreatePsdToFlux
+    Lgm_P2F_CreatePsdToFlux.argtypes = [c_int]
+    Lgm_P2F_CreatePsdToFlux.restype = POINTER(Lgm_PsdToFlux)
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 22
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecDot'):
-    Lgm_QuatVecDot = _libs['libLanlGeoMag.so'].Lgm_QuatVecDot
-    Lgm_QuatVecDot.argtypes = [POINTER(c_double), POINTER(c_double)]
-    Lgm_QuatVecDot.restype = c_double
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 209
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_FreePsdToFlux'):
+    Lgm_P2F_FreePsdToFlux = _libs['libLanlGeoMag.so'].Lgm_P2F_FreePsdToFlux
+    Lgm_P2F_FreePsdToFlux.argtypes = [POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_FreePsdToFlux.restype = None
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 23
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecZero'):
-    Lgm_QuatVecZero = _libs['libLanlGeoMag.so'].Lgm_QuatVecZero
-    Lgm_QuatVecZero.argtypes = [POINTER(c_double)]
-    Lgm_QuatVecZero.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 210
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_SetDateTimeAndPos'):
+    Lgm_P2F_SetDateTimeAndPos = _libs['libLanlGeoMag.so'].Lgm_P2F_SetDateTimeAndPos
+    Lgm_P2F_SetDateTimeAndPos.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_Vector), POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_SetDateTimeAndPos.restype = None
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 24
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecSet'):
-    Lgm_QuatVecSet = _libs['libLanlGeoMag.so'].Lgm_QuatVecSet
-    Lgm_QuatVecSet.argtypes = [POINTER(c_double), c_double, c_double, c_double]
-    Lgm_QuatVecSet.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 211
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_SetPsd'):
+    Lgm_P2F_SetPsd = _libs['libLanlGeoMag.so'].Lgm_P2F_SetPsd
+    Lgm_P2F_SetPsd.argtypes = [POINTER(POINTER(c_double)), POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_SetPsd.restype = None
+>>>>>>> Stashed changes
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 25
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecAdd'):
-    Lgm_QuatVecAdd = _libs['libLanlGeoMag.so'].Lgm_QuatVecAdd
-    Lgm_QuatVecAdd.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
-    Lgm_QuatVecAdd.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 212
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_GetFluxAtConstEsAndAs'):
+    Lgm_P2F_GetFluxAtConstEsAndAs = _libs['libLanlGeoMag.so'].Lgm_P2F_GetFluxAtConstEsAndAs
+    Lgm_P2F_GetFluxAtConstEsAndAs.argtypes = [POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_GetFluxAtConstEsAndAs.restype = None
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 26
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecSub'):
-    Lgm_QuatVecSub = _libs['libLanlGeoMag.so'].Lgm_QuatVecSub
-    Lgm_QuatVecSub.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
-    Lgm_QuatVecSub.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 213
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_P2F_GetPsdAtMuAndK'):
+    Lgm_P2F_GetPsdAtMuAndK = _libs['libLanlGeoMag.so'].Lgm_P2F_GetPsdAtMuAndK
+    Lgm_P2F_GetPsdAtMuAndK.argtypes = [c_double, c_double, c_double, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_GetPsdAtMuAndK.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 27
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecCopy'):
-    Lgm_QuatVecCopy = _libs['libLanlGeoMag.so'].Lgm_QuatVecCopy
-    Lgm_QuatVecCopy.argtypes = [POINTER(c_double), POINTER(c_double)]
-    Lgm_QuatVecCopy.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 219
+if hasattr(_libs['libLanlGeoMag.so'], 'DumpGif'):
+    DumpGif = _libs['libLanlGeoMag.so'].DumpGif
+    DumpGif.argtypes = [String, c_int, c_int, POINTER(POINTER(c_double))]
+    DumpGif.restype = None
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 28
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecScale'):
-    Lgm_QuatVecScale = _libs['libLanlGeoMag.so'].Lgm_QuatVecScale
-    Lgm_QuatVecScale.argtypes = [POINTER(c_double), c_double]
-    Lgm_QuatVecScale.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 220
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Ek_to_Mu'):
+    Lgm_Ek_to_Mu = _libs['libLanlGeoMag.so'].Lgm_Ek_to_Mu
+    Lgm_Ek_to_Mu.argtypes = [c_double, c_double, c_double, c_double]
+    Lgm_Ek_to_Mu.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 29
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecNormalize'):
-    Lgm_QuatVecNormalize = _libs['libLanlGeoMag.so'].Lgm_QuatVecNormalize
-    Lgm_QuatVecNormalize.argtypes = [POINTER(c_double)]
-    Lgm_QuatVecNormalize.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 221
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_Mu_to_Ek'):
+    Lgm_Mu_to_Ek = _libs['libLanlGeoMag.so'].Lgm_Mu_to_Ek
+    Lgm_Mu_to_Ek.argtypes = [c_double, c_double, c_double, c_double]
+    Lgm_Mu_to_Ek.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 30
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatVecCross'):
-    Lgm_QuatVecCross = _libs['libLanlGeoMag.so'].Lgm_QuatVecCross
-    Lgm_QuatVecCross.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
-    Lgm_QuatVecCross.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 222
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_p2c2'):
+    Lgm_p2c2 = _libs['libLanlGeoMag.so'].Lgm_p2c2
+    Lgm_p2c2.argtypes = [c_double, c_double]
+    Lgm_p2c2.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_Quat.h: 31
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_QuatCombineQuats'):
-    Lgm_QuatCombineQuats = _libs['libLanlGeoMag.so'].Lgm_QuatCombineQuats
-    Lgm_QuatCombineQuats.argtypes = [c_double * 4, c_double * 4, c_double * 4]
-    Lgm_QuatCombineQuats.restype = None
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 223
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_v2overc2'):
+    Lgm_v2overc2 = _libs['libLanlGeoMag.so'].Lgm_v2overc2
+    Lgm_v2overc2.argtypes = [c_double, c_double]
+    Lgm_v2overc2.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 224
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_gamma'):
+    Lgm_gamma = _libs['libLanlGeoMag.so'].Lgm_gamma
+    Lgm_gamma.argtypes = [c_double, c_double]
+    Lgm_gamma.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 225
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_PsdToDiffFlux'):
+    Lgm_PsdToDiffFlux = _libs['libLanlGeoMag.so'].Lgm_PsdToDiffFlux
+    Lgm_PsdToDiffFlux.argtypes = [c_double, c_double]
+    Lgm_PsdToDiffFlux.restype = c_double
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 226
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_DiffFluxToPsd'):
+    Lgm_DiffFluxToPsd = _libs['libLanlGeoMag.so'].Lgm_DiffFluxToPsd
+    Lgm_DiffFluxToPsd.argtypes = [c_double, c_double]
+    Lgm_DiffFluxToPsd.restype = c_double
 
 # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 48
 class struct_Lgm_FieldIntInfo(Structure):
@@ -4597,29 +4623,295 @@ if hasattr(_libs['libLanlGeoMag.so'], 'IFromLBmM_McIlwain'):
     IFromLBmM_McIlwain.argtypes = [c_double, c_double, c_double]
     IFromLBmM_McIlwain.restype = c_double
 
-# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 28
-if hasattr(_libs['libLanlGeoMag.so'], 'TRARA1'):
-    TRARA1 = _libs['libLanlGeoMag.so'].TRARA1
-    TRARA1.argtypes = [POINTER(c_int), POINTER(c_int), c_double, c_double, POINTER(c_double), POINTER(c_double), c_int]
-    TRARA1.restype = None
+# /usr/local/include/Lgm/Lgm_Eop.h: 26
+class struct_Lgm_NgaEopp(Structure):
+    pass
 
-# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 29
-if hasattr(_libs['libLanlGeoMag.so'], 'TRARA2'):
-    TRARA2 = _libs['libLanlGeoMag.so'].TRARA2
-    TRARA2.argtypes = [POINTER(c_int), c_int, c_int, c_double]
-    TRARA2.restype = c_double
+<<<<<<< Updated upstream
+# /usr/local/include/Lgm/Lgm_QuadPack.h: 2
+try:
+    LGM_QUADPACK_H = 1
+except:
+=======
+struct_Lgm_NgaEopp.__slots__ = [
+    'ta',
+    'A',
+    'B',
+    'C1',
+    'C2',
+    'D1',
+    'D2',
+    'P1',
+    'P2',
+    'E',
+    'F',
+    'G1',
+    'G2',
+    'H1',
+    'H2',
+    'Q1',
+    'Q2',
+    'tb',
+    'I',
+    'J',
+    'K1',
+    'K2',
+    'K3',
+    'K4',
+    'L1',
+    'L2',
+    'L3',
+    'L4',
+    'R1',
+    'R2',
+    'R3',
+    'R4',
+    'dat',
+    'EOPPWk',
+    'teff',
+]
+struct_Lgm_NgaEopp._fields_ = [
+    ('ta', c_double),
+    ('A', c_double),
+    ('B', c_double),
+    ('C1', c_double),
+    ('C2', c_double),
+    ('D1', c_double),
+    ('D2', c_double),
+    ('P1', c_double),
+    ('P2', c_double),
+    ('E', c_double),
+    ('F', c_double),
+    ('G1', c_double),
+    ('G2', c_double),
+    ('H1', c_double),
+    ('H2', c_double),
+    ('Q1', c_double),
+    ('Q2', c_double),
+    ('tb', c_double),
+    ('I', c_double),
+    ('J', c_double),
+    ('K1', c_double),
+    ('K2', c_double),
+    ('K3', c_double),
+    ('K4', c_double),
+    ('L1', c_double),
+    ('L2', c_double),
+    ('L3', c_double),
+    ('L4', c_double),
+    ('R1', c_double),
+    ('R2', c_double),
+    ('R3', c_double),
+    ('R4', c_double),
+    ('dat', c_int),
+    ('EOPPWk', c_int),
+    ('teff', c_int),
+]
 
-# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 30
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_AE8_AP8_Flux'):
-    Lgm_AE8_AP8_Flux = _libs['libLanlGeoMag.so'].Lgm_AE8_AP8_Flux
-    Lgm_AE8_AP8_Flux.argtypes = [c_double, c_double, c_int, c_int, c_double, c_double]
-    Lgm_AE8_AP8_Flux.restype = c_double
+Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
 
-# /usr/local/include/Lgm/Lgm_AE8_AP8.h: 31
-if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_AE8_AP8_FluxFromPos'):
-    Lgm_AE8_AP8_FluxFromPos = _libs['libLanlGeoMag.so'].Lgm_AE8_AP8_FluxFromPos
-    Lgm_AE8_AP8_FluxFromPos.argtypes = [POINTER(Lgm_Vector), c_int, c_int, c_double, c_double, POINTER(Lgm_MagModelInfo)]
-    Lgm_AE8_AP8_FluxFromPos.restype = c_double
+# /usr/local/include/Lgm/Lgm_Eop.h: 45
+class struct_Lgm_Eop(Structure):
+    pass
+
+struct_Lgm_Eop.__slots__ = [
+    'Size',
+    'nEopVals',
+    'Verbosity',
+    'Date',
+    'MJD',
+    'xp',
+    'yp',
+    'DUT1',
+    'LOD',
+    'dPsi',
+    'dEps',
+    'dX',
+    'dY',
+    'DAT',
+]
+struct_Lgm_Eop._fields_ = [
+    ('Size', c_long),
+    ('nEopVals', c_long),
+    ('Verbosity', c_int),
+    ('Date', POINTER(c_long)),
+    ('MJD', POINTER(c_double)),
+    ('xp', POINTER(c_double)),
+    ('yp', POINTER(c_double)),
+    ('DUT1', POINTER(c_double)),
+    ('LOD', POINTER(c_double)),
+    ('dPsi', POINTER(c_double)),
+    ('dEps', POINTER(c_double)),
+    ('dX', POINTER(c_double)),
+    ('dY', POINTER(c_double)),
+    ('DAT', POINTER(c_double)),
+]
+
+Lgm_Eop = struct_Lgm_Eop # /usr/local/include/Lgm/Lgm_Eop.h: 45
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 63
+class struct_Lgm_EopOne(Structure):
+>>>>>>> Stashed changes
+    pass
+
+struct_Lgm_EopOne.__slots__ = [
+    'Date',
+    'JD',
+    'MJD',
+    'UTC',
+    'xp',
+    'yp',
+    'DUT1',
+    'LOD',
+    'dPsi',
+    'dEps',
+    'dX',
+    'dY',
+    'DAT',
+]
+struct_Lgm_EopOne._fields_ = [
+    ('Date', c_long),
+    ('JD', c_double),
+    ('MJD', c_double),
+    ('UTC', c_double),
+    ('xp', c_double),
+    ('yp', c_double),
+    ('DUT1', c_double),
+    ('LOD', c_double),
+    ('dPsi', c_double),
+    ('dEps', c_double),
+    ('dX', c_double),
+    ('dY', c_double),
+    ('DAT', c_double),
+]
+
+Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 65
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_init_eop'):
+    Lgm_init_eop = _libs['libLanlGeoMag.so'].Lgm_init_eop
+    Lgm_init_eop.argtypes = [c_int]
+    Lgm_init_eop.restype = POINTER(Lgm_Eop)
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 66
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_destroy_eop'):
+    Lgm_destroy_eop = _libs['libLanlGeoMag.so'].Lgm_destroy_eop
+    Lgm_destroy_eop.argtypes = [POINTER(Lgm_Eop)]
+    Lgm_destroy_eop.restype = None
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 67
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_read_eop'):
+    Lgm_read_eop = _libs['libLanlGeoMag.so'].Lgm_read_eop
+    Lgm_read_eop.argtypes = [POINTER(Lgm_Eop)]
+    Lgm_read_eop.restype = None
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 68
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_NgaEoppPred'):
+    Lgm_NgaEoppPred = _libs['libLanlGeoMag.so'].Lgm_NgaEoppPred
+    Lgm_NgaEoppPred.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_NgaEopp)]
+    Lgm_NgaEoppPred.restype = None
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 69
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_ReadNgaEopp'):
+    Lgm_ReadNgaEopp = _libs['libLanlGeoMag.so'].Lgm_ReadNgaEopp
+    Lgm_ReadNgaEopp.argtypes = [POINTER(Lgm_NgaEopp), c_int]
+    Lgm_ReadNgaEopp.restype = c_int
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 70
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_get_eop_at_JD'):
+    Lgm_get_eop_at_JD = _libs['libLanlGeoMag.so'].Lgm_get_eop_at_JD
+    Lgm_get_eop_at_JD.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_Eop)]
+    Lgm_get_eop_at_JD.restype = None
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 71
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_set_eop'):
+    Lgm_set_eop = _libs['libLanlGeoMag.so'].Lgm_set_eop
+    Lgm_set_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
+    Lgm_set_eop.restype = None
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 72
+if hasattr(_libs['libLanlGeoMag.so'], 'Lgm_unset_eop'):
+    Lgm_unset_eop = _libs['libLanlGeoMag.so'].Lgm_unset_eop
+    Lgm_unset_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
+    Lgm_unset_eop.restype = None
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 5
+try:
+    WGS84_A = 6378.137
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 6
+try:
+    WGS84_B = 6356.7523142
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 7
+try:
+    WGS84_F = 0.0033528106718309896
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 8
+try:
+    WGS84_FINV = 298.2572229328697
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 10
+try:
+    WGS84_E2 = 0.00669437999014
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 11
+try:
+    WGS84_E = 0.08181919092890624
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 12
+try:
+    WGS84_EP2 = 0.006739496756586903
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 13
+try:
+    WGS84_EP = 0.08209443803685366
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 14
+try:
+    WGS84_A2 = 40680631.59076899
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 15
+try:
+    WGS84_B2 = 40408299.98408706
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 16
+try:
+    WGS84_A2mB2 = 272331.6066819355
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 17
+try:
+    WGS84_E4 = 4.481472364144719e-05
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_WGS84.h: 18
+try:
+    WGS84_1mE2 = 0.993305619995739
+except:
+    pass
 
 # /usr/local/include/Lgm/Lgm_QuadPack.h: 2
 try:
@@ -4655,87 +4947,9 @@ def STRINGIFY(x):
 def EXPAND(x):
     return (STRINGIFY (x))
 
-# /usr/local/include/Lgm/Lgm_WGS84.h: 5
-try:
-    WGS84_A = 6378.1369999999997
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 6
-try:
-    WGS84_B = 6356.7523142
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 7
-try:
-    WGS84_F = 0.0033528106718309896
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 8
-try:
-    WGS84_FINV = 298.25722293286969
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 10
-try:
-    WGS84_E2 = 0.0066943799901399998
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 11
-try:
-    WGS84_E = 0.081819190928906244
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 12
-try:
-    WGS84_EP2 = 0.0067394967565869027
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 13
-try:
-    WGS84_EP = 0.082094438036853665
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 14
-try:
-    WGS84_A2 = 40680631.590768993
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 15
-try:
-    WGS84_B2 = 40408299.984087057
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 16
-try:
-    WGS84_A2mB2 = 272331.60668193549
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 17
-try:
-    WGS84_E4 = 4.4814723641447188e-05
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_WGS84.h: 18
-try:
-    WGS84_1mE2 = 0.99330561999573896
-except:
-    pass
-
 # /usr/local/include/Lgm/Lgm_CTrans.h: 15
 try:
-    DegPerRad = 57.295779513082323
+    DegPerRad = 57.29577951308232
 except:
     pass
 
@@ -4747,37 +4961,37 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 17
 try:
-    RadPerArcSec = 4.8481368110953598e-06
+    RadPerArcSec = 4.84813681109536e-06
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 18
 try:
-    M_SQRTPI = 1.7724538509055161
+    M_SQRTPI = 1.772453850905516
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 19
 try:
-    M_SQRTPI_2 = 0.88622692545275805
+    M_SQRTPI_2 = 0.886226925452758
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 20
 try:
-    M_1_SQRTPI = 0.56418958354775628
+    M_1_SQRTPI = 0.5641895835477563
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 21
 try:
-    M_2PI = 6.2831853071795862
+    M_2PI = 6.283185307179586
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 22
 try:
-    M_OneThird = 0.33333333333333331
+    M_OneThird = 0.3333333333333333
 except:
     pass
 
@@ -4801,7 +5015,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 30
 try:
-    Re = 6378.1369999999997
+    Re = 6378.137
 except:
     pass
 
@@ -4813,7 +5027,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 36
 try:
-    LGM_GOLD = 1.6180339887498949
+    LGM_GOLD = 1.618033988749895
 except:
     pass
 
@@ -4837,7 +5051,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 41
 try:
-    LGM_FILL_VALUE = (-9.9999999999999996e+30)
+    LGM_FILL_VALUE = (-1e+31)
 except:
     pass
 
@@ -6397,19 +6611,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 11
 try:
-    LGM_ELECTRON_MASS = 9.1093818800000006e-31
+    LGM_ELECTRON_MASS = 9.10938188e-31
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 12
 try:
-    LGM_AMU = 1.6605379999999998e-27
+    LGM_AMU = 1.660538e-27
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 13
 try:
-    LGM_PROTON_MASS = (1.0079400000000001 * AMU)
+    LGM_PROTON_MASS = (1.00794 * AMU)
 except:
     pass
 
@@ -6433,7 +6647,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 17
 try:
-    LGM_EE = 1.6022000000000001e-19
+    LGM_EE = 1.6022e-19
 except:
     pass
 
@@ -6499,19 +6713,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 43
 try:
-    LGM_MAGSTEP_REDMAX = 1.0000000000000001e-05
+    LGM_MAGSTEP_REDMAX = 1e-05
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 44
 try:
-    LGM_MAGSTEP_REDMIN = 0.69999999999999996
+    LGM_MAGSTEP_REDMIN = 0.7
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 45
 try:
-    LGM_MAGSTEP_SCLMAX = 0.10000000000000001
+    LGM_MAGSTEP_SCLMAX = 0.1
 except:
     pass
 
@@ -6523,7 +6737,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 47
 try:
-    LGM_MAGSTEP_SAFE2 = 0.69999999999999996
+    LGM_MAGSTEP_SAFE2 = 0.7
 except:
     pass
 
@@ -6655,19 +6869,19 @@ except:
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 10
 try:
-    ELECTRON_MASS = 9.1093818800000006e-31
+    ELECTRON_MASS = 9.10938188e-31
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 11
 try:
-    AMU = 1.6605379999999998e-27
+    AMU = 1.660538e-27
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 12
 try:
-    PROTON_MASS = (1.0079400000000001 * AMU)
+    PROTON_MASS = (1.00794 * AMU)
 except:
     pass
 
@@ -6691,201 +6905,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 16
 try:
-    EE = 1.6022000000000001e-19
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 14
-try:
-    MAX_PITCH_ANGLES = 90
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 172
-try:
-    SGP_CK2 = 0.000541308
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 173
-try:
-    SGP_CK4 = 6.2098875000000002e-07
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 174
-try:
-    SGP_E6A = 9.9999999999999995e-07
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 175
-try:
-    SGP_QOMS2T = 1.88027916e-09
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 176
-try:
-    SGP_S = 1.0122292799999999
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 177
-try:
-    SGP_TOTHRD = 0.66666667000000002
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 178
-try:
-    SGP_XJ3 = (-2.53881e-06)
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 179
-try:
-    SGP_XKE = 0.0743669161
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 180
-try:
-    SGP_XKMPER = 6378.1350000000002
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 181
-try:
-    SGP_XMNPDA = 1440.0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 182
-try:
-    SGP_AE = 1.0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 183
-try:
-    SGP_DE2RA = 0.017453292499999998
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 184
-try:
-    SGP_PI = 3.1415926500000002
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 185
-try:
-    SGP_PIO2 = 1.5707963300000001
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 186
-try:
-    SGP_TWOPI = 6.2831853000000004
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 187
-try:
-    SGP_X3PIO2 = 4.7123889800000001
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 192
-try:
-    SGP_wgs72old = 0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 193
-try:
-    SGP_wgs72 = 1
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_Sgp.h: 194
-try:
-    SGP_wgs84 = 2
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 4
-def STRINGIFY(x):
-    return x
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 5
-def EXPAND(x):
-    return (STRINGIFY (x))
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 13
-try:
-    FALSE = 0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_LeapSeconds.h: 14
-try:
-    TRUE = 1
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 55
-try:
-    LGM_Ee0 = 0.51099890999999997
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 56
-try:
-    LGM_Ep0 = 938.27201322999997
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 6
-try:
-    ELECTRON_MASS = 9.1093818800000006e-31
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 7
-try:
-    AMU = 1.6605379999999998e-27
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 8
-try:
-    PROTON_MASS = (1.0079400000000001 * AMU)
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 9
-try:
-    OXYGEN_MASS = (15.9994 * AMU)
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 10
-try:
-    RE = 6378135.0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 11
-try:
-    CC = 299792458.0
-except:
-    pass
-
-# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 12
-try:
-    EE = 1.6022000000000001e-19
+    EE = 1.6022e-19
 except:
     pass
 
@@ -6925,9 +6945,183 @@ try:
 except:
     pass
 
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 14
+try:
+    MAX_PITCH_ANGLES = 90
+except:
+    pass
+
 # /usr/local/include/Lgm/Lgm_SphHarm.h: 21
 try:
     LGM_JENSEN_CAIN_1960 = 0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 172
+try:
+    SGP_CK2 = 0.000541308
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 173
+try:
+    SGP_CK4 = 6.2098875e-07
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 174
+try:
+    SGP_E6A = 1e-06
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 175
+try:
+    SGP_QOMS2T = 1.88027916e-09
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 176
+try:
+    SGP_S = 1.01222928
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 177
+try:
+    SGP_TOTHRD = 0.66666667
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 178
+try:
+    SGP_XJ3 = (-2.53881e-06)
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 179
+try:
+    SGP_XKE = 0.0743669161
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 180
+try:
+    SGP_XKMPER = 6378.135
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 181
+try:
+    SGP_XMNPDA = 1440.0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 182
+try:
+    SGP_AE = 1.0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 183
+try:
+    SGP_DE2RA = 0.0174532925
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 184
+try:
+    SGP_PI = 3.14159265
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 185
+try:
+    SGP_PIO2 = 1.57079633
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 186
+try:
+    SGP_TWOPI = 6.2831853
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 187
+try:
+    SGP_X3PIO2 = 4.71238898
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 192
+try:
+    SGP_wgs72old = 0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 193
+try:
+    SGP_wgs72 = 1
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_Sgp.h: 194
+try:
+    SGP_wgs84 = 2
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 55
+try:
+    LGM_Ee0 = 0.51099891
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 56
+try:
+    LGM_Ep0 = 938.27201323
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 6
+try:
+    ELECTRON_MASS = 9.10938188e-31
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 7
+try:
+    AMU = 1.660538e-27
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 8
+try:
+    PROTON_MASS = (1.00794 * AMU)
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 9
+try:
+    OXYGEN_MASS = (15.9994 * AMU)
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 10
+try:
+    RE = 6378135.0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 11
+try:
+    CC = 299792458.0
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 12
+try:
+    EE = 1.6022e-19
 except:
     pass
 
@@ -6953,17 +7147,17 @@ Lgm_LstarInfo = struct_Lgm_LstarInfo # /usr/local/include/Lgm/Lgm_LstarInfo.h: 1
 
 Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
 
-Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
-
-Lgm_Eop = struct_Lgm_Eop # /usr/local/include/Lgm/Lgm_Eop.h: 45
-
-Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
-
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 
 Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
 Lgm_FieldIntInfo = struct_Lgm_FieldIntInfo # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 48
+
+Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
+
+Lgm_Eop = struct_Lgm_Eop # /usr/local/include/Lgm/Lgm_Eop.h: 45
+
+Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
 
 # No inserted files
 
