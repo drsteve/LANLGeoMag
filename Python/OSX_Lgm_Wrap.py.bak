@@ -2,7 +2,11 @@
 
 Generated with:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 /usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.dylib --no-macro-warnings -o OSX_Lgm_Wrap.py.bak /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_SphHarm.h
+=======
+/usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.dylib --no-macro-warnings -o OSX_Lgm_Wrap.py.bak /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/quicksort.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_SphHarm.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h
+>>>>>>> Stashed changes
 =======
 /usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.dylib --no-macro-warnings -o OSX_Lgm_Wrap.py.bak /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/quicksort.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_SphHarm.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h
 >>>>>>> Stashed changes
@@ -3574,6 +3578,7 @@ for _lib in _libs.itervalues():
     break
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # /usr/local/include/Lgm/size.h: 26
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'size_t_size'):
@@ -3691,6 +3696,8 @@ for _lib in _libs.itervalues():
     size_Lgm_LeapSeconds.restype = c_int
     break
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
@@ -4473,6 +4480,7 @@ for _lib in _libs.itervalues():
     break
 
 # /usr/local/include/Lgm/Lgm_Quat.h: 28
+<<<<<<< Updated upstream
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_QuatVecScale'):
         continue
@@ -4652,6 +4660,187 @@ for _lib in _libs.itervalues():
     Lgm_kdelta.restype = c_double
     break
 
+=======
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_QuatVecScale'):
+        continue
+    Lgm_QuatVecScale = _lib.Lgm_QuatVecScale
+    Lgm_QuatVecScale.argtypes = [POINTER(c_double), c_double]
+    Lgm_QuatVecScale.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Quat.h: 29
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_QuatVecNormalize'):
+        continue
+    Lgm_QuatVecNormalize = _lib.Lgm_QuatVecNormalize
+    Lgm_QuatVecNormalize.argtypes = [POINTER(c_double)]
+    Lgm_QuatVecNormalize.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Quat.h: 30
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_QuatVecCross'):
+        continue
+    Lgm_QuatVecCross = _lib.Lgm_QuatVecCross
+    Lgm_QuatVecCross.argtypes = [POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    Lgm_QuatVecCross.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Quat.h: 31
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_QuatCombineQuats'):
+        continue
+    Lgm_QuatCombineQuats = _lib.Lgm_QuatCombineQuats
+    Lgm_QuatCombineQuats.argtypes = [c_double * 4, c_double * 4, c_double * 4]
+    Lgm_QuatCombineQuats.restype = None
+    break
+
+# /usr/local/include/Lgm/size.h: 26
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_t_size'):
+        continue
+    size_t_size = _lib.size_t_size
+    size_t_size.argtypes = []
+    size_t_size.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 27
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_MagModelInfo'):
+        continue
+    size_MagModelInfo = _lib.size_MagModelInfo
+    size_MagModelInfo.argtypes = []
+    size_MagModelInfo.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 28
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_CTrans'):
+        continue
+    size_CTrans = _lib.size_CTrans
+    size_CTrans.argtypes = []
+    size_CTrans.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 29
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_Vector'):
+        continue
+    size_Vector = _lib.size_Vector
+    size_Vector.argtypes = []
+    size_Vector.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 30
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_DateTime'):
+        continue
+    size_DateTime = _lib.size_DateTime
+    size_DateTime.argtypes = []
+    size_DateTime.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 31
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_gsl_interp_accel'):
+        continue
+    size_gsl_interp_accel = _lib.size_gsl_interp_accel
+    size_gsl_interp_accel.argtypes = []
+    size_gsl_interp_accel.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 32
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_gsl_interp_type'):
+        continue
+    size_gsl_interp_type = _lib.size_gsl_interp_type
+    size_gsl_interp_type.argtypes = []
+    size_gsl_interp_type.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 33
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_gsl_interp'):
+        continue
+    size_gsl_interp = _lib.size_gsl_interp
+    size_gsl_interp.argtypes = []
+    size_gsl_interp.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 34
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_gsl_spline'):
+        continue
+    size_gsl_spline = _lib.size_gsl_spline
+    size_gsl_spline.argtypes = []
+    size_gsl_spline.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 35
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_Lgm_OctreeData'):
+        continue
+    size_Lgm_OctreeData = _lib.size_Lgm_OctreeData
+    size_Lgm_OctreeData.argtypes = []
+    size_Lgm_OctreeData.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 36
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_Lgm_OctreeCell'):
+        continue
+    size_Lgm_OctreeCell = _lib.size_Lgm_OctreeCell
+    size_Lgm_OctreeCell.argtypes = []
+    size_Lgm_OctreeCell.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 37
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_pQueue'):
+        continue
+    size_pQueue = _lib.size_pQueue
+    size_pQueue.argtypes = []
+    size_pQueue.restype = c_int
+    break
+
+# /usr/local/include/Lgm/size.h: 38
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'size_Lgm_LeapSeconds'):
+        continue
+    size_Lgm_LeapSeconds = _lib.size_Lgm_LeapSeconds
+    size_Lgm_LeapSeconds.argtypes = []
+    size_Lgm_LeapSeconds.restype = c_int
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 63
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_fac1'):
+        continue
+    Lgm_fac1 = _lib.Lgm_fac1
+    Lgm_fac1.argtypes = [c_int]
+    Lgm_fac1.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 64
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_fac2'):
+        continue
+    Lgm_fac2 = _lib.Lgm_fac2
+    Lgm_fac2.argtypes = [c_int]
+    Lgm_fac2.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 65
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_kdelta'):
+        continue
+    Lgm_kdelta = _lib.Lgm_kdelta
+    Lgm_kdelta.argtypes = [c_int, c_int]
+    Lgm_kdelta.restype = c_double
+    break
+
+>>>>>>> Stashed changes
 # /usr/local/include/Lgm/Lgm_SphHarm.h: 66
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_GaussToSchmidtSemiNorm'):
@@ -5287,6 +5476,7 @@ for _lib in _libs.itervalues():
     break
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'DumpGif'):
@@ -5453,6 +5643,8 @@ for _lib in _libs.itervalues():
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_QuatVecZero'):
 =======
+=======
+>>>>>>> Stashed changes
 # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 208
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_P2F_CreatePsdToFlux'):
@@ -5501,6 +5693,9 @@ for _lib in _libs.itervalues():
 # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 213
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_P2F_GetPsdAtMuAndK'):
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         continue
     Lgm_P2F_GetPsdAtMuAndK = _lib.Lgm_P2F_GetPsdAtMuAndK
@@ -5797,6 +5992,7 @@ struct_Lgm_NgaEopp._fields_ = [
     ('EOPPWk', c_int),
     ('teff', c_int),
 ]
+<<<<<<< Updated upstream
 
 Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
 
@@ -5984,6 +6180,159 @@ for _lib in _libs.itervalues():
     break
 >>>>>>> Stashed changes
 
+=======
+
+Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 45
+class struct_Lgm_Eop(Structure):
+    pass
+
+struct_Lgm_Eop.__slots__ = [
+    'Size',
+    'nEopVals',
+    'Verbosity',
+    'Date',
+    'MJD',
+    'xp',
+    'yp',
+    'DUT1',
+    'LOD',
+    'dPsi',
+    'dEps',
+    'dX',
+    'dY',
+    'DAT',
+]
+struct_Lgm_Eop._fields_ = [
+    ('Size', c_long),
+    ('nEopVals', c_long),
+    ('Verbosity', c_int),
+    ('Date', POINTER(c_long)),
+    ('MJD', POINTER(c_double)),
+    ('xp', POINTER(c_double)),
+    ('yp', POINTER(c_double)),
+    ('DUT1', POINTER(c_double)),
+    ('LOD', POINTER(c_double)),
+    ('dPsi', POINTER(c_double)),
+    ('dEps', POINTER(c_double)),
+    ('dX', POINTER(c_double)),
+    ('dY', POINTER(c_double)),
+    ('DAT', POINTER(c_double)),
+]
+
+Lgm_Eop = struct_Lgm_Eop # /usr/local/include/Lgm/Lgm_Eop.h: 45
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 63
+class struct_Lgm_EopOne(Structure):
+    pass
+
+struct_Lgm_EopOne.__slots__ = [
+    'Date',
+    'JD',
+    'MJD',
+    'UTC',
+    'xp',
+    'yp',
+    'DUT1',
+    'LOD',
+    'dPsi',
+    'dEps',
+    'dX',
+    'dY',
+    'DAT',
+]
+struct_Lgm_EopOne._fields_ = [
+    ('Date', c_long),
+    ('JD', c_double),
+    ('MJD', c_double),
+    ('UTC', c_double),
+    ('xp', c_double),
+    ('yp', c_double),
+    ('DUT1', c_double),
+    ('LOD', c_double),
+    ('dPsi', c_double),
+    ('dEps', c_double),
+    ('dX', c_double),
+    ('dY', c_double),
+    ('DAT', c_double),
+]
+
+Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 65
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_init_eop'):
+        continue
+    Lgm_init_eop = _lib.Lgm_init_eop
+    Lgm_init_eop.argtypes = [c_int]
+    Lgm_init_eop.restype = POINTER(Lgm_Eop)
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 66
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_destroy_eop'):
+        continue
+    Lgm_destroy_eop = _lib.Lgm_destroy_eop
+    Lgm_destroy_eop.argtypes = [POINTER(Lgm_Eop)]
+    Lgm_destroy_eop.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 67
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_read_eop'):
+        continue
+    Lgm_read_eop = _lib.Lgm_read_eop
+    Lgm_read_eop.argtypes = [POINTER(Lgm_Eop)]
+    Lgm_read_eop.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 68
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_NgaEoppPred'):
+        continue
+    Lgm_NgaEoppPred = _lib.Lgm_NgaEoppPred
+    Lgm_NgaEoppPred.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_NgaEopp)]
+    Lgm_NgaEoppPred.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 69
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_ReadNgaEopp'):
+        continue
+    Lgm_ReadNgaEopp = _lib.Lgm_ReadNgaEopp
+    Lgm_ReadNgaEopp.argtypes = [POINTER(Lgm_NgaEopp), c_int]
+    Lgm_ReadNgaEopp.restype = c_int
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 70
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_get_eop_at_JD'):
+        continue
+    Lgm_get_eop_at_JD = _lib.Lgm_get_eop_at_JD
+    Lgm_get_eop_at_JD.argtypes = [c_double, POINTER(Lgm_EopOne), POINTER(Lgm_Eop)]
+    Lgm_get_eop_at_JD.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 71
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_set_eop'):
+        continue
+    Lgm_set_eop = _lib.Lgm_set_eop
+    Lgm_set_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
+    Lgm_set_eop.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_Eop.h: 72
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_unset_eop'):
+        continue
+    Lgm_unset_eop = _lib.Lgm_unset_eop
+    Lgm_unset_eop.argtypes = [POINTER(Lgm_EopOne), POINTER(Lgm_CTrans)]
+    Lgm_unset_eop.restype = None
+    break
+
+>>>>>>> Stashed changes
 # /usr/local/include/Lgm/Lgm_WGS84.h: 5
 try:
     WGS84_A = 6378.137
