@@ -106,7 +106,8 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
             Lgm_Convert_Coords( &v1, &vv1, GSM_TO_SM, LstarInfo->mInfo->c );
             Lam = asin( vv1.z/Lgm_Magnitude( &vv1 ) );
             CosLam = cos( Lam );
-            LSimple = (1.0+LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A)/( CosLam*CosLam );
+            //LSimple = (1.0+LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A)/( CosLam*CosLam );
+            LSimple = Lgm_Magnitude( &LstarInfo->mInfo->Pmin );
 
 
 

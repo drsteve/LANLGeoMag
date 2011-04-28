@@ -8,6 +8,7 @@
 #include <Lgm_Sgp.h>
 #include <Lgm_MagEphemInfo.h>
 #include <Lgm_DynamicMemory.h>
+#include <Lgm_ElapsedTime.h> 
 #include <Lgm_Eop.h>                                                                                                                   
 #include <ctype.h>
 
@@ -49,10 +50,9 @@ int main( int argc, char *argv[] ){
     int              nAlpha;
     //Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, nPitchAngles);
     Lgm_MagEphemInfo *MagEphemInfo;
+    Lgm_ElapsedTimeInfo  tInfo;
 
-
-
-
+    Lgm_ElapsedTimeInit( &tInfo, 255, 95, 0 );
 
 
     /* 
@@ -316,6 +316,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
             WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
         }
 
+        Lgm_PrintElapsedTime( &tInfo );
 
     }
     fclose(fp);

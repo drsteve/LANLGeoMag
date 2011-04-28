@@ -32,19 +32,8 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
      * Write Header
      */
     int nCol = 0;
+
     fprintf( fp, "# {\n");
-    fprintf( fp, "#  \"Spacecraft\":       { \"DESCRIPTION\": \"Spacecraft identifier.\",\n");
-    fprintf( fp, "#                        \"COMMON_NAME\": \"%s\",\n", Spacecraft);
-    fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
-    fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
-    fprintf( fp, "#  },\n");
-
-    fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents.\",\n");
-    fprintf( fp, "#                       \"CreationTime\": \"%02d:%02d:%02d UTC  %s %02d %4d\",\n", HH, MM, SS, sMonth[Month], Day, Year);
-    fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
-    fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
-    fprintf( fp, "#  },\n");
-
     if ( m->nAlpha > 0 ) {
         fprintf( fp, "#  \"Alpha\":            { \"DESCRIPTION\": \"Pitch Angles.\",\n");
         fprintf( fp, "#                               \"NAME\": \"Pitch Angle\",\n");
@@ -660,7 +649,21 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
 
     fprintf( fp, "# } end JSON\n");
     fprintf( fp, "#\n");
+
+
+
     fprintf( fp, "#\n");
+    fprintf( fp, "#  \"Spacecraft\":       { \"DESCRIPTION\": \"Spacecraft identifier.\",\n");
+    fprintf( fp, "#                        \"COMMON_NAME\": \"%s\",\n", Spacecraft);
+    fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
+    fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
+    fprintf( fp, "#  },\n");
+
+    fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents.\",\n");
+    fprintf( fp, "#                       \"CreationTime\": \"%02d:%02d:%02d UTC  %s %02d %4d\",\n", HH, MM, SS, sMonth[Month], Day, Year);
+    fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
+    fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
+    fprintf( fp, "#  },\n");
 
     fprintf( fp, "#\n");
     fprintf( fp, "#\n");

@@ -12,4 +12,4 @@ Dst:-20
 PitchAngles:6 90 80 70 60 50 40
 Footpoint Height:100.0
 Colorize:False
-Quality:5
+Quality:3
