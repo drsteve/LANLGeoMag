@@ -10,16 +10,15 @@ with open(filename, 'r') as f:
 
 # isolate header
 p = re.compile( r"^#(.*)$", re.M )
-#m = re.findall( p, Lines )
 h = re.findall( p, Lines )
 Header = "".join(h)
-print Header
-exit()
+#print Header
 
 # isolate JSON field
 #s = re.search( r'\s*begin\s+JSON\s*(.*)\s*end\s+JSON', Header )
-s = re.search( r'\{(.*)\}', Header )
-j = s.group(1)
+s = re.search( r'\{\s*(.*)\s*\}', Header )
+j = "{" + s.group(1) + "}"
+#print j
 
 
 config_dict = json.loads( j )

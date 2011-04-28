@@ -2,14 +2,14 @@ NAVSTAR 49 (USA 154)
 1 26605U 00071A   00364.82371404 -.00000018 +00000-0 +00000-0 0 00518
 2 26605 055.1007 101.8391 0031034 327.3824 032.4338 02.00486482001011
 OutputFile:JSON.txt
-ISO Start Date/Time:2001-01-01T00:04:00
-ISO End   Date/Time:2001-01-01T00:04:00
-Cadence in seconds:60
+ISO Start Date/Time:2001-01-01T00:00:00
+ISO End   Date/Time:2001-01-08T00:00:00
+Cadence in seconds:300
 Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
 Dst:-20
-PitchAngles:18 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90
+PitchAngles:6 90 80 70 60 50 40
 Footpoint Height:100.0
 Colorize:False
-Quality:0
+Quality:5
