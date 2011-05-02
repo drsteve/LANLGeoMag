@@ -31,7 +31,7 @@ import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
     SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
-    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT
+    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
@@ -338,7 +338,8 @@ def get_Lstar(pos, date, alpha = 90.,
 
     # Save nAlpha, and Alpha array to MagEphemInfo structure
     MagEphemInfo.nAlpha = len(Alpha)
-    MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
+    for i in range(len(Alpha)):
+        MagEphemInfo.Alpha[i] = Alpha[i]
 
     # Set Tolerances
     SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
@@ -492,6 +493,10 @@ def get_Lstar(pos, date, alpha = 90.,
                                             buffer=lstarinf.z_gsm)
                 delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
+
+    Lgm_FreeMagEphemInfo_Children(pointer(MagEphemInfo))
+
+
 
     return ans
 
