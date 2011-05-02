@@ -7,7 +7,7 @@ reporter: Brian Larsen <balarsen@lanl.gov>
 severity: minor
 
 
-status: open
+status: closed
 
 
 summary: the script LstarVersusPA is damn slow
