@@ -22,7 +22,7 @@ try:
                      headers)
 except OSError:
     print("ctyoesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
-else:
+finally:
     if sys.platform == 'darwin':
         shutil.copy('OSX_Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
     elif 'linux' in sys.platform:
