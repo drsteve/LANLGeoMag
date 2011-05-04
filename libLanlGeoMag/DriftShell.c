@@ -152,7 +152,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
                         // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
 
 //printf("SS = %g,   LstarInfo->mInfo->Hmax = %g\n", SS, LstarInfo->mInfo->Hmax);
-                        Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
+                        if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
 
 
                         /*

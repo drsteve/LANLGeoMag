@@ -88,7 +88,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     /*
      *  Save first point
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( u, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
@@ -120,7 +120,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         // Trace until we are not.
         Htry  = 0.1;
         while ( !done ) {
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
@@ -170,7 +170,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     SavePnt = TRUE;
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 
 
         R = Lgm_Magnitude( &P );
@@ -259,7 +259,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -381,7 +381,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      * Compute field strength at starting point and save the results in the
      * array.
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( &Pa, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
@@ -413,7 +413,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     SavePnt = TRUE;
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 
 
         R = Lgm_Magnitude( &P );
@@ -500,7 +500,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {

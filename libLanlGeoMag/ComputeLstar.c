@@ -216,7 +216,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
-
+    LstarInfo->ComputeVgc = FALSE;
 }
 
 
@@ -347,7 +347,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-7, 1e-7, LstarInfo->mInfo ) == 1 ) {
+    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-7, 1e-7, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
 
 
@@ -401,7 +401,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                                                        
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
-                    Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
+                    if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
                     InitSpline( LstarInfo->mInfo );
