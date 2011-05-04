@@ -119,7 +119,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
         if ( Htry > 0.1 ) Htry = 0.1;
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 
 	    /*
  	     *  Get value of quantity we want to minimize
@@ -223,7 +223,7 @@ Htry = fabs(R-1.0);
 
 	        //P = Pa; Htry = 0.5*d;
 	        P = Pa; Htry = LGM_1_OVER_GOLD*d;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 	        Info->Bfield( &P, &Bvec, Info );
 	        F = Lgm_Magnitude( &Bvec ) - Bm;
 	        if ( F >= 0.0 ) {

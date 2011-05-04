@@ -66,7 +66,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     /*
      *  Get an initial Htry that is safe -- i.e. start off slowly
      *  We dont really know where we are, so be conservative on the first try.
-     *  If Lgm_MagStep() gives back an Hnext thats higher, we'll crank Htry up then...
+     *  If if ( Lgm_MagStep() gives back an Hnext thats higher, we'll crank Htry up then...
      */
     Htry = 0.9*(R-1.0);        // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
     if (Htry > 0.01) Htry = 0.01; // If its bigger than 0.01 reset it to 0.01 -- to be safe.
@@ -84,7 +84,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      *  This determined which direction we should move in (via value of sgn)
      */
     P = Pa; reset = TRUE;
-    Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info );
+    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
     Info->Bfield( &P, &Btmp, Info );
     B = Lgm_Magnitude( &Btmp );
 
@@ -98,7 +98,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     } else {
 
         P2 = Pa; reset = TRUE;
-        Lgm_MagStep( &P2, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s2, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P2, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s2, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P2, &Btmp, Info );
         B2 = Lgm_Magnitude( &Btmp );
 
@@ -133,7 +133,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     while (!done) {
 
 	    P = Pb;
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P, &Btmp, Info );
         B = Lgm_Magnitude( &Btmp );
 
@@ -189,7 +189,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 	    } else if ( d1 > d2 ) {
 
 	        P = Pa; Htry = 0.381966011*d1;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
 
@@ -202,7 +202,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 	    } else {
 
 	        P = Pb; Htry = 0.381966011*d2;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
 

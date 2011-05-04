@@ -32,6 +32,8 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->SavePoints = 0;
     MagInfo->Hmax       = 1.0;
 
+    MagInfo->ComputeSb0 = FALSE;
+
     MagInfo->UseInterpRoutines = TRUE;
     Lgm_Set_Open_Limits( MagInfo, -80.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 

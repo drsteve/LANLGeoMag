@@ -50,6 +50,7 @@
  *          - LGM_OPEN_S_LOBE  ( = 3 ) if field line is southern lobe FL (v1 valid).
  *          - LGM_INSIDE_EARTH ( = -1 ) initial point is inside Earth (no points valid).
  *          - LGM_TARGET_HEIGHT_UNREACHABLE ( = -2 ) field line never got above the target height (no points valid).
+ *          - LGM_BAD_TRACE    ( = -3 ) Lgm_MagStep() was unable to make a non-zero step (B-field zero?).
  *
  *
  *  Upon return, the following elements of the Info structure will be set or changed;
@@ -153,7 +154,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         Htry = 0.01; // step finely
         reset = TRUE;
         P = *u;
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
         Rplus = Lgm_Magnitude( &P );
         if (Rplus > Rinitial ) {
             sgn =  1.0;
@@ -166,7 +167,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         reset = TRUE;
         P = *u;
         while( !done ) {
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0) return(LGM_BAD_TRACE);
             R = Lgm_Magnitude( &P );
             if (R > Rtarget) {
                 done = TRUE;
@@ -282,27 +283,29 @@ Info->Hmax = 0.10;
      *                            F[0]    F[1]     F[2]    F[3]   F[4]      F[5]    F[6]   
      */
 
+    if ( Info->ComputeSb0 ) {
 
-    h      = 0.01;     // Re
-    h2_inv = 10000.0;  // Re^(-2)
-    F[3] = Info->Bmin;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0; reset = TRUE;
-    for (i=-3; i<=3; i++){
-        if (i != 0) {
-            s = i*h;
-            P = Info->Pmin;
-            Lgm_MagStep( &P, &u_scale, s, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info );
-            Info->Bfield( &P, &Bvec, Info );
-            F[i+3] = Lgm_Magnitude( &Bvec );
-            //printf("F[%d] = %g Hdid = %g\n", i, F[i+3], Hdid);
+        h      = 0.01;     // Re
+        h2_inv = 10000.0;  // Re^(-2)
+        F[3] = Info->Bmin;
+        u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0; reset = TRUE;
+        for (i=-3; i<=3; i++){
+            if (i != 0) {
+                s = i*h;
+                P = Info->Pmin;
+                if ( Lgm_MagStep( &P, &u_scale, s, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
+                Info->Bfield( &P, &Bvec, Info );
+                F[i+3] = Lgm_Magnitude( &Bvec );
+                //printf("F[%d] = %g Hdid = %g\n", i, F[i+3], Hdid);
+            }
         }
-    }
-    Info->d2B_ds2 = h2_inv/180.0 * ( 2.0*F[0] - 27.0*F[1] + 270.0*F[2] - 490.0*F[3] + 270.0*F[4] - 27.0*F[5] + 2.0*F[6] );
-    //printf("d2B_ds2 = %g\n", d2B_ds2);
+        Info->d2B_ds2 = h2_inv/180.0 * ( 2.0*F[0] - 27.0*F[1] + 270.0*F[2] - 490.0*F[3] + 270.0*F[4] - 27.0*F[5] + 2.0*F[6] );
+        //printf("d2B_ds2 = %g\n", d2B_ds2);
 
-    Info->Sb0 = M_PI*M_SQRT2*sqrt( Info->Bmin/Info->d2B_ds2 );
-    //printf("Sb0 = %g\n", Info->Sb0);
+        Info->Sb0 = M_PI*M_SQRT2*sqrt( Info->Bmin/Info->d2B_ds2 );
+        //printf("Sb0 = %g\n", Info->Sb0);
     
+    }
 
 
 

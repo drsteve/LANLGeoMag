@@ -35,6 +35,7 @@
 #define		LGM_OPEN_S_LOBE		           3
 #define		LGM_INSIDE_EARTH           	  -1
 #define     LGM_TARGET_HEIGHT_UNREACHABLE -2
+#define     LGM_BAD_TRACE                 -3
 
 
 #define 	LGM_MAGSTEP_KMAX	16
@@ -174,6 +175,7 @@ typedef struct Lgm_MagModelInfo {
 
 
 
+    int                 ComputeSb0; // Flag to determine whether or not to compute d2B_ds2 and Sb0 (default is FALSE).
     double              d2B_ds2;    // second derivative of B wrt to s at smin.
     double              Sb0;        // value of Sb integral for eq. mirroring particles.
     int                 imin1;      // imin1 and imin2 are the indices in the

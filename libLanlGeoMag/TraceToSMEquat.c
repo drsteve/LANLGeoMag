@@ -81,7 +81,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
     Htry = Za;
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Lgm_Convert_Coords( &P, &Ztmp, GSM_TO_SM, Info->c );
         Z = fabs( Ztmp.z );
             if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
@@ -115,7 +115,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
     while (!done) {
 
 	    P = Pb;
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Lgm_Convert_Coords( &P, &Ztmp, GSM_TO_SM, Info->c );
         Z = fabs( Ztmp.z );
             if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
@@ -164,7 +164,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
 	    } else if ( d1 > d2 ) {
 
 	        P = Pa; Htry = 0.381966011*d1;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Lgm_Convert_Coords( &P, &Ztmp, GSM_TO_SM, Info->c );
             Z = fabs( Ztmp.z );
 	        if ( Z < Zb ) {
@@ -176,7 +176,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
 	    } else {
 
 	        P = Pb; Htry = 0.381966011*d2;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Lgm_Convert_Coords( &P, &Ztmp, GSM_TO_SM, Info->c );
             Z = fabs( Ztmp.z );
 	        if ( Z < Zb ) {
