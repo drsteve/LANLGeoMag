@@ -216,7 +216,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
-
+    LstarInfo->ComputeVgc = FALSE;
 }
 
 

@@ -88,7 +88,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     /*
      *  Save first point
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( u, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
@@ -381,7 +381,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      * Compute field strength at starting point and save the results in the
      * array.
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( &Pa, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
