@@ -47,11 +47,11 @@ class magcoords_Tests(unittest.TestCase):
         ans = {'I': 10.899260245224534, 'L': 7.9509964756205083}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
         for key in vals:
-            self.assertAlmostEqual(vals[key], ans[key], places=6)
+            self.assertAlmostEqual(vals[key], ans[key], places=4)
         ans = {'I': 0.69125074722140079, 'L': 4.5100680346100681}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), coord_system='SM')
         for key in vals:
-            self.assertAlmostEqual(vals[key], ans[key], places=6)
+            self.assertAlmostEqual(vals[key], ans[key], places=4)
 
     def test_Lvalue_extended_out(self):
         """Lvalue has an extended out (regression)"""
@@ -63,7 +63,7 @@ class magcoords_Tests(unittest.TestCase):
          'M': 29966.895576135077}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), extended_out=True)
         for key in vals:
-            self.assertAlmostEqual(vals[key], ans[key], places=6)
+            self.assertAlmostEqual(vals[key], ans[key], places=4)
 
     def test_Lvalue_raises(self):
         """Test the exceptions in Lvalue"""
