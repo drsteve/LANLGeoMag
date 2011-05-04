@@ -66,7 +66,7 @@ typedef struct Lgm_MagEphemInfo {
      * Array of PAs we need to compute things for...
      */
     int         nAlpha;     //!< Number of Pitch Angles
-    double      *Alpha;     //!< Pitch Angles (Degrees). 
+    double      *Alpha;     //!< Pitch Angles (Degrees).
                             //!< 1D array (dynamically allocated). Access as follows: Alpha[ PitchAngleIndex ]
     Lgm_Vector  *Pmn_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pmn_gsm[ PitchAngleIndex ]  position of northern |Bmirror|
     Lgm_Vector  *Pms_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pms_gsm[ PitchAngleIndex ]  position of southern |Bmirror|
@@ -154,6 +154,7 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
 void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
                                   int MaxPitchAngles, int Verbosity);
 void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
+void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo );
 
 void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
 void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );

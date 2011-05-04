@@ -64,16 +64,9 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
     LGM_ARRAY_1D( MagEphemInfo->LHilton,   MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->LMcIlwain, MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->Lstar,     MaxPitchAngles, double );
+    }
 
-}
-
-
-
-void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
-
-    /*
-     * De-allocate Arrays that depend on # of pitch angles.
-     */
+void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->Alpha );
     LGM_ARRAY_1D_FREE( MagEphemInfo->Pmn_gsm );
     LGM_ARRAY_1D_FREE( MagEphemInfo->Pms_gsm );
@@ -114,9 +107,18 @@ void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->Lstar );
 
     FreeLstarInfo( MagEphemInfo->LstarInfo );
-    free( MagEphemInfo );
-
 }
+
+void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
+
+    /*
+     * De-allocate Arrays that depend on # of pitch angles.
+     */
+    Lgm_FreeMagEphemInfo_Children(MagEphemInfo);
+    free( MagEphemInfo );
+}
+
+
 
 void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo ) {
 
