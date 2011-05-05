@@ -67,7 +67,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
          */
         m->Hmax = s/200.0;
         Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
-        InitSpline( m );
+        if ( !InitSpline( m ) ) return(-5);
 
     } 
     
@@ -88,7 +88,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
  */
 void  Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m ) {
 
-    FreeSpline( m );
+    if ( m->AllocedSplines ) FreeSpline( m );
 
 }
 
