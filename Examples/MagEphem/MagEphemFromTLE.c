@@ -15,9 +15,6 @@
 
 #define KP_DEFAULT 0
 
-void ComputeLstarVersusPA( long int Date, double ut, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo );
-void WriteMagEphemHeader( FILE *fp, char *Line0, int IdNumber, char *IntDesig2, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
-void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
 
 /*
@@ -263,7 +260,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
-        WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, TLEs[0].IdNumber, TLEs[0].IntDesig2, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+        Lgm_WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, TLEs[0].IdNumber, TLEs[0].IntDesig2, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
     }
 
     if ( UseEop ) {
@@ -308,9 +305,9 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
          * These quantities are stored in the MagEphemInfo Structure
          */
         printf("\n\n\nDate, ut = %ld %g   Ugsm = %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
-        ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
-        WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+        Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
 
         if ( nAlpha > 0 ){
             WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );

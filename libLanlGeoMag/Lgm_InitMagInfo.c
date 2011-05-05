@@ -17,6 +17,8 @@ Lgm_MagModelInfo *Lgm_InitMagInfo( ) {
 
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
+    MagInfo->AllocedSplines = FALSE;
+
     MagInfo->Bfield = Lgm_B_T89;
     MagInfo->InternalModel = LGM_IGRF;
 

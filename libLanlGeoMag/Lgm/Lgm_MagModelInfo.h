@@ -186,14 +186,15 @@ typedef struct Lgm_MagModelInfo {
     /*
      *  GSL defs for spline interpolation
      */
-    gsl_interp_accel    *acc;       // accelerator
-    gsl_interp_accel    *accPx;     // accelerator
-    gsl_interp_accel    *accPy;     // accelerator
-    gsl_interp_accel    *accPz;     // accelerator
-    gsl_spline          *spline;    // spline object
-    gsl_spline          *splinePx;  // spline object
-    gsl_spline          *splinePy;  // spline object
-    gsl_spline          *splinePz;  // spline object
+    int                 AllocedSplines;     // Flag to indicate that we have alloced splines (via gsl)
+    gsl_interp_accel    *acc;               // accelerator
+    gsl_interp_accel    *accPx;             // accelerator
+    gsl_interp_accel    *accPy;             // accelerator
+    gsl_interp_accel    *accPz;             // accelerator
+    gsl_spline          *spline;            // spline object
+    gsl_spline          *splinePx;          // spline object
+    gsl_spline          *splinePy;          // spline object
+    gsl_spline          *splinePz;          // spline object
 
 
     /*
@@ -321,20 +322,20 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
 void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info );
 Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s );
 
-int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info );
-int Lgm_TraceToMinBSurf( Lgm_Vector *, Lgm_Vector *, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceToSMEquat(  Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
-int Lgm_TraceToEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceToSphericalEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lgm_MagModelInfo * );
-int Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
+int  Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info );
+int  Lgm_TraceToMinBSurf( Lgm_Vector *, Lgm_Vector *, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToSMEquat(  Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToSphericalEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lgm_MagModelInfo * );
+int  Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
 void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
-void InitSpline( Lgm_MagModelInfo *Info );
-void FreeSpline( Lgm_MagModelInfo *Info );
-int Lgm_TraceToMinRdotB( Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
-int Lgm_TraceIDL( int, void *argv[] );
-int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
+int  InitSpline( Lgm_MagModelInfo *Info );
+int  FreeSpline( Lgm_MagModelInfo *Info );
+int  Lgm_TraceToMinRdotB( Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
+int  Lgm_TraceIDL( int, void *argv[] );
+int  Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
 
 
 

@@ -166,19 +166,25 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
                          *  first should already be there so dont include it.
                          */
                         //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-                        ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-                        AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
+//MGH MGH                        ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
+//MGH MGH                        AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
 
 
-                        InitSpline( LstarInfo->mInfo );
+                        if ( InitSpline( LstarInfo->mInfo ) ) {
 
-                        /*
-                         *  Do I integral with interped integrand. 
-                         */
-                        I = Iinv_interped( LstarInfo->mInfo  );
-                        if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                            /*
+                             *  Do I integral with interped integrand. 
+                             */
+                            I = Iinv_interped( LstarInfo->mInfo  );
+                            if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, b, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
 
-                        FreeSpline( LstarInfo->mInfo );
+                            FreeSpline( LstarInfo->mInfo );
+
+                        } else {
+
+                            I = -9e99;
+
+                        }
 
                     } else {
 
