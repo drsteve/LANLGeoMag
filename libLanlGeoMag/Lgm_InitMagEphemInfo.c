@@ -13,8 +13,7 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     return MagEphemInfo;
 }
 
-void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
-                                  int MaxPitchAngles, int Verbosity) {
+void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity) {
 
     MagEphemInfo->LstarInfo = InitLstarInfo( Verbosity );
 
@@ -64,7 +63,9 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
     LGM_ARRAY_1D( MagEphemInfo->LHilton,   MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->LMcIlwain, MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->Lstar,     MaxPitchAngles, double );
-    }
+
+}
+
 
 void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->Alpha );
@@ -94,6 +95,10 @@ void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellMirror_Ps );
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellMirror_Ss );
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellI );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Bmin );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Pmin );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_GradI );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Vgc );
 
     LGM_ARRAY_2D_FREE( MagEphemInfo->nFieldPnts );
     LGM_ARRAY_3D_FREE( MagEphemInfo->s_gsm );
@@ -116,6 +121,7 @@ void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
      */
     Lgm_FreeMagEphemInfo_Children(MagEphemInfo);
     free( MagEphemInfo );
+
 }
 
 

@@ -285,6 +285,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     
 
 
+//could create a LUT for this pow.
     XAPPA = pow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
 
 
@@ -335,6 +336,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         RoRH = R/RH;
         RoRH2 = RoRH*RoRH;
         RoRH3 = RoRH*RoRH2;
+//could create a LUT for this pow.
         SINPSAS = SPS/pow( 1.0 + RoRH3, 0.33333333 );
         SINPSAS2 = SINPSAS*SINPSAS;
         COSPSAS = sqrt(1.0 - SINPSAS2);
@@ -384,6 +386,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
         DSTT = -20.;
         if (DST < DSTT) DSTT = DST;
+//could create a LUT for this pow.
         ZNAM = pow( fabs( DSTT ), 0.37 );
         CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
         CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
@@ -403,7 +406,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         ZNAM = fabs( DST );
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ZNAM05 = 0.05*ZNAM;
+//could create a LUT for this pow.
         CB_BIRKPAR.XKAPPA1 = A[32]*pow( ZNAM05, A[33] );
+//could create a LUT for this pow.
         CB_BIRKPAR.XKAPPA2 = A[34]*pow( ZNAM05, A[35] );
         BIRK_TOT( IOPB,PS,XX,YY,ZZ,BXR11,BYR11,BZR11,BXR12,BYR12,
                 BZR12,BXR21,BYR21,BZR21,BXR22,BYR22,BZR22 );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
@@ -422,7 +427,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         ZNAM = fabs( DST );
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ooZNAM20 = 20.0/ZNAM;
+//could create a LUT for this pow.
         CB_RCPAR.SC_SY = A[28]* pow( ooZNAM20, A[29]) * XAPPA;    //
+//could create a LUT for this pow.
         CB_RCPAR.SC_AS = A[30]* pow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
                                 //  SCALING COMPLETELY INDEPENDENT OF THE GENERAL SCALING DUE TO THE
                                 //  MAGNETOPAUSE COMPRESSION/EXPANSION
@@ -456,7 +463,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     /* 
      *    NOW, ADD UP ALL THE COMPONENTS:
      */
+//could create a LUT for this pow.
     DLP1 = pow( 0.5*PDYN, A[21] );
+//could create a LUT for this pow.
     DLP2 = pow( 0.5*PDYN, A[22] );
 
     TAMP1 = A[2]  + A[3]*DLP1 +  A[4]*A[39]*W1/sqrt(W1*W1+A[39]*A[39]) + A[5]*DST;
@@ -868,6 +877,7 @@ void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
 
     RRH = R/RH; RRH2 = RRH*RRH;  RRH3 = RRH2*RRH;
         
+//could create a LUT for this pow.
     F = pow( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
     DFDR = -RRH2*F4/RH;
     DFDRH = -RRH*DFDR;
@@ -1525,12 +1535,15 @@ void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, d
     BRACK = CB_DPHI_B_RHO0.DPHI+CB_DPHI_B_RHO0.B*RHO2/(RHO2+1.0)*(RHOSQ-1.0)/(RHO2+RHOSQ);
     R1RH  = (Rsc-1.0)/RH;
     R1RH2 = R1RH*R1RH; R1RH3 = R1RH2*R1RH;
+//could create a LUT for this pow.
     PSIAS = BETA*PS/pow( 1.0+R1RH3, 1.0/3.0 );
                                                                    
     PHIS = PHI-BRACK*SPHIC - PSIAS;
     DPHISPHI = 1.0-BRACK*CPHIC;
     RHO2pRHOSQ = RHO2+RHOSQ; RHO2pRHOSQ2 = RHO2pRHOSQ*RHO2pRHOSQ;
+//could create a LUT for this pow.
     DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*pow( 1.0+R1RH3, 4.0/3.0 ));
+//could create a LUT for this pow.
     DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*pow( 1.0+R1RH3, 4.0/3.0 ));
                                                                    
     SPHICS = sin(PHIS);
@@ -1785,6 +1798,8 @@ void     FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BP
                                                                    
 
 
+// This is one of the costliest routines -- mostly due to sin,cos,exp
+// Almost 13% of Lstar calc is done in here.
 void    BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     int        L, M, I, N, NN, K;
@@ -1906,44 +1921,45 @@ void    BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZChanged
     GZ = 0.0;
 
 
-    for ( M=1;  M<=2; M++ ) {    //  M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY)
-                //  AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
+    for ( M=1;  M<=2; M++ ) {   //  M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY)
+                                //  AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
 
         for ( I=1;  I<=3; I++ ) {
 
             for ( K=1; K<= 3; K++ ) {
 
-                for (N=1; N<=2; N++ ) {        // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT
-                                // AND N=2 IS FOR THE SECOND ONE
+                for (N=1; N<=2; N++ ) { // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT
+                                        // AND N=2 IS FOR THE SECOND ONE
                                                                            
-                    for (NN=1; NN<=2; NN++ ) {        // NN = 1,2 FURTHER SPLITS THE COEFFICIENTS INTO 2 PARTS,
-                                    // TO TAKE INTO ACCOUNT THE SCALE FACTOR DEPENDENCE
+                    for (NN=1; NN<=2; NN++ ) {  // NN = 1,2 FURTHER SPLITS THE COEFFICIENTS INTO 2 PARTS,
+                                                // TO TAKE INTO ACCOUNT THE SCALE FACTOR DEPENDENCE
                         if (M == 1) {
 
                             FX = -SQPR[J][I][K]*EPR[J][I][K]*CYPI[J][I]*SZRK[J][K];
-                            FY = EPR[J][I][K]*SYPI[J][I]*SZRK[J][K]*ooP[J][I];
+                            FY =  EPR[J][I][K]*SYPI[J][I]*SZRK[J][K]*ooP[J][I];
                             FZ = -EPR[J][I][K]*CYPI[J][I]*CZRK[J][K]*ooR[J][K];
 
                             if (N == 1) {
-                            if (NN == 1) {
-                                HX = FX;
-                                HY = FY;
-                                HZ = FZ;
+
+                                if (NN == 1) {
+                                    HX = FX;
+                                    HY = FY;
+                                    HZ = FZ;
+                                } else {
+                                    HX = FX*X_SC;
+                                    HY = FY*X_SC;
+                                    HZ = FZ*X_SC;
+                                }
                             } else {
-                                HX = FX*X_SC;
-                                HY = FY*X_SC;
-                                HZ = FZ*X_SC;
-                            }
-                            } else {
-                            if (NN == 1) {
-                                HX = FX*CPS;
-                                HY = FY*CPS;
-                                HZ = FZ*CPS;
-                            } else {
-                                HX = FX*CPS*X_SC;
-                                HY = FY*CPS*X_SC;
-                                HZ = FZ*CPS*X_SC;
-                            }
+                                if (NN == 1) {
+                                    HX = FX*CPS;
+                                    HY = FY*CPS;
+                                    HZ = FZ*CPS;
+                                } else {
+                                    HX = FX*CPS*X_SC;
+                                    HY = FY*CPS*X_SC;
+                                    HZ = FZ*CPS*X_SC;
+                                }
                             }
 
                         } else {    //   M.EQ.2
@@ -1953,25 +1969,25 @@ void    BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZChanged
                             FZ = SPS*ooS[J][K]*EQS[J][I][K]*CYQI[J][I]*SZSK[J][K];
 
                             if (N == 1) {
-                            if (NN == 1) {
-                                HX = FX;
-                                HY = FY;
-                                HZ = FZ;
+                                if (NN == 1) {
+                                    HX = FX;
+                                    HY = FY;
+                                    HZ = FZ;
+                                } else {
+                                    HX = FX*X_SC;
+                                    HY = FY*X_SC;
+                                    HZ = FZ*X_SC;
+                                }
                             } else {
-                                HX = FX*X_SC;
-                                HY = FY*X_SC;
-                                HZ = FZ*X_SC;
-                            }
-                            } else {
-                            if (NN == 1) {
-                                HX = FX*S3PS;
-                                HY = FY*S3PS;
-                                HZ = FZ*S3PS;
-                            } else {
-                                HX = FX*S3PS*X_SC;
-                                HY = FY*S3PS*X_SC;
-                                HZ = FZ*S3PS*X_SC;
-                            }
+                                if (NN == 1) {
+                                    HX = FX*S3PS;
+                                    HY = FY*S3PS;
+                                    HZ = FZ*S3PS;
+                                } else {
+                                    HX = FX*S3PS*X_SC;
+                                    HY = FY*S3PS*X_SC;
+                                    HZ = FZ*S3PS*X_SC;
+                                }
                             }
 
                         }
@@ -2276,9 +2292,9 @@ double    AP( double R, double SINT, double COST) {
     SINT1 = SINT;
     COST1 = COST;
     if (SINT1 < 1e-2) {            // TOO CLOSE TO Z-AXIS;  USE LINEAR INTERPOLATION BETWEEN SINT=0 & SINT=0.01
-    SINT1 = 1e-2;
-    COST1 = .99994999875;
-    PROX  = TRUE;
+        SINT1 = 1e-2;
+        COST1 = .99994999875;
+        PROX  = TRUE;
     }
                                                                                                                                               
     ALPHA = SINT1*SINT1*ooR;        // R,THETA -> ALPHA,GAMMA
@@ -2312,13 +2328,16 @@ double    AP( double R, double SINT, double COST) {
     ALSQH = 0.5*ALPHA_S2;        //  ALPHA_S,GAMMA_S -> RS,SINTS,COSTS
     ALSQH2 = ALSQH*ALSQH;
     F = 64.0/27.0*GAMMAS2 + ALSQH2;
+//could create a LUT for this pow.
     Q = pow( sqrt(F)+ALSQH, 1.0/3.0 );
+//could create a LUT for this pow.
     C = Q-4.0*pow( GAMMAS2, 1.0/3.0 )/(3.0*Q);
 
 
 
     if (C < 0.0) C = 0.0;
 
+//could create a LUT for this pow.
     G  = sqrt(C*C+4.0*pow( GAMMAS2, 1.0/3.0 ));
     RS = 4.0/((sqrt(2.0*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
@@ -2469,9 +2488,9 @@ double    APPRC( double R, double SINT, double COST) {
     SINT1 = SINT;
     COST1 = COST;
     if (SINT1 < 1e-2) {        // TOO CLOSE TO Z-AXIS;  USE LINEAR INTERPOLATION BETWEEN SINT=0 & SINT=0.01
-    SINT1 = 1e-2;
-    COST1 = .99994999875;
-    PROX  = TRUE;
+        SINT1 = 1e-2;
+        COST1 = .99994999875;
+        PROX  = TRUE;
     }
                                                                                                                                               
     ALPHA = SINT1*SINT1/R;    // R,THETA -> ALPHA,GAMMA
@@ -2496,10 +2515,15 @@ double    APPRC( double R, double SINT, double COST) {
     GAMMAoDG2 = GAMMA/DG2; GAMMAoDG22 = GAMMAoDG2*GAMMAoDG2;
     GAMMAoDG3 = GAMMA/DG3; GAMMAoDG32 = GAMMAoDG3*GAMMAoDG3;
 
+//could create a LUT for this pow.
     ALPHA_S = ALPHA*(1.+P1/pow(1.+ALPHAmALPHA1oDAL12, BETA1)
+//could create a LUT for this pow.
         *DEXP1+P2*(ALPHA-ALPHA2)/pow(1.+ALPHAmALPHA2oDAL22, BETA2)
+//could create a LUT for this pow.
         /pow(1.+GAMMAoDG22, BETA3)
+//could create a LUT for this pow.
         +P3*ALPHAmALPHA32/pow(1.+ALPHAmALPHA3oDAL32, BETA4)
+//could create a LUT for this pow.
         /pow(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED)
 
 
