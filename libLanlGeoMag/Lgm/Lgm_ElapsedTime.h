@@ -13,11 +13,16 @@ typedef struct Lgm_ElapsedTimeInfo {
     time_t  RunStartTime;    // Clock time that the run was started.
     time_t  RunEndTime;      // Clock time that the run ended.
 
+    char    ElapsedTimeStr[15];  // String containing elapsed time. 
+    char    CurrentTimeStr[15];  // String containg current time.
+
 
 } Lgm_ElapsedTimeInfo;
 
-void Lgm_ElapsedTimeInit( Lgm_ElapsedTimeInfo *t, int red, int grn, int blu );
-double Lgm_PrintElapsedTime( Lgm_ElapsedTimeInfo *t );
-void Lgm_PrintCurrentTime( Lgm_ElapsedTimeInfo *t );
+void    Lgm_ElapsedTimeInit( Lgm_ElapsedTimeInfo *t, int red, int grn, int blu );
+double  Lgm_SetElapsedTimeStr( Lgm_ElapsedTimeInfo *t ); // returns total number of seconds
+void    Lgm_PrintElapsedTime( Lgm_ElapsedTimeInfo *t );
+void    Lgm_SetCurrentTimeStr( Lgm_ElapsedTimeInfo *t );
+void    Lgm_PrintCurrentTime( Lgm_ElapsedTimeInfo *t );
 
 #endif

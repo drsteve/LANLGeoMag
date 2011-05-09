@@ -35,14 +35,16 @@ void Lgm_ElapsedTimeInit( Lgm_ElapsedTimeInfo *t, int red, int grn, int blu ) {
 }
 
 
-double Lgm_PrintElapsedTime( Lgm_ElapsedTimeInfo *t ) {
+
+double Lgm_SetElapsedTimeStr( Lgm_ElapsedTimeInfo *t ) {
 
     int     Days, Hours, Minutes;
-    double  Seconds;
+    double  Seconds, s;
     time_t  CurrentTime;
 
     CurrentTime = time( NULL );
-    Seconds     = difftime( CurrentTime, t->RunStartTime );
+    s           = difftime( CurrentTime, t->RunStartTime );
+    Seconds     = s;
 
     Days     = (int)(Seconds/86400.0);
     Seconds -= Days*86400.0;
@@ -53,24 +55,32 @@ double Lgm_PrintElapsedTime( Lgm_ElapsedTimeInfo *t ) {
     Minutes  = (int)(Seconds/60.0);
     Seconds -= Minutes*60.0;
 
-    printf( "%s*****  Elapsed Time (DD:HH:MM:SS): %03d:%02d:%02d:%02d  *****%s\n", t->ColorStart, Days, Hours, Minutes, (int)(Seconds+0.5), t->ColorEnd  );
+    sprintf( t->ElapsedTimeStr, "%03d:%02d:%02d:%02d", Days, Hours, Minutes, (int)(Seconds+0.5)  );
 
-    return( Seconds );
+    return( s );
 
+}
+void Lgm_PrintElapsedTime( Lgm_ElapsedTimeInfo *t ) {
+    Lgm_SetElapsedTimeStr( t );
+    printf( "%s*****  Elapsed Time (DD:HH:MM:SS): %s  *****%s\n", t->ColorStart, t->ElapsedTimeStr, t->ColorEnd  );
 }
 
 
-void Lgm_PrintCurrentTime( Lgm_ElapsedTimeInfo *t ) {
+
+void Lgm_SetCurrentTimeStr( Lgm_ElapsedTimeInfo *t ) {
 
     struct tm   *tp;
     time_t      Time;
-    char        Line[80], *p;
+    char        Str[80], *p;
 
     Time = time( NULL );
     tp   = localtime( &Time );
-    sprintf( Line, "%s", asctime( tp ) );
-    p = index( Line, '\n' ); *p = '\0';
-    printf( "%s*****  Current Time: %s  *****%s\n", t->ColorStart, Line, t->ColorEnd  );
+    sprintf( Str, "%s", asctime( tp ) );
+    p = index( Str, '\n' ); *p = '\0';
+    sprintf( t->CurrentTimeStr, "%s", Str );
 
-
+}
+void Lgm_PrintCurrentTime( Lgm_ElapsedTimeInfo *t ) {
+    Lgm_SetCurrentTimeStr( t );
+    printf( "%s*****  Current Time: %s  *****%s\n", t->ColorStart, t->CurrentTimeStr, t->ColorEnd  );
 }

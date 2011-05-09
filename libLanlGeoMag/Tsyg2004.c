@@ -68,6 +68,24 @@
  *
  *
  */
+double mypow( double x, double e ) {
+
+    static double xmin=9e99, xmax=-9e99;
+
+    if ( (x<xmin) && (x >= 0.0) ) {
+        xmin = x;
+        printf("new xmin = %g\n", xmin);
+    }
+
+    if ( x>xmax ) {
+        xmax = x;
+        printf("new xmax = %g\n", xmax);
+    }
+    
+
+    return( pow( x, e ) );
+
+}
 
 
 
@@ -286,7 +304,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
 //could create a LUT for this pow.
-    XAPPA = pow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
+    XAPPA = mypow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
 
 
     XAPPA2 = XAPPA*XAPPA;
@@ -337,7 +355,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         RoRH2 = RoRH*RoRH;
         RoRH3 = RoRH*RoRH2;
 //could create a LUT for this pow.
-        SINPSAS = SPS/pow( 1.0 + RoRH3, 0.33333333 );
+        SINPSAS = SPS/mypow( 1.0 + RoRH3, 0.33333333 );
         SINPSAS2 = SINPSAS*SINPSAS;
         COSPSAS = sqrt(1.0 - SINPSAS2);
         ZSS = X*SINPSAS + Z*COSPSAS;
@@ -387,7 +405,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         DSTT = -20.;
         if (DST < DSTT) DSTT = DST;
 //could create a LUT for this pow.
-        ZNAM = pow( fabs( DSTT ), 0.37 );
+        ZNAM = mypow( fabs( DSTT ), 0.37 );
         CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
         CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
         CB_TAIL.D = A[36]*exp(-W1/A[37])  +A[69];
@@ -407,9 +425,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ZNAM05 = 0.05*ZNAM;
 //could create a LUT for this pow.
-        CB_BIRKPAR.XKAPPA1 = A[32]*pow( ZNAM05, A[33] );
+        CB_BIRKPAR.XKAPPA1 = A[32]*mypow( ZNAM05, A[33] );
 //could create a LUT for this pow.
-        CB_BIRKPAR.XKAPPA2 = A[34]*pow( ZNAM05, A[35] );
+        CB_BIRKPAR.XKAPPA2 = A[34]*mypow( ZNAM05, A[35] );
         BIRK_TOT( IOPB,PS,XX,YY,ZZ,BXR11,BYR11,BZR11,BXR12,BYR12,
                 BZR12,BXR21,BYR21,BZR21,BXR22,BYR22,BZR22 );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
     } else {
@@ -428,9 +446,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ooZNAM20 = 20.0/ZNAM;
 //could create a LUT for this pow.
-        CB_RCPAR.SC_SY = A[28]* pow( ooZNAM20, A[29]) * XAPPA;    //
+        CB_RCPAR.SC_SY = A[28]* mypow( ooZNAM20, A[29]) * XAPPA;    //
 //could create a LUT for this pow.
-        CB_RCPAR.SC_AS = A[30]* pow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
+        CB_RCPAR.SC_AS = A[30]* mypow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
                                 //  SCALING COMPLETELY INDEPENDENT OF THE GENERAL SCALING DUE TO THE
                                 //  MAGNETOPAUSE COMPRESSION/EXPANSION
         FULL_RC( IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC );    // SHIELDED RING CURRENT (SRC AND PRC)
@@ -464,9 +482,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
      *    NOW, ADD UP ALL THE COMPONENTS:
      */
 //could create a LUT for this pow.
-    DLP1 = pow( 0.5*PDYN, A[21] );
+    DLP1 = mypow( 0.5*PDYN, A[21] );
 //could create a LUT for this pow.
-    DLP2 = pow( 0.5*PDYN, A[22] );
+    DLP2 = mypow( 0.5*PDYN, A[22] );
 
     TAMP1 = A[2]  + A[3]*DLP1 +  A[4]*A[39]*W1/sqrt(W1*W1+A[39]*A[39]) + A[5]*DST;
     TAMP2 = A[6]  + A[7]*DLP2 +  A[8]*A[40]*W2/sqrt(W2*W2+A[40]*A[40]) + A[9]*DST;
@@ -878,7 +896,7 @@ void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
     RRH = R/RH; RRH2 = RRH*RRH;  RRH3 = RRH2*RRH;
         
 //could create a LUT for this pow.
-    F = pow( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
+    F = mypow( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
     DFDR = -RRH2*F4/RH;
     DFDRH = -RRH*DFDR;
  
@@ -1536,15 +1554,15 @@ void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, d
     R1RH  = (Rsc-1.0)/RH;
     R1RH2 = R1RH*R1RH; R1RH3 = R1RH2*R1RH;
 //could create a LUT for this pow.
-    PSIAS = BETA*PS/pow( 1.0+R1RH3, 1.0/3.0 );
+    PSIAS = BETA*PS/mypow( 1.0+R1RH3, 1.0/3.0 );
                                                                    
     PHIS = PHI-BRACK*SPHIC - PSIAS;
     DPHISPHI = 1.0-BRACK*CPHIC;
     RHO2pRHOSQ = RHO2+RHOSQ; RHO2pRHOSQ2 = RHO2pRHOSQ*RHO2pRHOSQ;
 //could create a LUT for this pow.
-    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*pow( 1.0+R1RH3, 4.0/3.0 ));
+    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*mypow( 1.0+R1RH3, 4.0/3.0 ));
 //could create a LUT for this pow.
-    DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*pow( 1.0+R1RH3, 4.0/3.0 ));
+    DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*mypow( 1.0+R1RH3, 4.0/3.0 ));
                                                                    
     SPHICS = sin(PHIS);
     CPHICS = cos(PHIS);
@@ -2329,16 +2347,16 @@ double    AP( double R, double SINT, double COST) {
     ALSQH2 = ALSQH*ALSQH;
     F = 64.0/27.0*GAMMAS2 + ALSQH2;
 //could create a LUT for this pow.
-    Q = pow( sqrt(F)+ALSQH, 1.0/3.0 );
+    Q = mypow( sqrt(F)+ALSQH, 1.0/3.0 );
 //could create a LUT for this pow.
-    C = Q-4.0*pow( GAMMAS2, 1.0/3.0 )/(3.0*Q);
+    C = Q-4.0*mypow( GAMMAS2, 1.0/3.0 )/(3.0*Q);
 
 
 
     if (C < 0.0) C = 0.0;
 
 //could create a LUT for this pow.
-    G  = sqrt(C*C+4.0*pow( GAMMAS2, 1.0/3.0 ));
+    G  = sqrt(C*C+4.0*mypow( GAMMAS2, 1.0/3.0 ));
     RS = 4.0/((sqrt(2.0*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.0-COSTS*COSTS);
@@ -2516,35 +2534,35 @@ double    APPRC( double R, double SINT, double COST) {
     GAMMAoDG3 = GAMMA/DG3; GAMMAoDG32 = GAMMAoDG3*GAMMAoDG3;
 
 //could create a LUT for this pow.
-    ALPHA_S = ALPHA*(1.+P1/pow(1.+ALPHAmALPHA1oDAL12, BETA1)
+    ALPHA_S = ALPHA*(1.+P1/mypow(1.+ALPHAmALPHA1oDAL12, BETA1)
 //could create a LUT for this pow.
-        *DEXP1+P2*(ALPHA-ALPHA2)/pow(1.+ALPHAmALPHA2oDAL22, BETA2)
+        *DEXP1+P2*(ALPHA-ALPHA2)/mypow(1.+ALPHAmALPHA2oDAL22, BETA2)
 //could create a LUT for this pow.
-        /pow(1.+GAMMAoDG22, BETA3)
+        /mypow(1.+GAMMAoDG22, BETA3)
 //could create a LUT for this pow.
-        +P3*ALPHAmALPHA32/pow(1.+ALPHAmALPHA3oDAL32, BETA4)
+        +P3*ALPHAmALPHA32/mypow(1.+ALPHAmALPHA3oDAL32, BETA4)
 //could create a LUT for this pow.
-        /pow(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED)
+        /mypow(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED)
 
 
                                                                                                                                               
     GAMMAoDG5 = GAMMA/DG5; GAMMAoDG52 = GAMMAoDG5*GAMMAoDG5;
     ALPHApALPHA5oDAL5 = (ALPHA-ALPHA5)/DAL5; ALPHApALPHA5oDAL52 = ALPHApALPHA5oDAL5*ALPHApALPHA5oDAL5;
     GAMMA_S = GAMMA*(1.+Q0+Q1*(ALPHA-ALPHA4)*DEXP2    // GAMMA -> GAMMA_  (DEFORMED)
-        +Q2*(ALPHA-ALPHA5)/pow( 1.+ALPHApALPHA5oDAL52, BETA6 )
-        /pow( 1.+GAMMAoDG52, BETA7 ));
+        +Q2*(ALPHA-ALPHA5)/mypow( 1.+ALPHApALPHA5oDAL52, BETA6 )
+        /mypow( 1.+GAMMAoDG52, BETA7 ));
                                                                                                                                               
     GAMMAS2 = GAMMA_S*GAMMA_S;
                                                                                                                                               
     ALSQH = 0.5*ALPHA_S*ALPHA_S;        // ALPHA_S,GAMMA_S -> RS,SINTS,COSTS
     F = 64./27.*GAMMAS2+ALSQH*ALSQH;
-    Q = pow( sqrt(F)+ALSQH, 1./3. );
-    C = Q-4.*pow( GAMMAS2, 1./3. )/(3.*Q);
+    Q = mypow( sqrt(F)+ALSQH, 1./3. );
+    C = Q-4.*mypow( GAMMAS2, 1./3. )/(3.*Q);
 
 
     if (C < 0.) C = 0.;
 
-    G  = sqrt(C*C+4.*pow( GAMMAS2, 1./3. ));
+    G  = sqrt(C*C+4.*mypow( GAMMAS2, 1./3. ));
     RS = 4./((sqrt(2.*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.-COSTS*COSTS);
@@ -2707,15 +2725,15 @@ double    BR_PRC_Q( double R, double SINT, double COST ) {
     GAMMA = COST*ooR2;
                                                                                                                                               
     FFS(ALPHA,AL1,DAL1,&F,&FA,&FS);
-    D1 = SC*pow(F, XK1)/(pow( R/B1, BE1) +1.0);
+    D1 = SC*mypow(F, XK1)/(mypow( R/B1, BE1) +1.0);
     D2 = D1*COST2;
                                                                                                                                               
     FFS(ALPHA,AL2,DAL2,&F,&FA,&FS);
-    D3 = SC*pow(FS, XK2)/(pow( R/B2, BE2) +1.0);
+    D3 = SC*mypow(FS, XK2)/(mypow( R/B2, BE2) +1.0);
     D4 = D3*COST2;
                                                                                                                                               
     FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = SC*pow(ALPHA, XK3)*pow(FS, XK4)/(pow(R/B3, BE3)+1.0);
+    D5 = SC*mypow(ALPHA, XK3)*mypow(FS, XK4)/(mypow(R/B3, BE3)+1.0);
     D6 = D5*COST2;
                                                                                                                                               
     ALPHAmAL4oDAL4 = (ALPHA-AL4)/DAL4; ALPHAmAL4oDAL42 = ALPHAmAL4oDAL4*ALPHAmAL4oDAL4;
@@ -2794,15 +2812,15 @@ double    BT_PRC_Q( double R, double SINT, double COST) {
     GAMMA = COST*ooR2;
                                                                                                                                               
     FFS(ALPHA,AL1,DAL1,&F,&FA,&FS);
-    D1 = pow(F, XK1)/(pow(R/B1, BE1)+1.0);
+    D1 = mypow(F, XK1)/(mypow(R/B1, BE1)+1.0);
     D2 = D1*COST2;
                                                                                                                                               
     FFS(ALPHA,AL2,DAL2,&F,&FA,&FS);
-    D3 = pow(FA, XK2)/pow(R, BE2);
+    D3 = mypow(FA, XK2)/mypow(R, BE2);
     D4 = D3*COST2;
                                                                                                                                               
     FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = pow(FS, XK3)*pow(ALPHA, XK4)/(pow(R/B3, BE3)+1.0);
+    D5 = mypow(FS, XK3)*mypow(ALPHA, XK4)/(mypow(R/B3, BE3)+1.0);
     D6 = D5*COST2;
                                                                                                                                               
     FFS(GAMMA,0.0,DG1,&F,&FA,&FS);
