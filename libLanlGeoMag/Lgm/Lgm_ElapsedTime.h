@@ -15,6 +15,7 @@ typedef struct Lgm_ElapsedTimeInfo {
 
     char    ElapsedTimeStr[15];  // String containing elapsed time. 
     char    CurrentTimeStr[15];  // String containg current time.
+    char    CurrentTimeStr2[15];  // String containg current time in different form YYYYMMDD_HHMMSS.
 
 
 } Lgm_ElapsedTimeInfo;
