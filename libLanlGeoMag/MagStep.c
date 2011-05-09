@@ -181,6 +181,8 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
 
 
+    if ( fabs(Htry) < 1e-16 ) printf("DAMN!\n");
+
 
 
     if ( ( eps != Info->Lgm_MagStep_eps_old ) || ( *reset ) ){
@@ -238,7 +240,7 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
         for (k=1; k<=Info->Lgm_MagStep_kmax; ++k) {
 
             Info->Lgm_MagStep_snew = *s + H;
-            if (Info->Lgm_MagStep_snew == (*s)) { 
+            if ( fabs(Info->Lgm_MagStep_snew - *s) < 1e-16 ) { 
                 printf("H = %g\n", H);
                 fprintf(stderr, "step size underflow\n");
                 fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
@@ -304,7 +306,7 @@ printf("HOW DID I GET HERE? P = \n");
 
         if (!done) {
             red = (red < LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;
-            red = (red > LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;
+            red = (red > LGM_MAGSTEP_REDMAX) ? red : LGM_MAGSTEP_REDMAX;
             H *= red;
             reduction = TRUE;
         }
