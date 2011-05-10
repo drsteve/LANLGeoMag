@@ -32,7 +32,7 @@
  *    THE ABOVE 10 INPUT PARAMETERS SHOULD BE PLACED IN THE ELEMENTS
  *    OF THE ARRAY PARMOD(10).
  *
- *    THE REST OF THE INPUT VARIABLES ARE: THE GEODIPOLE TILT ANGLE PS (RADIANS),
+ *    THE REST OF THE INPUT VARIABLES ARE: THE GEODIPOLE_opt TILT ANGLE PS (RADIANS),
  *         X,Y,Z -  GSM POSITION (RE)
  *
  *    IOPT IS A DUMMY INPUT PARAMETER, INCLUDED TO MAKE THIS SUBROUTINE
@@ -68,8 +68,9 @@
  *
  *
  */
-double mypow( double x, double e ) {
+double mypow_opt( double x, double e ) {
 
+/*
     static double xmin=9e99, xmax=-9e99;
 
     if ( (x<xmin) && (x >= 0.0) ) {
@@ -82,6 +83,7 @@ double mypow( double x, double e ) {
         printf("new xmax = %g\n", xmax);
     }
     
+*/
 
     return( pow( x, e ) );
 
@@ -130,51 +132,51 @@ double    sin_psi, cos_psi;
 /*
  *  Forward function declarations 
  */
-void    TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF, 
+void    TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF, 
                 double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS, 
                 double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, 
                 double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC, 
                 double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12, 
                 double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22, 
                 double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
-void    SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ );
-void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
+void    SHLCAR3X3_opt( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ );
+void    DEFORMED_opt( int IOPT, double PS, double X, double Y, double Z,
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2);
-void    WARPED( int IOPT, double PS, double X, double Y, double Z, 
+void    WARPED_opt( int IOPT, double PS, double X, double Y, double Z, 
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2);
-void    UNWARPED( int IOPT, double X, double Y, double Z, 
+void    UNWARPED_opt( int IOPT, double X, double Y, double Z, 
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2);
-void    TAILDISK( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void    SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ );
-void    BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
+void    TAILDISK_opt( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void    SHLCAR5X5_opt( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ );
+void    BIRK_TOT_opt( int IOPB, double PS, double X, double Y, double Z,
                 double *BX11, double *BY11, double *BZ11, double *BX12, double *BY12, double *BZ12,
                 double *BX21, double *BY21, double *BZ21, double *BX22, double *BY22, double *BZ22);
-void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
-void    TWOCONES( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-double  THETA_S( double *A, double R, double THETA);
-double  R_S( double *A, double R, double THETA);
-void    FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT);
-void    BIRK_SHL( int, int, int, int, int, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ );
-void    FULL_RC( int IOPR, double PS, double X, double Y, double Z, 
+void    BIRK_1N2_opt( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
+void    TWOCONES_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void    ONE_CONE_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  THETA_S_opt( double *A, double R, double Theta, double SinTheta, double Sin2Theta, double Sin3Theta);
+double  R_S_opt( double *A, double R, double CosTheta, double Cos2Theta );
+void    FIALCOS_opt( double R, double THETA, double SIN_THETA, double COS_THETA, double SIN_PHI, double COS_PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT);
+void    BIRK_SHL_opt( int, int, int, int, int, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ );
+void    FULL_RC_opt( int IOPR, double PS, double X, double Y, double Z, 
                 double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC,  double *BZPRC);
-void    SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z, 
+void    SRC_PRC_opt( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z, 
                 double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC, double *BZPRC);
-void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *BZ);
-double  AP( double R, double SINT, double COST);
-void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ );
-double  APPRC( double R, double SINT, double COST);
-void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *BZ);
-double  BR_PRC_Q( double R, double SINT, double COST );
-double  BT_PRC_Q( double R, double SINT, double COST);
-void    FFS( double A, double A0, double DA, double *F, double *FA, double *FS );
-void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ );
-void    DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ );
+void    RC_SYMM_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  AP_opt( double R, double SINT, double COST);
+void    PRC_SYMM_opt( double X,double Y,double Z, double *BX, double *BY, double *BZ );
+double  AP_optPRC( double R, double SINT, double COST);
+void    PRC_QUAD_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  BR_PRC_Q_opt( double R, double SINT, double COST );
+double  BT_PRC_Q_opt( double R, double SINT, double COST);
+void    FFS_opt( double A, double A0, double DA, double *F, double *FA, double *FS );
+void    RC_SHIELD_opt( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ );
+void    DIPOLE_opt( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ );
 
 
 
 
-void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
+void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
 
 
 
@@ -223,7 +225,7 @@ void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
     ZZ  = Z;
 
 
-    TS04_EXTERN( IOPGEN, IOPTT, IOPB, IOPR, A, 79, PDYN, DST_AST, BXIMF, BYIMF, 
+    TS04_EXTERN_opt( IOPGEN, IOPTT, IOPB, IOPR, A, 79, PDYN, DST_AST, BXIMF, BYIMF, 
         BZIMF, W1, W2, W3, W4, W5, W6, PSS, XX, YY, ZZ, &BXCF, &BYCF, &BZCF, &BXT1, &BYT1, 
         &BZT1, &BXT2, &BYT2, &BZT2, &BXSRC, &BYSRC, &BZSRC, &BXPRC, &BYPRC, &BZPRC,  &BXR11, 
         &BYR11, &BZR11, &BXR12, &BYR12, &BZR12, &BXR21, &BYR21, &BZR21, &BXR22, &BYR22, 
@@ -260,7 +262,7 @@ printf("BBX, BBY, BBZ   = %.10g %.10g %.10g\n", BBX, BBY, BBZ);
 
 /*  
  *     IOPGEN - GENERAL OPTION FLAG:  IOPGEN=0 - CALCULATE TOTAL FIELD
- *                                    IOPGEN=1 - DIPOLE SHIELDING ONLY
+ *                                    IOPGEN=1 - DIPOLE_opt SHIELDING ONLY
  *                                    IOPGEN=2 - TAIL FIELD ONLY
  *                                    IOPGEN=3 - BIRKELAND FIELD ONLY
  *                                    IOPGEN=4 - RING CURRENT FIELD ONLY
@@ -278,7 +280,7 @@ printf("BBX, BBY, BBZ   = %.10g %.10g %.10g\n", BBX, BBY, BBZ);
  *                                    IOPR=1  -  SRC ONLY
  *                                    IOPR=2  -  PRC ONLY
  */
-void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF, 
+void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF, 
         double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS, 
         double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, 
         double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC, 
@@ -304,7 +306,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
 //could create a LUT for this pow.
-    XAPPA = mypow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
+    XAPPA = mypow_opt( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
 
 
     XAPPA2 = XAPPA*XAPPA;
@@ -340,7 +342,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
     /*
-     *  BEGIN ITERATIVE SEARCH OF UNWARPED COORDS (TO FIND SIGMA)
+     *  BEGIN ITERATIVE SEARCH OF UNWARPED_opt COORDS (TO FIND SIGMA)
      */
     done = FALSE;
     while ( !done ) {
@@ -355,7 +357,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         RoRH2 = RoRH*RoRH;
         RoRH3 = RoRH*RoRH2;
 //could create a LUT for this pow.
-        SINPSAS = SPS/mypow( 1.0 + RoRH3, 0.33333333 );
+        SINPSAS = SPS/mypow_opt( 1.0 + RoRH3, 0.33333333 );
         SINPSAS2 = SINPSAS*SINPSAS;
         COSPSAS = sqrt(1.0 - SINPSAS2);
         ZSS = X*SINPSAS + Z*COSPSAS;
@@ -391,7 +393,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
     if (IOPGEN <= 1) {
-        SHLCAR3X3( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ );    // DIPOLE SHIELDING FIELD
+        SHLCAR3X3_opt( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ );    // DIPOLE_opt SHIELDING FIELD
         *BXCF = CFX*XAPPA3;
         *BYCF = CFY*XAPPA3;
         *BZCF = CFZ*XAPPA3;
@@ -405,12 +407,12 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         DSTT = -20.;
         if (DST < DSTT) DSTT = DST;
 //could create a LUT for this pow.
-        ZNAM = mypow( fabs( DSTT ), 0.37 );
+        ZNAM = mypow_opt( fabs( DSTT ), 0.37 );
         CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
         CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
         CB_TAIL.D = A[36]*exp(-W1/A[37])  +A[69];
         CB_TAIL.DELTADY = 4.7;
-        DEFORMED( IOPT, PS, XX, YY, ZZ, BXT1, BYT1, BZT1, BXT2, BYT2, BZT2);     // TAIL FIELD (THREE MODES)
+        DEFORMED_opt( IOPT, PS, XX, YY, ZZ, BXT1, BYT1, BZT1, BXT2, BYT2, BZT2);     // TAIL FIELD (THREE MODES)
     } else {
         *BXT1=0.0;
         *BYT1=0.0;
@@ -425,10 +427,10 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ZNAM05 = 0.05*ZNAM;
 //could create a LUT for this pow.
-        CB_BIRKPAR.XKAPPA1 = A[32]*mypow( ZNAM05, A[33] );
+        CB_BIRKPAR.XKAPPA1 = A[32]*mypow_opt( ZNAM05, A[33] );
 //could create a LUT for this pow.
-        CB_BIRKPAR.XKAPPA2 = A[34]*mypow( ZNAM05, A[35] );
-        BIRK_TOT( IOPB,PS,XX,YY,ZZ,BXR11,BYR11,BZR11,BXR12,BYR12,
+        CB_BIRKPAR.XKAPPA2 = A[34]*mypow_opt( ZNAM05, A[35] );
+        BIRK_TOT_opt( IOPB,PS,XX,YY,ZZ,BXR11,BYR11,BZR11,BXR12,BYR12,
                 BZR12,BXR21,BYR21,BZR21,BXR22,BYR22,BZR22 );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
     } else {
         *BXR11 = 0.0;
@@ -446,12 +448,12 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ooZNAM20 = 20.0/ZNAM;
 //could create a LUT for this pow.
-        CB_RCPAR.SC_SY = A[28]* mypow( ooZNAM20, A[29]) * XAPPA;    //
+        CB_RCPAR.SC_SY = A[28]* mypow_opt( ooZNAM20, A[29]) * XAPPA;    //
 //could create a LUT for this pow.
-        CB_RCPAR.SC_AS = A[30]* mypow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
+        CB_RCPAR.SC_AS = A[30]* mypow_opt( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
                                 //  SCALING COMPLETELY INDEPENDENT OF THE GENERAL SCALING DUE TO THE
                                 //  MAGNETOPAUSE COMPRESSION/EXPANSION
-        FULL_RC( IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC );    // SHIELDED RING CURRENT (SRC AND PRC)
+        FULL_RC_opt( IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC );    // SHIELDED RING CURRENT (SRC AND PRC)
     } else {
         *BXSRC = 0.0;
         *BYSRC = 0.0;
@@ -482,9 +484,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
      *    NOW, ADD UP ALL THE COMPONENTS:
      */
 //could create a LUT for this pow.
-    DLP1 = mypow( 0.5*PDYN, A[21] );
+    DLP1 = mypow_opt( 0.5*PDYN, A[21] );
 //could create a LUT for this pow.
-    DLP2 = mypow( 0.5*PDYN, A[22] );
+    DLP2 = mypow_opt( 0.5*PDYN, A[22] );
 
     TAMP1 = A[2]  + A[3]*DLP1 +  A[4]*A[39]*W1/sqrt(W1*W1+A[39]*A[39]) + A[5]*DST;
     TAMP2 = A[6]  + A[7]*DLP2 +  A[8]*A[40]*W2/sqrt(W2*W2+A[40]*A[40]) + A[9]*DST;
@@ -515,7 +517,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         FINT = 0.5*(1.-(SIGMA-S0)/DSIG);
         FEXT = 0.5*(1.+(SIGMA-S0)/DSIG);
 
-        DIPOLE( PS,X,Y,Z,&QX,&QY,&QZ );
+        DIPOLE_opt( PS,X,Y,Z,&QX,&QY,&QZ );
         *BX = (BBX+QX)*FINT + OIMFX*FEXT - QX;
         *BY = (BBY+QY)*FINT + OIMFY*FEXT - QY;
         *BZ = (BBZ+QZ)*FINT + OIMFZ*FEXT - QZ;
@@ -524,7 +526,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
     } else {    // THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING
         // POSSIBILITY IS NOW THE CASE (3):
-    DIPOLE( PS,X,Y,Z,&QX,&QY,&QZ );
+    DIPOLE_opt( PS,X,Y,Z,&QX,&QY,&QZ );
     *BX = OIMFX - QX;
     *BY = OIMFY - QY;
     *BZ = OIMFZ - QZ;
@@ -540,7 +542,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
 /*
- *    THIS S/R RETURNS THE SHIELDING FIELD FOR THE EARTH'S DIPOLE,
+ *    THIS S/R RETURNS THE SHIELDING FIELD FOR THE EARTH'S DIPOLE_opt,
  *    REPRESENTED BY  2x3x3=18 "CARTESIAN" HARMONICS, tilted with respect
  *    to the z=0 plane
  * 
@@ -554,7 +556,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
  *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * 
  */
-void    SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ ) {
+void    SHLCAR3X3_opt( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ ) {
 
     static double    A[] = { -9e99, -901.2327248,895.8011176,817.6208321,-845.5880889,
                       -83.73539535,86.58542841,336.8781402,-329.3619944,-311.2947120,
@@ -869,7 +871,7 @@ void    SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *
 
 
 
-void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
+void    DEFORMED_opt( int IOPT, double PS, double X, double Y, double Z,
         double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2) {
 
 //    static int        IEPS=3;
@@ -896,7 +898,7 @@ void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
     RRH = R/RH; RRH2 = RRH*RRH;  RRH3 = RRH2*RRH;
         
 //could create a LUT for this pow.
-    F = mypow( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
+    F = mypow_opt( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
     DFDR = -RRH2*F4/RH;
     DFDRH = -RRH*DFDR;
  
@@ -926,7 +928,7 @@ void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
     /* 
      *      DEFORM:
      */ 
-    WARPED( IOPT, PS, XAS, Y, ZAS, &BXAS1, &BYAS1, &BZAS1, &BXAS2, &BYAS2, &BZAS2 );
+    WARPED_opt( IOPT, PS, XAS, Y, ZAS, &BXAS1, &BYAS1, &BZAS1, &BXAS2, &BYAS2, &BZAS2 );
  
     *BX1 = BXAS1*DZASDZ - BZAS1*DXASDZ + BYAS1*FAC1;
     *BY1 = BYAS1*FAC2;
@@ -943,13 +945,13 @@ void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
 
 
 
-void WARPED( int IOPT, double PS, double X, double Y, double Z, 
+void WARPED_opt( int IOPT, double PS, double X, double Y, double Z, 
     double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2) {
 
     /* 
-     *    CALCULATES GSM COMPONENTS OF THE WARPED FIELD FOR TWO TAIL UNIT MODES.
-     *    THE WARPING DEFORMATION IS IMPOSED ON THE UNWARPED FIELD, COMPUTED
-     *    BY THE S/R "UNWARPED".  THE WARPING PARAMETERS WERE TAKEN FROM THE
+     *    CALCULATES GSM COMPONENTS OF THE WARPED_opt FIELD FOR TWO TAIL UNIT MODES.
+     *    THE WARPING DEFORMATION IS IMPOSED ON THE UNWARPED_opt FIELD, COMPUTED
+     *    BY THE S/R "UNWARPED_opt".  THE WARPING PARAMETERS WERE TAKEN FROM THE
      *    RESULTS OF GEOTAIL OBSERVATIONS (TSYGANENKO ET AL. [1998]).
      *    NB # 6, P.106, OCT 12, 2000.
      * 
@@ -968,7 +970,7 @@ void WARPED( int IOPT, double PS, double X, double Y, double Z,
     XL    = 20.0;
     DXLDX = 0.0;
         
-    SPS  = sin( PS );
+    SPS  = sin_psi;
     RHO2 = Y*Y+Z*Z;
     RHO  = sqrt( RHO2 );
         
@@ -992,12 +994,12 @@ void WARPED( int IOPT, double PS, double X, double Y, double Z,
     DFDRHO = G*RR4L42*(3.0*XL4-RHO4)*CPHI*SPS;
     DFDX   = RR4L4*CPHI*SPS*(DGDX*RHO2-G*RHO*RR4L4*4.0*XL3*DXLDX);
  
-    CF  = cos(F);
-    SF  = sin(F);
+    //CF  = cos(F); SF  = sin(F);
+    sincos( F, &SF, &CF );
     YAS = RHO*CF;
     ZAS = RHO*SF;
  
-    UNWARPED( IOPT, X, YAS, ZAS, &BX_AS1, &BY_AS1, &BZ_AS1, &BX_AS2, &BY_AS2, &BZ_AS2 );
+    UNWARPED_opt( IOPT, X, YAS, ZAS, &BX_AS1, &BY_AS1, &BZ_AS1, &BX_AS2, &BY_AS2, &BZ_AS2 );
  
     BRHO_AS  =   BY_AS1*CF+BZ_AS1*SF;        //   DEFORM THE 1ST MODE
     BPHI_AS  =  -BY_AS1*SF+BZ_AS1*CF;
@@ -1033,7 +1035,7 @@ void WARPED( int IOPT, double PS, double X, double Y, double Z,
 
 
 
-void    UNWARPED( int IOPT, double X, double Y, double Z, 
+void    UNWARPED_opt( int IOPT, double X, double Y, double Z, 
         double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2) {
 
     /* 
@@ -1095,8 +1097,8 @@ void    UNWARPED( int IOPT, double X, double Y, double Z,
         ZSC1  = Z*ALPHA1;
         D0SC1 = CB_TAIL.D*ALPHA1;        // HERE WE USE A SINGLE VALUE D0 OF THE THICKNESS FOR BOTH MODES
         
-        TAILDISK( D0SC1, DELTADX1, CB_TAIL.DELTADY, XSC1, YSC1, ZSC1, &FX1, &FY1, &FZ1 );
-        SHLCAR5X5( A1, X, Y, Z, CB_TAIL.DXSHIFT1, &HX1, &HY1, &HZ1 );
+        TAILDISK_opt( D0SC1, DELTADX1, CB_TAIL.DELTADY, XSC1, YSC1, ZSC1, &FX1, &FY1, &FZ1 );
+        SHLCAR5X5_opt( A1, X, Y, Z, CB_TAIL.DXSHIFT1, &HX1, &HY1, &HZ1 );
         
         *BX1 = FX1 + HX1;
         *BY1 = FY1 + HY1;
@@ -1117,8 +1119,8 @@ void    UNWARPED( int IOPT, double X, double Y, double Z,
     D0SC2 = CB_TAIL.D*ALPHA2;            // HERE WE USE A SINGLE VALUE D0 OF THE THICKNESS FOR BOTH MODES
 
 
-    TAILDISK( D0SC2, DELTADX2, CB_TAIL.DELTADY, XSC2, YSC2, ZSC2, &FX2, &FY2, &FZ2);
-    SHLCAR5X5( A2, X, Y, Z, CB_TAIL.DXSHIFT2, &HX2, &HY2, &HZ2);
+    TAILDISK_opt( D0SC2, DELTADX2, CB_TAIL.DELTADY, XSC2, YSC2, ZSC2, &FX2, &FY2, &FZ2);
+    SHLCAR5X5_opt( A2, X, Y, Z, CB_TAIL.DXSHIFT2, &HX2, &HY2, &HZ2);
 
     *BX2 = FX2 + HX2;
     *BY2 = FY2 + HY2;
@@ -1135,7 +1137,7 @@ void    UNWARPED( int IOPT, double X, double Y, double Z,
 }
 
 
-void     TAILDISK( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
+void     TAILDISK_opt( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
 
     /*
      *        THIS SUBROUTINE COMPUTES THE COMPONENTS OF THE TAIL CURRENT FIELD,
@@ -1234,7 +1236,7 @@ void     TAILDISK( double D0, double DELTADX, double DELTADY, double X, double Y
 
 
 
-void    SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ ) {
+void    SHLCAR5X5_opt( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ ) {
 
     /* 
      * 
@@ -1266,15 +1268,19 @@ void    SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, doubl
         RP   = 1.0/A[50+I];   // we could get rid of these divides by hand computing the inverse cooeffs...
         RP2 = RP*RP;
         YRP = Y*RP;
-        CYPI = cos(YRP);
-        SYPI = sin(YRP);
+
+        //SYPI = sin(YRP); CYPI = cos(YRP);
+        sincos( YRP, &SYPI, &CYPI );
 
         for ( K=1; K<=5; K++ ) {
 
             RR   = 1.0/A[55+K];   // we could get rid of these divides by hand computing the inverse cooeffs...
             RR2  = RR*RR;
-            SZRK = sin(Z*RR);
-            CZRK = cos(Z*RR);
+
+            //SZRK = sin(Z*RR); CZRK = cos(Z*RR);
+            sincos( Z*RR, &SZRK, &CZRK ); // these could be precomputed.
+
+
             SQPR = sqrt(RP2+RR2);
             EPR  = exp(X*SQPR);
 
@@ -1304,7 +1310,7 @@ void    SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, doubl
 
 
 
-void     BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
+void     BIRK_TOT_opt( int IOPB, double PS, double X, double Y, double Z,
         double *BX11, double *BY11, double *BZ11, double *BX12, double *BY12, double *BZ12,
         double *BX21, double *BY21, double *BZ21, double *BX22, double *BY22, double *BZ22){
 
@@ -1406,38 +1412,38 @@ void     BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
     YChanged = ( fabs(Y-OLD_Y) > 1e-10 ) ? TRUE : FALSE;
     ZChanged = ( fabs(Z-OLD_Z) > 1e-10 ) ? TRUE : FALSE;
 
-    CB_DPHI_B_RHO0.XKAPPA = CB_BIRKPAR.XKAPPA1;        // FORWARDED IN BIRK_1N2
-    X_SC   = CB_BIRKPAR.XKAPPA1-1.1;    // FORWARDED IN BIRK_SHL
+    CB_DPHI_B_RHO0.XKAPPA = CB_BIRKPAR.XKAPPA1;        // FORWARDED IN BIRK_1N2_opt
+    X_SC   = CB_BIRKPAR.XKAPPA1-1.1;    // FORWARDED IN BIRK_SHL_opt
         
     if ( (IOPB == 0) || (IOPB == 1) ) {
         
-        BIRK_1N2( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11 );        // REGION 1,  MODE 1
-        BIRK_SHL( 0, PSChanged, XChanged, YChanged, ZChanged, SH11, PS, X_SC, X, Y, Z, &HX11, &HY11, &HZ11 );
+        BIRK_1N2_opt( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11 );        // REGION 1,  MODE 1
+        BIRK_SHL_opt( 0, PSChanged, XChanged, YChanged, ZChanged, SH11, PS, X_SC, X, Y, Z, &HX11, &HY11, &HZ11 );
         *BX11 = FX11 + HX11;
         *BY11 = FY11 + HY11;
         *BZ11 = FZ11 + HZ11;
             
-        BIRK_1N2( 1, 2, PS, X, Y, Z, &FX12, &FY12, &FZ12 );        // REGION 1,  MODE 2
-        BIRK_SHL( 1, PSChanged, XChanged, YChanged, ZChanged, SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12 );
+        BIRK_1N2_opt( 1, 2, PS, X, Y, Z, &FX12, &FY12, &FZ12 );        // REGION 1,  MODE 2
+        BIRK_SHL_opt( 1, PSChanged, XChanged, YChanged, ZChanged, SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12 );
         *BX12 = FX12 + HX12;
         *BY12 = FY12 + HY12;
         *BZ12 = FZ12 + HZ12;
         
     }
         
-    CB_DPHI_B_RHO0.XKAPPA = CB_BIRKPAR.XKAPPA2;        // FORWARDED IN BIRK_1N2
-    X_SC   = CB_BIRKPAR.XKAPPA2-1.0;    // FORWARDED IN BIRK_SHL
+    CB_DPHI_B_RHO0.XKAPPA = CB_BIRKPAR.XKAPPA2;        // FORWARDED IN BIRK_1N2_opt
+    X_SC   = CB_BIRKPAR.XKAPPA2-1.0;    // FORWARDED IN BIRK_SHL_opt
         
     if ( (IOPB == 0)  || (IOPB == 2) ) {
 
-        BIRK_1N2( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21 );        // REGION 2,  MODE 1
-        BIRK_SHL( 2, PSChanged, XChanged, YChanged, ZChanged, SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21 );
+        BIRK_1N2_opt( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21 );        // REGION 2,  MODE 1
+        BIRK_SHL_opt( 2, PSChanged, XChanged, YChanged, ZChanged, SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21 );
         *BX21 = FX21 + HX21;
         *BY21 = FY21 + HY21;
         *BZ21 = FZ21 + HZ21;
 
-        BIRK_1N2( 2, 2, PS, X, Y, Z, &FX22, &FY22, &FZ22 );        // REGION 2,  MODE 2
-        BIRK_SHL( 3, PSChanged, XChanged, YChanged, ZChanged, SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22 );
+        BIRK_1N2_opt( 2, 2, PS, X, Y, Z, &FX22, &FY22, &FZ22 );        // REGION 2,  MODE 2
+        BIRK_SHL_opt( 3, PSChanged, XChanged, YChanged, ZChanged, SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22 );
         *BX22 = FX22 + HX22;
         *BY22 = FY22 + HY22;
         *BZ22 = FZ22 + HZ22;
@@ -1454,7 +1460,7 @@ void     BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
 }
 
 
-void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void    BIRK_1N2_opt( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
 
     /* 
@@ -1542,40 +1548,44 @@ void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, d
     Rsc  = sqrt(Xsc2+Ysc2+Zsc2);        // SCALED
                                                                    
     if ( (Xsc == 0.0) && (Zsc == 0.0) ) {
-        PHI = 0.0;
+        PHI   = 0.0;
+        SPHIC = 0.0;
+        CPHIC = 1.0;                // "C" means "CYLINDRICAL", TO DISTINGUISH FROM SPHERICAL PHI
     } else {
-        PHI = atan2(-Zsc, Xsc);            // FROM CARTESIAN TO CYLINDRICAL (RHO,PHI,Y)
+        PHI   = atan2(-Zsc, Xsc);            // FROM CARTESIAN TO CYLINDRICAL (RHO,PHI,Y)
+        //SPHIC = sin(PHI);
+        //CPHIC = cos(PHI);                // "C" means "CYLINDRICAL", TO DISTINGUISH FROM SPHERICAL PHI
+        SPHIC = -Zsc/RHO;
+        CPHIC =  Xsc/RHO;
     }
                                                                    
-    SPHIC = sin(PHI);
-    CPHIC = cos(PHI);                // "C" means "CYLINDRICAL", TO DISTINGUISH FROM SPHERICAL PHI
                                                                    
     BRACK = CB_DPHI_B_RHO0.DPHI+CB_DPHI_B_RHO0.B*RHO2/(RHO2+1.0)*(RHOSQ-1.0)/(RHO2+RHOSQ);
     R1RH  = (Rsc-1.0)/RH;
     R1RH2 = R1RH*R1RH; R1RH3 = R1RH2*R1RH;
 //could create a LUT for this pow.
-    PSIAS = BETA*PS/mypow( 1.0+R1RH3, 1.0/3.0 );
+    PSIAS = BETA*PS/mypow_opt( 1.0+R1RH3, 1.0/3.0 );
                                                                    
     PHIS = PHI-BRACK*SPHIC - PSIAS;
     DPHISPHI = 1.0-BRACK*CPHIC;
     RHO2pRHOSQ = RHO2+RHOSQ; RHO2pRHOSQ2 = RHO2pRHOSQ*RHO2pRHOSQ;
 //could create a LUT for this pow.
-    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*mypow( 1.0+R1RH3, 4.0/3.0 ));
+    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*mypow_opt( 1.0+R1RH3, 4.0/3.0 ));
 //could create a LUT for this pow.
-    DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*mypow( 1.0+R1RH3, 4.0/3.0 ));
+    DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*mypow_opt( 1.0+R1RH3, 4.0/3.0 ));
                                                                    
-    SPHICS = sin(PHIS);
-    CPHICS = cos(PHIS);
+    //SPHICS = sin(PHIS); CPHICS = cos(PHIS);
+    sincos( PHIS, &SPHICS, &CPHICS );
                                                                    
     XS =  RHO*CPHICS;
     ZS = -RHO*SPHICS;
                                                                    
     if (NUMB == 1) {
-        if (MODE == 1) TWOCONES( A11, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
-        if (MODE == 2) TWOCONES( A12, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
+        if (MODE == 1) TWOCONES_opt( A11, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
+        if (MODE == 2) TWOCONES_opt( A12, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
     } else {
-        if (MODE == 1) TWOCONES( A21, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
-        if (MODE == 2) TWOCONES( A22, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
+        if (MODE == 1) TWOCONES_opt( A21, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
+        if (MODE == 2) TWOCONES_opt( A22, XS, Ysc, ZS, &BXS, &BYAS, &BZS );
     }
                                                                    
     BRHOAS = BXS*CPHICS-BZS*SPHICS;
@@ -1593,7 +1603,7 @@ void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, d
 
 }
 
-void     TWOCONES( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ){
+void     TWOCONES_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ){
 
     /* 
      *  
@@ -1603,8 +1613,8 @@ void     TWOCONES( double *A, double X, double Y, double Z, double *BX, double *
      */  
     double    BXN, BYN, BZN, BXS, BYS, BZS;
 
-    ONE_CONE( A, X, Y, Z, &BXN, &BYN, &BZN );
-    ONE_CONE( A, X, -Y, -Z, &BXS, &BYS, &BZS );
+    ONE_CONE_opt( A, X, Y, Z, &BXN, &BYN, &BZN );
+    ONE_CONE_opt( A, X, -Y, -Z, &BXS, &BYS, &BZS );
     *BX = BXN - BXS;
     *BY = BYN + BYS;
     *BZ = BZN + BZS;
@@ -1615,13 +1625,13 @@ void     TWOCONES( double *A, double X, double Y, double Z, double *BX, double *
 
 
 
-void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
+void    ONE_CONE_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ) {
 
     /*
      *
      *
      *
-     *  RETURNS FIELD COMPONENTS FOR A DEFORMED CONICAL CURRENT SYSTEM, FITTED TO A BIOSAVART FIELD
+     *  RETURNS FIELD COMPONENTS FOR A DEFORMED_opt CONICAL CURRENT SYSTEM, FITTED TO A BIOSAVART FIELD
      *    BY SIM_14.FOR.  HERE ONLY THE NORTHERN CONE IS TAKEN INTO ACCOUNT.
      *
      */
@@ -1630,8 +1640,10 @@ void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *B
     double  THETA0, RHO2, RHO, R, THETA, PHI, RS, THETAS, PHIS, BTAST, BFAST;
     double  DRSDR, DRSDT, DTSDR, DTSDT, STSST, RSR, BR, BTHETA, BPHI;
     double  S, C, SF, CF, BE;
-    double  SinTheta, CosTheta, Cos2Theta;
+    double  SinTheta, Sin2Theta, Sin3Theta, CosTheta, Cos2Theta;
     double  CosACosB, SinASinB, CosApB, CosAmB, Cos2ApB, Cos2AmB;
+    double  SinACosB, CosASinB, SinApB, Sin2ApB, Sin3ApB, SinAmB, Sin2AmB, Sin3AmB;
+    double  SIN_PHIS, COS_PHIS, SIN_THETAS, COS_THETAS;
 
                                                                    
     THETA0 = A[31];
@@ -1646,15 +1658,56 @@ void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *B
     /*
      *   MAKE THE DEFORMATION OF COORDINATES:
      */
-    RS     = R_S( A, R, THETA );
-    THETAS = THETA_S( A, R, THETA );
-    PHIS   = PHI;
+    SinTheta = RHO/R; 
+    CosTheta = Z/R;
+
+    Sin2Theta = 2.0*SinTheta*CosTheta;                  // Used identity sin(2a) = 2sin(a)cos(a)
+    Sin3Theta = SinTheta*(3.0 - 4.0*SinTheta*SinTheta); // Used identity sin(3a) = 3sin(a) - 4sin^3(a)
+    Cos2Theta = 2.0*CosTheta*CosTheta - 1.0;            // Used identity cos(2a) = 2cos^2(a) - 1
+
+    RS     = R_S_opt( A, R, CosTheta, Cos2Theta );
+    THETAS = THETA_S_opt( A, R, THETA, SinTheta, Sin2Theta, Sin3Theta );
+    sincos( THETAS, &SIN_THETAS, &COS_THETAS );
+
+    PHIS     = PHI;
+    SIN_PHIS = Y/RHO;
+    COS_PHIS = X/RHO;
+
+    /*
+     * Efficiently compute cos( THETA+DT ), cos( 2(THETA+DT) ), cos( THETA-DT ), cos( 2(THETA-DT) )
+     * Use identities cos(a+b) = cos(a)cos(b) - sin(a)sin(b)
+     *                cos(a-b) = cos(a)cos(b) + sin(a)sin(b)
+     * NOTE: this ASSUMES that b == 1e-6 (Used linux bc to get cos(1e-6) and sin(1e-6) )
+     */
+    CosACosB = CosTheta*0.99999999999949995555;
+    SinASinB = SinTheta*0.00000099999999999983;
+
+    CosApB = CosACosB - SinASinB;
+    Cos2ApB = 2.0*CosApB*CosApB - 1.0;
+
+    CosAmB = CosACosB + SinASinB;
+    Cos2AmB = 2.0*CosAmB*CosAmB - 1.0;
+
+    
+    
+
+    SinACosB = SinTheta*0.99999999999949995555;
+    CosASinB = CosTheta*0.00000099999999999983;
+
+    SinApB  = SinACosB + CosASinB;
+    Sin2ApB = 2.0*SinApB*CosApB;
+    Sin3ApB = SinApB*(3.0 - 4.0*SinApB*SinApB);
+
+    SinAmB  = SinACosB - CosASinB;
+    Sin2AmB = 2.0*SinAmB*CosAmB;
+    Sin3AmB = SinAmB*(3.0 - 4.0*SinAmB*SinAmB);
+
 
 
     /* 
      *   CALCULATE FIELD COMPONENTS AT THE NEW POSITION (ASTERISKED):
      */
-    FIALCOS( RS, THETAS, PHIS, &BTAST, &BFAST, CB_MODENUM.M, THETA0, CB_DTHETA.DTHETA);    // MODE #M
+    FIALCOS_opt( RS, THETAS, SIN_THETAS, COS_THETAS, SIN_PHIS, COS_PHIS, &BTAST, &BFAST, CB_MODENUM.M, THETA0, CB_DTHETA.DTHETA);    // MODE #M
 //FIX what gets returned here?
 
 
@@ -1663,13 +1716,13 @@ void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *B
      *
      *      FIRST OF ALL, FIND THE DERIVATIVES:
      */
-    DRSDR = (R_S(A,R+DR,THETA)-R_S(A, R-DR,THETA))/(2.0*DR);
-    DRSDT = (R_S(A,R,THETA+DT)-R_S(A,R,THETA-DT))/(2.0*DT);
+    DRSDR = (R_S_opt(A, R+DR, CosTheta, Cos2Theta)-R_S_opt(A, R-DR, CosTheta, Cos2Theta))/(2.0*DR);
+    DRSDT = (R_S_opt(A,R, CosApB, Cos2ApB)-R_S_opt(A,R, CosAmB, Cos2AmB))/(2.0*DT);
 
-    DTSDR = (THETA_S(A,R+DR,THETA)-THETA_S(A,R-DR,THETA))/(2.0*DR);
-    DTSDT = (THETA_S(A,R,THETA+DT)-THETA_S(A,R,THETA-DT))/(2.0*DT);
+    DTSDR = (THETA_S_opt(A,R+DR,THETA, SinTheta, Sin2Theta, Sin3Theta)-THETA_S_opt(A,R-DR,THETA, SinTheta, Sin2Theta, Sin3Theta))/(2.0*DR);
+    DTSDT = (THETA_S_opt(A,R,THETA+DT, SinApB, Sin2ApB, Sin3ApB)-THETA_S_opt(A,R,THETA-DT, SinAmB, Sin2AmB, Sin3AmB))/(2.0*DT);
                                                                    
-    STSST = sin(THETAS)/sin(THETA);
+    STSST = SIN_THETAS/SinTheta;
     RSR  =  RS/R;
                                                                    
     BR      =  -RSR/R*STSST*BTAST*DRSDT;
@@ -1692,7 +1745,7 @@ void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *B
 }
 
 
-double R_S( double *A, double R, double THETA) {
+double R_S_opt( double *A, double R, double CosTheta, double Cos2Theta ) {
 
     double    RS, R2, A11_2, A12_2, A13_2, A14_2, A15_2, A16_2, R2pA16_2, R2pA16_2_2;
 
@@ -1706,13 +1759,13 @@ double R_S( double *A, double R, double THETA) {
     R2pA16_2 = R2+A16_2; R2pA16_2_2 = R2pA16_2*R2pA16_2;
     
     RS = R+A[2]/R +A[3]*R/sqrt(R2+A11_2)+A[4]*R/(R2+A12_2)
-           +(A[5]+A[6]/R+A[7]*R/sqrt(R2+A13_2)+A[8]*R/(R2+A14_2))*cos(THETA)
-           +(A[9]*R/sqrt(R2+A15_2)+A[10]*R/R2pA16_2_2)*cos(2.0*THETA);
+           +(A[5]+A[6]/R+A[7]*R/sqrt(R2+A13_2)+A[8]*R/(R2+A14_2))*CosTheta
+           +(A[9]*R/sqrt(R2+A15_2)+A[10]*R/R2pA16_2_2)*Cos2Theta;
 
       return( RS );
 
 }
-double THETA_S( double *A, double R, double THETA) {
+double THETA_S_opt( double *A, double R, double Theta, double SinTheta, double Sin2Theta, double Sin3Theta) {
 
     double    TS, R2, A27_2, A28_2, A29_2, A30_2;
 
@@ -1722,18 +1775,18 @@ double THETA_S( double *A, double R, double THETA) {
     A29_2 = A[29]*A[29];
     A30_2 = A[30]*A[30];
     
-    TS = THETA +(A[17]+A[18]/R+A[19]/R2
-            +A[20]*R/sqrt(R2+A27_2))*sin(THETA)
+    TS = Theta +(A[17]+A[18]/R+A[19]/R2
+            +A[20]*R/sqrt(R2+A27_2))*SinTheta
             +(A[21]+A[22]*R/sqrt(R2+A28_2)
-            +A[23]*R/(R2+A29_2))*sin(2.0*THETA)
-            +(A[24]+A[25]/R+A[26]*R/(R2+A30_2))*sin(3.0*THETA);
+            +A[23]*R/(R2+A29_2))*Sin2Theta
+            +(A[24]+A[25]/R+A[26]*R/(R2+A30_2))*Sin3Theta;
 
       return( TS );
 }
 
 
 
-void     FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT) {
+void     FIALCOS_opt( double R, double THETA, double SIN_THETA, double COS_THETA, double SIN_PHI, double COS_PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT) {
 
     /* 
      *  
@@ -1752,11 +1805,16 @@ void     FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BP
     double    COSM1, SINM1, TM, TGM2M, TGP2M, T, FC, FC1, TGM2M1, TG21, DTT, DTT0;
     double    BTN[10], BPN[10], CCOS[10], SSIN[10];
 
-    SINTE = sin(THETA);
+    //SINTE = sin(THETA); COSTE = cos(THETA);
+    //sincos( THETA, &SINTE, &COSTE );
+    SINTE = SIN_THETA; COSTE = COS_THETA;
+
     RO    = R*SINTE;
-    COSTE = cos(THETA);
-    SINFI = sin(PHI);
-    COSFI = cos(PHI);
+
+    //SINFI = sin(PHI); COSFI = cos(PHI);
+    //sincos( PHI, &SINFI, &COSFI );
+    SINFI = SIN_PHI; COSFI = COS_PHI;
+
     TG    = SINTE/(1.0+COSTE);        //  TAN(THETA/2)
     CTG   = SINTE/(1.0-COSTE);        //  CTG(THETA/2)
  
@@ -1779,36 +1837,36 @@ void     FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BP
 
     for ( M=1; M<= N; M++ ) {
 
-    TM *= TG;
-    CCOS[M] = COSM1*COSFI-SINM1*SINFI;
-    SSIN[M] = SINM1*COSFI+COSM1*SINFI;
-    COSM1   = CCOS[M];
-    SINM1   = SSIN[M];
-    if (THETA < TETANM) {
-        T    = TM;
-        DTT  = 0.5*M*TM*(TG+CTG);
-        DTT0 = 0.0;
-    } else if (THETA < TETANP) {
-        TGM2M  = TGM2M*TGM2;
-        FC     = 1.0/(TGP-TGM);
-        FC1    = 1.0/(2*M+1);
-        TGM2M1 = TGM2M*TGM;
-        TG21   = 1.0+TG*TG;
-        T      = FC*(TM*(TGP-TG)+FC1*(TM*TG-TGM2M1/TM));
-        DTT    = 0.5*M*FC*TG21*(TM/TG*(TGP-TG)-FC1*(TM-TGM2M1/(TM*TG)));
-        DTT0   = 0.5*FC*((TGP+TGM)*(TM*TG-FC1*(TM*TG-TGM2M1/TM))+
-                  TM*(1.0-TGP*TGM)-(1.0+TGM2)*TGM2M/TM);
-    } else {
-        TGP2M = TGP2M*TGP2;
-        TGM2M = TGM2M*TGM2;
-        FC    = 1.0/(TGP-TGM);
-        FC1   = 1.0/(2*M+1);
-        T     = FC*FC1*(TGP2M*TGP-TGM2M*TGM)/TM;
-        DTT   = -T*M*0.50*(TG+CTG);
-    }
+        TM *= TG;
+        CCOS[M] = COSM1*COSFI-SINM1*SINFI;
+        SSIN[M] = SINM1*COSFI+COSM1*SINFI;
+        COSM1   = CCOS[M];
+        SINM1   = SSIN[M];
+        if (THETA < TETANM) {
+            T    = TM;
+            DTT  = 0.5*M*TM*(TG+CTG);
+            DTT0 = 0.0;
+        } else if (THETA < TETANP) {
+            TGM2M  = TGM2M*TGM2;
+            FC     = 1.0/(TGP-TGM);
+            FC1    = 1.0/(2*M+1);
+            TGM2M1 = TGM2M*TGM;
+            TG21   = 1.0+TG*TG;
+            T      = FC*(TM*(TGP-TG)+FC1*(TM*TG-TGM2M1/TM));
+            DTT    = 0.5*M*FC*TG21*(TM/TG*(TGP-TG)-FC1*(TM-TGM2M1/(TM*TG)));
+            DTT0   = 0.5*FC*((TGP+TGM)*(TM*TG-FC1*(TM*TG-TGM2M1/TM))+
+                      TM*(1.0-TGP*TGM)-(1.0+TGM2)*TGM2M/TM);
+        } else {
+            TGP2M = TGP2M*TGP2;
+            TGM2M = TGM2M*TGM2;
+            FC    = 1.0/(TGP-TGM);
+            FC1   = 1.0/(2*M+1);
+            T     = FC*FC1*(TGP2M*TGP-TGM2M*TGM)/TM;
+            DTT   = -T*M*0.50*(TG+CTG);
+        }
 
-    BTN[M] = M*T*CCOS[M]/RO;
-    BPN[M] = -DTT*SSIN[M]/R;
+        BTN[M] = M*T*CCOS[M]/RO;
+        BPN[M] = -DTT*SSIN[M]/R;
 
     }
                                                                    
@@ -1821,7 +1879,7 @@ void     FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BP
 
 // This is one of the costliest routines -- mostly due to sin,cos,exp
 // Almost 13% of Lstar calc is done in here.
-void    BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void    BIRK_SHL_opt( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     int        L, M, I, N, NN, K;
     double    GX, GY, GZ, FX, FY, FZ, HX, HY, HZ, HXR, HZR;
@@ -2045,7 +2103,7 @@ void    BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZChanged
 
 
 
-void     FULL_RC( int IOPR, double PS, double X, double Y, double Z, 
+void     FULL_RC_opt( int IOPR, double PS, double X, double Y, double Z, 
     double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC,  double *BZPRC) {
 
     /*  
@@ -2107,11 +2165,11 @@ void     FULL_RC( int IOPR, double PS, double X, double Y, double Z,
     double    HXSRC, HYSRC, HZSRC, HXPRC, HYPRC, HZPRC, X_SC, FSX, FSY, FSZ;
     double    FPX, FPY, FPZ;
 
-    SRC_PRC( IOPR, CB_RCPAR.SC_SY, CB_RCPAR.SC_AS, CB_RCPAR.PHI, PS, X, Y, Z, &HXSRC, &HYSRC, &HZSRC, &HXPRC, &HYPRC, &HZPRC );
+    SRC_PRC_opt( IOPR, CB_RCPAR.SC_SY, CB_RCPAR.SC_AS, CB_RCPAR.PHI, PS, X, Y, Z, &HXSRC, &HYSRC, &HZSRC, &HXPRC, &HYPRC, &HZPRC );
                                                                    
     X_SC = CB_RCPAR.SC_SY-1.0;
     if ( (IOPR == 0) || (IOPR == 1) ) {
-        RC_SHIELD( C_SY, PS, X_SC, X, Y, Z, &FSX, &FSY, &FSZ );
+        RC_SHIELD_opt( C_SY, PS, X_SC, X, Y, Z, &FSX, &FSY, &FSZ );
     } else {
         FSX = 0.0;
         FSY = 0.0;
@@ -2120,7 +2178,7 @@ void     FULL_RC( int IOPR, double PS, double X, double Y, double Z,
                                                                    
     X_SC = CB_RCPAR.SC_AS-1.0;
     if ( (IOPR == 0) || (IOPR == 2) ) {
-        RC_SHIELD( C_PR, PS, X_SC, X, Y, Z, &FPX, &FPY, &FPZ);
+        RC_SHIELD_opt( C_PR, PS, X_SC, X, Y, Z, &FPX, &FPY, &FPZ);
     } else {
         FPX = 0.0;
         FPY = 0.0;
@@ -2140,12 +2198,12 @@ void     FULL_RC( int IOPR, double PS, double X, double Y, double Z,
 
 
 
-void     SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z, 
+void     SRC_PRC_opt( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z, 
         double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC, double *BZPRC) {
     /*
      *   RETURNS FIELD COMPONENTS FROM A MODEL RING CURRENT, INCLUDING ITS SYMMETRIC PART
      *     AND A PARTIAL RING CURRENT, CLOSED VIA BIRKELAND CURRENTS. BASED ON RESULTS, DESCRIBED
-     *     IN A PAPER "MODELING THE INNER MAGNETOSPHERE: ASYMMETRIC RING CURRENT AND REGION 2
+     *     IN A PAP_optER "MODELING THE INNER MAGNETOSPHERE: ASYMMETRIC RING CURRENT AND REGION 2
      *     BIRKELAND CURRENTS REVISITED" (JGR, DEC.2000).
      *
      *     IOPR -  A RING CURRENT CALCULATION FLAG (FOR LEAST-SQUARES FITTING ONLY):
@@ -2193,8 +2251,8 @@ void     SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, d
      *  
      *      3a. SYMMETRIC FIELD:
      */
-    if (IOPR <= 1)                      RC_SYMM( XTS, YTS, ZTS, &BXS, &BYS, &BZS);
-    if ( (IOPR == 0) || (IOPR == 2) )   PRC_SYMM( XTA, YTA, ZTA, &BXA_S, &BYA_S, &BZA_S);
+    if (IOPR <= 1)                      RC_SYMM_opt( XTS, YTS, ZTS, &BXS, &BYS, &BZS);
+    if ( (IOPR == 0) || (IOPR == 2) )   PRC_SYMM_opt( XTA, YTA, ZTA, &BXA_S, &BYA_S, &BZA_S);
                                                                      
     /*     3b. ROTATE THE SCALED SM COORDINATES BY PHI AROUND ZSM AXIS AND CALCULATE QUADRUPOLE PRC FIELD
      *         IN THOSE COORDS:
@@ -2204,7 +2262,7 @@ void     SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, d
     XR = XTA*CP - YTA*SP;
     YR = XTA*SP + YTA*CP;
 
-    if ( (IOPR == 0) || (IOPR == 2) )   PRC_QUAD( XR, YR, ZTA, &BXA_QR, &BYA_QR, &BZA_Q);
+    if ( (IOPR == 0) || (IOPR == 2) )   PRC_QUAD_opt( XR, YR, ZTA, &BXA_QR, &BYA_QR, &BZA_Q);
                                                                      
     /*     3c. TRANSFORM THE QUADRUPOLE FIELD COMPONENTS BACK TO THE SM COORDS:
      */
@@ -2236,13 +2294,14 @@ void     SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, d
 
 
 
-void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *BZ){
+void    RC_SYMM_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ){
 
-    double    DS=1e-2, DC=0.99994999875, D=1e-4, DRD=5e3;     //  DS=SIN(THETA) AT THE BOUNDARY OF THE LINEARITY
+    double  DS=1e-2, DC=0.99994999875, D=1e-4, DRD=5e3;     //  DS=SIN(THETA) AT THE BOUNDARY OF THE LINEARITY
                                 //  REGION; DC = SQRT(1-DS**2);  DRD=1/(2*D)
 
-    double    RHO2, R2, R, ooR, RP, RM, SINT, COST, A, DARDR, FXY, THETA;
-    double    TP, TM, SINTP, SINTM, COSTP, COSTM, BR, BT;
+    double  RHO2, R2, R, ooR, RP, RM, SINT, COST, A, DARDR, FXY, THETA;
+    double  TP, TM, SINTP, SINTM, COSTP, COSTM, BR, BT;
+    double  SinTCosD, CosTSinD, CosTCosD, SinTSinD;
 
     RHO2 = X*X+Y*Y;
     R2   = RHO2+Z*Z;
@@ -2253,10 +2312,10 @@ void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *B
     SINT = sqrt(RHO2)*ooR;
     COST = Z*ooR;
     
-    if ( SINT < DS ) {    // TOO CLOSE TO THE Z-AXIS; USING A LINEAR APPROXIMATION A_PHI~SINT,
+    if ( SINT < DS ) {    // TOO CLOSE TO THE Z-AXIS; USING A LINEAR AP_optPROXIMATION A_PHI~SINT,
                           // TO AVOID THE SINGULARITY PROBLEM
-        A = AP(R,DS,DC)/DS;
-        DARDR = (RP*AP(RP,DS,DC)-RM*AP(RM,DS,DC))*DRD;
+        A = AP_opt(R,DS,DC)/DS;
+        DARDR = (RP*AP_opt(RP,DS,DC)-RM*AP_opt(RM,DS,DC))*DRD;
         FXY   = Z*(2.0*A-DARDR)/(R*R2);
         *BX    = FXY*X;
         *BY    = FXY*Y;
@@ -2265,14 +2324,26 @@ void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *B
     } else {
                                                                      
         THETA = atan2(SINT,COST);
+        /*
         TP    = THETA+D;
         TM    = THETA-D;
         SINTP = sin(TP);
         SINTM = sin(TM);
         COSTP = cos(TP);
         COSTM = cos(TM);
-        BR    = (SINTP*AP(R,SINTP,COSTP)-SINTM*AP(R,SINTM,COSTM))/(R*SINT)*DRD;
-        BT    = (RM*AP(RM,SINT,COST)-RP*AP(RP,SINT,COST))/R*DRD;
+        */
+        SinTCosD = SINT*0.99999999500000003039;                                                                                                                                                                  
+        CosTSinD = COST*0.00009999999983333334;                                                                                                                                                                  
+        CosTCosD = COST*0.99999999500000003039;                                                                                                                                                                  
+        SinTSinD = SINT*0.00009999999983333334;                                                                                                                                                                  
+        SINTP = SinTCosD + CosTSinD;                                                                                                                                                                             
+        SINTM = SinTCosD - CosTSinD;                                                                                                                                                                             
+        COSTP = CosTCosD - SinTSinD;                                                                                                                                                                             
+        COSTM = CosTCosD + SinTSinD;   
+
+
+        BR    = (SINTP*AP_opt(R,SINTP,COSTP)-SINTM*AP_opt(R,SINTM,COSTM))/(R*SINT)*DRD;
+        BT    = (RM*AP_opt(RM,SINT,COST)-RP*AP_opt(RP,SINT,COST))/R*DRD;
         FXY   = (BR+BT*COST/SINT)/R;
         *BX    = FXY*X;
         *BY    = FXY*Y;
@@ -2286,7 +2357,7 @@ void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *B
 
 
 
-double    AP( double R, double SINT, double COST) {
+double    AP_opt( double R, double SINT, double COST) {
 
     /*  
      *    Calculates azimuthal component of the vector potential of the symmetric
@@ -2304,7 +2375,7 @@ double    AP( double R, double SINT, double COST) {
     double    RR3oDR3, RR3oDR3_2, COST1oDLA1, COST1oDLA1_2, COST1oDLA2, COST1oDLA2_2, ARG1;
     double    ARG2, ARG3, DEXP1, DEXP2, DEXP3, ALPHA_S, ALPHA_S2, GAMMA_S, GAMMAS2, ALSQH2;
     double    ALSQH, F, Q, C, G, RS, COSTS, SINTS, RHOS, RHOS2, ZS, RRC1pRHOS, RRC1pRHOS2;
-    double    P, XK2, XK, XKRHO12, XK2S, DL, ELK, ELE, APHI1, RRC2pRHOS, RRC2pRHOS2, APHI2, Result;
+    double    P, XK2, XK, XKRHO12, XK2S, DL, ELK, ELE, AP_optHI1, RRC2pRHOS, RRC2pRHOS2, AP_optHI2, Result;
 
     ooR = 1.0/R;
     ooR2 = ooR*ooR;
@@ -2335,7 +2406,7 @@ double    AP( double R, double SINT, double COST) {
     DEXP2 = (ARG2 < -500.0) ? 0.0 : exp(ARG2);
     DEXP3 = (ARG3 < -500.0) ? 0.0 : exp(ARG3);
                                                                                                                                               
-    ALPHA_S = ALPHA*(1.0+P1*DEXP1+P2*DEXP2+P3*DEXP3);    // ALPHA -> ALPHA_S  (DEFORMED)
+    ALPHA_S = ALPHA*(1.0+P1*DEXP1+P2*DEXP2+P3*DEXP3);    // ALPHA -> ALPHA_S  (DEFORMED_opt)
     ALPHA_S2 = ALPHA_S*ALPHA_S;
                                                                                                                                               
 
@@ -2350,16 +2421,16 @@ double    AP( double R, double SINT, double COST) {
     ALSQH2 = ALSQH*ALSQH;
     F = 64.0/27.0*GAMMAS2 + ALSQH2;
 //could create a LUT for this pow.
-    Q = mypow( sqrt(F)+ALSQH, 1.0/3.0 );
+    Q = mypow_opt( sqrt(F)+ALSQH, 1.0/3.0 );
 //could create a LUT for this pow.
-    C = Q-4.0*mypow( GAMMAS2, 1.0/3.0 )/(3.0*Q);
+    C = Q-4.0*mypow_opt( GAMMAS2, 1.0/3.0 )/(3.0*Q);
 
 
 
     if (C < 0.0) C = 0.0;
 
 //could create a LUT for this pow.
-    G  = sqrt(C*C+4.0*mypow( GAMMAS2, 1.0/3.0 ));
+    G  = sqrt(C*C+4.0*mypow_opt( GAMMAS2, 1.0/3.0 ));
     RS = 4.0/((sqrt(2.0*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.0-COSTS*COSTS);
@@ -2389,7 +2460,7 @@ double    AP( double R, double SINT, double COST) {
         XK2S*(0.2499836831+XK2S*(0.09200180037+XK2S*
         (0.04069697526+XK2S*0.00526449639)));
  
-    APHI1 = ((1.0-XK2*0.5)*ELK-ELE)/XKRHO12;
+    AP_optHI1 = ((1.0-XK2*0.5)*ELK-ELE)/XKRHO12;
 
 
 
@@ -2414,9 +2485,9 @@ double    AP( double R, double SINT, double COST) {
         XK2S*(0.2499836831+XK2S*(0.09200180037+XK2S*
         (0.04069697526+XK2S*0.00526449639)));
  
-    APHI2 = ((1.0-XK2*0.5)*ELK-ELE)/XKRHO12;
+    AP_optHI2 = ((1.0-XK2*0.5)*ELK-ELE)/XKRHO12;
                                                                                                                                               
-    Result = A1*APHI1+A2*APHI2;
+    Result = A1*AP_optHI1+A2*AP_optHI2;
     if (PROX) Result *= SINT/SINT1;        // LINEAR INTERPOLATION, IF TOO CLOSE TO THE Z-AXIS
  
 
@@ -2426,12 +2497,13 @@ double    AP( double R, double SINT, double COST) {
 }
 
 
-void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ ) {
+void    PRC_SYMM_opt( double X,double Y,double Z, double *BX, double *BY, double *BZ ) {
 
-    double    DS=1e-2, DC=0.99994999875, D=1e-4, DRD=5e3;   // DS=SIN(THETA) AT THE BOUNDARY OF THE LINEARITY
+    double  DS=1e-2, DC=0.99994999875, D=1e-4, DRD=5e3;   // DS=SIN(THETA) AT THE BOUNDARY OF THE LINEARITY
                                                             // REGION; DC=SQRT(1-DS**2);  DRD=1/(2*D)
-    double    RHO2, R2, R, ooR, RP, RM, SINT, COST, A, DARDR, FXY, THETA;
-    double    TP, TM, SINTP, SINTM, COSTP, COSTM, BR, BT;
+    double  RHO2, R2, R, ooR, RP, RM, SINT, COST, A, DARDR, FXY, THETA;
+    double  TP, TM, SINTP, SINTM, COSTP, COSTM, BR, BT;
+    double  SinTCosD, CosTSinD, CosTCosD, SinTSinD;
 
     RHO2 = X*X+Y*Y;
     R2   = RHO2+Z*Z;
@@ -2441,10 +2513,10 @@ void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ
     SINT = sqrt(RHO2)*ooR;
     COST = Z*ooR;
                                                                                                                                               
-    if (SINT < DS) {    //  TOO CLOSE TO THE Z-AXIS; USING A LINEAR APPROXIMATION A_PHI~SINT,
+    if (SINT < DS) {    //  TOO CLOSE TO THE Z-AXIS; USING A LINEAR AP_optPROXIMATION A_PHI~SINT,
                         //  TO AVOID THE SINGULARITY PROBLEM
-        A     = APPRC(R,DS,DC)/DS;
-        DARDR = (RP*APPRC(RP,DS,DC)-RM*APPRC(RM,DS,DC))*DRD;
+        A     = AP_optPRC(R,DS,DC)/DS;
+        DARDR = (RP*AP_optPRC(RP,DS,DC)-RM*AP_optPRC(RM,DS,DC))*DRD;
         FXY   = Z*(2.0*A-DARDR)/(R*R2);
         *BX    = FXY*X;
         *BY    = FXY*Y;
@@ -2453,14 +2525,26 @@ void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ
     } else {
                                                                                                                                               
         THETA = atan2(SINT,COST);
+        /*
         TP    = THETA+D;
         TM    = THETA-D;
         SINTP = sin(TP);
         SINTM = sin(TM);
         COSTP = cos(TP);
         COSTM = cos(TM);
-        BR    = (SINTP*APPRC(R,SINTP,COSTP)-SINTM*APPRC(R,SINTM,COSTM))/(R*SINT)*DRD;
-        BT    = (RM*APPRC(RM,SINT,COST)-RP*APPRC(RP,SINT,COST))*ooR*DRD;
+        */
+        SinTCosD = SINT*0.99999999500000003039;                                                                                                                                                                  
+        CosTSinD = COST*0.00009999999983333334;                                                                                                                                                                  
+        CosTCosD = COST*0.99999999500000003039;                                                                                                                                                                  
+        SinTSinD = SINT*0.00009999999983333334;                                                                                                                                                                  
+        SINTP = SinTCosD + CosTSinD;                                                                                                                                                                             
+        SINTM = SinTCosD - CosTSinD;                                                                                                                                                                             
+        COSTP = CosTCosD - SinTSinD;                                                                                                                                                                             
+        COSTM = CosTCosD + SinTSinD;    
+
+
+        BR    = (SINTP*AP_optPRC(R,SINTP,COSTP)-SINTM*AP_optPRC(R,SINTM,COSTM))/(R*SINT)*DRD;
+        BT    = (RM*AP_optPRC(RM,SINT,COST)-RP*AP_optPRC(RP,SINT,COST))*ooR*DRD;
         FXY   = (BR+BT*COST/SINT)*ooR;
         *BX    = FXY*X;
         *BY    = FXY*Y;
@@ -2474,7 +2558,7 @@ void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ
 
 
 
-double    APPRC( double R, double SINT, double COST) {
+double    AP_optPRC( double R, double SINT, double COST) {
 
     /*  
      *        Calculates azimuthal component of the vector potential of the symmetric
@@ -2501,7 +2585,7 @@ double    APPRC( double R, double SINT, double COST) {
     double GAMMAoDG2, GAMMAoDG22, GAMMAoDG3, GAMMAoDG32, ALPHA_S, GAMMAoDG5, GAMMAoDG52;
     double ALPHApALPHA5oDAL5, ALPHApALPHA5oDAL52, GAMMA_S, GAMMAS2, ALSQH, F, Q, C, G, RS;
     double COSTS, SINTS, RHOS, RHOS2, ZS, RRC1pRHOS, RRC1pRHOS2, P, XK2, XK, XKRHO12, XK2S, DL;
-    double ELK, ELE, APHI1, RRC2pRHOS, RRC2pRHOS2, APHI2, Result;
+    double ELK, ELE, AP_optHI1, RRC2pRHOS, RRC2pRHOS2, AP_optHI2, Result;
 
 
                                                                                                                                               
@@ -2537,35 +2621,35 @@ double    APPRC( double R, double SINT, double COST) {
     GAMMAoDG3 = GAMMA/DG3; GAMMAoDG32 = GAMMAoDG3*GAMMAoDG3;
 
 //could create a LUT for this pow.
-    ALPHA_S = ALPHA*(1.+P1/mypow(1.+ALPHAmALPHA1oDAL12, BETA1)
+    ALPHA_S = ALPHA*(1.+P1/mypow_opt(1.+ALPHAmALPHA1oDAL12, BETA1)
 //could create a LUT for this pow.
-        *DEXP1+P2*(ALPHA-ALPHA2)/mypow(1.+ALPHAmALPHA2oDAL22, BETA2)
+        *DEXP1+P2*(ALPHA-ALPHA2)/mypow_opt(1.+ALPHAmALPHA2oDAL22, BETA2)
 //could create a LUT for this pow.
-        /mypow(1.+GAMMAoDG22, BETA3)
+        /mypow_opt(1.+GAMMAoDG22, BETA3)
 //could create a LUT for this pow.
-        +P3*ALPHAmALPHA32/mypow(1.+ALPHAmALPHA3oDAL32, BETA4)
+        +P3*ALPHAmALPHA32/mypow_opt(1.+ALPHAmALPHA3oDAL32, BETA4)
 //could create a LUT for this pow.
-        /mypow(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED)
+        /mypow_opt(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED_opt)
 
 
                                                                                                                                               
     GAMMAoDG5 = GAMMA/DG5; GAMMAoDG52 = GAMMAoDG5*GAMMAoDG5;
     ALPHApALPHA5oDAL5 = (ALPHA-ALPHA5)/DAL5; ALPHApALPHA5oDAL52 = ALPHApALPHA5oDAL5*ALPHApALPHA5oDAL5;
-    GAMMA_S = GAMMA*(1.+Q0+Q1*(ALPHA-ALPHA4)*DEXP2    // GAMMA -> GAMMA_  (DEFORMED)
-        +Q2*(ALPHA-ALPHA5)/mypow( 1.+ALPHApALPHA5oDAL52, BETA6 )
-        /mypow( 1.+GAMMAoDG52, BETA7 ));
+    GAMMA_S = GAMMA*(1.+Q0+Q1*(ALPHA-ALPHA4)*DEXP2    // GAMMA -> GAMMA_  (DEFORMED_opt)
+        +Q2*(ALPHA-ALPHA5)/mypow_opt( 1.+ALPHApALPHA5oDAL52, BETA6 )
+        /mypow_opt( 1.+GAMMAoDG52, BETA7 ));
                                                                                                                                               
     GAMMAS2 = GAMMA_S*GAMMA_S;
                                                                                                                                               
     ALSQH = 0.5*ALPHA_S*ALPHA_S;        // ALPHA_S,GAMMA_S -> RS,SINTS,COSTS
     F = 64./27.*GAMMAS2+ALSQH*ALSQH;
-    Q = mypow( sqrt(F)+ALSQH, 1./3. );
-    C = Q-4.*mypow( GAMMAS2, 1./3. )/(3.*Q);
+    Q = mypow_opt( sqrt(F)+ALSQH, 1./3. );
+    C = Q-4.*mypow_opt( GAMMAS2, 1./3. )/(3.*Q);
 
 
     if (C < 0.) C = 0.;
 
-    G  = sqrt(C*C+4.*mypow( GAMMAS2, 1./3. ));
+    G  = sqrt(C*C+4.*mypow_opt( GAMMAS2, 1./3. ));
     RS = 4./((sqrt(2.*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.-COSTS*COSTS);
@@ -2594,7 +2678,7 @@ double    APPRC( double R, double SINT, double COST) {
         XK2S*(0.2499836831+XK2S*(0.09200180037+XK2S*
         (0.04069697526+XK2S*0.00526449639)));
  
-    APHI1 = ((1.-XK2*0.5)*ELK-ELE)/XKRHO12;
+    AP_optHI1 = ((1.-XK2*0.5)*ELK-ELE)/XKRHO12;
 
 
 
@@ -2619,9 +2703,9 @@ double    APPRC( double R, double SINT, double COST) {
           XK2S*(0.2499836831+XK2S*(0.09200180037+XK2S*
             (0.04069697526+XK2S*0.00526449639)));
  
-    APHI2 = ((1.-XK2*0.5)*ELK-ELE)/XKRHO12;
+    AP_optHI2 = ((1.-XK2*0.5)*ELK-ELE)/XKRHO12;
                                                                                                                                               
-    Result = A1*APHI1+A2*APHI2;
+    Result = A1*AP_optHI1+A2*AP_optHI2;
     if (PROX) Result *= SINT/SINT1;        // LINEAR INTERPOLATION, IF TOO CLOSE TO THE Z-AXIS
 
  
@@ -2631,15 +2715,16 @@ double    APPRC( double R, double SINT, double COST) {
 }
 
 
-void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *BZ) {
+void    PRC_QUAD_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ) {
 
 //    double    DD=2e-4;
-    double    D=1e-4, DS=1e-2, DC=0.99994999875, ooDD=5000.0;
+    double  D=1e-4, DS=1e-2, DC=0.99994999875, ooDD=5000.0;
 
 
-    double    X2, Y2, RHO2, R, ooR, RHO, SINT, COST, RP, RM, ooRHO, CPHI, SPHI;
-    double    BR, BT, DBRR, THETA, TP, TM, SINTP, COSTP, SINTM, COSTM, DBTT, ST;
-    double    CT, FCXY, RtST, RtST2, ooRtST2;
+    double  X2, Y2, RHO2, R, ooR, RHO, SINT, COST, RP, RM, ooRHO, CPHI, SPHI;
+    double  BR, BT, DBRR, THETA, TP, TM, SINTP, COSTP, SINTM, COSTM, DBTT, ST;
+    double  CT, FCXY, RtST, RtST2, ooRtST2;
+    double  SinTCosD, CosTSinD, CosTCosD, SinTSinD;
                                                                                                                                               
                                                                                                                                               
     X2 = X*X; Y2 = Y*Y;
@@ -2655,17 +2740,43 @@ void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *
         ooRHO = 1.0/RHO;
         CPHI  = X*ooRHO;
         SPHI  = Y*ooRHO;
-        BR = BR_PRC_Q(R,SINT,COST);
-        BT = BT_PRC_Q(R,SINT,COST);
-        DBRR  = (BR_PRC_Q(RP,SINT,COST)-BR_PRC_Q(RM,SINT,COST))*ooDD;
-        THETA = atan2(SINT,COST);
-        TP = THETA+D;
-        TM = THETA-D;
-        SINTP = sin(TP);
-        COSTP = cos(TP);
-        SINTM = sin(TM);
-        COSTM = cos(TM);
-        DBTT  = (BT_PRC_Q(R,SINTP,COSTP)-BT_PRC_Q(R,SINTM,COSTM))*ooDD;
+        BR = BR_PRC_Q_opt(R,SINT,COST);
+        BT = BT_PRC_Q_opt(R,SINT,COST);
+        DBRR  = (BR_PRC_Q_opt(RP,SINT,COST)-BR_PRC_Q_opt(RM,SINT,COST))*ooDD;
+
+        /*
+         *  THETA = atan2(SINT,COST);
+         *  TP = THETA+D;
+         *  TM = THETA-D;
+         *  SINTP = sin(TP);
+         *  COSTP = cos(TP);
+         *  SINTM = sin(TM);
+         *  COSTM = cos(TM);
+         *
+         * Sigh... We need sin(T+D) cos(T+D) sin(T-D) cos(T-D)
+         * Use angle-sum angle-diff relations instead;
+         *
+         *      SINTP = sin(T+D) = sin(T)cos(D) + cos(T)sin(D)
+         *      SINTM = sin(T-D) = sin(T)cos(D) - cos(T)sin(D)
+         *      COSTP = cos(T+D) = cos(T)cos(D) - sin(T)sin(D)
+         *      COSTM = cos(T-D) = cos(T)cos(D) + sin(T)sin(D)
+         *
+         * Note that; D=1e-4, so cos(D) = 0.99999999500000003039
+         * and sin(D) = 0.00009999999983333334
+         *
+         */
+        SinTCosD = SINT*0.99999999500000003039;
+        CosTSinD = COST*0.00009999999983333334;
+        CosTCosD = COST*0.99999999500000003039;
+        SinTSinD = SINT*0.00009999999983333334;
+        SINTP = SinTCosD + CosTSinD;
+        SINTM = SinTCosD - CosTSinD;
+        COSTP = CosTCosD - SinTSinD;
+        COSTM = CosTCosD + SinTSinD;
+        
+        
+
+        DBTT  = (BT_PRC_Q_opt(R,SINTP,COSTP)-BT_PRC_Q_opt(R,SINTM,COSTM))*ooDD;
         *BX = SINT*(BR+(BR+R*DBRR+DBTT)*SPHI*SPHI)+COST*BT;
         *BY = -SINT*SPHI*CPHI*(BR+R*DBRR+DBTT);
         *BZ = (BR*COST-BT*SINT)*CPHI;
@@ -2674,16 +2785,27 @@ void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *
         CT = DC;
         if (Z < 0.0) CT = -DC;
         THETA = atan2(ST,CT);
+        /*
         TP = THETA+D;
         TM = THETA-D;
         SINTP = sin(TP);
         COSTP = cos(TP);
         SINTM = sin(TM);
         COSTM = cos(TM);
-        BR = BR_PRC_Q(R,ST,CT);
-        BT = BT_PRC_Q(R,ST,CT);
-        DBRR = (BR_PRC_Q(RP,ST,CT)-BR_PRC_Q(RM,ST,CT))*ooDD;
-        DBTT = (BT_PRC_Q(R,SINTP,COSTP)-BT_PRC_Q(R,SINTM,COSTM))*ooDD;
+        */
+        SinTCosD = SINT*0.99999999500000003039;
+        CosTSinD = COST*0.00009999999983333334;
+        CosTCosD = COST*0.99999999500000003039;
+        SinTSinD = SINT*0.00009999999983333334;
+        SINTP = SinTCosD + CosTSinD;
+        SINTM = SinTCosD - CosTSinD;
+        COSTP = CosTCosD - SinTSinD;
+        COSTM = CosTCosD + SinTSinD;
+
+        BR = BR_PRC_Q_opt(R,ST,CT);
+        BT = BT_PRC_Q_opt(R,ST,CT);
+        DBRR = (BR_PRC_Q_opt(RP,ST,CT)-BR_PRC_Q_opt(RM,ST,CT))*ooDD;
+        DBTT = (BT_PRC_Q_opt(R,SINTP,COSTP)-BT_PRC_Q_opt(R,SINTM,COSTM))*ooDD;
         FCXY = R*DBRR+DBTT;
         RtST = R*ST; RtST2 = RtST*RtST; ooRtST2 = 1.0/RtST2;
         *BX = (BR*(X2+2.0*Y2)+FCXY*Y2)*ooRtST2+BT*COST;
@@ -2696,7 +2818,7 @@ void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *
 }
 
 
-double    BR_PRC_Q( double R, double SINT, double COST ) {
+double    BR_PRC_Q_opt( double R, double SINT, double COST ) {
 
     /* 
      *   Calculates the radial component of the "quadrupole" part of the model partial ring current.
@@ -2727,16 +2849,16 @@ double    BR_PRC_Q( double R, double SINT, double COST ) {
     ALPHA = SINT2*ooR;
     GAMMA = COST*ooR2;
                                                                                                                                               
-    FFS(ALPHA,AL1,DAL1,&F,&FA,&FS);
-    D1 = SC*mypow(F, XK1)/(mypow( R/B1, BE1) +1.0);
+    FFS_opt(ALPHA,AL1,DAL1,&F,&FA,&FS);
+    D1 = SC*mypow_opt(F, XK1)/(mypow_opt( R/B1, BE1) +1.0);
     D2 = D1*COST2;
                                                                                                                                               
-    FFS(ALPHA,AL2,DAL2,&F,&FA,&FS);
-    D3 = SC*mypow(FS, XK2)/(mypow( R/B2, BE2) +1.0);
+    FFS_opt(ALPHA,AL2,DAL2,&F,&FA,&FS);
+    D3 = SC*mypow_opt(FS, XK2)/(mypow_opt( R/B2, BE2) +1.0);
     D4 = D3*COST2;
                                                                                                                                               
-    FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = SC*mypow(ALPHA, XK3)*mypow(FS, XK4)/(mypow(R/B3, BE3)+1.0);
+    FFS_opt(ALPHA,AL3,DAL3,&F,&FA,&FS);
+    D5 = SC*mypow_opt(ALPHA, XK3)*mypow_opt(FS, XK4)/(mypow_opt(R/B3, BE3)+1.0);
     D6 = D5*COST2;
                                                                                                                                               
     ALPHAmAL4oDAL4 = (ALPHA-AL4)/DAL4; ALPHAmAL4oDAL42 = ALPHAmAL4oDAL4*ALPHAmAL4oDAL4;
@@ -2769,7 +2891,7 @@ double    BR_PRC_Q( double R, double SINT, double COST ) {
     D16 = SC/(R4+C24)*COST2;
     D17 = SC/(R4+C34)*COST2*COST2;
                                                                                                                                               
-    FFS(ALPHA,AL6,DAL6,&F,&FA,&FS);
+    FFS_opt(ALPHA,AL6,DAL6,&F,&FA,&FS);
     
     RmNUMoDRM = (R-1.20)/DRM; RmNUMoDRM2 = RmNUMoDRM*RmNUMoDRM;
     D18 = SC*FS/(1.0+RmNUMoDRM2);
@@ -2783,7 +2905,7 @@ double    BR_PRC_Q( double R, double SINT, double COST ) {
 
 
 
-double    BT_PRC_Q( double R, double SINT, double COST) {
+double    BT_PRC_Q_opt( double R, double SINT, double COST) {
 
 
     /* 
@@ -2814,19 +2936,19 @@ double    BT_PRC_Q( double R, double SINT, double COST) {
     ALPHA = SINT2*ooR;
     GAMMA = COST*ooR2;
                                                                                                                                               
-    FFS(ALPHA,AL1,DAL1,&F,&FA,&FS);
-    D1 = mypow(F, XK1)/(mypow(R/B1, BE1)+1.0);
+    FFS_opt(ALPHA,AL1,DAL1,&F,&FA,&FS);
+    D1 = mypow_opt(F, XK1)/(mypow_opt(R/B1, BE1)+1.0);
     D2 = D1*COST2;
                                                                                                                                               
-    FFS(ALPHA,AL2,DAL2,&F,&FA,&FS);
-    D3 = mypow(FA, XK2)/mypow(R, BE2);
+    FFS_opt(ALPHA,AL2,DAL2,&F,&FA,&FS);
+    D3 = mypow_opt(FA, XK2)/mypow_opt(R, BE2);
     D4 = D3*COST2;
                                                                                                                                               
-    FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = mypow(FS, XK3)*mypow(ALPHA, XK4)/(mypow(R/B3, BE3)+1.0);
+    FFS_opt(ALPHA,AL3,DAL3,&F,&FA,&FS);
+    D5 = mypow_opt(FS, XK3)*mypow_opt(ALPHA, XK4)/(mypow_opt(R/B3, BE3)+1.0);
     D6 = D5*COST2;
                                                                                                                                               
-    FFS(GAMMA,0.0,DG1,&F,&FA,&FS);
+    FFS_opt(GAMMA,0.0,DG1,&F,&FA,&FS);
     ALPHAmAL4oDAL4 = (ALPHA-AL4)/DAL4; ALPHAmAL4oDAL42 = ALPHAmAL4oDAL4*ALPHAmAL4oDAL4;
     FCC = (1.0+ALPHAmAL4oDAL42); ooFCC = 1.0/FCC;
     D7  = ooFCC*FS;
@@ -2859,7 +2981,7 @@ double    BT_PRC_Q( double R, double SINT, double COST) {
 
 
 
-void    FFS( double A, double A0, double DA, double *F, double *FA, double *FS ) {
+void    FFS_opt( double A, double A0, double DA, double *F, double *FA, double *FS ) {
 
     double    DA2, ApA0, ApA02, AmA0, AmA02, SQ1, SQ2;
 
@@ -2879,7 +3001,7 @@ void    FFS( double A, double A0, double DA, double *F, double *FA, double *FS )
 
 
 
-void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void    RC_SHIELD_opt( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
 
     int    L, M, I, K, N, NN ;
@@ -2902,10 +3024,8 @@ void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double
     PST1 = PS*A[85];
     PST2 = PS*A[86];
                                                                                                                                               
-    ST1 = sin(PST1);
-    CT1 = cos(PST1);
-    ST2 = sin(PST2);
-    CT2 = cos(PST2);
+ST1 = sin(PST1); CT1 = cos(PST1);
+ST2 = sin(PST2); CT2 = cos(PST2);
                                                                                                                                               
     X1 = X*CT1-Z*ST1;
     Z1 = X*ST1+Z*CT1;
@@ -2920,113 +3040,111 @@ void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double
     for (M=1; M<=2; M++ ){      // M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY)
                                 // AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
 
-    for (I=1; I<=3; I++ ){
+        for (I=1; I<=3; I++ ){
 
-        P    = A[72+I]; ooP = 1.0/P; ooP2 = ooP*ooP;
-        Q    = A[78+I]; ooQ = 1.0/Q; ooQ2 = ooQ*ooQ;
-        YoP = Y*ooP; YoQ = Y*ooQ;
-        CYPI = cos(YoP);
-        CYQI = cos(YoQ);
-        SYPI = sin(YoP);
-        SYQI = sin(YoQ);
- 
-        for (K=1; K<=3; K++ ){
+            P    = A[72+I]; ooP = 1.0/P; ooP2 = ooP*ooP;
+            Q    = A[78+I]; ooQ = 1.0/Q; ooQ2 = ooQ*ooQ;
+            YoP = Y*ooP; YoQ = Y*ooQ;
 
-        R    = A[75+K]; ooR = 1.0/R; ooR2 = ooR*ooR;
-        S    = A[81+K]; ooS = 1.0/S; ooS2 = ooS*ooS;
-        Z1oR = Z1*ooR; Z2oS = Z2*ooS;
-        SZRK = sin(Z1oR);
-        CZSK = cos(Z2oS);
-        CZRK = cos(Z1oR);
-        SZSK = sin(Z2oS);
-        SQPR = sqrt(ooP2+ooR2);
-        SQQS = sqrt(ooQ2+ooS2);
-        EPR  = exp(X1*SQPR);
-        EQS  = exp(X2*SQQS);
- 
-        for (N=1; N<=2; N++ ){      // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT
-                                    // AND N=2 IS FOR THE SECOND ONE
-                                                                                                                                              
-            for (NN=1; NN<=2; NN++ ){   // NN = 1,2 FURTHER SPLITS THE COEFFICIENTS INTO 2 PARTS,
-                                        // TO TAKE INTO ACCOUNT THE SCALE FACTOR DEPENDENCE
+SYPI = sin(YoP); CYPI = cos(YoP);
+SYQI = sin(YoQ); CYQI = cos(YoQ);
+     
+            for (K=1; K<=3; K++ ){
 
-                if (M == 1) {
+                R    = A[75+K]; ooR = 1.0/R; ooR2 = ooR*ooR;
+                S    = A[81+K]; ooS = 1.0/S; ooS2 = ooS*ooS;
+                Z1oR = Z1*ooR; Z2oS = Z2*ooS;
+SZRK = sin(Z1oR); CZSK = cos(Z2oS);
+CZRK = cos(Z1oR); SZSK = sin(Z2oS);
 
-                    FX = -SQPR*EPR*CYPI*SZRK  *FAC_SC;
-                    FY = EPR*SYPI*SZRK*ooP   *FAC_SC;
-                    FZ = -EPR*CYPI*CZRK*ooR  *FAC_SC;
+                SQPR = sqrt(ooP2+ooR2);
+                SQQS = sqrt(ooQ2+ooS2);
+                EPR  = exp(X1*SQPR);
+                EQS  = exp(X2*SQQS);
+         
+                for (N=1; N<=2; N++ ){      // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT
+                                            // AND N=2 IS FOR THE SECOND ONE
+                                                                                                                                                      
+                    for (NN=1; NN<=2; NN++ ){   // NN = 1,2 FURTHER SPLITS THE COEFFICIENTS INTO 2 PARTS,
+                                                // TO TAKE INTO ACCOUNT THE SCALE FACTOR DEPENDENCE
 
-                    if (N == 1) {
-                        if (NN == 1) {
-                            HX = FX;
-                            HY = FY;
-                            HZ = FZ;
+                        if (M == 1) {
+
+                            FX = -SQPR*EPR*CYPI*SZRK  *FAC_SC;
+                            FY = EPR*SYPI*SZRK*ooP   *FAC_SC;
+                            FZ = -EPR*CYPI*CZRK*ooR  *FAC_SC;
+
+                            if (N == 1) {
+                                if (NN == 1) {
+                                    HX = FX;
+                                    HY = FY;
+                                    HZ = FZ;
+                                } else {
+                                    HX = FX*X_SC;
+                                    HY = FY*X_SC;
+                                    HZ = FZ*X_SC;
+                                }
+                            } else {
+                                if (NN == 1) {
+                                    HX = FX*CPS;
+                                    HY = FY*CPS;
+                                    HZ = FZ*CPS;
+                                } else {
+                                    HX = FX*CPS*X_SC;
+                                    HY = FY*CPS*X_SC;
+                                    HZ = FZ*CPS*X_SC;
+                                }
+                            }
+                                                                                                                                                      
+                    } else {        // M.EQ.2
+
+                        FX = -SPS*SQQS*EQS*CYQI*CZSK  *FAC_SC;
+                        FY = SPS*ooQ*EQS*SYQI*CZSK   *FAC_SC;
+                        FZ = SPS*ooS*EQS*CYQI*SZSK   *FAC_SC;
+
+                        if (N == 1) {
+
+                            if (NN == 1) {
+                                HX = FX;
+                                HY = FY;
+                                HZ = FZ;
+                            } else {
+                                HX = FX*X_SC;
+                                HY = FY*X_SC;
+                                HZ = FZ*X_SC;
+                            }
                         } else {
-                            HX = FX*X_SC;
-                            HY = FY*X_SC;
-                            HZ = FZ*X_SC;
-                        }
-                    } else {
-                        if (NN == 1) {
-                            HX = FX*CPS;
-                            HY = FY*CPS;
-                            HZ = FZ*CPS;
-                        } else {
-                            HX = FX*CPS*X_SC;
-                            HY = FY*CPS*X_SC;
-                            HZ = FZ*CPS*X_SC;
+
+                            if (NN == 1) {
+                                HX = FX*S3PS;
+                                HY = FY*S3PS;
+                                HZ = FZ*S3PS;
+                            } else {
+                                HX = FX*S3PS*X_SC;
+                                HY = FY*S3PS*X_SC;
+                                HZ = FZ*S3PS*X_SC;
+                            }
                         }
                     }
-                                                                                                                                              
-            } else {        // M.EQ.2
 
-                FX = -SPS*SQQS*EQS*CYQI*CZSK  *FAC_SC;
-                FY = SPS*ooQ*EQS*SYQI*CZSK   *FAC_SC;
-                FZ = SPS*ooS*EQS*CYQI*SZSK   *FAC_SC;
-
-                if (N == 1) {
-
-                    if (NN == 1) {
-                        HX = FX;
-                        HY = FY;
-                        HZ = FZ;
+                    ++L;
+                                                                                                                                                      
+                    if (M == 1) {
+                        HXR = HX*CT1+HZ*ST1;
+                        HZR = -HX*ST1+HZ*CT1;
                     } else {
-                        HX = FX*X_SC;
-                        HY = FY*X_SC;
-                        HZ = FZ*X_SC;
+                        HXR = HX*CT2+HZ*ST2;
+                        HZR = -HX*ST2+HZ*CT2;
                     }
-                } else {
-
-                    if (NN == 1) {
-                        HX = FX*S3PS;
-                        HY = FY*S3PS;
-                        HZ = FZ*S3PS;
-                    } else {
-                        HX = FX*S3PS*X_SC;
-                        HY = FY*S3PS*X_SC;
-                        HZ = FZ*S3PS*X_SC;
+                                                                                                                                                      
+                    GX = GX + HXR*A[L];
+                    GY = GY + HY *A[L];
+                    GZ = GZ + HZR*A[L];
+                                                                                                                                                      
                     }
                 }
             }
-
-            ++L;
-                                                                                                                                              
-            if (M == 1) {
-                HXR = HX*CT1+HZ*ST1;
-                HZR = -HX*ST1+HZ*CT1;
-            } else {
-                HXR = HX*CT2+HZ*ST2;
-                HZR = -HX*ST2+HZ*CT2;
-            }
-                                                                                                                                              
-            GX = GX + HXR*A[L];
-            GY = GY + HY *A[L];
-            GZ = GZ + HZR*A[L];
-                                                                                                                                              
-            }
         }
-        }
-    }
     }
                                                                                                                                               
     *BX = GX;
@@ -3039,16 +3157,16 @@ void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double
 
 
 
-void    DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void    DIPOLE_opt( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     /* 
      *        A DOUBLE PRECISION ROUTINE
      *  
-     *    CALCULATES GSM COMPONENTS OF A GEODIPOLE FIELD WITH THE DIPOLE MOMENT
+     *    CALCULATES GSM COMPONENTS OF A GEODIPOLE_opt FIELD WITH THE DIPOLE_opt MOMENT
      *    CORRESPONDING TO THE EPOCH OF 2000.
      *  
      *  ----INPUT PARAMETERS:
-     *       PS - GEODIPOLE TILT ANGLE IN RADIANS,
+     *       PS - GEODIPOLE_opt TILT ANGLE IN RADIANS,
      *       X,Y,Z - GSM COORDINATES IN RE (1 RE = 6371.2 km)
      *  
      *  ----OUTPUT PARAMETERS:
