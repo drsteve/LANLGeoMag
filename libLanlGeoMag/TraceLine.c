@@ -101,7 +101,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
     ++n;
     if (n > LGM_MAX_INTERP_PNTS){
-	print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+	    print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     }
 
 
@@ -120,7 +120,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         // Trace until we are not.
         Htry  = 0.1;
         while ( !done ) {
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
@@ -170,7 +170,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     SavePnt = TRUE;
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
 
 
         R = Lgm_Magnitude( &P );
@@ -259,7 +259,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 3\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -342,7 +342,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
     int		    done, reset, n, SavePnt;
 
-//printf("*************************\n");
+//printf("\n\n\n*************************\n");
 //printf("*************************\n");
 //printf("*************************\n");
 
@@ -413,7 +413,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     SavePnt = TRUE;
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
 
 
         R = Lgm_Magnitude( &P );
@@ -500,7 +500,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 5\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -555,6 +555,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     if ( AddBminPoint ) {
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
 //printf("2) ADDING NEW POINT\n");
+//printf("n, nPnts = %d %d\n", n, Info->nPnts);
     }
 
 
@@ -649,11 +650,13 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
 
 
 
-void InitSpline( Lgm_MagModelInfo *Info ) {
+int InitSpline( Lgm_MagModelInfo *Info ) {
 
 
 
     int i;
+
+    if ( ( Info->nPnts < 2 )||( Info->AllocedSplines ) ) return( 0 );
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
 
@@ -692,10 +695,16 @@ void InitSpline( Lgm_MagModelInfo *Info ) {
     gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
     gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
 
+    Info->AllocedSplines = TRUE;
+
+    return( 1 );
 
 }
 
-void FreeSpline( Lgm_MagModelInfo *Info ) {
+int FreeSpline( Lgm_MagModelInfo *Info ) {
+
+    if ( !Info->AllocedSplines ) return(0);
+
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     if ( Info->spline != NULL ) gsl_spline_free( Info->spline );
     if ( Info->splinePx != NULL ) gsl_spline_free( Info->splinePx );
@@ -705,6 +714,10 @@ void FreeSpline( Lgm_MagModelInfo *Info ) {
     if ( Info->accPx != NULL ) gsl_interp_accel_free( Info->accPx );
     if ( Info->accPy != NULL ) gsl_interp_accel_free( Info->accPy );
     if ( Info->accPz != NULL ) gsl_interp_accel_free( Info->accPz );
+
+    Info->AllocedSplines = FALSE;
+
+    return(1);
 }
 
 

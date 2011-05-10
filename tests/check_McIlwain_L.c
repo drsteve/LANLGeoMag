@@ -49,7 +49,7 @@ START_TEST(test_MCILWAIN_01) {
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
     if ( !Passed ){
-        printf("\nTest 01, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       L       ", "       Bm       ", "       M       ");
+        printf("\nTest 01, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
         printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
         printf("                        Got: %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M);
     }
@@ -98,7 +98,7 @@ START_TEST(test_MCILWAIN_02) {
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
     if ( !Passed ){
-        printf("\nTest 02, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       L       ", "       Bm       ", "       M       ");
+        printf("\nTest 02, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
         printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
         printf("                        Got: %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M);
     }
@@ -148,7 +148,7 @@ START_TEST(test_MCILWAIN_03) {
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
     if ( !Passed ){
-        printf("\nTest 02, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       L       ", "       Bm       ", "       M       ");
+        printf("\nTest 02, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
         printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
         printf("                        Got: %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M);
     }

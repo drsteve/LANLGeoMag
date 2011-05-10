@@ -1,6 +1,6 @@
-#include <Lgm_MagModelInfo.h>
-#include <Lgm_LstarInfo.h>
-#include <Lgm_MagEphemInfo.h>
+#include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_LstarInfo.h"
+#include "Lgm/Lgm_MagEphemInfo.h"
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +33,7 @@ int Colors[9] = { 224, 209, 21, 46, 55, 104, 22, 185, 23 };
  *              MagEphemInfo:  Structure used to input and output parameters/settings/results to/from routine.
  *  
  */
-void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
+void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
     Lgm_LstarInfo 	*LstarInfo, *LstarInfo2, *LstarInfo3;
     Lgm_Vector      v1, v2, v3, vv1, Bvec;

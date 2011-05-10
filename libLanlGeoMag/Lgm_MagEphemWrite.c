@@ -1,21 +1,9 @@
-#include <Lgm_CTrans.h>
-#include <Lgm_MagEphemInfo.h>
+#include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_MagEphemInfo.h"
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
-/*
-main(){
 
-    FILE        *fp;
-
-    fp = fopen( "puke.txt", "wb");
-    WriteMagEphemHeader( fp, "mgh", "mithril" );
-    WriteMagEphemData( fp );
-
-}
-*/
-
-
-void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS;
     char        Str[80];
@@ -935,7 +923,7 @@ void WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDes
 }
 
 
-void WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
 
     int             i;
     char            Str[128];
