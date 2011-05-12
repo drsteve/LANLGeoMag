@@ -76,20 +76,19 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
     /*
-     *  Bracket the minimum first.
+     *  Try to Bracket the minimum first.
      *  We want to stop when F = 0.0
      *
-     *  Set the first point of the bracket to be the start point.
-     *  A point of caution here...
-     *  One might think that if Fa is identically zero (or very small) already
-     *  then we are done. I.e., if F=0, then the caller was asking for the
-     *  mirror points of a locally mirroring particle -- so we are done right?
-     *  Not quite.  The problem with this is that unless we are exactly
-     *  in the min-B surface already, there are two mirror points: one where we
-     *  are already and another some distance away. If Fa is small, but
-     *  negative, we still have a chance that there is another root beyond us.
-     *  However, if Fa is positive, then we will fail to get a
-     *  bracket. In that case we will assume that we are already at the root.
+     *  Set the first point of the bracket to be the start point.  A point of
+     *  caution here...  One might think that if Fa is identically zero (or
+     *  very small) already then we are done. I.e., if F=0, then the caller was
+     *  asking for the mirror points of a locally mirroring particle -- so we
+     *  are done right?  Not quite.  The problem with this is that unless we
+     *  are exactly in the min-B surface already, there are two mirror points:
+     *  one where we are already and another some distance away. If Fa is small
+     *  we may not be done.  Chances are that we need to go out before we come
+     *  back, so F may get wrose for a while.  We need to test if we have a
+     *  bracket at the end.
      */
     Pa   = Pb = *u;
     Sa   = 0.0;
@@ -101,216 +100,204 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   Ra, Fa = %g %g\n\n", Pa.x, Pa.y, Pa.z, Ra, Fa );
     }
 
-    if ( (Fa > 0.0) && (Fa < 1e-5) ){
 
-        // assume Pa is the root
-
-        Fb = Fa;
-        Sb = Sa;
-        Pb = Pa;
-
-    } else if ( Fa > 0.0 ) {
-
-        // error? pathological case? Fa not positive, but it isnt very small.
-
-        Fb = Fa;
-        Sb = Sa;
-        Pb = Pa;
-        return(-1);
-
-    } else {
-
-        // find the root
-        
-        /*
-         *  Set the step size to be XX% of the (linear) distance to surface of earth
-         */
-        Htry = 0.2*(Ra-1.0);
+    /*
+     *  For the first step, lets take a small step to help us get away from
+     *  a very close mirror point if thets where we started from.
+     */
+    Htry = 1e-4;
 
 
 
 
-        // Allow larger step sizes.
-        Hmax = 0.5;
-        
-        /*
-         *  To begin with, B - Bm will be negative (or near zero already). So all we need to do is
-         *  trace along the F.L. until B - Bm changes sign. That will give us the far side of the bracket.
-         *  But dont go below surface of the Earth.
-         */
-        P = Pa;
-        done  = FALSE;
-        FoundBracket = FALSE;
-        while ( !done ) {
+    // Allow larger step sizes.
+    Hmax = 0.5;
+    
+    /*
+     *  To begin with, B - Bm will be negative (or near zero already). So all we need to do is
+     *  trace along the F.L. until B - Bm changes sign. That will give us the far side of the bracket.
+     *  But dont go below surface of the Earth.
+     */
+    P = Pa;
+    done         = FALSE;
+    FoundBracket = FALSE;
+    while ( !done ) {
 
-            if ( Info->VerbosityLevel > 4 ) {
-                printf("    TraceToMirrorPoint, Finding Bracket: Starting P: %15g %15g %15g\n", P.x, P.y, P.z );
-            }
-
-            /*
-             *  If user doesnt want large steps, limit Htry ...
-             */
-            if (Htry > Hmax) Htry = Hmax;
-
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
-
-            /*
-             *  Get value of quantity we want to minimize
-             */
-            Info->Bfield( &P, &Bvec, Info );
-            R = Lgm_Magnitude( &P );
-            F = Lgm_Magnitude( &Bvec ) - Bm;
-            Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
-            Lgm_WGS84_to_GeodHeight( &w, &Height );
-
-
-            if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
-                    || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
-                /*
-                 *  Open FL!
-                 */
-                v->x = v->y = v->z = 0.0;
-                if ( Info->VerbosityLevel > 1 ) {
-                    printf("    TraceToMirrorPoint: FL OPEN\n");
-                }
-                if ( Info->VerbosityLevel > 4 ) {
-                    printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
-                }
-                return(-2);
-            } else if ( F > 0.0 ) { /* not >= because we want to explore at least a step beyond */
-                done = TRUE;
-                FoundBracket = TRUE;
-                Pb = P;
-                Rb = R;
-                Fb = F;
-                Sb = Sa + Hdid;
-            } else {
-                Pa = P;
-                Ra = R;
-                Fa = F;
-                Sa += Hdid;
-            }
-
-            // Set Htry adaptively. But make sure we wont descend below the Earth's surface.
-            Htry = Hnext;
-            if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
-
-
-            // If Htry gets to be too small, there is probably something wrong.
-            if (Htry < 1e-12) done = TRUE;
-
-
-            if ( Info->VerbosityLevel > 4 ) {
-                printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
-                printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
-                printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
-                printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
-            }
-
-            if ( Height < 0.0 ) {
-                if ( Info->VerbosityLevel > 1 ) {
-                    printf("    Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth. (Height = %g) \n", Height );
-                }
-                if ( Info->VerbosityLevel > 4 ) {
-                    printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
-                }
-                return(-1); /* dropped below surface of the Earth */
-            }
-
+        if ( Info->VerbosityLevel > 4 ) {
+            printf("    TraceToMirrorPoint, Finding Bracket: Starting P: %15g %15g %15g\n", P.x, P.y, P.z );
         }
 
-        if ( !FoundBracket ) {
+        /*
+         *  If user doesnt want large steps, limit Htry ...
+         */
+        if (Htry > Hmax) Htry = Hmax;
+
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+
+        /*
+         *  Get value of quantity we want to minimize
+         */
+        Info->Bfield( &P, &Bvec, Info );
+        R = Lgm_Magnitude( &P );
+        F = Lgm_Magnitude( &Bvec ) - Bm;
+        Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
+        Lgm_WGS84_to_GeodHeight( &w, &Height );
+
+
+        if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
+                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
+            /*
+             *  Open FL!
+             */
+            v->x = v->y = v->z = 0.0;
             if ( Info->VerbosityLevel > 1 ) {
-                printf("    Lgm_TraceToMirrorPoint: Bracket not found.\n");
+                printf("    TraceToMirrorPoint: FL OPEN\n");
             }
             if ( Info->VerbosityLevel > 4 ) {
                 printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
             }
-            return(-2); /* We have gone as far as we could without finding a bracket. Bail out. */
+            return(-2);
+        } else if ( F > 0.0 ) { /* not >= because we want to explore at least a step beyond */
+            done = TRUE;
+            FoundBracket = TRUE;
+            Pb = P;
+            Rb = R;
+            Fb = F;
+            Sb = Sa + Hdid;
+        } else {
+            Pa = P;
+            Ra = R;
+            Fa = F;
+            Sa += Hdid;
         }
 
+        // Set Htry adaptively. But make sure we wont descend below the Earth's surface.
+        Htry = Hnext;
+        if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
 
 
-        /*
-         *  We have a bracket. Now go in for the kill using bisection.
-         *
-         *  (Note: If all we wanted to know is whether or not the line hits the
-         *  Earth, we could stop here: it must hit the Earth or we wouldnt
-         *  have a minimum bracketed.)
-         *
-         */
-    if (0==1){
-        done  = FALSE;
-        //reset = TRUE;
-        if ( Info->VerbosityLevel > 4 ) nIts = 0;
-        while (!done) {
+        // If Htry gets to be too small, there is probably something wrong.
+        if (Htry < 1e-12) done = TRUE;
 
-            if ( Info->VerbosityLevel > 4 ) {
-                printf("    TraceToMirrorPoint, Finding Root: Starting P: %15g %15g %15g  ...\n", P.x, P.y, P.z );
-            }
 
-            d = Sb - Sa;
-
-            if ( (fabs(d) < tol)  ) {
-                done = TRUE;
-            } else {
-
-                //P = Pa; Htry = 0.5*d;
-                P = Pa; Htry = LGM_1_OVER_GOLD*d;
-                if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
-                Info->Bfield( &P, &Bvec, Info );
-                F = Lgm_Magnitude( &Bvec ) - Bm;
-                if ( F >= 0.0 ) {
-                    Pb = P; Fb = F; Sb = Sa + Hdid;
-                } else {
-                    Pa = P; Fa = F; Sa += Hdid;
-                }
-        
-            }
-
-            if ( Info->VerbosityLevel > 4 ) {
-                printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
-                printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
-                printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
-                printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
-                ++nIts;
-            }
-
+        if ( Info->VerbosityLevel > 4 ) {
+            printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
+            printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
+            printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
+            printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
         }
+
+        if ( Height < 0.0 ) {
+            if ( Info->VerbosityLevel > 1 ) {
+                printf("    Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth. (Height = %g) \n", Height );
+            }
+            if ( Info->VerbosityLevel > 4 ) {
+                printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
+            }
+            return(-1); /* dropped below surface of the Earth */
+        }
+
     }
 
 
 
+    /*
+     * We have found a potential bracket, but lets just be sure.
+     */
+    if ( (Fa>=0.0)&&(Fb<=0.0) || (Fa<=0.0)&&(Fb>=0.0) ) FoundBracket = TRUE;
+    else FoundBracket = FALSE;
+
+
+
+
+    if ( !FoundBracket ) {
+        if ( Info->VerbosityLevel > 1 ) {
+            printf("    Lgm_TraceToMirrorPoint: Bracket not found.\n");
+        }
+        if ( Info->VerbosityLevel > 4 ) {
+            printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
+        }
+        return(-2); /* We have gone as far as we could without finding a bracket. Bail out. */
+    }
+
+
+
+
+    /*
+     *  We have a bracket. Now go in for the kill using bisection.
+     *
+     *  (Note: If all we wanted to know is whether or not the line hits the
+     *  Earth, we could stop here: it must hit the Earth or we wouldnt
+     *  have a minimum bracketed.)
+     *
+     */
+if (0==1){
+    done  = FALSE;
     //reset = TRUE;
+    if ( Info->VerbosityLevel > 4 ) nIts = 0;
+    while (!done) {
 
+        if ( Info->VerbosityLevel > 4 ) {
+            printf("    TraceToMirrorPoint, Finding Root: Starting P: %15g %15g %15g  ...\n", P.x, P.y, P.z );
+        }
 
+        d = Sb - Sa;
 
-    if (1==1){
-        /*
-         *  Use Brent's method
-         */
-    //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
-        double      Sz, Fz;
-        Lgm_Vector  Pz;
-        FuncInfo    f;
+        if ( (fabs(d) < tol)  ) {
+            done = TRUE;
+        } else {
 
-        f.u_scale = u_scale;
-        f.Htry    = Htry;
-        f.sgn     = sgn;
-        f.reset   = reset;
-        f.Info    = Info;
-        f.func    = &mpFunc;
-        f.Val     = Bm;
-        Lgm_zBrent( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
-        Fb = Fz; Sb = Sz; Pb = Pz;
-    //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+            //P = Pa; Htry = 0.5*d;
+            P = Pa; Htry = LGM_1_OVER_GOLD*d;
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            Info->Bfield( &P, &Bvec, Info );
+            F = Lgm_Magnitude( &Bvec ) - Bm;
+            if ( F >= 0.0 ) {
+                Pb = P; Fb = F; Sb = Sa + Hdid;
+            } else {
+                Pa = P; Fa = F; Sa += Hdid;
+            }
+    
+        }
+
+        if ( Info->VerbosityLevel > 4 ) {
+            printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
+            printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
+            printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
+            printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
+            ++nIts;
+        }
+
     }
+}
 
 
 
+//reset = TRUE;
 
 
-    }
+
+if (1==1){
+    /*
+     *  Use Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    FuncInfo    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &mpFunc;
+    f.Val     = Bm;
+    Lgm_zBrent( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
+    Fb = Fz; Sb = Sz; Pb = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+}
+
 
 
 

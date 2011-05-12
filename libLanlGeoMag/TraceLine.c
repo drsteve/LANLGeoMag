@@ -553,7 +553,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      *
      */
     //reset = TRUE;
-if (0==1){
+if (1==1){
     done  = FALSE;
     while (!done) {
 
@@ -574,7 +574,7 @@ if (0==1){
 	    }
     }
 }
-if (1==1){
+if (0==1){
     /*
      * Try Brent's method
      */

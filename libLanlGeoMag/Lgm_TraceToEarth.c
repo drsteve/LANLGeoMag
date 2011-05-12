@@ -330,10 +330,10 @@ if (0==1){
      */
     v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
     Info->Trace_s = 0.5*(Sa+Sc);
-    printf("%f \t%f\t %f\t 2\n", Pa.x, Pa.y, Pa.z);
-    printf("%f \t%f\t %f\t 2\n", Pc.x, Pc.y, Pc.z);
-    printf("%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
-    printf("%f \t%f\t %f\t 2 tol = %g Height = %.15lf\n", v->x, v->y, v->z, tol, Fc+TargetHeight);
+    //printf("%f \t%f\t %f\t 2\n", Pa.x, Pa.y, Pa.z);
+    //printf("%f \t%f\t %f\t 2\n", Pc.x, Pc.y, Pc.z);
+    //printf("%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
+    //printf("%f \t%f\t %f\t 2 tol = %g Height = %.15lf\n", v->x, v->y, v->z, tol, Fc+TargetHeight);
 
 }
 
