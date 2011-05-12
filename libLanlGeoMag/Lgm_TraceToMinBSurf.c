@@ -167,6 +167,10 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 
     }
 	
+    if ( (Bb > Bc) || (Bb > Ba) ) {
+        // no bracket
+        return(0);
+    }
 
 
 

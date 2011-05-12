@@ -278,6 +278,10 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
     }
 
+    if ( Fc*Fa > 0.0 ) {
+        // No bracket
+        return(0);
+    }
 
 
 

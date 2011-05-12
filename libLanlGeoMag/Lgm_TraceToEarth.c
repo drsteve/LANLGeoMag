@@ -275,6 +275,11 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
     }
 
+    if ( Fc*Fa > 0.0 ) {
+        // No bracket
+        return(0);
+    }
+
 
 
 

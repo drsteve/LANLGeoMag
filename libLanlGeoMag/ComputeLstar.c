@@ -26,8 +26,10 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
     }
 
     // These tend to be critical to keep things working smoothly.
-    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
-    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
+//    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
+//    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
+    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-8;
+    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-8;
 
 
     switch ( Quality ) {
@@ -347,7 +349,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-6, LstarInfo->mInfo ) == LGM_CLOSED ) {
+    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
 
 
@@ -666,7 +668,7 @@ mlat0 = -30.0;
          */
         if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
             //Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
-            Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-6, LstarInfo->mInfo );
+            Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             LstarInfo->mInfo->Bfield( &v2, &LstarInfo->Bmin[k], LstarInfo->mInfo );
             LstarInfo->Pmin[k] = v2;
         }

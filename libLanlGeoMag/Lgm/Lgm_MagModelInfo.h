@@ -327,7 +327,7 @@ typedef struct FuncInfo {
 
 } FuncInfo;
 int Lgm_Brent(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, FuncInfo *f, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin );
-double Lgm_zBrent(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, FuncInfo *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
+int Lgm_zBrent(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, FuncInfo *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
 
 
 Lgm_MagModelInfo *Lgm_InitMagInfo( );
