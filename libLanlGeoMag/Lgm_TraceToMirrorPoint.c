@@ -23,6 +23,16 @@
 #define LC_TOL  0.99    // Allow height to be as low as .99*Lgm_LossConeHeight, before we call it "in the loss cone"
 
 
+double mpFunc( Lgm_Vector *P, double Bm, Lgm_MagModelInfo *Info ){
+
+    Lgm_Vector  Bvec;
+    double      F;
+
+    Info->Bfield( P, &Bvec, Info );
+    F = Lgm_Magnitude( &Bvec ) - Bm;
+    return( F );
+
+}
 
 int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info ) {
 
@@ -34,6 +44,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_Vector	w, Pa, Pb, P, Bvec;
     int		    done, FoundBracket, reset, nIts;
 
+    reset = TRUE;
 
     if ( Info->VerbosityLevel > 4 ) {
         printf( "\n\n**************** Start Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n", Info->VerbosityLevel );
@@ -48,11 +59,10 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_Convert_Coords( u, &w, GSM_TO_WGS84, Info->c );
     Lgm_WGS84_to_GeodHeight( &w, &Height );
     if ( Height < LC_TOL*Info->Lgm_LossConeHeight ) {
-        if ( Info->VerbosityLevel > 1 ) 
+        if ( Info->VerbosityLevel > 1 )
         printf("    Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         return(-1); // below loss cone height -> particle is in loss cone!
     }
-
 
 
 
@@ -66,16 +76,16 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
     /*
-     *  Bracket the minimum first. 
+     *  Bracket the minimum first.
      *  We want to stop when F = 0.0
      *
      *  Set the first point of the bracket to be the start point.
      *  A point of caution here...
-     *  One might think that if Fa is identically zero (or very small) already 
+     *  One might think that if Fa is identically zero (or very small) already
      *  then we are done. I.e., if F=0, then the caller was asking for the
      *  mirror points of a locally mirroring particle -- so we are done right?
      *  Not quite.  The problem with this is that unless we are exactly
-     *  in the min-B surface already, there are two mirror points: one where we   
+     *  in the min-B surface already, there are two mirror points: one where we
      *  are already and another some distance away. So dont bail out yet.
      */
     Pa   = Pb = *u;
@@ -94,12 +104,11 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Htry = 0.2*(Ra-1.0);
 
 
-    /*
-     *  If user doesnt want large steps, limit Htry ...
-     */
-    if (Htry > Hmax) Htry = Hmax;
 
 
+//FIX
+Hmax = 0.5;
+//Hmax = 0.1;
 
     /*
      *  To begin with, B - Bm will be negative (or zero already). So all we need to do is
@@ -110,14 +119,17 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
     done  = FALSE;
     FoundBracket = FALSE;
-    reset = TRUE;
+    //reset = TRUE;
     while ( !done ) {
 
         if ( Info->VerbosityLevel > 4 ) {
             printf("    TraceToMirrorPoint, Finding Bracket: Starting P: %15g %15g %15g\n", P.x, P.y, P.z );
         }
 
-        if ( Htry > 0.1 ) Htry = 0.1;
+        /*
+         *  If user doesnt want large steps, limit Htry ...
+         */
+        if (Htry > Hmax) Htry = Hmax;
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 
@@ -158,14 +170,21 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 	        Sa += Hdid;
 	    }
 	    /*
-	     *  Go no farther than some small distance above 
+	     *  Go no farther than some small distance above
 	     *  the surface of the Earth.
 	     */
+/*
 	    Htry = fabs(0.2*(R-0.999999));
 Htry = fabs(0.2*(R-(1.0-WGS84_F)));
 Htry = 0.2*fabs(R-(1.0-WGS84_F));
 Htry = 0.2*fabs(R-1.0);
 Htry = fabs(R-1.0);
+*/
+//mmmmm
+Htry = Hnext;
+//printf("Hnext = %g\n", Hnext);
+if (Htry > (R-0.999999)) Htry = 0.95*(R-0.999999);
+//if (Htry > 1.0) Htry = 1.0;
         if (Htry < 1e-12) done = TRUE;
 
         if ( Info->VerbosityLevel > 4 ) {
@@ -183,7 +202,7 @@ Htry = fabs(R-1.0);
                 printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
             }
 	        return(-1); /* dropped below surface of the Earth */
-	    } 
+	    }
 
     }
 
@@ -198,6 +217,7 @@ Htry = fabs(R-1.0);
     }
 
 
+
     /*
      *  We have a bracket. Now go in for the kill using bisection.
      *
@@ -206,8 +226,9 @@ Htry = fabs(R-1.0);
      *  have a minimum bracketed.)
      *
      */
+if (0==1){
     done  = FALSE;
-    reset = TRUE;
+    //reset = TRUE;
     if ( Info->VerbosityLevel > 4 ) nIts = 0;
     while (!done) {
 
@@ -229,9 +250,9 @@ Htry = fabs(R-1.0);
 	        if ( F >= 0.0 ) {
 		        Pb = P; Fb = F; Sb = Sa + Hdid;
 	        } else {
-		        Pa = P; Fa = F; Sa += Hdid; 
+		        Pa = P; Fa = F; Sa += Hdid;
 	        }
-	    
+	
 	    }
 
         if ( Info->VerbosityLevel > 4 ) {
@@ -243,6 +264,42 @@ Htry = fabs(R-1.0);
         }
 
     }
+}
+
+
+
+//reset = TRUE;
+
+
+
+if (1==1){
+    /*
+     * Try Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    FuncInfo    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &mpFunc;
+    f.Val     = Bm;
+    Lgm_zBrent( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
+    Fb = Fz;
+    Sb = Sz;
+    Pb = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+}
+
+
+
+
+
+
 
 
     /*
@@ -279,6 +336,8 @@ Htry = fabs(R-1.0);
         printf("    =============================================================================================================\n", v->x, v->y, v->z, *Sm );
         printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
     }
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToMirrorPoint(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
