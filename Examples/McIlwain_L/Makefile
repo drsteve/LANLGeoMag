@@ -9,8 +9,9 @@ FILES2    =  McIlwain_L_2.c
 FILES3    =  McIlwain_L_3.c
 FILES4    =  McIlwain_L_4.c
 FILES5    =  McIlwain_L_Test.c
+FILES6    =  McIlwain_L_CDIP.c
 
-all   : McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test
+all   : McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test McIlwain_L_CDIP
 
 McIlwain_L : Makefile $(FILES1) McIlwain_L.o
 	$(CC) $(FILES1) $(LIBS) $(CFLAGS) -o McIlwain_L
@@ -27,6 +28,9 @@ McIlwain_L_4 : Makefile $(FILES4) McIlwain_L_4.o
 McIlwain_L_Test : Makefile $(FILES5) McIlwain_L_Test.o
 	$(CC) $(FILES5) $(LIBS) $(CFLAGS) -o McIlwain_L_Test
 
+McIlwain_L_CDIP : Makefile $(FILES6) McIlwain_L_CDIP.o
+	$(CC) $(FILES6) $(LIBS) $(CFLAGS) -o McIlwain_L_CDIP
+
 
 clean :
-	rm McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test *.o
+	rm McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test McIlwain_L_CDIP *.o

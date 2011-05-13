@@ -1,7 +1,7 @@
 /* TraceToEarth, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *    - Attempts to trace FL down to (some height above) the Earth.
- *     
+ *
  *
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -19,6 +19,18 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_WGS84.h"
 
+double eeFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
+
+    Lgm_Vector  w;
+    double      Height, F;
+
+    Lgm_Convert_Coords( P, &w, GSM_TO_WGS84, Info->c );
+    Lgm_WGS84_to_GeodHeight( &w, &Height );
+    F =  Height - TargetHeight;
+
+    return( F );
+
+}
 
 
 
@@ -102,7 +114,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
 
     /*
-     * Save initial point if we need to 
+     * Save initial point if we need to
      */
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 3\n", u->x, u->y, u->z);
 
@@ -146,11 +158,11 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
 
 
-        /* 
+        /*
          *  We are already at or below target height. Trace until we are not.
          */
         done  = FALSE;
-        reset = TRUE;
+        //reset = TRUE;
         while ( !done ) {
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
@@ -168,7 +180,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         }
 
     }
-  
+
 
 
 
@@ -177,17 +189,17 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
 
     /*
-     *  Bracket the zero first. 
+     *  Bracket the zero first.
      *  We want to stop in the ionosphere at a certain height above the Earth.
      *  We need to find 2 points along the field line such that the
      *  intersection of the FL with the spheroid is guaranteed to lie between
      *  them. To do this, we need to find two points; Pa and Pc such that;
-     *  
+     *
      *		and  Height( Pa ) - TargetHeight   >   0.0
      *		and  Height( Pc ) - TargetHeight   <   0.0
      *
      *  I.e., F = Height - TargetHeight has opposite signs
-     * 
+     *
      *  Set the start point, Pa and Fa. (Fa is difference between Height_a and
      *  TargetHeight.)
      *
@@ -207,7 +219,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
      */
     Htry = 0.9*Height_a;	    // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
     if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-    
+
 
 
     /*
@@ -252,7 +264,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         Htry = Hnext; // adaptively reset Htry
 
 	    /*
-	     *  Go no farther than some small distance below 
+	     *  Go no farther than some small distance below
 	     *  the target Height. Also respect Hmin and Hmax.
 	     */
 	    Htry_max = 0.9*Height;
@@ -261,6 +273,11 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 	    else if (Htry > Hmax) Htry = Hmax;
 
 
+    }
+
+    if ( Fc*Fa > 0.0 ) {
+        // No bracket
+        return(0);
     }
 
 
@@ -281,8 +298,9 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
      *  Sc gets small enough we bail out and take Pb as the min).
      *
      */
+    //reset = TRUE;
+if (0==1){
     done  = FALSE;
-    reset = TRUE;
 //printf( "Lgm_TraceToEarth: About to go in for kill \n");
     while (!done) {
 
@@ -307,15 +325,60 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
         }
     }
-    Info->Trace_s = Sa;
-
-
-
     /*
      *  Take average as the final answer.
      */
     v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
+    Info->Trace_s = 0.5*(Sa+Sc);
+    //printf("%f \t%f\t %f\t 2\n", Pa.x, Pa.y, Pa.z);
+    //printf("%f \t%f\t %f\t 2\n", Pc.x, Pc.y, Pc.z);
+    //printf("%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
+    //printf("%f \t%f\t %f\t 2 tol = %g Height = %.15lf\n", v->x, v->y, v->z, tol, Fc+TargetHeight);
+
+}
+
+if (1==1){
+
+    /*
+     * Try Brent's method
+     */
+Fa = eeFunc( &Pa, TargetHeight, Info);
+Fc = eeFunc( &Pc, TargetHeight, Info);
+//printf("1. Lgm_TraceToEarth(): Sa, Sc = %g %g  Fa, Fc = %g %g   tol = %g\n", Sa, Sc, Fa, Fc, tol);
+//printf("1. Lgm_TraceToEarth(): Pa, Pc = %g %g %g     %g %g %g\n", Pa.x, Pa.y, Pa.z, Pc.x, Pc.y, Pc.z);
+
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    FuncInfo    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &eeFunc;
+    f.Val     = TargetHeight;
+    Lgm_zBrent( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Fc = Fz;
+    Sc = Sz;
+    Pc = Pz;
+//printf("2. Lgm_TraceToEarth(): Sa, Sc = %g %g  Fa, Fc = %g %g   tol = %g\n", Sa, Sc, Fa, Fc, tol);
+
+    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;
+    Info->Trace_s = Sz;
+    //printf("%f \t%f\t %f\t 2 tol = %g Height = %.15lf\n", v->x, v->y, v->z, tol, eeFunc( v, TargetHeight, Info)+TargetHeight);
+    
+
+}
+
+
+
+
+
+
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToEarth(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 

@@ -1700,6 +1700,7 @@ void    ONE_CONE_opt( double *A, double X, double Y, double Z, double *BX, doubl
 
     SinAmB  = SinACosB - CosASinB;
     Sin2AmB = 2.0*SinAmB*CosAmB;
+
     Sin3AmB = SinAmB*(3.0 - 4.0*SinAmB*SinAmB);
 
 

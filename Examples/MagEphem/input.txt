@@ -3,7 +3,7 @@ RBSP A
 2 99991 009.9808 186.1894 6824413 012.0712 110.1573 02.67198139000375
 OutputFile:JSON2.txt
 ISO Start Date/Time:2011-05-01T00:00:00
-ISO End   Date/Time:2011-06-01T00:00:00
+ISO End   Date/Time:2011-05-02T00:00:00
 Cadence in seconds:300
 Internal Field Model:IGRF
 External Field Model:T89

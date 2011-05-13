@@ -208,15 +208,16 @@ typedef struct Lgm_MagModelInfo {
      *  These variables are needed to make Lgm_MagStep() reentrant/thread-safe.
      *  They basically used to be static declarations within Lgm_MagStep()
      */
-    double  Lgm_MagStep_eps_old;
-    int	    Lgm_MagStep_FirstTimeThrough;
-    int     Lgm_MagStep_kmax;
-    int     Lgm_MagStep_kopt;
-    double  Lgm_MagStep_snew;
-    double  Lgm_MagStep_A[LGM_MAGSTEP_JMAX+1];
-    double  Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
-    double  Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
-    double  Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
+    long int    Lgm_nMagEvals; // records number of Bfield evals between resets
+    double      Lgm_MagStep_eps_old;
+    int	        Lgm_MagStep_FirstTimeThrough;
+    int         Lgm_MagStep_kmax;
+    int         Lgm_MagStep_kopt;
+    double      Lgm_MagStep_snew;
+    double      Lgm_MagStep_A[LGM_MAGSTEP_JMAX+1];
+    double      Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
+    double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
+    double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
 
 
     /*
@@ -315,6 +316,19 @@ typedef struct Lgm_MagModelInfo {
 
 } Lgm_MagModelInfo;
 
+typedef struct FuncInfo {
+
+    Lgm_Vector          u_scale;
+    double              Htry, sgn;
+    int                 reset;
+    Lgm_MagModelInfo    *Info;
+    double              Val;
+    double 		        (*func)( Lgm_Vector *P, double Val, Lgm_MagModelInfo *Info );
+
+} FuncInfo;
+int Lgm_Brent(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, FuncInfo *f, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin );
+int Lgm_zBrent(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, FuncInfo *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
+
 
 Lgm_MagModelInfo *Lgm_InitMagInfo( );
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
@@ -340,7 +354,7 @@ int  Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm
 
 
 
-void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
+int Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
