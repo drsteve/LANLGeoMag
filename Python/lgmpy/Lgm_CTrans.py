@@ -12,6 +12,7 @@ transformations in Lgm
 from __future__ import division
 
 from ctypes import pointer
+import datetime
 
 import numpy
 import spacepy.toolbox as tb
@@ -97,6 +98,30 @@ def dateToDateLong(inval):
                 return [long(val.strftime('%Y%m%d')) for val in inval]
     except:
         return long(inval.strftime('%Y%m%d'))
+
+def dateLongToDate(inval):
+    """
+    convert a python date or datetime object to a Date (long) object that
+    LanlGeoMag Likes to use
+
+    Parameters
+    ----------
+    inval : dateLong, int
+        int to change to a datetime object
+
+    Returns
+    -------
+    out : datetime, list
+        datetime or list of datetime corresponding to the dateLongs
+    """
+    try:
+        if len(inval) > 1:
+            if isinstance(inval, numpy.ndarray):
+                return numpy.array([datetime.datetime.strptime(str(val), '%Y%m%d') for val in inval])
+            else:
+                return [datetime.datetime.strptime(str(val), '%Y%m%d') for val in inval]
+    except:
+        return datetime.datetime.strptime(str(inval), '%Y%m%d')
 
 def dateToFPHours(inval):
     """

@@ -44,11 +44,11 @@ class magcoords_Tests(unittest.TestCase):
 
     def test_Lvalue(self):
         """Lvalue should have known output"""
-        ans = {'I': 10.899260245224534, 'L': 7.9509964756205083}
+        ans = {'I': 10.900322098579005, 'L': 7.9513963891276997}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
         for key in vals:
             self.assertAlmostEqual(vals[key], ans[key], places=4)
-        ans = {'I': 0.69125074722140079, 'L': 4.5100680346100681}
+        ans = {'I': 0.69117410082880282, 'L': 4.5100680346100681}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), coord_system='SM')
         for key in vals:
             self.assertAlmostEqual(vals[key], ans[key], places=4)
@@ -58,8 +58,8 @@ class magcoords_Tests(unittest.TestCase):
         ans = {'Blocal': 630.0509017184838,
          'Bmin': 22.033891107554684,
          'Bmirr': 630.0509017184838,
-         'I': 10.899260245224534,
-         'L': 7.9509964756205083,
+         'I': 10.900322098579005,
+         'L': 7.9513963891276997,
          'M': 29966.895576135077}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), extended_out=True)
         for key in vals:
