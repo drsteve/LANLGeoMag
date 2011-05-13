@@ -90,6 +90,16 @@ double mypow_opt( double x, double e ) {
 }
 
 
+// This sincos function is not a standard function.  Seems to be a linux only extension
+void sincos(double val, double *sin_val, double *cos_val)
+{
+    *sin_val = sin(val);
+    *cos_val = cos(val);
+    return;
+
+}
+
+
 
 /*
  * Define some structures to accomodate the FORTRAN common blocks
