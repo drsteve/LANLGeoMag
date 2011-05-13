@@ -330,6 +330,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         printf(    "\t\t%sDate (yyyymmdd):                         %ld%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, PostStr );
         printf(    "\t\t%sUTC (hours):                             %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Time, PostStr );
         printf(    "\t\t%sPitch Angle (deg.):                      %g%s\n", PreStr, LstarInfo->PitchAngle, PostStr );
+        printf(    "\t\t%sInitial Position, vin (Re):              < %g, %g, %g >%s\n", PreStr, vin->x, vin->y, vin->z, PostStr);
         printf(    "\t\t%sMirror Mag. Field Strength, Bm (nT):     %g%s\n", PreStr, LstarInfo->mInfo->Bm, PostStr );
     }
     LstarInfo->nPnts = 0;
@@ -351,6 +352,12 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     }
     if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
+	    if (LstarInfo->VerbosityLevel > 0) {
+            printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
+	        LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
+	        B = Lgm_Magnitude( &Bvec );
+            printf("\t\t%sMag. Field Strength, B at Pmin (nT):    %g%s\n", PreStr, B, PostStr);
+        }
 
 
         /*
@@ -362,7 +369,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &dSa, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
 	        if (LstarInfo->VerbosityLevel > 0) {
-                printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
                 printf("\n\t\t%sMirror Point Location, Pm_South (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, PostStr);
 	            LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
 	            B = Lgm_Magnitude( &Bvec );
@@ -373,7 +379,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
                 if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
                     B = Lgm_Magnitude( &Bvec );

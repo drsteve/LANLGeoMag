@@ -162,6 +162,11 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
                         printf("\n\n\t%sComputing L* for: UTC = %g PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
                         printf("    \t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
                     }
+//////////////////////////////NOTE
+//////////////////////////////NOTE   We are giving Lstar the Min B point ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//////////////////////////////NOTE
+//////////////////////////////NOTE 
+//////////////////////////////NOTE
                     LS_Flag = Lstar( &v3, LstarInfo2);
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
                         printf("\t%sUTC, L*          = %g %g%s\n", PreStr, UTC, LstarInfo2->LS, PostStr );
