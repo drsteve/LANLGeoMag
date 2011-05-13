@@ -106,7 +106,10 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              *  B's are almost the same; And the Pitch angle is close to 90.  If
              *  so, use an approximation to I.
              */
-            if ( ( ((SS=Lgm_VecDiffMag( &LstarInfo->mInfo->Pm_North, &LstarInfo->mInfo->Pmin )) < 1e-4) || (fabs( LstarInfo->mInfo->Bm - LstarInfo->mInfo->Bmin) < 1e-2) ) && (fabs(90.0-LstarInfo->PitchAngle) < 1e-2)  ) {
+SS=Lgm_VecDiffMag( &LstarInfo->mInfo->Pm_North, &LstarInfo->mInfo->Pmin );
+printf("SS = %g\n", SS);
+//            if ( ( ((SS=Lgm_VecDiffMag( &LstarInfo->mInfo->Pm_North, &LstarInfo->mInfo->Pmin )) < 1e-4) || (fabs( LstarInfo->mInfo->Bm - LstarInfo->mInfo->Bmin) < 1e-2) ) && (fabs(90.0-LstarInfo->PitchAngle) < 1e-2)  ) {
+            if (  (SS < 1e-2)  && (fabs(90.0-LstarInfo->PitchAngle) < 1e-2)  ) {
 
                 // if FL length is small, use an approx expression for I
                 rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
