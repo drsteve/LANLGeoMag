@@ -34,8 +34,8 @@ class Lstar_Tests(unittest.TestCase):
     def testLgm_B_T89_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.0231064800914069, ans[90]['LHilton'])
-        self.assertAlmostEqual(5.023227580319058, ans[90]['LMcIlwain'])
+        self.assertAlmostEqual(5.0231064800914069, ans[90]['LHilton'], places=6)
+        self.assertAlmostEqual(5.023227580319058, ans[90]['LMcIlwain'], places=6)
         self.assertAlmostEqual(4.44427733, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.8143100824678715, ans[90]['Lsimple'][0])
 
