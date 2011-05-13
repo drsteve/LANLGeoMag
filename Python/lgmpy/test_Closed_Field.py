@@ -52,7 +52,7 @@ class Closed_FieldTests(unittest.TestCase):
         self.assertEqual(Closed_Field.Closed_Field([1,1,9], self.date), 'LGM_OPEN_N_LOBE')
         self.assertEqual(Closed_Field.Closed_Field([12,1,9], self.date), 'LGM_OPEN_IMF')
         self.assertEqual(Closed_Field.Closed_Field([4,1,-9], self.date), 'LGM_OPEN_S_LOBE')
-        self.assertEqual(Closed_Field.Closed_Field([.1,1,0], self.date), 'LGM_BAD_TRACE')
+        self.assertTrue(Closed_Field.Closed_Field([.1,1,0], self.date) in ['LGM_BAD_TRACE', 'LGM_INSIDE_EARTH'])
         # still haven't testing this one
         #'LGM_TARGET_HEIGHT_UNREACHABLE'
 
