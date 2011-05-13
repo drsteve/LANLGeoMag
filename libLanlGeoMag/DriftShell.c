@@ -216,6 +216,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
                 } else {
 
+
                     /*
                      * open field line
                      */
@@ -284,7 +285,6 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             } else {
                 FoundValidI = -4;
             }
-FoundValidI = -4;
         } else if ( D > 0.0 ) {
             c = b;
         } else {

@@ -176,7 +176,6 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 
 
 
-
     /*
      *  We have a bracket. Now go in for the kill.
      *  Use golden-section search to converge toward minimum.
