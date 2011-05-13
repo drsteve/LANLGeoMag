@@ -217,7 +217,7 @@ printf("fa, fb = %g %g\n", fa, fb);
 //        if ( dd < 0.0 ) sgn *= -1.0;
 //        Htry = fabs(dd);
         Htry = dd;
-        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
         fb = f->func( &Pb, f->Val, f->Info );
 //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 

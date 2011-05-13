@@ -105,7 +105,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      *  For the first step, lets take a small step to help us get away from
      *  a very close mirror point if thets where we started from.
      */
-    Htry = 1e-4;
+    Htry = 1e-5;
 
 
 
@@ -206,6 +206,8 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      */
     if ( (Fa>=0.0)&&(Fb<=0.0) || (Fa<=0.0)&&(Fb>=0.0) ) FoundBracket = TRUE;
     else FoundBracket = FALSE;
+
+    
 
 
 
