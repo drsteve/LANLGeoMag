@@ -277,12 +277,14 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
 
             Info->Lgm_MagStep_snew = *s + H;
             if ( fabs(Info->Lgm_MagStep_snew - *s) < 1e-16 ) { 
-                printf("H = %g\n", H);
-                fprintf(stderr, "step size underflow\n");
-                fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
+                if (Info->VerbosityLevel > 1) {
+                    //printf("H = %g\n", H);
+                    fprintf(stderr, "step size underflow\n");
+                    fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
+                    }
                 Info->Lgm_MagStep_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_eps_old = -1.0;
-                printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
+                //printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
                 return(-1);
             }
 

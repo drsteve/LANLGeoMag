@@ -13,7 +13,7 @@ perform tracing to see if a file line is closed
 from ctypes import pointer
 import math, numpy
 
-from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE
+from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_BAD_TRACE
 from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
 from Lgm_Wrap import Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
 from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
@@ -160,6 +160,8 @@ def Closed_Field(*args, **kwargs):
         retstr = 'LGM_INSIDE_EARTH'
     elif ans == LGM_TARGET_HEIGHT_UNREACHABLE:
         retstr = 'LGM_TARGET_HEIGHT_UNREACHABLE'
+    elif ans == LGM_BAD_TRACE:
+        retstr = 'LGM_BAD_TRACE'
     if kwargs['extended_out']:
         return retstr, northern.tolist(), southern.tolist(), minB.tolist(), L
     else:
