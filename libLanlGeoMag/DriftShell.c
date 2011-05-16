@@ -107,7 +107,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              *  so, use an approximation to I.
              */
 SS=Lgm_VecDiffMag( &LstarInfo->mInfo->Pm_North, &LstarInfo->mInfo->Pmin );
-printf("SS = %g\n", SS);
+if (LstarInfo->VerbosityLevel > 1) printf("SS = %g\n", SS);
 //            if ( ( ((SS=Lgm_VecDiffMag( &LstarInfo->mInfo->Pm_North, &LstarInfo->mInfo->Pmin )) < 1e-4) || (fabs( LstarInfo->mInfo->Bm - LstarInfo->mInfo->Bmin) < 1e-2) ) && (fabs(90.0-LstarInfo->PitchAngle) < 1e-2)  ) {
             if (  (SS < 1e-2)  && (fabs(90.0-LstarInfo->PitchAngle) < 1e-2)  ) {
 
