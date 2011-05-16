@@ -60,7 +60,10 @@ class magcoords_Tests(unittest.TestCase):
          'Bmirr': 630.0509017184838,
          'I': 10.900322098579005,
          'L': 7.9513963891276997,
-         'M': 29966.895576135077}
+         'M': 29966.895576135077,
+         'MLon': 180.0,
+         'MLT': 0.0,
+         }
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), extended_out=True)
         for key in vals:
             self.assertAlmostEqual(vals[key], ans[key], places=4)
