@@ -90,8 +90,8 @@ double mypow_opt( double x, double e ) {
 }
 
 
-// This sincos function is not a standard function.  Seems to be a linux only extension
-void sincos(double val, double *sin_val, double *cos_val)
+// This mysincos function is not a standard function.  Seems to be a linux only extension
+void mysincos(double val, double *sin_val, double *cos_val)
 {
     *sin_val = sin(val);
     *cos_val = cos(val);
@@ -1005,7 +1005,7 @@ void WARPED_opt( int IOPT, double PS, double X, double Y, double Z,
     DFDX   = RR4L4*CPHI*SPS*(DGDX*RHO2-G*RHO*RR4L4*4.0*XL3*DXLDX);
 
     //CF  = cos(F); SF  = sin(F);
-    sincos( F, &SF, &CF );
+    mysincos( F, &SF, &CF );
     YAS = RHO*CF;
     ZAS = RHO*SF;
 
@@ -1280,7 +1280,7 @@ void    SHLCAR5X5_opt( double *A, double X, double Y, double Z, double DSHIFT, d
         YRP = Y*RP;
 
         //SYPI = sin(YRP); CYPI = cos(YRP);
-        sincos( YRP, &SYPI, &CYPI );
+        mysincos( YRP, &SYPI, &CYPI );
 
         for ( K=1; K<=5; K++ ) {
 
@@ -1288,7 +1288,7 @@ void    SHLCAR5X5_opt( double *A, double X, double Y, double Z, double DSHIFT, d
             RR2  = RR*RR;
 
             //SZRK = sin(Z*RR); CZRK = cos(Z*RR);
-            sincos( Z*RR, &SZRK, &CZRK ); // these could be precomputed.
+            mysincos( Z*RR, &SZRK, &CZRK ); // these could be precomputed.
 
 
             SQPR = sqrt(RP2+RR2);
@@ -1585,7 +1585,7 @@ void    BIRK_1N2_opt( int NUMB, int MODE, double PS, double X, double Y, double 
     DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*mypow_opt( 1.0+R1RH3, 4.0/3.0 ));
 
     //SPHICS = sin(PHIS); CPHICS = cos(PHIS);
-    sincos( PHIS, &SPHICS, &CPHICS );
+    mysincos( PHIS, &SPHICS, &CPHICS );
 
     XS =  RHO*CPHICS;
     ZS = -RHO*SPHICS;
@@ -1677,7 +1677,7 @@ void    ONE_CONE_opt( double *A, double X, double Y, double Z, double *BX, doubl
 
     RS     = R_S_opt( A, R, CosTheta, Cos2Theta );
     THETAS = THETA_S_opt( A, R, THETA, SinTheta, Sin2Theta, Sin3Theta );
-    sincos( THETAS, &SIN_THETAS, &COS_THETAS );
+    mysincos( THETAS, &SIN_THETAS, &COS_THETAS );
 
     PHIS     = PHI;
     SIN_PHIS = Y/RHO;
@@ -1817,13 +1817,13 @@ void     FIALCOS_opt( double R, double THETA, double SIN_THETA, double COS_THETA
     double    BTN[10], BPN[10], CCOS[10], SSIN[10];
 
     //SINTE = sin(THETA); COSTE = cos(THETA);
-    //sincos( THETA, &SINTE, &COSTE );
+    //mysincos( THETA, &SINTE, &COSTE );
     SINTE = SIN_THETA; COSTE = COS_THETA;
 
     RO    = R*SINTE;
 
     //SINFI = sin(PHI); COSFI = cos(PHI);
-    //sincos( PHI, &SINFI, &COSFI );
+    //mysincos( PHI, &SINFI, &COSFI );
     SINFI = SIN_PHI; COSFI = COS_PHI;
 
     TG    = SINTE/(1.0+COSTE);        //  TAN(THETA/2)

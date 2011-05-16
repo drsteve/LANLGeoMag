@@ -2,14 +2,14 @@ RBSP A
 1 99991U          12153.00000000 -.00000006  00000-0  00000-0 0 00009
 2 99991 009.9808 186.1894 6824413 012.0712 110.1573 02.67198139000375
 OutputFile:JSON2.txt
-ISO Start Date/Time:2011-05-01T00:00:00
-ISO End   Date/Time:2011-05-02T00:00:00
+ISO Start Date/Time:2011-05-01T01:15:00
+ISO End   Date/Time:2011-05-01T01:15:00
 Cadence in seconds:300
 Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
 Dst:-20
-PitchAngles:18 90 85 80 75 70 65 60 55 50 45 40 35 30 25 20 15 10 5
+PitchAngles:1 90 
 Footpoint Height:100.0
 Colorize:False
 Quality:3
