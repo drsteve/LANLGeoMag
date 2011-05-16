@@ -15,21 +15,14 @@ Steve Morley, Brian Larsen (Python), Mike Henderson (C) - LANL
 import itertools
 from ctypes import pointer, c_double
 
-import numpy
+import numpy as np
 from spacepy import datamodel
 
-try:
-    #this block makes sure the tests in working directory run on local files not installed versions
-    #TODO: I don't like this -- so how can this be done better????
-    from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from .Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
-    from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
-    from .Lstar import Lstar_Data
-except:
-    from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-    from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM
-    from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
-    from lgmpy.Lstar import Lstar_Data
+
+from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
+from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM
+from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+from lgmpy.Lstar import Lstar_Data
 
 from _Bfield_dict import Bfield_dict
 
@@ -41,7 +34,8 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'GSE_WGS84': GSE_TO_WGS84,
                  'GSM_GSE': GSM_TO_GSE,
                  'GSE_GSM': GSE_TO_GSM,
-                 'TEME_WGS84': TEME_TO_WGS84}
+                 'TEME_WGS84': TEME_TO_WGS84,
+                 'MOD_GSM' : MOD_TO_GSM}
 
 def coordTrans(*args):
     '''
@@ -252,7 +246,16 @@ def Lvalue(*args, **kwargs):
     #TODO: decide on format for output -- perhaps use datamodel and have method as attribute?
     #maybe only return I for extended_out flag=True
     if kwargs['extended_out']:
+        sunPos_GSM = coordTrans(mInfo.c.contents.Sun, args[1], 'MOD', kwargs['coord_system'])
+        SunMlon = np.rad2deg(np.arctan2( sunPos_GSM[1], sunPos_GSM[0]))
+        SunMlon += 180.0 # flip to midnight
+
+        MLON = np.rad2deg(np.arctan2( Pgsm.y, Pgsm.x))
+        if (MLON < 0.0):
+            MLON += 360.0
+
+        MLT = np.mod( (MLON-SunMlon)/15.0+24.0, 24.0 )
         return {'L': ans, 'I': Iout.value, 'Bmin': mInfo.Bmin, 'Blocal': mInfo.Blocal,
-                'Bmirr': mInfo.Bm, 'M': M.value}
+                'Bmirr': mInfo.Bm, 'M': M.value, 'MLon':MLON, 'MLT':MLT}
     else:
         return {'L': ans, 'I': Iout.value}
