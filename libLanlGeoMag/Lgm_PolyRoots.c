@@ -6,20 +6,20 @@
  */
 
 
-/*
+/**
  *  \brief
  *      Returns the two roots of the quadratic equation.
  *
  *  \details
- *      Returns the two roots of the quadratic equation.
+ *      Returns the two roots of the quadratic equation;
  *
- *              \f[a z^2 + b z + c = 0\f],
+ *              \f[a z^2 + b z + c = 0,\f]
  *
  *      where \f$a, b, c\f$ are real coefficients.
  *
- *      \param[in]      a   Coefficient of the \f$z^2\f$ term.
- *      \param[in]      b   Coefficient of the \f$z\f$ term.
- *      \param[in]      c   Constant term.
+ *      \param[in]      a   Real coefficient of the \f$z^2\f$ term.
+ *      \param[in]      b   Real coefficient of the \f$z\f$ term.
+ *      \param[in]      c   Real constant term.
  *      \param[out]     z1  First (possibly complex) root.
  *      \param[out]     z2  Second (possibly complex) root.
  *
@@ -29,11 +29,11 @@
  *      \date           2011
  *
  */
-int  Lgm_QuadraticRoots( double a, double b, double c, complex double *z1, complex double *z2 ){
+int  Lgm_QuadraticRoots( double a, double b, double c, double complex *z1, double complex *z2 ){
 
     int             nReal;
     double          x, D2 = b*b - 4.0*a*c;
-    complex double  D;
+    double complex  D;
 
     if ( fabs(D2) < 1e-10 ) {
         // roots are real and equal
@@ -61,21 +61,21 @@ int  Lgm_QuadraticRoots( double a, double b, double c, complex double *z1, compl
 
 
 
-/*
+/**
  *  \brief 
  *      Returns the three roots of the cubic equation with real coefficients.
  *
  *  \details 
- *      Returns the three roots of the cubic equation.
+ *      Returns the three roots of the cubic equation;
  *
- *              \f[z^3 + b z^2 + c z + d = 0\f],
+ *              \f[z^3 + b z^2 + c z + d = 0,\f]
  *
  *      where \f$b, c, d\f$ are real coefficients, and the coefficient on the
  *      \f$x^3\f$ term is assumed to be 1.
  *
- *      \param[in]      b   Coefficient of the \f$z^2\f$ term.
- *      \param[in]      c   Coefficient of the \f$z\f$ term.
- *      \param[in]      d   Constant term.
+ *      \param[in]      b   Real coefficient of the \f$z^2\f$ term.
+ *      \param[in]      c   Real coefficient of the \f$z\f$ term.
+ *      \param[in]      d   Real constant term.
  *      \param[out]     z1  First real root.
  *      \param[out]     z2  Second (possibly complex) root.
  *      \param[out]     z3  Third (possibly complex) root.
@@ -86,7 +86,7 @@ int  Lgm_QuadraticRoots( double a, double b, double c, complex double *z1, compl
  *      \date           2011
  *
  */
-int  Lgm_CubicRoots( double b, double c, double d, double *z1, complex double *z2, complex double *z3 ){
+int  Lgm_CubicRoots( double b, double c, double d, double *z1, double complex *z2, double complex *z3 ){
 
     int     nReal;
     double  b2, Q, R, D2, D, RpD, RmD, S, T, Theta, SqrtNQ, f, g, h;
@@ -128,8 +128,8 @@ int  Lgm_CubicRoots( double b, double c, double d, double *z1, complex double *z
         SqrtNQ = sqrt(-Q);
         Theta = acos( R/(SqrtNQ*fabs(Q)) );
         *z1 = 2.0*SqrtNQ*cos(Theta/3.0) - b/3.0; // real (returned as real double z1)
-        *z2 = 2.0*SqrtNQ*cos( (Theta + 2.0*M_PI)/3.0 ) - b/3.0; // real (but returned as complex double z2)
-        *z3 = 2.0*SqrtNQ*cos( (Theta + 4.0*M_PI)/3.0 ) - b/3.0; // real (but returned as complex double z3)
+        *z2 = 2.0*SqrtNQ*cos( (Theta + 2.0*M_PI)/3.0 ) - b/3.0; // real (but returned as double complex z2)
+        *z3 = 2.0*SqrtNQ*cos( (Theta + 4.0*M_PI)/3.0 ) - b/3.0; // real (but returned as double complex z3)
         nReal = 3;
 
     }
@@ -138,23 +138,14 @@ int  Lgm_CubicRoots( double b, double c, double d, double *z1, complex double *z
 
 }
 
-/*
- *
- *  Return a real root for the cubic equation;
- *
- *       z^3 + b z^2 + c z + d = 0
- *
- *
- */
-
-/*
+/**
  *  \brief 
  *      Returns a real root of the cubic equation with real coefficients.
  *
  *  \details 
- *      Returns a real root of the cubic equation.
+ *      Returns a real root of the cubic equation;
  *
- *              \f[z^3 + b z^2 + c z + d = 0\f],
+ *              \f[z^3 + b z^2 + c z + d = 0,\f]
  *
  *      where \f$b, c, d\f$ are real coefficients, and the coefficient on the
  *      \f$4^3\f$ term is assumed to be 1.
@@ -165,9 +156,9 @@ int  Lgm_CubicRoots( double b, double c, double d, double *z1, complex double *z
  *      (see Lgm_QuarticRoots()). If you need all three roots, use
  *      Lgm_CubicRoots() instead.
  *
- *      \param[in]      b   Coefficient of the \f$z^2\f$ term.
- *      \param[in]      c   Coefficient of the \f$z\f$ term.
- *      \param[in]      d   Constant term.
+ *      \param[in]      b   Real coefficient of the \f$z^2\f$ term.
+ *      \param[in]      c   Real coefficient of the \f$z\f$ term.
+ *      \param[in]      d   Real constant term.
  *
  *      \return         A single real root of the cubic equation.
  *
@@ -216,38 +207,27 @@ double  Lgm_CubicRealRoot( double b, double c, double d ){
 
 
 
-/*
- *
- *  Solve the general quartic equation;
- *
- *       z^4 + b z^3 + c z^2 + d z + e = 0
- *
- *  where b, c, d, e are real coefficients.
- *
- *  This rotuine uses Ferrari's' method. The idea is to recast the quartic in
- *  terms of a quadratic. In the process of doing this, a real root of a cubic
- *  equation needs to be obtained (hence the reason for Lgm_RealCubicRoot()).
- *
- */
-
-/*
+/**
  *  \brief 
  *      Returns the four roots of the quartic equation with real coefficients.
  *
  *  \details 
  *      Returns the four roots of the quartic equation;
  *
- *              \f[z^4 + b z^3 + c z^2 + d z + e = 0\f],
+ *              \f[z^4 + b z^3 + c z^2 + d z + e = 0,\f]
  *
  *      where \f$b, c, d, e\f$ are real coefficients, and the coefficient on the
  *      \f$z^4\f$ term is assumed to be 1.
  *
- *      This routine
+ *      This rotuine uses Ferrari's' method. The idea is to recast the quartic
+ *      in terms of a quadratic. In the process of doing this, a real root of a
+ *      cubic equation needs to be obtained (hence the reason for
+ *      Lgm_RealCubicRoot()).
  *
- *      \param[in]      b   Coefficient of the \f$z^3\f$ term.
- *      \param[in]      c   Coefficient of the \f$z^2\f$ term.
- *      \param[in]      d   Coefficient of the \f$z\f$ term.
- *      \param[in]      e   Constant term.
+ *      \param[in]      b   Real coefficient of the \f$z^3\f$ term.
+ *      \param[in]      c   Real coefficient of the \f$z^2\f$ term.
+ *      \param[in]      d   Real coefficient of the \f$z\f$ term.
+ *      \param[in]      e   Real constant term.
  *      \param[out]     z1  First (possibly complex) root.
  *      \param[out]     z2  First (possibly complex) root.
  *      \param[out]     z3  First (possibly complex) root.

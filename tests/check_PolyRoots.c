@@ -75,9 +75,9 @@ START_TEST(test_PolyRoots_02) {
     double          z2_r_expected, z2_i_expected;
     double          z3_r_expected, z3_i_expected;
     double          x1;
-    complex double  z2, z3;
+    double complex  z2, z3;
     double          Residual1;
-    complex double  Residual2, Residual3;
+    double complex  Residual2, Residual3;
     FILE            *fp_expected;
     FILE            *fp_got;
 
@@ -143,8 +143,8 @@ START_TEST(test_PolyRoots_03) {
     double          z2_r_expected, z2_i_expected;
     double          z3_r_expected, z3_i_expected;
     double          z4_r_expected, z4_i_expected;
-    complex double  z1, z2, z3, z4;
-    complex double  Residual1, Residual2, Residual3, Residual4;
+    double complex  z1, z2, z3, z4;
+    double complex  Residual1, Residual2, Residual3, Residual4;
     FILE            *fp_expected;
     FILE            *fp_got;
 
