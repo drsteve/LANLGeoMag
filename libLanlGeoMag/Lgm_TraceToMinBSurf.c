@@ -239,14 +239,14 @@ if (1==1){
 //printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
     double      Smin, Bmin;
     Lgm_Vector  Pmin;
-    FuncInfo    f;
+    BrentFuncInfoP    f;
 
     f.u_scale = u_scale;
     f.Htry    = Htry;
     f.sgn     = sgn;
     f.reset   = reset;
     f.Info    = Info;
-    Lgm_Brent( Sa, Sb, Sc, Bb, Pa, Pb, Pc, &f, tol, &Smin, &Bmin, &Pmin );
+    Lgm_BrentP( Sa, Sb, Sc, Bb, Pa, Pb, Pc, &f, tol, &Smin, &Bmin, &Pmin );
     Bb = Bmin;
     Sb = Smin;
     Pb = Pmin;

@@ -299,7 +299,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
         double      Sz, Fz;
         Lgm_Vector  Pz;
-        FuncInfo    f;
+        BrentFuncInfoP    f;
 
         f.u_scale = u_scale;
         f.Htry    = Htry;
@@ -308,7 +308,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         f.Info    = Info;
         f.func    = &mpFunc;
         f.Val     = Bm;
-        Lgm_zBrent( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
+        Lgm_zBrentP( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
         Fb = Fz; Sb = Sz; Pb = Pz;
     //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     }

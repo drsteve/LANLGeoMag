@@ -12,7 +12,7 @@
  *
  *  Smin, Pmin are the final result
  */
-int Lgm_Brent(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, FuncInfo *f, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin ) {
+int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, BrentFuncInfoP *f, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin ) {
 
     Lgm_Vector  P, Px, Pw, Pv, Pu, Btmp;
     int         iter;
@@ -117,7 +117,7 @@ int Lgm_Brent(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vec
 
 
 
-int Lgm_zBrent(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, FuncInfo *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz ) {
+int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, BrentFuncInfoP *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz ) {
 
 	int         iter;
 	double      a, b, c, d, e, min1, min2;
@@ -231,9 +231,104 @@ printf("fa, fb = %g %g\n", fa, fb);
 }
 
 
+int Lgm_zBrent(double S1, double S2, double F1, double F2, BrentFuncInfo *f, double tol, double *Sz, double *Fz ) {
+
+	int         iter;
+	double      a, b, c, d, e, min1, min2;
+	double      fa, fb, fc, p, q, r, s, tol1, xm;
+    double      Htry, Hdid, Hnext, dd, sgn;
+    Lgm_Vector  Pa, Pb, Pc, P;
+
+    a = S1; fa = F1;
+    b = S2; fb = F2;
+    c = S2; fc = F2;
 
 
+    if ( fabs(fa) < tol ) {
+        *Sz = S1;
+        *Fz = F1;
+    } else if ( fabs(fb) < tol ) {
+        *Sz = S2;
+        *Fz = F2;
+    }
 
 
+	if ( ((fa > 0.0) && (fb > 0.0)) || ((fa < 0.0) && (fb < 0.0)) ) {
+printf("fa, fb = %g %g\n", fa, fb);
+		fprintf(stderr, "Root not bracketed in Lgm_zBrent, tol = %g\n", tol);
+        return(0);
+    }
+
+	for ( iter=1; iter<=ITMAX; iter++ ) {
+
+		if ( ((fb > 0.0) && (fc > 0.0)) || ((fb < 0.0) && (fc < 0.0)) ) {
+			c  = a;
+			fc = fa;
+			e = d = b-a;
+		}
+
+		if ( fabs(fc) < fabs(fb) ) {
+			a  = b;  b  = c;  c  = a;
+			fa = fb; fb = fc; fc = fa;
+		}
+
+        // Check if we are done
+		tol1 = 2.0*EPS*fabs(b)+0.5*tol;
+		xm = 0.5*(c-b);
+		if ( (fabs(xm) <= tol1) || (fb == 0.0) ) {
+//printf("c, b   = %lf %lf\n", c, b);
+//printf("fc, fb = %g %g\n", fc, fb);
+            *Sz = b;
+            *Fz = fb;
+            return(1);
+        }
+
+		if ( (fabs(e) >= tol1) && (fabs(fa) > fabs(fb)) ) {
+			s = fb/fa;
+			if ( a == c ) {
+				p = 2.0*xm*s;
+				q = 1.0-s;
+			} else {
+				q = fa/fc;
+				r = fb/fc;
+				p = s*(2.0*xm*q*(q-r)-(b-a)*(r-1.0));
+				q = (q-1.0)*(r-1.0)*(s-1.0);
+			}
+			if (p > 0.0) q = -q;
+			p = fabs(p);
+			min1 = 3.0*xm*q-fabs(tol1*q);
+			min2 = fabs(e*q);
+			if ( 2.0*p < ( (min1 < min2) ? min1 : min2) ) {
+				e = d;
+				d = p/q;
+			} else {
+				d = xm;
+				e = d;
+			}
+		} else {
+			d = xm;
+			e = d;
+		}
+
+		a  = b;
+		fa = fb;
+
+		if (fabs(d) > tol1) {
+            dd = d;
+		} else {
+            dd = SIGN(tol1,xm);
+        }
+        b += dd;
+
+        fb = f->func( f->Val, f->Info );
+        //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
+
+	}
+	printf("Lgm_zBrent(): Maximum number of iterations exceeded\n");
+    *Sz = b;
+    *Fz = fb;
+	return(0);
+
+}
 
 

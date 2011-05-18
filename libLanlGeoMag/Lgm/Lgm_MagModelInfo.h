@@ -316,7 +316,7 @@ typedef struct Lgm_MagModelInfo {
 
 } Lgm_MagModelInfo;
 
-typedef struct FuncInfo {
+typedef struct BrentFuncInfoP {
 
     Lgm_Vector          u_scale;
     double              Htry, sgn;
@@ -325,9 +325,19 @@ typedef struct FuncInfo {
     double              Val;
     double 		        (*func)( Lgm_Vector *P, double Val, Lgm_MagModelInfo *Info );
 
-} FuncInfo;
-int Lgm_Brent(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, FuncInfo *f, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin );
-int Lgm_zBrent(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, FuncInfo *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
+} BrentFuncInfoP;
+int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, BrentFuncInfoP *fInfo, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin );
+int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, BrentFuncInfoP *fInfo, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
+
+typedef struct BrentFuncInfo {
+
+    double              Val;
+    void                *Info;
+    double 		        (*func)( double x, void *Info );
+
+} BrentFuncInfo;
+int Lgm_Brent(double xa, double xb, double xc, double fb, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin );
+int Lgm_zBrent(double x1, double x2, double f1, double f2, BrentFuncInfo *fInfo, double tol, double *x, double *f );
 
 
 Lgm_MagModelInfo *Lgm_InitMagInfo( );

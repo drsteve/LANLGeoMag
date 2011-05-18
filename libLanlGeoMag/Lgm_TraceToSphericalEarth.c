@@ -26,17 +26,17 @@
 #include "Lgm/Lgm_WGS84.h"
 
 
-double seFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){                                                                                                                                                               
-                                                                                                                                                                                                                                           
-    Lgm_Vector  w;                                                                                                                                                                                                                         
-    double      Height, F;                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                           
-    Height = WGS84_A*(Lgm_Magnitude( P )-1.0);                                                                                                                                                                                    
-    F =  Height - TargetHeight;                                                                                                                                                                                                            
-                                                                                                                                                                                                                                           
-    return( F );                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                           
-}          
+double seFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
+
+    Lgm_Vector  w;
+    double      Height, F;
+
+    Height = WGS84_A*(Lgm_Magnitude( P )-1.0);
+    F =  Height - TargetHeight;
+
+    return( F );
+
+}
 
 
 
@@ -125,7 +125,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
 
     /*
-     * Save initial point if we need to 
+     * Save initial point if we need to
      */
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 3\n", u->x, u->y, u->z);
 
@@ -165,7 +165,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
 
 
-        /* 
+        /*
          *  We are already at or below target height. Trace until we are not.
          */
         done  = FALSE;
@@ -187,7 +187,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
         }
 
     }
-  
+
 
 
 
@@ -196,18 +196,18 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
 
     /*
-     *  Bracket the zero first. 
+     *  Bracket the zero first.
      *  We want to stop in the ionosphere at a certain height above the Earth
      *  (assumed to be a spehere of radius WGS84_A in this routine).  We need
      *  to find 2 points along the field line such that the intersection of the
      *  FL with the sphere is guaranteed to lie between them. To do this, we
      *  need to find two points; Pa and Pc such that;
-     *  
+     *
      *		and  Height( Pa ) - TargetHeight   >   0.0
      *		and  Height( Pc ) - TargetHeight   <   0.0
      *
      *  I.e., F = Height - TargetHeight has opposite signs
-     * 
+     *
      *  Set the start point, Pa and Fa. (Fa is difference between Height_a and
      *  TargetHeight.)
      *
@@ -222,7 +222,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     Htry = 0.9*Height_a;	    // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
     if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-    
+
 
 
     /*
@@ -267,7 +267,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
         Htry = Hnext; // adaptively reset Htry
 
 	    /*
-	     *  Go no farther than some small distance below 
+	     *  Go no farther than some small distance below
 	     *  the target Height. Also respect Hmin and Hmax.
 	     */
 	    Htry_max = 0.9*Height;
@@ -341,29 +341,29 @@ if (0==1){
 
 
 if (1==1){
-    /*                                                                                                                                                                                                                                     
-     * Try Brent's method                                                                                                                                                                                                                  
-     */                                                                                                                                                                                                                                    
-//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);                                                                                                                                                              
-    double      Sz, Fz;                                                                                                                                                                                                                    
-    Lgm_Vector  Pz;                                                                                                                                                                                                                        
-    FuncInfo    f;                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                           
-    f.u_scale = u_scale;                                                                                                                                                                                                                   
-    f.Htry    = Htry;                                                                                                                                                                                                                      
-    f.sgn     = sgn;                                                                                                                                                                                                                       
-    f.reset   = reset;                                                                                                                                                                                                                     
-    f.Info    = Info;                                                                                                                                                                                                                      
-    f.func    = &seFunc;                                                                                                                                                                                                                   
-    f.Val     = TargetHeight;                                                                                                                                                                                                              
-    Lgm_zBrent( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );                                                                                                                                                                          
-    Fc = Fz;                                                                                                                                                                                                                               
-    Sc = Sz;                                                                                                                                                                                                                               
-    Pc = Pz;                                                                                                                                                                                                                               
-//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);                                                                                                                                                              
-                                                                                                                                                                                                                                           
-    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;                                                                                                                                                                                                 
-    Info->Trace_s = Sz;                  
+    /*
+     * Try Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    BrentFuncInfoP    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &seFunc;
+    f.Val     = TargetHeight;
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Fc = Fz;
+    Sc = Sz;
+    Pc = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+
+    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;
+    Info->Trace_s = Sz;
 
 }
 

@@ -294,7 +294,7 @@ if (1==1){
 //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     double      Sz, Fz;
     Lgm_Vector  Pz;
-    FuncInfo    f;
+    BrentFuncInfoP    f;
 
     f.u_scale = u_scale;
     f.Htry    = Htry;
@@ -303,7 +303,7 @@ if (1==1){
     f.Info    = Info;
     f.func    = &tlFunc;
     f.Val     = R0;
-    Lgm_zBrent( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
     Fc = Fz;
     Sc = Sz;
     Pc = Pz;
@@ -581,7 +581,7 @@ if (0==1){
 //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     double      Sz, Fz;
     Lgm_Vector  Pz;
-    FuncInfo    f;
+    BrentFuncInfoP    f;
 
     f.u_scale = u_scale;
     f.Htry    = Htry;
@@ -590,7 +590,7 @@ if (0==1){
     f.Info    = Info;
     f.func    = &tlFunc;
     f.Val     = R0;
-    Lgm_zBrent( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
     Fc = Fz;
     Sc = Sz;
     Pc = Pz;

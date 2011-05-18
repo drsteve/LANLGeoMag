@@ -349,7 +349,7 @@ Fc = eeFunc( &Pc, TargetHeight, Info);
 
     double      Sz, Fz;
     Lgm_Vector  Pz;
-    FuncInfo    f;
+    BrentFuncInfoP    f;
 
     f.u_scale = u_scale;
     f.Htry    = Htry;
@@ -358,7 +358,7 @@ Fc = eeFunc( &Pc, TargetHeight, Info);
     f.Info    = Info;
     f.func    = &eeFunc;
     f.Val     = TargetHeight;
-    Lgm_zBrent( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
     Fc = Fz;
     Sc = Sz;
     Pc = Pz;

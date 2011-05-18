@@ -139,6 +139,7 @@ printf("SS = %g\n", SS);
                  LstarInfo->mInfo->Hmax = 0.1;
                  if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_North), &(LstarInfo->mInfo->Pm_South), &SS, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
                     if ( SS <= 1e-5 ) {
+printf("FUCK\n");
                         // if FL length is small, use an approx expression for I
                         rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
                         if ((1.0-rat) < 0.0) {
@@ -288,6 +289,8 @@ printf("SS = %g\n", SS);
             } else {
                 FoundValidI = -4;
             }
+printf("D = %g\n", D);
+FoundValidI = -4;
         } else if ( D > 0.0 ) {
             c = b;
         } else {
