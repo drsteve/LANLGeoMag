@@ -333,7 +333,7 @@ typedef struct BrentFuncInfo {
 
     double              Val;
     void                *Info;
-    double 		        (*func)( double x, void *Info );
+    double 		        (*func)( double x, double Val, void *Info );
 
 } BrentFuncInfo;
 int Lgm_Brent(double xa, double xb, double xc, double fb, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin );

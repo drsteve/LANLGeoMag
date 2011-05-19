@@ -320,7 +320,7 @@ printf("fa, fb = %g %g\n", fa, fb);
         }
         b += dd;
 
-        fb = f->func( f->Val, f->Info );
+        fb = f->func( b, f->Val, f->Info );
         //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 
 	}
