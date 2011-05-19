@@ -1,18 +1,13 @@
 """
 Overview
---------
-Data model for magnetic field data
+========
+Data model for magnetic field data.
 
-
-Unittest coverage
------------------
-This module has full unittest coverage.
-
-Authors
--------
-Brian Larsen - LANL
-
+The SpaceData class is a derived dictionary used to hold information in a comman
+format
 """
+__author__ = 'Brian Larsen'
+
 import numpy as np
 import spacepy.toolbox as tb
 

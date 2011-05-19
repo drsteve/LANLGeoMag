@@ -3,10 +3,9 @@ Overview
 --------
 Python implementation of the LanlGeoMag T89 Magnetic field model
 
-Authors
--------
-Brian Larsen, Mike Henderson - LANL
 """
+__author__ = 'Brian Larsen, Mike Henderson - LANL'
+
 import datetime
 from ctypes import pointer
 

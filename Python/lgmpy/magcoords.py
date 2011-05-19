@@ -6,11 +6,9 @@ this is a coordinate transformation class based on LangGeoMag
 
 It is still just a a partial solution
 
-Authors
--------
-Steve Morley, Brian Larsen (Python), Mike Henderson (C) - LANL
 
 """
+__author__ = 'Steve Morley, Brian Larsen (Python), Mike Henderson (C) - LANL'
 
 import itertools
 from ctypes import pointer, c_double

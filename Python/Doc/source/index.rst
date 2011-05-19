@@ -9,7 +9,7 @@ lgmpy Reference
 
 
 :Release: |version|
-:Date: |today|
+:Doc generation date: |today|
 
 .. module:: lgmpy
 

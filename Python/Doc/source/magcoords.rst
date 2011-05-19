@@ -8,7 +8,6 @@ magcoords
 
 .. todolist::
 
-
 .. currentmodule:: lgmpy
 
 .. automodule:: lgmpy.magcoords

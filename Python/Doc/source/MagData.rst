@@ -13,4 +13,3 @@ MagData
 
 .. automodule:: lgmpy.MagData
     :members:
-
