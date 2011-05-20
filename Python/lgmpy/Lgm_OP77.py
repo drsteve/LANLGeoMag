@@ -4,10 +4,6 @@ Overview
 --------
 Python implementation of the LanlGeoMag OP77 Magnetic field model
 
-Authors
--------
-Brian Larsen, Mike Henderson - LANL
-
 TODO
 ----
 Add more information about the model.
@@ -24,6 +20,8 @@ import MagData
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+
+__author__ = 'Brian Larsen, Mike Henderson - LANL'
 
 class Lgm_OP77(MagData.MagData):
     """

@@ -8,14 +8,6 @@ Class to compute Lstar using LanlGeoMag
 This class computes Lstar, I, and other quantities for simple magnetic field models
   - eventually this will work with more complicated models as well, the C already does
 
-
-Unittest coverage
------------------
-This module has ``in progress`` unittest coverage, main functionality is tested
-
-Authors
--------
-Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL
 """
 
 from __future__ import division
@@ -39,6 +31,7 @@ import Lgm_MagEphemInfo
 import Closed_Field
 from _Bfield_dict import Bfield_dict
 
+__author__ = 'Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL'
 
 class Lstar_Data(datamodel.SpaceData):
     """

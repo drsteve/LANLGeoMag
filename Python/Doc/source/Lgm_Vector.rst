@@ -3,6 +3,10 @@
 ##########
 Lgm_Vector
 ##########
+.. inheritance-diagram:: lgmpy.Lgm_Vector
+   :parts: 1
+
+.. todolist::
 
 .. currentmodule:: lgmpy
 

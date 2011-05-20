@@ -104,6 +104,14 @@ class Lgm_CTransTests(unittest.TestCase):
             Lgm_CTrans.dateToDateLong(numpy.array([d1, d1])).tolist())
         self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1.date()))
 
+    def test_dateLongToDate(self):
+        """dateLongToDate should give known output"""
+        self.assertEqual(Lgm_CTrans.dateLongToDate(20001223), datetime.datetime(2000, 12, 23, 0, 0))
+        self.assertEqual(Lgm_CTrans.dateLongToDate([20001223]*2),
+                         [datetime.datetime(2000, 12, 23, 0, 0), datetime.datetime(2000, 12, 23, 0, 0)])
+        numpy.testing.assert_array_equal(Lgm_CTrans.dateLongToDate(numpy.array([20001223]*2)),
+                         numpy.array([datetime.datetime(2000, 12, 23, 0, 0), datetime.datetime(2000, 12, 23, 0, 0)]))
+
     def test_dateToFPHours(self):
         """dateToFPHours should give known output for known input"""
         d1 = datetime.datetime(2000, 12, 12)

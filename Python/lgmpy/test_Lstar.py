@@ -25,11 +25,14 @@ class Lstar_Tests(unittest.TestCase):
         super(Lstar_Tests, self).tearDown()
 
     def test_Lstar_input(self):
-        """Lstar does some inpout checking"""
+        """Lstar does some input checking"""
         self.assertRaises(TypeError, Lstar.get_Lstar, [1,2,3], 'bad')
         self.assertRaises(TypeError, Lstar.get_Lstar, 'bad', coord_system = 'GSM')
         self.assertRaises(TypeError, Lstar.get_Lstar, 'bad', coord_system = 'SM')
+        self.assertRaises(TypeError, Lstar.get_Lstar, 12, self.date, coord_system = 'GSM')
+        self.assertRaises(TypeError, Lstar.get_Lstar, 12, self.date, coord_system = 'SM')
         self.assertRaises(NotImplementedError, Lstar.get_Lstar, [1,2,3], self.date, coord_system = 'bad')
+        self.assertRaises(NotImplementedError, Lstar.get_Lstar, [1,2,3], self.date, Bfield = 'bad')
 
     def testLgm_B_T89_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""

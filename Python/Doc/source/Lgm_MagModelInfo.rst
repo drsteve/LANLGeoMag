@@ -3,6 +3,10 @@
 ################
 Lgm_MagModelInfo
 ################
+.. inheritance-diagram:: lgmpy.Lgm_MagModelInfo
+   :parts: 1
+
+.. todolist::
 
 .. currentmodule:: lgmpy
 

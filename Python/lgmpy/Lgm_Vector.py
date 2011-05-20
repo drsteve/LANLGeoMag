@@ -10,14 +10,6 @@ operate on the vectors.  There is full coverage for <, >, ==, +, -. /.
 All the operations are done in the underlying C library (even though that is
 silly for much of this).
 
-
-Unittest coverage
------------------
-This module has full unittest coverage, see test_Lgm_Vector.py
-
-Authors
--------
-Brian Larsen (Python), Mike Henderson (C) - LANL
 """
 import itertools
 import copy
@@ -26,6 +18,8 @@ from ctypes import pointer, c_double
 from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
     Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords
+
+__author__ = 'Brian Larsen (Python), Mike Henderson (C) - LANL'
 
 class Lgm_Vector(Lgm_Vector):
     def __eq__(self, other):
