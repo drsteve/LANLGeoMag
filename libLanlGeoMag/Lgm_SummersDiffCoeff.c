@@ -1,24 +1,4 @@
-/*
-I'm guessing mthej _g's mean 'global'???
-
-MODULE mod_global
-  
-  IMPLICIT NONE
-
-  REAL(8) :: alpha0_g, Ekin_g, L_g, astar_g
-  LOGICAL :: sum_res = .FALSE., select_bandwidth = .FALSE.
-
-END MODULE mod_global
-*/
-
-
-
-
-
-
-
-
-
+#include "Lgm/Lgm_SummersDiffCoeff.h"
 
 
 /**
@@ -41,10 +21,12 @@ END MODULE mod_global
  *      \date           2010-2011
  *
  */
-void getDs_ba( double alpha0,  double E_kin,  double L,  double astar,  double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+void getDs_ba( double Alpha0,  double Ek_in,  double L,  double astar,  double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
-    double  tau, lambda_m;
-    double  SinAlpha0 = sin( alpha0 );
+    double          T0, T1, T, a, b;
+    double          epsabs, epsrel, result, abserr, resabs, resasc, work[2001], points[3];
+    int             npts=4, key=6, limit=500, lenw=4*limit, iwork[501], last, ier, neval;
+    Lgm_SummersInfo *s=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
 
 
     /*
@@ -53,196 +35,227 @@ void getDs_ba( double alpha0,  double E_kin,  double L,  double astar,  double *
      */
     epsabs = 1e-10;
     epsrel = 1e-3;
-   
-
-    /*
-     *  Calculate bounce period. THIS IS PROBABLY WRONG. THIS JUST LOOKS LIKE THE f() FACTOR IN AN APPROXIMATE TAU FROM ROEDERER.
-*  DO THIS CORRECTLY.
-     */
-    tau = 1.3 - 0.56*SinAlpha0;
 
 
-    /*
-     *  Compute mirror latitude.
-ACTUALLY returns cos(lambda_m)
-     */
-    lambda_m = Lgm_CdipMirrorLat( SinAlpha0 ); // returns radians
-     
 
-    // why is this commented out?
-    //lambda_m = MIN( lambda_m, 25.*RadPerDeg );  // equatatorial confinement of waves.
-   
+
+
 
     /*
      *  Pack integrand parameters into structure
-*  MAKE INTO STRUCTURE.
      */
-    alpha0_g = alpha0;
-    Ekin_g   = E_kin;
-    L_g      = L;
-    astar_g  = astar;
+    s->Alpha0     = Alpha0*M_PI/180.0;
+    s->SinAlpha0  = sin(s->Alpha0);
+    s->CosAlpha0  = cos(s->Alpha0);
+    s->SinAlpha02 = s->SinAlpha0*s->SinAlpha0;
+    s->CosAlpha02 = s->CosAlpha0*s->CosAlpha0;
+    s->Ek_in      = Ek_in;
+    s->L          = L;
+    s->astar      = astar;
 
 
     /*
-     *  Perform integration using QUADPACK (DQAGS - adaptive integration with possible singularities).
-*  NO! DQAGS does not handle singularities well. Change this if we really need it.
+     *  Set integration limits
      */
-    dqags( integaa, 0.0, lambda_m, epsabs, epsrel, Daa_ba, abserr, neval, ier, limit, lenw, last, iwork, work );
-    dqags( integap, 0.0, lambda_m, epsabs, epsrel, Dap_ba, abserr, neval, ier, limit, lenw, last, iwork, work );
-    dqags( integpp, 0.0, lambda_m, epsabs, epsrel, Dpp_ba, abserr, neval, ier, limit, lenw, last, iwork, work );
-   
+    a = 0.0;                                        // radians
+    b = acos( Lgm_CdipMirrorLat( s->SinAlpha0 ) );  // radians
+    //lambda_m = MIN( lambda_m, 25.*RadPerDeg );  // equatatorial confinement of waves.
 
-// I HAVE DOUBTS ABOUT THIS BEING A CORRECT BOUNCE-AVG
-    Daa_ba /= tau;
-    Dap_ba /= tau;
-    Dpp_ba /= tau;
+    /*
+     *  Perform integrations.
+     */
+    points[1] = a; points[2] = b; npts=2;
+    dqagp( CdipIntegrand_Sb, (_qpInfo *)s, a, b, npts, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+printf("neval = %d\n", neval);
+    dqagp( SummersIntegrand_Gaa, (_qpInfo *)s, a, b, npts, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+printf("neval = %d\n", neval);
+    dqagp( SummersIntegrand_Gap, (_qpInfo *)s, a, b, npts, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+printf("neval = %d\n", neval);
+    dqagp( SummersIntegrand_Gpp, (_qpInfo *)s, a, b, npts, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+printf("neval = %d\n", neval);
+
+
+    /*
+     *  Calculate T( SinAlpha0 ), related to bounce period.
+     */
+    //T0 = 1.38017299815047317375;
+    //T1 = 0.74048048969306104115;
+    //T  = T0 - 0.5*(T0-T1)*(s->SinAlpha0 + sqrt(s->SinAlpha0));
+
+
+    *Daa_ba /= T;
+    *Dap_ba /= T;
+    *Dpp_ba /= T;
 
 
     return;
-} 
+}
 
 
 
 
 
-
-/*
- *  Integrand for computing the bounce-averaged value of Daa
+/**
+ *  \brief
+ *      Integrand for computing bounce-averaged Summer's [2005] Daa diffusion coefficient.
+ *
+ *  \details
+ *
+ *      The bounce average of a quantity \f$Q\f$ is;
+ *
+ *          \f[ <Q> = { 1\over S_b} \int_{s_{sm}}^{s_{nm}} {Q\;ds\over [1-{B/B_m}]^{1/2}} \f]
+ *
+ *      where,
+ *          \f[ S_b = \int_{s_{sm}}^{s_{nm}} {ds\over [1-{B/B_m}]^{1/2}} \f]
+ *
+ *      and \f$s\f$ is the distance along the fieldl line and \f$s_{sm}\f$ and
+ *      \f$s_{nm}\f$ are the southern and northern mirror points respectively.
+ *
+ *      The integrals can be recast as integrals over latitude using;
+ *
+ *          \f[ ds = L\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda \f]
+ *          \f[ B/B_m = { \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over cos^6\lambda } \f]
+ *
+ *      Since \f$L\f$ is constant and is in the numerator and denominator it cancels (so we can ignore it).
+ *      The final result is;
+ *
+ *          \f[ <Q> = { 1\over S_b}\displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- {\displaystyle \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over\displaystyle cos^6\lambda }   \right]^{1/2}} \f]
+ *
+ *
+ *
+ *
+ *      \param[in]      Lat         LAtitude in radians
+ *      \param[in]      qpInfo      Structure contaning additional information needed to compute the integrand.
+ *
+ *      \return         The value of the integrand
+ *
+ *      \author         J. Koller, S. Zaharia, M. Henderson
+ *      \date           2010-2011
  */
+double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
+
+    double  CosLat, CosLat2, CosLat3, CosLat6, v;
+    double  BoverB0, BoverBm, SinAlpha2;
+    double  SinAlpha02, Ek_in, L, astar;
+    double  f;
+    Lgm_SummersInfo *s;
+
+    /*
+     * Pull parameters for integrand from Lgm_SummersInfo structure.
+     */
+    s  = (Lgm_SummersInfo *)qpInfo;
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    v = sqrt(4.0 - 3.0*CosLat2);
+
+    BoverB0   = v/CosLat6;          // B/B0
+    BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
+
+    f = CosLat*v/sqrt(1-BoverBm);
+
+    return( f );
+
+}
 double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
-    double  LocPa, SinLocPa, CosLocPa;
-    double  SinLat, CosLat, CosLat2, CosLat3, CosLat7;
-    double  SinAlpha0_g, CosAlpha0_g2;
-    double  integaa, Daa, Dap, Dpp;
-    
+    double  CosLat, CosLat2, CosLat3, CosLat6, v;
+    double  BoverB0, BoverBm, SinAlpha2;
+    double  SinAlpha02, Ek_in, L, astar;
+    double  Daa, Dap, Dpp, f;
+    Lgm_SummersInfo *s;
+
     /*
      * Pull parameters for integrand from Lgm_SummersInfo structure.
      */
-    SummersInfo  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha0_g  = SummersInfo->SinAlpha0_g;    // pre-computed sin( Alpha0_g )
-    CosAlpha0_g2 = SummersInfo->CosAlpha0_g2;   // pre-computed cos( Alpha0_g )*cos( Alpha0_g )
+    s  = (Lgm_SummersInfo *)qpInfo;
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+    Ek_in      = s->Ek_in;
+    L          = s->L;
+    astar      = s->astar;
 
-    
-    /*
-     * sin's and cos's are costly. A lookup table would speed this up radically.
-     */
-    SinLat  = sin( Lat );
-    CosLat  = cos( Lat );
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    v = sqrt(4.0 - 3.0*CosLat2);
 
-    CosLat2 = CosLat*CosLat;
-    CosLat3 = CosLat2*CosLat;
-    CosLat7 = CosLat3*CosLat3*CosLat;
-    
+    BoverB0   = v/CosLat6;          // B/B0
+    BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
 
-    // The pow() should be replaced by sqrt's?.
-    SinLocPa = SinAlpha0_g * pow( 4.0 - 3.0*CosLat2, 0.25) / CosLat3;
-    if (SinLocPA > 1.0) SinLocPA = 1.0;
-    CosLocPa = sqrt( 1.0 - SinLocPa*SinLocPa );
-    
+    getDs( SinAlpha2, Ek_in, L, Lat, astar, &Daa, &Dap, &Dpp );
 
+    f = Daa * CosLat*v/sqrt(1-BoverBm);
 
-    // check on this. do we really need LocPa? Or do we only ever need sin or cos of it?
-    LocPa = asin( SinlocPa );
-    getDs( LocPa, Ekin_g, L_g, lat, astar_g, Daa, Dap, Dpp );
+    return( f );
 
-    integaa = Daa * CosLocPa * CosLat7 / CosAlpha0_g2;
-
-    return( integaa );
-  
 }
 
-/*
- *  Integrand for computing the bounce-averaged value of Dap
- */
 double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
-    double  LocPa, SinLocPa, CosLocPa;
-    double  SinLat, CosLat, CosLat2, CosLat3, CosLat7;
-    double  SinAlpha0_g, CosAlpha0_g;
-    double  integaa, Daa, Dap, Dpp;
-    
+    double  CosLat, CosLat2, CosLat3, CosLat6, v;
+    double  BoverB0, BoverBm, SinAlpha2;
+    double  SinAlpha02, Ek_in, L, astar;
+    double  Daa, Dap, Dpp, f;
+    Lgm_SummersInfo *s;
+
     /*
      * Pull parameters for integrand from Lgm_SummersInfo structure.
      */
-    SummersInfo  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha0_g  = SummersInfo->SinAlpha0_g;    // pre-computed sin( Alpha0_g )
-    CosAlpha0_g  = SummersInfo->CosAlpha0_g;    // pre-computed cos( Alpha0_g )
+    s  = (Lgm_SummersInfo *)qpInfo;
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+    Ek_in      = s->Ek_in;
+    L          = s->L;
+    astar      = s->astar;
 
-    
-    /*
-     * sin's and cos's are costly. A lookup table would speed this up radically.
-     */
-    SinLat  = sin( Lat );
-    CosLat  = cos( Lat );
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    v = sqrt(4.0 - 3.0*CosLat2);
 
-    CosLat2 = CosLat*CosLat;
-    CosLat3 = CosLat2*CosLat;
-    CosLat7 = CosLat3*CosLat3*CosLat;
-    
+    BoverB0   = v/CosLat6;          // B/B0
+    BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
 
-    // The pow() should be replaced by sqrt's?.
-    SinLocPa = SinAlpha0_g * pow( 4.0 - 3.0*CosLat2, 0.25) / CosLat3;
-    if (SinLocPA > 1.0) SinLocPA = 1.0;
-    CosLocPa = sqrt( 1.0 - SinLocPa*SinLocPa );
-    
+    getDs( SinAlpha2, Ek_in, L, Lat, astar, &Daa, &Dap, &Dpp );
 
+    f = Dap * CosLat*v/sqrt(1-BoverBm);
 
-    // check on this. do we really need LocPa? Or do we only ever need sin or cos of it?
-    LocPa = asin( SinlocPa );
-    getDs( LocPa, Ekin_g, L_g, lat, astar_g, Daa, Dap, Dpp );
+    return( f );
 
-    integrand = Dap * SinLocPa * CosLat7/ ( SinAlpha0_g*CosAlpha0_g );
-
-    return( integrand );
-  
 }
 
-/*
- *  Integrand for computing the bounce-averaged value of Dpp
- */
 double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
-    double  LocPa, SinLocPa, CosLocPa;
-    double  SinLat, CosLat, CosLat2, CosLat3, CosLat7;
-    double  SinAlpha0_g, SinAlpha0_g2;
-    double  integaa, Daa, Dap, Dpp;
-    
+    double  CosLat, CosLat2, CosLat3, CosLat6, v;
+    double  BoverB0, BoverBm, SinAlpha2;
+    double  SinAlpha02, Ek_in, L, astar;
+    double  Daa, Dap, Dpp, f;
+    Lgm_SummersInfo *s;
+
     /*
      * Pull parameters for integrand from Lgm_SummersInfo structure.
      */
-    SummersInfo  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha0_g  = SummersInfo->SinAlpha0_g;     // pre-computed sin( Alpha0_g )
-    SinAlpha0_g2 = SummersInfo->CosAlpha0_g2;    // pre-computed sin( Alpha0_g )*sin( Alpha0_g )
+    s  = (Lgm_SummersInfo *)qpInfo;
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+    Ek_in      = s->Ek_in;
+    L          = s->L;
+    astar      = s->astar;
 
-    
-    /*
-     * sin's and cos's are costly. A lookup table would speed this up radically.
-     */
-    SinLat  = sin( Lat );
-    CosLat  = cos( Lat );
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    v = sqrt(4.0 - 3.0*CosLat2);
 
-    CosLat2 = CosLat*CosLat;
-    CosLat3 = CosLat2*CosLat;
-    CosLat7 = CosLat3*CosLat3*CosLat;
-    
+    BoverB0   = v/CosLat6;          // B/B0
+    BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
 
-    // The pow() should be replaced by sqrt's?.
-    SinLocPa = SinAlpha0_g * pow( 4.0 - 3.0*CosLat2, 0.25) / CosLat3;
-    if (SinLocPA > 1.0) SinLocPA = 1.0;
-    CosLocPa = sqrt( 1.0 - SinLocPa*SinLocPa );
-    
+    getDs( SinAlpha2, Ek_in, L, Lat, astar, &Daa, &Dap, &Dpp );
 
+    f = Dpp * CosLat*v/sqrt(1-BoverBm);
 
-    // check on this. do we really need LocPa? Or do we only ever need sin or cos of it?
-    LocPa = asin( SinlocPa );
-    getDs( LocPa, Ekin_g, L_g, lat, astar_g, Daa, Dap, Dpp );
+    return( f );
 
-    integrand = Dpp * SinLocPa*SinLocPa * CosLat7 / ( CosLocPa*SinAlpha0_g2 );
-    
-
-    return( integrand );
-  
 }
 
 
@@ -268,7 +281,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *      \date           2010-2011
  *
  */
-void getDs( double alpha, double E_kin, double L, double lat, double astar, double *Daa, double *Dap, double *Dpp ) {
+void getDs( double alpha, double Ek_in, double L, double Lat, double astar, double *Daa, double *Dap, double *Dpp ) {
 
     // test
     *Daa = 1.0;

@@ -20,7 +20,7 @@
  *      \param[in]      s4      The value of \f$\sin^4\alpha_\circ\f$.
  *      \param[in]      Info    Additional information that can be passed by Lgm_zBrent(), but not needed here.
  *
- *      \return         \f$f[ F(x) = x^6 + 3s^4x - 4s^4 \f$
+ *      \return         \f$ F(x) = x^6 + 3s^4x - 4s^4 \f$
  *
  *      \author         Mike Henderson
  *      \date           2011
@@ -34,7 +34,7 @@ double MirrorLatFunc( double x, double s4, void *Info ) {
 
 /**
  *  \brief
- *      Compute the mirror latitude in a pure centered dipole field.
+ *      Computes the mirror latitude in a pure centered dipole field for a given equatorial pitch angle.
  *
  *  \details
  *      The Magnetic field strength in a dipole is given by;
