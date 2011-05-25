@@ -258,7 +258,7 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
         printf("Lgm_MagStep(): Bmag too small at u0 = %g %g %g (Bmag = %g) (returning with -1).\n", u0.x, u0.y, u0.z, Bmag );
-        return(0);
+        return(-1);
     }
 
     if ( (*s != Info->Lgm_MagStep_snew) || (H != *Hnext) || ( *reset ) ) {
