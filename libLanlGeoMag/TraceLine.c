@@ -1051,3 +1051,113 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 
 }
 
+
+
+/*
+ * Start at point u. Then trace the distance S in N steps.
+ */
+int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
+
+    Lgm_Vector	u_scale;
+    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Sa=0.0, Sc=0.0, d;
+    double	    R0, R, Fa, Fb, Fc, F;
+    double	    Ra, Rb, Rc;
+    Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
+    int		    done, reset, n, SavePnt;
+
+
+    reset = TRUE;
+
+
+//    Pa.x = Pa.y = Pa.z = 0.0;
+//    Pc.x = Pc.y = Pc.z = 0.0;
+//    P.x  = P.y  = P.z  = 0.0;
+
+
+    /*
+     *  H0 is in km above Earth's surface (assumed to be spherical here).
+     *  Convert to geocentric radius.
+     */
+//    R0 = H0/Re + 1.0;
+
+
+
+    Htry = Info->Hmax;  // we want to step with constant increments.
+    Hmin = 1e-7;        // This may be necessary to find the endpoint.
+    Hmax = Info->Hmax;  // Dont use step bigger than this.
+    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+
+
+    /*
+     *  Save first point
+     */
+    n = 0; Info->nPnts = n;
+    ss = 0.0;
+    Info->Bfield( u, &Bvec, Info );
+    Info->s[n]    = ss;                         // save arc length
+    Info->Px[n]   = u->x;                       // save 3D position vector.
+    Info->Py[n]   = u->y;                       //
+    Info->Pz[n]   = u->z;                       //
+    Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
+    Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
+    Lgm_B_cdip( u, &Bcdip, Info );
+    Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+    ++n;
+    if (n > LGM_MAX_INTERP_PNTS){
+	    print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+    }
+
+
+    Htry = S/(double)N;
+    done  = FALSE;
+    P = *u;
+    while ( !done ) {
+
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        ss += Hdid;  
+
+        /*
+         * Save this (new) point only if its different from the previous one)
+         */
+        if ( ss > Info->s[n-1] ) {
+            Info->Bfield( &P, &Bvec, Info );
+            Info->s[n]    = ss;                         // save arc length
+            Info->Px[n]   = P.x;                        // save 3D position vector.
+            Info->Py[n]   = P.y;                        //
+            Info->Pz[n]   = P.z;                        //
+            Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
+            Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
+            Lgm_B_cdip( &P, &Bcdip, Info );
+            Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+            ++n;
+        }
+
+        if ( (ss >= S) || (n > LGM_MAX_INTERP_PNTS) ) done = TRUE;
+
+    }
+    
+    Info->nPnts     = n;                       // set total number of points in the array.
+    Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
+                                               // when trying to interpolate.
+
+
+    /*
+     *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE
+     *  This will only make sense if these values are legitimate for this FL.
+     *  Perhaps it would be better to force user to do this elesewhere.
+     */
+    if ( AddBminPoint ) {
+        printf("1) ADDING NEW POINT\n");
+        // MUST ADD Bcdip for this too!
+        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
+    }
+    //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
+
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+
+    return( 1 );
+
+
+}

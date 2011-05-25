@@ -39,7 +39,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_Vector	u_scale;
     double	    Htry, Hdid, Hnext, Hmin, Hmax, s;
     double	    Sa=0.0, Sb=0.0, Smin, d;
-    double	    Rlc, R, Fa, Fb, F, Fmin;
+    double	    Rlc, R, Fa, Fb, F, Fmin, B, Fs, Fn;
     double	    Ra, Rb, Height;
     Lgm_Vector	w, Pa, Pb, P, Bvec, Pmin;
     int		    done, FoundBracket, reset, nIts;
@@ -66,6 +66,16 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     }
 
 
+    /*
+     * Put in some logic to bail if the initial point is below Bm (i.e. if B is
+     * significantly higher than Bm). This ammounts to requiring that the input
+     * point is at least on a part of the F.L. accessible to bouncing particles
+     * (that have Bm as specified.)
+     */
+
+
+
+
 
     Hmax = Info->Hmax;
     Hmin = 1e-10;
@@ -77,54 +87,86 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
     /*
-     *  Try to Bracket the minimum first.
-     *  We want to stop when F = 0.0
-     *
-     *  Set the first point of the bracket to be the start point.  A point of
-     *  caution here...  One might think that if Fa is identically zero (or
-     *  very small) already then we are done. I.e., if F=0, then the caller was
-     *  asking for the mirror points of a locally mirroring particle -- so we
-     *  are done right?  Not quite.  The problem with this is that unless we
-     *  are exactly in the min-B surface already, there are two mirror points:
-     *  one where we are already and another some distance away. If Fa is small
-     *  we may not be done.  Chances are that we need to go out before we come
-     *  back, so F may get wrose for a while.  We need to test if we have a
-     *  bracket at the end.
+     *  Bracket the root first.
+     *  We are attempting to find a root in the direction given to us (via ithe
+     *  sgn value).  We want to find where F=0 (i.e. where B = Bm).  Thus we
+     *  need a bracket [Pa, Pb] such that Fa is negative and Pb is positive.
+     *  Ideally, we would like to start at Bmin and trace up or down to get the
+     *  mirror points. However, we could easily have a situation where the
+     *  input point is already at (or very close) to one of the mirror points.
+     *  For example, if we put in the S/C location, locally mirroring particles
+     *  (PA=90) will have a mirror point at exactly that location and another
+     *  one at some point beyond the Bmin point. To find the other root, we
+     *  first need to get a point Pa between them (so that Fa<0). When the
+     *  input point is numerically very close to a mirror point, F will be +/-
+     *  a very small number, so it cant be used as the first point of the
+     *  bracket. Instead, we need to step a tiny bit to get the first bracket.
      */
-    Pa   = Pb = *u;
-    Sa   = 0.0;
-    Info->Bfield( &Pa, &Bvec, Info );
-    Ra   = Lgm_Magnitude( &Pa );
-    Fa   = Lgm_Magnitude( &Bvec ) - Bm;
-    if ( Fa < Fmin ) { Fmin = Fa; Smin = Sa; Pmin = Pa; }
-
     if ( Info->VerbosityLevel > 4 )  {
-        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   Ra, Fa = %g %g\n\n", Pa.x, Pa.y, Pa.z, Ra, Fa );
+        Info->Bfield( u, &Bvec, Info );
+        R = Lgm_Magnitude( u );
+        F = Lgm_Magnitude( &Bvec ) - Bm;
+        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g\n\n", u->x, u->y, u->z, R, F );
     }
 
 
+
+
+
     /*
-     *  For the first step, lets take a small step first . 
+     *  To proceed, we need to find a point to start the bracket on (i.e. a
+     *  point where B-Bm < 0).  Then we need to trace until the sign changes
+     *  (or we bail due to hitting earth or because its open or whatever.)
+     *
+     *  First, try a small step in the user-supplied direction.
      */
-    P    = Pa;
-    Htry = 1e-4;
-    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+    Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+    P    = *u;
+    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
     Info->Bfield( &P, &Bvec, Info );
-    Sa += Hdid;
-    Fa = Lgm_Magnitude( &Bvec ) - Bm;
-    if ( Fa < Fmin ) { Fmin = Fa; Smin = Sa; Pmin = P; }
-//    Htry = 1e-4;
+    B = Lgm_Magnitude( &Bvec );
+    F = B-Bm;
+
+    if ( F < 0.0 ) {
+
+        /*
+         *  If F < 0.0, then it means |B| is still less than Bm in this
+         *  direction.  Save this point as the start of a potential bracket.
+         *  Then continue tracing in this direction.
+         */
+        Pa  = P;
+        Ra  = Lgm_Magnitude( &P );
+        Sa  = Hdid;
+        Fa  = F;
+
+    } else {
+
+        /*
+         * Even with a small step size in this direction, |B| was not found to
+         * be less than Bm. This could mean that we are very close to the Pmin
+         * point. Since we are trusting the user that this really is the
+         * direction that the other root should have been found in, we must
+         * conclude that the roots are very closely separated around Pmin. Just
+         * return the input point back as the output point.
+         */
+         *v  = *u;
+         *Sm = 0.0;
+         return( 1 );
+
+    }
 
 
 
 
-    // Allow larger step sizes.
+
+    // Allow larger step sizes. Also, we can go beyond Bm to get the bracket.
     Hmax = 0.5;
-    
+    P    = Pa;
+
     /*
-     *  To begin with, B - Bm will be negative (or near zero already). So all we need to do is
+     *  To begin with, B - Bm will be negative (we wouldnt be here otherwise). So all we need to do is
      *  trace along the F.L. until B - Bm changes sign. That will give us the far side of the bracket.
-     *  But dont go below surface of the Earth.
+     *  But dont go below surface of the Earth, etc.
      */
     done         = FALSE;
     FoundBracket = FALSE;
@@ -149,11 +191,10 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         F = Lgm_Magnitude( &Bvec ) - Bm;
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
-        if ( F < Fmin ) { Fmin = F; Smin = Sa+Hdid; Pmin = P; }
 
 
         if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
-                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
+                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) || ( Sa > 300.0 ) ) {
             /*
              *  Open FL!
              */
@@ -165,19 +206,26 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
                 printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
             }
             return(-2);
+
         } else if ( F > 0.0 ) { /* not >= because we want to explore at least a step beyond */
+
             done = TRUE;
             FoundBracket = TRUE;
             Pb = P;
             Rb = R;
             Fb = F;
             Sb = Sa + Hdid;
+
         } else {
+
             Pa = P;
             Ra = R;
             Fa = F;
             Sa += Hdid;
+
         }
+
+
 
         // Set Htry adaptively. But make sure we wont descend below the Earth's surface.
         Htry = Hnext;
@@ -226,12 +274,12 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         if ( Info->VerbosityLevel > 4 ) {
             printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
         }
-        return(-3); /* We have gone as far as we could without finding a bracket. Bail out. */
+        return( -3 ); /* We have gone as far as we could without finding a bracket. Bail out. */
 
     } else if ( !FoundBracket && Fmin <= 1e-4 ) {
 
-        Fb = Fmin; 
-        Sb = Smin; 
+        Fb = Fmin;
+        Sb = Smin;
         Pb = Pmin;
 
     } else {
@@ -272,7 +320,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
                 } else {
                     Pa = P; Fa = F; Sa += Hdid;
                 }
-        
+
             }
 
             if ( Info->VerbosityLevel > 4 ) {

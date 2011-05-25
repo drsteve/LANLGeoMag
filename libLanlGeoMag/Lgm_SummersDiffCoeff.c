@@ -46,9 +46,11 @@ void getDs_ba( double Alpha0,  double Ek_in,  double L,  double astar,  double *
      */
     s->Alpha0     = Alpha0*M_PI/180.0;
     s->SinAlpha0  = sin(s->Alpha0);
-    s->CosAlpha0  = cos(s->Alpha0);
     s->SinAlpha02 = s->SinAlpha0*s->SinAlpha0;
+    s->CosAlpha0  = cos(s->Alpha0);
     s->CosAlpha02 = s->CosAlpha0*s->CosAlpha0;
+    s->TanAlpha0  = s->SinAlpha0/s->CosAlpha0;
+    s->TanAlpha02 = s->TanAlpha0*s->TanAlpha0;
     s->Ek_in      = Ek_in;
     s->L          = L;
     s->astar      = astar;
@@ -77,6 +79,7 @@ printf("neval = %d\n", neval);
 
     /*
      *  Calculate T( SinAlpha0 ), related to bounce period.
+     *  Schultz and lanzeroti Eqns 1.28a-d)
      */
     //T0 = 1.38017299815047317375;
     //T1 = 0.74048048969306104115;
@@ -163,7 +166,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v;
     double  BoverB0, BoverBm, SinAlpha2;
-    double  SinAlpha02, Ek_in, L, astar;
+    double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, astar;
     double  Daa, Dap, Dpp, f;
     Lgm_SummersInfo *s;
 
@@ -171,7 +174,8 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      * Pull parameters for integrand from Lgm_SummersInfo structure.
      */
     s  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin^2( Alpha0 )
+    TanAlpha02 = s->TanAlpha02;    // pre-computed tan^2( Alpha0 )
     Ek_in      = s->Ek_in;
     L          = s->L;
     astar      = s->astar;
@@ -183,10 +187,12 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     BoverB0   = v/CosLat6;          // B/B0
     BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
     SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
+    CosAlpha2 = 1.0-SinAlpha2;
+    TanAlpha2 = SinAlpha2/CosAlpha2;
 
     getDs( SinAlpha2, Ek_in, L, Lat, astar, &Daa, &Dap, &Dpp );
 
-    f = Daa * CosLat*v/sqrt(1-BoverBm);
+    f = (Daa*TanAlpha02/TanAlpha2)   * CosLat*v/sqrt(1-BoverBm);
 
     return( f );
 
@@ -195,8 +201,8 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v;
-    double  BoverB0, BoverBm, SinAlpha2;
-    double  SinAlpha02, Ek_in, L, astar;
+    double  BoverB0, BoverBm, SinAlpha2, CosAlpha2, TanAlpha2;
+    double  SinAlpha02, TanAlpha02, Ek_in, L, astar;
     double  Daa, Dap, Dpp, f;
     Lgm_SummersInfo *s;
 
@@ -204,7 +210,8 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      * Pull parameters for integrand from Lgm_SummersInfo structure.
      */
     s  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha02 = s->SinAlpha02;    // pre-computed sin( Alpha0 )
+    SinAlpha02 = s->SinAlpha02;    // pre-computed sin^2( Alpha0 )
+    TanAlpha02 = s->SinAlpha02;    // pre-computed tan^2( Alpha0 )
     Ek_in      = s->Ek_in;
     L          = s->L;
     astar      = s->astar;
@@ -216,10 +223,12 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     BoverB0   = v/CosLat6;          // B/B0
     BoverBm   = BoverB0*SinAlpha02; // B/Bm = B/B0 * sin^2(Alpha0)
     SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
+    CosAlpha2 = 1.0-SinAlpha2;
+    TanAlpha2 = SinAlpha2/CosAlpha2;
 
     getDs( SinAlpha2, Ek_in, L, Lat, astar, &Daa, &Dap, &Dpp );
 
-    f = Dap * CosLat*v/sqrt(1-BoverBm);
+    f = (Dap*sqrt(TanAlpha02/TanAlpha2)) * CosLat*v/sqrt(1-BoverBm);
 
     return( f );
 
@@ -266,6 +275,9 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *      Computes the local Summer's [2005] diffusion coefficients.
  *
  *  \details
+ *
+ *
+ *
  *
  *      \param[in]      Alpha0      equatoria PA in radians.
  *      \param[in]      Ek_in       kinetic energy in MeV.

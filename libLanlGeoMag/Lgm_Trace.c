@@ -208,7 +208,8 @@ Info->Hmax = 0.10;
 	    /*
 	     *  Closed FL -- attempt to trace to Eq Plane.
 	     */
-        Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
+        //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
+        Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
         Info->Pmin = *v3;
         Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );

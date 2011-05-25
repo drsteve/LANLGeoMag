@@ -138,7 +138,7 @@ MagEphemInfo->ComputeVgc = FALSE;
     MagEphemInfo->LstarQuality = Quality;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 10.0;
-    MagEphemInfo->LstarInfo->VerbosityLevel = 4;
+    MagEphemInfo->LstarInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 

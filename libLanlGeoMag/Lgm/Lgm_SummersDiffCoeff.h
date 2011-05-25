@@ -11,6 +11,8 @@ typedef struct Lgm_SummersInfo {
     double  CosAlpha0;
     double  SinAlpha02;
     double  CosAlpha02;
+    double  TanAlpha0;
+    double  TanAlpha02;
     double  Ek_in;
     double  L;
     double  astar;

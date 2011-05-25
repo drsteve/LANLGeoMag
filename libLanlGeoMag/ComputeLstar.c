@@ -378,6 +378,16 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             //if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
+
+
+
+
+
+
+
+
+
+
                 if (LstarInfo->VerbosityLevel > 0) {
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
@@ -547,7 +557,7 @@ delta = 5.0;
                  *  First time through -- lets use the predicted range.
                  */
                 //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
-                mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
+                mlat0 = ((pred_mlat-delta) <  -10.0) ?  -10.0 : (pred_mlat-delta);
                 mlat1 = ((pred_mlat+delta) > 90.0) ? 90.0 : (pred_mlat+delta);
 
     	    } else if ( Count == 1 ) {
@@ -557,7 +567,7 @@ delta = 5.0;
                  * Try double what we had.
                  */
                 delta *= 2;
-                mlat0 = ((mlat-delta) >  0.0) ?  0.0 : (mlat-delta);
+                mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
 
             } else if ( Count == 2 ) {
@@ -568,10 +578,10 @@ delta = 5.0;
 	            */
 
                 if ( FoundShellLine == -3 ) {
-                    mlat0 = ((mlat-5.0) >  0.0) ?  0.0 : (mlat-5.0);
+                    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
                     mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
                 } else {
-                    mlat0 = ((mlat-1.0) >  0.0) ?  0.0 : (mlat-1.0);
+                    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
                     mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
                 }
 
@@ -606,7 +616,7 @@ mlat0 = -30.0;
 
 
 
-        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat         = %g  \t Count = %d%s", PreStr, mlat, Count, PostStr ); fflush(stdout);
+        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout);
 
 
         /*
