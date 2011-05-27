@@ -39,7 +39,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
         self.assertAlmostEqual(5.0231064800914069, ans[90]['LHilton'], places=6)
         self.assertAlmostEqual(5.023227580319058, ans[90]['LMcIlwain'], places=6)
-        self.assertAlmostEqual(4.4470253961778594, ['Lstar'][0])
+        self.assertAlmostEqual(4.4470253961778594, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.8143100824678715, ans[90]['Lsimple'][0])
 
     def testLgm_B_T89_2(self):
@@ -66,6 +66,15 @@ class Lstar_Tests(unittest.TestCase):
         self.assertAlmostEqual(4.8561801068770318, ans[90]['LMcIlwain'], places=6)
         self.assertAlmostEqual(4.559620799451368, ans[90]['Lstar'][0], places=6)
         self.assertAlmostEqual(6.289533683215196, ans[90]['Lsimple'][0], places=6)
+
+    def testCentredDipole(self):
+        """Unit test for centred dipole - should give known result"""
+        ans = Lstar.get_Lstar([-6,0,0], self.date, alpha=90, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=1)
+        self.assertAlmostEqual(6.0, ans[90]['Lstar'][0], places=1)
+        ans = Lstar.get_Lstar([-6,0,0], self.date, alpha=90, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=3)
+        self.assertAlmostEqual(6.0, ans[90]['Lstar'][0], places=3)
+        ans = Lstar.get_Lstar([-6,0,0], self.date, alpha=90, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=5)
+        self.assertAlmostEqual(6.0, ans[90]['Lstar'][0], places=5)
 
 class Lstar_Data_Tests(unittest.TestCase):
     def setUp(self):
