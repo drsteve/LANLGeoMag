@@ -605,7 +605,7 @@ mlat0 = -30.0;
                 done2 = TRUE;
             } else if ( Count > 2 ) {
                 done2 =  TRUE;
-                printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout);
+                if (LstarInfo->VerbosityLevel >1) printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout);
                 FoundShellLine = 0;
                 return(-3);
             } else {
