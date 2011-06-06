@@ -1,8 +1,8 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #define ITMAX 100
 #define CGOLD 0.3819660
-#define ZEPS 1.0e-10
-#define EPS  3.0e-8
+#define ZEPS 1.0e-16
+#define EPS  1.0e-16
 #define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 
@@ -219,7 +219,7 @@ printf("fa, fb = %g %g\n", fa, fb);
         Htry = dd;
         Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
         fb = f->func( &Pb, f->Val, f->Info );
-//printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
+        //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 
 	}
 	printf("Lgm_zBrent(): Maximum number of iterations exceeded\n");
@@ -259,6 +259,7 @@ printf("fa, fb = %g %g\n", fa, fb);
         return(0);
     }
 
+    fc = fb;
 	for ( iter=1; iter<=ITMAX; iter++ ) {
 
 		if ( ((fb > 0.0) && (fc > 0.0)) || ((fb < 0.0) && (fc < 0.0)) ) {
@@ -321,7 +322,7 @@ printf("fa, fb = %g %g\n", fa, fb);
         b += dd;
 
         fb = f->func( b, f->Val, f->Info );
-        //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
+        //printf("a, b, c, fa, fb, fc = %g %g %g   %g %g %g\n", a, b, c, fa, fb, fc);
 
 	}
 	printf("Lgm_zBrent(): Maximum number of iterations exceeded\n");

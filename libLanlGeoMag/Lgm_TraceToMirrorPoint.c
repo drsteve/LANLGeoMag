@@ -120,12 +120,13 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      *
      *  First, try a small step in the user-supplied direction.
      */
-    Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+    Htry = 1e-8; // we probably dont ever need to split the mirror points to any finer precision than this(?).
     P    = *u;
-    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
     Info->Bfield( &P, &Bvec, Info );
     B = Lgm_Magnitude( &Bvec );
     F = B-Bm;
+//printf("MIKE: B, Bm = %.15g %.15g\n", B, Bm);
 
     if ( F < 0.0 ) {
 
@@ -149,12 +150,12 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
          * conclude that the roots are very closely separated around Pmin. Just
          * return the input point back as the output point.
          */
+//printf("HEREEEEEEEEEEEEEEEEEEEEEEEEEE\n");
          *v  = *u;
          *Sm = 0.0;
          return( 1 );
 
     }
-
 
 
 

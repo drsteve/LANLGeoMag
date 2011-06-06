@@ -176,7 +176,7 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
                     MagEphemInfo->I[i] = LstarInfo2->I[i];
 
-                    printf("%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+                    printf("%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
 
                     /*
                      * Save results to the MagEphemInfo structure.

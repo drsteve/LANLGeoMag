@@ -109,6 +109,10 @@ typedef struct Lgm_MagModelInfo {
     int         InternalModel;          // Can be LGM_CDIP, LGM_EDIP or LGM_IGRF
     int         ExternalModel;          // Can be from list above (e.g. LGM_EXTMODEL_T89)
 
+    /*
+     * Temporary variable to hold a generic position
+     */
+    Lgm_Vector  Ptmp;
 
 
     /*

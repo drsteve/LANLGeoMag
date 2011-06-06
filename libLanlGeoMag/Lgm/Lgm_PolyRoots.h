@@ -7,5 +7,6 @@ int     Lgm_QuadraticRoots( double a, double b, double c, complex double *z1, co
 int     Lgm_CubicRoots( double b, double c, double d, double *z1, complex double *z2, complex double *z3 );
 double  Lgm_CubicRealRoot( double b, double c, double d );
 int     Lgm_QuarticRoots( double b, double c, double d, double e, double complex *z1, double complex *z2, double complex *z3, double complex *z4 );
+int     Lgm_QuarticRootsSorted( double b, double c, double d, double e, int *nReal, double *RealRoots, int *nComplex, double complex *ComplexRoots );
 
 #endif

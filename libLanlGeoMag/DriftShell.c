@@ -67,7 +67,10 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      */
     if ( (fabs(Db) > fabs(Da)) || (fabs(Db) > fabs(Dc)) ) {
         *Ifound = 9e99;
+//        printf("Not bracketed.\n");
         return(-5);
+    } else {
+//        printf("bracketed.\n");
     }
 
 
@@ -92,7 +95,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         }
         I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
         De = I-I0;
-//        printf("a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
+        //printf("a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
 
 
 
@@ -128,13 +131,13 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              * try to enlarge initial bracket.
              */
             done = TRUE;
-            FoundValidI = -4;
-            //if ( fabs(Db) < 0.1 ) {
-            //    FoundValidI = TRUE; // lets just take what we get here....
-            //    *mlat = mlat_min;  // Use the best value we got
-            //} else {
-            //    FoundValidI = -4;
-            //}
+            //FoundValidI = -4;
+            if ( fabs(Db) < 0.001 ) {
+                FoundValidI = TRUE; // lets just take what we get here....
+                *mlat = mlat_min;  // Use the best value we got
+            } else {
+                FoundValidI = -4;
+            }
             //printf("Db = %g\n", Db);
             //FoundValidI = -4;
 
@@ -177,6 +180,19 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
 
+double RadBmFunc( double r, double Bm, void *data ) {
+
+    Lgm_Vector          u, v, Bvec;
+    Lgm_MagModelInfo    *mInfo;
+    
+    mInfo = (Lgm_MagModelInfo *)data;
+
+    u.x = r*mInfo->Ptmp.x; u.y = r*mInfo->Ptmp.y; u.z = r*mInfo->Ptmp.z;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, mInfo->c );
+    mInfo->Bfield( &v, &Bvec, mInfo );
+    return( Lgm_Magnitude( &Bvec ) - Bm );
+
+}
 
 
 /** Find radius of specified Bm for a given MLT and mlat.
@@ -203,11 +219,12 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
  */
 int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo ) {
 
-    Lgm_Vector    u, v, Bvec;
-    int            done, FoundValidBm;
-    double        Phi, D, a0, c0, Da0, Dc0;
-    double        a, b, c, d, B, cl, sl, cp, sp, lat, f, g;
+    Lgm_Vector  u, v, Bvec;
+    int         done, FoundValidBm, Flag;
+    double      Phi, D, a0, c0, Da0, Dc0;
+    double      a, b, c, d, B, cl, sl, cp, sp, lat, f, g;
 
+    LstarInfo->mInfo->nFunc = 0;
 
     Phi = 15.0*(MLT-12.0)*RadPerDeg; lat = mlat * RadPerDeg;
     cl = cos( lat ); sl = sin( lat );
@@ -237,7 +254,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     while ( !done ) {
 
         // Increment c0 and recompute Dc0.
-        c0 += 0.1;
+        c0 += 1.0;
         u.x = c0*f; u.y = c0*g; u.z = c0*sl;
         Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
         LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
@@ -247,9 +264,13 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
         // Check to see if we went beyond Bm
         if ( Dc0 < 0.0 ) {
             done = TRUE;
+        } else {
+            a0  = c0;
+            Da0 = Dc0;
         }
+        
 
-//printf("c0 = %g     B = %g    Bm = %g\n", c0, B, Bm);
+        //printf("c0 = %g     B = %g    Bm = %g\n", c0, B, Bm);
         // We may never be able to get a B value low enough...
         if (c0>20.0) return(FALSE);
     }
@@ -269,90 +290,29 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  reason) if Dc0 is > 0.0 we wont be able to find the point because its higher than our
      *  initial c0.
      */
-
-    if ( ( Da0 < 0.0 ) || ( Dc0 > 0.0 ) ) return( FALSE );
-
+    if ( ( Da0 < 0.0 ) || ( Dc0 > 0.0 ) ) return( FALSE ); // bracket not found
 
 
 
     /*
-     *  Find a bracket by stepping out in small increments.
+     * We have a bracket. Use brent's method to find root.
      */
-    done = FALSE;
-    b    = a0;
-    while ( !done ) {
+    LstarInfo->mInfo->Ptmp.x = f; 
+    LstarInfo->mInfo->Ptmp.y = g; 
+    LstarInfo->mInfo->Ptmp.z = sl; 
+    BrentFuncInfo bfi;
+    bfi.Info    = (void *)LstarInfo->mInfo;
+    bfi.func    = &RadBmFunc;                                                                                                                                                                                     
+    bfi.Val     = Bm;                                                                                                                                                                                          
+    Flag = Lgm_zBrent( a0, c0, Da0, Dc0, &bfi, tol, r, &D );                                                                                                                                           
+//printf("tol = %g\n", tol);
+    FoundValidBm = (Flag) ? TRUE : FALSE;
 
-        u.x = b*f; u.y = b*g; u.z = b*sl;
-        Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
-        LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
-        B = Lgm_Magnitude( &Bvec );
-        D = B - Bm;
-
-        if ( D < 0.0 ) {
-            done = TRUE;
-            a0 = b - 0.1;
-            c0 = b + 0.1;
-            break;
-        } else {
-            b += 0.1;
-        }
-
-    }
+//printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG     D = %g\n", D);
     if (LstarInfo->VerbosityLevel > 5) {
-        printf("%sFindBmRadius: a0, c0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, LstarInfo->PostStr );
+        printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr );
     }
 
-
-    a = a0, c = c0;
-
-    done = FALSE;
-    FoundValidBm = FALSE;
-    while ( !done ) {
-
-        d = c-a;
-        b = a + 0.5*d;
-
-
-        u.x = b*f; u.y = b*g; u.z = b*sl;
-        Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
-        LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
-        B = Lgm_Magnitude( &Bvec );
-        D = B - Bm;
-
-
-        if ( (fabs((b-a0)/a0) < tol) || (fabs((b-c0)/c0) < tol) ) {
-            /* converged to an endpoint -> no Bm in interval! */
-            done = TRUE;
-            FoundValidBm = FALSE;
-        } else if ( fabs(D/Bm) < tol ) {
-            /* converged */
-            done = TRUE;
-            FoundValidBm = TRUE;
-        } else if ( fabs(d) < tol ) {
-            done = TRUE;
-            printf("%sFindBmRadius: Warning, BmRadius converged before Bm (might not have found proper Bm)%s\n", LstarInfo->PreStr, LstarInfo->PostStr );
-            FoundValidBm = TRUE; // not really true
-        } else if ( D > 0.0 ){
-            a = b;
-        } else {
-            c = b;
-        }
-
-        if (LstarInfo->VerbosityLevel > 5) {
-            printf("%sFindBmRadius: a, b, c = %g %g %g    D, Bm, fabs(D/Bm) = %g %g %g%s\n", LstarInfo->PreStr, a, b, c, D, Bm, fabs(D/Bm), LstarInfo->PostStr );
-        }
-
-    }
-
-
-
-    /*
-     *  Take average of endpoints as final answer
-     */
-    *r = 0.5*(a+c);
-    if (LstarInfo->VerbosityLevel > 5) {
-        printf("%sFindBmRadius: Final r = %.15lf%s\n", LstarInfo->PreStr, *r, LstarInfo->PostStr );
-    }
     return( FoundValidBm );
 
 }

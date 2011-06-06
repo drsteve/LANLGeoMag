@@ -9,7 +9,7 @@ Internal Field Model:IGRF
 External Field Model:T89
 Kp:4.3
 Dst:-20
-PitchAngles:18 90 85 80 75 70 65 60 55 50 45 40 35 30 25 20 15 10 5
+PitchAngles:1 40
 Footpoint Height:100.0
 Colorize:False
 Quality:3

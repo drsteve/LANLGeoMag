@@ -28,7 +28,7 @@ int main( int argc, char *argv[] ){
     Lgm_Eop         *e = Lgm_init_eop( 0 );                                                                                            
     Lgm_EopOne      eop;                      
     int             i; 
-    char            *InputFile   = "input.txt";
+    char            *InputFile   = "input2.txt";
     char            IsoTimeString[1024];
     char            InputFilename[1024];
     char            OutputFilename[1024];
@@ -36,7 +36,7 @@ int main( int argc, char *argv[] ){
     int             AppendMode, UseEop, Colorize;
     FILE            *fp, *fp_in, *fp_MagEphem;
     double           Alpha[1000], Kp, Dst, FootpointHeight;
-    int              nAlpha;
+    int              nAlpha, Quality;
     Lgm_MagEphemInfo *MagEphemInfo;
 
 
@@ -66,6 +66,7 @@ int main( int argc, char *argv[] ){
         } else {
             Colorize = FALSE;
         }
+        fscanf( fp, "%*[^:]:%d", &Quality );
     } else {
         printf( "Couldnt open file %s for reading\n", InputFile );
         exit( 1 );
@@ -78,7 +79,8 @@ int main( int argc, char *argv[] ){
     printf("ExtModel        = %s\n", ExtModel);
     printf("Kp              = %g\n", Kp);
     printf("Dst             = %g\n", Dst);
-    printf("FootpointHeight = %g", FootpointHeight);
+    printf("FootpointHeight = %g\n", FootpointHeight);
+    printf("Quality = %d\n", Quality);
     //exit(0);
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);

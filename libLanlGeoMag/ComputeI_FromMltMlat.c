@@ -5,7 +5,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
     int         reset=1;
     
-    double      I, Phi, cl, sl, rat, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
+    double      I, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
     Lgm_Vector  w, u, Pmirror1, Pmirror2, v1, v2, v3, Bvec, P, Ps, u_scale;
 
 
@@ -16,6 +16,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
      *  so convert to GSM.
      */
     //printf("Bm, MLT, b, r = %g %g %g %g\n", Bm, MLT, b, r );
+//printf("LstarInfo->mInfo->Lgm_FindBmRadius_Tol = %g\n", LstarInfo->mInfo->Lgm_FindBmRadius_Tol);
     if ( !FindBmRadius( Bm, MLT, mlat, r, LstarInfo->mInfo->Lgm_FindBmRadius_Tol, LstarInfo ) ) {
 
         /*
@@ -60,23 +61,25 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  To find the other mirror point, we need to know which way Bmin is.
          *  Lgm_TraceToMirrorPoint() should do the rest is for us.
          */
-        Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+        Htry = 1e-3; // we probably dont ever need to split the mirror points to any finer precision than this(?).
         u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
         P = Pmirror1;
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Bs = Lgm_Magnitude( &Bvec );
+//printf("Bs-Bm = %g\n", Bs-Bm);
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( LGM_BAD_TRACE );
 
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Be  = Lgm_Magnitude( &Bvec );
 
-//printf("1. Be-Bs = %g\n", Be - Bs);
         if ( Be < Bs ) {
             // our assumption that its a northern mirror point is probably correct.
+//printf("1. Be-Bs = %g        Be, Bs = %.15g %.15g  Bm = %.15g\n", Be - Bs, Be, Bs, LstarInfo->mInfo->Bm);
             sgn = -1.0;
         } else {
             
+//printf("2a. Be-Bs = %g        Be, Bs = %.15g %.15g Bm = %.15g\n", Be - Bs, Be, Bs, LstarInfo->mInfo->Bm);
             // try the other direction
             P = Pmirror1;
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
@@ -86,8 +89,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Be  = Lgm_Magnitude( &Bvec );
-//printf("2. Be-Bs = %g\n", Be - Bs);
 
+//printf("2b. Be-Bs = %g        Be, Bs = %.15g %.15g Bm = %.15g\n", Be - Bs, Be, Bs, LstarInfo->mInfo->Bm);
             if ( Be < Bs ) {
                 sgn = 1.0;
             } else {
@@ -97,9 +100,17 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
         }
 
+        SS1 = Hdid;
+//SS1 = 0.0;
 
 
-        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+
+//        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+        SS2 = 0.0;
+        if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+
+            SS = SS1 + SS2;
+//printf("SS = %g\n", SS);
 
             if ( sgn < 0.0 ) {
                 LstarInfo->mInfo->Pm_North = Pmirror1;
@@ -109,7 +120,12 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 LstarInfo->mInfo->Pm_South = Pmirror1;
             }
             SS = fabs( SS );
-            if (SS < 1e-7) return(0.0);
+            if (SS < 1e-7) {
+//printf("AHA! SS = %.15g\n", SS);
+//printf("Pm_South = %.15g %.15g %.15g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z );
+//printf("Pm_North = %.15g %.15g %.15g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z );
+                return(0.0);
+            }
 
 
             /*
@@ -140,6 +156,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                  *  Note we start at Pm_South and trace to Pm_North (which is at an altitude of (r-1.0) Re above the Earth.
                  */
                 LstarInfo->mInfo->Hmax = SS/200.0;
+//printf("LstarInfo->mInfo->Hmax = %g\n", LstarInfo->mInfo->Hmax);
 
 
 

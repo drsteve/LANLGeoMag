@@ -297,3 +297,58 @@ int Lgm_QuarticRoots( double b, double c, double d, double e, double complex *z1
     return( nReal );
 
 }
+
+/**
+ *  \brief 
+ *      Returns the four roots of the quartic equation with real coefficients. Results are sorted.
+ *
+ *  \details 
+ *      Returns the four roots of the quartic equation;
+ *
+ *              \f[z^4 + b z^3 + c z^2 + d z + e = 0,\f]
+ *
+ *      where \f$b, c, d, e\f$ are real coefficients, and the coefficient on the
+ *      \f$z^4\f$ term is assumed to be 1.
+ *
+ *      This routine calls Lgm_QuarticRoots() and splits the results into Real and Complex roots.
+ *
+ *      \param[in]      b            Real coefficient of the \f$z^3\f$ term.
+ *      \param[in]      c            Real coefficient of the \f$z^2\f$ term.
+ *      \param[in]      d            Real coefficient of the \f$z\f$ term.
+ *      \param[in]      e            Real constant term.
+ *      \param[out]     nReal        Number of real roots found.
+ *      \param[out]     RealRoots    Array of real roots.
+ *      \param[out]     nComplex     Number of complex roots found.
+ *      \param[out]     ComplexRoots Array of complex roots.
+ *
+ *      The RealRoots and ComplexRoots arrays need to be suitably allocated by
+ *      the user and should have at least 4 elements each.
+ *
+ *      \return         The number of real roots found.
+ *
+ *      \author         Mike Henderson
+ *      \date           2011
+ *
+ */
+int Lgm_QuarticRootsSorted( double b, double c, double d, double e, int *nReal, double *RealRoots, int *nComplex, double complex *ComplexRoots ){
+
+    int             nr=0, nc = 0;
+    double complex  z1, z2, z3, z4;
+
+    Lgm_QuarticRoots( b, c, d, e, &z1, &z2, &z3, &z4 );
+
+    if ( cimag( z1 ) < 1e-16 ) { RealRoots[nr++] = creal(z1); } else { ComplexRoots[nc++] = z1; }
+    if ( cimag( z2 ) < 1e-16 ) { RealRoots[nr++] = creal(z2); } else { ComplexRoots[nc++] = z2; }
+    if ( cimag( z3 ) < 1e-16 ) { RealRoots[nr++] = creal(z3); } else { ComplexRoots[nc++] = z3; }
+    if ( cimag( z4 ) < 1e-16 ) { RealRoots[nr++] = creal(z4); } else { ComplexRoots[nc++] = z4; }
+
+    *nReal    = nr;
+    *nComplex = nc;
+
+    return( nr );
+
+}
+
+
+
+
