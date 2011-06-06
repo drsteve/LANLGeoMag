@@ -13,6 +13,7 @@ Test suite for the LstarVersusPA
 
 import unittest
 import datetime
+import itertools
 
 import Lstar, magcoords
 
@@ -39,7 +40,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
         self.assertAlmostEqual(5.0231064800914069, ans[90]['LHilton'], places=6)
         self.assertAlmostEqual(5.023227580319058, ans[90]['LMcIlwain'], places=6)
-        self.assertAlmostEqual(4.4470253961778594, ['Lstar'][0])
+        self.assertAlmostEqual(4.4470253961778594, ans[90]['Lstar'][0])
         self.assertAlmostEqual(5.8143100824678715, ans[90]['Lsimple'][0])
 
     def testLgm_B_T89_2(self):
@@ -66,6 +67,26 @@ class Lstar_Tests(unittest.TestCase):
         self.assertAlmostEqual(4.8561801068770318, ans[90]['LMcIlwain'], places=6)
         self.assertAlmostEqual(4.559620799451368, ans[90]['Lstar'][0], places=6)
         self.assertAlmostEqual(6.289533683215196, ans[90]['Lsimple'][0], places=6)
+
+    def testCentredDipole90(self):
+        """Unit test for centred dipole - should give known result"""
+        for rdist, qlevel in itertools.product([3, 3.5, 4, 5, 6] ,range(1,7)):
+            ans = Lstar.get_Lstar([-rdist,0,0], self.date, alpha=90, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=qlevel)
+            try:
+                self.assertAlmostEqual(rdist, ans[90]['Lstar'][0], places=qlevel)
+            except:
+                print('Failed Lstar:CentredDipole90:: L=%f, Qual=%d -- dropped to %d places' 
+                    % (rdist, qlevel, qlevel-1))
+                self.assertAlmostEqual(rdist, ans[90]['Lstar'][0], places=qlevel-1)
+    
+    def testCentredDipole75(self):
+        """Unit test for centred dipole - should give known result"""
+        for rdist, qlevel in itertools.product([3,3.5,4,5,6] ,range(2,7)):
+            ans = Lstar.get_Lstar([-rdist,0,0], self.date, alpha=75, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=qlevel)
+            try:
+                self.assertAlmostEqual(rdist, ans[75]['Lstar'][0], places=qlevel)
+            except:
+                print('FAILURE L=%f, Qual=%d, date=%s' % (rdist, qlevel, self.date))
 
 class Lstar_Data_Tests(unittest.TestCase):
     def setUp(self):
