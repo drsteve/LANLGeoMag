@@ -2,12 +2,18 @@
 from __future__ import division
 
 """
+Overview
+--------
 perform tracing to see if a file line is closed
+
+    Authors
+    -------
+    Steve Morley, Brian Larsen (python)
 """
 from ctypes import pointer
 import math, numpy
 
-from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE
+from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_BAD_TRACE
 from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
 from Lgm_Wrap import Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
 from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
@@ -20,7 +26,7 @@ def _simpleL(position, MagModelInfo):
     """
     code to return a simple measure of L
     Inputs:
-    - GSM position of nothern most point (from Closed_Field)
+    - GSM position of northern most point (from Closed_Field)
     """
     # Get a simple measure of how big L is
     position_sm = Lgm_Vector.Lgm_Vector()
@@ -32,9 +38,61 @@ def _simpleL(position, MagModelInfo):
     return LSimple
 
 
-# BAL: I belive the position is in GSM, check with Mike
+# BAL: I believe the position is in GSM, check with Mike
 def Closed_Field(*args, **kwargs):
-    '''TODO: Need docstring'''
+    """
+    Function to see if a field line is closed
+
+    Either MagEphem or pos and date must be specified
+
+    Parameters
+    ----------
+    MagEphem : Lgm_MagEphemInfo, optional
+        If a populated Lgm_MagEphemInfo class is passed in the data is pulled
+        from it
+    pos : list, optional
+        3-element list of the position in system coord_system
+    date : datetime, optional
+        date and time of the calculation
+    height : float, optional
+        height above the earth to consider a particle lost [km], default=100
+    tol1 : float, optional
+        TODO what do I set?  default=0.01
+    tol2 : float, optional
+        TODO what do I set?  default=1e-7
+    bfield : str, optional
+        The magnetic field model to use, default=Lgm_B_T89
+    Kp : int, optional
+        Kp index for the calculation, default=2
+    coord_system : str
+        the coordinate system of the input position, default=GSM
+    extended_out : bool
+        switch on extended vs regular output, see examples for details,
+        default=False
+
+    Returns
+    -------
+    out : str
+        a string with the open of closed value for the input
+            - LGM_OPEN_IMF
+            - LGM_CLOSED
+            - LGM_OPEN_N_LOBE
+            - LGM_OPEN_S_LOBE
+            - LGM_INSIDE_EARTH
+            - LGM_TARGET_HEIGHT_UNREACHABLE
+
+    Examples
+    --------
+    >>> from lgmpy import Closed_Field
+    >>> import datetime
+    >>> Closed_Field([3,1,0], datetime.datetime(2000, 12, 3))
+    'LGM_CLOSED'
+    >>> Closed_Field([6,1,12], datetime.datetime(2000, 12, 3))
+    'LGM_OPEN_IMF'
+    >>> Closed_Field([-16,1,5], datetime.datetime(2000, 12, 3))
+    'LGM_OPEN_N_LOBE'
+    """
+
     defaults = {'height': 100,
                 'tol1': 0.01,
                 'tol2': 1e-7,
@@ -102,6 +160,8 @@ def Closed_Field(*args, **kwargs):
         retstr = 'LGM_INSIDE_EARTH'
     elif ans == LGM_TARGET_HEIGHT_UNREACHABLE:
         retstr = 'LGM_TARGET_HEIGHT_UNREACHABLE'
+    elif ans == LGM_BAD_TRACE:
+        retstr = 'LGM_BAD_TRACE'
     if kwargs['extended_out']:
         return retstr, northern.tolist(), southern.tolist(), minB.tolist(), L
     else:

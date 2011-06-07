@@ -26,8 +26,10 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
     }
 
     // These tend to be critical to keep things working smoothly.
-    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
-    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
+//    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
+//    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
+    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-8;
+    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-8;
 
 
     switch ( Quality ) {
@@ -216,7 +218,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
-
+    LstarInfo->ComputeVgc = FALSE;
 }
 
 
@@ -328,6 +330,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         printf(    "\t\t%sDate (yyyymmdd):                         %ld%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, PostStr );
         printf(    "\t\t%sUTC (hours):                             %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Time, PostStr );
         printf(    "\t\t%sPitch Angle (deg.):                      %g%s\n", PreStr, LstarInfo->PitchAngle, PostStr );
+        printf(    "\t\t%sInitial Position, vin (Re):              < %g, %g, %g >%s\n", PreStr, vin->x, vin->y, vin->z, PostStr);
         printf(    "\t\t%sMirror Mag. Field Strength, Bm (nT):     %g%s\n", PreStr, LstarInfo->mInfo->Bm, PostStr );
     }
     LstarInfo->nPnts = 0;
@@ -347,8 +350,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-7, 1e-7, LstarInfo->mInfo ) == 1 ) {
+    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
+	    if (LstarInfo->VerbosityLevel > 0) {
+            printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
+	        LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
+	        B = Lgm_Magnitude( &Bvec );
+            printf("\t\t%sMag. Field Strength, B at Pmin (nT):    %g%s\n", PreStr, B, PostStr);
+        }
 
 
         /*
@@ -360,17 +369,26 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &dSa, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
 	        if (LstarInfo->VerbosityLevel > 0) {
-                printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
                 printf("\n\t\t%sMirror Point Location, Pm_South (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, PostStr);
 	            LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
 	            B = Lgm_Magnitude( &Bvec );
                 printf("\t\t%sMag. Field Strength, Bm at Pm_South (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
             }
 
-            if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
+            //if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
+            if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
+
+
+
+
+
+
+
+
+
+
 
                 if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
                     B = Lgm_Magnitude( &Bvec );
@@ -383,7 +401,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  */
                 //LstarInfo->mInfo->Sm_South = LstarInfo->mInfo->smin - dSa;
                 //LstarInfo->mInfo->Sm_North = LstarInfo->mInfo->Sm_South + dSb;
-                SS = dSb;
+                //SS = dSb;
+                SS = dSa+dSb;
                 LstarInfo->mInfo->Hmax = SS/200.0;
                 r  = Lgm_Magnitude( &LstarInfo->mInfo->Pm_North );
                 LstarInfo->mInfo->Sm_South = 0.0;
@@ -401,18 +420,25 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                                                        
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
-                    Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo );
+                    if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
-                    InitSpline( LstarInfo->mInfo );
+                    if ( InitSpline( LstarInfo->mInfo ) ) {
 
-                    /*
-                     *  Do interped I integral.
-                     */
-                    I = Iinv_interped( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                        /*
+                         *  Do interped I integral.
+                         */
+                        I = Iinv_interped( LstarInfo->mInfo  );
+                        if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
 
-                    FreeSpline( LstarInfo->mInfo );
+                        FreeSpline( LstarInfo->mInfo );
+
+                    } else {
+
+                        I = -9e99;
+
+                    }
+
 
 
                 } else {
@@ -531,7 +557,7 @@ delta = 5.0;
                  *  First time through -- lets use the predicted range.
                  */
                 //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
-                mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
+                mlat0 = ((pred_mlat-delta) <  -10.0) ?  -10.0 : (pred_mlat-delta);
                 mlat1 = ((pred_mlat+delta) > 90.0) ? 90.0 : (pred_mlat+delta);
 
     	    } else if ( Count == 1 ) {
@@ -541,7 +567,7 @@ delta = 5.0;
                  * Try double what we had.
                  */
                 delta *= 2;
-                mlat0 = ((mlat-delta) >  0.0) ?  0.0 : (mlat-delta);
+                mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
 
             } else if ( Count == 2 ) {
@@ -552,10 +578,10 @@ delta = 5.0;
 	            */
 
                 if ( FoundShellLine == -3 ) {
-                    mlat0 = ((mlat-5.0) >  0.0) ?  0.0 : (mlat-5.0);
+                    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
                     mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
                 } else {
-                    mlat0 = ((mlat-1.0) >  0.0) ?  0.0 : (mlat-1.0);
+                    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
                     mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
                 }
 
@@ -579,7 +605,7 @@ mlat0 = -30.0;
                 done2 = TRUE;
             } else if ( Count > 2 ) {
                 done2 =  TRUE;
-                printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout);
+                if (LstarInfo->VerbosityLevel >1) printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout);
                 FoundShellLine = 0;
                 return(-3);
             } else {
@@ -590,7 +616,7 @@ mlat0 = -30.0;
 
 
 
-        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat         = %g  \t Count = %d%s", PreStr, mlat, Count, PostStr ); fflush(stdout);
+        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout);
 
 
         /*
@@ -658,6 +684,7 @@ mlat0 = -30.0;
          * the saved arrays backwards so that they go from south to north.
          */
         if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
+            //Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             LstarInfo->mInfo->Bfield( &v2, &LstarInfo->Bmin[k], LstarInfo->mInfo );
             LstarInfo->Pmin[k] = v2;
@@ -746,6 +773,7 @@ M = ELECTRON_MASS; // kg
              */
             Hmax = LstarInfo->mInfo->Hmax;
             LstarInfo->mInfo->Hmax = 0.001;
+            //if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ) {
             if ( Lgm_TraceToEarth( &LstarInfo->Spherical_Footprint_Ps[k], &LstarInfo->Ellipsoid_Footprint_Ps[k], LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ) {
 
                 LstarInfo->Ellipsoid_Footprint_Ss[k] = LstarInfo->Spherical_Footprint_Ss[k] - LstarInfo->mInfo->Trace_s; // should be slightly negative

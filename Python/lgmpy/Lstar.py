@@ -6,16 +6,8 @@ Overview
 Class to compute Lstar using LanlGeoMag
 
 This class computes Lstar, I, and other quantities for simple magnetic field models
-  - eventaully this will work wuth more complicated models as well, the C already does
+  - eventually this will work with more complicated models as well, the C already does
 
-
-Unittest coverage
------------------
-This module has ``in progress`` unittest coverage, main functionality is tested
-
-Authors
--------
-Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL
 """
 
 from __future__ import division
@@ -31,7 +23,7 @@ import spacepy.toolbox as tb
 
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
     SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
-    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT
+    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
@@ -39,6 +31,7 @@ import Lgm_MagEphemInfo
 import Closed_Field
 from _Bfield_dict import Bfield_dict
 
+__author__ = 'Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL'
 
 class Lstar_Data(datamodel.SpaceData):
     """
@@ -84,7 +77,7 @@ def get_Lstar(pos, date, alpha = 90.,
 
     There are many options to set and a lot of output.  We have tried to describe
     it well here but certainly have missed something, if you can't understand something
-    please contach the authors.
+    please contact the authors.
 
     Parameters
     ==========
@@ -95,14 +88,14 @@ def get_Lstar(pos, date, alpha = 90.,
     alpha : float, optional
         Local pitch angle at ``pos`` to calculate Lstar, default (90)
     Kp : int, optional
-        The Kp intex to pass to the magnetic field model, used in T89, ignoted
+        The Kp index to pass to the magnetic field model, used in T89, ignored
         in OP77, default (2)
     coord_system : str, optional
         The coordinate system of the input position, default (GSM)
     Bfield : str, optional
         The Magnetic field model to use for the calculation, default (Lgm_B_T89)
     LstarThresh : float, optional
-        The calculation computes a simple L value and does not calcualtion Lstar
+        The calculation computes a simple L value and does not calculation Lstar
         if simple L is beyond this, default (10)
     extended_out : bool, optional
         Keyword that enables the output of significantly more information into
@@ -111,13 +104,13 @@ def get_Lstar(pos, date, alpha = 90.,
         each point along the trace.
     LstarQuality : int
         The quality flag for the integrators in the calculation, this can have
-        serious imact on run speed and Lstar value
+        serious impact on run speed and Lstar value
 
     Returns
     =======
     out : Lstar_Data
-        Returns a datamodel object that comtains all the information for the run.
-        See examples for the contets of this object for extended_out=False and True
+        Returns a datamodel object that contains all the information for the run.
+        See examples for the contents of this object for extended_out=False and True
 
     Examples
     ========
@@ -160,17 +153,17 @@ def get_Lstar(pos, date, alpha = 90.,
             - Bmin : the minimum B for that pitch angle and position
             - BMirror : the position of the mirror point for that position
             - I : the I value for that position
-            - LHilton : L value calcualtioed with the Hilton approximation
-            - LMcIlwain: L values calculated wioth the McIlwain formula
+            - LHilton : L value calculated with the Hilton approximation
+            - LMcIlwain: L values calculated with the McIlwain formula
             - Lsimple : a simple L value
-            - Lstar : the valule of Lstar for that position and pitch angle
+            - Lstar : the value of Lstar for that position and pitch angle
             - Pmin : TODO what is Pmin?
-        - Bcalc : information about the magnetif field model
-        - Epoch : the time of the calcuation
+        - Bcalc : information about the magnetic field model
+        - Epoch : the time of the calculation
         - Kp : Kp used for the calculation
         - MLT : MLT value for the position and coord_system
         - position : the position of the calculation
-            - GSM : the value in this system, if conversons are done thwy all apprer here
+            - GSM : the value in this system, if conversions are done they all appear here
 
     >>> from lgmpy import Lstar
     >>> import datetime
@@ -227,10 +220,10 @@ def get_Lstar(pos, date, alpha = 90.,
             - Bmin : the minimum B for that pitch angle and position
             - BMirror : the position of the mirror point for that position
             - I : the I value for that position
-            - LHilton : L value calcualtioed with the Hilton approximation
-            - LMcIlwain: L values calculated wioth the McIlwain formula
+            - LHilton : L value calculated with the Hilton approximation
+            - LMcIlwain: L values calculated with the McIlwain formula
             - Lsimple : a simple L value
-            - Lstar : the valule of Lstar for that position and pitch angle
+            - Lstar : the value of Lstar for that position and pitch angle
             - Pmin : TODO what am I?
             - ShellEllipsoidFootprint_Pn : TODO what am I?
             - ShellEllipsoidFootprint_Ps : TODO what am I?
@@ -244,12 +237,12 @@ def get_Lstar(pos, date, alpha = 90.,
             - x_gsm : TODO what am I?
             - y_gsm : TODO what am I?
             - z_gsm : TODO what am I?
-        - Bcalc : information about the magnetif field model
-        - Epoch : the time of the calcuation
+        - Bcalc : information about the magnetic field model
+        - Epoch : the time of the calculation
         - Kp : Kp used for the calculation
         - MLT : MLT value for the position and coord_system
         - position : the position of the calculation
-            - GSM : the value in this system, if conversons are done thwy all apprer here
+            - GSM : the value in this system, if conversions are done they all appear here
 
 
     """
@@ -338,7 +331,8 @@ def get_Lstar(pos, date, alpha = 90.,
 
     # Save nAlpha, and Alpha array to MagEphemInfo structure
     MagEphemInfo.nAlpha = len(Alpha)
-    MagEphemInfo.Alpha = (c_double*len(Alpha))(*Alpha)
+    for i in range(len(Alpha)):
+        MagEphemInfo.Alpha[i] = Alpha[i]
 
     # Set Tolerances
     SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
@@ -367,6 +361,8 @@ def get_Lstar(pos, date, alpha = 90.,
         #sets up nans in case of Lstar failure
         ans[pa]['I'] = datamodel.dmarray(numpy.nan)
         ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
+        ans[pa]['LMcIlwain'] = datamodel.dmarray(numpy.nan)
+        ans[pa]['LHilton'] = datamodel.dmarray(numpy.nan)
         ans[pa]['Bmin'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
         ans[pa]['Bmirror'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
 
@@ -423,7 +419,7 @@ def get_Lstar(pos, date, alpha = 90.,
             ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
-            elif LS_Flag == -1: # mirror below nothern hemisphere mirror alt
+            elif LS_Flag == -1: # mirror below northern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'N_LOSS'})
             elif LS_Flag == 0: # valid calc
                 ans[pa]['Lstar'] = datamodel.dmarray([lstarinf.LS], attrs={'info':'GOOD'}) # want better word?
@@ -490,6 +486,10 @@ def get_Lstar(pos, date, alpha = 90.,
                                             buffer=lstarinf.z_gsm)
                 delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
+
+    Lgm_FreeMagEphemInfo_Children(pointer(MagEphemInfo))
+
+
 
     return ans
 

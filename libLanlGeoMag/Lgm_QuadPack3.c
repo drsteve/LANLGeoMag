@@ -24,26 +24,26 @@ double	*work;
 {
 
 
-    /*    EGIN PROLOGUE  DQAGP
-	 *    URPOSE  The routine calculates an approximation result to a given
+    /*    BEGIN PROLOGUE  DQAGP
+	 *    PURPOSE  The routine calculates an approximation result to a given
 	 *            definite integral I = Integral of F over (A,B),
 	 *            hopefully satisfying following claim for accuracy
 	 *            break points of the integration interval, where local
 	 *            difficulties of the integrand may occur (e.g.
 	 *            SINGULARITIES, DISCONTINUITIES), are provided by the user.
-	 *    IBRARY   SLATEC (QUADPACK)
-	 *    ATEGORY  H2A2A1
-	 *    YPE      DOUBLE PRECISION (QAGP-S, DQAGP-D)
-	 *    EYWORDS  AUTOMATIC INTEGRATOR, EXTRAPOLATION, GENERAL-PURPOSE,
+	 *    LIBRARY   SLATEC (QUADPACK)
+	 *    CATEGORY  H2A2A1
+	 *    TYPE      DOUBLE PRECISION (QAGP-S, DQAGP-D)
+	 *    KEYWORDS  AUTOMATIC INTEGRATOR, EXTRAPOLATION, GENERAL-PURPOSE,
 	 *             GLOBALLY ADAPTIVE, QUADPACK, QUADRATURE,
 	 *             SINGULARITIES AT USER SPECIFIED POINTS
-	 *    UTHOR  Piessens, Robert
+	 *    AUTHOR  Piessens, Robert
 	 *             Applied Mathematics and Programming Division
 	 *             K. U. Leuven
 	 *           de Doncker, Elise
 	 *             Applied Mathematics and Programming Division
 	 *             K. U. Leuven
-	 *    ESCRIPTION
+	 *    DESCRIPTION
 	 *
 	 *        Computation of a definite integral
 	 *        Standard fortran subroutine

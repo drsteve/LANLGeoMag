@@ -9,7 +9,7 @@ lgmpy Reference
 
 
 :Release: |version|
-:Date: |today|
+:Doc generation date: |today|
 
 .. module:: lgmpy
 
@@ -21,8 +21,19 @@ Classes
 .. toctree::
    :maxdepth: 2
 
-   Lgm_Vector
+   MagData
+   magcoords
    Lstar
+   Closed_Field
+   Lgm_CTrans
+   Lgm_MagEphemInfo
+   Lgm_MagModelInfo
+   Lgm_OP77
+   Lgm_T89
+   Lgm_Wrap
+   Lgm_Vector
+
+
 
 TODO List
 =========

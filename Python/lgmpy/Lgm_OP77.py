@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Overview
+--------
 Python implementation of the LanlGeoMag OP77 Magnetic field model
 
-
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 21-Mar-2011 (BAL)
+TODO
+----
+Add more information about the model.
 """
 import datetime
 from ctypes import pointer
@@ -22,15 +21,33 @@ import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
 
+__author__ = 'Brian Larsen, Mike Henderson - LANL'
+
 class Lgm_OP77(MagData.MagData):
     """
-    Python implementation of the LanlGeoMag OP77 Magnetic field model
+    Python implementation of the LanlGeoMag OP77 Magnetic field model. This is
+    the full wrapper, most users will not use this.
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ----------
+    pos : list
+        3-element list of the position to do the calculation
+    time : datetime
+        date and time of when to do the calculation
+    coord_system : str, optional
+        the coordinate system of the position, default=GSM
+    INTERNAL_MODEL : str, optional
+        the internal magnetic field model to use, default=LGM_IGRF
 
-    @version: V1: 21-Mar-2011 (BAL)
+    Returns
+    -------
+    out : Lgm_OP77 object
+        Lgm_OP77 object with the magnetic field value and other information
+
+    See Also
+    --------
+    Lgm_OP77.OP77
+
     """
     def __init__(self, pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
         super(Lgm_OP77, self).__init__(Position=pos, Epoch=time, coord_system = coord_system, INTERNAL_MODEL=INTERNAL_MODEL,)
@@ -63,7 +80,7 @@ class Lgm_OP77(MagData.MagData):
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
-        # either they are all one elemet or they are compatible lists no 1/2 way
+        # either they are all one element or they are compatible lists no 1/2 way
         try:
             if len(self._Vpos) != len(self['Epoch']):
                 raise(ValueError('Inputs must be the same length, scalars or lists'))
@@ -79,7 +96,7 @@ class Lgm_OP77(MagData.MagData):
             for v1, v2 in zip(self._Vpos, self['Epoch'], ):
                 date = Lgm_CTrans.dateToDateLong(v2)
                 utc = Lgm_CTrans.dateToFPHours(v2)
-                Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
+                Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # don't need pointer as it is one
                 B = Lgm_Vector.Lgm_Vector()
                 retval = Lgm_B_OP77(pointer(v1), pointer(B), pointer(self._mmi))
                 if retval != 1:
@@ -89,7 +106,7 @@ class Lgm_OP77(MagData.MagData):
         except TypeError:
             date = Lgm_CTrans.dateToDateLong(self['Epoch'])
             utc = Lgm_CTrans.dateToFPHours(self['Epoch'])
-            Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
+            Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # don't need pointer as it is one
             B = Lgm_Vector.Lgm_Vector()
             retval = Lgm_B_OP77(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
             if retval != 1:
@@ -114,24 +131,36 @@ def OP77(pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     Easy wrapper to just return values without having to create an instance of
     Lgm_OP77
 
-    @param pos: a list of 3 element lists of positions in coord_system system
-    @type pos: list
-    @param time: a datetime or list of datetime objects
-    @type time: (list, datetime)
+    All input parameters can be either their type or a list of the that type, all
+    inputs must be the same length
 
-    @keyword coord_system: the name of the coord system to use (or Lgm number)
-    @type coord_system: (str, int)
-    @keyword INTERNAL_MODEL: the intermal magnetic field model to use (or Lgm number)
-    @type INTERNAL_MODEL: (str, int)
+    Parameters
+    ----------
+    pos : list
+        3-element list of the position to do the calculation
+    time : datetime
+        date and time of when to do the calculation
+    coord_system : str, optional
+        the coordinate system of the position, default=GSM
+    INTERNAL_MODEL : str, optional
+        the internal magnetic field model to use, default=LGM_IGRF
 
-    @retval: list of the x, y, z, compents of B in nT
-    @rtype: list
+    Returns
+    -------
+    out : list
+        the magnetic field vector in GSM [nT]
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Examples
+    --------
+    >>> from lgmpy import Lgm_OP77
+    >>> import datetime
+    >>> Lgm_OP77.OP77([1,2,3], datetime.datetime(1999, 1, 16, 12, 34, 12))
+    [-498.5006017..., -614.7106283..., -430.26894377...]
 
-    @version: V1: 21-Mar-2011 (BAL)
+
+    See Also
+    --------
+    Lgm_OP77.Lgm_OP77
     """
     a = Lgm_OP77(pos, time, coord_system = coord_system,
                         INTERNAL_MODEL=INTERNAL_MODEL)

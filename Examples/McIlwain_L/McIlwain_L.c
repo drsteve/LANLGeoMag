@@ -1,4 +1,5 @@
 #include <Lgm_MagModelInfo.h>
+#include <Lgm_ElapsedTime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,12 +9,14 @@
 
 
 int main(){
-    long int            Date;
-    double              L, I, Bm, M, a, UTC, Ltarget;
-    Lgm_Vector          u, v;
+    long int             Date;
+    double               L, I, Bm, M, a, UTC, Ltarget;
+    Lgm_Vector           u, v;
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
+    Lgm_ElapsedTimeInfo  tInfo;
 
+    Lgm_ElapsedTimeInit( &tInfo, 255, 95, 0 );
 
     for (Ltarget=1.5; Ltarget<16.0; Ltarget += 0.1){
         //Ltarget = 5.0;
@@ -34,6 +37,8 @@ int main(){
     }
 
 
+
+    Lgm_PrintElapsedTime( &tInfo );
 
     return(0);
 }

@@ -13,8 +13,7 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     return MagEphemInfo;
 }
 
-void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
-                                  int MaxPitchAngles, int Verbosity) {
+void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity) {
 
     MagEphemInfo->LstarInfo = InitLstarInfo( Verbosity );
 
@@ -68,12 +67,7 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
 }
 
 
-
-void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
-
-    /*
-     * De-allocate Arrays that depend on # of pitch angles.
-     */
+void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->Alpha );
     LGM_ARRAY_1D_FREE( MagEphemInfo->Pmn_gsm );
     LGM_ARRAY_1D_FREE( MagEphemInfo->Pms_gsm );
@@ -101,6 +95,10 @@ void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellMirror_Ps );
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellMirror_Ss );
     LGM_ARRAY_2D_FREE( MagEphemInfo->ShellI );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Bmin );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Pmin );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_GradI );
+    LGM_ARRAY_2D_FREE( MagEphemInfo->Shell_Vgc );
 
     LGM_ARRAY_2D_FREE( MagEphemInfo->nFieldPnts );
     LGM_ARRAY_3D_FREE( MagEphemInfo->s_gsm );
@@ -114,9 +112,19 @@ void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->Lstar );
 
     FreeLstarInfo( MagEphemInfo->LstarInfo );
+}
+
+void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *MagEphemInfo ) {
+
+    /*
+     * De-allocate Arrays that depend on # of pitch angles.
+     */
+    Lgm_FreeMagEphemInfo_Children(MagEphemInfo);
     free( MagEphemInfo );
 
 }
+
+
 
 void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo ) {
 

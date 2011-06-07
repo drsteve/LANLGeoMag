@@ -1,3 +1,5 @@
+*~
+*callgrind*
 *.pyc
 .svn*
 .coverage

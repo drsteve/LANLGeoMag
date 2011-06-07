@@ -26,6 +26,17 @@
 #include "Lgm/Lgm_WGS84.h"
 
 
+double seFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
+
+    Lgm_Vector  w;
+    double      Height, F;
+
+    Height = WGS84_A*(Lgm_Magnitude( P )-1.0);
+    F =  Height - TargetHeight;
+
+    return( F );
+
+}
 
 
 
@@ -40,6 +51,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Lgm_Vector	Pa, Pc, P;
     int		    done, reset, AboveTargetHeight;
 
+    reset = TRUE;
     Info->Trace_s = 0.0;
     Sa = Sc = 0.0;
 
@@ -113,7 +125,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
 
     /*
-     * Save initial point if we need to 
+     * Save initial point if we need to
      */
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 3\n", u->x, u->y, u->z);
 
@@ -142,26 +154,26 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
         Htry = 0.001;
 
         // sgn = +1
-        P = *u; Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, Info->Bfield, Info );
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         HeightPlus = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 
         // sgn = -1
-        P = *u; Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info );
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         HeightMinus = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 
         direction = ( HeightPlus > HeightMinus ) ? 1.0 : -1.0;
 
 
 
-        /* 
+        /*
          *  We are already at or below target height. Trace until we are not.
          */
         done  = FALSE;
-        reset = TRUE;
+        //reset = TRUE;
         while ( !done ) {
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, direction, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, direction, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Sa += Hdid;
             Info->Trace_s += Hdid;
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
@@ -175,7 +187,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
         }
 
     }
-  
+
 
 
 
@@ -184,18 +196,18 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
 
     /*
-     *  Bracket the zero first. 
+     *  Bracket the zero first.
      *  We want to stop in the ionosphere at a certain height above the Earth
      *  (assumed to be a spehere of radius WGS84_A in this routine).  We need
      *  to find 2 points along the field line such that the intersection of the
      *  FL with the sphere is guaranteed to lie between them. To do this, we
      *  need to find two points; Pa and Pc such that;
-     *  
+     *
      *		and  Height( Pa ) - TargetHeight   >   0.0
      *		and  Height( Pc ) - TargetHeight   <   0.0
      *
      *  I.e., F = Height - TargetHeight has opposite signs
-     * 
+     *
      *  Set the start point, Pa and Fa. (Fa is difference between Height_a and
      *  TargetHeight.)
      *
@@ -206,11 +218,11 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     /*
      *  Get an initial Htry that is safe -- i.e. start off slowly
      *  We dont really know where we are, so be conservative on the first try.
-     *  If Lgm_MagStep() gives back an Hnext thats higher, we'll crank Htry up then...
+     *  If if ( Lgm_MagStep() gives back an Hnext thats higher, we'll crank Htry up then...
      */
     Htry = 0.9*Height_a;	    // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
     if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-    
+
 
 
     /*
@@ -223,10 +235,10 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     P     = Pa;
     done  = FALSE;
-    reset = TRUE;
+    //reset = TRUE;
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
@@ -255,7 +267,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
         Htry = Hnext; // adaptively reset Htry
 
 	    /*
-	     *  Go no farther than some small distance below 
+	     *  Go no farther than some small distance below
 	     *  the target Height. Also respect Hmin and Hmax.
 	     */
 	    Htry_max = 0.9*Height;
@@ -266,6 +278,10 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
     }
 
+    if ( ((Fc > 0.0) && (Fa > 0.0)) || ((Fc < 0.0) && (Fa < 0.0)) ) {
+        // No bracket
+        return(0);
+    }
 
 
 
@@ -284,8 +300,9 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      *  Sc gets small enough we bail out and take Pb as the min).
      *
      */
+    //reset = TRUE;
+if (0==1){
     done  = FALSE;
-    reset = TRUE;
     while (!done) {
 
         d = Sc - Sa;
@@ -300,7 +317,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
                 //Htry = LGM_1M_1O_GOLD*d; // LGM_1M_1O_GOLD is 0.381966...
                 Htry = 0.5*fabs(d); // LGM_1M_1O_GOLD is 0.381966...
 //            }
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, tol, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 	        F =  Height - TargetHeight;
             if ( F >= 0.0 ) {
@@ -314,13 +331,48 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Info->Trace_s = Sa;
 
 
-
     /*
      *  Take average as the final answer.
      */
     v->x = 0.5*(Pa.x + Pc.x); v->y = 0.5*(Pa.y + Pc.y); v->z = 0.5*(Pa.z + Pc.z);
     //printf( "Lgm_TraceToSphericalEarth: v = %g %g %g\n", v->x, v->y, v->z);
+
+}
+
+
+if (1==1){
+    /*
+     * Try Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    BrentFuncInfoP    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &seFunc;
+    f.Val     = TargetHeight;
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Fc = Fz;
+    Sc = Sz;
+    Pc = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+
+    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;
+    Info->Trace_s = Sz;
+
+}
+
+
+
+
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToSphericalEarth(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 

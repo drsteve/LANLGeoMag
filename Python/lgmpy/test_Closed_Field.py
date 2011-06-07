@@ -47,15 +47,13 @@ class Closed_FieldTests(unittest.TestCase):
     def test_Closed_Field_Output(self):
         """Closed_Field should give known results (regression)"""
         self.assertEqual(Closed_Field.Closed_Field([1,2,2], self.date), 'LGM_CLOSED')
-        self.assertEqual(Closed_Field.Closed_Field([1,0,0], self.date), 'LGM_INSIDE_EARTH')
+        self.assertEqual(Closed_Field.Closed_Field([.1,.1,.1], self.date), 'LGM_INSIDE_EARTH')
         self.assertEqual(Closed_Field.Closed_Field([1,1,10], self.date), 'LGM_OPEN_N_LOBE')
         self.assertEqual(Closed_Field.Closed_Field([1,1,9], self.date), 'LGM_OPEN_N_LOBE')
-        # need to find some tests that hit the rest of the options
-        #'LGM_OPEN_IMF'
-        #'LGM_CLOSED'
-        #'LGM_OPEN_N_LOBE'
-        #'LGM_OPEN_S_LOBE'
-        #'LGM_INSIDE_EARTH'
+        self.assertEqual(Closed_Field.Closed_Field([12,1,9], self.date), 'LGM_OPEN_IMF')
+        self.assertEqual(Closed_Field.Closed_Field([4,1,-9], self.date), 'LGM_OPEN_S_LOBE')
+        self.assertTrue(Closed_Field.Closed_Field([.1,1,0], self.date) in ['LGM_BAD_TRACE', 'LGM_INSIDE_EARTH'])
+        # still haven't testing this one
         #'LGM_TARGET_HEIGHT_UNREACHABLE'
 
     def test_extended_out(self):
@@ -63,12 +61,12 @@ class Closed_FieldTests(unittest.TestCase):
         data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
         numpy.testing.assert_array_almost_equal(data[1],
-                [-0.06195473,  0.39503837,  0.9313725 ])
+                [-0.06208285,  0.39459274,  0.93068772])
         numpy.testing.assert_array_almost_equal(data[2],
-                [ 0.76662888,  0.33533055, -0.57131527])
+                [ 0.76665539,  0.33534993, -0.57132811])
         numpy.testing.assert_array_almost_equal(data[3],
-                [ 2.2794347 ,  2.80962392,  1.12454746])
-        self.assertAlmostEqual(data[4], 3.7346417307338116)
+                [ 2.27943343,  2.80962207,  1.12454683])
+        self.assertAlmostEqual(data[4], 3.737378184729371)
 
 
 if __name__ == '__main__':

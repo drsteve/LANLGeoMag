@@ -50,6 +50,16 @@
 #define GSL_INTERP  gsl_interp_cspline
 
 
+double tlFunc( Lgm_Vector *P, double R0, Lgm_MagModelInfo *Info ){
+
+    Lgm_Vector  w;
+    double      Height, F;
+
+    F =  Lgm_Magnitude( P ) - R0;
+
+    return( F );
+
+}
 
 
 int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
@@ -63,6 +73,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     int		    done, reset, n, SavePnt;
 
 
+    reset = TRUE;
 
 
     Pa.x = Pa.y = Pa.z = 0.0;
@@ -88,7 +99,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     /*
      *  Save first point
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( u, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
@@ -101,7 +112,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
     ++n;
     if (n > LGM_MAX_INTERP_PNTS){
-	print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+	    print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     }
 
 
@@ -111,7 +122,6 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
      *   If it is, we can trace up until we are beyond it or some such thing...
      */
     done  = FALSE;
-    reset = TRUE;
     P = *u;
     R = Lgm_Magnitude( &P );
     F = R - R0;
@@ -120,7 +130,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         // Trace until we are not.
         Htry  = 0.1;
         while ( !done ) {
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
@@ -140,7 +150,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
             Info->Pz[n]   = P.z;                        //
             Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
             Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
-            Lgm_B_cdip( &P, &Bcdip, Info ); 
+            Lgm_B_cdip( &P, &Bcdip, Info );
             Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
             ++n;
         }
@@ -166,17 +176,17 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
      */
     P       = Pa;
     done    = FALSE;
-    reset   = TRUE;
+    //reset   = TRUE;
     SavePnt = TRUE;
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
 
 
         R = Lgm_Magnitude( &P );
 	    F =  R - R0;
 
-	    if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin) 
+	    if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
 	        || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
 	        /*
 	         *  Open FL!
@@ -194,7 +204,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
 	        Fa = F;
 	        Ra = R;
 	        Sa = 0.0;
-            ss += Hdid;  
+            ss += Hdid;
             /*
              * Compute field strength and save the results in the array.
              */
@@ -206,9 +216,14 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
                 Info->Pz[n]   = P.z;                        //
                 Info->Bvec[n] = Bvec;                        // save 3D B-field vector.
                 Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
-                Lgm_B_cdip( &P, &Bcdip, Info ); 
+                Lgm_B_cdip( &P, &Bcdip, Info );
                 Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
                 ++n;
+            }
+
+            if ( n > LGM_MAX_INTERP_PNTS-10 ) {
+                printf("Lgm_TraceLine(): Trying to add too many points to interpolation arrays - bailing.\n");
+                return( -1 );
             }
 	    }
 
@@ -249,8 +264,10 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
      *  when Sc gets small enough we bail out and take Pb as the min).
      *
      */
+
+    //reset = TRUE;
+if (0==1){
     done  = FALSE;
-    reset = TRUE;
     while (!done) {
 
 	    d = Sc - Sa;
@@ -259,7 +276,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 3\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -269,6 +286,33 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
             }
 	    }
     }
+}
+if (1==1){
+    /*
+     * Try Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    BrentFuncInfoP    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &tlFunc;
+    f.Val     = R0;
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Fc = Fz;
+    Sc = Sz;
+    Pc = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+
+//    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;
+//    Info->Trace_s = Sz;
+
+}
 
 
     /*
@@ -294,7 +338,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         Info->Pz[n]   = v->z;                       //
         Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
         Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
-        Lgm_B_cdip( v, &Bcdip, Info ); 
+        Lgm_B_cdip( v, &Bcdip, Info );
         Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
         ++n;
     }
@@ -321,6 +365,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -340,9 +385,11 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     double	    R0, R, Fa, Fb, Fc, F;
     double	    Ra, Rb, Rc;
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
-    int		    done, reset, n, SavePnt;
+    int		    done, reset, n, m, SavePnt;
 
-//printf("*************************\n");
+    reset = TRUE;
+
+//printf("\n\n\n*************************\n");
 //printf("*************************\n");
 //printf("*************************\n");
 
@@ -381,7 +428,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      * Compute field strength at starting point and save the results in the
      * array.
      */
-    n = 0;
+    n = 0; Info->nPnts = n;
     ss = 0.0;
     Info->Bfield( &Pa, &Bvec, Info );
     Info->s[n]    = ss;                         // save arc length
@@ -409,24 +456,38 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      */
     P       = Pa;
     done    = FALSE;
-    reset   = TRUE;
+    //reset   = TRUE;
     SavePnt = TRUE;
+    m       = 0; // counts the number of iteration through the loop (for use as a failsafe bailout)
     while ( !done ) {
 
-        Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
 
 
         R = Lgm_Magnitude( &P );
 	    F =  R - R0;
 //printf( "P = %g %g %g    R, R0, F, Htry  = %g %g %g %g    ss, MinDist = %g %g\n", P.x, P.y, P.z, R, R0, F, Htry, ss, MinDist);
 
-	    if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin) 
+	    if ( m > 5000 ) {
+            // Too many times through the loop!!!!
+	        v->x = v->y = v->z = 0.0;
+            return(0);
+        } else if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
 	        || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
 	        /*
 	         *  Open FL!
 	         */
 	        v->x = v->y = v->z = 0.0;
 	        return(0);
+        } else if ( (ss > 0.0) && ((R-1.0) < 1e-8) && (F < 0.0) ) {
+            // We have detected a change in sign for F, and we have gone some distance already, and we seem to be very close to surface of the Earth...
+            // But we havent yet gone Min dist.
+            // Something may have gone wrong?
+            done = TRUE;
+            Pc = P;
+            Rc = R;
+            Fc = F;
+            Sc = Sa + Hdid;
 	    } else if ( (ss < MinDist) || ( F > 0.0 ) ) { // keep on stepping
             Pa = P;
             Fa = F;
@@ -444,7 +505,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
                 Info->Pz[n]   = P.z;                        //
                 Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
                 Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
-                Lgm_B_cdip( &P, &Bcdip, Info ); 
+                Lgm_B_cdip( &P, &Bcdip, Info );
                 Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
                 ++n;
             }
@@ -454,8 +515,8 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
             Rc = R;
             Fc = F;
             Sc = Sa + Hdid;
-        } 
-	/*
+        }
+	    /*
          *  We have been stepping along at a constant Htry. But when we get
          *  close to the end we do not want to drop below the surface of the
          *  Earth -- some models crash and burn if you do that. To make sure we
@@ -470,12 +531,13 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
          *  end.)
 	     */
         if ( Htry > (R-1.0) ) {
-            Htry = 0.5*(R-1.0);
+            Htry = 0.9*(R-1.0);
             SavePnt = FALSE;
         } else {
             SavePnt = TRUE;
         }
 
+        ++m;
     }
 
     /*
@@ -490,8 +552,9 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
      *  when Sc gets small enough we bail out and take Pb as the min).
      *
      */
+    //reset = TRUE;
+if (1==1){
     done  = FALSE;
-    reset = TRUE;
     while (!done) {
 
 	    d = Sc - Sa;
@@ -500,7 +563,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 5\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -508,8 +571,35 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
             } else {
                 Pc = P; Fc = F; Sc = Sa + Hdid;
             }
-	    }    
+	    }
     }
+}
+if (0==1){
+    /*
+     * Try Brent's method
+     */
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+    double      Sz, Fz;
+    Lgm_Vector  Pz;
+    BrentFuncInfoP    f;
+
+    f.u_scale = u_scale;
+    f.Htry    = Htry;
+    f.sgn     = sgn;
+    f.reset   = reset;
+    f.Info    = Info;
+    f.func    = &tlFunc;
+    f.Val     = R0;
+    Lgm_zBrentP( Sa, Sc, Fa, Fc, Pa, Pc, &f, tol, &Sz, &Fz, &Pz );
+    Fc = Fz;
+    Sc = Sz;
+    Pc = Pz;
+//printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+
+//    v->x = Pz.x; v->y = Pz.y; v->z = Pz.z;
+//    Info->Trace_s = Sz;
+
+}
 
 
 
@@ -536,7 +626,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
         Info->Pz[n]   = v->z;                       //
         Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
         Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
-        Lgm_B_cdip( v, &Bcdip, Info ); 
+        Lgm_B_cdip( v, &Bcdip, Info );
         Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
         ++n;
     }
@@ -555,8 +645,10 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     if ( AddBminPoint ) {
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
 //printf("2) ADDING NEW POINT\n");
+//printf("n, nPnts = %d %d\n", n, Info->nPnts);
     }
 
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine2(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -572,7 +664,7 @@ void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Inf
     Info->Px[0]   = P->x;
     Info->Py[0]   = P->y;
     Info->Pz[0]   = P->z;
-    Lgm_B_cdip( P, &Bcdip, Info ); 
+    Lgm_B_cdip( P, &Bcdip, Info );
     Info->BminusBcdip[0] = Info->Bmag[0] - Lgm_Magnitude( &Bcdip );
 
 }
@@ -590,7 +682,7 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
      */
     for (i=0; i<Info->nPnts; ++i){
         if (fabs(s-Info->s[i]) < 1e-10) {
-//            printf("AddNewPoint: Warning, already have a point very close to this s value. (s,B) = (%g,%g) (Info->s[%d], Info->Bmag[%d]) = (%g, %g). Point not added.\n", 
+//            printf("AddNewPoint: Warning, already have a point very close to this s value. (s,B) = (%g,%g) (Info->s[%d], Info->Bmag[%d]) = (%g, %g). Point not added.\n",
 //                s, B, i, i, Info->s[i], Info->Bmag[i]);
             return;
         }
@@ -640,7 +732,7 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
     Info->Px[i2]   = P->x;
     Info->Py[i2]   = P->y;
     Info->Pz[i2]   = P->z;
-    Lgm_B_cdip( P, &Bcdip, Info ); 
+    Lgm_B_cdip( P, &Bcdip, Info );
     Info->BminusBcdip[i2] = Info->Bmag[i2] - Lgm_Magnitude( &Bcdip );
     ++Info->nPnts;
 
@@ -649,11 +741,13 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
 
 
 
-void InitSpline( Lgm_MagModelInfo *Info ) {
+int InitSpline( Lgm_MagModelInfo *Info ) {
 
 
 
     int i;
+
+    if ( ( Info->nPnts < 2 )||( Info->AllocedSplines ) ) return( 0 );
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
 
@@ -672,39 +766,49 @@ void InitSpline( Lgm_MagModelInfo *Info ) {
      *
      */
     Info->acc    = gsl_interp_accel_alloc( );
-    Info->accPx  = gsl_interp_accel_alloc( );
-    Info->accPy  = gsl_interp_accel_alloc( );
-    Info->accPz  = gsl_interp_accel_alloc( );
+//    Info->accPx  = gsl_interp_accel_alloc( );
+//    Info->accPy  = gsl_interp_accel_alloc( );
+//    Info->accPz  = gsl_interp_accel_alloc( );
     if ( Info->nPnts > 2 ){
         Info->spline   = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-        Info->splinePx = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-        Info->splinePy = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-        Info->splinePz = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+//        Info->splinePx = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+//        Info->splinePy = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+//        Info->splinePz = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
     } else {
         Info->spline   = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-        Info->splinePx = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-        Info->splinePy = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-        Info->splinePz = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+//        Info->splinePx = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+//        Info->splinePy = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+//        Info->splinePz = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
     }
-    //gsl_spline_init( Info->spline, Info->s, Info->Bmag, Info->nPnts );
-    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
-    gsl_spline_init( Info->splinePx, Info->s, Info->Px, Info->nPnts );
-    gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
-    gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
+    gsl_spline_init( Info->spline, Info->s, Info->Bmag, Info->nPnts );
+//    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
+//    gsl_spline_init( Info->splinePx, Info->s, Info->Px, Info->nPnts );
+//    gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
+//    gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
 
+    Info->AllocedSplines = TRUE;
+
+    return( 1 );
 
 }
 
-void FreeSpline( Lgm_MagModelInfo *Info ) {
+int FreeSpline( Lgm_MagModelInfo *Info ) {
+
+    if ( !Info->AllocedSplines ) return(0);
+
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     if ( Info->spline != NULL ) gsl_spline_free( Info->spline );
-    if ( Info->splinePx != NULL ) gsl_spline_free( Info->splinePx );
-    if ( Info->splinePy != NULL ) gsl_spline_free( Info->splinePy );
-    if ( Info->splinePz != NULL ) gsl_spline_free( Info->splinePz );
+//    if ( Info->splinePx != NULL ) gsl_spline_free( Info->splinePx );
+//    if ( Info->splinePy != NULL ) gsl_spline_free( Info->splinePy );
+//    if ( Info->splinePz != NULL ) gsl_spline_free( Info->splinePz );
     if ( Info->acc != NULL ) gsl_interp_accel_free( Info->acc );
-    if ( Info->accPx != NULL ) gsl_interp_accel_free( Info->accPx );
-    if ( Info->accPy != NULL ) gsl_interp_accel_free( Info->accPy );
-    if ( Info->accPz != NULL ) gsl_interp_accel_free( Info->accPz );
+//    if ( Info->accPx != NULL ) gsl_interp_accel_free( Info->accPx );
+//    if ( Info->accPy != NULL ) gsl_interp_accel_free( Info->accPy );
+//    if ( Info->accPz != NULL ) gsl_interp_accel_free( Info->accPz );
+
+    Info->AllocedSplines = FALSE;
+
+    return(1);
 }
 
 
@@ -724,17 +828,21 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
     /*
      * Use GSL to compute BminusBcdip(s)
      */
-    BminusBcdip = gsl_spline_eval( Info->spline, s, Info->acc );
+//    BminusBcdip = gsl_spline_eval( Info->spline, s, Info->acc );
 
     /*
      * Interpolate to get P(s) and Bcdip(P(s))
      */
-    P.x = gsl_spline_eval( Info->splinePx, s, Info->accPx );
-    P.y = gsl_spline_eval( Info->splinePy, s, Info->accPy );
-    P.z = gsl_spline_eval( Info->splinePz, s, Info->accPz );
-    Lgm_B_cdip( &P, &Bvec, Info );
-    Bcdip = Lgm_Magnitude( &Bvec );
-    B = BminusBcdip + Bcdip;
+//    P.x = gsl_spline_eval( Info->splinePx, s, Info->accPx );
+//    P.y = gsl_spline_eval( Info->splinePy, s, Info->accPy );
+//    P.z = gsl_spline_eval( Info->splinePz, s, Info->accPz );
+//    Lgm_B_cdip( &P, &Bvec, Info );
+//    Bcdip = Lgm_Magnitude( &Bvec );
+//    B = BminusBcdip + Bcdip;
+
+
+
+    B = gsl_spline_eval( Info->spline, s, Info->acc );
     return( B );
 
 
@@ -793,8 +901,8 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
         if (fabs(ds) > 1e-7){
             m  = (Info->Bmag[i2] - Info->Bmag[i1])/ds;  // slope
             B  = m*(s-Info->s[i1]) + Info->Bmag[i1];    // linearly interped value
-        } else {    
-            B  = Info->Bmag[i1];   
+        } else {
+            B  = Info->Bmag[i1];
         }
     }
 
@@ -943,3 +1051,113 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 
 }
 
+
+
+/*
+ * Start at point u. Then trace the distance S in N steps.
+ */
+int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
+
+    Lgm_Vector	u_scale;
+    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Sa=0.0, Sc=0.0, d;
+    double	    R0, R, Fa, Fb, Fc, F;
+    double	    Ra, Rb, Rc;
+    Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
+    int		    done, reset, n, SavePnt;
+
+
+    reset = TRUE;
+
+
+//    Pa.x = Pa.y = Pa.z = 0.0;
+//    Pc.x = Pc.y = Pc.z = 0.0;
+//    P.x  = P.y  = P.z  = 0.0;
+
+
+    /*
+     *  H0 is in km above Earth's surface (assumed to be spherical here).
+     *  Convert to geocentric radius.
+     */
+//    R0 = H0/Re + 1.0;
+
+
+
+    Htry = Info->Hmax;  // we want to step with constant increments.
+    Hmin = 1e-7;        // This may be necessary to find the endpoint.
+    Hmax = Info->Hmax;  // Dont use step bigger than this.
+    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+
+
+    /*
+     *  Save first point
+     */
+    n = 0; Info->nPnts = n;
+    ss = 0.0;
+    Info->Bfield( u, &Bvec, Info );
+    Info->s[n]    = ss;                         // save arc length
+    Info->Px[n]   = u->x;                       // save 3D position vector.
+    Info->Py[n]   = u->y;                       //
+    Info->Pz[n]   = u->z;                       //
+    Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
+    Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
+    Lgm_B_cdip( u, &Bcdip, Info );
+    Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+    ++n;
+    if (n > LGM_MAX_INTERP_PNTS){
+	    print("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+    }
+
+
+    Htry = S/(double)N;
+    done  = FALSE;
+    P = *u;
+    while ( !done ) {
+
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        ss += Hdid;  
+
+        /*
+         * Save this (new) point only if its different from the previous one)
+         */
+        if ( ss > Info->s[n-1] ) {
+            Info->Bfield( &P, &Bvec, Info );
+            Info->s[n]    = ss;                         // save arc length
+            Info->Px[n]   = P.x;                        // save 3D position vector.
+            Info->Py[n]   = P.y;                        //
+            Info->Pz[n]   = P.z;                        //
+            Info->Bvec[n] = Bvec;                       // save 3D B-field vector.
+            Info->Bmag[n] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
+            Lgm_B_cdip( &P, &Bcdip, Info );
+            Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+            ++n;
+        }
+
+        if ( (ss >= S) || (n > LGM_MAX_INTERP_PNTS) ) done = TRUE;
+
+    }
+    
+    Info->nPnts     = n;                       // set total number of points in the array.
+    Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
+                                               // when trying to interpolate.
+
+
+    /*
+     *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE
+     *  This will only make sense if these values are legitimate for this FL.
+     *  Perhaps it would be better to force user to do this elesewhere.
+     */
+    if ( AddBminPoint ) {
+        printf("1) ADDING NEW POINT\n");
+        // MUST ADD Bcdip for this too!
+        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
+    }
+    //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
+
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+
+    return( 1 );
+
+
+}

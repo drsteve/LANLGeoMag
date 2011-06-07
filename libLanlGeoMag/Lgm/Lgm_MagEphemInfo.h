@@ -66,7 +66,7 @@ typedef struct Lgm_MagEphemInfo {
      * Array of PAs we need to compute things for...
      */
     int         nAlpha;     //!< Number of Pitch Angles
-    double      *Alpha;     //!< Pitch Angles (Degrees). 
+    double      *Alpha;     //!< Pitch Angles (Degrees).
                             //!< 1D array (dynamically allocated). Access as follows: Alpha[ PitchAngleIndex ]
     Lgm_Vector  *Pmn_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pmn_gsm[ PitchAngleIndex ]  position of northern |Bmirror|
     Lgm_Vector  *Pms_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pms_gsm[ PitchAngleIndex ]  position of southern |Bmirror|
@@ -138,25 +138,26 @@ typedef struct Lgm_MagEphemInfo {
 
 
 /*
- * Protos
+ * Function Prototypes
  */
+Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
+void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity);
+void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
+void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo );
+
 double  j_to_fp_1( double j, double Ek );
 double  j_to_fp_2( double j, double Ek0, double Ek1 );
-double Ek_to_mu_1( double Ek, double alpha, double B );
-double Ek_to_mu_2( double Ek0, double Ek1, double alpha, double B );
+double  k_to_mu_1( double Ek, double alpha, double B );
+double  k_to_mu_2( double Ek0, double Ek1, double alpha, double B );
 double  Ek_to_v( double Ek, int Species );
-//void ComputeFieldLineQuantities( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
+void    Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo );
+
+void    ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
+void    WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
+void    Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
+void    Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
 
-
-
-Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
-void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo,
-                                  int MaxPitchAngles, int Verbosity);
-void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
-
-void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
-void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
 
 
 #endif

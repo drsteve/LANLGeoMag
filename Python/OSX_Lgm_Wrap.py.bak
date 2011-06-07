@@ -1,7 +1,7 @@
 '''Wrapper for size.h
 
 Generated with:
-/usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.dylib --no-macro-warnings -o OSX_Lgm_Wrap.py.bak /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_SphHarm.h
+/usr/local/bin/ctypesgen.py -L/usr/local/lib/ -llibLanlGeoMag.dylib --no-macro-warnings -o OSX_Lgm_Wrap.py.bak /usr/local/include/Lgm/size.h /usr/local/include/Lgm/Lgm_WGS84.h /usr/local/include/Lgm/quicksort.h /usr/local/include/Lgm/Lgm_MagModelInfo.h /usr/local/include/Lgm/Lgm_MagEphemInfo.h /usr/local/include/Lgm/Lgm_Vec.h /usr/local/include/Lgm/Lgm_CTrans.h /usr/local/include/Lgm/Lgm_MaxwellJuttner.h /usr/local/include/Lgm/Lgm_ElapsedTime.h /usr/local/include/Lgm/Lgm_Eop.h /usr/local/include/Lgm/Lgm_Octree.h /usr/local/include/Lgm/DynamicMemory.h /usr/local/include/Lgm/Lgm_IGRF.h /usr/local/include/Lgm/Lgm_Sgp.h /usr/local/include/Lgm/Lgm_LstarInfo.h /usr/local/include/Lgm/Lgm_LeapSeconds.h /usr/local/include/Lgm/Lgm_DynamicMemory.h /usr/local/include/Lgm/Lgm_FluxToPsd.h /usr/local/include/Lgm/Lgm_Quat.h /usr/local/include/Lgm/Lgm_FieldIntInfo.h /usr/local/include/Lgm/Lgm_QuadPack.h /usr/local/include/Lgm/Lgm_AE8_AP8.h /usr/local/include/Lgm/Lgm_SphHarm.h
 
 Do not modify this file.
 '''
@@ -597,6 +597,10 @@ _libs["libLanlGeoMag.dylib"] = load_library("libLanlGeoMag.dylib")
 __off_t = c_long # /usr/include/bits/types.h: 141
 
 __off64_t = c_long # /usr/include/bits/types.h: 142
+
+__time_t = c_long # /usr/include/bits/types.h: 149
+
+time_t = __time_t # /usr/include/time.h: 76
 
 # /usr/include/libio.h: 271
 class struct__IO_FILE(Structure):
@@ -2494,7 +2498,7 @@ struct_anon_31._fields_ = [
 
 gsl_spline = struct_anon_31 # /usr/include/gsl/gsl_spline.h: 44
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 308
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 317
 class struct_Lgm_MagModelInfo(Structure):
     pass
 
@@ -2538,6 +2542,8 @@ struct_Lgm_MagModelInfo.__slots__ = [
     'Bvec',
     'Bmag',
     'BminusBcdip',
+    'MaxDiv',
+    'nDivs',
     'nPnts',
     'ds',
     'P_gsm',
@@ -2564,10 +2570,12 @@ struct_Lgm_MagModelInfo.__slots__ = [
     'Ellipsoid_Footprint_Bs',
     'Ellipsoid_Footprint_Bvecs',
     'FieldLineType',
+    'ComputeSb0',
     'd2B_ds2',
     'Sb0',
     'imin1',
     'imin2',
+    'AllocedSplines',
     'acc',
     'accPx',
     'accPy',
@@ -2578,6 +2586,7 @@ struct_Lgm_MagModelInfo.__slots__ = [
     'splinePz',
     'VerbosityLevel',
     'UseInterpRoutines',
+    'Lgm_nMagEvals',
     'Lgm_MagStep_eps_old',
     'Lgm_MagStep_FirstTimeThrough',
     'Lgm_MagStep_kmax',
@@ -2613,6 +2622,8 @@ struct_Lgm_MagModelInfo.__slots__ = [
     'Lgm_FindBmRadius_Tol',
     'Lgm_FindShellLine_I_Tol',
     'Lgm_TraceToMirrorPoint_Tol',
+    'Lgm_TraceToEarth_Tol',
+    'Lgm_TraceToBmin_Tol',
     'OctreeRoot',
     'Octree_kNN_k',
     'Octree_kNN_InterpMethod',
@@ -2676,6 +2687,8 @@ struct_Lgm_MagModelInfo._fields_ = [
     ('Bvec', Lgm_Vector * 10000),
     ('Bmag', c_double * 10000),
     ('BminusBcdip', c_double * 10000),
+    ('MaxDiv', c_double),
+    ('nDivs', c_int),
     ('nPnts', c_int),
     ('ds', c_double),
     ('P_gsm', Lgm_Vector),
@@ -2702,10 +2715,12 @@ struct_Lgm_MagModelInfo._fields_ = [
     ('Ellipsoid_Footprint_Bs', c_double),
     ('Ellipsoid_Footprint_Bvecs', Lgm_Vector),
     ('FieldLineType', c_int),
+    ('ComputeSb0', c_int),
     ('d2B_ds2', c_double),
     ('Sb0', c_double),
     ('imin1', c_int),
     ('imin2', c_int),
+    ('AllocedSplines', c_int),
     ('acc', POINTER(gsl_interp_accel)),
     ('accPx', POINTER(gsl_interp_accel)),
     ('accPy', POINTER(gsl_interp_accel)),
@@ -2716,15 +2731,16 @@ struct_Lgm_MagModelInfo._fields_ = [
     ('splinePz', POINTER(gsl_spline)),
     ('VerbosityLevel', c_int),
     ('UseInterpRoutines', c_int),
+    ('Lgm_nMagEvals', c_long),
     ('Lgm_MagStep_eps_old', c_double),
     ('Lgm_MagStep_FirstTimeThrough', c_int),
     ('Lgm_MagStep_kmax', c_int),
     ('Lgm_MagStep_kopt', c_int),
     ('Lgm_MagStep_snew', c_double),
-    ('Lgm_MagStep_A', c_double * ((9 + 2) + 1)),
-    ('Lgm_MagStep_alpha', (c_double * ((9 + 1) + 1)) * ((9 + 1) + 1)),
-    ('Lgm_MagStep_d', (c_double * (9 + 2)) * (9 + 2)),
-    ('Lgm_MagStep_x', c_double * (9 + 2)),
+    ('Lgm_MagStep_A', c_double * ((16 + 2) + 1)),
+    ('Lgm_MagStep_alpha', (c_double * ((16 + 1) + 1)) * ((16 + 1) + 1)),
+    ('Lgm_MagStep_d', (c_double * (16 + 2)) * (16 + 2)),
+    ('Lgm_MagStep_x', c_double * (16 + 2)),
     ('Lgm_I_integrand_FirstCall', c_int),
     ('Lgm_I_integrand_JumpMethod', c_int),
     ('Lgm_I_integrand_S', c_double),
@@ -2751,6 +2767,8 @@ struct_Lgm_MagModelInfo._fields_ = [
     ('Lgm_FindBmRadius_Tol', c_double),
     ('Lgm_FindShellLine_I_Tol', c_double),
     ('Lgm_TraceToMirrorPoint_Tol', c_double),
+    ('Lgm_TraceToEarth_Tol', c_double),
+    ('Lgm_TraceToBmin_Tol', c_double),
     ('OctreeRoot', POINTER(Lgm_OctreeCell)),
     ('Octree_kNN_k', c_int),
     ('Octree_kNN_InterpMethod', c_int),
@@ -2775,9 +2793,52 @@ struct_Lgm_MagModelInfo._fields_ = [
     ('OP77_TT', c_double * 5),
 ]
 
-Lgm_MagModelInfo = struct_Lgm_MagModelInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 308
+Lgm_MagModelInfo = struct_Lgm_MagModelInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 317
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 311
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 328
+class struct_FuncInfo(Structure):
+    pass
+
+struct_FuncInfo.__slots__ = [
+    'u_scale',
+    'Htry',
+    'sgn',
+    'reset',
+    'Info',
+    'Val',
+    'func',
+]
+struct_FuncInfo._fields_ = [
+    ('u_scale', Lgm_Vector),
+    ('Htry', c_double),
+    ('sgn', c_double),
+    ('reset', c_int),
+    ('Info', POINTER(Lgm_MagModelInfo)),
+    ('Val', c_double),
+    ('func', CFUNCTYPE(UNCHECKED(c_double), POINTER(Lgm_Vector), c_double, POINTER(Lgm_MagModelInfo))),
+]
+
+FuncInfo = struct_FuncInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 328
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 329
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_Brent'):
+        continue
+    Lgm_Brent = _lib.Lgm_Brent
+    Lgm_Brent.argtypes = [c_double, c_double, c_double, c_double, Lgm_Vector, Lgm_Vector, Lgm_Vector, POINTER(FuncInfo), c_double, POINTER(c_double), POINTER(c_double), POINTER(Lgm_Vector)]
+    Lgm_Brent.restype = c_int
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 330
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_zBrent'):
+        continue
+    Lgm_zBrent = _lib.Lgm_zBrent
+    Lgm_zBrent.argtypes = [c_double, c_double, c_double, c_double, Lgm_Vector, Lgm_Vector, POINTER(FuncInfo), c_double, POINTER(c_double), POINTER(c_double), POINTER(Lgm_Vector)]
+    Lgm_zBrent.restype = c_int
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 333
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitMagInfo'):
         continue
@@ -2786,7 +2847,7 @@ for _lib in _libs.itervalues():
     Lgm_InitMagInfo.restype = POINTER(Lgm_MagModelInfo)
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 312
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 334
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_InitMagInfoDefaults'):
         continue
@@ -2795,7 +2856,7 @@ for _lib in _libs.itervalues():
     Lgm_InitMagInfoDefaults.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 314
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 336
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_FreeMagInfo'):
         continue
@@ -2804,7 +2865,7 @@ for _lib in _libs.itervalues():
     Lgm_FreeMagInfo.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 315
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 337
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_CopyMagInfo'):
         continue
@@ -2813,7 +2874,7 @@ for _lib in _libs.itervalues():
     Lgm_CopyMagInfo.restype = POINTER(Lgm_MagModelInfo)
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 317
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 339
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Trace'):
         continue
@@ -2822,7 +2883,7 @@ for _lib in _libs.itervalues():
     Lgm_Trace.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 318
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 340
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToMinBSurf'):
         continue
@@ -2831,7 +2892,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceToMinBSurf.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 319
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 341
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToSMEquat'):
         continue
@@ -2840,7 +2901,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceToSMEquat.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 320
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 342
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToEarth'):
         continue
@@ -2849,7 +2910,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceToEarth.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 321
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 343
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToSphericalEarth'):
         continue
@@ -2858,7 +2919,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceToSphericalEarth.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 322
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 344
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceLine'):
         continue
@@ -2867,7 +2928,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceLine.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 323
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 345
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceLine2'):
         continue
@@ -2876,7 +2937,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceLine2.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 324
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 346
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'ReplaceFirstPoint'):
         continue
@@ -2885,7 +2946,7 @@ for _lib in _libs.itervalues():
     ReplaceFirstPoint.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 325
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 347
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'AddNewPoint'):
         continue
@@ -2894,25 +2955,25 @@ for _lib in _libs.itervalues():
     AddNewPoint.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 326
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 348
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'InitSpline'):
         continue
     InitSpline = _lib.InitSpline
     InitSpline.argtypes = [POINTER(Lgm_MagModelInfo)]
-    InitSpline.restype = None
+    InitSpline.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 327
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 349
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'FreeSpline'):
         continue
     FreeSpline = _lib.FreeSpline
     FreeSpline.argtypes = [POINTER(Lgm_MagModelInfo)]
-    FreeSpline.restype = None
+    FreeSpline.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 328
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 350
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToMinRdotB'):
         continue
@@ -2921,7 +2982,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceToMinRdotB.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 329
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 351
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceIDL'):
         continue
@@ -2930,7 +2991,7 @@ for _lib in _libs.itervalues():
     Lgm_TraceIDL.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 330
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 352
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TraceToMirrorPoint'):
         continue
@@ -2939,16 +3000,16 @@ for _lib in _libs.itervalues():
     Lgm_TraceToMirrorPoint.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 335
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 357
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_ModMid'):
         continue
     Lgm_ModMid = _lib.Lgm_ModMid
-    Lgm_ModMid.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), c_double, c_int, c_double, CFUNCTYPE(UNCHECKED(c_int), POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_MagModelInfo)), POINTER(Lgm_MagModelInfo)]
-    Lgm_ModMid.restype = None
+    Lgm_ModMid.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_Vector), c_double, c_int, c_double, CFUNCTYPE(UNCHECKED(c_int), POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_MagModelInfo)), POINTER(Lgm_MagModelInfo)]
+    Lgm_ModMid.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 337
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 359
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_RatFunExt'):
         continue
@@ -2957,7 +3018,7 @@ for _lib in _libs.itervalues():
     Lgm_RatFunExt.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 338
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 360
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MagStep'):
         continue
@@ -2966,7 +3027,7 @@ for _lib in _libs.itervalues():
     Lgm_MagStep.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 348
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 370
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_igrf'):
         continue
@@ -2975,7 +3036,7 @@ for _lib in _libs.itervalues():
     Lgm_B_igrf.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 349
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 371
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_cdip'):
         continue
@@ -2984,7 +3045,7 @@ for _lib in _libs.itervalues():
     Lgm_B_cdip.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 350
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 372
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_edip'):
         continue
@@ -2993,7 +3054,7 @@ for _lib in _libs.itervalues():
     Lgm_B_edip.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 351
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 373
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_JensenCain1960'):
         continue
@@ -3002,7 +3063,7 @@ for _lib in _libs.itervalues():
     Lgm_B_JensenCain1960.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 360
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 382
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_OP77'):
         continue
@@ -3011,7 +3072,7 @@ for _lib in _libs.itervalues():
     Lgm_B_OP77.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 361
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 383
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'OlsenPfitzerStatic'):
         continue
@@ -3020,7 +3081,7 @@ for _lib in _libs.itervalues():
     OlsenPfitzerStatic.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 370
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 392
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B1_T87'):
         continue
@@ -3029,7 +3090,7 @@ for _lib in _libs.itervalues():
     Lgm_B1_T87.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 371
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 393
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B2_T87'):
         continue
@@ -3038,7 +3099,7 @@ for _lib in _libs.itervalues():
     Lgm_B2_T87.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 372
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 394
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B3_T87'):
         continue
@@ -3047,7 +3108,7 @@ for _lib in _libs.itervalues():
     Lgm_B3_T87.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 373
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 395
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_T87'):
         continue
@@ -3056,7 +3117,7 @@ for _lib in _libs.itervalues():
     Lgm_B_T87.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 381
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 403
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_BM_T89'):
         continue
@@ -3065,7 +3126,7 @@ for _lib in _libs.itervalues():
     Lgm_BM_T89.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 382
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 404
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_BT_T89'):
         continue
@@ -3074,7 +3135,7 @@ for _lib in _libs.itervalues():
     Lgm_BT_T89.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 383
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 405
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_BRC_T89'):
         continue
@@ -3083,7 +3144,7 @@ for _lib in _libs.itervalues():
     Lgm_BRC_T89.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 384
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 406
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_BC_T89'):
         continue
@@ -3092,7 +3153,7 @@ for _lib in _libs.itervalues():
     Lgm_BC_T89.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 385
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 407
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_T89'):
         continue
@@ -3101,7 +3162,7 @@ for _lib in _libs.itervalues():
     Lgm_B_T89.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 393
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 415
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_T96MOD_MGH'):
         continue
@@ -3110,7 +3171,7 @@ for _lib in _libs.itervalues():
     Lgm_B_T96MOD_MGH.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 394
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 416
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'lgm_field_t96mod_mgh_'):
         continue
@@ -3119,7 +3180,7 @@ for _lib in _libs.itervalues():
     lgm_field_t96mod_mgh_.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 395
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 417
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'lgm_field_t96mod_mgh__'):
         continue
@@ -3128,7 +3189,7 @@ for _lib in _libs.itervalues():
     lgm_field_t96mod_mgh__.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 396
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 418
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'lgm_field_t96mod_'):
         continue
@@ -3137,7 +3198,7 @@ for _lib in _libs.itervalues():
     lgm_field_t96mod_.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 404
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 426
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_TS04'):
         continue
@@ -3146,7 +3207,7 @@ for _lib in _libs.itervalues():
     Lgm_B_TS04.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 405
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 427
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_ComputeW'):
         continue
@@ -3155,7 +3216,7 @@ for _lib in _libs.itervalues():
     Lgm_ComputeW.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 406
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 428
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Tsyg_TS04'):
         continue
@@ -3164,7 +3225,7 @@ for _lib in _libs.itervalues():
     Tsyg_TS04.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 407
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 429
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'TS04_EXTERN'):
         continue
@@ -3173,7 +3234,43 @@ for _lib in _libs.itervalues():
     TS04_EXTERN.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 422
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 443
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_B_TS04_opt'):
+        continue
+    Lgm_B_TS04_opt = _lib.Lgm_B_TS04_opt
+    Lgm_B_TS04_opt.argtypes = [POINTER(Lgm_Vector), POINTER(Lgm_Vector), POINTER(Lgm_MagModelInfo)]
+    Lgm_B_TS04_opt.restype = c_int
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 444
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Tsyg_TS04_opt'):
+        continue
+    Tsyg_TS04_opt = _lib.Tsyg_TS04_opt
+    Tsyg_TS04_opt.argtypes = [c_int, POINTER(c_double), c_double, c_double, c_double, c_double, c_double, c_double, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    Tsyg_TS04_opt.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 445
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'TS04_EXTERN_opt'):
+        continue
+    TS04_EXTERN_opt = _lib.TS04_EXTERN_opt
+    TS04_EXTERN_opt.argtypes = [c_int, c_int, c_int, c_int, POINTER(c_double), c_int, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, c_double, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    TS04_EXTERN_opt.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 460
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mypow'):
+        continue
+    mypow = _lib.mypow
+    mypow.argtypes = [c_double, c_double]
+    mypow.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 461
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_T01S'):
         continue
@@ -3182,7 +3279,7 @@ for _lib in _libs.itervalues():
     Lgm_B_T01S.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 423
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 462
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Tsyg_T01S'):
         continue
@@ -3191,7 +3288,7 @@ for _lib in _libs.itervalues():
     Tsyg_T01S.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 424
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 463
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'T01S_EXTALL'):
         continue
@@ -3200,7 +3297,7 @@ for _lib in _libs.itervalues():
     T01S_EXTALL.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 438
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 478
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_B_FromScatteredData'):
         continue
@@ -3209,7 +3306,7 @@ for _lib in _libs.itervalues():
     Lgm_B_FromScatteredData.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 444
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 484
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_SimplifiedMead'):
         continue
@@ -3218,7 +3315,7 @@ for _lib in _libs.itervalues():
     Lgm_SimplifiedMead.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 450
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 490
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Iinv'):
         continue
@@ -3227,7 +3324,7 @@ for _lib in _libs.itervalues():
     Iinv.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 451
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 491
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'I_integrand'):
         continue
@@ -3236,7 +3333,7 @@ for _lib in _libs.itervalues():
     I_integrand.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 452
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 492
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Iinv_interped'):
         continue
@@ -3245,7 +3342,7 @@ for _lib in _libs.itervalues():
     Iinv_interped.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 453
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 493
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'I_integrand_interped'):
         continue
@@ -3254,7 +3351,7 @@ for _lib in _libs.itervalues():
     I_integrand_interped.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 454
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 494
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'SbIntegral'):
         continue
@@ -3263,7 +3360,7 @@ for _lib in _libs.itervalues():
     SbIntegral.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 455
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 495
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Sb_integrand'):
         continue
@@ -3272,7 +3369,7 @@ for _lib in _libs.itervalues():
     Sb_integrand.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 456
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 496
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'SbIntegral_interped'):
         continue
@@ -3281,7 +3378,7 @@ for _lib in _libs.itervalues():
     SbIntegral_interped.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 457
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 497
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Sb_integrand_interped'):
         continue
@@ -3290,7 +3387,7 @@ for _lib in _libs.itervalues():
     Sb_integrand_interped.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 458
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 498
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'ratint'):
         continue
@@ -3299,7 +3396,7 @@ for _lib in _libs.itervalues():
     ratint.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 459
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 499
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'polint'):
         continue
@@ -3308,7 +3405,7 @@ for _lib in _libs.itervalues():
     polint.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 460
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 500
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Interp'):
         continue
@@ -3317,7 +3414,7 @@ for _lib in _libs.itervalues():
     Interp.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 461
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 501
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Interp2'):
         continue
@@ -3326,7 +3423,7 @@ for _lib in _libs.itervalues():
     Interp2.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 462
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 502
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'LFromIBmM_Hilton'):
         continue
@@ -3335,7 +3432,7 @@ for _lib in _libs.itervalues():
     LFromIBmM_Hilton.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 463
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 503
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'IFromLBmM_Hilton'):
         continue
@@ -3344,7 +3441,7 @@ for _lib in _libs.itervalues():
     IFromLBmM_Hilton.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 464
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 504
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'LFromIBmM_McIlwain'):
         continue
@@ -3353,7 +3450,7 @@ for _lib in _libs.itervalues():
     LFromIBmM_McIlwain.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 465
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 505
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'IFromLBmM_McIlwain'):
         continue
@@ -3362,7 +3459,7 @@ for _lib in _libs.itervalues():
     IFromLBmM_McIlwain.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 466
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 506
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_McIlwain_L'):
         continue
@@ -3371,7 +3468,7 @@ for _lib in _libs.itervalues():
     Lgm_McIlwain_L.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 469
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 509
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'BofS'):
         continue
@@ -3380,7 +3477,7 @@ for _lib in _libs.itervalues():
     BofS.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 470
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 510
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'SofBm'):
         continue
@@ -3389,7 +3486,7 @@ for _lib in _libs.itervalues():
     SofBm.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 471
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 511
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_AlphaOfK'):
         continue
@@ -3398,7 +3495,16 @@ for _lib in _libs.itervalues():
     Lgm_AlphaOfK.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 472
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 512
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_KofAlpha'):
+        continue
+    Lgm_KofAlpha = _lib.Lgm_KofAlpha
+    Lgm_KofAlpha.argtypes = [c_double, POINTER(Lgm_MagModelInfo)]
+    Lgm_KofAlpha.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 513
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Setup_AlphaOfK'):
         continue
@@ -3407,7 +3513,7 @@ for _lib in _libs.itervalues():
     Lgm_Setup_AlphaOfK.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 473
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 514
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_TearDown_AlphaOfK'):
         continue
@@ -3416,7 +3522,7 @@ for _lib in _libs.itervalues():
     Lgm_TearDown_AlphaOfK.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 474
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 515
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Grad_I'):
         continue
@@ -3425,7 +3531,7 @@ for _lib in _libs.itervalues():
     Lgm_Grad_I.restype = c_int
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 482
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 523
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MagModelInfo_Set_Psw'):
         continue
@@ -3434,7 +3540,7 @@ for _lib in _libs.itervalues():
     Lgm_MagModelInfo_Set_Psw.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 483
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 524
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MagModelInfo_Set_Kp'):
         continue
@@ -3443,7 +3549,7 @@ for _lib in _libs.itervalues():
     Lgm_MagModelInfo_Set_Kp.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 484
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 525
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Octree_kNN_InterpMethod'):
         continue
@@ -3452,7 +3558,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Octree_kNN_InterpMethod.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 485
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 526
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Octree_kNN_k'):
         continue
@@ -3461,7 +3567,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Octree_kNN_k.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 486
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 527
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Octree_kNN_MaxDist'):
         continue
@@ -3470,7 +3576,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Octree_kNN_MaxDist.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 487
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 528
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Open_Limits'):
         continue
@@ -3479,7 +3585,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Open_Limits.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 488
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 529
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_LossConeHeight'):
         continue
@@ -3488,7 +3594,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_LossConeHeight.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 489
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 530
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_MagModelInfo_Set_MagModel'):
         continue
@@ -3497,7 +3603,7 @@ for _lib in _libs.itervalues():
     Lgm_MagModelInfo_Set_MagModel.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 495
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 536
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_cdip'):
         continue
@@ -3506,7 +3612,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_cdip.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 496
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 537
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_edip'):
         continue
@@ -3515,7 +3621,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_edip.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 497
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 538
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_igrf'):
         continue
@@ -3524,7 +3630,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_igrf.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 498
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 539
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_T01S'):
         continue
@@ -3533,7 +3639,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_T01S.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 499
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 540
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_gm_B_TS04'):
         continue
@@ -3542,7 +3648,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_gm_B_TS04.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 500
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 541
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_T89'):
         continue
@@ -3551,7 +3657,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_T89.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 501
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 542
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Set_Lgm_B_OP77'):
         continue
@@ -3560,7 +3666,7 @@ for _lib in _libs.itervalues():
     Lgm_Set_Lgm_B_OP77.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 508
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 549
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_CDMAG_TO_CGM'):
         continue
@@ -3684,6 +3790,33 @@ for _lib in _libs.itervalues():
     size_Lgm_LeapSeconds = _lib.size_Lgm_LeapSeconds
     size_Lgm_LeapSeconds.argtypes = []
     size_Lgm_LeapSeconds.restype = c_int
+    break
+
+# /usr/local/include/Lgm/quicksort.h: 3
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'quicksort'):
+        continue
+    quicksort = _lib.quicksort
+    quicksort.argtypes = [c_ulong, POINTER(c_double)]
+    quicksort.restype = None
+    break
+
+# /usr/local/include/Lgm/quicksort.h: 5
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'quicksort2'):
+        continue
+    quicksort2 = _lib.quicksort2
+    quicksort2.argtypes = [c_ulong, POINTER(c_double), POINTER(c_double)]
+    quicksort2.restype = None
+    break
+
+# /usr/local/include/Lgm/quicksort.h: 7
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'bubbleSort'):
+        continue
+    bubbleSort = _lib.bubbleSort
+    bubbleSort.argtypes = [c_ulong, POINTER(c_double)]
+    bubbleSort.restype = None
     break
 
 # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
@@ -4179,6 +4312,42 @@ Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphem
 
 # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 143
 for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_InitMagEphemInfo'):
+        continue
+    Lgm_InitMagEphemInfo = _lib.Lgm_InitMagEphemInfo
+    Lgm_InitMagEphemInfo.argtypes = [c_int, c_int]
+    Lgm_InitMagEphemInfo.restype = POINTER(Lgm_MagEphemInfo)
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 144
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_InitMagEphemInfoDefaults'):
+        continue
+    Lgm_InitMagEphemInfoDefaults = _lib.Lgm_InitMagEphemInfoDefaults
+    Lgm_InitMagEphemInfoDefaults.argtypes = [POINTER(Lgm_MagEphemInfo), c_int, c_int]
+    Lgm_InitMagEphemInfoDefaults.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 145
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_FreeMagEphemInfo'):
+        continue
+    Lgm_FreeMagEphemInfo = _lib.Lgm_FreeMagEphemInfo
+    Lgm_FreeMagEphemInfo.argtypes = [POINTER(Lgm_MagEphemInfo)]
+    Lgm_FreeMagEphemInfo.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 146
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_FreeMagEphemInfo_Children'):
+        continue
+    Lgm_FreeMagEphemInfo_Children = _lib.Lgm_FreeMagEphemInfo_Children
+    Lgm_FreeMagEphemInfo_Children.argtypes = [POINTER(Lgm_MagEphemInfo)]
+    Lgm_FreeMagEphemInfo_Children.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 148
+for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_1'):
         continue
     j_to_fp_1 = _lib.j_to_fp_1
@@ -4186,7 +4355,7 @@ for _lib in _libs.itervalues():
     j_to_fp_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 144
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 149
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'j_to_fp_2'):
         continue
@@ -4195,25 +4364,25 @@ for _lib in _libs.itervalues():
     j_to_fp_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 145
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 150
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'Ek_to_mu_1'):
+    if not hasattr(_lib, 'k_to_mu_1'):
         continue
-    Ek_to_mu_1 = _lib.Ek_to_mu_1
-    Ek_to_mu_1.argtypes = [c_double, c_double, c_double]
-    Ek_to_mu_1.restype = c_double
+    k_to_mu_1 = _lib.k_to_mu_1
+    k_to_mu_1.argtypes = [c_double, c_double, c_double]
+    k_to_mu_1.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 146
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 151
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'Ek_to_mu_2'):
+    if not hasattr(_lib, 'k_to_mu_2'):
         continue
-    Ek_to_mu_2 = _lib.Ek_to_mu_2
-    Ek_to_mu_2.argtypes = [c_double, c_double, c_double, c_double]
-    Ek_to_mu_2.restype = c_double
+    k_to_mu_2 = _lib.k_to_mu_2
+    k_to_mu_2.argtypes = [c_double, c_double, c_double, c_double]
+    k_to_mu_2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 147
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 152
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Ek_to_v'):
         continue
@@ -4224,32 +4393,14 @@ for _lib in _libs.itervalues():
 
 # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 153
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'Lgm_InitMagEphemInfo'):
+    if not hasattr(_lib, 'Lgm_ComputeLstarVersusPA'):
         continue
-    Lgm_InitMagEphemInfo = _lib.Lgm_InitMagEphemInfo
-    Lgm_InitMagEphemInfo.argtypes = [c_int, c_int]
-    Lgm_InitMagEphemInfo.restype = POINTER(Lgm_MagEphemInfo)
+    Lgm_ComputeLstarVersusPA = _lib.Lgm_ComputeLstarVersusPA
+    Lgm_ComputeLstarVersusPA.argtypes = [c_long, c_double, POINTER(Lgm_Vector), c_int, POINTER(c_double), c_int, c_int, POINTER(Lgm_MagEphemInfo)]
+    Lgm_ComputeLstarVersusPA.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 154
-for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'Lgm_InitMagEphemInfoDefaults'):
-        continue
-    Lgm_InitMagEphemInfoDefaults = _lib.Lgm_InitMagEphemInfoDefaults
-    Lgm_InitMagEphemInfoDefaults.argtypes = [POINTER(Lgm_MagEphemInfo), c_int, c_int]
-    Lgm_InitMagEphemInfoDefaults.restype = None
-    break
-
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 156
-for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'Lgm_FreeMagEphemInfo'):
-        continue
-    Lgm_FreeMagEphemInfo = _lib.Lgm_FreeMagEphemInfo
-    Lgm_FreeMagEphemInfo.argtypes = [POINTER(Lgm_MagEphemInfo)]
-    Lgm_FreeMagEphemInfo.restype = None
-    break
-
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 155
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'ReadMagEphemInfoStruct'):
         continue
@@ -4258,13 +4409,31 @@ for _lib in _libs.itervalues():
     ReadMagEphemInfoStruct.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 159
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 156
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'WriteMagEphemInfoStruct'):
         continue
     WriteMagEphemInfoStruct = _lib.WriteMagEphemInfoStruct
     WriteMagEphemInfoStruct.argtypes = [String, c_int, POINTER(Lgm_MagEphemInfo)]
     WriteMagEphemInfoStruct.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 157
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_WriteMagEphemHeader'):
+        continue
+    Lgm_WriteMagEphemHeader = _lib.Lgm_WriteMagEphemHeader
+    Lgm_WriteMagEphemHeader.argtypes = [POINTER(FILE), String, c_int, String, String, String, c_double, c_double, POINTER(Lgm_MagEphemInfo)]
+    Lgm_WriteMagEphemHeader.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 158
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_WriteMagEphemData'):
+        continue
+    Lgm_WriteMagEphemData = _lib.Lgm_WriteMagEphemData
+    Lgm_WriteMagEphemData.argtypes = [POINTER(FILE), String, String, c_double, c_double, POINTER(Lgm_MagEphemInfo)]
+    Lgm_WriteMagEphemData.restype = None
     break
 
 # /usr/local/include/Lgm/Lgm_MaxwellJuttner.h: 13
@@ -4283,6 +4452,78 @@ for _lib in _libs.itervalues():
     Lgm_Maxwellian = _lib.Lgm_Maxwellian
     Lgm_Maxwellian.argtypes = [c_double, c_double, c_double, c_double]
     Lgm_Maxwellian.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 21
+class struct_Lgm_ElapsedTimeInfo(Structure):
+    pass
+
+struct_Lgm_ElapsedTimeInfo.__slots__ = [
+    'ColorizeText',
+    'ColorStart',
+    'ColorEnd',
+    'RunStartTime',
+    'RunEndTime',
+    'ElapsedTimeStr',
+    'CurrentTimeStr',
+    'CurrentTimeStr2',
+]
+struct_Lgm_ElapsedTimeInfo._fields_ = [
+    ('ColorizeText', c_int),
+    ('ColorStart', c_char * 15),
+    ('ColorEnd', c_char * 15),
+    ('RunStartTime', time_t),
+    ('RunEndTime', time_t),
+    ('ElapsedTimeStr', c_char * 15),
+    ('CurrentTimeStr', c_char * 15),
+    ('CurrentTimeStr2', c_char * 15),
+]
+
+Lgm_ElapsedTimeInfo = struct_Lgm_ElapsedTimeInfo # /usr/local/include/Lgm/Lgm_ElapsedTime.h: 21
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 23
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_ElapsedTimeInit'):
+        continue
+    Lgm_ElapsedTimeInit = _lib.Lgm_ElapsedTimeInit
+    Lgm_ElapsedTimeInit.argtypes = [POINTER(Lgm_ElapsedTimeInfo), c_int, c_int, c_int]
+    Lgm_ElapsedTimeInit.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 24
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_SetElapsedTimeStr'):
+        continue
+    Lgm_SetElapsedTimeStr = _lib.Lgm_SetElapsedTimeStr
+    Lgm_SetElapsedTimeStr.argtypes = [POINTER(Lgm_ElapsedTimeInfo)]
+    Lgm_SetElapsedTimeStr.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 25
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_PrintElapsedTime'):
+        continue
+    Lgm_PrintElapsedTime = _lib.Lgm_PrintElapsedTime
+    Lgm_PrintElapsedTime.argtypes = [POINTER(Lgm_ElapsedTimeInfo)]
+    Lgm_PrintElapsedTime.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 26
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_SetCurrentTimeStr'):
+        continue
+    Lgm_SetCurrentTimeStr = _lib.Lgm_SetCurrentTimeStr
+    Lgm_SetCurrentTimeStr.argtypes = [POINTER(Lgm_ElapsedTimeInfo)]
+    Lgm_SetCurrentTimeStr.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_ElapsedTime.h: 27
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_PrintCurrentTime'):
+        continue
+    Lgm_PrintCurrentTime = _lib.Lgm_PrintCurrentTime
+    Lgm_PrintCurrentTime.argtypes = [POINTER(Lgm_ElapsedTimeInfo)]
+    Lgm_PrintCurrentTime.restype = None
     break
 
 # /usr/local/include/Lgm/Lgm_Eop.h: 26
@@ -5157,7 +5398,58 @@ struct_Lgm_FluxToPsd._fields_ = [
 
 Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 130
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 194
+class struct_Lgm_PsdToFlux(Structure):
+    pass
+
+struct_Lgm_PsdToFlux.__slots__ = [
+    'nMu',
+    'Mu',
+    'nK',
+    'K',
+    'PSD_MK',
+    'Alloced1',
+    'DateTime',
+    'Position',
+    'KofA',
+    'MuofE',
+    'B',
+    'nE',
+    'E',
+    'nA',
+    'A',
+    'PSD_EA',
+    'FLUX_EA',
+    'Alloced2',
+    'DumpDiagnostics',
+    'Extrapolate',
+]
+struct_Lgm_PsdToFlux._fields_ = [
+    ('nMu', c_int),
+    ('Mu', POINTER(c_double)),
+    ('nK', c_int),
+    ('K', POINTER(c_double)),
+    ('PSD_MK', POINTER(POINTER(c_double))),
+    ('Alloced1', c_int),
+    ('DateTime', Lgm_DateTime),
+    ('Position', Lgm_Vector),
+    ('KofA', POINTER(c_double)),
+    ('MuofE', POINTER(POINTER(c_double))),
+    ('B', c_double),
+    ('nE', c_int),
+    ('E', POINTER(c_double)),
+    ('nA', c_int),
+    ('A', POINTER(c_double)),
+    ('PSD_EA', POINTER(POINTER(c_double))),
+    ('FLUX_EA', POINTER(POINTER(c_double))),
+    ('Alloced2', c_int),
+    ('DumpDiagnostics', c_int),
+    ('Extrapolate', c_int),
+]
+
+Lgm_PsdToFlux = struct_Lgm_PsdToFlux # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 194
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 199
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_CreateFluxToPsd'):
         continue
@@ -5166,7 +5458,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_CreateFluxToPsd.restype = POINTER(Lgm_FluxToPsd)
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 131
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 200
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_FreeFluxToPsd'):
         continue
@@ -5175,7 +5467,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_FreeFluxToPsd.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 132
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 201
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_SetFlux'):
         continue
@@ -5184,7 +5476,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_SetFlux.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 133
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 202
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_SetDateTimeAndPos'):
         continue
@@ -5193,7 +5485,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_SetDateTimeAndPos.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 134
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 203
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_GetPsdAtConstMusAndKs'):
         continue
@@ -5202,7 +5494,7 @@ for _lib in _libs.itervalues():
     Lgm_F2P_GetPsdAtConstMusAndKs.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 135
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 204
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_F2P_GetPsdAtEandAlpha'):
         continue
@@ -5211,7 +5503,61 @@ for _lib in _libs.itervalues():
     Lgm_F2P_GetPsdAtEandAlpha.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 142
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 208
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_CreatePsdToFlux'):
+        continue
+    Lgm_P2F_CreatePsdToFlux = _lib.Lgm_P2F_CreatePsdToFlux
+    Lgm_P2F_CreatePsdToFlux.argtypes = [c_int]
+    Lgm_P2F_CreatePsdToFlux.restype = POINTER(Lgm_PsdToFlux)
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 209
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_FreePsdToFlux'):
+        continue
+    Lgm_P2F_FreePsdToFlux = _lib.Lgm_P2F_FreePsdToFlux
+    Lgm_P2F_FreePsdToFlux.argtypes = [POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_FreePsdToFlux.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 210
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_SetDateTimeAndPos'):
+        continue
+    Lgm_P2F_SetDateTimeAndPos = _lib.Lgm_P2F_SetDateTimeAndPos
+    Lgm_P2F_SetDateTimeAndPos.argtypes = [POINTER(Lgm_DateTime), POINTER(Lgm_Vector), POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_SetDateTimeAndPos.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 211
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_SetPsd'):
+        continue
+    Lgm_P2F_SetPsd = _lib.Lgm_P2F_SetPsd
+    Lgm_P2F_SetPsd.argtypes = [POINTER(POINTER(c_double)), POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_SetPsd.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 212
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_GetFluxAtConstEsAndAs'):
+        continue
+    Lgm_P2F_GetFluxAtConstEsAndAs = _lib.Lgm_P2F_GetFluxAtConstEsAndAs
+    Lgm_P2F_GetFluxAtConstEsAndAs.argtypes = [POINTER(c_double), c_int, POINTER(c_double), c_int, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_GetFluxAtConstEsAndAs.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 213
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_P2F_GetPsdAtMuAndK'):
+        continue
+    Lgm_P2F_GetPsdAtMuAndK = _lib.Lgm_P2F_GetPsdAtMuAndK
+    Lgm_P2F_GetPsdAtMuAndK.argtypes = [c_double, c_double, c_double, POINTER(Lgm_PsdToFlux)]
+    Lgm_P2F_GetPsdAtMuAndK.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 219
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'DumpGif'):
         continue
@@ -5220,7 +5566,7 @@ for _lib in _libs.itervalues():
     DumpGif.restype = None
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 143
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 220
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Ek_to_Mu'):
         continue
@@ -5229,7 +5575,7 @@ for _lib in _libs.itervalues():
     Lgm_Ek_to_Mu.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 144
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 221
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_Mu_to_Ek'):
         continue
@@ -5238,7 +5584,7 @@ for _lib in _libs.itervalues():
     Lgm_Mu_to_Ek.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 145
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 222
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_p2c2'):
         continue
@@ -5247,7 +5593,7 @@ for _lib in _libs.itervalues():
     Lgm_p2c2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 146
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 223
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_v2overc2'):
         continue
@@ -5256,7 +5602,7 @@ for _lib in _libs.itervalues():
     Lgm_v2overc2.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 147
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 224
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_gamma'):
         continue
@@ -5265,7 +5611,7 @@ for _lib in _libs.itervalues():
     Lgm_gamma.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 148
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 225
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_PsdToDiffFlux'):
         continue
@@ -5274,7 +5620,7 @@ for _lib in _libs.itervalues():
     Lgm_PsdToDiffFlux.restype = c_double
     break
 
-# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 149
+# /usr/local/include/Lgm/Lgm_FluxToPsd.h: 226
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'Lgm_DiffFluxToPsd'):
         continue
@@ -5629,6 +5975,51 @@ for _lib in _libs.itervalues():
     Lgm_AE8_AP8_FluxFromPos.restype = c_double
     break
 
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 63
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_fac1'):
+        continue
+    Lgm_fac1 = _lib.Lgm_fac1
+    Lgm_fac1.argtypes = [c_int]
+    Lgm_fac1.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 64
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_fac2'):
+        continue
+    Lgm_fac2 = _lib.Lgm_fac2
+    Lgm_fac2.argtypes = [c_int]
+    Lgm_fac2.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 65
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_kdelta'):
+        continue
+    Lgm_kdelta = _lib.Lgm_kdelta
+    Lgm_kdelta.argtypes = [c_int, c_int]
+    Lgm_kdelta.restype = c_double
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 66
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_GaussToSchmidtSemiNorm'):
+        continue
+    Lgm_GaussToSchmidtSemiNorm = _lib.Lgm_GaussToSchmidtSemiNorm
+    Lgm_GaussToSchmidtSemiNorm.argtypes = [c_int, c_int, c_double, POINTER(c_double), POINTER(c_double)]
+    Lgm_GaussToSchmidtSemiNorm.restype = None
+    break
+
+# /usr/local/include/Lgm/Lgm_SphHarm.h: 67
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'Lgm_SchmidtSemiNormToGauss'):
+        continue
+    Lgm_SchmidtSemiNormToGauss = _lib.Lgm_SchmidtSemiNormToGauss
+    Lgm_SchmidtSemiNormToGauss.argtypes = [c_int, c_int, c_double, POINTER(c_double), POINTER(c_double)]
+    Lgm_SchmidtSemiNormToGauss.restype = None
+    break
+
 # /usr/local/include/Lgm/Lgm_QuadPack.h: 2
 try:
     LGM_QUADPACK_H = 1
@@ -5827,13 +6218,13 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 37
 try:
-    LGM_1O_GOLD = 0.6180339887498949
+    LGM_1_OVER_GOLD = 0.6180339887498949
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 38
 try:
-    LGM_1M_1O_GOLD = 0.38196601125010515
+    LGM_1_MINUS_1_OVER_GOLD = 0.38196601125010515
 except:
     pass
 
@@ -5953,7 +6344,7 @@ except:
 
 # /usr/local/include/Lgm/Lgm_CTrans.h: 138
 try:
-    IRTF_COORDS = 6
+    ITRF_COORDS = 6
 except:
     pass
 
@@ -7487,175 +7878,181 @@ try:
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 40
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 38
 try:
-    LGM_MAGSTEP_KMAX = 9
+    LGM_BAD_TRACE = (-3)
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 41
 try:
-    LGM_MAGSTEP_IMAX = (LGM_MAGSTEP_KMAX + 1)
+    LGM_MAGSTEP_KMAX = 16
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 42
 try:
-    LGM_MAGSTEP_JMAX = (LGM_MAGSTEP_KMAX + 2)
+    LGM_MAGSTEP_IMAX = (LGM_MAGSTEP_KMAX + 1)
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 43
 try:
-    LGM_MAGSTEP_REDMAX = 1.0000000000000001e-05
+    LGM_MAGSTEP_JMAX = (LGM_MAGSTEP_KMAX + 2)
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 44
 try:
-    LGM_MAGSTEP_REDMIN = 0.69999999999999996
+    LGM_MAGSTEP_REDMAX = 1.0000000000000001e-05
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 45
 try:
-    LGM_MAGSTEP_SCLMAX = 0.10000000000000001
+    LGM_MAGSTEP_REDMIN = 0.69999999999999996
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 46
 try:
-    LGM_MAGSTEP_SAFE1 = 0.25
+    LGM_MAGSTEP_SCLMAX = 0.10000000000000001
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 47
 try:
-    LGM_MAGSTEP_SAFE2 = 0.69999999999999996
+    LGM_MAGSTEP_SAFE1 = 0.25
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 49
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 48
 try:
-    DQAGS = 0
+    LGM_MAGSTEP_SAFE2 = 0.69999999999999996
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 50
 try:
-    DQAGP = 1
+    DQAGS = 0
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 51
 try:
-    DQK21 = 2
+    DQAGP = 1
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 60
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 52
 try:
-    LINEAR = 0
+    DQK21 = 2
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 61
 try:
-    LINEAR_DFI = 1
+    LINEAR = 0
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 62
 try:
-    QUADRATIC = 2
+    LINEAR_DFI = 1
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 63
 try:
-    QUADRATIC_DFI = 3
+    QUADRATIC = 2
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 64
 try:
-    NEWTON_INTERP = 4
+    QUADRATIC_DFI = 3
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 66
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 65
 try:
-    LGM_CDIP = 0
+    NEWTON_INTERP = 4
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 67
 try:
-    LGM_EDIP = 1
+    LGM_CDIP = 0
 except:
     pass
 
 # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 68
 try:
+    LGM_EDIP = 1
+except:
+    pass
+
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 69
+try:
     LGM_IGRF = 2
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 70
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 71
 try:
     LGM_MAX_INTERP_PNTS = 10000
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 72
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 73
 try:
     LGM_RELATIVE_JUMP_METHOD = 0
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 73
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 74
 try:
     LGM_ABSOLUTE_JUMP_METHOD = 1
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 76
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 77
 try:
     LGM_EXTMODEL_NULL = (-1)
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 77
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 78
 try:
     LGM_EXTMODEL_T87 = 0
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 78
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 79
 try:
     LGM_EXTMODEL_T89 = 1
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 79
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 80
 try:
     LGM_EXTMODEL_T96 = 2
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 80
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 81
 try:
     LGM_EXTMODEL_T01S = 3
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 81
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 82
 try:
     LGM_EXTMODEL_TS04 = 4
 except:
     pass
 
-# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 82
+# /usr/local/include/Lgm/Lgm_MagModelInfo.h: 83
 try:
     LGM_EXTMODEL_OP77 = 5
 except:
@@ -7955,11 +8352,15 @@ _Lgm_OctreeCell = struct__Lgm_OctreeCell # /usr/local/include/Lgm/Lgm_Octree.h: 
 
 _pQueue = struct__pQueue # /usr/local/include/Lgm/Lgm_Octree.h: 59
 
-Lgm_MagModelInfo = struct_Lgm_MagModelInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 308
+Lgm_MagModelInfo = struct_Lgm_MagModelInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 317
+
+FuncInfo = struct_FuncInfo # /usr/local/include/Lgm/Lgm_MagModelInfo.h: 328
 
 Lgm_LstarInfo = struct_Lgm_LstarInfo # /usr/local/include/Lgm/Lgm_LstarInfo.h: 114
 
 Lgm_MagEphemInfo = struct_Lgm_MagEphemInfo # /usr/local/include/Lgm/Lgm_MagEphemInfo.h: 137
+
+Lgm_ElapsedTimeInfo = struct_Lgm_ElapsedTimeInfo # /usr/local/include/Lgm/Lgm_ElapsedTime.h: 21
 
 Lgm_NgaEopp = struct_Lgm_NgaEopp # /usr/local/include/Lgm/Lgm_Eop.h: 26
 
@@ -7970,6 +8371,8 @@ Lgm_EopOne = struct_Lgm_EopOne # /usr/local/include/Lgm/Lgm_Eop.h: 63
 _SgpTLE = struct__SgpTLE # /usr/local/include/Lgm/Lgm_Sgp.h: 99
 
 Lgm_FluxToPsd = struct_Lgm_FluxToPsd # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 126
+
+Lgm_PsdToFlux = struct_Lgm_PsdToFlux # /usr/local/include/Lgm/Lgm_FluxToPsd.h: 194
 
 Lgm_FieldIntInfo = struct_Lgm_FieldIntInfo # /usr/local/include/Lgm/Lgm_FieldIntInfo.h: 48
 

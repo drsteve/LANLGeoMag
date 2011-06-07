@@ -1,6 +1,6 @@
 """
 LanlGeoMag python wrappers
-See Mike Henderon about LanlGeoMag and Brian Larsen about the python wrappers
+See Mike Henderson about LanlGeoMag and Brian Larsen about the python wrappers
 
 
 @author: Brian Larsen
@@ -21,4 +21,3 @@ from lgmpy.Lstar import get_Lstar
 #package info
 __version__ = '0.1dev'
 __author__ = ['Brian Larsen', 'Steve Morley']
-

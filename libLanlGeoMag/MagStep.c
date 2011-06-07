@@ -14,11 +14,11 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 
 
-void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn, 
+int Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *b0, Lgm_Vector *v, double H, int n, double sgn, 
          int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ) {
 
     int            m;
-    double        h2, h;
+    double        h2, h, Bmag;
     Lgm_Vector    z0, z1, z2, B;
 
 
@@ -36,12 +36,11 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
 
 
     /*
-     *  Do initial Euler step to get z1.
+     *  Do initial Euler step to get z1. We get b0 from the arg list (its computed once).
      */
-    (*Mag)(&z0, &B, Info); Lgm_NormalizeVector(&B);
-    z1.x = z0.x + h*B.x; 
-    z1.y = z0.y + h*B.y; 
-    z1.z = z0.z + h*B.z;
+    z1.x = z0.x + h*b0->x; 
+    z1.y = z0.y + h*b0->y; 
+    z1.z = z0.z + h*b0->z;
     
 
     /*
@@ -49,7 +48,18 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
      */
     for ( m = 1; m < n; ++m ) {
 
-        (*Mag)(&z1, &B, Info); Lgm_NormalizeVector(&B);
+        if ( (*Mag)(&z1, &B, Info) == 0 ) {
+            // bail if B-field eval had issues.
+            printf("Lgm_ModMid(): B-field evaluation during midpoint phase (m = %d and z1 = %g %g %g) returned with errors (returning with 0)\n", m, z1.x, z1.y, z1.z );
+            return(0);
+        }
+        ++(Info->Lgm_nMagEvals);
+        Bmag = Lgm_NormalizeVector(&B);
+        if ( Bmag < 1e-16 ) {
+            // bail if B-field magnitude is too small
+            printf("Lgm_ModMid(): Bmag too small during midpoint phase (m = %d and z1 = %g %g %g Bmag = %g) is too small (returning with 0).\n", m, z1.x, z1.y, z1.z, Bmag );
+            return(0); 
+        }
         z2.x = z0.x + h2*B.x; 
         z2.y = z0.y + h2*B.y; 
         z2.z = z0.z + h2*B.z;
@@ -62,7 +72,18 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
     /*
      *  Do final Euler step to get z(n+1).
      */
-    (*Mag)(&z1, &B, Info); Lgm_NormalizeVector(&B);
+    if ( (*Mag)(&z1, &B, Info) == 0 ) {
+        // bail if B-field eval had issues.
+        printf("Lgm_ModMid(): B-field evaluation during final Euler step (z1 = %g %g %g) returned with errors (returning with 0)\n", z1.x, z1.y, z1.z );
+        return(0);
+    }
+    ++(Info->Lgm_nMagEvals);
+    Bmag = Lgm_NormalizeVector(&B);
+    if ( Bmag < 1e-16 ) {
+        // bail if B-field magnitude is too small
+        printf("Lgm_ModMid(): Bmag too small during final Euler step (z1 = %g %g %g Bmag = %g) is too small (returning with 0).\n", z1.x, z1.y, z1.z, Bmag );
+        return(0);
+    }
     z2.x = z1.x + h*B.x; 
     z2.y = z1.y + h*B.y; 
     z2.z = z1.z + h*B.z;
@@ -77,6 +98,7 @@ void Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *v, double H, int n, double sgn,
     v->z = 0.5 * (z0.z + z2.z);
     
 
+    return(1);
 
 }
 
@@ -153,35 +175,45 @@ void Lgm_RatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
  *
  *
  */
-// NOT thread safe?
 int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale, 
           double Htry, double *Hdid, double *Hnext, 
           double eps, double sgn, double *s, int *reset,
           int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
 
-    Lgm_Vector        u_save, v, uerr, e;
-    int                q, k, kk, km=0, n;
-    int                reduction, done;
-    double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1];
+    Lgm_Vector        u0, b0, v, uerr, e;
+    int               q, k, kk, km=0, n;
+    int               reduction, done;
+    double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1], Bmag;
     double            eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
-//static int        Info->Lgm_MagStep_FirstTimeThrough=TRUE, Info->Lgm_MagStep_kmax, Info->Lgm_MagStep_kopt;
-//static double   Info->Lgm_MagStep_eps_old=-1.0, Info->Lgm_MagStep_snew;
-//static double   A[JMAX+1], Info->Lgm_MagStep_alpha[IMAX+1][IMAX+1];
     /*
-     *  This sequence seems to be pretty good in general. The "1" seems to be
-     *  really essential to speed things up (on some test runsa, its almost a factor of
-     *  (2 slower without it!).
+     *  For years, we ran with this seq;
+     *
+     *      static int     Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
+     *
+     *  but, some tests show this is more efficient;
+     *
+     *      static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
+     *  
+     *  Ratio of required func calls (for the test I did) was about 1.6
      */
-    static int     Seq[] = { 0, 1, 2, 4, 6, 8, 12, 18, 24, 32, 48, 64 };
+    static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
 
 
+    if ( fabs(Htry) < 1e-16 ) {
+        printf("Lgm_MagStep(): Requested stepsize is very small (returning with -1). Htry = %g\n", Htry );
+        return(-1);
+    }
+
+
+    if ( *reset ) Info->Lgm_nMagEvals = 0;
 
     if ( ( eps != Info->Lgm_MagStep_eps_old ) || ( *reset ) ){
 
+        Info->Lgm_MagStep_eps_old = eps;
+
         *Hnext  = -1.0;
         eps1    = LGM_MAGSTEP_SAFE1*eps;
-        Info->Lgm_MagStep_eps_old = eps;
 
         /*
          *  Compute work to get to column k of the tableau.
@@ -215,7 +247,20 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
 
 
     H = Htry;
-    u_save = *u;
+    u0 = *u;
+    if ( (*Mag)(&u0, &b0, Info) == 0 ) {
+        // bail if B-field eval had issues.
+        printf("Lgm_MagStep(): B-field evaluation at u0 = %g %g %g returned with errors (returning with -1)\n", u0.x, u0.y, u0.z );
+        return(-1);
+    }
+    ++(Info->Lgm_nMagEvals);
+    Bmag = Lgm_NormalizeVector(&b0);
+    if ( Bmag < 1e-16 ) {
+        // bail if B-field magnitude is too small
+        printf("Lgm_MagStep(): Bmag too small at u0 = %g %g %g (Bmag = %g) (returning with -1).\n", u0.x, u0.y, u0.z, Bmag );
+        return(-1);
+    }
+
     if ( (*s != Info->Lgm_MagStep_snew) || (H != *Hnext) || ( *reset ) ) {
         Info->Lgm_MagStep_snew = 0.0;
         *s   = 0.0;
@@ -231,21 +276,22 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
         for (k=1; k<=Info->Lgm_MagStep_kmax; ++k) {
 
             Info->Lgm_MagStep_snew = *s + H;
-            if (Info->Lgm_MagStep_snew == (*s)) { 
-                printf("H = %g\n", H);
-                fprintf(stderr, "step size underflow\n");
-                fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
+            if ( fabs(Info->Lgm_MagStep_snew - *s) < 1e-16 ) { 
+                if (Info->VerbosityLevel > 1) {
+                    //printf("H = %g\n", H);
+                    fprintf(stderr, "step size underflow\n");
+                    fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
+                    }
                 Info->Lgm_MagStep_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_eps_old = -1.0;
-printf("HOW DID I GET HERE? P = \n");
-exit(0);
+                //printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
                 return(-1);
             }
 
             n  = Seq[k];
             n2 = (double)(n*n);
             h2 = H*H;
-            Lgm_ModMid( &u_save, &v, H, n, sgn, Mag, Info );
+            if ( !Lgm_ModMid( &u0, &b0, &v, H, n, sgn, Mag, Info ) ) return(-1); // bail if Lgm_ModMid() had issues.
             sss = h2/n2;
             Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
             
@@ -298,7 +344,7 @@ exit(0);
 
         if (!done) {
             red = (red < LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;
-            red = (red > LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;
+            red = (red > LGM_MAGSTEP_REDMAX) ? red : LGM_MAGSTEP_REDMAX;
             H *= red;
             reduction = TRUE;
         }

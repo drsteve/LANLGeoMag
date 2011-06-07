@@ -7,7 +7,7 @@ reporter: Brian Larsen <balarsen@lanl.gov>
 severity: minor
 
 
-status: open
+status: closed
 
 
 summary: add unit tests not just function tests to LstarVersusPA_Tests

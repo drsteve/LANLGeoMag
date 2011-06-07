@@ -1,13 +1,11 @@
 """
+Overview
+--------
 Python implementation of the LanlGeoMag T89 Magnetic field model
 
-
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 23-Dec-2010 (BAL)
 """
+__author__ = 'Brian Larsen, Mike Henderson - LANL'
+
 import datetime
 from ctypes import pointer
 
@@ -22,13 +20,31 @@ import Lgm_MagModelInfo
 
 class Lgm_T89(MagData.MagData):
     """
-    Python implementation of the LanlGeoMag T89 Magnetic field model
+    Python implementation of the LanlGeoMag T89 Magnetic field model.  This is
+    the full wrapper, most users will not use this.
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ----------
+    pos : list
+        3-element list of the position to do the calculation
+    time : datetime
+        date and time of when to do the calculation
+    Kp : int
+        Kp value for the calculation
+    coord_system : str, optional
+        the coordinate system of the position, default=GSM
+    INTERNAL_MODEL : str, optional
+        the internal magnetic field model to use, default=LGM_IGRF
 
-    @version: V1: 23-Dec-2010 (BAL)
+    Returns
+    -------
+    out : Lgm_T89 object
+        Lgm_T89 object will the magnetic field value and other information
+
+    See Also
+    --------
+    Lgm_T89.T89
+
     """
     def __init__(self, pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
         # pos must be a Lgm_Vector or list of Lgm_Vectors
@@ -69,7 +85,7 @@ class Lgm_T89(MagData.MagData):
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
-        # either they are all one elemet or they are compatible lists no 1/2 way
+        # either they are all one element or they are compatible lists no 1/2 way
         try:
             if len(self._Vpos) != len(self['Kp']) or \
                 len(self._Vpos) != len(self['Epoch']) or \
@@ -126,28 +142,41 @@ class Lgm_T89(MagData.MagData):
 def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """
     Easy wrapper to just return values without having to create an instance of
-    Lgm_T89
+    Lgm_T89.
 
-    @param pos: a list of 3 element lists of positions in coord_system system
-    @type pos: list
-    @param time: a datetime or list of datetime objects
-    @type time: (list, datetime)
-    @param Kp: the Kp value for T89 (0,1,2,3,4,5)
-    @type Kp: int
+    All input parameters can be either their type or a list of the that type, all
+    inputs must be the same length
 
-    @keyword coord_system: the name of the coord system to use (or Lgm number)
-    @type coord_system: (str, int)
-    @keyword INTERNAL_MODEL: the intermal magnetic field model to use (or Lgm number)
-    @type INTERNAL_MODEL: (str, int)
+    Parameters
+    ----------
+    pos : list
+        3-element list of the position to do the calculation
+    time : datetime
+        date and time of when to do the calculation
+    Kp : int
+        Kp value for the calculation
+    coord_system : str, optional
+        the coordinate system of the position, default=GSM
+    INTERNAL_MODEL : str, optional
+        the internal magnetic field model to use, default=LGM_IGRF
 
-    @retval: list of the x, y, z, compents of B in nT
-    @rtype: list
+    Returns
+    -------
+    out : list
+        Magnetic field vector in GSM coordinates in nT
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Examples
+    --------
+    >>> from lgmpy import Lgm_T89
+    >>> import datetime
+    >>> Lgm_T89.T89([1,2,3], datetime.datetime(1999, 1, 16, 12, 34, 12), 3)
+    [-509.297442..., -619.8167352..., -426.193633024...]
 
-    @version: V1: 11-Jan-2011 (BAL)
+
+    See Also
+    --------
+    Lgm_T89.Lgm_T89
+
     """
     a = Lgm_T89(pos, time, Kp, coord_system = coord_system,
                         INTERNAL_MODEL=INTERNAL_MODEL)

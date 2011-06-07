@@ -10,14 +10,6 @@ operate on the vectors.  There is full coverage for <, >, ==, +, -. /.
 All the operations are done in the underlying C library (even though that is
 silly for much of this).
 
-
-Unittest coverage
------------------
-This module has full unitest coverage, see test_Lgm_Vector.py
-
-Authors
--------
-Brian Larsen (Python), Mike Henderson (C) - LANL
 """
 import itertools
 import copy
@@ -26,6 +18,8 @@ from ctypes import pointer, c_double
 from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
     Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords
+
+__author__ = 'Brian Larsen (Python), Mike Henderson (C) - LANL'
 
 class Lgm_Vector(Lgm_Vector):
     def __eq__(self, other):
@@ -103,7 +97,7 @@ class Lgm_Vector(Lgm_Vector):
         """
         print out the Lgm_Vector as a list
 
-        @return: List repersentation of the components
+        @return: List representation of the components
         @rtype: str
 
         @author: Brian Larsen
@@ -148,7 +142,7 @@ class Lgm_Vector(Lgm_Vector):
 
     def __add__(self, other):
         """
-        add two vectors together or add a scaler to each component
+        add two vectors together or add a scalar to each component
 
         @param other: other vector or scalar to add to vector
         @type other: (Lgm_Vector, int, long, float)
@@ -176,7 +170,7 @@ class Lgm_Vector(Lgm_Vector):
 
     def __sub__(self, other):
         """
-        subtract two vectors or subtract a scaler from each component
+        subtract two vectors or subtract a scalar from each component
 
         @param other: other vector or scalar to subtract from vector
         @type other: (Lgm_Vector, int, long, float)
@@ -395,7 +389,7 @@ class Lgm_Vector(Lgm_Vector):
 
     def forceMagnitude(self, val):
         """
-        Force the vector to have a given magnitude inplace
+        Force the vector to have a given magnitude in place
 
         Parameters
         ----------
@@ -424,7 +418,7 @@ def SphToCart(lat, lon, rad):
     Returns
     -------
     out : Lgm_Vector
-        A Lgm_Vector in Cartestian coords same units as the input
+        A Lgm_Vector in Cartesian coords same units as the input
 
     Examples
     --------

@@ -1,13 +1,13 @@
 """
-Data model for magnetic field data
+Overview
+========
+Data model for magnetic field data.
 
-
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 21-Mar-2011 (BAL)
+The SpaceData class is a derived dictionary used to hold information in a comman
+format
 """
+__author__ = 'Brian Larsen'
+
 import numpy as np
 import spacepy.toolbox as tb
 
@@ -17,11 +17,16 @@ class MagData(datamodel.SpaceData):
     """
     Class to store data and attributes
 
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
+    Parameters
+    ==========
+    args : arguments, optional
+        passed directly to datamodel.SpaceData
+    kwargs : keyword arguments, optional
+        passed directly to datamodel.SpaceData
 
-    @version: V1: 21-Mar-2011 (BAL)
+    See Also
+    ========
+    spacepy.datamodel.SpaceData
     """
     def __init__(self, *args, **kwargs):
         super(MagData, self).__init__(*args, **kwargs)

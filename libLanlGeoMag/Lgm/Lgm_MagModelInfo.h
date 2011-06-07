@@ -35,9 +35,10 @@
 #define		LGM_OPEN_S_LOBE		           3
 #define		LGM_INSIDE_EARTH           	  -1
 #define     LGM_TARGET_HEIGHT_UNREACHABLE -2
+#define     LGM_BAD_TRACE                 -3
 
 
-#define 	LGM_MAGSTEP_KMAX	9
+#define 	LGM_MAGSTEP_KMAX	16
 #define 	LGM_MAGSTEP_IMAX	(LGM_MAGSTEP_KMAX+1)
 #define 	LGM_MAGSTEP_JMAX	(LGM_MAGSTEP_KMAX+2)
 #define 	LGM_MAGSTEP_REDMAX 	1.0e-5
@@ -108,6 +109,10 @@ typedef struct Lgm_MagModelInfo {
     int         InternalModel;          // Can be LGM_CDIP, LGM_EDIP or LGM_IGRF
     int         ExternalModel;          // Can be from list above (e.g. LGM_EXTMODEL_T89)
 
+    /*
+     * Temporary variable to hold a generic position
+     */
+    Lgm_Vector  Ptmp;
 
 
     /*
@@ -174,6 +179,7 @@ typedef struct Lgm_MagModelInfo {
 
 
 
+    int                 ComputeSb0; // Flag to determine whether or not to compute d2B_ds2 and Sb0 (default is FALSE).
     double              d2B_ds2;    // second derivative of B wrt to s at smin.
     double              Sb0;        // value of Sb integral for eq. mirroring particles.
     int                 imin1;      // imin1 and imin2 are the indices in the
@@ -184,14 +190,15 @@ typedef struct Lgm_MagModelInfo {
     /*
      *  GSL defs for spline interpolation
      */
-    gsl_interp_accel    *acc;       // accelerator
-    gsl_interp_accel    *accPx;     // accelerator
-    gsl_interp_accel    *accPy;     // accelerator
-    gsl_interp_accel    *accPz;     // accelerator
-    gsl_spline          *spline;    // spline object
-    gsl_spline          *splinePx;  // spline object
-    gsl_spline          *splinePy;  // spline object
-    gsl_spline          *splinePz;  // spline object
+    int                 AllocedSplines;     // Flag to indicate that we have alloced splines (via gsl)
+    gsl_interp_accel    *acc;               // accelerator
+    gsl_interp_accel    *accPx;             // accelerator
+    gsl_interp_accel    *accPy;             // accelerator
+    gsl_interp_accel    *accPz;             // accelerator
+    gsl_spline          *spline;            // spline object
+    gsl_spline          *splinePx;          // spline object
+    gsl_spline          *splinePy;          // spline object
+    gsl_spline          *splinePz;          // spline object
 
 
     /*
@@ -205,15 +212,16 @@ typedef struct Lgm_MagModelInfo {
      *  These variables are needed to make Lgm_MagStep() reentrant/thread-safe.
      *  They basically used to be static declarations within Lgm_MagStep()
      */
-    double  Lgm_MagStep_eps_old;
-    int	    Lgm_MagStep_FirstTimeThrough;
-    int     Lgm_MagStep_kmax;
-    int     Lgm_MagStep_kopt;
-    double  Lgm_MagStep_snew;
-    double  Lgm_MagStep_A[LGM_MAGSTEP_JMAX+1];
-    double  Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
-    double  Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
-    double  Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
+    long int    Lgm_nMagEvals; // records number of Bfield evals between resets
+    double      Lgm_MagStep_eps_old;
+    int	        Lgm_MagStep_FirstTimeThrough;
+    int         Lgm_MagStep_kmax;
+    int         Lgm_MagStep_kopt;
+    double      Lgm_MagStep_snew;
+    double      Lgm_MagStep_A[LGM_MAGSTEP_JMAX+1];
+    double      Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
+    double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
+    double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
 
 
     /*
@@ -312,6 +320,29 @@ typedef struct Lgm_MagModelInfo {
 
 } Lgm_MagModelInfo;
 
+typedef struct BrentFuncInfoP {
+
+    Lgm_Vector          u_scale;
+    double              Htry, sgn;
+    int                 reset;
+    Lgm_MagModelInfo    *Info;
+    double              Val;
+    double 		        (*func)( Lgm_Vector *P, double Val, Lgm_MagModelInfo *Info );
+
+} BrentFuncInfoP;
+int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Vector Pb, Lgm_Vector Pc, BrentFuncInfoP *fInfo, double tol, double *Smin, double *Bmin, Lgm_Vector *Pmin );
+int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, BrentFuncInfoP *fInfo, double tol, double *Sz, double *Fz, Lgm_Vector *Pz );
+
+typedef struct BrentFuncInfo {
+
+    double              Val;
+    void                *Info;
+    double 		        (*func)( double x, double Val, void *Info );
+
+} BrentFuncInfo;
+int Lgm_Brent(double xa, double xb, double xc, double fb, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin );
+int Lgm_zBrent(double x1, double x2, double f1, double f2, BrentFuncInfo *fInfo, double tol, double *x, double *f );
+
 
 Lgm_MagModelInfo *Lgm_InitMagInfo( );
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
@@ -319,25 +350,26 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
 void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info );
 Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s );
 
-int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info );
-int Lgm_TraceToMinBSurf( Lgm_Vector *, Lgm_Vector *, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceToSMEquat(  Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
-int Lgm_TraceToEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceToSphericalEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
-int Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lgm_MagModelInfo * );
-int Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
+int  Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info );
+int  Lgm_TraceToMinBSurf( Lgm_Vector *, Lgm_Vector *, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToSMEquat(  Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToSphericalEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lgm_MagModelInfo * );
+int  Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
+int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info );
 void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
-void InitSpline( Lgm_MagModelInfo *Info );
-void FreeSpline( Lgm_MagModelInfo *Info );
-int Lgm_TraceToMinRdotB( Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
-int Lgm_TraceIDL( int, void *argv[] );
-int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
+int  InitSpline( Lgm_MagModelInfo *Info );
+int  FreeSpline( Lgm_MagModelInfo *Info );
+int  Lgm_TraceToMinRdotB( Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
+int  Lgm_TraceIDL( int, void *argv[] );
+int  Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
 
 
 
 
-void Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, double, int, double,
+int Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
@@ -402,7 +434,7 @@ void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *
 
 
 /*
- *  T01S
+ *  T04
  *
  *  Function Prototypes for TS04 model
  */
@@ -418,15 +450,32 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
                 double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
 
 
-
 /*
- *  TS04
+ *  T04 Optimized
  *
  *  Function Prototypes for TS04 model
  */
-int  Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
+int  Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
+                double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
+                double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
+                double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
+                double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
+                double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
+                double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
+
+
+
+/*
+ *  T01S
+ *
+ *  Function Prototypes for TS04 model
+ */
+double mypow( double, double );
+int     Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void    T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
                     double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
                     double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
                     double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
@@ -434,6 +483,7 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
                     double *BXR12, double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21,
                     double *BXR22, double *BYR22, double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF,
                     double *BX, double *BY, double *BZ);
+
 
 /*
  *  Computing B from scattered data -- (e.g. an irregular mesh)

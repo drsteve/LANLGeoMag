@@ -132,7 +132,10 @@
  *     CALIF.,  PHONE (714) 896-3231.
  *
  *
- *  \warning   The code artificially bails out with zero field when r<2 and when r>15 Re. This may cause discontinuities that can cause trouble.
+ *  \warning    The original code artificially bails out with zero field when
+ *              r<2 and when r>15 Re. This may cause discontinuities that can cause
+ *              trouble. This version tries to smoothly transition to dipole at large
+ *              distances.
  *
  */
 
