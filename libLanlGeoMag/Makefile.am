@@ -5,7 +5,7 @@ AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 # Location to keep Eop-related stuff
 LGM_EOP_DATA_DIR = @prefix@/share/LanlGeoMag/EopData
 includedir       = @prefix@/include/Lgm
-libdir           = @prefix@/lib
+#libdir           = @prefix@/lib
 pkgconfigdir     = $(libdir)/pkgconfig
 pkgconfig_DATA   = lgm.pc
 

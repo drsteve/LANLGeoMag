@@ -5,6 +5,11 @@
 
 AC_PREREQ([2.59])
 AC_INIT([LanlGeoMag], [1.5.11], [mghenderson@lanl.gov])
+THE_PKG_RELEASE=0
+PKG_RELEASE=$THE_PKG_RELEASE
+
+AC_SUBST([PKG_RELEASE])
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG([C])
@@ -95,7 +100,9 @@ AC_CHECK_FUNCS([floor memset pow sqrt strstr])
 AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/Lgm/Makefile
                  libLanlGeoMag/Makefile
+                 tests/Makefile
                  libLanlGeoMag/EopData/GetEopFiles
-                 libLanlGeoMag/lgm.pc]
-                 tests/Makefile)
+                 libLanlGeoMag/lgm.pc
+                 lanlgeomag.spec
+                 ])
 AC_OUTPUT
