@@ -6,11 +6,7 @@ GIT repository
 
 Initial checkout:
 
-<<<<<<< HEAD
-git clone YOUR_SCHEME_LOGIN@sueno.lanl.gov:/n/projects/lanl/LanlGeoMag.git
-=======
 git clone ssh://YOUR_SCHEME_LOGIN@svn.isr.lanl.gov/n/projects/lanl/LanlGeoMag.git
->>>>>>> 87920a27613bb39e91b92c783767532ff62c9632
 
 cd LanlGeoMag
 
@@ -70,3 +66,24 @@ git push --tags
 * Then move to the "development" version v1.5.12+ by editing
   configure.ac and NEWS and putting AC_INIT(... , [1.5.12] , ...)
 
+Release engineer actions
+........................
+
+Start with a fresh clone followed by a checkout of the release tag:
+
+git clone ssh://YOUR_SCHEME_LOGIN@svn.isr.lanl.gov/n/projects/lanl/LanlGeoMag.git LanlGeoMag-v1.5.12
+cd LanlGeoMag-v1.5.12
+git checkout v1.5.12
+
+autoreconf -i
+./configure
+make distcheck
+
+And you've got a well-tracked tarball called lanlgeomag-1.5.12.tar.gz
+
+Finally, you can try running
+
+rpmbuild -ta lanlgeomag-1.5.12.tar.gz
+
+to build RPMs.  RPMs are not yet working because we still have
+/usr/lanl hard-coded in a lot of places, but we are getting closer.
