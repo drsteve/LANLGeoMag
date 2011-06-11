@@ -28,8 +28,8 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
     // These tend to be critical to keep things working smoothly.
 //    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
 //    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
-    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-8;
-    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-8;
+    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
+    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
 
 
     switch ( Quality ) {
@@ -37,20 +37,40 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
         case 8: // Highest Quality -- (although 7 may be better?)
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-6;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-8;
 
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-6;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-8;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-8;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-8;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-7;
+
+            s->mInfo->nDivs = 500;
 
             break;
 
         case 7:
+
+            s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-7;
+
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-7;
+
+            s->mInfo->Lgm_I_Integrator        = DQAGS;
+            s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-7;
+
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-6;
+
+            s->mInfo->nDivs = 400;
+
+            break;
+
+        case 6:
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
             s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-6;
@@ -60,13 +80,15 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-7;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-6;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-7;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-5;
+
+            s->mInfo->nDivs = 300;
 
             break;
 
-        case 6:
+        case 5:
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
             s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-5;
@@ -76,13 +98,15 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-6;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-5;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-6;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-4;
+
+            s->mInfo->nDivs = 200;
 
             break;
 
-        case 5:
+        case 4:
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
             s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-4;
@@ -92,25 +116,11 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-5;
-
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-5;
-
-            break;
-
-        case 4:
-
-            s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-3;
-
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-3;
-
-            s->mInfo->Lgm_I_Integrator        = DQAGS;
-            s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-4;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-4;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
+
+            s->mInfo->nDivs = 200;
 
             break;
 
@@ -123,10 +133,12 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-3;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
-            s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-3;
+            s->mInfo->Lgm_I_Integrator_epsrel = 1e-3;
+            s->mInfo->Lgm_I_Integrator_epsabs = 0.0;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-2;
+
+            s->mInfo->nDivs = 200;
 
             break;
 
@@ -142,7 +154,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-2;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-2;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
+
+            s->mInfo->nDivs = 200;
 
             break;
 
@@ -160,6 +174,8 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
 
+            s->mInfo->nDivs = 200;
+
             break;
 
         case 0:
@@ -175,6 +191,8 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-1;
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
+
+            s->mInfo->nDivs = 100;
 
             break;
 
@@ -311,7 +329,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
     int		done2, Count, FoundShellLine;
-    double	rat, B, dSa, dSb, smax, SS, L, Hmax;
+    double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[500], MirrorMlat_Old[500];
@@ -403,7 +421,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 //LstarInfo->mInfo->Sm_North = LstarInfo->mInfo->Sm_South + dSb;
                 //SS = dSb;
                 SS = dSa+dSb;
-                LstarInfo->mInfo->Hmax = SS/200.0;
+                //LstarInfo->mInfo->Hmax = SS/200.0;
+                LstarInfo->mInfo->Hmax = SS/(double)LstarInfo->mInfo->nDivs;
                 r  = Lgm_Magnitude( &LstarInfo->mInfo->Pm_North );
                 LstarInfo->mInfo->Sm_South = 0.0;
                 LstarInfo->mInfo->Sm_North = SS;
@@ -428,8 +447,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         /*
                          *  Do interped I integral.
                          */
+                        epsabs = LstarInfo->mInfo->Lgm_I_Integrator_epsabs;
+                        epsrel = LstarInfo->mInfo->Lgm_I_Integrator_epsrel;
+                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
+                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
                         I = Iinv_interped( LstarInfo->mInfo  );
                         if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
+                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
 
                         FreeSpline( LstarInfo->mInfo );
 
@@ -462,8 +487,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\t\t%sCurrent Dipole Moment, M_cd:             %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_McIllwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIllwain, PostStr);
                     printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, M, PostStr);
-                    printf("\t\t%sMcIlwain L (Hilton):                     %g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, M ), PostStr );
-                    printf("\t\t%sMcIlwain L (McIlwain):                   %g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, M ), PostStr );
+                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, M ), PostStr );
+                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, M ), PostStr );
                 }
 
             } else {

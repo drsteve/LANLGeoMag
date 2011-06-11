@@ -457,7 +457,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
@@ -533,7 +534,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
@@ -605,7 +607,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );

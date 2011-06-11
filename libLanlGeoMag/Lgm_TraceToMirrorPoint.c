@@ -102,13 +102,14 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      *  a very small number, so it cant be used as the first point of the
      *  bracket. Instead, we need to step a tiny bit to get the first bracket.
      */
+    Info->Bfield( u, &Bvec, Info );
+    Pa = *u;
+    Ra = Lgm_Magnitude( &Pa );
+    Fa = Lgm_Magnitude( &Bvec ) - Bm;
+    Sa = 0.0;
     if ( Info->VerbosityLevel > 4 )  {
-        Info->Bfield( u, &Bvec, Info );
-        R = Lgm_Magnitude( u );
-        F = Lgm_Magnitude( &Bvec ) - Bm;
         printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g\n\n", u->x, u->y, u->z, R, F );
     }
-
 
 
 
@@ -116,52 +117,88 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     /*
      *  To proceed, we need to find a point to start the bracket on (i.e. a
      *  point where B-Bm < 0).  Then we need to trace until the sign changes
-     *  (or we bail due to hitting earth or because its open or whatever.)
+     *  (or we bail due to hitting earth or because its open or whatever.) Note
+     *  that B-Bm may not be negative if we are at or above a mirror point
+     *  already. If Fa is not < 0, we need to try and step a bit to see if we
+     *  can get such a point.
      *
-     *  First, try a small step in the user-supplied direction.
      */
-    Htry = 1e-8; // we probably dont ever need to split the mirror points to any finer precision than this(?).
-    P    = *u;
-    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
-    Info->Bfield( &P, &Bvec, Info );
-    B = Lgm_Magnitude( &Bvec );
-    F = B-Bm;
-//printf("MIKE: B, Bm = %.15g %.15g\n", B, Bm);
+    if ( Fa > 0.0 ) {
 
-    if ( F < 0.0 ) {
+        // First, try a moderately small step in the user-supplied direction.
+        Htry = 0.1; // Some mirror point pairs may be closer thogether than this. If we fail, we need to try with a smaller value here.
+        P = *u;
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+        Info->Bfield( &P, &Bvec, Info );
+        B = Lgm_Magnitude( &Bvec );
+        F = B-Bm;
+        if (fabs(F)<Fmin) { Fmin = fabs(F); Pmin = P; }
 
-        /*
-         *  If F < 0.0, then it means |B| is still less than Bm in this
-         *  direction.  Save this point as the start of a potential bracket.
-         *  Then continue tracing in this direction.
-         */
-        Pa  = P;
-        Ra  = Lgm_Magnitude( &P );
-        Sa  = Hdid;
-        Fa  = F;
+        if ( F < 0.0 ) {
 
-    } else {
+            /*
+             *  If F < 0.0, then it means |B| is still less than Bm in this
+             *  direction.  Save this point as the start of a potential bracket.
+             *  Then we can continue tracing in this direction to getm the
+             *  other side of the bracket.
+             */
+            Pa  = P;
+            Ra  = Lgm_Magnitude( &P );
+            Sa  = Hdid;
+            Fa  = F;
 
-        /*
-         * Even with a small step size in this direction, |B| was not found to
-         * be less than Bm. This could mean that we are very close to the Pmin
-         * point. Since we are trusting the user that this really is the
-         * direction that the other root should have been found in, we must
-         * conclude that the roots are very closely separated around Pmin. Just
-         * return the input point back as the output point.
-         */
-//printf("HEREEEEEEEEEEEEEEEEEEEEEEEEEE\n");
-         *v  = *u;
-         *Sm = 0.0;
-         return( 1 );
+        } else {
 
+            /*
+             *  We tried a moderately small step size and didnt find a decreasing
+             *  |B|. It could be that we need a very small step size to split mirror
+             *  points that a very close together.
+             */
+            Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+            P    = *u;
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+            Info->Bfield( &P, &Bvec, Info );
+            B = Lgm_Magnitude( &Bvec );
+            F = B-Bm;
+            if (fabs(F)<Fmin) { Fmin = fabs(F); Pmin = P; }
+
+            if ( F < 0.0 ) {
+
+                /*
+                 *  If F < 0.0, then it means |B| is still less than Bm in this
+                 *  direction.  Save this point as the start of a potential bracket.
+                 *  Then continue tracing in this direction.
+                 */
+                Pa  = P;
+                Ra  = Lgm_Magnitude( &P );
+                Sa  = Hdid;
+                Fa  = F;
+
+            } else {
+
+                /*
+                 * Even with a small step size in this direction, |B| was not found to
+                 * be less than Bm. This could mean that we are very close to the Pmin
+                 * point. Since we are trusting the user that this really is the
+                 * direction that the other root should have been found in, we must
+                 * conclude that the roots are very closely separated around Pmin. Just
+                 * return the input point back as the output point.
+                 */
+                 *v  = *u;
+                 *Sm = 0.0;
+                 return( 1 );
+
+
+            }
+
+        }
     }
-
 
 
 
     // Allow larger step sizes. Also, we can go beyond Bm to get the bracket.
     Hmax = 0.5;
+    Htry = 0.25;
     P    = Pa;
 
     /*
@@ -190,6 +227,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         Info->Bfield( &P, &Bvec, Info );
         R = Lgm_Magnitude( &P );
         F = Lgm_Magnitude( &Bvec ) - Bm;
+        if (fabs(F)<Fmin) { Fmin = fabs(F); Pmin = P; }
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
 
@@ -223,6 +261,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
             Ra = R;
             Fa = F;
             Sa += Hdid;
+//printf("Sa = %g   Fa = %g\n", Sa, Fa);
 
         }
 
@@ -257,6 +296,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     }
 
 
+//printf("Fa, Fb = %g %g\n", Fa, Fb);
 
     /*
      * We have found a potential bracket, but lets just be sure.
@@ -336,16 +376,16 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     }
 
 
-
     //reset = TRUE;
 
 
 
     if (1==1){
+
         /*
          *  Use Brent's method
          */
-    //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+        //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
         double      Sz, Fz;
         Lgm_Vector  Pz;
         BrentFuncInfoP    f;
@@ -359,7 +399,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         f.Val     = Bm;
         Lgm_zBrentP( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
         Fb = Fz; Sb = Sz; Pb = Pz;
-    //printf("Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+        //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     }
 
     }

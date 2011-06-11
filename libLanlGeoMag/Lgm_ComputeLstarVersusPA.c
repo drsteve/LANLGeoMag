@@ -174,7 +174,7 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
                         printf("\t%sUTC, LSimple     = %g %g%s\n\n\n", PreStr, UTC, LSimple, PostStr );
                     }
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
-                    MagEphemInfo->I[i] = LstarInfo2->I[i];
+                    MagEphemInfo->I[i] = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
 
                     printf("%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
 

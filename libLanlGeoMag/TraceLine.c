@@ -46,8 +46,8 @@
  *  taylor-made interpolator may do better?)
  */
 //#define GSL_INTERP  gsl_interp_linear
-//#define GSL_INTERP  gsl_interp_akima
-#define GSL_INTERP  gsl_interp_cspline
+#define GSL_INTERP  gsl_interp_akima
+//#define GSL_INTERP  gsl_interp_cspline
 
 
 double tlFunc( Lgm_Vector *P, double R0, Lgm_MagModelInfo *Info ){
