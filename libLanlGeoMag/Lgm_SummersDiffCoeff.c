@@ -528,10 +528,10 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
     nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );
 
     //printf("nReal = %d\n", nReal );
-    //printf("z1    = %g + %g i%d\n", creal(z1), cimag(z1) );
-    //printf("z2    = %g + %g i%d\n", creal(z2), cimag(z2) );
-    //printf("z3    = %g + %g i%d\n", creal(z3), cimag(z3) );
-    //printf("z4    = %g + %g i%d\n", creal(z4), cimag(z4) );
+    //printf("z1    = %g + %g i\n", creal(z1), cimag(z1) );
+    //printf("z2    = %g + %g i\n", creal(z2), cimag(z2) );
+    //printf("z3    = %g + %g i\n", creal(z3), cimag(z3) );
+    //printf("z4    = %g + %g i\n", creal(z4), cimag(z4) );
 
 
 

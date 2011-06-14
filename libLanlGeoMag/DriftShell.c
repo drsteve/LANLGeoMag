@@ -131,7 +131,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     }
 
 
-    F0 = 0.9; F1 = 0.1;
+    F0 = 0.5; F1 = 0.5;
     done = FALSE; FoundValidI = FALSE; nIts = 0;
     while ( !done ) {
 
@@ -153,7 +153,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
         De = I-I0;
         if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
-        //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
+        printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
 
 
 
@@ -208,16 +208,16 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             b  = e;
             Db = De;
             F0 = 0.9; F1 = 0.1;
-        } else if ( FirstHalf && ( fabs(De) < fabs(Da) ) ) {
+        } else if ( FirstHalf && ( fabs(De) < fabs(Da) ) && (De < 0.0) ) {
             /*
-             * We found a better value for the lower end of the bracket.
+             * We found a better value for the lower end of the bracket. (And its negative).
              */
             a  = e;
             Da = De;
             F0 = 0.9; F1 = 0.1;
-        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc) ) ) {
+        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc) && (De > 0.0) ) ) {
             /*
-             * We found a better value for the upper end of the bracket.
+             * We found a better value for the upper end of the bracket. (And its positive).
              */
             c  = e;
             Dc = De;
@@ -229,9 +229,10 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              * out if we do too many iterations, lets try a random selection
              * for the new point (but still between the current bracket).
              */
-            F0 = F1 = rand()/(double)RAND_MAX; // F is in range [0, 1]
+            F0 = rand()/(double)RAND_MAX; // F is in range [0, 1]
+            F1 = 1.0 - F0;
         }
-        //printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
+        printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
 
         ++nIts;
 

@@ -118,7 +118,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-4;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1.0e-3;
 
             s->mInfo->nDivs = 200;
 
@@ -170,11 +170,11 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-1;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-2;
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
 
-            s->mInfo->nDivs = 200;
+            s->mInfo->nDivs = 100;
 
             break;
 
@@ -188,7 +188,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQK21; // Note - changed to simpler integrator.
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-1;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-2;
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
 
@@ -439,7 +439,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                                                        
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
-                    if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
+                    //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
+                    if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
+
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
                     if ( InitSpline( LstarInfo->mInfo ) ) {
@@ -447,14 +449,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         /*
                          *  Do interped I integral.
                          */
-                        epsabs = LstarInfo->mInfo->Lgm_I_Integrator_epsabs;
-                        epsrel = LstarInfo->mInfo->Lgm_I_Integrator_epsrel;
-                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
-                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
+//                        epsabs = LstarInfo->mInfo->Lgm_I_Integrator_epsabs;
+//                        epsrel = LstarInfo->mInfo->Lgm_I_Integrator_epsrel;
+//                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
+//                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
                         I = Iinv_interped( LstarInfo->mInfo  );
                         if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
-                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
-                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
+//                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
+//                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
 
                         FreeSpline( LstarInfo->mInfo );
 
