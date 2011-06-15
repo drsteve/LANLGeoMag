@@ -559,11 +559,14 @@ printf("r = %g\n", r);
     
     // Color Bar
     sprintf( Filename, "%s_%03d.info", FilenameBase, n );
-printf("Filename = %s\n", Filename);
-    fp_info = fopen( Filename, "r" );
-    fscanf( fp_info, "%*[^:]:%lf", &Min );
-    fscanf( fp_info, "%*[^:]:%lf", &Max );
-    fclose( fp_info );
+    if ( (fp_info = fopen( Filename, "r" )) != NULL  ) {;
+        fp_info = fopen( Filename, "r" );
+        fscanf( fp_info, "%*[^:]:%lf", &Min );
+        fscanf( fp_info, "%*[^:]:%lf", &Max );
+        fclose( fp_info );
+    } else {
+        printf("Could not open file: %s\n", Filename);
+    }
     sprintf( Filename, "file://%s_Bar.gif", FilenameBase );
     SvgImage( fp, 460+200+10, 200, 10, 200, Filename, g );
     SetupCoords( -0.5, 9.5, g->ImageX, g->ImageX+g->ImageWidth, Min, Max, g->ImageY+g->ImageHeight, g->ImageY, g );
@@ -585,10 +588,13 @@ printf("Filename = %s\n", Filename);
 
     // Color Bar
     sprintf( Filename, "%s_%03d.info", FilenameBase, n );
-    fp_info = fopen( Filename, "r" );
-    fscanf( fp_info, "%*[^:]:%lf", &Min );
-    fscanf( fp_info, "%*[^:]:%lf", &Max );
-    fclose( fp_info );
+    if ( (fp_info = fopen( Filename, "r" )) != NULL  ) {;
+        fscanf( fp_info, "%*[^:]:%lf", &Min );
+        fscanf( fp_info, "%*[^:]:%lf", &Max );
+        fclose( fp_info );
+    } else {
+        printf("Could not open file: %s\n", Filename);
+    }
     sprintf( Filename, "file://%s_Bar.gif", FilenameBase );
     SvgImage( fp, 90+200+10, 550, 10, 200, Filename, g );
     SetupCoords( -0.5, 9.5, g->ImageX, g->ImageX+g->ImageWidth, Min, Max, g->ImageY+g->ImageHeight, g->ImageY, g );
@@ -610,10 +616,13 @@ printf("Filename = %s\n", Filename);
 
     // Color Bar
     sprintf( Filename, "%s_%03d.info", FilenameBase, n );
-    fp_info = fopen( Filename, "r" );
-    fscanf( fp_info, "%*[^:]:%lf", &Min );
-    fscanf( fp_info, "%*[^:]:%lf", &Max );
-    fclose( fp_info );
+    if ( (fp_info = fopen( Filename, "r" )) != NULL  ) {;
+        fscanf( fp_info, "%*[^:]:%lf", &Min );
+        fscanf( fp_info, "%*[^:]:%lf", &Max );
+        fclose( fp_info );
+    } else {
+        printf("Could not open file: %s\n", Filename);
+    }
     sprintf( Filename, "file://%s_Bar.gif", FilenameBase );
     SvgImage( fp, 460+200+10, 550, 10, 200, Filename, g );
     SetupCoords( -0.5, 9.5, g->ImageX, g->ImageX+g->ImageWidth, Min, Max, g->ImageY+g->ImageHeight, g->ImageY, g );

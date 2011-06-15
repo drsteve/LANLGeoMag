@@ -85,7 +85,7 @@ for (j=0; j<nMu; j++) Mu[j] = S[j];
      * Read in a sample GEO file
      */
     n = 0;
-    fp = fopen("/data2/DREAM/data/LANL-97A/2002/20021211_LANL-97A_l3_data.txt", "r");
+    fp = fopen("/data2/DREAM/Satellites/LANL-97A/RawFlux/2002/20021211_LANL-97A_l3_data.txt", "r");
     //fp = fopen("puke.txt", "r");
     pos = ftell( fp );
     n = 0;
@@ -152,8 +152,6 @@ printf("k = %d\n", k);
             sprintf( Command, "cp Lgm_FluxToPsd_PSD_EA.info Lgm_FluxToPsd_PSD_EA_%03d.info", k); system( Command );
             sprintf( Command, "cp Lgm_FluxToPsd_PSD_MK.info Lgm_FluxToPsd_PSD_MK_%03d.info", k); system( Command );
 
-            DumpSvg( k, ISO_TIME[k] );
-            sprintf( Command, "inkscape -e %03d.png mike.svg", k ); system( Command );
 
             
 
@@ -198,6 +196,21 @@ printf("k = %d\n", k);
             sprintf( Command, "cp J_DIFF.info J_DIFF_%03d.info", k); system( Command );
 
 
+
+            /*
+             *  Dump a summary plot showing forward and inverse results + difference.
+             */
+            DumpSvg( k, ISO_TIME[k] );
+            sprintf( Command, "inkscape -e %03d.png mike.svg", k ); system( Command );
+
+            /*
+             * Cleanup
+             */
+            sprintf( Command, "rm J_DIFF*.info J_DIFF*.gif"); system( Command );
+            sprintf( Command, "rm Lgm_PsdToFlux_FLUX_EA*.gif Lgm_PsdToFlux_PSD_EA*.gif Lgm_PsdToFlux_PSD_MK*.gif"); system( Command );
+            sprintf( Command, "rm Lgm_PsdToFlux_FLUX_EA*.info Lgm_PsdToFlux_PSD_EA*.info Lgm_PsdToFlux_PSD_MK*.info"); system( Command );
+            sprintf( Command, "rm Lgm_FluxToPsd_FLUX_EA*.gif Lgm_FluxToPsd_PSD_EA*.gif Lgm_FluxToPsd_PSD_MK*.gif"); system( Command );
+            sprintf( Command, "rm Lgm_FluxToPsd_FLUX_EA*.info Lgm_FluxToPsd_PSD_EA*.info Lgm_FluxToPsd_PSD_MK*.info"); system( Command );
 
             Lgm_P2F_FreePsdToFlux( p2f );
             Lgm_F2P_FreeFluxToPsd( f2p );
