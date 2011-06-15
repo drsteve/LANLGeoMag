@@ -19,7 +19,7 @@ pos = dm.dmarray([-5, 0, 0], attrs={'sys': 'SM'})
 alpha = 45
 Lstar = [[]]*nvals
 for date, qual in itertools.product(dates.UTC, range(nvals)):
-    data = lgmpy.get_Lstar(pos, date, alpha=alpha, coord_system='SM', Bfield='Lgm_B_edip', LstarThresh=20.0, extended_out=True, LstarQuality=qual)
+    data = lgmpy.get_Lstar(pos, date, alpha=alpha, coord_system='SM', Bfield='Lgm_B_cdip', LstarThresh=20.0, extended_out=True, LstarQuality=qual)
     try:
         Lstar[qual].extend(data[alpha]['Lstar'])
     except TypeError:
