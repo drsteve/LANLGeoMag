@@ -214,6 +214,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     Pa   = P;
     Height_a = WGS84_A*(Lgm_Magnitude( &Pa )-1.0);
+    Fa   = Height_a - TargetHeight;
 
     /*
      *  Get an initial Htry that is safe -- i.e. start off slowly

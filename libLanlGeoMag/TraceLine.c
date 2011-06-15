@@ -46,8 +46,8 @@
  *  taylor-made interpolator may do better?)
  */
 //#define GSL_INTERP  gsl_interp_linear
-#define GSL_INTERP  gsl_interp_akima
-//#define GSL_INTERP  gsl_interp_cspline
+//#define GSL_INTERP  gsl_interp_akima
+#define GSL_INTERP  gsl_interp_cspline
 
 
 double tlFunc( Lgm_Vector *P, double R0, Lgm_MagModelInfo *Info ){
@@ -766,25 +766,25 @@ int InitSpline( Lgm_MagModelInfo *Info ) {
      *
      */
     Info->acc    = gsl_interp_accel_alloc( );
-//    Info->accPx  = gsl_interp_accel_alloc( );
-//    Info->accPy  = gsl_interp_accel_alloc( );
-//    Info->accPz  = gsl_interp_accel_alloc( );
+    Info->accPx  = gsl_interp_accel_alloc( );
+    Info->accPy  = gsl_interp_accel_alloc( );
+    Info->accPz  = gsl_interp_accel_alloc( );
     if ( Info->nPnts > 2 ){
         Info->spline   = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-//        Info->splinePx = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-//        Info->splinePy = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
-//        Info->splinePz = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+        Info->splinePx = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+        Info->splinePy = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
+        Info->splinePz = gsl_spline_alloc( GSL_INTERP, Info->nPnts );
     } else {
         Info->spline   = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-//        Info->splinePx = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-//        Info->splinePy = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
-//        Info->splinePz = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+        Info->splinePx = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+        Info->splinePy = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
+        Info->splinePz = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
     }
     gsl_spline_init( Info->spline, Info->s, Info->Bmag, Info->nPnts );
-//    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
-//    gsl_spline_init( Info->splinePx, Info->s, Info->Px, Info->nPnts );
-//    gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
-//    gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
+    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
+    gsl_spline_init( Info->splinePx, Info->s, Info->Px, Info->nPnts );
+    gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
+    gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
 
     Info->AllocedSplines = TRUE;
 
@@ -798,13 +798,13 @@ int FreeSpline( Lgm_MagModelInfo *Info ) {
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     if ( Info->spline != NULL ) gsl_spline_free( Info->spline );
-//    if ( Info->splinePx != NULL ) gsl_spline_free( Info->splinePx );
-//    if ( Info->splinePy != NULL ) gsl_spline_free( Info->splinePy );
-//    if ( Info->splinePz != NULL ) gsl_spline_free( Info->splinePz );
+    if ( Info->splinePx != NULL ) gsl_spline_free( Info->splinePx );
+    if ( Info->splinePy != NULL ) gsl_spline_free( Info->splinePy );
+    if ( Info->splinePz != NULL ) gsl_spline_free( Info->splinePz );
     if ( Info->acc != NULL ) gsl_interp_accel_free( Info->acc );
-//    if ( Info->accPx != NULL ) gsl_interp_accel_free( Info->accPx );
-//    if ( Info->accPy != NULL ) gsl_interp_accel_free( Info->accPy );
-//    if ( Info->accPz != NULL ) gsl_interp_accel_free( Info->accPz );
+    if ( Info->accPx != NULL ) gsl_interp_accel_free( Info->accPx );
+    if ( Info->accPy != NULL ) gsl_interp_accel_free( Info->accPy );
+    if ( Info->accPz != NULL ) gsl_interp_accel_free( Info->accPz );
 
     Info->AllocedSplines = FALSE;
 
@@ -828,21 +828,21 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
     /*
      * Use GSL to compute BminusBcdip(s)
      */
-//    BminusBcdip = gsl_spline_eval( Info->spline, s, Info->acc );
+    BminusBcdip = gsl_spline_eval( Info->spline, s, Info->acc );
 
     /*
      * Interpolate to get P(s) and Bcdip(P(s))
      */
-//    P.x = gsl_spline_eval( Info->splinePx, s, Info->accPx );
-//    P.y = gsl_spline_eval( Info->splinePy, s, Info->accPy );
-//    P.z = gsl_spline_eval( Info->splinePz, s, Info->accPz );
-//    Lgm_B_cdip( &P, &Bvec, Info );
-//    Bcdip = Lgm_Magnitude( &Bvec );
-//    B = BminusBcdip + Bcdip;
+    P.x = gsl_spline_eval( Info->splinePx, s, Info->accPx );
+    P.y = gsl_spline_eval( Info->splinePy, s, Info->accPy );
+    P.z = gsl_spline_eval( Info->splinePz, s, Info->accPz );
+    Lgm_B_cdip( &P, &Bvec, Info );
+    Bcdip = Lgm_Magnitude( &Bvec );
+    B = BminusBcdip + Bcdip;
 
 
 
-    B = gsl_spline_eval( Info->spline, s, Info->acc );
+//    B = gsl_spline_eval( Info->spline, s, Info->acc );
     return( B );
 
 

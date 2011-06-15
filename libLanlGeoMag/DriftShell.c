@@ -153,7 +153,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
         De = I-I0;
         if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
-        printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
+        //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
 
 
 
@@ -232,7 +232,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             F0 = rand()/(double)RAND_MAX; // F is in range [0, 1]
             F1 = 1.0 - F0;
         }
-        printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
+        //printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
 
         ++nIts;
 
@@ -307,6 +307,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  out to find c0.
      */
     a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // 110 km altitude
+//a0 = 1.0;
 
     u.x = a0*f; u.y = a0*g; u.z = a0*sl;
     Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );

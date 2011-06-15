@@ -236,7 +236,7 @@ if (0==1){
      * Try Brent's method
      */
 if (1==1){
-printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
+//printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
     double      Smin, Bmin;
     Lgm_Vector  Pmin;
     BrentFuncInfoP    f;
@@ -250,7 +250,7 @@ printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, 
     Bb = Bmin;
     Sb = Smin;
     Pb = Pmin;
-printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
+//printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
 }
 
 

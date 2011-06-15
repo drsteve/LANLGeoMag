@@ -108,7 +108,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Fa = Lgm_Magnitude( &Bvec ) - Bm;
     Sa = 0.0;
     if ( Info->VerbosityLevel > 4 )  {
-        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g\n\n", u->x, u->y, u->z, R, F );
+        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g\n\n", u->x, u->y, u->z, Ra, Fa );
     }
 
 
@@ -128,7 +128,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         // First, try a moderately small step in the user-supplied direction.
         Htry = 0.1; // Some mirror point pairs may be closer thogether than this. If we fail, we need to try with a smaller value here.
         P = *u;
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
         Info->Bfield( &P, &Bvec, Info );
         B = Lgm_Magnitude( &Bvec );
         F = B-Bm;
@@ -156,7 +156,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
              */
             Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
             P    = *u;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
             Info->Bfield( &P, &Bvec, Info );
             B = Lgm_Magnitude( &Bvec );
             F = B-Bm;
@@ -219,7 +219,8 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
          */
         if (Htry > Hmax) Htry = Hmax;
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+
 
         /*
          *  Get value of quantity we want to minimize
@@ -353,7 +354,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
                 //P = Pa; Htry = 0.5*d;
                 P = Pa; Htry = LGM_1_OVER_GOLD*d;
-                if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+                if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
                 Info->Bfield( &P, &Bvec, Info );
                 F = Lgm_Magnitude( &Bvec ) - Bm;
                 if ( F >= 0.0 ) {
@@ -369,8 +370,8 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
                 printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
                 printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
                 printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
-                ++nIts;
             }
+            ++nIts;
 
         }
     }
@@ -397,6 +398,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         f.Info    = Info;
         f.func    = &mpFunc;
         f.Val     = Bm;
+tol = 1e-10;
         Lgm_zBrentP( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
         Fb = Fz; Sb = Sz; Pb = Pz;
         //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);

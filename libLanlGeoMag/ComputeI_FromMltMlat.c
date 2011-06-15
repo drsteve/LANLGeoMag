@@ -62,7 +62,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  Lgm_TraceToMirrorPoint() should do the rest is for us.
          */
         Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
-        u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+        //u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+        u_scale.x =  1e-6;  u_scale.y = 1e-6; u_scale.z = 1e-6;
         P = Pmirror1;
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Bs = Lgm_Magnitude( &Bvec );
@@ -118,6 +119,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             } else {
                 LstarInfo->mInfo->Pm_North = Pmirror2;
                 LstarInfo->mInfo->Pm_South = Pmirror1;
+//printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGg\n");
             }
             SS = fabs( SS );
             if (SS < 1e-7) {
@@ -127,6 +129,13 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 return(0.0);
             }
 
+//Lgm_Vector vvv;
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_South, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );
+//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
+//printf("Pm_South_sm = %.15g %.15g %.15g      B-Bm = %.15g\n", vvv.x, vvv.y, vvv.z, Lgm_Magnitude( &Bvec)-LstarInfo->mInfo->Bm );
+//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("Pm_North_sm = %.15g %.15g %.15g      B-Bm = %.15g\n", vvv.x, vvv.y, vvv.z, Lgm_Magnitude( &Bvec)-LstarInfo->mInfo->Bm );
 
             /*
              *  Compute I
@@ -162,8 +171,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
 
                 // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
-                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
-                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
+                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
                 //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
                 if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
 
@@ -190,7 +198,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                      *  Do I integral with interped integrand.
                      */
                     I = Iinv_interped( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     FreeSpline( LstarInfo->mInfo );
 
                 } else {

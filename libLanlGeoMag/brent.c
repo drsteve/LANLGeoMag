@@ -219,6 +219,7 @@ int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_V
 //        Htry = fabs(dd);
         Htry = dd;
         Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+if (Htry != Hdid) printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
         fb = f->func( &Pb, f->Val, f->Info );
         //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 
