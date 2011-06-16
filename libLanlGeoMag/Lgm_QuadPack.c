@@ -1,7 +1,7 @@
 #include "Lgm/Lgm_QuadPack.h"
 
 /*
- *      QUADPACK DQAGS Routine converted to C 
+ *      QUADPACK DQAGS Routine converted to C
  */
 int dqags(f, qpInfo, a, b, epsabs, epsrel, result, abserr, neval, ier, limit, lenw, last, iwork, work)
 double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate    	 */
@@ -206,7 +206,10 @@ int TMPiwork[600];
     if( (limit < 1) || (lenw < limit*4) ) {
 
         if (*ier == 6) lvl = 1;
-        if (*ier != 0) fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
+        if (*ier != 0) {
+            fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
+            PrintQuadpackError( ier );
+        }
         return(-1);
 
     } else {
@@ -219,7 +222,7 @@ int TMPiwork[600];
         l3 = limit+l2;
 
 
-        dqagse(f, qpInfo, a, b, epsabs, epsrel, limit, result, abserr, neval, ier, 
+        dqagse(f, qpInfo, a, b, epsabs, epsrel, limit, result, abserr, neval, ier,
 				work, work+l1, work+l2, work+l3, iwork, last);
 
     }
@@ -233,8 +236,9 @@ int TMPiwork[600];
 
 
     if(*ier == 6) lvl = 1;
-    if(*ier != 0){ 
-	fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
+    if(*ier != 0){
+	    fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
+        PrintQuadpackError( *ier );
         return(-1);
     } else {
         return(1);
@@ -426,7 +430,7 @@ int	*last;
     double 	area, abseps, area1, area12, area2, a1;
     double     	a2, b1, b2, correc=0.0, defabs, defab1, defab2, d1mach();
     double     	dres, epmach, erlarg=0.0, erlast, errbnd, errmax;
-    double     	error1, error2, erro12, errsum, ertest=0.0, oflow, resabs, reseps; 
+    double     	error1, error2, erro12, errsum, ertest=0.0, oflow, resabs, reseps;
     double     	res3la[4], rlist2[53], small=0.0, uflow;
     int 	id, ierro, iroff1, iroff2, iroff3, jupbnd, k, ksgn;
     int		ktmin, maxerr, nres, nrmax, numrl2;
@@ -609,7 +613,7 @@ int	*last;
 
         if (  (defab1 != error1) && (defab2 != error2)  ) {
 
-            if (  (fabs(rlist[maxerr]-area12) <= 0.1e-4*fabs(area12)) && (erro12 >= 0.99*errmax)  ) { 
+            if (  (fabs(rlist[maxerr]-area12) <= 0.1e-4*fabs(area12)) && (erro12 >= 0.99*errmax)  ) {
                 if (extrap) ++iroff2;
                 if (!extrap) ++iroff1;
 	    }
@@ -652,7 +656,7 @@ int	*last;
         /*
          *           append the newly-created intervals to the list.
          */
-        if(error2 > error1) { 
+        if(error2 > error1) {
 
             alist[maxerr] = a2;
             alist[*last] = a1;
@@ -686,13 +690,13 @@ int	*last;
 
 
 
-	/*  
+	/*
 	 *  Jump out of do-loop
 	 */
         if (errsum <= errbnd) goto L115;
 
 
-	/*  
+	/*
 	 *  Jump out of do-loop
 	 */
         if (*ier != 0) break;
@@ -744,7 +748,7 @@ int	*last;
 		    maxerr = iord[nrmax];
 		    errmax = elist[maxerr];
 
-		    /*  
+		    /*
 	 	     *  Jump out of do-loop
 	 	     */
 		    if ( fabs(blist[maxerr]-alist[maxerr]) > small ) goto L90;
@@ -774,7 +778,7 @@ int	*last;
 		*result = reseps;
 		correc = erlarg;
 		ertest = dmax1( epsabs, epsrel*fabs(reseps) );
-		/*  
+		/*
 		 *  Jump out of do-loop
 		 */
 		if( *abserr <= ertest ) break;
@@ -800,7 +804,7 @@ int	*last;
 L90:
 	crap = 0;
 
-    }  
+    }
 
 
 
@@ -1030,7 +1034,7 @@ int dqelg(int n, double epstab[], double *result, double *abserr, double res3la[
 	     */
 	    break;
 
-	} 
+	}
         ss = 1.0/delta1+1.0/delta2-1.0/delta3;
         epsinf = fabs(ss*e1);
 
@@ -1067,7 +1071,7 @@ int dqelg(int n, double epstab[], double *result, double *abserr, double res3la[
 
 	}
 
-    }   
+    }
 
 
 
@@ -1206,7 +1210,7 @@ double  *resasc;        	  /*  */
 
 
 
- 
+
     /*
      *           the abscissae and weights are given for the interval (-1,1).
      *           because of symmetry only the positive abscissae and their
@@ -1249,7 +1253,7 @@ double  *resasc;        	  /*  */
 		0.294392862701460198131126603103866,
 		0.148874338981631210884826001129720,
 		0.000000000000000000000000000000000 };
- 
+
     double wgk[] = {	0.0,
 		0.011694638867371874278064396062192,
 		0.032558162307964727478818972459390,
@@ -1295,7 +1299,7 @@ double  *resasc;        	  /*  */
      */
     epmach = d1mach(4);
     uflow = d1mach(1);
- 
+
     centr = 0.5*(a+b);
     hlgth = 0.5*(b-a);
     dhlgth = fabs(hlgth);
@@ -1574,10 +1578,10 @@ L90:
  *	EMIN = -1022
  *  	EMAX = 1024
  *	T    = 52       (-T is the smallest power of B that added to 1.0 gives something different from 1.0)
- *  
+ *
  *   So this gives:
  *	
- *	B^EMIN   = 2.225073698e-308 
+ *	B^EMIN   = 2.225073698e-308
  *	B^EMAX   = 1.797693301e308      (B^EMAX - B^(-T-1)*B^EMAX is the same to within precision here )
  *	B^(-T-1) = 1.110223025e-16	(smallest number that when subtracted from 1.0 gives something different from 1.0)
  *	B^(-T)   = 2.220446049e-16	(smallest number that when added to 1.0 gives something different from 1.0)
@@ -1615,3 +1619,53 @@ double d1mach( int i ) {
 
 }
 
+
+void PrintQuadpackError( int ier ) {
+
+    switch ( ier ) {
+
+        case 1:
+                printf( "\tThe maximum number of subdivisions allowed has been achieved. one can allow\n"
+                        "\tmore subdivisions by increasing the value of limit (and taking the according\n"
+                        "\tdimension adjustments into account. However, if this yields no improvement it\n"
+                        "\tis advised to analyze the integrand in order to determine the integration\n"
+                        "\tdifficulties. If the position of a local difficulty can be determined (e.g.\n"
+                        "\tsingularity, discontinuity within the interval) one will probably gain from\n"
+                        "\tsplitting up the interval at this point and calling the integrator on the\n"
+                        "\tsubranges. If possible, an appropriate special-purpose integrator should be\n"
+                        "\tused, which is designed for handling the type of difficulty involved.\n" );
+                break;
+
+        case 2:
+                printf( "\tThe occurrence of roundoff error is detected, which prevents the requested\n"
+                        "\ttolerance from being achieved.  the error may be underestimated.\n" );
+                break;
+
+        case 3:
+                printf( "\tExtremely bad integrand behaviour occurs at some points of the integration\n"
+                        "\tinterval.\n" );
+                break;
+
+        case 4:
+                printf( "\tThe algorithm does not converge.  roundoff error is detected in the\n"
+                        "\textrapolation table. it is presumed that the requested tolerance cannot be\n"
+                        "\tachieved, and that the returned result is the best which can be obtained.\n" );
+                break;
+
+        case 5:
+                printf( "\tThe integral is probably divergent, or slowly convergent. it must be noted that\n"
+                        "\tdivergence can occur with any other value of ier.\n" );
+                break;
+
+        case 6:
+                printf( "\tThe input is invalid.\n" );
+                break;
+
+        default:
+                printf( "\tUnknown error.\n" );
+                break;
+    
+
+    } 
+
+}

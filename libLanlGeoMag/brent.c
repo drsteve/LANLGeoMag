@@ -72,7 +72,7 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         // x to u. (From point Px to Pu.)
         P    = Px;
         Htry = du;
-        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-7, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
         f->Info->Bfield( &P, &Btmp, f->Info );
         B = Lgm_Magnitude( &Btmp );
         Pu = P;
@@ -218,7 +218,7 @@ int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_V
 //        if ( dd < 0.0 ) sgn *= -1.0;
 //        Htry = fabs(dd);
         Htry = dd;
-        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
 if (Htry != Hdid) printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
         fb = f->func( &Pb, f->Val, f->Info );
         //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);

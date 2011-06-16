@@ -154,7 +154,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         Htry = 0.01; // step finely
         reset = TRUE;
         P = *u;
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
         Rplus = Lgm_Magnitude( &P );
         if (Rplus > Rinitial ) {
             sgn =  1.0;
@@ -167,7 +167,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         reset = TRUE;
         P = *u;
         while( !done ) {
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0) return(LGM_BAD_TRACE);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0) return(LGM_BAD_TRACE);
             R = Lgm_Magnitude( &P );
             if (R > Rtarget) {
                 done = TRUE;
@@ -294,7 +294,7 @@ Info->Hmax = 0.10;
             if (i != 0) {
                 s = i*h;
                 P = Info->Pmin;
-                if ( Lgm_MagStep( &P, &u_scale, s, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
+                if ( Lgm_MagStep( &P, &u_scale, s, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
                 Info->Bfield( &P, &Bvec, Info );
                 F[i+3] = Lgm_Magnitude( &Bvec );
                 //printf("F[%d] = %g Hdid = %g\n", i, F[i+3], Hdid);
