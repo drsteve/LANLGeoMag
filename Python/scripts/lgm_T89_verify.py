@@ -2,7 +2,7 @@
 
 '''Script to verify the Lstar calculation of LanlGeoMag
 
-Uses the centred dipole to get the expected value'''
+Uses the T89 model to check spread and convergence of L* calcs'''
 
 from __future__ import division
 import matplotlib.pyplot as plt
@@ -19,14 +19,16 @@ fig = plt.figure(figsize=(17, 21))
 #set up test runs
 nvals, rvals = 5, [3,4,5,6]
 dates = spt.tickrange('2001-04-22T12:00:00', '2001-04-23T23:00:00', 1/24)
-alpha = 45
-
+alpha = 90
+print('T89: alpha=%s, date range [%s, %s]' % (alpha, dates.UTC[0], dates.UTC[-1]))
 #loop over radial positions, dates and quality flags
 for rval in rvals:
+    print('Radial Distance: %s' % rval)
     Lstar = [[]]*nvals
     for date, qual in itertools.product(dates.UTC, range(nvals)):
-        pos = dm.dmarray([-1*rval, 0, 0], attrs={'sys': 'SM'})
-        data = lgmpy.get_Lstar(pos, date, alpha=alpha, coord_system='SM', Bfield='Lgm_B_cdip', LstarThresh=20.0, extended_out=True, LstarQuality=qual)
+        print('%s, Quality=%d' % (date, qual))
+        pos = dm.dmarray([-1*rval, 0, 0], attrs={'sys': 'GSM'})
+        data = lgmpy.get_Lstar(pos, date, alpha=alpha, coord_system='GSM', Bfield='Lgm_B_T89', LstarThresh=20.0, extended_out=True, LstarQuality=qual)
         try:
             Lstar[qual].extend(data[alpha]['Lstar'])
         except TypeError:
@@ -36,12 +38,9 @@ for rval in rvals:
     fstr = '%d1%d' % (len(rvals), rval-rvals[0]+1)
     ax = fig.add_subplot(fstr)
     ax.boxplot(Lstar)
-    #ax = plt.gca()
-    ax.set_title('Centred dipole [-%d, 0, 0]$_{SM}$; PA=%d$^{o}$' % (rval, alpha))
+    ax.set_title('T89 [-%d, 0, 0]$_{GSM}$; PA=%d$^{o}$' % (rval, alpha))
     ax.set_ylabel('L* (LanlGeoMag)')
     ax.set_xlabel('Quality Flag')
     ax.set_xticklabels([str(n) for n in range(5)])
     
-fig.savefig('lgm_cdip_verify%d_zoom.png' % alpha, dpi=300)
-    ##plt.ylim([4.96, 5.02])
-    ##plt.savefig('lgm_cdip_verify%d.png' % alpha, dpi=300)
+fig.savefig('lgm_T89%d_zoom.png' % alpha, dpi=300)
