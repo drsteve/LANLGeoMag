@@ -223,6 +223,8 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
     double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
 
+    double      Lgm_MagStep_Tol;        // tolerance for Magstep (ODE solver).
+
 
     /*
      *  These variables are needed to make I_integrand() reentrant/thread-safe.
@@ -235,8 +237,9 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector  Lgm_I_integrand_u_scale;
     int         Lgm_n_I_integrand_Calls;
     int         Lgm_I_Integrator;
-    double      Lgm_I_Integrator_epsrel;
-    double      Lgm_I_Integrator_epsabs;
+
+    double      Lgm_I_Integrator_epsrel;        // Quadpack epsrel tolerance for I_integrator
+    double      Lgm_I_Integrator_epsabs;        // Quadpack epsabs tolerance for I_integrator
 
     /*
      *  These variables are needed to make Sb_integrand() reentrant/thread-safe.
@@ -249,8 +252,8 @@ typedef struct Lgm_MagModelInfo {
     int         Lgm_n_Sb_integrand_Calls;
     int         Lgm_Sb_Integrator;              // This variable is not currently used (for now I force
                                                 // Sb to use DQAGP. )
-    double      Lgm_Sb_Integrator_epsrel;
-    double      Lgm_Sb_Integrator_epsabs;
+    double      Lgm_Sb_Integrator_epsrel;       // Quadpack epsrel tolerance for Sb_integrator
+    double      Lgm_Sb_Integrator_epsabs;       // Quadpack epsabs tolerance for Sb_integrator
 
 
 

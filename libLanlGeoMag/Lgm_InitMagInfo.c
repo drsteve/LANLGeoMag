@@ -46,6 +46,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
      */
     MagInfo->Lgm_MagStep_FirstTimeThrough = TRUE;
     MagInfo->Lgm_MagStep_eps_old          = -1.0;
+    MagInfo->Lgm_MagStep_Tol              = 1e-10;
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
 

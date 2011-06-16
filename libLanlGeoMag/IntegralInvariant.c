@@ -354,7 +354,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 
     while ( !done ) {
 
-        Lgm_MagStep( &mInfo->Lgm_I_integrand_P, &mInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, mInfo->Bfield, mInfo );
+        Lgm_MagStep( &mInfo->Lgm_I_integrand_P, &mInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, mInfo->Lgm_MagStep_Tol, sgn, &sdid, &reset, mInfo->Bfield, mInfo );
         Hdone += Hdid; // positive qnty
 
         mInfo->Lgm_I_integrand_S += sgn*Hdid;
