@@ -37,10 +37,10 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
         case 8: // Highest Quality -- (although 7 may be better?)
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-10;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-9;
 
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-10;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-9;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;

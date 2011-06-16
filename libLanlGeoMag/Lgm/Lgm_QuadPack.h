@@ -53,5 +53,7 @@ int dqelg(int n, double epstab[], double *result, double *abserr, double res3la[
 int dqpsrt(int limit, int last, int *maxerr, double *ermax, double elist[], 
 	int iord[], int *nrmax);
 
+void PrintQuadpackError( int );
+
 #endif 
 
