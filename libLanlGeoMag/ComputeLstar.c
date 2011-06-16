@@ -181,18 +181,18 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
         case 0:
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-4;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 5e-4;
 
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-4;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 5e-4;
 
             s->mInfo->Lgm_I_Integrator        = DQK21; // Note - changed to simpler integrator.
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-2;
+            s->mInfo->Lgm_I_Integrator_epsabs = 5e-2;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-1;
 
-            s->mInfo->nDivs = 100;
+            s->mInfo->nDivs = 50;
 
             break;
 
@@ -362,7 +362,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      *  Do Initial field Line to get Bm and I
      */
     u = *vin;
-	if (LstarInfo->VerbosityLevel > 0) {
+    if (LstarInfo->VerbosityLevel > 0) {
         printf("\n\t\t%sInitial Position, U_gsm (Re):            < %g, %g, %g >%s\n", PreStr, u.x, u.y, u.z, PostStr);
 	    LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
 	    B = Lgm_Magnitude( &Bvec );
