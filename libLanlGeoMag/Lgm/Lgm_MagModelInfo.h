@@ -91,10 +91,10 @@ typedef struct Lgm_MagModelInfo {
     double		Hmax;
     FILE	    *fp;
     double      W[6];
-    double      G1, G2;
-    int			Kp;
-    double      Dst;
-    double      P;
+    double      G1, G2, G3;
+    int			Kp, aKp3;
+    double      fKp, Dst;
+    double      V, Den, P;
     double      Bx, By, Bz;
     double      T96MOD_V[11];       /* free params for T96_MOD */
 

@@ -116,7 +116,8 @@ typedef struct Lgm_LstarInfo {
 
 void        SetLstarTolerances( int Quality, Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo  *InitLstarInfo( int VerbosityLevel );
-void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
+//void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
+void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo   *LstarInfo );
 
 void FreeLstarInfo( Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );

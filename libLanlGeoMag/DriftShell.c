@@ -48,7 +48,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
     /*
-     * Compute I-I0 at midpoint.
+     * Compute I-I0 at midpoint. If the caller predicted a good midpoint, then
+     * this may be dead on, so try it first.
      */
     b  = 0.5*(mlat0+mlat1);
     I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
@@ -69,51 +70,87 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     }
 
 
+     
 
-
-    /*
-     * Compute I-I0 at lower side of potential bracket.
-     */
-    a  = mlat0;
-    I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
-    if ( fabs(I) > 1e99 ) return(-5);
-    Da = I-I0;
-    if (fabs(Da) < Dmin){ Dmin = fabs(Da); mlat_min = b; }
-
-    if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+    if ( Db > 0.0 ) {
         /*
-         * Already Converged with requested tolerance.
+         *  Then we would like to have the other side of the bracket be < 0.0.
+         *  I.e. we need a bigger I which (usually) is a bigger mlat.
          */
-        //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
-        *rad    = r;
-        *Ifound = I;
-        *mlat   = mlat_min;
-        FoundValidI = TRUE;
-        return( FoundValidI );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+        if ( fabs(I) > 1e99 ) return(-5);
+        D1 = I-I0;
+        if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
+
+        if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            /*
+             * Already Converged with requested tolerance.
+             */
+            //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat_min;
+            FoundValidI = TRUE;
+            return( FoundValidI );
+        }
+
+        if ( D1 < 0.0 ) {
+
+            /*
+             * Found Bracket!!!
+             */
+            a = mlat1;
+
+        } else {
+
+            /*
+             * Still no bracket. Evaluate the other side.
+             */
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
+            if ( fabs(I) > 1e99 ) return(-5);
+            D0 = I-I0;
+            if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = mlat0; }
+
+            if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+                /*
+                 * Already Converged with requested tolerance.
+                 */
+                //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+                *rad    = r;
+                *Ifound = I;
+                *mlat   = mlat_min;
+                FoundValidI = TRUE;
+                return( FoundValidI );
+            }
+            
+        }
+
+    } else {
+        /*
+         *  Then we would like to have the other side of the bracket be > 0.0.
+         *  I.e. we need a smaller I which (usually) is a smaller mlat.
+         */
+        a  = mlat0;
+        I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
+        if ( fabs(I) > 1e99 ) return(-5);
+        Da = I-I0;
+        if (fabs(Da) < Dmin){ Dmin = fabs(Da); mlat_min = a; }
+
+        if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            /*
+             * Already Converged with requested tolerance.
+             */
+            //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat_min;
+            FoundValidI = TRUE;
+            return( FoundValidI );
+        }
     }
 
 
 
-    /*
-     * Compute I-I0 at upper side of potential bracket.
-     */
-    c  = mlat1;
-    I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
-    if ( fabs(I) > 1e99 ) return(-5);
-    Dc = I-I0;
-    if (fabs(Dc) < Dmin){ Dmin = fabs(Dc); mlat_min = c; }
-
-    if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
-        /*
-         * Already Converged with requested tolerance.
-         */
-        //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
-        *rad    = r;
-        *Ifound = I;
-        *mlat   = mlat_min;
-        FoundValidI = TRUE;
-        return( FoundValidI );
-    }
 
 
 
@@ -153,7 +190,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
         De = I-I0;
         if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
-        //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
+        printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
 
 
 
@@ -208,14 +245,16 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             b  = e;
             Db = De;
             F0 = 0.9; F1 = 0.1;
-        } else if ( FirstHalf && ( fabs(De) < fabs(Da) ) && (De < 0.0) ) {
+//        } else if ( FirstHalf && ( fabs(De) < fabs(Da) ) && (De < 0.0) ) {
+        } else if ( FirstHalf && ( fabs(De) < fabs(Da) )  ) {
             /*
              * We found a better value for the lower end of the bracket. (And its negative).
              */
             a  = e;
             Da = De;
             F0 = 0.9; F1 = 0.1;
-        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc) && (De > 0.0) ) ) {
+//        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc) && (De > 0.0) ) ) {
+        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc)  ) ) {
             /*
              * We found a better value for the upper end of the bracket. (And its positive).
              */
@@ -232,7 +271,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             F0 = rand()/(double)RAND_MAX; // F is in range [0, 1]
             F1 = 1.0 - F0;
         }
-        //printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
+        printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
 
         ++nIts;
 

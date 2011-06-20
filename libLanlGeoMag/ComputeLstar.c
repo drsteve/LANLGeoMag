@@ -440,7 +440,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
                     //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
-                    if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
+                    if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
 
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
@@ -625,8 +625,17 @@ mlat0 = -30.0;
             }
 
 
+if ( mlat0<0.0) mlat = 0.0;
             if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s-------------------  Line %02d of %02d   MLT: %g  (mlat0, mlat1 = %g %g) ---------------------%s\n", PreStr, k, nLines, MLT, mlat0, mlat1, PostStr );
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat1, LstarInfo );
+
+
+
+
+
+
+
+
 
             if ( FoundShellLine > 0 ) {
                 done2 = TRUE;

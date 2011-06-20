@@ -165,7 +165,7 @@ int main( int argc, char *argv[] ){
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
-        Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+        Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", IntModel, ExtModel, MagEphemInfo );
     }
 
     if ( UseEop ) {

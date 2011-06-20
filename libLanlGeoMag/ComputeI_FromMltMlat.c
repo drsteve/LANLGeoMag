@@ -37,7 +37,6 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         w.x = (*r)*cl*cos(Phi); w.y = (*r)*cl*sin(Phi); w.z = (*r)*sl;
         Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
         if (LstarInfo->VerbosityLevel > 4) {
-
             printf("%sResults of FindBmRadius: Bm, MLT, mlat, r = %g %g %g %g%s\n", LstarInfo->PreStr, Bm, MLT, mlat, (*r), LstarInfo->PostStr);
             printf("%sResults of FindBmRadius: u_sm  = %g %g %g%s\n", LstarInfo->PreStr, w.x, w.y, w.z, LstarInfo->PostStr);
             printf("%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
