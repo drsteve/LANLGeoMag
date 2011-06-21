@@ -37,7 +37,6 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         w.x = (*r)*cl*cos(Phi); w.y = (*r)*cl*sin(Phi); w.z = (*r)*sl;
         Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
         if (LstarInfo->VerbosityLevel > 4) {
-
             printf("%sResults of FindBmRadius: Bm, MLT, mlat, r = %g %g %g %g%s\n", LstarInfo->PreStr, Bm, MLT, mlat, (*r), LstarInfo->PostStr);
             printf("%sResults of FindBmRadius: u_sm  = %g %g %g%s\n", LstarInfo->PreStr, w.x, w.y, w.z, LstarInfo->PostStr);
             printf("%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
@@ -63,13 +62,13 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          */
         Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
         //u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
-        u_scale.x =  1e-6;  u_scale.y = 1e-6; u_scale.z = 1e-6;
+        u_scale.x =  1.0;  u_scale.y = 1.0; u_scale.z = 1.0;
         P = Pmirror1;
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Bs = Lgm_Magnitude( &Bvec );
 //printf("Bs-Bm = %g\n", Bs-Bm);
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( LGM_BAD_TRACE );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Be  = Lgm_Magnitude( &Bvec );
@@ -86,7 +85,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Bs = Lgm_Magnitude( &Bvec );
 
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( LGM_BAD_TRACE );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Be  = Lgm_Magnitude( &Bvec );
@@ -101,17 +100,18 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
         }
 
-        //SS1 = Hdid;
-        SS1 = 0.0;
+        SS1 = Hdid;
+        //SS1 = 0.0;
 
 
 
         SS2 = 0.0;
-        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
-//        if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) 
+//        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+        if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 )  {
 
             SS = SS1 + SS2;
 //printf("SS1, SS2, SS = %g %g %g   sgn = %g\n", SS1, SS2, SS, sgn);
+//printf("%g %g\n", mlat, SS);
 
             if ( sgn < 0.0 ) {
                 LstarInfo->mInfo->Pm_North = Pmirror1;
@@ -136,6 +136,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 //LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
 //Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("Pm_North_sm = %.15g %.15g %.15g      B-Bm = %.15g\n", vvv.x, vvv.y, vvv.z, Lgm_Magnitude( &Bvec)-LstarInfo->mInfo->Bm );
+//printf("%.15g %.15g\n", mlat, LstarInfo->mInfo->Pm_North.z);
 
             /*
              *  Compute I

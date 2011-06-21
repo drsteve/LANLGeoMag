@@ -3,7 +3,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS;
     char        Str[80];

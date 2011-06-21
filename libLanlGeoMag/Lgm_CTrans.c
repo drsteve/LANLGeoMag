@@ -1605,7 +1605,7 @@ void Lgm_jd_to_ymdh ( double JD, long int *Date, int *year, int *month, int *day
 
 //?
 void Lgm_mjd_to_ymdh( double MJD, long int *Date, int *year, int *month, int *day, double *UT ) {
-    Lgm_mjd_to_ymdh( MJD+2400000.5, Date, year, month, day, UT );
+    Lgm_jd_to_ymdh( MJD+2400000.5, Date, year, month, day, UT );
 }
 
 

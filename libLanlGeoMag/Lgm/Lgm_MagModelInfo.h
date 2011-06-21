@@ -91,10 +91,10 @@ typedef struct Lgm_MagModelInfo {
     double		Hmax;
     FILE	    *fp;
     double      W[6];
-    double      G1, G2;
-    int			Kp;
-    double      Dst;
-    double      P;
+    double      G1, G2, G3;
+    int			Kp, aKp3;
+    double      fKp, Dst;
+    double      V, Den, P;
     double      Bx, By, Bz;
     double      T96MOD_V[11];       /* free params for T96_MOD */
 
@@ -362,6 +362,7 @@ int  Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lg
 int  Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
 int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info );
 void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
+void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 int  InitSpline( Lgm_MagModelInfo *Info );
 int  FreeSpline( Lgm_MagModelInfo *Info );

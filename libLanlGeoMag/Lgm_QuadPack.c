@@ -208,7 +208,7 @@ int TMPiwork[600];
         if (*ier == 6) lvl = 1;
         if (*ier != 0) {
             fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
-            PrintQuadpackError( ier );
+            PrintQuadpackError( *ier );
         }
         return(-1);
 

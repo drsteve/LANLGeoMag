@@ -260,7 +260,7 @@ printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mIn
         fp_MagEphem = fopen( OutputFilename, "ab" );
     } else {
         fp_MagEphem = fopen( OutputFilename, "wb" );
-        Lgm_WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, TLEs[0].IdNumber, TLEs[0].IntDesig2, IntModel, ExtModel, Kp, Dst, MagEphemInfo );
+        Lgm_WriteMagEphemHeader( fp_MagEphem, TLEs[0].Line0, TLEs[0].IdNumber, TLEs[0].IntDesig2, IntModel, ExtModel, MagEphemInfo );
     }
 
     if ( UseEop ) {
