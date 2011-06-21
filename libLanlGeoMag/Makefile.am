@@ -30,7 +30,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c 
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
                             Lgm_QinDenton.c
                             
-include_HEADERS = DynamicMemory.h
+include_HEADERS = Lgm/*.h
 
 EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/finals.daily EopData/finals2000A.all EopData/finals.all \

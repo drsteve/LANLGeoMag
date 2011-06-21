@@ -102,5 +102,6 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/EopData/GetEopFiles
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
+                 tmp/Makefile
                  ])
 AC_OUTPUT
