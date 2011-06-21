@@ -45,6 +45,7 @@ while len(libname) > 0:
         library_name = name
     elif name.split(os.path.extsep)[-1] == 'dylib':
         library_name = name
+
 try:
     subprocess.call(['ctypesgen.py',
                      '-l' + library_name,
