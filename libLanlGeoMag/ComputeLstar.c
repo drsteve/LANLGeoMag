@@ -443,7 +443,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
 
                     ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
-                    AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
+                    //AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
+                    ReplaceLastPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
                     if ( InitSpline( LstarInfo->mInfo ) ) {
 
                         /*
@@ -625,9 +626,9 @@ mlat0 = -30.0;
             }
 
 
-if ( mlat0<0.0) mlat = 0.0;
+//if ( (Count < 1) && (mlat0 < -1.0) ) mlat0 = -1.0;
             if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s-------------------  Line %02d of %02d   MLT: %g  (mlat0, mlat1 = %g %g) ---------------------%s\n", PreStr, k, nLines, MLT, mlat0, mlat1, PostStr );
-            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat1, LstarInfo );
+            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, LstarInfo );
 
 
 

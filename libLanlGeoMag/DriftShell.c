@@ -23,39 +23,62 @@
  *            \return 0 - no field line could be found
  *
  */
-int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, Lgm_LstarInfo *LstarInfo) {
+int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector    u, w, Pm_North, Pmirror, v1, v2, v3;
-    double        F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl, SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D;
-    int           done, FoundValidI, FirstHalf, nIts;
+    double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
+    double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2;
+    int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
 
 
     /*
-     *   Set the bracket for the mlat range. The safest values here would be 0->90 deg.
-     *   since if a shell field line exists for the given I,Bm values, it must have Bm
-     *   between 0 and 90. (Is this strictly true for very low L-shells that involve FLs
-     *   near the equator?)
+     *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
+     *  caller. The assumption is that the field line with the I we are
+     *  looking fo is between these two latitudes.  (If it isnt we will
+     *  eventually have to bail and the user has to try a different range.) We
+     *  also got mlat1 which is the user's best guess at where it ought to be.
      *
-     *   A problem with using 0->90 is that long FLs take some time to integrate. The
-     *   search algorithm moves away from these FLs in a few steps, but those steps cost
-     *   us alot.
+     *  Define D to be I-I0.
+     *  We need to find the latitude that gives D=0 (or 0 to within tolerance).
      *
-     *   A compromise I have adopted here is to allow the user to set the bracket manually.
-     *   Be careful because there *will* be problems if the bracket is no good (i.e. its not
-     *   a true bracket).
+     *  If there is a solution (zero-crossing) in the given range
+     *  (mlat0->mlat2), we can get the following cases:
+     *
+     *      1) Of the 3 mlat's we are given, at least one positive and negative
+     *      value of D results straight away. This is the best case scenario
+     *      because we immediately have a bracket on the zero. However, try to
+     *      minimize number of I evals needed to determine which pair to take.
+     *
+     *      2) None of the 3 mlats lead to a negative (negatives are difficult
+     *      to capture when the D(mlat) curve only slightly dips below the zero
+     *      line. Typically whn this happens, there will be two roots between
+     *      mlat0 and mlat2 (and we werent lucky with mlat1). In this case, we
+     *      will:
+     *              a) First make sure the 3 lats form a triple bracket for
+     *              minimization.
+     *
+     *              b) Use a bisection minimizer to zoom in on the minimim
+     *              value of D in the range. Note that this is not the same as
+     *              the zero crossing. There are two zeros -- one on either
+     *              side of the minimum. 
+     *
+     *              c) Stop doing minimization when we have located a value of
+     *              D that is negative.
+     *
+     *              d) Switch to bisection root finder using the new bracketed
+     *              zero.
      *
      */
     Dmin = 9e99;
 
 
     /*
-     * Compute I-I0 at midpoint. If the caller predicted a good midpoint, then
+     * Compute I-I0 at best-guess mlat. If the caller predicted well, then
      * this may be dead on, so try it first.
      */
-    b  = 0.5*(mlat0+mlat1);
-    I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
+    I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
     if ( fabs(I) > 1e99 ) return(-5);
-    Db = I-I0;
-    if (fabs(Db) < Dmin){ Dmin = fabs(Db); mlat_min = b; }
+    D1 = I-I0;
+    if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
 
     if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
         /*
@@ -72,15 +95,16 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
      
 
-    if ( Db > 0.0 ) {
+    FoundZeroBracket = FALSE;
+    if ( D1 > 0.0 ) {
         /*
          *  Then we would like to have the other side of the bracket be < 0.0.
-         *  I.e. we need a bigger I which (usually) is a bigger mlat.
+         *  I.e. we need a smaller I which (usually) is a smaller mlat.
          */
-        I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
-        D1 = I-I0;
-        if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
+        D0 = I-I0;
+        if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = mlat0; }
 
         if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
             /*
@@ -94,12 +118,84 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             return( FoundValidI );
         }
 
-        if ( D1 < 0.0 ) {
+        if ( D0 < 0.0 ) {
 
             /*
              * Found Bracket!!!
              */
-            a = mlat1;
+            FoundZeroBracket = TRUE;
+            a = mlat0; Da = D0;
+            b = mlat1; Db = D1;
+
+        } else {
+
+            /*
+             * Still no bracket. Evaluate the other side.
+             */
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+            if ( fabs(I) > 1e99 ) return(-5);
+            D2 = I-I0;
+            if (fabs(D2) < Dmin){ Dmin = fabs(D2); mlat_min = mlat2; }
+
+            if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+                /*
+                 * Already Converged with requested tolerance.
+                 */
+                //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+                *rad    = r;
+                *Ifound = I;
+                *mlat   = mlat_min;
+                FoundValidI = TRUE;
+                return( FoundValidI );
+            }
+
+            if ( D2 < 0.0 ) {
+                /*
+                 * Found Bracket!!!
+                 */
+                FoundZeroBracket = TRUE;
+                a = mlat1; Da = D1;
+                b = mlat2; Db = D2;
+            } else {
+                // set up a potential bracket for minimization
+                a = mlat0; Da = D0;
+                b = mlat1; Db = D1;
+                c = mlat2; Dc = D2;
+            }
+
+        }
+
+    } else {  // D1 is < 0.0
+
+        /*
+         *  Then we would like to have the other side of the bracket be > 0.0.
+         *  I.e. we need a bigger I which (usually) is a bigger mlat.
+         */
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+        if ( fabs(I) > 1e99 ) return(-5);
+        D2 = I-I0;
+        if (fabs(D2) < Dmin){ Dmin = fabs(D2); mlat_min = mlat2; }
+
+        if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            /*
+             * Already Converged with requested tolerance.
+             */
+            //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat_min;
+            FoundValidI = TRUE;
+            return( FoundValidI );
+        }
+
+        if ( D2 > 0.0 ) {
+
+            /*
+             * Found Bracket!!!
+             */
+            FoundZeroBracket = TRUE;
+            a = mlat1; Da = D1;
+            b = mlat2; Db = D2;
 
         } else {
 
@@ -122,31 +218,295 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
                 FoundValidI = TRUE;
                 return( FoundValidI );
             }
-            
+
+            if ( D0 > 0.0 ) {
+                /*
+                 * Found Bracket!!!
+                 */
+                FoundZeroBracket = TRUE;
+                a = mlat0; Da = D0;
+                b = mlat1; Db = D1;
+            } else {
+                // set up a potential bracket for minimization
+                a = mlat0; Da = D0;
+                b = mlat1; Db = D1;
+                c = mlat2; Dc = D2;
+            }
+
         }
+
+    }
+
+    
+
+    if ( !FoundZeroBracket ){
+
+        /*
+         * We did not find a Zero bracket. We will have to try the minimization
+         * strategy to obtain a value of D that is negative.
+         */
+
+
+        /*
+         *  Test to see if we have a valid bracket. If we dont, then either the
+         *  minimum is outside the range we chose or there is no solution.
+         */
+        if ( (Db > Da) || (Db > Dc) ) {
+            *Ifound = 9e99;
+            return(-5);
+        }
+
+
+        F0 = 0.5; F1 = 0.5;
+        done = FALSE; FoundValidI = FALSE; nIts = 0;
+        while ( !done ) {
+
+
+            /*
+             *  Find a new point that is a fraction, F through the largest interval.
+             *  Compute I and the difference between I and the desired I (i.e. I0
+             *  that the caller gave us)
+             */
+            d0 = b-a;
+            d1 = c-b;
+            if ( d0 > d1 ) {
+                FirstHalf = TRUE;
+                e = a + F0*d0;
+            } else {
+                FirstHalf = FALSE;
+                e = b + F1*d1;
+            }
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            De = I-I0;
+            if (De < Dmin){ Dmin = De; mlat_min = e; }
+            //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
+
+
+
+            /*
+             * Analyze the new value.
+             */
+            if ( nIts > MAX_ITS ) {
+                /*
+                 *  Too many iterations. Bail with errror.
+                 */
+                done = TRUE;
+                FoundValidI = -6;
+                I = 9e99;
+            } else if ( fabs(De) < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+                /*
+                 * Converged with requested tolerance.
+                 */
+                //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+                done = TRUE;
+                FoundValidI = TRUE;
+                *mlat = mlat_min;
+            } else if ( De < 0.0 ) {
+                done = TRUE;
+                /*
+                 *  Set bracket for finding the zero.
+                 *  Lower end should be this new negative value.
+                 *  If FirstHalf==TRUE, then b is already set to the value we want.
+                 */
+                a = e; Da = De;
+                if ( !FirstHalf ) {
+                    b = c; Db = Dc;
+                } 
+                FoundZeroBracket = TRUE;
+                //printf("Found bracket!!!!\n");
+                //printf("[a, b] = %g %g   [Da, Db] = %g %g\n", a, b, Da, Db);
+
+                //exit(0);
+            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+                /*
+                 * Converged  to lower endpoint -- no valid mlat found within
+                 * interval - probably have to enlarge initial bracket.
+                 */
+                done = TRUE;
+                FoundValidI = -2;
+            } else if ( fabs(e-mlat2) < 1e-5 ) {
+                /*
+                 * Converged  to upper endpoint -- no valid mlat found within
+                 * interval - probably have to enlarge initial bracket.
+                 */
+                done = TRUE;
+                FoundValidI = -3;
+            } else if ( fabs(a-c) < 1e-8 ) {
+                /*
+                 * Converged  to something, but not I?  try to enlarge initial
+                 * bracket.
+                 */
+                done = TRUE;
+                if ( fabs(De) < 0.001 ) {
+                    FoundValidI = TRUE;     // lets just take what we get here....
+                    *mlat = mlat_min;       // Use the best value we got
+                } else {
+                    FoundValidI = -4;
+                }
+            } else if ( De < Db ) {
+                /*
+                 * We found a better value for the center value.
+                 */
+                b  = e;
+                Db = De;
+                F0 = 0.9; F1 = 0.1;
+            //} else if ( FirstHalf && ( fabs(De) < fabs(Da) ) && (De < 0.0) ) {
+            } else if ( FirstHalf && ( De < Da )  ) {
+                /*
+                 * We found a better value for the lower end of the bracket. (And its negative).
+                 */
+                a  = e;
+                Da = De;
+                F0 = 0.9; F1 = 0.1;
+            //} else if ( !FirstHalf && ( fabs(De) < fabs(Dc) && (De > 0.0) ) ) {
+            } else if ( !FirstHalf && ( De < Dc ) ) {
+                /*
+                 * We found a better value for the upper end of the bracket. (And its positive).
+                 */
+                c  = e;
+                Dc = De;
+                F0 = 0.9; F1 = 0.1;
+            } else {
+                /*
+                 * For some reason, the new value is not within the bracket.
+                 * (Pathological function behavior).  Since we will eventually bail
+                 * out if we do too many iterations, lets try a random selection
+                 * for the new point (but still between the current bracket).
+                 */
+                F0 = rand()/(double)RAND_MAX; // F is in range [0, 1]
+                F1 = 1.0 - F0;
+            }
+            //printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
+
+            ++nIts;
+
+        }
+
+    }
+
+
+/*
+FILE *fp;
+double bb;
+fp = fopen("crap.txt", "w");
+for(bb=a; bb<=b; bb+=0.01){
+fprintf(fp, "%g %g\n", bb, ComputeI_FromMltMlat( Bm, MLT, bb, &r, I0, LstarInfo ) - I0);
+}
+fclose(fp);
+exit(0);
+*/
+
+
+
+
+
+
+
+
+
+    if ( FoundZeroBracket ) {
+
+        /*
+         * We have a bracket on a zero value. Go in for the kill using bisection.
+         */
+        F = 0.5;
+        done = FALSE; FoundValidI = FALSE; nIts = 0;
+        while ( !done ) {
+            /*
+             *  Find a new point that is a fraction, F through the interval.
+             *  Compute I and the difference between I and the desired I (i.e. I0
+             *  that the caller gave us)
+             */
+            d = b-a;
+            e = a + F*d;
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            De = I-I0;
+            if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
+            //printf("Initially:  a, b, [e]  = %g %g [%g]   Da, Db, [De] = %g %g [%g]   Dmin = %g\n", a, b, e, Da, Db, De, Dmin );
+
+
+            /*
+             * Analyze the new value.
+             */
+            if ( nIts > MAX_ITS ) {
+                /*
+                 *  Too many iterations. Bail with errror.
+                 */
+                done = TRUE;
+                FoundValidI = -6;
+                I = 9e99;
+            } else if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+                /*
+                 * Converged with requested tolerance.
+                 */
+                //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+                done = TRUE;
+                FoundValidI = TRUE;
+                *mlat = mlat_min;
+            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+                /*
+                 * Converged  to lower endpoint -- no valid mlat found within
+                 * interval - probably have to enlarge initial bracket.
+                 */
+                done = TRUE;
+                FoundValidI = -2;
+            } else if ( fabs(e-mlat1) < 1e-5 ) {
+                /*
+                 * Converged  to upper endpoint -- no valid mlat found within
+                 * interval - probably have to enlarge initial bracket.
+                 */
+                done = TRUE;
+                FoundValidI = -3;
+            } else if ( fabs(a-b) < 1e-8 ) {
+                /*
+                 * Converged  to something, but not I?  try to enlarge initial
+                 * bracket.
+                 */
+                done = TRUE;
+                if ( fabs(De) < 0.001 ) {
+                    FoundValidI = TRUE;     // lets just take what we get here....
+                    *mlat = mlat_min;       // Use the best value we got
+                } else {
+                    FoundValidI = -4;
+                }
+            //} else if ( (De < 0.0) && (De > Da)  ) {
+            } else if ( De < 0.0 ) {
+                /*
+                 * We found a better value for the lower end of the bracket.
+                 */
+                a  = e;
+                Da = De;
+            } else if ( De > 0.0 ) {
+            //} else if ( (De > 0.0) && (De < Db)  ) {
+                /*
+                 * We found a better value for the lower end of the bracket.
+                 */
+                b  = e;
+                Db = De;
+            } else {
+                // WE SHOULD NEVER GET HERE
+                /*
+                 * For some reason, the new value is not within the bracket.
+                 * (Pathological function behavior).  Since we will eventually bail
+                 * out if we do too many iterations, lets try a random selection
+                 * for the new point (but still between the current bracket).
+                 */
+                F = 0.01+0.98*rand()/(double)RAND_MAX; // F is in range [0.01, .99]
+            }
+            //printf("Setting To: a, b, [e]  = %g %g [%g]   Da, Db, [De] = %g %g [%g]\n\n", a, b, e, Da, Db, De );
+
+            ++nIts;
+
+        }
+
 
     } else {
+        
         /*
-         *  Then we would like to have the other side of the bracket be > 0.0.
-         *  I.e. we need a smaller I which (usually) is a smaller mlat.
+         *  After all this, its unlikely we can find a solution.
          */
-        a  = mlat0;
-        I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
-        if ( fabs(I) > 1e99 ) return(-5);
-        Da = I-I0;
-        if (fabs(Da) < Dmin){ Dmin = fabs(Da); mlat_min = a; }
-
-        if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
-            /*
-             * Already Converged with requested tolerance.
-             */
-            //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
-            *rad    = r;
-            *Ifound = I;
-            *mlat   = mlat_min;
-            FoundValidI = TRUE;
-            return( FoundValidI );
-        }
+        FoundValidI = -7;
+        I = 9e99;
     }
 
 
@@ -154,128 +514,6 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
 
-
-
-
-
-    /*
-     *  Test to see if we have a valid bracket. If we dont, then either the
-     *  minimum is outside the range we chose or there is no solution.
-     */
-    if ( (fabs(Db) > fabs(Da)) || (fabs(Db) > fabs(Dc)) ) {
-        *Ifound = 9e99;
-        return(-5);
-    }
-
-
-    F0 = 0.5; F1 = 0.5;
-    done = FALSE; FoundValidI = FALSE; nIts = 0;
-    while ( !done ) {
-
-
-        /*
-         *  Find a new point that is a fraction, F through the largest interval.
-         *  Compute I and the difference between I and the desired I (i.e. I0
-         *  that the caller gave us)
-         */
-        d0 = b-a;
-        d1 = c-b;
-        if ( d0 > d1 ) {
-            FirstHalf = TRUE;
-            e = a + F0*d0;
-        } else {
-            FirstHalf = FALSE;
-            e = b + F1*d1;
-        }
-        I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
-        De = I-I0;
-        if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
-        printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
-
-
-
-        /*
-         * Analyze the new value.
-         */
-        if ( nIts > MAX_ITS ) {
-            /*
-             *  Too many iterations. Bail with errror.
-             */
-            done = TRUE;
-            FoundValidI = -6;
-            I = 9e99;
-        } else if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
-            /*
-             * Converged with requested tolerance.
-             */
-            //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
-            done = TRUE;
-            FoundValidI = TRUE;
-            *mlat = mlat_min;
-        } else if ( fabs(e-mlat0)  < 1e-5 ) {
-            /*
-             * Converged  to lower endpoint -- no valid mlat found within
-             * interval - probably have to enlarge initial bracket.
-             */
-            done = TRUE;
-            FoundValidI = -2;
-        } else if ( fabs(e-mlat1) < 1e-5 ) {
-            /*
-             * Converged  to upper endpoint -- no valid mlat found within
-             * interval - probably have to enlarge initial bracket.
-             */
-            done = TRUE;
-            FoundValidI = -3;
-        } else if ( fabs(a-c) < 1e-8 ) {
-            /*
-             * Converged  to something, but not I?  try to enlarge initial
-             * bracket.
-             */
-            done = TRUE;
-            if ( fabs(De) < 0.001 ) {
-                FoundValidI = TRUE;     // lets just take what we get here....
-                *mlat = mlat_min;       // Use the best value we got
-            } else {
-                FoundValidI = -4;
-            }
-        } else if ( fabs(De) < fabs(Db) ) {
-            /*
-             * We found a better value for the center value.
-             */
-            b  = e;
-            Db = De;
-            F0 = 0.9; F1 = 0.1;
-//        } else if ( FirstHalf && ( fabs(De) < fabs(Da) ) && (De < 0.0) ) {
-        } else if ( FirstHalf && ( fabs(De) < fabs(Da) )  ) {
-            /*
-             * We found a better value for the lower end of the bracket. (And its negative).
-             */
-            a  = e;
-            Da = De;
-            F0 = 0.9; F1 = 0.1;
-//        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc) && (De > 0.0) ) ) {
-        } else if ( !FirstHalf && ( fabs(De) < fabs(Dc)  ) ) {
-            /*
-             * We found a better value for the upper end of the bracket. (And its positive).
-             */
-            c  = e;
-            Dc = De;
-            F0 = 0.9; F1 = 0.1;
-        } else {
-            /*
-             * For some reason, the new value is not within the bracket.
-             * (Pathological function behavior).  Since we will eventually bail
-             * out if we do too many iterations, lets try a random selection
-             * for the new point (but still between the current bracket).
-             */
-            F0 = rand()/(double)RAND_MAX; // F is in range [0, 1]
-            F1 = 1.0 - F0;
-        }
-        printf("Setting To: a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]\n\n", a, b, c, e, Da, Db, Dc, De );
-
-        ++nIts;
-
-    }
 
     *rad    = r;
     *Ifound = I;
