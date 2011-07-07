@@ -53,8 +53,6 @@ int main( int argc, char *argv[] ){
         fscanf( fp, "%*[^:]:%s", OutputFilename );
         fscanf( fp, "%*[^:]:%s", IntModel );
         fscanf( fp, "%*[^:]:%s", ExtModel );
-        fscanf( fp, "%*[^:]:%lf", &Kp );
-        fscanf( fp, "%*[^:]:%lf", &Dst );
         fscanf( fp, "%*[^:]:%d", &nAlpha );
         for (i=0; i<nAlpha; i++ ) fscanf( fp, "%lf", &Alpha[i]);
         fscanf( fp, "%*[^:]:%lf", &FootpointHeight );
@@ -75,8 +73,6 @@ int main( int argc, char *argv[] ){
     printf("OutputFilename  = %s\n", OutputFilename);
     printf("IntModel        = %s\n", IntModel);
     printf("ExtModel        = %s\n", ExtModel);
-    printf("Kp              = %g\n", Kp);
-    printf("Dst             = %g\n", Dst);
     printf("FootpointHeight = %g\n", FootpointHeight);
     printf("Quality = %d\n", Quality);
     if ( nAlpha > 0 ){

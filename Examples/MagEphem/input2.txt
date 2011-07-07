@@ -1,10 +1,8 @@
-InputFile:tmp_eph.txt
-OutputFile:JSON4.txt
-Internal Field Model:IGRF
-External Field Model:T89
-Kp:4.3
-Dst:-20
-PitchAngles:36 90 87.5 85 82.5 80 77.5 75 72.5 70 67.5 65 62.5 60 57.5 55 52.5 50 47.5 45 42.5 40 37.5 35 32.5 30 27.5 25 22.5 20 17.5 15 12.5 10 7.5 5 2.5 
-Footpoint Height:100.0
-Colorize:True
-Quality:3
+           InputFile: tmp_eph.txt
+          OutputFile: JSON4.txt
+Internal Field Model: IGRF
+External Field Model: T89
+         PitchAngles: 18 90 85 80 75 70 65 60 55 50 45 40 35 30 25 20 15 10 5
+    Footpoint Height: 100.0
+            Colorize: True
+             Quality: 3

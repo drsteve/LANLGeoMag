@@ -53,7 +53,7 @@ Lgm_QinDenton *Lgm_init_QinDenton( int Verbose ) {
     LGM_ARRAY_1D( q->G2_status,     NMAX, int );
     LGM_ARRAY_1D( q->G3_status,     NMAX, int );
 
-    LGM_ARRAY_1D( q->Kp,            NMAX, double );
+    LGM_ARRAY_1D( q->fKp,           NMAX, double );
     LGM_ARRAY_1D( q->akp3,          NMAX, double );
     LGM_ARRAY_1D( q->Dst,           NMAX, double );
 
@@ -118,7 +118,7 @@ void  Lgm_destroy_QinDenton( Lgm_QinDenton *q ) {
     LGM_ARRAY_1D_FREE( q->G2_status );
     LGM_ARRAY_1D_FREE( q->G3_status );
 
-    LGM_ARRAY_1D_FREE( q->Kp );
+    LGM_ARRAY_1D_FREE( q->fKp );
     LGM_ARRAY_1D_FREE( q->akp3 );
     LGM_ARRAY_1D_FREE( q->Dst );
 
@@ -192,7 +192,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
                             &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
-                            &q->Kp[n], &q->akp3[n], &q->Dst[n],
+                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
                             &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
@@ -218,7 +218,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
                             &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
-                            &q->Kp[n], &q->akp3[n], &q->Dst[n],
+                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
                             &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
@@ -245,7 +245,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
                             &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
-                            &q->Kp[n], &q->akp3[n], &q->Dst[n],
+                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
                             &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
@@ -338,8 +338,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         gsl_spline_init( spline, x, y, nq ); p->G3 = gsl_spline_eval( spline, MJD, acc );
 
         // interpolate Kp
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Kp[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Kp = gsl_spline_eval( spline, MJD, acc );
+        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->fKp[i]; }
+        gsl_spline_init( spline, x, y, nq ); p->fKp = gsl_spline_eval( spline, MJD, acc );
 
         // interpolate akp3
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->akp3[i]; }
@@ -422,7 +422,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         printf("          G1 = %11.7g\n", p->G1 );
         printf("          G2 = %11.7g\n", p->G2 );
         printf("          G3 = %11.7g\n", p->G3 );
-        printf("          Kp = %11.7g\n", p->Kp );
+        printf("          Kp = %11.7g\n", p->fKp );
         printf("        akp3 = %11.7g\n", p->akp3 );
         printf("         Dst = %11.7g nT\n", p->Dst );
         printf("         Bz1 = %11.7g nT\n", p->Bz1 );
@@ -461,8 +461,8 @@ void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
     m->G1   = p->G1;
     m->G2   = p->G2;
     m->G3   = p->G3;
-    m->fKp  = p->Kp;
-    m->Kp   = (int)(p->Kp+0.5); if (m->Kp > 5) m->Kp = 5; if (m->Kp < 0 ) m->Kp = 0;
+    m->fKp  = p->fKp;
+    m->Kp   = (int)(p->fKp+0.5); if (m->Kp > 5) m->Kp = 5; if (m->Kp < 0 ) m->Kp = 0;
     m->aKp3 = p->akp3;
     m->Dst  = p->Dst;
     m->W[0] = p->W1;
@@ -472,16 +472,4 @@ void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
     m->W[4] = p->W5;
     m->W[5] = p->W6;
 }
-
-//void Lgm_unset_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
-//    c->DUT1 = 0.0;
-//    c->xp   = 0.0;
-//    c->yp   = 0.0;
-//    c->dPsi = 0.0;
-//    c->dEps = 0.0;
-//    c->LOD  = 0.0;
-//    c->dX   = 0.0;
-//    c->dY   = 0.0;
-//}
-
 

@@ -1134,14 +1134,18 @@ typedef struct _GuiInfo {
     MaterialProp *FieldLineMaterial;
     MaterialProp *DriftShellMaterial;
 
-    GtkWidget    **FieldLineShowPitchAngleButton;
+    GtkWidget   **FieldLineShowPitchAngleButton;
     gulong      *FieldLineShowPitchAngleButtonHandler;
 
-    GtkWidget    **DriftShellShowPitchAngleButton;
+    GtkWidget   **DriftShellShowPitchAngleButton;
     gulong      *DriftShellShowPitchAngleButtonHandler;
 
-    GtkWidget    ***FieldLineColorButton;
-    GtkWidget    ***DriftShellColorButton;
+    GtkWidget   **FieldLineDiffuseColorButton;
+    GtkWidget   **FieldLineAmbientColorButton;
+    GtkWidget   **FieldLineSpecularColorButton;
+    GtkWidget   **DriftShellDiffuseColorButton;
+    GtkWidget   **DriftShellAmbientColorButton;
+    GtkWidget   **DriftShellSpecularColorButton;
     GtkWidget   **FieldLineShininessButton;
     GtkWidget   **DriftShellShininessButton;
 
@@ -5906,8 +5910,8 @@ static void ChangeMaterialShininess( GtkMenuItem  *menuitem, gpointer data ) {
              * So we need to set it back to "Custom" and re-read the color buttons too...
              */
             material = &gInfo->FieldLineMaterial[k];
-            GetAllMaterialColors( material, gInfo->FieldLineColorButton[k][0], gInfo->FieldLineColorButton[k][1], 
-                                             gInfo->FieldLineColorButton[k][2], gInfo->FieldLineShininessButton[k]);
+            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k], 
+                                             gInfo->FieldLineSpecularColorButton[k], gInfo->FieldLineShininessButton[k]);
 
             g_signal_handler_block( G_OBJECT( gInfo->FieldLineMaterialButton[k] ), gInfo->FieldLineMaterialButtonHandler[k] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[k]), nNamedMaterials);
@@ -5924,8 +5928,8 @@ static void ChangeMaterialShininess( GtkMenuItem  *menuitem, gpointer data ) {
              * So we need to set it back to "Custom" and re-read the color buttons too...
              */
             material = &gInfo->DriftShellMaterial[kk];
-            GetAllMaterialColors( material, gInfo->DriftShellColorButton[kk][0], gInfo->DriftShellColorButton[kk][1], 
-                                             gInfo->DriftShellColorButton[kk][2], gInfo->DriftShellShininessButton[kk]);
+            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[kk], gInfo->DriftShellAmbientColorButton[kk], 
+                                             gInfo->DriftShellSpecularColorButton[kk], gInfo->DriftShellShininessButton[kk]);
 
             g_signal_handler_block( G_OBJECT( gInfo->DriftShellMaterialButton[kk] ), gInfo->DriftShellMaterialButtonHandler[kk] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[kk]), nNamedMaterials);
@@ -5945,6 +5949,7 @@ static void ChangeMaterial( GtkWidget  *widget, gpointer data ) {
     int             i, k, Flag, indx;
     MaterialProp    *material;
     GtkWidget       *button;
+    GdkColor        color;
 
     k = GPOINTER_TO_INT( data );
     Flag = 0;
@@ -5966,13 +5971,42 @@ static void ChangeMaterial( GtkWidget  *widget, gpointer data ) {
      * Get material
      */
     indx = gtk_combo_box_get_active( GTK_COMBO_BOX(button) );
+    --indx;
+printf("indx = %d\n", indx);
 
-    if ( indx < nNamedMaterials ) {
+    if ( indx == 0 ) {
+        // If "Custom:"
+        if ( Flag ){
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[k]), &material->diffuse );
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[k]), &material->ambient );
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[k]), &material->specular );
+        } else {
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineDiffuseColorButton[k]), &material->diffuse );
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineAmbientColorButton[k]), &material->ambient );
+            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineSpecularColorButton[k]), &material->specular );
+        }
+    } else if ( indx < nNamedMaterials ) {
 
         for (i=0; i<4; i++) material->ambient[i]  = NamedMaterials[indx].Ambient[i];
         for (i=0; i<4; i++) material->diffuse[i]  = NamedMaterials[indx].Diffuse[i];
         for (i=0; i<4; i++) material->specular[i] = NamedMaterials[indx].Specular[i];
         material->shininess = NamedMaterials[indx].Shininess;
+        if ( Flag ){
+
+            color.red = material->diffuse[0]*65535; color.green = material->diffuse[1]*65535; color.blue = material->diffuse[2]*65535;
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[k]), &color );
+
+            color.red = material->ambient[0]*65535; color.green = material->ambient[1]*65535; color.blue = material->ambient[2]*65535;
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[k]), &color );
+
+            color.red = material->specular[0]*65535; color.green = material->specular[1]*65535; color.blue = material->specular[2]*65535;
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[k]), &color );
+
+        } else {
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineDiffuseColorButton[k]), &material->diffuse );
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineAmbientColorButton[k]), &material->ambient );
+            gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineSpecularColorButton[k]), &material->specular );
+        }
 
     } else {
 
@@ -5980,11 +6014,11 @@ static void ChangeMaterial( GtkWidget  *widget, gpointer data ) {
          * Get colors and shininess
          */
         if ( Flag) {
-            GetAllMaterialColors( material, gInfo->DriftShellColorButton[k][0], gInfo->DriftShellColorButton[k][1], 
-                                             gInfo->DriftShellColorButton[k][2], gInfo->DriftShellShininessButton[k]);
+            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[k], gInfo->DriftShellAmbientColorButton[k], 
+                                             gInfo->DriftShellSpecularColorButton[k], gInfo->DriftShellShininessButton[k]);
         } else {
-            GetAllMaterialColors( material, gInfo->FieldLineColorButton[k][0], gInfo->FieldLineColorButton[k][1], 
-                                             gInfo->FieldLineColorButton[k][2], gInfo->FieldLineShininessButton[k]);
+            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k], 
+                                             gInfo->FieldLineSpecularColorButton[k], gInfo->FieldLineShininessButton[k]);
         }
 
     }
@@ -6024,17 +6058,23 @@ static void ChangeMaterialColor( GtkMenuItem  *menuitem, gpointer data ) {
              * If we are here, it means we are adjusting a color button while there is a named material selected.
              * So we need to set it back to "Custom" and re-read all the color buttons too...
              */
-            GetAllMaterialColors( material, gInfo->FieldLineColorButton[i][0], gInfo->FieldLineColorButton[i][1], 
-                                             gInfo->FieldLineColorButton[i][2], gInfo->FieldLineShininessButton[i]);
+            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[i], gInfo->FieldLineAmbientColorButton[i], 
+                                             gInfo->FieldLineSpecularColorButton[i], gInfo->FieldLineShininessButton[i]);
 
             g_signal_handler_block( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), nNamedMaterials);
             g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
         } else {
-            button = gInfo->DriftShellColorButton[i][j];
-            if      (j==0) GetOneMaterialColor( material->diffuse, button );
-            else if (j==1) GetOneMaterialColor( material->ambient, button );
-            else           GetOneMaterialColor( material->specular, button );
+            if (j==0) {
+                button = gInfo->DriftShellDiffuseColorButton[i];
+                GetOneMaterialColor( material->diffuse, button );
+            } else if (j==1) {
+                GetOneMaterialColor( material->ambient, button );
+                button = gInfo->DriftShellAmbientColorButton[i];
+            } else {
+                GetOneMaterialColor( material->specular, button );
+                button = gInfo->DriftShellSpecularColorButton[i];
+            }
             Alpha = gtk_color_button_get_alpha( GTK_COLOR_BUTTON(button) );
         }
 
@@ -6047,18 +6087,24 @@ static void ChangeMaterialColor( GtkMenuItem  *menuitem, gpointer data ) {
              * If we are here, it means we are adjusting a color button while there is a named material selected.
              * So we need to set it back to "Custom" and re-read all the color buttons too...
              */
-            GetAllMaterialColors( material, gInfo->FieldLineColorButton[i][0], gInfo->FieldLineColorButton[i][1], 
-                                             gInfo->FieldLineColorButton[i][2], gInfo->FieldLineShininessButton[i]);
+            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[i], gInfo->FieldLineAmbientColorButton[i], 
+                                             gInfo->FieldLineSpecularColorButton[i], gInfo->FieldLineShininessButton[i]);
 
             g_signal_handler_block( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), nNamedMaterials);
             g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
         } else {
-            button   = gInfo->FieldLineColorButton[i][j];
-            if      (j==0) GetOneMaterialColor( material->diffuse, button );
-            else if (j==1) GetOneMaterialColor( material->ambient, button );
-            else           GetOneMaterialColor( material->specular, button );
-            Alpha = gtk_color_button_get_alpha( GTK_COLOR_BUTTON(button) );
+            if (j==0) {
+                button = gInfo->FieldLineDiffuseColorButton[i];
+                GetOneMaterialColor( material->diffuse, button );
+            } else if (j==1) {
+                button = gInfo->FieldLineAmbientColorButton[i];
+                GetOneMaterialColor( material->ambient, button );
+            } else           {
+                button = gInfo->FieldLineSpecularColorButton[i];
+                GetOneMaterialColor( material->specular, button );
+            }
+            Alpha = gtk_color_button_get_alpha( GTK_COLOR_BUTTON(button));
         }
     }
 
@@ -6838,22 +6884,16 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), vbox2, label );
 
     // Table for widgets
-    table1 = gtk_table_new (11, 8, FALSE); gtk_widget_show (table1);
+    table1 = gtk_table_new( 40, 10, FALSE ); gtk_widget_show (table1);
     gtk_box_pack_start (GTK_BOX (vbox2), table1, TRUE, TRUE, 15);
-    //gtk_table_set_row_spacings (GTK_TABLE (table1), 2);
     gtk_table_set_row_spacings( GTK_TABLE (table1), 0 );
     gtk_table_set_col_spacings( GTK_TABLE (table1), 10 );
-
-    //grid1 = gtk_grid_new(); 
-    //gtk_widget_show( grid1 );
-    
 
     
     col = 0;
     // Pitch angle column
     label = gtk_label_new (_("<b>Pitch\nAngle</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 0, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0);
-    //gtk_gride_attach( GTK_GRID(grid1), label, col, col+1, 0, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
@@ -6861,54 +6901,46 @@ GtkWidget *PitchAngleDisplayProperties(){
     // vertical separator
     vseparator = gtk_vseparator_new (); gtk_widget_show (vseparator);
     gtk_table_attach (GTK_TABLE (table1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0); 
-    //gtk_grid_attach( GTK_GRID(grid1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0); 
     ++col;
 
     // Column Headers for Field Lines
     label = gtk_label_new (_("<b>Show\nField\nLines</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 0, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0);
-    //gtk_grid_attach( GTK_GRID(grid1), label, col, col+1, 0, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
 
     label = gtk_label_new (_("<b><span size=\"large\">Field Line Material</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 3, 8, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, 3, 8, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
 
     label = gtk_label_new (_("<b><span size=\"small\">Material</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
 
     label = gtk_label_new (_("<b><span size=\"small\">Diffuse</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
 
     label = gtk_label_new (_("<b><span size=\"small\">Ambient</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
 
     label = gtk_label_new (_("<b><span size=\"small\">Specular</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
 
     label = gtk_label_new (_("<b><span size=\"small\">Shininess</span></b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
-    //gtk_grid_attach (GTK_GRID(grid1), label, col, col+1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     ++col;
@@ -6916,7 +6948,6 @@ GtkWidget *PitchAngleDisplayProperties(){
     // Separator
     hseparator = gtk_hseparator_new (); gtk_widget_show (hseparator);
     gtk_table_attach (GTK_TABLE (table1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0); 
-    //gtk_grid_attach( GTK_GRID(grid1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0); 
 
 
 
@@ -6934,7 +6965,6 @@ GtkWidget *PitchAngleDisplayProperties(){
         }
         label = gtk_label_new( Str ); gtk_widget_show( label );
         gtk_table_attach( GTK_TABLE(table1), label, col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), label, col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
         gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
         gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_CENTER);
         ++col;
@@ -6949,27 +6979,21 @@ GtkWidget *PitchAngleDisplayProperties(){
         if (i==MagEphemInfo->nAlpha) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[i] ), ShowAllPitchAngles );
         else      gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[i] ), ShowPitchAngle[i] );
         gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineShowPitchAngleButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineShowPitchAngleButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(0), (GtkAttachOptions)(0), 0, 0 );
         gInfo->FieldLineShowPitchAngleButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[i] ), "toggled", G_CALLBACK( SelectPitchAngles2 ), GINT_TO_POINTER(i) );
         ++col;
 
 
 
-GtkTreeIter     *iter;
-GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
-GtkCellRenderer *cr = gtk_cell_renderer_text_new();
-g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
-gtk_tree_store_clear( ts ); 
+        GtkTreeIter     iter;
+        GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
+        GtkCellRenderer *cr = gtk_cell_renderer_text_new();
+        g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
+        gtk_tree_store_clear( ts ); 
 
-
-
-        //gInfo->FieldLineMaterialButton[i] = gtk_combo_box_new_text(); 
-        for (ii=0; ii<nNamedMaterials; ii++){
-            //gtk_combo_box_append_text( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), NamedMaterials[ii].Name);
+        for (ii=nNamedMaterials-1; ii>=0; ii--){
             gtk_tree_store_insert( ts, &iter, NULL, 0 );
             gtk_tree_store_set(ts, &iter, 0, NamedMaterials[ii].Name, -1);
         }
-        //gtk_combo_box_append_text( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), "Custom:");
         gtk_tree_store_insert( ts, &iter, NULL, 0 );
         gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
 
@@ -6978,53 +7002,47 @@ gtk_tree_store_clear( ts );
         gtk_cell_layout_pack_start( GTK_CELL_LAYOUT(gInfo->FieldLineMaterialButton[i]), cr, FALSE);
         gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT(gInfo->FieldLineMaterialButton[i]), cr, "text", 0, NULL);
 
-        //gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), nNamedMaterials);
         gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), 0);
         gtk_widget_show( gInfo->FieldLineMaterialButton[i] );
-//PangoFontDescription *font_desc = pango_font_description_from_string("Arial bold 8");
-//GtkTreeModel *tm = gtk_combo_box_get_model( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]) );
-//gtk_widget_modify_font( tm, font_desc );
         gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineMaterialButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineMaterialButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
         gInfo->FieldLineMaterialButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), "changed", G_CALLBACK( ChangeMaterial ), GINT_TO_POINTER(i) );
         ++col;
       
 
-        color.red = gInfo->FieldLineMaterial[i].diffuse[0]*65535; color.green = gInfo->FieldLineMaterial[i].diffuse[1]*65535; color.blue = gInfo->FieldLineMaterial[i].diffuse[2]*65535;
-        gInfo->FieldLineColorButton[i][0] = gtk_color_button_new(); gtk_widget_show( gInfo->FieldLineColorButton[i][0] );
-        gtk_widget_set_size_request( gInfo->FieldLineColorButton[i][0], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][0]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineColorButton[i][0], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineColorButton[i][0], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][0]), TRUE );
-        g_signal_connect( G_OBJECT( gInfo->FieldLineColorButton[i][0] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+0) );
+        color.red = gInfo->FieldLineMaterial[i].diffuse[0]*65535;
+        color.green = gInfo->FieldLineMaterial[i].diffuse[1]*65535;
+        color.blue = gInfo->FieldLineMaterial[i].diffuse[2]*65535;
+        gInfo->FieldLineDiffuseColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->FieldLineDiffuseColorButton[i] );
+        gtk_widget_set_size_request( gInfo->FieldLineDiffuseColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineDiffuseColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineDiffuseColorButton[i]), TRUE );
+        g_signal_connect( G_OBJECT( gInfo->FieldLineDiffuseColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+0) );
         ++col;
 
-        color.red = gInfo->FieldLineMaterial[i].ambient[0]*65535; color.green = gInfo->FieldLineMaterial[i].ambient[1]*65535; color.blue = gInfo->FieldLineMaterial[i].ambient[2]*65535;
-        gInfo->FieldLineColorButton[i][1] = gtk_color_button_new(); gtk_widget_show( gInfo->FieldLineColorButton[i][1] );
-        gtk_widget_set_size_request( gInfo->FieldLineColorButton[i][1], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][1]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineColorButton[i][1], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineColorButton[i][1], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][1]), TRUE );
-        g_signal_connect( G_OBJECT( gInfo->FieldLineColorButton[i][1] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+1) );
+        color.red = gInfo->FieldLineMaterial[i].ambient[0]*65535;
+        color.green = gInfo->FieldLineMaterial[i].ambient[1]*65535;
+        color.blue = gInfo->FieldLineMaterial[i].ambient[2]*65535;
+        gInfo->FieldLineAmbientColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->FieldLineAmbientColorButton[i] );
+        gtk_widget_set_size_request( gInfo->FieldLineAmbientColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineAmbientColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineAmbientColorButton[i]), TRUE );
+        g_signal_connect( G_OBJECT( gInfo->FieldLineAmbientColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+1) );
         ++col;
 
-        color.red = gInfo->FieldLineMaterial[i].specular[0]*65535; color.green = gInfo->FieldLineMaterial[i].specular[1]*65535; color.blue = gInfo->FieldLineMaterial[i].specular[2]*65535;
-        gInfo->FieldLineColorButton[i][2] = gtk_color_button_new(); gtk_widget_show( gInfo->FieldLineColorButton[i][2] );
-        gtk_widget_set_size_request( gInfo->FieldLineColorButton[i][2], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][2]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineColorButton[i][2], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineColorButton[i][2], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineColorButton[i][2]), TRUE );
-        g_signal_connect( G_OBJECT( gInfo->FieldLineColorButton[i][2] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+2) );
+        color.red = gInfo->FieldLineMaterial[i].specular[0]*65535;
+        color.green = gInfo->FieldLineMaterial[i].specular[1]*65535;
+        color.blue = gInfo->FieldLineMaterial[i].specular[2]*65535;
+        gInfo->FieldLineSpecularColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->FieldLineSpecularColorButton[i] );
+        gtk_widget_set_size_request( gInfo->FieldLineSpecularColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineSpecularColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->FieldLineSpecularColorButton[i]), TRUE );
+        g_signal_connect( G_OBJECT( gInfo->FieldLineSpecularColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(i*3+2) );
         ++col;
 
         spinbutton1_adj = gtk_adjustment_new( 0.15, 0, 1, 0.01, 0.1, 0 );
         gInfo->FieldLineShininessButton[i]  = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton1_adj), 1, 2); gtk_widget_show( gInfo->FieldLineShininessButton[i]  );
         gtk_widget_set_size_request( gInfo->FieldLineShininessButton[i], 30, 20);
         gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineShininessButton[i] , col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        //gtk_grid_attach( GTK_GRID(grid1), gInfo->FieldLineShininessButton[i] , col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0 );
         gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(gInfo->FieldLineShininessButton[i] ), TRUE );
         g_signal_connect( G_OBJECT( gInfo->FieldLineShininessButton[i] ), "value_changed", G_CALLBACK( ChangeMaterialShininess ), GINT_TO_POINTER(i) );
         ++col;
@@ -7051,7 +7069,7 @@ gtk_tree_store_clear( ts );
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), vbox2, label );
 
-    table1 = gtk_table_new (11, 8, FALSE); gtk_widget_show (table1);
+    table1 = gtk_table_new (40, 10, FALSE); gtk_widget_show (table1);
     gtk_box_pack_start (GTK_BOX (vbox2), table1, TRUE, TRUE, 15);
     gtk_table_set_row_spacings (GTK_TABLE (table1), 2);
     gtk_table_set_col_spacings (GTK_TABLE (table1), 10);
@@ -7152,46 +7170,72 @@ gtk_tree_store_clear( ts );
         gInfo->DriftShellShowPitchAngleButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[i] ), "toggled", G_CALLBACK( SelectPitchAngles2 ), GINT_TO_POINTER(100+i) );
         ++col;
 
-        gInfo->DriftShellMaterialButton[i] = gtk_combo_box_new_text(); 
-        gtk_widget_set_size_request( gInfo->DriftShellMaterialButton[i], 30, 20);
-        for (ii=0; ii<nNamedMaterials; ii++){
-            gtk_combo_box_append_text( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[i]), NamedMaterials[ii].Name);
+
+        GtkTreeIter     iter;
+        GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
+        GtkCellRenderer *cr = gtk_cell_renderer_text_new();
+        g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
+        gtk_tree_store_clear( ts ); 
+
+        for (ii=nNamedMaterials-1; ii>=0; ii--){
+            gtk_tree_store_insert( ts, &iter, NULL, 0 );
+            gtk_tree_store_set(ts, &iter, 0, NamedMaterials[ii].Name, -1);
         }
-        gtk_combo_box_append_text( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[i]), "Custom:");
-        gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[i]), nNamedMaterials);
+        gtk_tree_store_insert( ts, &iter, NULL, 0 );
+        gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
+
+        gInfo->DriftShellMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) ); 
+        gtk_widget_set_size_request( gInfo->DriftShellMaterialButton[i], 30, 20);
+        gtk_cell_layout_pack_start( GTK_CELL_LAYOUT(gInfo->DriftShellMaterialButton[i]), cr, FALSE);
+        gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT(gInfo->DriftShellMaterialButton[i]), cr, "text", 0, NULL);
+
+        gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[i]), 0);
         gtk_widget_show( gInfo->DriftShellMaterialButton[i] );
         gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellMaterialButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
         gInfo->DriftShellMaterialButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->DriftShellMaterialButton[i] ), "changed", G_CALLBACK( ChangeMaterial ), GINT_TO_POINTER(100+i) );
         ++col;
+
+
+
+
+
+
+
+
+
+
             
-        color.red = gInfo->DriftShellMaterial[i].diffuse[0]*65535; color.green = gInfo->DriftShellMaterial[i].diffuse[1]*65535; color.blue = gInfo->DriftShellMaterial[i].diffuse[2]*65535;
-        gInfo->DriftShellColorButton[i][0] = gtk_color_button_new(); gtk_widget_show( gInfo->DriftShellColorButton[i][0] );
-        gtk_widget_set_size_request( gInfo->DriftShellColorButton[i][0], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][0]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellColorButton[i][0], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][0]), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][0]), gInfo->DriftShellMaterial[i].diffuse[3]*65535 );
-        g_signal_connect( G_OBJECT( gInfo->DriftShellColorButton[i][0] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+0) );
+        color.red = gInfo->DriftShellMaterial[i].diffuse[0]*65535; 
+        color.green = gInfo->DriftShellMaterial[i].diffuse[1]*65535; 
+        color.blue = gInfo->DriftShellMaterial[i].diffuse[2]*65535;
+        gInfo->DriftShellDiffuseColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->DriftShellDiffuseColorButton[i] );
+        gtk_widget_set_size_request( gInfo->DriftShellDiffuseColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellDiffuseColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[i]), TRUE );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[i]), gInfo->DriftShellMaterial[i].diffuse[3]*65535 );
+        g_signal_connect( G_OBJECT( gInfo->DriftShellDiffuseColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+0) );
         ++col;
 
-        color.red = gInfo->DriftShellMaterial[i].ambient[0]*65535; color.green = gInfo->DriftShellMaterial[i].ambient[1]*65535; color.blue = gInfo->DriftShellMaterial[i].ambient[2]*65535;
-        gInfo->DriftShellColorButton[i][1] = gtk_color_button_new(); gtk_widget_show( gInfo->DriftShellColorButton[i][1] );
-        gtk_widget_set_size_request( gInfo->DriftShellColorButton[i][1], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][1]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellColorButton[i][1], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][1]), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][1]), gInfo->DriftShellMaterial[i].ambient[3]*65535 );
-        g_signal_connect( G_OBJECT( gInfo->DriftShellColorButton[i][1] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+1) );
+        color.red = gInfo->DriftShellMaterial[i].ambient[0]*65535;
+        color.green = gInfo->DriftShellMaterial[i].ambient[1]*65535;
+        color.blue = gInfo->DriftShellMaterial[i].ambient[2]*65535;
+        gInfo->DriftShellAmbientColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->DriftShellAmbientColorButton[i] );
+        gtk_widget_set_size_request( gInfo->DriftShellAmbientColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellAmbientColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[i]), TRUE );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[i]), gInfo->DriftShellMaterial[i].ambient[3]*65535 );
+        g_signal_connect( G_OBJECT( gInfo->DriftShellAmbientColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+1) );
         ++col;
 
-        color.red = gInfo->DriftShellMaterial[i].specular[0]*65535; color.green = gInfo->DriftShellMaterial[i].specular[1]*65535; color.blue = gInfo->DriftShellMaterial[i].specular[2]*65535;
-        gInfo->DriftShellColorButton[i][2] = gtk_color_button_new(); gtk_widget_show( gInfo->DriftShellColorButton[i][2] );
-        gtk_widget_set_size_request( gInfo->DriftShellColorButton[i][2], 30, 20);
-        gtk_color_button_set_color( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][2]), &color );
-        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellColorButton[i][2], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
-        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][2]), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellColorButton[i][2]), gInfo->DriftShellMaterial[i].specular[3]*65535 );
-        g_signal_connect( G_OBJECT( gInfo->DriftShellColorButton[i][2] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+2) );
+        color.red = gInfo->DriftShellMaterial[i].specular[0]*65535;
+        color.green = gInfo->DriftShellMaterial[i].specular[1]*65535;
+        color.blue = gInfo->DriftShellMaterial[i].specular[2]*65535;
+        gInfo->DriftShellSpecularColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->DriftShellSpecularColorButton[i] );
+        gtk_widget_set_size_request( gInfo->DriftShellSpecularColorButton[i], 30, 20);
+        gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellSpecularColorButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
+        gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[i]), TRUE );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[i]), gInfo->DriftShellMaterial[i].specular[3]*65535 );
+        g_signal_connect( G_OBJECT( gInfo->DriftShellSpecularColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+2) );
         ++col;
 
         spinbutton1_adj = gtk_adjustment_new( 0.15, 0, 1, 0.01, 0.1, 0 );
@@ -8179,72 +8223,57 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
     add_pixmap_directory( "/home/mgh/DREAM/Dream/Dream/Images" );
 
 
-
-//    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20091026/20091026_002230_GOES_11_MagEphem.dat", O_RDONLY );
-//    fd = open( "test.dat", O_RDONLY );
-
-//    fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20080722/20080722_185730_GOES_11_MagEphem_T89_Kp5.dat", O_RDONLY );
-    //fd = open( "/home/mgh/DREAM/Dream/DreamDataCache/PsdData/New/20090420/20090420_000230_VIRTUAL_MagEphem_T89_Kp5.dat", O_RDONLY );
-
     int nPitchAngles;
-MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(*MagEphemInfo));
-ReadMagEphemInfoStruct( "test.dat", &nPitchAngles, MagEphemInfo );
-printf("nPitchAngles = %d\n", nPitchAngles);
-//exit(0);
-//    read( fd, &nPitchAngles, sizeof( nPitchAngles ) );
-//    read( fd, MagEphemInfo, sizeof( *MagEphemInfo ) );
-//KLUDGE
-//printf("nAlpha = %d\n", MagEphemInfo->nAlpha);
-//int iiii;
-//for (iiii=0; iiii<MagEphemInfo->nAlpha; iiii++){
-//printf("nShellPoints[%d] = %d\n", iiii, MagEphemInfo->nShellPoints[iiii]);
-//}
-//MagEphemInfo->nAlpha = 9;
-//exit(0);
-//    close( fd );
-
+    MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(*MagEphemInfo));
+    ReadMagEphemInfoStruct( "test.dat", &nPitchAngles, MagEphemInfo );
+    printf("nPitchAngles = %d\n", nPitchAngles);
 
     for (i=0; i<nPitchAngles+1; i++){
-        //ShowPitchAngle[i] = ShowAllPitchAngles;
-        //ShowPitchAngle2[i] = ShowAllPitchAngles2;
         ShowPitchAngle[i] = 0;
         ShowPitchAngle2[i] = 0;
     }
-//    ShowPitchAngle[4] = 0;
-//    ShowPitchAngle2[4] = 1;
 
 
     /*
      * Set up materials
      */
-    ARRAY_1D( gInfo->FieldLineMaterial, nPitchAngles+1,  MaterialProp );
-    ARRAY_1D( gInfo->DriftShellMaterial, nPitchAngles+1,  MaterialProp );
-    ARRAY_2D( gInfo->FieldLineColorButton,  nPitchAngles+1, 3, GtkWidget * );
-    ARRAY_2D( gInfo->DriftShellColorButton, nPitchAngles+1, 3, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineShininessButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellShininessButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineMaterialButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineMaterialButtonHandler, nPitchAngles+1, gulong );
-    ARRAY_1D( gInfo->DriftShellMaterialButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellMaterialButtonHandler, nPitchAngles+1, gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterial,                     nPitchAngles+1,    MaterialProp );
+    LGM_ARRAY_1D( gInfo->FieldLineShininessButton,              nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterialButton,               nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterialButtonHandler,        nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButton,         nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler,  nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineDiffuseColorButton,           nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineAmbientColorButton,           nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineSpecularColorButton,          nPitchAngles+1,    GtkWidget * );
 
-    ARRAY_1D( gInfo->FieldLineShowPitchAngleButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler, nPitchAngles+1, gulong );
-    ARRAY_1D( gInfo->DriftShellShowPitchAngleButton, nPitchAngles+1, GtkWidget * );
-    ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, nPitchAngles+1, gulong );
-    int ii;
+    LGM_ARRAY_1D( gInfo->DriftShellMaterial,                    nPitchAngles+1,    MaterialProp );
+    LGM_ARRAY_1D( gInfo->DriftShellShininessButton,             nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellMaterialButton,              nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellMaterialButtonHandler,       nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButton,        nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->DriftShellDiffuseColorButton,          nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellAmbientColorButton,          nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellSpecularColorButton,         nPitchAngles+1,    GtkWidget * );
+
+    int ii, j;
     for (i=0; i<nPitchAngles; i++){
-        ii = (i<=18) ? i : i-18;
+
+        ii = i%19;
+
         gInfo->FieldLineMaterial[i] = mat_silver;
         gInfo->FieldLineMaterial[i].diffuse[0] = colors[ii][0];
         gInfo->FieldLineMaterial[i].diffuse[1] = colors[ii][1];
         gInfo->FieldLineMaterial[i].diffuse[2] = colors[ii][2];
         gInfo->FieldLineMaterial[i].diffuse[3] = 1.0;
+
         gInfo->DriftShellMaterial[i] = mat_ruby;
         gInfo->DriftShellMaterial[i].diffuse[0] = colors[ii][0];
         gInfo->DriftShellMaterial[i].diffuse[1] = colors[ii][1];
         gInfo->DriftShellMaterial[i].diffuse[2] = colors[ii][2];
         gInfo->DriftShellMaterial[i].diffuse[3] = 0.6;
+
     }
 
     /*

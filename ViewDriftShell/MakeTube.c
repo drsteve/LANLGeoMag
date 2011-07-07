@@ -2,6 +2,7 @@
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <Lgm/Lgm_DynamicMemory.h>
 
 
 
@@ -11,17 +12,16 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 
 	double CurvePoint[MaxCurvePoints][3], TangentVector[MaxCurvePoints][3]; 
 	double a, b, c, L, Linv, min, sgn, AngInc, Angle;
-//    double TubeRadius;
 	double x[MaxCurvePoints][3], y[MaxCurvePoints][3], z[MaxCurvePoints][3], tmp[3];
 	double CirclePoints[100][3], CirclePoints_p[100][3];
-	double Mesh[MaxCurvePoints][100][3], Normals[MaxCurvePoints][100][3];
+	double ***Mesh, ***Normals;
 	double v1[3], v2[3], v3[3], n1[3], n2[3], n3[3];
 	
 	int     i, j, k, n;
-    //int     NumCirclePoints;
-//	FILE *fp;
 
 
+    LGM_ARRAY_3D( Mesh,    MaxCurvePoints, 100, 3, double );
+    LGM_ARRAY_3D( Normals, MaxCurvePoints, 100, 3, double );
 
 	/*
 	 *  Read in the points
@@ -33,13 +33,13 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 	}
 
 
-//	TubeRadius = 0.075/2.0;
-//	NumCirclePoints = 24;
+    //TubeRadius = 0.075/2.0;
+    //NumCirclePoints = 24;
 
 
-//	printf("NumCurvePoints = %d\n", NumCurvePoints);
-//	printf("NumCirclePoints = %d\n", NumCirclePoints);
-//	printf("TubeRadius = %f\n", TubeRadius);
+    //printf("NumCurvePoints = %d\n", NumCurvePoints);
+    //printf("NumCirclePoints = %d\n", NumCirclePoints);
+    //printf("TubeRadius = %f\n", TubeRadius);
 
 
 
@@ -303,18 +303,8 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 //	fclose(fp);
 
 
-	
 
-
-
-
-
-
-
-
-
-
-
-
+    LGM_ARRAY_3D_FREE( Mesh );
+    LGM_ARRAY_3D_FREE( Normals );
 
 }

@@ -28,7 +28,7 @@ typedef struct Lgm_QinDenton {
     double      *G1, *G2, *G3;
     int         *ByIMF_status, *BzIMF_status, *V_SW_status, *Den_P_status, *Pdyn_status;
     int         *G1_status, *G2_status, *G3_status;
-    double      *Kp, *akp3, *Dst;
+    double      *fKp, *akp3, *Dst;
     double      *Bz1, *Bz2, *Bz3, *Bz4, *Bz5, *Bz6;
     double      *W1, *W2, *W3, *W4, *W5, *W6;
     int         *W1_status, *W2_status, *W3_status, *W4_status, *W5_status, *W6_status;
@@ -47,7 +47,7 @@ typedef struct Lgm_QinDentonOne {
     double      G1, G2, G3;
     int         ByIMF_status, BzIMF_status, V_SW_status, Den_P_status, Pdyn_status;
     int         G1_status, G2_status, *G3_status;
-    double      Kp, akp3, Dst;
+    double      fKp, akp3, Dst;
     double      Bz1, Bz2, Bz3, Bz4, Bz5, Bz6;
     double      W1, W2, W3, W4, W5, W6;
     int         W1_status, W2_status, W3_status, W4_status, W5_status, W6_status;
