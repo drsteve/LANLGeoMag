@@ -154,6 +154,12 @@ parser.add_option("-i", "--InputFile",   dest="InputFile",
                              "INFILE should have 4 columns: ISO DateTime String, and GEI_J2000 cartesian components in units of Re.",    
                         metavar="INFILE")
 
+parser.add_option("-g", "--InputGeoFile",   dest="InputGeoFile", 
+                        help="If specified, the times and positions to compute the magnetic ephemeris for will be read from INFILE. "\
+                             "INFILE should have 4 columns: ISO DateTime String, and GEO Lat (Deg.), Lon (Deg.), Radius (Re).",    
+                        metavar="INFILE")
+
+
 parser.add_option("-o", "--OutputFile",   dest="OutputFile", 
                         help="Filename to dump output to. Stdout is assumed if "\
                              "no file given.",    
@@ -275,6 +281,16 @@ if options.InputFile != None:
 else:
     ReadFromFile = False
 
+
+if options.InputGeoFile != None:
+    ReadFromGeoFile = True
+    InputFile = options.InputGeoFile
+else:
+    ReadFromGeoFile = False
+
+
+
+
 if options.OutputFile == None:
     print 'Must provide an output file via -o option\n'
     parser.print_help()
@@ -291,6 +307,14 @@ else:
 print FootpointHeight
 
 
+# Quality setting
+if options.Quality != None:
+    Quality = int(options.Quality)
+    if (Quality < 0): Quality = 0
+    if (Quality > 8): Quality = 8
+else:
+    Quality = 3
+
 
 if options.AppendMode:
     Append = True
@@ -303,17 +327,17 @@ if options.IntFieldModel != None:
 if options.ExtFieldModel != None:
     ExtFieldModel = options.ExtFieldModel
 
+PathName = os.path.dirname(sys.argv[0])
+print PathName + '/puke'
 
 
-if ReadFromFile == True:
+if (ReadFromFile == True) or (ReadFromGeoFile == True):
         # 
         # Find correct Kp  and Dst
         # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
         # We are letting MagEphemFromFile do the entire file which means that there will be a problem
         # with Kp/Dst stuff. Maybe we still want to do one line at a time.
         #
-        Kp  = 4.3
-        Dst = -20 # nT
 
 
         # 
@@ -325,11 +349,10 @@ if ReadFromFile == True:
             f.write('OutputFile:'+OutputFile+'\n')    # Output file
             f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
             f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
-            f.write('Kp:'+str(Kp)+'\n') # The external field model to use
-            f.write('Dst:'+str(Dst)+'\n') # The external field model to use
             f.write('PitchAngles:'+PA_Str+'\n')
             f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
             f.write('Colorize:'+str(Colorize)+'\n')
+            f.write('Quality:'+str(Quality)+'\n')
             f.close()
 
             #exit()
@@ -337,11 +360,18 @@ if ReadFromFile == True:
         # 
         # Add start and end times to input.txt
         #
-        if Append:
-            os.system('./MagEphemFromFile -a')
+        if (ReadFromFile == True):
+            if Append:
+                os.system(PathName + '/MagEphemFromFile -a')
+            else:
+                os.system(PathName + '/MagEphemFromFile')
+                Append = True
         else:
-            os.system('./MagEphemFromFile')
-            Append = True
+            if Append:
+                os.system(PathName + '/MagEphemFromLatLonRad -a')
+            else:
+                os.system(PathName + '/MagEphemFromLatLonRad')
+                Append = True
 
 else:
 
@@ -354,12 +384,6 @@ else:
         parser.print_help()
         exit()
 
-    if options.Quality != None:
-        Quality = int(options.Quality)
-        if (Quality < 0): Quality = 0
-        if (Quality > 8): Quality = 8
-    else:
-        Quality = 3
 
 
     # Start Date/Time
@@ -412,16 +436,9 @@ else:
         c     = b-1
         fname1 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, b )
         fname2 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, c )
-        command = str.format('./FindTLEforGivenTime.py -n {0} -d {1} -o input.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
+        command = str.format(PathName + '/FindTLEforGivenTime.py -n {0} -d {1} -o input.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
         print command
         os.system(command)
-
-        # 
-        # Find correct Kp  and Dst
-        # Kp as a floating point number is defined like: 4-, 5o, 5+ corresponds to (4.7, 5.0, 5.3)
-        #
-        Kp  = 4.3
-        Dst = -20 # nT
 
 
         # 
@@ -434,8 +451,6 @@ else:
             f.write('Cadence in seconds:'+str(delta)+'\n')          # Cadence in seconds
             f.write('Internal Field Model:'+IntFieldModel+'\n') # The internal field model to use
             f.write('External Field Model:'+ExtFieldModel+'\n') # The external field model to use
-            f.write('Kp:'+str(Kp)+'\n') # The external field model to use
-            f.write('Dst:'+str(Dst)+'\n') # The external field model to use
             f.write('PitchAngles:'+PA_Str+'\n')
             f.write('Footpoint Height:'+str(FootpointHeight)+'\n')
             f.write('Colorize:'+str(Colorize)+'\n')
@@ -448,10 +463,10 @@ else:
         # Add start and end times to input.txt
         #
         if Append:
-            os.system('./MagEphemFromTLE -a')
+            os.system(PathName + '/MagEphemFromTLE -a')
             
         else:
-            os.system('./MagEphemFromTLE')
+            os.system(PathName + '/MagEphemFromTLE')
             Append = True
 
         end = time.time()

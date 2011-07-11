@@ -1,5 +1,7 @@
-2011-04-25  Mark Galassi  <markgalassi@lanl.gov>
+2011-07-08  Mike Henderson <mghenderson@lanl.gov>
+    * configure.ac: added LGM_INDEX_DATA_DIR to locate where to find index data (e.g. Kp, Dst, AE). 
 
+2011-04-25  Mark Galassi  <markgalassi@lanl.gov>
 	* configure.ac, lanlgeomag.spec.in: started maintaining a .spec.in
 	file.
 

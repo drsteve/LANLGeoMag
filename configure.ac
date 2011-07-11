@@ -15,6 +15,7 @@ AC_LANG([C])
 #AH_VERBATIM([PDDH], [#define LGM_EOP_DATA_DIR "@datadir@/LanlGeoMag/EopData"])
 #AC_DEFINE([PDD], ["PDD @prefix@/data"], ["dude"])
 AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory where Eop data can be found])
+AC_DEFINE([LGM_INDEX_DATA_DIR],[(DATADIR "/LanlGeoMag/Data")],[Define directory where Geophysical Index Data (e.g. Kp, AE, Dst, etc. data can be found])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL

@@ -28,14 +28,14 @@ int main( int argc, char *argv[] ){
     Lgm_Eop          *e = Lgm_init_eop( 0 );                                                                                            
     Lgm_EopOne       eop;                      
     int              i; 
-    char             *InputFile   = "input2.txt";
+    char             *InputFile   = "input.txt";
     char             IsoTimeString[1024];
     char             InputFilename[1024];
     char             OutputFilename[1024];
     char             IntModel[20], ExtModel[20], opt, ColorizeStr[20], Line[5000];
     int              AppendMode, UseEop, Colorize;
     FILE             *fp, *fp_in, *fp_MagEphem;
-    double           Alpha[1000], Kp, Dst, FootpointHeight, GeoLat, GeoLon, GeoRad;
+    double           Alpha[1000], FootpointHeight, GeoLat, GeoLon, GeoRad;
     int              nAlpha, Quality;
     Lgm_MagEphemInfo *MagEphemInfo;
     Lgm_QinDentonOne p;
@@ -113,14 +113,6 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
     }
 
-    
-    
-
-    
-
-//    MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0.0 ) ? (int)(Kp+0.5) : KP_DEFAULT;
-//    if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
-//    printf("MagEphemInfo->LstarInfo->mInfo->Kp = %d\n", MagEphemInfo->LstarInfo->mInfo->Kp);
 
 
     /*
@@ -175,7 +167,7 @@ int main( int argc, char *argv[] ){
 
 
     /*
-     *  Loop over the times/positions given. Here we assume the file contains, Time and GEI_J2000 x, y, z
+     *  Loop over the times/positions given. Here we assume the file contains, Time and GEO Lat (Deg.), Lon (Deg.), Rad (Re)
      */
     while ( fgets( Line, 4096, fp_in ) != NULL ) {
 

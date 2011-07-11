@@ -1,5 +1,5 @@
-#ifdef HAVE_CONFIG_H 
-#include <config.h> 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
 #include <stdio.h>
@@ -7,11 +7,19 @@
 #include <string.h>
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
-#include "Lgm/Lgm_DynamicMemory.h"                                                                                                                                                    
+#include "Lgm/Lgm_DynamicMemory.h"
 #include "Lgm/Lgm_QinDenton.h"
 
 
 #define NMAX    (3*1440)
+
+
+#ifndef LGM_INDEX_DATA_DIR
+#warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"
+#define LGM_INDEX_DATA_DIR    /usr/local/share/LanlGeoMag/Data
+#endif
+
+
 
 Lgm_QinDenton *Lgm_init_QinDenton( int Verbose ) {
 
@@ -77,7 +85,7 @@ Lgm_QinDenton *Lgm_init_QinDenton( int Verbose ) {
     LGM_ARRAY_1D( q->W4_status,     NMAX, int );
     LGM_ARRAY_1D( q->W5_status,     NMAX, int );
     LGM_ARRAY_1D( q->W6_status,     NMAX, int );
-    
+
 
     return q;
 
@@ -142,13 +150,13 @@ void  Lgm_destroy_QinDenton( Lgm_QinDenton *q ) {
     LGM_ARRAY_1D_FREE( q->W4_status );
     LGM_ARRAY_1D_FREE( q->W5_status );
     LGM_ARRAY_1D_FREE( q->W6_status );
-    
+
 
     // then free structure itself
     free( q );
 
     return;
-    
+
 }
 
 
@@ -171,7 +179,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
     Next_MJD = MJD+1.0;
     Lgm_mjd_to_ymdh( Next_MJD, &Next_Date, &Next_Year, &Next_Month, &Next_Day, &Next_UT );
-    
+
 
 
 
@@ -182,7 +190,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 
     // Read in Previous Date
-    sprintf( Filename, "/home/mgh/QinDenton/%4d/QinDenton_%8ld_1min.txt", Prev_Year, Prev_Date );
+    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Prev_Year, Prev_Date );
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
         while( fgets( Line, 2048, fp ) != NULL ) {
             if ( Line[0] != '#' ) {
@@ -191,7 +199,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
+                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
                             &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
@@ -208,7 +216,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 
     // Read in Current Date
-    sprintf( Filename, "/home/mgh/QinDenton/%4d/QinDenton_%8ld_1min.txt", Year, Date );
+    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Year, Date );
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
         while( fgets( Line, 2048, fp ) != NULL ) {
             if ( Line[0] != '#' ) {
@@ -217,7 +225,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
+                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
                             &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
@@ -235,7 +243,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 
     // Read in Next Date
-    sprintf( Filename, "/home/mgh/QinDenton/%4d/QinDenton_%8ld_1min.txt", Next_Year, Next_Date );
+    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Next_Year, Next_Date );
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
         while( fgets( Line, 2048, fp ) != NULL ) {
             if ( Line[0] != '#' ) {
@@ -244,7 +252,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                             &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
                             &q->G1[n], &q->G2[n], &q->G3[n],
                             &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n], 
+                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
                             &q->fKp[n], &q->akp3[n], &q->Dst[n],
                             &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
                             &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
@@ -273,8 +281,8 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 }
 
 
-void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) { 
-     
+void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
+
     int                 t, nq, i, ny, nm, nd;
     double              *x, *y, MJD, UTC;
     gsl_interp_accel    *acc;
@@ -293,7 +301,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
     if (q->nPnts < 3) {
 
         printf("Not enough QinDenton values to interpolate\n");
-        
+
     } else {
 
         nq = q->nPnts;
@@ -303,7 +311,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         acc    = gsl_interp_accel_alloc( );
         spline = gsl_spline_alloc( gsl_interp_cspline, nq );
 
-        
+
 
         // interpolate ByIMF
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->ByIMF[i]; }
@@ -443,15 +451,15 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
 
 
-        
+
     Lgm_destroy_QinDenton( q );
-    
+
 
 
 
 }
 
-void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) { 
+void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
     m->Bx   = 0.0;
     m->By   = p->ByIMF;
     m->Bz   = p->BzIMF;
