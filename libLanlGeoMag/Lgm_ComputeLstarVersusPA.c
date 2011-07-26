@@ -124,8 +124,6 @@ printf("MagEphemInfo->LstarQuality = %d\n", MagEphemInfo->LstarQuality);
             #pragma omp for schedule(dynamic, 1)
             for ( i=0; i<MagEphemInfo->nAlpha; i++ ){  // LOOP OVER PITCH ANGLES
 
-                
-
                 /*
                  * make a local copy of LstarInfo structure -- needed for multi-threading
                  */

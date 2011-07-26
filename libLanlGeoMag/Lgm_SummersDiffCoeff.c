@@ -70,10 +70,17 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *
  *  \details
  *
- *      \param[in]      Alpha0      equatoria PA in radians.
- *      \param[in]      Ek_in       kinetic energy in MeV.
+ *      \param[in]      Alpha0      Equatoria PA in radians.
+ *      \param[in]      Ek          Kinetic energy in MeV.
  *      \param[in]      L           L-shell parameter (dimensionless).
+ *      \param[in]      dB          Wave power. Currently this is a fixed quanity.
  *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter /f$\Omega_\sigma/\omega_{pe}/f$.
+ *      \param[in]      w1          Lower limit of freq. band
+ *      \param[in]      w2          Lower limit of freq. band
+ *      \param[in]      wm          Midpoint of freq. band
+ *      \param[in]      dw          Width of freq. band
+ *      \param[in]      WaveMode    Mode of the wave. Can be LGM_R_MODE_WAVE or LGM_L_MODE_WAVE
+ *      \param[in]      Species     Particle species. Can be LGM_ELECTRONS, LGM_PROTONS, or ....?
  *      \param[out]     Daa_ba      Bounce-averaged value of Daa.
  *      \param[out]     Dap_ba      Bounce-averaged value of Dap.
  *      \param[out]     Dpp_ba      Bounce-averaged value of Dpp.
@@ -81,14 +88,14 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \return         void
  *
  *      \author         M. Henderson
- *      \date           2010-2011
+ *      \date           2011
  *
  */
 int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
-    double          T0, T1, T, a, b, E, s, Lambda, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
-    double          epsabs, epsrel, result, abserr, resabs, resasc, work[2001], points[3];
-    int             npts=4, key=6, limit=500, lenw=4*limit, iwork[501], last, ier, neval;
+    double           T0, T1, T, a, b, E, s, Lambda, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
+    double           epsabs, epsrel, result, abserr, resabs, resasc, work[2001], points[3];
+    int              npts=4, key=6, limit=500, lenw=4*limit, iwork[501], last, ier, neval;
     Lgm_SummersInfo *si=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
 
 
@@ -184,7 +191,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
 
     /*
      *  Calculate T( SinAlpha0 ), related to bounce period.
-     *  Schultz and lanzeroti Eqns 1.28a-d)
+     *  Schultz and Lanzeroti Eqns 1.28a-d)
      */
     //T0 = 1.38017299815047317375;
     //T1 = 0.74048048969306104115;
@@ -208,10 +215,74 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
 
 /**
  *  \brief
- *      Integrand for computing bounce-averaged Summer's [2005] Daa diffusion coefficient.
+ *      Integrand for computing \f$ S_b \f$ in a pure centered dipole field.
  *
  *  \details
  *
+ *
+ *      This routine computes the integrand of the \f$ S_b \f$ integral in a
+ *      centered dipole field;
+ *
+ *          \f[ S_b = \displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}}
+ *          {\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1-
+ *          B/B_m\right]^{1/2}} \f]
+ *
+ *      Note that B/Bm depends on lattitude and on equatorial pitch angle and
+ *      is obtained as follows in the code;
+ *
+ *          \f[ B/B_m = { \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over
+ *          cos^6\lambda } \f]
+ *
+ *      \param[in]      Lat         Latitude in radians
+ *      \param[in]      qpInfo      Structure contaning additional information needed to compute the integrand.
+ *
+ *      \return         The value of the integrand
+ *
+ *      \author         M. Henderson
+ *      \date           2010-2011
+ */
+double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
+
+    double  CosLat, CosLat2, CosLat3, CosLat6, v, arg;
+    double  BoverBeq, BoverBm, SinAlpha2;
+    double  SinAlpha02, Ek_in, L, aStarEq;
+    double  f;
+    Lgm_SummersInfo *si;
+
+    /*
+     * Pull parameters for integrand from Lgm_SummersInfo structure.
+     */
+    si  = (Lgm_SummersInfo *)qpInfo;
+    SinAlpha02 = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
+
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    arg = 4.0 - 3.0*CosLat2;
+    v = (arg < 0.0 ) ? 0.0 : sqrt( arg );
+
+    BoverBeq  = v/CosLat6;              // B/Beq
+    BoverBm   = BoverBeq*SinAlpha02;    // B/Bm = B/Beq * sin^2(Alpha0)
+    //SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
+    //if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
+
+    /*
+     * We dont need to worry about the possibility that 1-B/Bm is 0 which gives
+     * f of infinity. This singularity is not a problem because it is
+     * integrable and will never get evaluated when using the proper quadpack
+     * integrator.
+     */
+    f = CosLat*v/sqrt(1.0-BoverBm);
+
+    return( f );
+
+}
+
+/**
+ *  \brief
+ *      Integrand for computing bounce-averaged Summer's [2005] Daa diffusion
+ *      coefficient in a pure centered dipole field.
+ *
+ *  \details
  *      The bounce average of a quantity \f$Q\f$ is;
  *
  *          \f[ <Q> = { 1\over S_b} \int_{s_{sm}}^{s_{nm}} {Q\;ds\over [1-{B/B_m}]^{1/2}} \f]
@@ -219,7 +290,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
  *      where,
  *          \f[ S_b = \int_{s_{sm}}^{s_{nm}} {ds\over [1-{B/B_m}]^{1/2}} \f]
  *
- *      and \f$s\f$ is the distance along the fieldl line and \f$s_{sm}\f$ and
+ *      and \f$s\f$ is the distance along the field line and \f$s_{sm}\f$ and
  *      \f$s_{nm}\f$ are the southern and northern mirror points respectively.
  *
  *      The integrals can be recast as integrals over latitude using;
@@ -232,52 +303,33 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
  *
  *          \f[ <Q> = { 1\over S_b}\displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- {\displaystyle \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over\displaystyle cos^6\lambda }   \right]^{1/2}} \f]
  *
+ *      If we already have B/Bm, then its easier to compute this as;
  *
+ *          \f[ <Q> = { 1\over S_b}\displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- B/B_m\right]^{1/2}} \f]
  *
+ *      where,
  *
- *      \param[in]      Lat         LAtitude in radians
- *      \param[in]      qpInfo      Structure contaning additional information needed to compute the integrand.
+ *          \f[ S_b = \displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- B/B_m\right]^{1/2}} \f]
  *
- *      \return         The value of the integrand
+ *      This routine computes the integrand;
  *
- *      \author         M. Henderson
- *      \date           2010-2011
+ *         \f[  f(\lambda) = {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2}  \over \left[1- B/B_m\right]^{1/2}} \f]
+ *
+ *      where \f$ Q = D_{\alpha_\circ\alpha_\circ} \f$. In the code, \f$ D_{\alpha_\circ\alpha_\circ} \f$ is determined as follows;
+ *
+ *         \f[  D_{\alpha_\circ\alpha_\circ} = D_{\alpha\alpha}\left({\partial\alpha_\circ\over\partial\alpha}\right)^2  \f]
+ *
+ *      For a dipole, 
+ *
+ *         \f[  {\partial\alpha_\circ\over\partial\alpha} = \tan^2(\alpha_\circ)/\tan^2(\alpha) \f]
+ *
  */
-double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
-
-    double  CosLat, CosLat2, CosLat3, CosLat6, v;
-    double  BoverBeq, BoverBm, SinAlpha2;
-    double  SinAlpha02, Ek_in, L, aStarEq;
-    double  f;
-    Lgm_SummersInfo *si;
-
-    /*
-     * Pull parameters for integrand from Lgm_SummersInfo structure.
-     */
-    si  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha02 = si->SinAlpha02;    // pre-computed sin( Alpha0 )
-
-    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
-    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
-    v = sqrt(4.0 - 3.0*CosLat2);
-
-    BoverBeq  = v/CosLat6;          // B/Beq
-    BoverBm   = BoverBeq*SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)
-    SinAlpha2 = BoverBm;            // sin^2(Alpha) = B/Bm
-    if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
-
-    f = CosLat*v/sqrt(1.0-BoverBm);
-
-    return( f );
-
-}
-
 double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, xm, dx;
     double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, wm, dw;
     double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, aStarEq;
-    double  Daa, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
+    double  Daa, Da0a0, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
     Lgm_SummersInfo *si;
 
     /*
@@ -297,7 +349,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     Lambda      = si->Lambda;        // 
     s           = si->s;             // 
     Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
-    Sig         = si->Sig;           // Sig -- seetext above eqn (30).
+    Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
 
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
@@ -308,7 +360,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
     if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
     CosAlpha2 = 1.0-SinAlpha2;
-    if (CosAlpha2 < 0.0) { CosAlpha2 = 0.0; }
+    if (CosAlpha2 < 0.0) { CosAlpha2 = 0.0; } // Somewhat moot, because this case will lead to TanAlpha2 = infty
     TanAlpha2 = SinAlpha2/CosAlpha2;
 
     /*
@@ -328,11 +380,18 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      */
     Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, xm, dx, Lambda, s, aStar );
 
+
     /*
-     * Finally the integrand. The TanAlpha02/TanAlpha2 term (which is dAlphaeq/dAlpha) converts D_Alpha,Alpha to
-     * D_Alpha_eq,Alpha_eq.
+     * Compute Da0a0. The TanAlpha02/TanAlpha2 term (which is dAlphaeq/dAlpha)
+     * converts D_Alpha,Alpha to D_Alpha_eq,Alpha_eq.
      */
-    f = (Daa*TanAlpha02/TanAlpha2)   * CosLat*v/sqrt(1-BoverBm);
+    Da0a0 = Daa*TanAlpha02/TanAlpha2;
+
+
+    /*
+     * Finally the integrand. 
+     */
+    f = Da0a0 * CosLat*v/sqrt(1-BoverBm);
 
     return( f );
 
@@ -484,11 +543,19 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *
  *
  *
- *      \param[in]      Alpha0      equatoria PA in radians.
+ *      \param[in]      SinAlpha2   /f$\sin^2(\alpha)/f$, where /f$\alpha/f$ is the local particle pitch angle.
  *      \param[in]      E           Dimensionless energy Ek/E0 (kinetic energy over rest mass).
  *      \param[in]      dBoverB2    Ratio of wave amplitude, dB to local background field, B.
  *      \param[in]      BoverBeq    Ratio of local B to Beq.
- *      \param[in]      aStar  Local value of the aStar parameter.
+ *      \param[in]      Omega_e     Local gyro-frequency of electrons. 
+ *      \param[in]      Omega_Sig   Local gyro-frequency of particle species we are interested in.
+ *      \param[in]      Rho         This is /f$0.5 \sqrt(\pi) ( \erf((wm-w1)/dw) + \erf((wm-w1)/dw) )/f$. 
+ *      \param[in]      Sig         Blah.
+ *      \param[in]      xm          Blah.
+ *      \param[in]      dx          Blah.
+ *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
+ *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
+ *      \param[in]      aStar       Local value of the aStar parameter ( /f$ \alpha^* /f$ ) in the Summer's papers.
  *
  *      \return         Local value of Daa
  *
@@ -538,12 +605,13 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
     R  = dBoverB2;   // The ratio (dB/B)^2
 
 
+// This is another hard-wired input parameter. Fix.
 int sum_res = 0;
 
 
 
     /*
-     * Gather applicable roots together into and array
+     * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
     if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;

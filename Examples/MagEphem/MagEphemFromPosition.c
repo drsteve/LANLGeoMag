@@ -42,8 +42,11 @@ int main( int argc, char *argv[] ){
 
     Lgm_ElapsedTimeInit( &tInfo, 255, 95, 0 );
 
-    nAlpha   = 1;
-    Alpha[0] = 90.0;
+    nAlpha   = 36;
+    for (i=0; i<nAlpha; i++) {
+        Alpha[i] = 90.0 -  i*2.5;
+        printf("Alpha = %lf\n", Alpha[i]);
+    }
 
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -55,7 +58,7 @@ int main( int argc, char *argv[] ){
     // Settings for Lstar calcs
     MagEphemInfo->ComputeVgc = TRUE;
     MagEphemInfo->ComputeVgc = FALSE;
-    MagEphemInfo->LstarQuality = 8;
+    MagEphemInfo->LstarQuality = 3;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 20.0;
     MagEphemInfo->LstarInfo->VerbosityLevel = 4;
@@ -64,9 +67,9 @@ int main( int argc, char *argv[] ){
 
 
 //    MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
-//    MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04_opt;
+    MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04_opt;
 //MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_OP77;
-MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_cdip;
+//MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_cdip;
 //MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
     MagEphemInfo->LstarInfo->mInfo->P      = 4.1011111111111118;
     MagEphemInfo->LstarInfo->mInfo->Dst    = 7.7777777777777777;
@@ -80,39 +83,21 @@ MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->W[5]   = 1.0461333333333334;
 
     //vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
-    Date = 20010422;
+    Date = 19960106;
     //UTC = 1.0 + 40.0/60.0 + 59.145/3600.0;
-    UTC = 12.0;
+    UTC = 1.2444444444444445;
 
 
 
 
-    Dst = -50.0;
-    Kp = 0;
     Colorize = TRUE;
-    MagEphemInfo->LstarInfo->mInfo->Kp = Kp;
-    r = 3.1818653;
-    lat = 42.5627*RadPerDeg;
-    lon = -43.7385*RadPerDeg;
-    Ugeo.x = r*cos(lat)*cos(lon);
-    Ugeo.y = r*cos(lat)*sin(lon);
-    Ugeo.z = r*sin(lat);
-//    printf("Ugeo = %.15lf %.15lf %.15lf\n", Ugeo.x, Ugeo.y, Ugeo.z);
-    Lgm_Set_Coord_Transforms( Date, UTC, c );
-    Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, c );
-//Ugsm.x = -2.16025927;
-//Ugsm.y = 0.68699476;
-//Ugsm.z = -3.49447319;
-//Ugsm.z = -2.49447319;
-//Ugsm.x = -1.74077809;
-//Ugsm.y = -2.11283646;
-//Ugsm.z = -3.13328477;
-//Ugsm.z = -2.13328477;
-MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
-Lgm_Vector Usm;
-Usm.x = -5.0; Usm.y = 0.0; Usm.z = 0.0;
-Usm.x = -1.05; Usm.y = 0.0; Usm.z = 0.0;
-Lgm_Convert_Coords( &Usm, &Ugsm, SM_TO_GSM, c );
+//    MagEphemInfo->LstarInfo->mInfo->Kp = Kp;
+    r = 4.83415065;
+    lon = -40.26632902*RadPerDeg;
+    lat = 36.44696388*RadPerDeg;
+    Ugsm.x = r*cos(lat)*cos(lon);
+    Ugsm.y = r*cos(lat)*sin(lon);
+    Ugsm.z = r*sin(lat);
     printf("Ugsm = %.15lf %.15lf %.15lf\n", Ugsm.x, Ugsm.y, Ugsm.z);
 
 

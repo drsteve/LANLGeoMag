@@ -426,17 +426,18 @@ else:
     for t in range(s,e,delta):
         dt    = datetime.datetime.fromtimestamp(t)
         iso   = dt.isoformat()
+        print "************************************************ Date: " + iso
 
 
 
         # 
-        # Find correct TLE and dump to input.txt
+        # Find correct TLE and dump to input3.txt
         #
         b     = dt.year
         c     = b-1
         fname1 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, b )
         fname2 = str.format('/home/mgh/TLE_DATABASE/{0}000_{0}999/{1}/{2}.txt', a, SatNum, c )
-        command = str.format(PathName + '/FindTLEforGivenTime.py -n {0} -d {1} -o input.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
+        command = str.format(PathName + '/FindTLEforGivenTime.py -n {0} -d {1} -o input3.txt {2} {3}', SatelliteNumber, iso, fname1, fname2)
         print command
         os.system(command)
 
@@ -444,7 +445,7 @@ else:
         # 
         # Add other information to the "input.txt file
         #
-        with open("input.txt", "a") as f:
+        with open("input3.txt", "a") as f:
             f.write('OutputFile:'+OutputFile+'\n')    # Output file
             f.write('ISO Start Date/Time:'+iso+'\n')           # Start Date/Time
             f.write('ISO End   Date/Time:'+iso+'\n')           # End   Date/Time

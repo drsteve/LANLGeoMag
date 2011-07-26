@@ -33,8 +33,8 @@ int main( int argc, char *argv[] ){
     Lgm_EopOne      eop;                      
     int             i, nTLEs; 
     char            Line0[100], Line1[100], Line2[100], *ptr;
-    char            *InputFile   = "input2.txt";
-    char            *OutputFile  = "output2.txt";
+    char            *InputFile   = "input3.txt";
+    char            *OutputFile  = "output3.txt";
     char            OutputFilename[1024];
     char            IntModel[20], ExtModel[20], opt, ColorizeStr[20];
     int             AppendMode, UseEop, Colorize, Quality;
@@ -61,17 +61,17 @@ int main( int argc, char *argv[] ){
     int sY, sM, sD, sh, sm, ss;
     int eY, eM, eD, eh, em, es;
     if ( (fp = fopen( InputFile, "r" )) != NULL ) {
-        fgets( Line0, 99, fp );
-        fgets( Line1, 99, fp );
-        fgets( Line2, 99, fp );
+        fgets( Line0, 99, fp ); // Line 0 of "3-line TLE"
+        fgets( Line1, 99, fp ); // Line 1 of "3-line TLE"
+        fgets( Line2, 99, fp ); // Line 2 of "3-line TLE"
         fscanf( fp, "%*[^:]:%s", OutputFilename );
         fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &sY, &sM, &sD, &sh, &sm, &ss );
         fscanf( fp, "%*[^:]:%4d-%2d-%2dT%2d:%2d:%2d", &eY, &eM, &eD, &eh, &em, &es );
         fscanf( fp, "%*[^:]:%lf", &Delta );
         fscanf( fp, "%*[^:]:%s", IntModel );
         fscanf( fp, "%*[^:]:%s", ExtModel );
-        fscanf( fp, "%*[^:]:%lf", &Kp );
-        fscanf( fp, "%*[^:]:%lf", &Dst );
+//        fscanf( fp, "%*[^:]:%lf", &Kp );
+//        fscanf( fp, "%*[^:]:%lf", &Dst );
         fscanf( fp, "%*[^:]:%d", &nAlpha );
         for (i=0; i<nAlpha; i++ ) fscanf( fp, "%lf", &Alpha[i]);
         fscanf( fp, "%*[^:]:%lf", &FootpointHeight );
@@ -99,8 +99,8 @@ int main( int argc, char *argv[] ){
     printf("EndUTC          = %g\n", EndUT);
     printf("IntModel        = %s\n", IntModel);
     printf("ExtModel        = %s\n", ExtModel);
-    printf("Kp              = %g\n", Kp);
-    printf("Dst             = %g\n", Dst);
+//    printf("Kp              = %g\n", Kp);
+//    printf("Dst             = %g\n", Dst);
     printf("FootpointHeight = %g\n", FootpointHeight);
     printf("Colorize        = %d\n", Colorize);
     printf("Quality         = %d\n", Quality);

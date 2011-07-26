@@ -6,7 +6,7 @@ int main( ) {
     double  SinAlpha, SinAlpha2, E, dBoverB2, BoverBeq, Rho, xm, dx, Lambda, s, aStar, Alpha, Daa, Sig;
     double  Ek, L, Beq, dB, Omega_e, Omega_p, wm, dw, w1, w2;
 
-    Ek       = 0.1100;   // Kinetic energy in MeV.
+    Ek       = 0.0500;   // Kinetic energy in MeV.
     L        = 4.0;   // L-shell parameter (dimensionless);.
     dB       = 1.0;   // mean wave amplitude in nT.
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).

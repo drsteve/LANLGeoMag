@@ -194,11 +194,11 @@ int main( int argc, char *argv[] ){
             Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
         
 
-            // Converting GEI->GSM coords.
+            // Converting GEO->GSM coords.
             Ugeo.x = GeoRad*cos(GeoLon*RadPerDeg)*cos(GeoLat*RadPerDeg);
             Ugeo.y = GeoRad*sin(GeoLon*RadPerDeg)*cos(GeoLat*RadPerDeg);
             Ugeo.z = GeoRad*sin(GeoLat*RadPerDeg);
-            Lgm_Convert_Coords( &Ugeo, &Ugsm, GEI2000_TO_GSM, c );
+            Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, c );
 
 
             /*
