@@ -3,7 +3,7 @@
 
 /**
  *  \brief
- *      Compute the electron plasma frequency, /f$\omega_{pe}/f$.
+ *      Compute the electron plasma frequency, \f$\omega_{pe}\f$.
  *
  *  \details
  *
@@ -33,7 +33,7 @@ double  Lgm_ePlasmaFreq( double Density ) {
 
 /**
  *  \brief
- *      Compute the gyro-frequency of a particle with change q and mass m, /f$\Omega_\sigma/f$.
+ *      Compute the gyro-frequency of a particle with change q and mass m, \f$\Omega_\sigma\f$.
  *
  *  \details
  *
@@ -66,7 +66,55 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
 
 /**
  *  \brief
- *      Computes the bounce-averaged Summer's [2005] diffusion coefficients.
+ *      Computes the bounce-averaged Summer's [2005] diffusion coefficients
+ *      in a pure centered dipole field.
+ *
+ *  \details
+ *      The bounce average of a quantity \f$Q\f$ is;
+ *
+ *          \f[ <Q> = { 1\over S_b} \int_{s_{sm}}^{s_{nm}} {Q\;ds\over [1-{B/B_m}]^{1/2}} \f]
+ *
+ *      where,
+ *          \f[ S_b = \int_{s_{sm}}^{s_{nm}} {ds\over [1-{B/B_m}]^{1/2}} \f]
+ *
+ *      and \f$s\f$ is the distance along the field line and \f$s_{sm}\f$ and
+ *      \f$s_{nm}\f$ are the southern and northern mirror points respectively.
+ *
+ *      In a pure dipole field, the integrals can be recast as integrals over
+ *      latitude using;
+ *
+ *          \f[ ds = L\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda \f]
+ *          \f[ B/B_m = { \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over cos^6\lambda } \f]
+ *
+ *      Since \f$L\f$ is constant and is in the numerator and denominator it
+ *      cancels (so we can ignore it).  
+ *
+ *      The final result is;
+ *
+ *          \f[ <Q> = { 1\over S_b^\prime}\displaystyle
+ *          \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;
+ *          \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1-
+ *          {\displaystyle \sin^2\alpha_\circ
+ *          [4-3\cos^2\lambda]^{1/2}\over\displaystyle cos^6\lambda }
+ *          \right]^{1/2}} \f]
+ *
+ *      If we already have B/Bm, then its easier to compute this as;
+ *
+ *          \f[ <Q> = { 1\over S_b}\displaystyle
+ *          \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;
+ *          \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1-
+ *          B/B_m\right]^{1/2}} \f]
+ *
+ *      where,
+ *
+ *          \f[ S_b^\prime = \displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}}
+ *          {\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1-
+ *          B/B_m\right]^{1/2}} \f]
+ *
+ *      Note that \f$ S_b^\prime = S_b/L \f$, is a normalized \f$ S_b \f$ .
+ *
+ *      This routine computes \f$ <D_{\alpha_\circ\alpha_\circ}>,
+ *      <D_{\alpha_\circ p}>, <D_{pp}> \f$.
  *
  *  \details
  *
@@ -74,7 +122,7 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \param[in]      Ek          Kinetic energy in MeV.
  *      \param[in]      L           L-shell parameter (dimensionless).
  *      \param[in]      dB          Wave power. Currently this is a fixed quanity.
- *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter /f$\Omega_\sigma/\omega_{pe}/f$.
+ *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter \f$\Omega_\sigma/\omega_{pe}\f$.
  *      \param[in]      w1          Lower limit of freq. band
  *      \param[in]      w2          Lower limit of freq. band
  *      \param[in]      wm          Midpoint of freq. band
@@ -102,6 +150,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
     /*
      *  Set Rho. See Eqn(3) of Summers2007.
      *      Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )
+     *  Note: If wm-w1 = w2-wm, then this is the same as the Summers2005 paper.
      */
     Rho = ( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )/M_2_SQRTPI;
 
@@ -221,14 +270,14 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
  *
  *
  *      This routine computes the integrand of the \f$ S_b \f$ integral in a
- *      centered dipole field;
+ *      pure centered dipole field;
  *
  *          \f[ S_b = \displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}}
  *          {\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1-
  *          B/B_m\right]^{1/2}} \f]
  *
- *      Note that B/Bm depends on lattitude and on equatorial pitch angle and
- *      is obtained as follows in the code;
+ *      Note that \f$ B/B_m \f$ depends on lattitude and on equatorial pitch
+ *      angle and is obtained as follows in the code;
  *
  *          \f[ B/B_m = { \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over
  *          cos^6\lambda } \f]
@@ -279,49 +328,26 @@ double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
 
 /**
  *  \brief
- *      Integrand for computing bounce-averaged Summer's [2005] Daa diffusion
- *      coefficient in a pure centered dipole field.
- *
- *  \details
- *      The bounce average of a quantity \f$Q\f$ is;
- *
- *          \f[ <Q> = { 1\over S_b} \int_{s_{sm}}^{s_{nm}} {Q\;ds\over [1-{B/B_m}]^{1/2}} \f]
- *
- *      where,
- *          \f[ S_b = \int_{s_{sm}}^{s_{nm}} {ds\over [1-{B/B_m}]^{1/2}} \f]
- *
- *      and \f$s\f$ is the distance along the field line and \f$s_{sm}\f$ and
- *      \f$s_{nm}\f$ are the southern and northern mirror points respectively.
- *
- *      The integrals can be recast as integrals over latitude using;
- *
- *          \f[ ds = L\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda \f]
- *          \f[ B/B_m = { \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over cos^6\lambda } \f]
- *
- *      Since \f$L\f$ is constant and is in the numerator and denominator it cancels (so we can ignore it).
- *      The final result is;
- *
- *          \f[ <Q> = { 1\over S_b}\displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- {\displaystyle \sin^2\alpha_\circ [4-3\cos^2\lambda]^{1/2}\over\displaystyle cos^6\lambda }   \right]^{1/2}} \f]
- *
- *      If we already have B/Bm, then its easier to compute this as;
- *
- *          \f[ <Q> = { 1\over S_b}\displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- B/B_m\right]^{1/2}} \f]
- *
- *      where,
- *
- *          \f[ S_b = \displaystyle \int_{\lambda_{sm}}^{\lambda_{nm}} {\cos\lambda[4-3\cos^2\lambda]^{1/2} d\lambda  \over \left[1- B/B_m\right]^{1/2}} \f]
+ *      Integrand for computing \f$ <D_{\alpha\circ\alpha_\circ} > \f$ in a
+ *      pure centered dipole field.
  *
  *      This routine computes the integrand;
  *
- *         \f[  f(\lambda) = {Q\;  \cos\lambda[4-3\cos^2\lambda]^{1/2}  \over \left[1- B/B_m\right]^{1/2}} \f]
+ *         \f[  g_{\alpha_\circ\alpha_\circ}(\lambda) =
+ *         {D_{\alpha_\circ\alpha_\circ}\; \cos\lambda[4-3\cos^2\lambda]^{1/2}
+ *         \over \left[1- B/B_m\right]^{1/2}} \f]
  *
- *      where \f$ Q = D_{\alpha_\circ\alpha_\circ} \f$. In the code, \f$ D_{\alpha_\circ\alpha_\circ} \f$ is determined as follows;
+ *      In the code, \f$ D_{\alpha_\circ\alpha_\circ} \f$ is determined as
+ *      follows;
  *
- *         \f[  D_{\alpha_\circ\alpha_\circ} = D_{\alpha\alpha}\left({\partial\alpha_\circ\over\partial\alpha}\right)^2  \f]
+ *         \f[  D_{\alpha_\circ\alpha_\circ} =
+ *         D_{\alpha\alpha}\left({\partial\alpha_\circ\over\partial\alpha}\right)^2
+ *         \f]
  *
  *      For a dipole, 
  *
- *         \f[  {\partial\alpha_\circ\over\partial\alpha} = \tan^2(\alpha_\circ)/\tan^2(\alpha) \f]
+ *         \f[  {\partial\alpha_\circ\over\partial\alpha} =
+ *         \tan(\alpha_\circ)/\tan(\alpha) \f]
  *
  */
 double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
@@ -397,6 +423,30 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
 }
 
+/**
+ *  \brief
+ *      Integrand for computing \f$ <D_{\alpha\_circ p} > \f$ in a
+ *      pure centered dipole field.
+ *
+ *      This routine computes the integrand;
+ *
+ *         \f[  g_{\alpha_\circ p }(\lambda) =
+ *         {D_{\alpha_\circ p }\; \cos\lambda[4-3\cos^2\lambda]^{1/2}
+ *         \over \left[1- B/B_m\right]^{1/2}} \f]
+ *
+ *      In the code, \f$ D_{\alpha_\circ p } \f$ is determined as
+ *      follows;
+ *
+ *         \f[  D_{\alpha_\circ p } =
+ *         D_{\alpha p }{\partial\alpha_\circ\over\partial\alpha}
+ *         \f]
+ *
+ *      For a dipole, 
+ *
+ *         \f[  {\partial\alpha_\circ\over\partial\alpha} =
+ *         \tan(\alpha_\circ)/\tan(\alpha) \f]
+ *
+ */
 double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, xm, dx;
@@ -464,6 +514,19 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
 }
 
+/**
+ *  \brief
+ *      Integrand for computing \f$ <D_{pp}> \f$ in a
+ *      pure centered dipole field.
+ *
+ *      This routine computes the integrand;
+ *
+ *         \f[  g_{pp}(\lambda) =
+ *         {D_{pp}\; \cos\lambda[4-3\cos^2\lambda]^{1/2}
+ *         \over \left[1- B/B_m\right]^{1/2}} \f]
+ *
+ *
+ */
 double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, xm, dx;
@@ -543,19 +606,19 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *
  *
  *
- *      \param[in]      SinAlpha2   /f$\sin^2(\alpha)/f$, where /f$\alpha/f$ is the local particle pitch angle.
+ *      \param[in]      SinAlpha2   \f$\sin^2(\alpha)\f$, where \f$\alpha\f$ is the local particle pitch angle.
  *      \param[in]      E           Dimensionless energy Ek/E0 (kinetic energy over rest mass).
  *      \param[in]      dBoverB2    Ratio of wave amplitude, dB to local background field, B.
  *      \param[in]      BoverBeq    Ratio of local B to Beq.
  *      \param[in]      Omega_e     Local gyro-frequency of electrons. 
  *      \param[in]      Omega_Sig   Local gyro-frequency of particle species we are interested in.
- *      \param[in]      Rho         This is /f$0.5 \sqrt(\pi) ( \erf((wm-w1)/dw) + \erf((wm-w1)/dw) )/f$. 
+ *      \param[in]      Rho         This is \f$0.5 \sqrt(\pi) ( \mbox{erf}((wm-w1)/dw) + \mbox{erf}(wm-w1)/dw) )\f$. 
  *      \param[in]      Sig         Blah.
  *      \param[in]      xm          Blah.
  *      \param[in]      dx          Blah.
  *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
  *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
- *      \param[in]      aStar       Local value of the aStar parameter ( /f$ \alpha^* /f$ ) in the Summer's papers.
+ *      \param[in]      aStar       Local value of the aStar parameter ( \f$ \alpha^* \f$ ) in the Summer's papers.
  *
  *      \return         Local value of Daa
  *
