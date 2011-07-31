@@ -5,8 +5,8 @@ all: SummersDiffCoeff SummersDiffCoeffBounceAvg
 SummersDiffCoeff: SummersDiffCoeff.c
 	gcc SummersDiffCoeff.c `pkg-config --cflags --libs lgm` -o SummersDiffCoeff
 
-SummersDiffCoeffBounceAvg: SummersDiffCoeffBounceAvg.c
-	gcc SummersDiffCoeffBounceAvg.c `pkg-config --cflags --libs lgm` -o SummersDiffCoeffBounceAvg
+SummersDiffCoeffBounceAvg: SummersDiffCoeffBounceAvg.c DumpGif.c
+	gcc SummersDiffCoeffBounceAvg.c DumpGif.c `pkg-config --cflags --libs lgm` -o SummersDiffCoeffBounceAvg
 
 
 clean:

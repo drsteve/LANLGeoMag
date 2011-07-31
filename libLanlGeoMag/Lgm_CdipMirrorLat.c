@@ -75,7 +75,7 @@ double Lgm_CdipMirrorLat( double SinAlpha0 ){
     f.func = MirrorLatFunc;
     f.Val  = s4;
 
-    Lgm_zBrent( 0.0, 1.0, -4.0*s4, 1.0-s4, &f, 1e-7, &x, &g );
+    Lgm_zBrent( 0.0, 1.0, -4.0*s4, 1.0-s4, &f, 1e-10, &x, &g );
     return( sqrt(x) );
 
 }
