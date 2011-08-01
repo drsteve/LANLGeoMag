@@ -140,7 +140,7 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \date           2011
  *
  */
-int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
     double           T0, T1, T, a, b, E, s, Lambda, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
     double           epsabs, epsrel, result, abserr, resabs, resasc, work[2001], points[3];
@@ -214,7 +214,8 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, d
     si->TanAlpha02  = si->TanAlpha0*si->TanAlpha0;
     si->L           = L;
     si->aStarEq     = aStarEq;
-    si->dB          = dB;
+//    si->dB          = dB;
+    si->BwFunc      = BwFunc;
     si->w1          = w1;           // Lower freq cuttof.
     si->w2          = w2;           // Upper freq cuttof.
     si->wm          = wm;           // Frequency of max wave power.
@@ -386,7 +387,8 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
     L           = si->L;
     aStarEq     = si->aStarEq;
-    dB          = si->dB;
+//    dB          = si->dB;
+    dB          = si->BwFunc( Lat, si->BwFuncData );
     Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
     Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
     w1          = si->w1;            // lower cutoff frequency.
@@ -493,7 +495,8 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
     L           = si->L;
     aStarEq     = si->aStarEq;
-    dB          = si->dB;
+//    dB          = si->dB;
+    dB          = si->BwFunc( Lat, si->BwFuncData );
     Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
     Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
     w1          = si->w1;            // lower cutoff frequency.
@@ -587,7 +590,8 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
     L           = si->L;
     aStarEq     = si->aStarEq;
-    dB          = si->dB;
+//    dB          = si->dB;
+    dB          = si->BwFunc( Lat, si->BwFuncData );
     Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
     Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
     w1          = si->w1;            // lower cutoff frequency.

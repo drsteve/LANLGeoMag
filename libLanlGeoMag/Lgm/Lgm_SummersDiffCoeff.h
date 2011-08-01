@@ -75,7 +75,9 @@ typedef struct Lgm_SummersInfo {
     double  E;              //!< Normalized dimensionless energy, \f$ E_k/E_\sigma\circ \f$, where \f$ E_\sigma\circ \f$ is rest energy of species.
     double  L;              //!< Dipole L-shell value
     double  aStarEq;        //!< Summer's \f$ \alpha^* \f$ value which is \f$ \Omega_e/\omega^2_{pe} \f$.
-    double  dB;             //!< Value of wave amplitude [nT].
+//    double  dB;           //!< Value of wave amplitude [nT].
+    void   *BwFuncData;     //!< Pointer to data that may be needed by BwFunc()
+    double (*BwFunc)();     //!< Function to return Bw as a function of latitude.
     double  Omega_eEq;      //!< Equatorial gyrofrequency of electrons [Hz].
     double  Omega_SigEq;    //!< Equatorial gyrofrequency of species [Hz].
     double  w1;             //!< Lower frequency cutoff [Hz].
@@ -90,7 +92,7 @@ typedef struct Lgm_SummersInfo {
 
 } Lgm_SummersInfo;
 
-int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
+int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );
