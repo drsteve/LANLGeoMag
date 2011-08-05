@@ -85,6 +85,8 @@ double mypow_opt( double x, double e ) {
 
 */
 
+//return(powFastLookup( x, e ));
+//return(1.0);
     return( pow( x, e ) );
 
 }
@@ -367,7 +369,7 @@ void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int N
         RoRH2 = RoRH*RoRH;
         RoRH3 = RoRH*RoRH2;
 //could create a LUT for this pow.
-        SINPSAS = SPS/mypow_opt( 1.0 + RoRH3, 0.33333333 );
+        SINPSAS = SPS/cbrt( 1.0 + RoRH3 );
         SINPSAS2 = SINPSAS*SINPSAS;
         COSPSAS = sqrt(1.0 - SINPSAS2);
         ZSS = X*SINPSAS + Z*COSPSAS;
@@ -908,7 +910,7 @@ void    DEFORMED_opt( int IOPT, double PS, double X, double Y, double Z,
     RRH = R/RH; RRH2 = RRH*RRH;  RRH3 = RRH2*RRH;
 
 //could create a LUT for this pow.
-    F = mypow_opt( 1.0/(1.0+RRH3), 1.0/3.0 ); F2 = F*F; F4 = F2*F2;
+    F = cbrt( 1.0/(1.0+RRH3) ); F2 = F*F; F4 = F2*F2;
     DFDR = -RRH2*F4/RH;
     DFDRH = -RRH*DFDR;
 
@@ -1573,16 +1575,16 @@ void    BIRK_1N2_opt( int NUMB, int MODE, double PS, double X, double Y, double 
     BRACK = CB_DPHI_B_RHO0.DPHI+CB_DPHI_B_RHO0.B*RHO2/(RHO2+1.0)*(RHOSQ-1.0)/(RHO2+RHOSQ);
     R1RH  = (Rsc-1.0)/RH;
     R1RH2 = R1RH*R1RH; R1RH3 = R1RH2*R1RH;
-//could create a LUT for this pow.
-    PSIAS = BETA*PS/mypow_opt( 1.0+R1RH3, 1.0/3.0 );
+double R1RH3p1 = 1.0+R1RH3;
+double  cbrt_R1RH3p1 = cbrt( R1RH3p1 );
+    PSIAS = BETA*PS/cbrt_R1RH3p1;
 
     PHIS = PHI-BRACK*SPHIC - PSIAS;
     DPHISPHI = 1.0-BRACK*CPHIC;
     RHO2pRHOSQ = RHO2+RHOSQ; RHO2pRHOSQ2 = RHO2pRHOSQ*RHO2pRHOSQ;
-//could create a LUT for this pow.
-    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC +BETA*PS*R1RH2*RHO/(RH*Rsc*mypow_opt( 1.0+R1RH3, 4.0/3.0 ));
-//could create a LUT for this pow.
-    DPHISDY= BETA*PS*R1RH2*Ysc/(RH*Rsc*mypow_opt( 1.0+R1RH3, 4.0/3.0 ));
+double  fff = 1.0/(RH*Rsc*R1RH3p1*cbrt_R1RH3p1);
+    DPHISRHO = -2.0*CB_DPHI_B_RHO0.B*RHO2*RHO/RHO2pRHOSQ2*SPHIC + BETA*PS*R1RH2*RHO*fff;
+    DPHISDY= BETA*PS*R1RH2*Ysc*fff;
 
     //SPHICS = sin(PHIS); CPHICS = cos(PHIS);
     mysincos( PHIS, &SPHICS, &CPHICS );
@@ -2431,17 +2433,14 @@ double    AP_opt( double R, double SINT, double COST) {
     ALSQH = 0.5*ALPHA_S2;        //  ALPHA_S,GAMMA_S -> RS,SINTS,COSTS
     ALSQH2 = ALSQH*ALSQH;
     F = 64.0/27.0*GAMMAS2 + ALSQH2;
-//could create a LUT for this pow.
-    Q = mypow_opt( sqrt(F)+ALSQH, 1.0/3.0 );
-//could create a LUT for this pow.
-    C = Q-4.0*mypow_opt( GAMMAS2, 1.0/3.0 )/(3.0*Q);
+    Q = cbrt( sqrt(F)+ALSQH );
+    C = Q-4.0*cbrt( GAMMAS2 )/(3.0*Q);
 
 
 
     if (C < 0.0) C = 0.0;
 
-//could create a LUT for this pow.
-    G  = sqrt(C*C+4.0*mypow_opt( GAMMAS2, 1.0/3.0 ));
+    G  = sqrt(C*C+4.0*cbrt( GAMMAS2 ));
     RS = 4.0/((sqrt(2.0*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.0-COSTS*COSTS);
@@ -2923,15 +2922,15 @@ double    BT_PRC_Q_opt( double R, double SINT, double COST) {
      *  Calculates the Theta component of the "quadrupole" part of the model partial ring current.
      */
 
-    double A1=12.74640393, A2=-7.516393516;
-    double A3=-5.476233865, A4=3.212704645, A5=-59.10926169, A6=46.62198189, A7=-.01644280062;        // ALL LINEAR PARAMETERS HERE
-    double A8=.1234229112, A9=-.08579198697, A10=.01321366966, A11=.8970494003, A12=9.136186247;    // WERE MULTIPLIED BY 0.1,
-    double A13=-38.19301215, A14=21.73775846, A15=-410.0783424, A16=-69.90832690, A17=-848.8543440;    // SO THAT THEY CORRESPOND TO P_0=1 nPa,
-    double XK1=1.243288286, AL1=.2071721360, DAL1=.05030555417, B1=7.471332374, BE1=3.180533613;    // RATHER THAN THE ORIGINAL VALUE OF 10 nPa
-    double XK2=1.376743507, AL2=.1568504222, DAL2=.02092910682, BE2=1.985148197, XK3=.3157139940;    // ASSUMED IN THE BIOT-SAVART INTEGRAL
-    double XK4=1.056309517, AL3=.1701395257, DAL3=.1019870070, B3=6.293740981, BE3=5.671824276;
-    double AL4=.1280772299, DAL4=.02189060799, DG1=.01040696080, AL5=.1648265607, DAL5=.04701592613;
-    double DG2=.01526400086, C1=12.88384229, C2=3.361775101, C3=23.44173897;
+    double A1=12.74640393,   A2=-7.516393516;
+    double A3=-5.476233865,  A4=3.212704645,    A5=-59.10926169, A6=46.62198189, A7=-.01644280062;        // ALL LINEAR PARAMETERS HERE
+    double A8=.1234229112,   A9=-.08579198697,  A10=.01321366966, A11=.8970494003, A12=9.136186247;    // WERE MULTIPLIED BY 0.1,
+    double A13=-38.19301215, A14=21.73775846,   A15=-410.0783424, A16=-69.90832690, A17=-848.8543440;    // SO THAT THEY CORRESPOND TO P_0=1 nPa,
+    double XK1=1.243288286,  AL1=.2071721360,   DAL1=.05030555417, B1=7.471332374, BE1=3.180533613;    // RATHER THAN THE ORIGINAL VALUE OF 10 nPa
+    double XK2=1.376743507,  AL2=.1568504222,   DAL2=.02092910682, BE2=1.985148197, XK3=.3157139940;    // ASSUMED IN THE BIOT-SAVART INTEGRAL
+    double XK4=1.056309517,  AL3=.1701395257,   DAL3=.1019870070, B3=6.293740981, BE3=5.671824276;
+    double AL4=.1280772299,  DAL4=.02189060799, DG1=.01040696080, AL5=.1648265607, DAL5=.04701592613;
+    double DG2=.01526400086, C1=12.88384229,    C2=3.361775101, C3=23.44173897;
 
     double ooR, ooR2, SINT2, COST2, SC, ALPHA, GAMMA, F, FA, FS, D1, D2;
     double D3, D4, D5, D6, ALPHAmAL4oDAL42, ALPHAmAL4oDAL4, FCC, ooFCC, D7;

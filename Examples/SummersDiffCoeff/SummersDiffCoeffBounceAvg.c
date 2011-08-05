@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <Lgm_SummersDiffCoeff.h>
 #include <Lgm_DynamicMemory.h>
+#include <Lgm_FastPowPoly.h>
+
 
 
 void DumpGif( char *FilenameBase, int W, int H, double **Image );
@@ -12,23 +14,31 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image );
  */
 typedef struct MyBwFuncInfo {
 
+    Lgm_FastPow *fp;
     double  whatever;
 
 } MyBwFuncInfo;
 
 double MyBwFunc( double Lat, void *Data ) {
 
-    double          Bw;
+    double          a[4], b[4], c[4];
+    double          Bw, Bw2, y;
     MyBwFuncInfo    *MyInfo;
 
     // typecast generic data structure type to one we expect
     MyInfo = (MyBwFuncInfo *)Data;
+    y = 0.75 + 0.04*Lat*DegPerRad;
 
+//    Bw = pow( 10.0, y );
+//    Bw = (double)Lgm_FastPowPoly( 10.0, y );
+    a[0] = 10.0; a[1] = 10.0; a[2] = 10.0; a[3] = 10.0;
+    b[0] = y; b[1] = y+0.1; b[2] = y+0.2; b[3] = y+0.3;
+    Lgm_FastPowPoly_v( a, b, c );
+    
+    Bw = c[0];
+//    Bw = (double)powFastLookup( y, MyInfo->fp );
 
-    Bw = pow( 10.0, 0.75 + 0.04*Lat*DegPerRad );
-
-    return( Bw );
-
+    return( Bw/1000.0 );
 }
 
 
@@ -43,7 +53,9 @@ int main( ) {
     double          **ImageDaa, **ImageDap_neg, **ImageDap_pos, **ImageDpp;
     MyBwFuncInfo    *MyInfo;
 
+
     MyInfo = (MyBwFuncInfo *)calloc( 1, sizeof(*MyInfo));
+    MyInfo->fp = Lgm_InitFastPow( );
 
 
     Ek    = 1.000;  // Kinetic energy in MeV.
@@ -70,24 +82,26 @@ int main( ) {
 w1 = 0.1*Omega_e;
 w2 = 0.3*Omega_e;
     MaxWaveLat = 35.0;      // Degrees
-    
 
-    int nAlpha  = 100; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+
+    int nAlpha  = 1000; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 1000; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDpp,     nEnergy, nAlpha, double );
 
-    {
-        #pragma omp parallel private(logEk, Ek, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)                                                                                                                                          
-        #pragma omp for schedule(dynamic, 1)
+    { /***** Start Parallel Execution ****/
+        #pragma omp parallel private(logEk, Ek, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)
+        #pragma omp for schedule(dynamic, 8)
         for (i=0; i<nEnergy; i++ ){
             logEk = logEk0 + i*dlogEk;
             Ek = pow( 10.0, logEk );
             for (j=0; j<nAlpha; j++ ){
                 Alpha = Alpha0 + j*dAlpha;
-                Lgm_SummersDxxBounceAvg( Alpha, Ek, L, (void *)MyInfo, MyBwFunc, aStar, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
+
+                Lgm_SummersDxxBounceAvg( Alpha, Ek, L, (void *)MyInfo, MyBwFunc, aStar, w1, w2, wm,
+                                         dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
                 ImageDaa[i][j]     = Daa_ba;
                 if ( Dap_ba < 0.0 ) {
                     ImageDap_neg[i][j] = fabs(Dap_ba);
@@ -97,7 +111,7 @@ w2 = 0.3*Omega_e;
                 ImageDpp[i][j]     = Dpp_ba;
             }
         }
-    }
+    } /***** End Parallel Execution ****/
 
 
     DumpGif( "Daa_E_versus_Alpha", nAlpha, nEnergy, ImageDaa );
@@ -110,6 +124,8 @@ w2 = 0.3*Omega_e;
     LGM_ARRAY_2D_FREE( ImageDap_pos );
     LGM_ARRAY_2D_FREE( ImageDpp );
 
+
+    Lgm_FreeFastPow( MyInfo->fp );
     free( MyInfo );
 
     return(0);

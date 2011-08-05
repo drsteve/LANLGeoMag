@@ -100,11 +100,11 @@ int  Lgm_CubicRoots( double b, double c, double d, double *z1, double complex *z
     if (D2 == 0){
         // All 3 roots are real and at least two are equal.
         if ( R > 0.0) {
-            f = pow( R, 1.0/3.0 );
+            f = cbrt( R );
             *z1 = 2.0*f - b/3.0;
             *z2 = *z3 = -f - b/3.0;
         } else {
-            f = -pow( -R, 1.0/3.0 );
+            f = -cbrt( -R );
             *z1 = 2.0*f - b/3.0;
             *z2 = *z3 = -f - b/3.0;
         }
@@ -112,8 +112,8 @@ int  Lgm_CubicRoots( double b, double c, double d, double *z1, double complex *z
     } else if ( D2 > 0 ) {
         // only one real root exists. The other two are complex conjugates.
         D = sqrt(D2); RpD = R+D; RmD = R-D;
-        S = (RpD > 0.0) ? pow( RpD, 1.0/3.0 ) : -pow( -RpD, 1.0/3.0 );
-        T = (RmD > 0.0) ? pow( RmD, 1.0/3.0 ) : -pow( -RmD, 1.0/3.0);
+        S = (RpD > 0.0) ? cbrt( RpD ) : -cbrt( -RpD );
+        T = (RmD > 0.0) ? cbrt( RmD ) : -cbrt( -RmD);
         f = S+T;
         g = sqrt(3.0)/2.0*(S-T);
         h = b/3.0;
@@ -179,15 +179,15 @@ double  Lgm_CubicRealRoot( double b, double c, double d ){
     if (D2 == 0){
         // All 3 roots are real and at least two are equal.
         if ( R > 0.0) {
-            x1 = 2.0*pow( R, 1.0/3.0 ) - b/3.0;
+            x1 = 2.0*cbrt( R ) - b/3.0;
         } else {
-            x1 = -2.0*pow( -R, 1.0/3.0 ) - b/3.0;
+            x1 = -2.0*cbrt( -R ) - b/3.0;
         }
     } else if ( D2 > 0 ) {
         // only one real root exists. The other two are complex conjugates.
         D = sqrt(D2); RpD = R+D; RmD = R-D;
-        S = (RpD > 0.0) ? pow( RpD, 1.0/3.0 ) : -pow( -RpD, 1.0/3.0 );
-        T = (RmD > 0.0) ? pow( RmD, 1.0/3.0 ) : -pow( -RmD, 1.0/3.0);
+        S = (RpD > 0.0) ? cbrt( RpD ) : -cbrt( -RpD );
+        T = (RmD > 0.0) ? cbrt( RmD ) : -cbrt( -RmD);
         x1 = S + T - b/3.0;
     } else if ( D2 < 0 ) {
         // All three roots are real and unequal.
@@ -676,12 +676,29 @@ void Lgm_PolyRoots_GetQuads( double *a, int n, double *quad, double *x ) {
 }
 
 
-/*
- * Returns number oif roots found.
+/**
+ *  \brief
+ *      Find roots of arbitrary polynomials (with real coefficients).
+ *
+ *      Solves for the roots of the polynomial;
+ *
+ *          \f[ a_0 x^n + a_1 x^{n-1} + a_2 x^{n-2} + \cdots + a_{n-1} x + a_n = 0 \f]
+ *
+ *
+ *  \details
+ *
+ *
+ *      \param[in]      a   The polynomial coefficients. There should be n+1 of these.
+ *      \param[in]      n   The order of the polynomial.
+ *      \param[in]      z   The complex roots found.
+ *
+ *      \return         The number of roots found.
+ *
+ *
  */
 int  Lgm_PolyRoots( double *a, int n, double complex *z ){
 
-    int     numr;
+    int     numr, i;
     double  *wr, *wi, *x, quad[2];
 
     if (a[0] == 0) {
@@ -704,6 +721,10 @@ int  Lgm_PolyRoots( double *a, int n, double complex *z ){
     // get roots
     Lgm_PolyRoots_GetQuads( a, n, quad, x );
     numr = Lgm_PolyRoots_Roots( x, n, wr, wi );
+
+    for (i=0; i<numr; i++){
+        z[i] = wr[i] + wi[i]*I;
+    }
 
     return( numr );
 

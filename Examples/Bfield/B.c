@@ -19,20 +19,20 @@ int main(){
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
 
     mInfo->Bfield = Lgm_B_T89;
-    mInfo->Bfield = Lgm_B_TS04_opt;                                                                                                                                                     
-   mInfo->Bfield = Lgm_B_TS04;                                                                                                                                                         
-//mInfo->Bfield = Lgm_B_OP77;                                                                                                                                                           
-//mInfo->Bfield = Lgm_B_T89;                                                                                                                                                            
-    mInfo->P      = 4.1011111111111118;                                                                                                                                                 
-    mInfo->Dst    = 7.7777777777777777;                                                                                                                                                 
-    mInfo->By     = 3.7244444444444444;                                                                                                                                                 
-    mInfo->Bz     = -0.12666666666666665;                                                                                                                                               
-    mInfo->W[0]   = 0.12244444444444445;                                                                                                                                                
-    mInfo->W[1]   = 0.2514;                                                                                                                                                             
-    mInfo->W[2]   = 0.089266666666666661;                                                                                                                                               
-    mInfo->W[3]   = 0.047866666666666668;                                                                                                                                               
-    mInfo->W[4]   = 0.22586666666666666;                                                                                                                                                
-    mInfo->W[5]   = 1.0461333333333334;          
+   mInfo->Bfield = Lgm_B_TS04;
+//mInfo->Bfield = Lgm_B_OP77;
+//mInfo->Bfield = Lgm_B_T89;
+    mInfo->Bfield = Lgm_B_TS04_opt;
+    mInfo->P      = 4.1011111111111118;
+    mInfo->Dst    = 7.7777777777777777;
+    mInfo->By     = 3.7244444444444444;
+    mInfo->Bz     = -0.12666666666666665;
+    mInfo->W[0]   = 0.12244444444444445;
+    mInfo->W[1]   = 0.2514;
+    mInfo->W[2]   = 0.089266666666666661;
+    mInfo->W[3]   = 0.047866666666666668;
+    mInfo->W[4]   = 0.22586666666666666;
+    mInfo->W[5]   = 1.0461333333333334;
 
 
     printf("%13s", "Kp");

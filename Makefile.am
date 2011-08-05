@@ -34,5 +34,5 @@ EXTRA_DIST = lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
 	$(ALL_VIEW_DRIFT_SHELL_FILES) example_file_list \
 	view_drift_shell_file_list $(DX_CONFIG)
 
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'

@@ -12,7 +12,7 @@ int main( ) {
     dB       = 0.1;   // mean wave amplitude in nT.
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
     Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-    aStar = 0.16;
+    aStar    = 0.16;
 
 
     Beq = M_CDIP/(L*L*L);

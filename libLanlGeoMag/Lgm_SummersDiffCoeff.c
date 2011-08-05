@@ -121,7 +121,8 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \param[in]      Alpha0      Equatoria PA in Degrees.
  *      \param[in]      Ek          Kinetic energy in MeV.
  *      \param[in]      L           L-shell parameter (dimensionless).
- *      \param[in]      dB          Wave amplitude [nT]. Currently this is a fixed quanity.
+ *      \param[in]      BwFuncData  A (void *) pointer to data that the user may need to use in BwFunc().
+ *      \param[in]      BwFunc      A user-defined function that returns Bw as a function of Latitude in units of nT. Prototype is "double BwFunc( double Lat, void *Data )".
  *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter \f$\Omega_\sigma/\omega_{pe}\f$.
  *      \param[in]      w1          Lower limit of freq. band, [Hz].
  *      \param[in]      w2          Lower limit of freq. band, [Hz].
@@ -215,6 +216,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFunc
     si->L           = L;
     si->aStarEq     = aStarEq;
 //    si->dB          = dB;
+    si->BwFuncData  = BwFuncData;
     si->BwFunc      = BwFunc;
     si->w1          = w1;           // Lower freq cuttof.
     si->w2          = w2;           // Upper freq cuttof.
@@ -489,7 +491,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     si  = (Lgm_SummersInfo *)qpInfo;
     MaxWaveLat  = si->MaxWaveLat;    // Latitudinal cutoff for waves.
-    if ( fabs(Lat) > MaxWaveLat ) return(0.0);
+    if ( fabs(Lat) > MaxWaveLat ) return(0.0); // Return 0 if beyond cutoff latitude.
     SinAlpha02  = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
     TanAlpha0   = si->TanAlpha0;     // pre-computed tan( Alpha0 )
     E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
@@ -554,6 +556,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0p * CosLat*v/sqrt(1-BoverBm);
 
+//printf("Lat, f = %.15g %.15g\n", Lat*DegPerRad, log10(fabs(f))  );
     return( f );
 
 }
@@ -705,6 +708,23 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
 
     nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );
 
+
+/*
+double aaa[4];
+int    nn=4;
+double complex zz[4];
+int num = 0;
+aaa[0] = 1.0;
+aaa[1] = a1;
+aaa[2] = a2;
+aaa[3] = a3;
+aaa[4] = a4;
+num = Lgm_PolyRoots( aaa, nn, zz );
+*/
+
+
+
+
     R  = dBoverB2;   // The ratio (dB/B)^2
 
 
@@ -721,6 +741,13 @@ int sum_res = 0;
     if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
     if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
     if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
+/*
+int ii;
+nRoots = 0;
+for (ii=0; ii<num; ii++){
+    if ( ( fabs(cimag(zz[ii])) < 1e-10 ) && ( fabs(creal(zz[ii])) > 0.0 ) ) z[nRoots++] = zz[ii];
+}
+*/
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -1013,7 +1040,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
 
 
 // This is another hard-wired input parameter. Fix.
-int sum_res = 0;
+int sum_res = 1;
 
 
 
@@ -1049,10 +1076,6 @@ CHECK THAT THIS IS USING (A2) and (A3) CORRECTLY.
         arg   = (x0-xm)/dx;
         Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
         Dpp   = ( sum_res ) ? 2.0*Dcore : Dcore;
-if (Dpp < 0.0) {
-printf("1. Dpp = %g\n", Dpp);
-exit(0);
-}
 
     } else {
 
@@ -1066,10 +1089,6 @@ exit(0);
         c4  = LGM_EPS*(b + LGM_EPS);
         Ep1 = E+1.0; Ep12 = Ep1*Ep1;
         fac = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*SinAlpha2/Ep12 /Beta2;
-if (fac < 0.0) {
-printf("fac = %g\n", fac);
-exit(0);
-}
 
         /*
          * Execute sum over resonant roots.
@@ -1091,10 +1110,6 @@ if ((x>xl)&&(x<xh)) {
 
             arg = (x-xm)/dx;
             Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-if (Dpp < 0.0) {
-printf("Dpp = %g\n", Dpp);
-exit(0);
-}
 //}
 }
 
@@ -1104,10 +1119,6 @@ exit(0);
 
 
     }
-if (Dpp < 0.0) {
-printf("Dpp = %g\n", Dpp);
-exit(0);
-}
 
     return(Dpp);
 
