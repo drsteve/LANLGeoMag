@@ -7,7 +7,7 @@ int main( ) {
     double  Ek, L, Beq, dB, Omega_e, Omega_p, Omega_SigEq, wm, dw, w1, w2, E0;
     double  Lat, CosLat, CosLat2, CosLat3, CosLat6, v, Alpha0, B, Omega_Sig;
 
-    Ek       = 1.0000;   // Kinetic energy in MeV.
+    Ek       = 0.150009; // Kinetic energy in MeV.
     L        = 7.0;   // L-shell parameter (dimensionless);.
     dB       = 0.1;   // mean wave amplitude in nT.
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).

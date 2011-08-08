@@ -84,8 +84,8 @@ w2 = 0.3*Omega_e;
     MaxWaveLat = 35.0;      // Degrees
 
 
-    int nAlpha  = 1000; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 1000; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+    int nAlpha  = 500; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 500; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -100,6 +100,9 @@ w2 = 0.3*Omega_e;
             for (j=0; j<nAlpha; j++ ){
                 Alpha = Alpha0 + j*dAlpha;
 
+//if ((i==40)&&(j==500-99+1)) {
+if ((i==500-99+1)) {
+printf("Ek = %g Alpha = %g\n", Ek, Alpha);
                 Lgm_SummersDxxBounceAvg( Alpha, Ek, L, (void *)MyInfo, MyBwFunc, aStar, w1, w2, wm,
                                          dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
                 ImageDaa[i][j]     = Daa_ba;
@@ -109,6 +112,7 @@ w2 = 0.3*Omega_e;
                     ImageDap_pos[i][j] = Dap_ba;
                 }
                 ImageDpp[i][j]     = Dpp_ba;
+}
             }
         }
     } /***** End Parallel Execution ****/
