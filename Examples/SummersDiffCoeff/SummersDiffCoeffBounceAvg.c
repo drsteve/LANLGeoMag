@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <Lgm_SummersDiffCoeff.h>
 #include <Lgm_DynamicMemory.h>
-#include <Lgm_FastPowPoly.h>
+//#include <Lgm_FastPowPoly.h>
 
 
 
@@ -14,7 +14,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image );
  */
 typedef struct MyBwFuncInfo {
 
-    Lgm_FastPow *fp;
+//    Lgm_FastPow *fp;
     double  whatever;
 
 } MyBwFuncInfo;
@@ -29,13 +29,13 @@ double MyBwFunc( double Lat, void *Data ) {
     MyInfo = (MyBwFuncInfo *)Data;
     y = 0.75 + 0.04*Lat*DegPerRad;
 
-//    Bw = pow( 10.0, y );
+    Bw = pow( 10.0, y );
 //    Bw = (double)Lgm_FastPowPoly( 10.0, y );
-    a[0] = 10.0; a[1] = 10.0; a[2] = 10.0; a[3] = 10.0;
-    b[0] = y; b[1] = y+0.1; b[2] = y+0.2; b[3] = y+0.3;
-    Lgm_FastPowPoly_v( a, b, c );
+//    a[0] = 10.0; a[1] = 10.0; a[2] = 10.0; a[3] = 10.0;
+//    b[0] = y; b[1] = y+0.1; b[2] = y+0.2; b[3] = y+0.3;
+//    Lgm_FastPowPoly_v( a, b, c );
     
-    Bw = c[0];
+//   Bw = c[0];
 //    Bw = (double)powFastLookup( y, MyInfo->fp );
 
     return( Bw/1000.0 );
@@ -55,7 +55,7 @@ int main( ) {
 
 
     MyInfo = (MyBwFuncInfo *)calloc( 1, sizeof(*MyInfo));
-    MyInfo->fp = Lgm_InitFastPow( );
+//    MyInfo->fp = Lgm_InitFastPow( );
 
 
     Ek    = 1.000;  // Kinetic energy in MeV.
@@ -129,7 +129,7 @@ printf("Ek = %g Alpha = %g\n", Ek, Alpha);
     LGM_ARRAY_2D_FREE( ImageDpp );
 
 
-    Lgm_FreeFastPow( MyInfo->fp );
+//    Lgm_FreeFastPow( MyInfo->fp );
     free( MyInfo );
 
     return(0);
