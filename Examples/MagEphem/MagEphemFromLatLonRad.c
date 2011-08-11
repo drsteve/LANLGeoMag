@@ -51,6 +51,7 @@ static struct argp_option Options[] = {
     {"Append",          'a',    0,                            0,                                      "Append to OutFile instead of creating a new one"  },
     {"UseEop",          'e',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
     {"Colorize",        'c',    0,                            0,                                      "Colorize output"                         },
+    {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
     {"verbose",         'v',    0,                            OPTION_ARG_OPTIONAL,                    "Produce verbose output"                  },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
     { 0 }
@@ -67,6 +68,7 @@ struct Arguments {
 
     int         Quality;
     int         Colorize;
+    int         Force;
     double      FootPointHeight;
 
     char        IntModel[80];
@@ -101,6 +103,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'p':
             sscanf( arg, "%lf, %lf, %d", &arguments->StartPA, &arguments->EndPA, &arguments->nPA );
+            break;
+        case 'F':
+            arguments->Force = 1;
             break;
         case 'f':
             sscanf( arg, "%lf", &arguments->FootPointHeight );
@@ -158,7 +163,7 @@ int main( int argc, char *argv[] ){
     char             InputFilename[1024];
     char             OutputFilename[1024];
     char             IntModel[20], ExtModel[20], Line[5000];
-    int              AppendMode, UseEop, Colorize;
+    int              AppendMode, UseEop, Colorize, Force;
     FILE             *fp_in, *fp_MagEphem;
     double           Inc, Alpha[1000], FootpointHeight, GeoLat, GeoLon, GeoRad;
     int              nAlpha, Quality;
@@ -179,6 +184,7 @@ int main( int argc, char *argv[] ){
     arguments.verbose         = 0;
     arguments.Quality         = 3;
     arguments.Colorize        = 0;
+    arguments.Force           = 0;
     arguments.Append          = 0;
     arguments.UseEop          = 0;
     arguments.StartDate       = -1;
@@ -214,6 +220,7 @@ int main( int argc, char *argv[] ){
     FootpointHeight = arguments.FootPointHeight;
     Quality         = arguments.Quality;
     Colorize        = arguments.Colorize;
+    Force           = arguments.Force;
     AppendMode      = arguments.Append;
     UseEop          = arguments.UseEop;
     StartDate       = arguments.StartDate;
@@ -239,7 +246,8 @@ int main( int argc, char *argv[] ){
         printf( "\t         External Model: %s\n", ExtModel );
         printf( "\t   FootpointHeight [km]: %g\n", FootpointHeight );
         printf( "\t             L* Quality: %d\n", Quality );
-        printf( "\t   Append to OutputFile: %s\n", AppendMode ? "yes" : "no" );
+        printf( "\t           Force output: %s\n", Force ? "yes" : "no" );
+        //printf( "\t   Append to OutputFile: %s\n", AppendMode ? "yes" : "no" );
         printf( "\t                Use Eop: %s\n", UseEop ? "yes" : "no" );
         printf( "\t Colorize Thread Output: %d\n", Colorize );
         printf( "\t                Verbose: %s\n", arguments.verbose ? "yes" : "no" );
@@ -381,9 +389,10 @@ int main( int argc, char *argv[] ){
             printf("\t      Last file access:  %s", ctime(&StatBuf.st_atime));
             printf("\tLast file modification:  %s", ctime(&StatBuf.st_mtime));
 
-        } else {
+        } 
 
-            FileExists = FALSE;
+        if ( !FileExists || Force ) {
+
 
             /*
              * Open input file for reading
