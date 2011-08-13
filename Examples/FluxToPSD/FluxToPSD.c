@@ -115,7 +115,7 @@ int main( ) {
      *   Create HDF5 file.
      */
     hid_t       file;
-    hid_t       dataspace, dataset;
+    hid_t       dataspace, dataset, dataspace_Time, dataset_Time;
     hid_t       filespace;
     hid_t       cparms;
     hsize_t     dims[3]    = { 1, 36, 36 };
@@ -125,11 +125,11 @@ int main( ) {
     herr_t      status;
 
 
-    // Create the data space with unlimited dimensions.
-    dataspace = H5Screate_simple( 3, dims, maxdims ); // rank 3
-
     // Create a new file. If file exists its contents will be overwritten.
     file = H5Fcreate( "myfile.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+
+    // Create the data space with unlimited dimensions.
+    dataspace = H5Screate_simple( 3, dims, maxdims ); // rank 3
 
     // Modify dataset creation properties, i.e. enable chunking
     cparms = H5Pcreate( H5P_DATASET_CREATE );
@@ -137,6 +137,10 @@ int main( ) {
 
     // Create a new dataset within the file using cparms creation properties.
     dataset = H5Dcreate( file, "PhaseSpaceDensity", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT );
+
+
+
+
 
 
     /*
@@ -196,10 +200,9 @@ int main( ) {
     }
 
 
-
-    status = H5Dclose( dataset );
     status = H5Sclose( filespace );
     status = H5Sclose( dataspace );
+    status = H5Dclose( dataset );
     status = H5Fclose( file );
 
 

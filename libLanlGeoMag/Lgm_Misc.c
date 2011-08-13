@@ -44,3 +44,6 @@ void Lgm_ReplaceSubString( char *NewStr, char *OrigStr, char *SubStr, char *RepS
     return;
 
 }
+
+
+

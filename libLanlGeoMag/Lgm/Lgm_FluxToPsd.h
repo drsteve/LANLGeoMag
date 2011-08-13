@@ -216,14 +216,15 @@ double          Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdTo
 
 
 
-void   DumpGif( char *Filename, int W, int H, double **Image );
-double Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 );
-double Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 );
-double Lgm_p2c2( double Ek, double E0 );
-double Lgm_v2overc2( double Ek, double E0 );
-double Lgm_gamma( double Ek, double E0 );
-double Lgm_PsdToDiffFlux( double f, double p2c2 );
-double Lgm_DiffFluxToPsd( double j, double p2c2 );
+void    DumpGif( char *Filename, int W, int H, double **Image );
+double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 );
+double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 );
+double  Lgm_p2c2( double Ek, double E0 );
+double  Lgm_v2overc2( double Ek, double E0 );
+double  Lgm_gamma( double Ek, double E0 );
+double  Lgm_PsdToDiffFlux( double f, double p2c2 );
+double  Lgm_DiffFluxToPsd( double j, double p2c2 );
+int     Lgm_GeometricSeq( double a, double b, int n, double *G );
 
 
 

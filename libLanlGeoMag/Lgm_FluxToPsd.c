@@ -1554,6 +1554,44 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
 
 
+/**
+ *  \brief
+ *     Fills the given array with a geomteric sequence of values.
+ *
+ *  \details
+ *      
+ *      \param[in]      a  Starting value.
+ *      \param[in]      b  Ending value.
+ *      \param[in]      n  Number of values (must be 2 or more.)
+ *      \param[out]     G  User supply array (or size >= n ).
+ *
+ *      \return         1 if successful, 0 otherwise.
+ *
+ *  \notes
+ *      a and be must be greater than zero and n must be greater than or equal to 2.
+ *
+ *      \author         Mike Henderson
+ *      \date           2010-2011
+ */
+int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
+
+    if ( ( a <= 0.0 ) || ( b <= 0.0 ) || ( n<2 ) ) return(0);
+
+    int     j;
+    double  r, *S = (double *)calloc( n, sizeof(double) );
+
+    r = pow( b/a, 1.0/((double)(n-1)));
+
+printf("a, b, r = %g %g %g\n", a, b, r);
+    
+    S[0] = a;
+    for (j=1; j<n; j++) S[j] = S[j-1]*r;
+    for (j=0; j<n; j++) G[j] = S[j];
+
+    free( S );
+
+    return(1);
+}
 
 
 
