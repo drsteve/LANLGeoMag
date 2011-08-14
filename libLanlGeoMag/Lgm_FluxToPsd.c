@@ -1496,7 +1496,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
         }
     }
 
-    printf("Min, Max = %g %g\n", Min, Max);
+    //printf("Min, Max = %g %g\n", Min, Max);
 
     sprintf( Filename, "%s.info", FilenameBase);
     fp_info = fopen( Filename, "w" );
@@ -1582,7 +1582,6 @@ int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
 
     r = pow( b/a, 1.0/((double)(n-1)));
 
-printf("a, b, r = %g %g %g\n", a, b, r);
     
     S[0] = a;
     for (j=1; j<n; j++) S[j] = S[j-1]*r;
