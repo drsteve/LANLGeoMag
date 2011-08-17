@@ -3,11 +3,12 @@ SUBDIRS = Lgm
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
 # Location to keep Eop-related stuff
-LGM_EOP_DATA_DIR = @prefix@/share/LanlGeoMag/EopData
-includedir       = @prefix@/include/Lgm
-#libdir           = @prefix@/lib
-pkgconfigdir     = $(libdir)/pkgconfig
-pkgconfig_DATA   = lgm.pc
+LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
+LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
+includedir         = @prefix@/include/Lgm
+#libdir             = @prefix@/lib
+pkgconfigdir       = $(libdir)/pkgconfig
+pkgconfig_DATA     = lgm.pc
 
 if LINUX
     CRONDIR = /etc/cron.daily
@@ -38,8 +39,10 @@ EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/eopc04_IAU2000.62-now EopData/GetEopFiles.in \
 	EopData/Lgm_LeapSecondDates.dat
 
+QINDENTON_DIR = QinDenton
+
 #EXTRA_DIST = EopData
-EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list
+EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list $(QINDENTON_DIR)
 
 
 
@@ -59,4 +62,6 @@ install-exec-hook:
 	cp EopData/finals.all $(LGM_EOP_DATA_DIR)/.
 	cp EopData/finals.daily $(LGM_EOP_DATA_DIR)/.
 	cp EopData/tai-utc.dat $(LGM_EOP_DATA_DIR)/.
+	mkdir -p $(LGM_INDEX_DATA_DIR)
+	cp -r QinDenton $(LGM_INDEX_DATA_DIR)/.
 #	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles
