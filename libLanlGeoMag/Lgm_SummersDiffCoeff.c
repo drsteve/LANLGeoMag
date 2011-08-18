@@ -448,7 +448,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      * Finally the integrand.
      */
     f = Da0a0 * CosLat*v/sqrt(1-BoverBm);
-printf("%g %g\n", Lat*DegPerRad, f);
+    /*printf("%g %g\n", Lat*DegPerRad, f);*/
 
     return( f );
 
