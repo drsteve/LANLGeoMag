@@ -35,7 +35,8 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'GSM_GSE': GSM_TO_GSE,
                  'GSE_GSM': GSE_TO_GSM,
                  'TEME_WGS84': TEME_TO_WGS84,
-                 'MOD_GSM' : MOD_TO_GSM}
+                 'MOD_GSM' : MOD_TO_GSM,
+                 'SM_GSE' : SM_TO_GSE}
 
 def coordTrans(*args):
     '''
