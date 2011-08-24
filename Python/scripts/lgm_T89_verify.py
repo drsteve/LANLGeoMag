@@ -25,7 +25,7 @@ print('T89: alpha=%s, date range [%s, %s]' % (alpha, dates.UTC[0], dates.UTC[-1]
 for rval in rvals:
     print('Radial Distance: %s' % rval)
     Lstar = [[]]*nvals
-    for date, qual in itertools.product(dates.UTC, range(nvals)):
+    for date, qual in itertools.product([dates.UTC[0]], range(nvals)):
         print('%s, Quality=%d' % (date, qual))
         pos = dm.dmarray([-1*rval, 0, 0], attrs={'sys': 'GSM'})
         data = lgmpy.get_Lstar(pos, date, alpha=alpha, coord_system='GSM', Bfield='Lgm_B_T89', LstarThresh=20.0, extended_out=True, LstarQuality=qual)
@@ -34,6 +34,7 @@ for rval in rvals:
         except TypeError:
             Lstar[qual].append(data[alpha]['Lstar'].tolist())
 
+    1/0
     #make plots
     fstr = '%d1%d' % (len(rvals), rval-rvals[0]+1)
     ax = fig.add_subplot(fstr)
@@ -43,4 +44,4 @@ for rval in rvals:
     ax.set_xlabel('Quality Flag')
     ax.set_xticklabels([str(n) for n in range(5)])
     
-fig.savefig('lgm_T89%d_zoom.png' % alpha, dpi=300)
+fig.savefig('lgm_T89%d_zoom_singleval.png' % alpha, dpi=300)

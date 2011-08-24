@@ -60,6 +60,10 @@ LDFLAGS=${LDFLAGS}\ ${GSLCBLAS_LDFLAGS}
 OPENMP_LDFLAGS="-fopenmp -lgomp"
 LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 
+dnl Add LDFLAGS for HDF5
+HDF5_LDFLAGS="-lhdf5"
+LDFLAGS=${LDFLAGS}\ ${HDF5_LDFLAGS}
+
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])

@@ -61,12 +61,12 @@ class Closed_FieldTests(unittest.TestCase):
         data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
         numpy.testing.assert_array_almost_equal(data[1],
-                [-0.06208285,  0.39459274,  0.93068772])
+                [-0.06195451,  0.39503915,  0.93137369])
         numpy.testing.assert_array_almost_equal(data[2],
-                [ 0.76665539,  0.33534993, -0.57132811])
+                [ 0.76608872,  0.33493643, -0.57105222])
         numpy.testing.assert_array_almost_equal(data[3],
-                [ 2.27943343,  2.80962207,  1.12454683])
-        self.assertAlmostEqual(data[4], 3.737378184729371)
+                [ 2.27943481,  2.80962393,  1.12454726])
+        self.assertAlmostEqual(data[4], 3.7346369909011456)
 
 
 if __name__ == '__main__':
