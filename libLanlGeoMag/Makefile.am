@@ -29,7 +29,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c 
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c \
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
-                            Lgm_QinDenton.c Daa_param.c Lgm_Misc.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
+                            Lgm_QinDenton.c Daa_param.c Lgm_Misc.c Lgm_HDF5.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
                             
 include_HEADERS = Lgm/*.h
 
@@ -63,5 +63,5 @@ install-exec-hook:
 	cp EopData/finals.daily $(LGM_EOP_DATA_DIR)/.
 	cp EopData/tai-utc.dat $(LGM_EOP_DATA_DIR)/.
 	mkdir -p $(LGM_INDEX_DATA_DIR)
-	cp -r QinDenton $(LGM_INDEX_DATA_DIR)/.
+	rsync -ar QinDenton $(LGM_INDEX_DATA_DIR)/.
 #	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles
