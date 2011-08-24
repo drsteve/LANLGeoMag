@@ -18,7 +18,7 @@ from spacepy import datamodel
 
 
 from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM
+from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE
 from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
 from lgmpy.Lstar import Lstar_Data
 
@@ -26,6 +26,8 @@ from _Bfield_dict import Bfield_dict
 
 conv_dict = {'SM_GSM': SM_TO_GSM,
                  'GSM_SM': GSM_TO_SM,
+                 'SM_GSE': SM_TO_GSE,
+                 'GSE_SM': GSE_TO_SM,
                  'WGS84_GSM': WGS84_TO_GSM,
                  'GSM_WGS84': GSM_TO_WGS84,
                  'WGS84_GSE': WGS84_TO_GSE,
