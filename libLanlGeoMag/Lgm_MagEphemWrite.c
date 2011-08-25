@@ -685,7 +685,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %51s",  " +---- Mag. Field at South Mag. Footpoint GSM ----+" );
     fprintf( fp, " %12s",  " +-S.L.Cone-+" );
     fprintf( fp, " %38s",  " +----- Minimum |B| Point GSM -------+" );
-    fprintf( fp, " %51s",  " +---- Magnetic Field at Minimum |B| Pointint ----+" );
+    fprintf( fp, " %51s",  " +---- Magnetic Field at Minimum |B| Point    ----+" );
 
     fprintf(fp, "\n");
 
