@@ -266,3 +266,29 @@ double ***Get_DoubleDataset_3D( hid_t file, char *Str, hsize_t *Dims ) {
     return( buf );
 
 }
+
+double ****Get_DoubleDataset_4D( hid_t file, char *Str, hsize_t *Dims ) {
+
+    hid_t     dataset, dataspace;
+    herr_t    status;
+    int       rank, status_n;
+    double  ****buf;
+
+    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataspace = H5Dget_space( dataset );
+    rank      = H5Sget_simple_extent_ndims( dataspace );
+    if ( rank != 4 ) {
+        printf("Dataset is not rank 4. Rank = %d\n", rank);
+        exit(0);
+    }
+    status_n = H5Sget_simple_extent_dims( dataspace, Dims, NULL );
+
+    LGM_ARRAY_4D(  buf, Dims[0], Dims[1], Dims[2], Dims[3], double );
+    status   = H5Dread( dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf[0][0][0][0] );
+
+    H5Dclose(dataset);
+    H5Sclose(dataspace);
+
+    return( buf );
+
+}

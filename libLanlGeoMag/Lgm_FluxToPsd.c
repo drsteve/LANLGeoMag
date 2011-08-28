@@ -13,7 +13,7 @@
 
 
 
-typedef struct _FitData { 
+typedef struct _FitData {
 
     int     n;
     double  *E;
@@ -39,7 +39,7 @@ typedef struct _FitData {
  *
  *      \f[\mu = {p_\perp^2\over 2 m_\circ B}\f].
  *
- *      Since, 
+ *      Since,
  *
  *            \f[ p^2c^2 = E_k^2 + 2 E_k E_\circ \f]
  *
@@ -50,7 +50,7 @@ typedef struct _FitData {
  *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
  *          \f}
- *      
+ *
  *      \param[in]      Ek  Kinetic Energy of Particle.     <b>( MeV )</b>
  *      \param[in]      a   Pitch Angle of Particle.        <b>( Degrees )</b>
  *      \param[in]      B   Local magnetic field strength.  <b>( nT )</b>
@@ -69,11 +69,11 @@ double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
-    
+
     mu = Ek*(1.0+0.5*Ek/E0)*sa2*nT_Per_Gauss/B;
-    
-    return( mu ); 
-    
+
+    return( mu );
+
 }
 
 
@@ -83,7 +83,7 @@ double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
  * first invariant, \f$\alpha\f$, Pitch Angle \f$\alpha\f$ and the local
  * B-field strength and rest energy. This is the inverse of Lgm_Ek_to_Mu(). See
  * description of Lgm_Ek_to_Mu() for more details on the equations used.
- *  
+ *
  *      \param[in]      Mu  First adiabatic invariant.      <b>( MeV/G )</b>
  *      \param[in]      a   Pitch Angle of Particle.        <b>( Degrees )</b>
  *      \param[in]      B   Local magnetic field strength.  <b>( nT )</b>
@@ -99,7 +99,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
     double  sa, sa2, Ek;
 
     if ( a < 0.0 ) return( -9e99 );
-    
+
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
 
@@ -118,7 +118,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  * Compute \f$ p^2c^2 \f$  given a particle's kinetic energy and rest energy.
  *
  *  Some relativistic equations:
- *  
+ *
  *  With,
  *          \f{eqnarray*}{
  *                  m       &=& \mbox{Particle mass.}\\
@@ -129,12 +129,12 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *
  *          \f}
  *
- *      \f[ 
- *          m = m_\circ \gamma = m_\circ (1-v^2/c^2)^{-1/2} 
+ *      \f[
+ *          m = m_\circ \gamma = m_\circ (1-v^2/c^2)^{-1/2}
  *      \f]
  *
  *  Rearrange this to get,
- *      \f[ 
+ *      \f[
  *          (mc^2)^2 = (m_\circ c^2)^ + p^2c^2
  *      \f]
  *
@@ -146,21 +146,21 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f}
  *
  *  this is,
- *      \f[ 
+ *      \f[
  *          E^2 = E_\circ^2 + (pc)^2
  *      \f]
- *  
- *  so, 
- *      \f[ 
+ *
+ *  so,
+ *      \f[
  *          p^2c^2  = E^2 - E_\circ^2
  *      \f]
- *  
+ *
  *  Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
  *          \f{eqnarray*}{
  *              p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
  *                      &=& E_k (E_k+2E_\circ)
  *          \f}
- *  
+ *
  *
  *      \param[in]      Ek (\f$ = E_k) \f$  Kinetic Energy of Particle.   <b>( MeV )</b>
  *      \param[in]      E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
@@ -231,7 +231,7 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *          f &=& {j c^2 \over p^2c^2 } \\
  *          f &=& { j\over c } {c^3 \over (p^2c^2)}
  *      \f}
- *  
+ *
  *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
  *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm}
  *  \mbox{MeV}\right]^3 \f$. These are the standard GEM phase space density
@@ -239,12 +239,12 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *
  *      \param[in]      j               Differential Flux in units of   <b>#/cm^2/s/sr/MeV</b>
  *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of             <b>Mev^2</b>
- *  
+ *
  *      \return         f, Phase space density in units of              <b>(c/cm/MeV)^3</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
- *  
+ *
  */
 double Lgm_DiffFluxToPsd( double j, double p2c2 ){
     return( j/(p2c2*2.9979e10) ); // f in units of (c/cm/MeV)^3
@@ -266,18 +266,18 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *          f &=& {j c^2 \over p^2c^2 } \\
  *          f &=& { j\over c } {c^3 \over (p^2c^2)}
  *      \f}
- *  
+ *
  *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
  *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
  *
  *      \param[in]      f    Phase space density in units of    <b>(c/cm/MeV)^3</b>
  *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of     <b>Mev^2</b>
- *  
+ *
  *      \return         j, Differential Flux in units of        <b>#/cm^2/s/sr/MeV</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
- *  
+ *
  */
 double Lgm_PsdToDiffFlux( double f, double p2c2 ){
     return( f*2.9979e10*p2c2 ); // j in units of #/cm^2/s/sr/MeV
@@ -355,8 +355,8 @@ void Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
 /**
  *  Set Date/Time and position in the Lgm_FluxToPsd structure.
- *      
- *     
+ *
+ *
  *      \param[in]      d   Date/Time of measurement.
  *      \param[in]      u   Position of measurment (in GSM).
  *      \param[in,out]  f   Lgm_FluxToPsd sturcture.
@@ -389,7 +389,7 @@ void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f
  */
 void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
 
-    
+
     int     i, j;
     double  flux, p2c2, fp, Min, Max;
 
@@ -408,8 +408,8 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
     /*
      * Add Flux array to f structure. Alloc arrays appropriately.
      */
-    f->nE = nE; 
-    f->nA = nA; 
+    f->nE = nE;
+    f->nA = nA;
     LGM_ARRAY_1D( f->E, f->nE, double );
     LGM_ARRAY_1D( f->A, f->nA, double );
     LGM_ARRAY_2D( f->FLUX_EA, f->nE, f->nA, double );
@@ -445,7 +445,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
     }
 
     f->Alloced1 = TRUE;
-   
+
     return;
 
 }
@@ -468,7 +468,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *  compute, it is dependant on both E and \f$\alpha\f$. K is only dependant
  *  upon \f$\alpha\f$, but on the other hand K is not so easy to compute from
  *  \f$\alpha\f$.
- * 
+ *
  *  To perform the calculation we note that \f$f( E, \alpha )\f$ is the same as
  *  \f$f( E(\mu, \alpha(K)), \alpha(K) )\f$. Thus, for a given \f$\mu\f$ and K,
  *  we can figure out what E and \f$\alpha\f$ they correspond to and then we
@@ -494,7 +494,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *      \author     Mike Henderson
  *      \date       2011
  *      \warning    Still working on this code. It is not finished.
- * 
+ *
  */
 void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
 
@@ -522,12 +522,12 @@ For now we will just go with the defaults.
         LGM_ARRAY_2D_FREE( f->EofMu );
         LGM_ARRAY_2D_FREE( f->PSD_MK );
     }
-    
+
     /*
      * Alloc arrays
      */
-    f->nMu = nMu; 
-    f->nK  = nK; 
+    f->nMu = nMu;
+    f->nK  = nK;
     LGM_ARRAY_1D( f->Mu,    f->nMu, double );
     LGM_ARRAY_1D( f->K,     f->nK,  double );
     LGM_ARRAY_1D( f->AofK,  f->nK,  double );
@@ -566,7 +566,7 @@ For now we will just go with the defaults.
             //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
-            
+
 
         }
     }
@@ -668,7 +668,7 @@ double Cost( double *x, void *data ){
     if ( (x[3] > 2.0) || ( x[3] < -30.0) ) return( 9e99 );
     if ( (fabs( x[4] ) > 1000.0) || (fabs( x[4] ) < 1.0) ) return( 9e99 );
 
-    FitData = (_FitData *)data; 
+    FitData = (_FitData *)data;
 
 
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
@@ -761,7 +761,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
     if ( FitData->n > 4 ) {
 
-        
+
         // interpolate/fit E
         // for now just do a linear interp.
         // no lets try a fit...
@@ -796,10 +796,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     fprintf(fp, "%g %g\n", f->E[j], FitData->g[j]);
     }
     fclose(fp);
-        
+
     exit(0);
     */
-        
+
 
     //x[2] = 200.0;
         //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
@@ -810,8 +810,8 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     } else {
         psd = -9e99;
     }
-    
-    
+
+
 
     LGM_ARRAY_1D_FREE( FitData->E );
     LGM_ARRAY_1D_FREE( FitData->g );
@@ -894,8 +894,8 @@ void Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p ) {
 
 /**
  *  Set Date/Time and position in the Lgm_PsdToFlux structure.
- *      
- *     
+ *
+ *
  *      \param[in]      d   Date/Time of measurement.
  *      \param[in]      u   Position of measurment (in GSM).
  *      \param[in,out]  p   Lgm_PsdToFlux sturcture.
@@ -915,21 +915,23 @@ void Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p
 /**
  *     Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
  *
- *      \param[in]      P                 2D array containing the Phase Space Density as a function of Mu and K.
- *      \param[in]      Mu                1D array containing the energy values implied by the first index of Flux[][] array.
+ *      \param[in]      P                 3D array containing the Phase Space Density as a function of Mu and K.
+ *      \param[in]      L                 1D array containing the Lstar values implied by the first index of PSD[][][] array.
+ *      \param[in]      nL                number of Lstar values.
+ *      \param[in]      Mu                1D array containing the energy values implied by the second index of PSD[][][] array.
  *      \param[in]      nMu               number of energies.
- *      \param[in]      K                 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *      \param[in]      K                 1D array containing the pitch angles values implied by the third index of PSD[][][] array.
  *      \param[in]      nK                number of pitch angles.
- *      \param[in,out]  p                 Lgm_FluxToPsd sturcture.
+ *      \param[in,out]  p                 Lgm_FluxToPsd structure.
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
  *
  */
-void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p ) {
+void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p ) {
 
-    
-    int     i, j;
+
+    int     i, j, k;
 
 
     /*
@@ -938,37 +940,37 @@ void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_Psd
     if ( p->Alloced1 ) {
         LGM_ARRAY_1D_FREE( p->Mu );
         LGM_ARRAY_1D_FREE( p->K );
-        LGM_ARRAY_2D_FREE( p->PSD_MK );
+        LGM_ARRAY_1D_FREE( p->L );
+        LGM_ARRAY_3D_FREE( p->PSD_LMK );
     }
 
 
     /*
      * Add Psd array to p structure. Alloc arrays appropriately.
      */
-    p->nMu = nMu; 
-    p->nK  = nK; 
+    p->nL  = nL;
+    p->nMu = nMu;
+    p->nK  = nK;
+    LGM_ARRAY_1D( p->L, p->nL, double );
     LGM_ARRAY_1D( p->Mu, p->nMu, double );
     LGM_ARRAY_1D( p->K, p->nK, double );
-    LGM_ARRAY_2D( p->PSD_MK, p->nMu, p->nK, double );
+    LGM_ARRAY_3D( p->PSD_LMK, p->nL, p->nMu, p->nK, double );
+    for (i=0; i<p->nL; i++)  p->L[i] = L[i];
     for (i=0; i<p->nMu; i++) p->Mu[i] = Mu[i];
     for (i=0; i<p->nK; i++)  p->K[i]  = K[i];
-    for (i=0; i < p->nMu; i++) {
-        for (j=0; j < p->nK; j++) {
-            p->PSD_MK[i][j] = P[i][j]; // PSD_MK is "PSD versus Mu and K".
+    for (i=0; i<p->nL; i++) {
+        for (j=0; j<p->nMu; j++) {
+            for (k=0; k<p->nK; k++) {
+                p->PSD_LMK[i][j][k] = P[i][j][k]; // PSD_LMK is "PSD versus L*, Mu and K".
+            }
         }
     }
-    if ( p->DumpDiagnostics ) {
-        DumpGif( "Lgm_PsdToFlux_PSD_MK", p->nK, p->nMu, p->PSD_MK );
-    }
-
 
     p->Alloced1 = TRUE;
-   
+
     return;
 
 }
-
-
 
 
 /**
@@ -980,8 +982,8 @@ void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_Psd
  *  is used to add PSD data/info to an Lgm_PsdToFlux structure.
  *
  *  We want Flux at constant E and \f$\alpha \f$ (i.e. we want \J$f( E, \alpha
- *  )\f$).  
- * 
+ *  )\f$).
+ *
  *  To perform the calculation we note that \f$f( \mu, K )\f$ is the same as
  *  \f$f( \mu(E, \alpha), K(\alpha) )\f$. Thus, for a given E and \f$\alpha\f$,
  *  we can figure out what \f$\mu\f$ and K  they correspond to and then we can
@@ -1001,18 +1003,21 @@ void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_Psd
  *      \param[in]      E           1-D array of E values
  *      \param[in]      nA          Number of Alpha values
  *      \param[in]      A           1-D array of Alpha values
- *      \param[in]      Extrapolate Turns on/off extrapolation capability
+ *      \param[in]      Larr        Array of precomputed L* versus Alpha values.
+ *      \param[in]      Karr        Array of precomputed K versus Alpha values.
+ *      \param[in]      Aarr        Array of Alpha values for Larr and Karr.
+ *      \param[in]      narr        Number of values in Larr, Karr, Aarr arrays.
  *      \param[in,out]  p           A properly pre-initialized Lgm_PsdToFlux structure.
  *
  *      \author     Mike Henderson
  *      \date       2011
  *      \warning    Still working on this code. It is not finished.
- * 
+ *
  */
-void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, Lgm_PsdToFlux *p ) {
+void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p ) {
 
-    int                 k, m, DoIt;
-    double              SinAlphaEq, AlphaEq, p2c2;
+    int                 k, m, DoIt, i, iL, done;
+    double              SinAlphaEq, AlphaEq, p2c2, Lstar;
     Lgm_MagModelInfo    *mInfo, *mInfo2;
 
     /*
@@ -1036,12 +1041,12 @@ For now we will just go with the defaults.
         LGM_ARRAY_2D_FREE( p->PSD_EA );
         LGM_ARRAY_2D_FREE( p->FLUX_EA );
     }
-    
+
     /*
      * Alloc arrays
      */
-    p->nE = nE; 
-    p->nA = nA; 
+    p->nE = nE;
+    p->nA = nA;
     LGM_ARRAY_1D( p->E,     p->nE, double );
     LGM_ARRAY_1D( p->A,     p->nA,  double );
     LGM_ARRAY_1D( p->KofA,  p->nA,  double );
@@ -1066,13 +1071,21 @@ For now we will just go with the defaults.
             p->A[k]    = A[k]; // A is local Pitch Angle
             SinAlphaEq = sqrt( mInfo2->Bmin/mInfo2->Blocal ) * sin( RadPerDeg*p->A[k] );
             AlphaEq    = DegPerRad*asin( SinAlphaEq );
-            p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
+// REALLY SHOULD ASSUME WE HAVE THESE ALREADY. I.E. from MahEphemInfo pre-processing.
+            //p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
+            Lgm_InterpArr( Karr, Aarr, narr,   p->A[k], &p->KofA[k] );
+            Lgm_InterpArr( Larr, Aarr, narr,   p->A[k], &p->LstarOfA[k] );
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
         }
     }
     Lgm_TearDown_AlphaOfK( mInfo );
+
+
+
+
+
 
 
     /*
@@ -1091,15 +1104,50 @@ assumes electrons -- generalize this...
     }
 
 
+
+
+
+
+
+
+
     /*
      * Now, from the PSD[Mu][K] array, get PSD at the Mu's and K's we just computed.
      * The result will be the same as PSD at the given E's and A's
      */
     LGM_ARRAY_2D( p->PSD_EA,  p->nE,  p->nA,  double );
     LGM_ARRAY_2D( p->FLUX_EA, p->nE,  p->nA,  double );
-    for ( m=0; m<nE; m++ ){
-        p2c2 = Lgm_p2c2( p->E[m], LGM_Ee0 );
-        for ( k=0; k<nA; k++ ){
+    for ( k=0; k<nA; k++ ){
+
+
+        /*
+         * Get L index and MK array
+         */
+        Lstar = p->LstarOfA[k]; // MAKE SURE THIS GETS INTO p STRUCTURE.
+        i=0; done = FALSE;
+        while ( !done ){
+            if (i >= p->nL ) {
+                done = TRUE;
+            } else if ( p->L[i] < Lstar ) {
+                ++i;
+            } else {
+                done = TRUE;
+            }
+        }
+        iL = i; if (iL<0)iL=0; if (iL>=p->nL) iL=p->nL-1;
+        p->PSD_MK = p->PSD_LMK[iL];  // just a pointer into the 3D array.
+
+
+
+
+
+
+
+
+
+        for ( m=0; m<nE; m++ ){
+            p2c2 = Lgm_p2c2( p->E[m], LGM_Ee0 );
+
             DoIt = FALSE;
 
             if ( p->Extrapolate > 2 ){ // extrapolate above and below
@@ -1151,10 +1199,20 @@ assumes electrons -- generalize this...
 
 
 /**
- * The p structure should have an initialized PSD[Mu][K] array in it (i.e. as
- * added by Lgm_P2F_SetPsd()).  This routine computes psd from this array given
- * arbitrary values of Mu and K. (Alpha is also needed here, because we need to
- * convert some Mu's to to Energie's long the way).
+ * The p structure should have an initialized PSD[L][Mu][K] array in it (i.e.
+ * as added by Lgm_P2F_SetPsd()).  When transforming from PSD at constant Mu
+ * and K, to Flux at constant E and Alpha, we note that a given Alpha implies
+ * both a value for K and a value for L*. First, since the L* dimension is
+ * usually large (because these types of arrays typically come from diffusion
+ * codes), we can just use the nearest bin for iL. However, that wont
+ * necessarily work so well for the K dimension because there are usually far
+ * fewer of those bins. For K, we will do a full interpolation. After that we
+ * will have an array of PSD(Mu) at the pitch angle we are interested in. This
+ * is easily transformed into PSD(E) which we then fit with a relativistic
+ * Maxwellian and evaluate at the E we desire.
+ *
+ * In this routine, we assume we have already done the iL step to reduce the 3D
+ * array down to a PSD[Mu][K] array.
  */
 double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p ) {
 
@@ -1212,7 +1270,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
 
     if ( FitData->n >=  4 ) {
 
-        
+
         // interpolate/fit E
         // for now just do a linear interp.
         // no lets try a fit...
@@ -1247,10 +1305,10 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     fprintf(fp, "%g %g\n", f->E[j], FitData->g[j]);
     }
     fclose(fp);
-        
+
     exit(0);
     */
-        
+
 
     //x[2] = 200.0;
         //printf("PSD_TO_FLUX: x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
@@ -1264,8 +1322,8 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         psd = -9e99;
 
     }
-    
-    
+
+
 
     LGM_ARRAY_1D_FREE( FitData->E );
     LGM_ARRAY_1D_FREE( FitData->g );
@@ -1395,7 +1453,7 @@ void UpSizeImage( double **Orig, double *X, double *Y, int M, int N, double **Ne
             if (m2 > M-1)   m2 = M-1;
             if (m3 > M-1)   m3 = M-1;
 
-            
+
 
             /*
              * Extract the pixel vals.
@@ -1559,7 +1617,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
  *     Fills the given array with a geomteric sequence of values.
  *
  *  \details
- *      
+ *
  *      \param[in]      a  Starting value.
  *      \param[in]      b  Ending value.
  *      \param[in]      n  Number of values (must be 2 or more.)
@@ -1582,7 +1640,7 @@ int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
 
     r = pow( b/a, 1.0/((double)(n-1)));
 
-    
+
     S[0] = a;
     for (j=1; j<n; j++) S[j] = S[j-1]*r;
     for (j=0; j<n; j++) G[j] = S[j];
@@ -1594,5 +1652,48 @@ int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
 
 
 
+void Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {                                                                                                                      
+                                                                                                                                                                                            
+    gsl_interp_accel    *acc;                                                                                                                                                               
+    gsl_spline          *spline;                                                                                                                                                            
+    double              *xa2, *ya2;                                                                                                                                                         
+    int                 i, Flag;                                                                                                                                                            
+                                                                                                                                                                                            
+    Flag = 0;                                                                                                                                                                               
+    if ( xa[1] < xa[0] ) {                                                                                                                                                                  
+                                                                                                                                                                                            
+        xa2 = (double *)calloc( n, sizeof(double) );                                                                                                                                        
+        ya2 = (double *)calloc( n, sizeof(double) );                                                                                                                                        
+                                                                                                                                                                                            
+        for (i=0; i<n; i++){                                                                                                                                                                
+            xa2[i] = xa[n-1-i];                                                                                                                                                             
+            ya2[i] = ya[n-1-i];                                                                                                                                                             
+        }                                                                                                                                                                                   
+                                                                                                                                                                                            
+        Flag = 1;                                                                                                                                                                           
+                                                                                                                                                                                            
+    } else {                                                                                                                                                                                
+                                                                                                                                                                                            
+        xa2 = xa;                                                                                                                                                                           
+        ya2 = ya;                                                                                                                                                                           
+                                                                                                                                                                                            
+    }                                                                                                                                                                                       
+                                                                                                                                                                                            
+                                                                                                                                                                                            
+    acc    = gsl_interp_accel_alloc( );                                                                                                                                                     
+    spline = gsl_spline_alloc( gsl_interp_akima, n );                                                                                                                                       
+    gsl_spline_init( spline, xa2, ya2, n );                                                                                                                                                 
+    *y = gsl_spline_eval( spline, x, acc );                                                                                                                                                 
+    gsl_spline_free( spline );                                                                                                                                                              
+    gsl_interp_accel_free( acc );                                                                                                                                                           
+                                                                                                                                                                                            
+    if ( Flag ){                                                                                                                                                                            
+        free( xa2 );                                                                                                                                                                        
+        free( ya2 );                                                                                                                                                                        
+    }                                                                                                                                                                                       
+                                                                                                                                                                                            
+    return;                                                                                                                                                                                 
+                                                                                                                                                                                            
+}    
 
 

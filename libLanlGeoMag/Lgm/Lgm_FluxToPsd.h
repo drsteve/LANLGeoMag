@@ -130,15 +130,21 @@ typedef struct Lgm_PsdToFlux {
 
 
     /*
-     * Params for PSD versus Mu and K.
+     * Params for PSD versus L, Mu and K.
      */
-    int          nMu;                //!< Number of mu bins in PSD array.
+    int          nL;               //!< Number of L bins in PSD array.
 
-    double       *Mu;                //!< Array of mu values in PSD array.
+    double       *L;                //!< Array of L values in PSD array.
+
+    int          nMu;               //!< Number of mu bins in PSD array.
+
+    double       *Mu;               //!< Array of mu values in PSD array.
 
     int          nK;                //!< Number of K bins in PSD array.
 
     double       *K;                //!< Array of K values in PSD array.
+
+    double       ***PSD_LMK;        //!< Array of PSD versus L, Mu and K, PSD[L][Mu][K].
 
     double       **PSD_MK;          //!< Array of PSD versus Mu and K, PSD[Mu][K].
 
@@ -154,6 +160,8 @@ typedef struct Lgm_PsdToFlux {
     Lgm_Vector   Position;         //!< Position of measurment.
 
     double       *KofA;            //!< Array of K values that are implied by the Alpha values. Size is nA.
+
+    double       *LstarOfA;        //!< Array of Lstar values that are implied by the Alpha values. Size is nA.
 
     double       **MuofE;          //!< Array of Mu values that are implied by the E, Alpha and B values. Size is nMu by nK.
 
@@ -208,8 +216,8 @@ double         Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f )
 Lgm_PsdToFlux  *Lgm_P2F_CreatePsdToFlux( int DumpDiagnostics );
 void            Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p );
 void            Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p );
-void            Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p );
-void            Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, Lgm_PsdToFlux *p );
+void            Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p );
+void            Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p );
 double          Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p );
 
 

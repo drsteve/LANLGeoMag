@@ -89,21 +89,23 @@ void Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p
 /**
  *     Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
  *
- *      \param[in]      P                 2D array containing the Phase Space Density as a function of Mu and K.
- *      \param[in]      Mu                1D array containing the energy values implied by the first index of Flux[][] array.
+ *      \param[in]      P                 3D array containing the Phase Space Density as a function of Mu and K.
+ *      \param[in]      L                 1D array containing the Lstar values implied by the first index of PSD[][][] array.
+ *      \param[in]      nL                number of Lstar values.
+ *      \param[in]      Mu                1D array containing the energy values implied by the second index of PSD[][][] array.
  *      \param[in]      nMu               number of energies.
- *      \param[in]      K                 1D array containing the pitch angles values implied by the second index of Flux[][] array.
+ *      \param[in]      K                 1D array containing the pitch angles values implied by the third index of PSD[][][] array.
  *      \param[in]      nK                number of pitch angles.
- *      \param[in,out]  p                 Lgm_FluxToPsd sturcture.
+ *      \param[in,out]  p                 Lgm_FluxToPsd structure.
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
  *
  */
-void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p ) {
+void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p ) {
 
     
-    int     i, j;
+    int     i, j, k;
 
 
     /*
@@ -112,29 +114,31 @@ void Lgm_P2F_SetPsd( double **P, double *Mu, int nMu, double *K, int nK, Lgm_Psd
     if ( p->Alloced1 ) {
         LGM_ARRAY_1D_FREE( p->Mu );
         LGM_ARRAY_1D_FREE( p->K );
-        LGM_ARRAY_2D_FREE( p->PSD_MK );
+        LGM_ARRAY_1D_FREE( p->L );
+        LGM_ARRAY_3D_FREE( p->PSD_LMK );
     }
 
 
     /*
      * Add Psd array to p structure. Alloc arrays appropriately.
      */
+    p->nL  = nL; 
     p->nMu = nMu; 
     p->nK  = nK; 
+    LGM_ARRAY_1D( p->L, p->nL, double );
     LGM_ARRAY_1D( p->Mu, p->nMu, double );
     LGM_ARRAY_1D( p->K, p->nK, double );
-    LGM_ARRAY_2D( p->PSD_MK, p->nMu, p->nK, double );
+    LGM_ARRAY_3D( p->PSD_LMK, p->nL, p->nMu, p->nK, double );
+    for (i=0; i<p->nL; i++)  p->L[i] = L[i];
     for (i=0; i<p->nMu; i++) p->Mu[i] = Mu[i];
     for (i=0; i<p->nK; i++)  p->K[i]  = K[i];
-    for (i=0; i < p->nMu; i++) {
-        for (j=0; j < p->nK; j++) {
-            p->PSD_MK[i][j] = P[i][j]; // PSD_MK is "PSD versus Mu and K".
+    for (i=0; i<p->nL; i++) {
+        for (j=0; j<p->nMu; j++) {
+            for (k=0; k<p->nK; k++) {
+                p->PSD_LMK[i][j][k] = P[i][j][k]; // PSD_LMK is "PSD versus L*, Mu and K".
+            }
         }
     }
-    if ( p->DumpDiagnostics ) {
-        DumpGif( "Lgm_Psd_ToFlux_SetPsd_PSD_MK", f->nK, MK>nMu, MK>PSD_MK );
-    }
-
 
     f->Alloced1 = TRUE;
    
@@ -239,6 +243,7 @@ For now we will just go with the defaults.
             p->A[k]    = A[k]; // A is local Pitch Angle
             SinAlphaEq = sqrt( mInfo2->Bmin/mInfo2->Blocal ) * sin( RadPerDeg*p->A[k] );
             AlphaEq    = DegPerRad*asin( SinAlphaEq );
+// REALLY SHOULD ASSUME WE HAVE THESE ALREADY.
             p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
@@ -264,14 +269,48 @@ assumes electrons -- generalize this...
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*
-     * Now, from the PSD[Mu][K] array, get PSD at the Mu's and K's we just computed.
+     * Now, from the PSD[L][Mu][K] array, get PSD at the L's, Mu's and K's we have.
      * The result will be the same as PSD at the given E's and A's
      */
     LGM_ARRAY_2D( p->PSD_EA,  p->nE,  p->nA,  double );
     LGM_ARRAY_2D( p->FLUX_EA, p->nE,  p->nA,  double );
-    for ( m=0; m<nE; m++ ){
-        for ( k=0; k<nA; k++ ){
+    for ( k=0; k<nA; k++ ){
+
+        /*
+         * Get L index and MK array
+         */
+        Lstar = p->LstarOfAlpha[k]; // MAKE SURE THIS GETS INTO p STRUCTURE.
+        i=0; done = FALSE;
+        while ( !done ){
+            if (i >= p->nL ) {
+                done = TRUE;
+            } else if ( p->L[i] < Lstar ) {
+                ++i;
+            } else {    
+                done = TRUE;
+            }
+        }
+        iL = i; if (iL<0)iL=0; if (iL>=p->nL) iL=p->nL-1;
+        p->PSD_MK = p->PSD_LMK[iL];  // just a pointer into the 3D array.
+
+
+
+        for ( m=0; m<nE; m++ ){
             DoIt = FALSE;
 
             if ( p->Extrapolate > 2 ){ // extrapolate above and below
@@ -321,10 +360,20 @@ assumes electrons -- generalize this...
 
 
 /**
- * The p structure should have an initialized PSD[Mu][K] array in it (i.e. as
- * added by Lgm_P2F_SetPsd()).  This routine computes psd from this array given
- * arbitrary values of Mu and K. (Alpha is also needed here, because we need to
- * convert some Mu's to to Energie's long the way).
+ * The p structure should have an initialized PSD[L][Mu][K] array in it (i.e.
+ * as added by Lgm_P2F_SetPsd()).  When transforming from PSD at constant Mu
+ * and K, to Flux at constant E and Alpha, we note that a given Alpha implies
+ * both a value for K and a value for L*. First, since the L* dimension is
+ * usually large (because these types of arrays typically come from diffusion
+ * codes), we can just use the nearest bin for iL. However, that wont
+ * necessarily work so well for the K dimension because there are usually far
+ * fewer of those bins. For K, we will do a full interpolation. After that we
+ * will have an array of PSD(Mu) at the pitch angle we are interested in. This
+ * is easily transformed into PSD(E) which we then fit with a relativistic
+ * Maxwellian and evaluate at the E we desire. 
+ * 
+ * In this routine, we assume we have already done the iL step to reduce the 3D
+ * array down to a PSD[Mu][K] array. 
  */
 double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p ) {
 
@@ -358,7 +407,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     //printf("i0, i1 = %d %d\n", i0, i1);
 
 
-    // interpolate K
+    // interpolate K. This give f(E) (i.e. called g(E) here).
     FitData->n = p->nMu;
     LGM_ARRAY_1D( FitData->E, FitData->n, double );
     LGM_ARRAY_1D( FitData->g, FitData->n, double );
