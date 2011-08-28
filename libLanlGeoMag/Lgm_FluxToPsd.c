@@ -875,12 +875,14 @@ void Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p ) {
         LGM_ARRAY_1D_FREE( p->Mu );
         LGM_ARRAY_1D_FREE( p->K );
         LGM_ARRAY_2D_FREE( p->PSD_MK );
+        LGM_ARRAY_3D_FREE( p->PSD_LMK );
     }
 
     if ( p->Alloced2 ) {
         LGM_ARRAY_1D_FREE( p->E );
         LGM_ARRAY_1D_FREE( p->A );
         LGM_ARRAY_1D_FREE( p->KofA );
+        LGM_ARRAY_1D_FREE( p->LstarOfA );
         LGM_ARRAY_2D_FREE( p->MuofE );
         LGM_ARRAY_2D_FREE( p->PSD_EA );
         LGM_ARRAY_2D_FREE( p->FLUX_EA );
@@ -942,6 +944,7 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
         LGM_ARRAY_1D_FREE( p->K );
         LGM_ARRAY_1D_FREE( p->L );
         LGM_ARRAY_3D_FREE( p->PSD_LMK );
+        LGM_ARRAY_2D_FREE( p->PSD_MK );
     }
 
 
@@ -955,9 +958,12 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
     LGM_ARRAY_1D( p->Mu, p->nMu, double );
     LGM_ARRAY_1D( p->K, p->nK, double );
     LGM_ARRAY_3D( p->PSD_LMK, p->nL, p->nMu, p->nK, double );
-    for (i=0; i<p->nL; i++)  p->L[i] = L[i];
+    LGM_ARRAY_2D( p->PSD_MK, p->nMu, p->nK, double );
+
+    for (i=0; i<p->nL; i++)  p->L[i]  = L[i];
     for (i=0; i<p->nMu; i++) p->Mu[i] = Mu[i];
     for (i=0; i<p->nK; i++)  p->K[i]  = K[i];
+
     for (i=0; i<p->nL; i++) {
         for (j=0; j<p->nMu; j++) {
             for (k=0; k<p->nK; k++) {
@@ -1016,7 +1022,7 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
  */
 void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p ) {
 
-    int                 k, m, DoIt, i, iL, done;
+    int                 k, m, DoIt, i, iL, iMu, iK, done;
     double              SinAlphaEq, AlphaEq, p2c2, Lstar;
     Lgm_MagModelInfo    *mInfo, *mInfo2;
 
@@ -1037,6 +1043,7 @@ For now we will just go with the defaults.
         LGM_ARRAY_1D_FREE( p->E );
         LGM_ARRAY_1D_FREE( p->A );
         LGM_ARRAY_1D_FREE( p->KofA );
+        LGM_ARRAY_1D_FREE( p->LstarOfA );
         LGM_ARRAY_2D_FREE( p->MuofE );
         LGM_ARRAY_2D_FREE( p->PSD_EA );
         LGM_ARRAY_2D_FREE( p->FLUX_EA );
@@ -1050,6 +1057,7 @@ For now we will just go with the defaults.
     LGM_ARRAY_1D( p->E,     p->nE, double );
     LGM_ARRAY_1D( p->A,     p->nA,  double );
     LGM_ARRAY_1D( p->KofA,  p->nA,  double );
+    LGM_ARRAY_1D( p->LstarOfA,  p->nA,  double );
     LGM_ARRAY_2D( p->MuofE, p->nE,  p->nA,  double );
 
 
@@ -1062,8 +1070,8 @@ For now we will just go with the defaults.
     Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
     {
-        #pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
-        #pragma omp for schedule(dynamic, 1)
+        //#pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
+        //#pragma omp for schedule(dynamic, 1)
         for ( k=0; k<nA; k++ ){
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
@@ -1073,8 +1081,8 @@ For now we will just go with the defaults.
             AlphaEq    = DegPerRad*asin( SinAlphaEq );
 // REALLY SHOULD ASSUME WE HAVE THESE ALREADY. I.E. from MahEphemInfo pre-processing.
             //p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
-            Lgm_InterpArr( Karr, Aarr, narr,   p->A[k], &p->KofA[k] );
-            Lgm_InterpArr( Larr, Aarr, narr,   p->A[k], &p->LstarOfA[k] );
+            Lgm_InterpArr( Aarr, Karr, narr,   AlphaEq, &p->KofA[k] );
+            Lgm_InterpArr( Aarr, Larr, narr,   AlphaEq, &p->LstarOfA[k] );
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
@@ -1099,7 +1107,7 @@ assumes electrons -- generalize this...
         p->E[m] = E[m];
         for ( k=0; k<nA; k++ ){
             p->MuofE[m][k] = Lgm_Ek_to_Mu( p->E[m], p->A[k], p->B, LGM_Ee0 );
-            //printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
+            //printf("p->E[%d], p->A[%d], p->KofA[%d], p->B, f->MuofE[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, p->E[m], p->A[k], p->KofA[k], p->B, p->MuofE[m][k]);
         }
     }
 
@@ -1135,7 +1143,14 @@ assumes electrons -- generalize this...
             }
         }
         iL = i; if (iL<0)iL=0; if (iL>=p->nL) iL=p->nL-1;
-        p->PSD_MK = p->PSD_LMK[iL];  // just a pointer into the 3D array.
+
+
+
+        for ( iMu=0; iMu<p->nMu; iMu++ ){
+            for ( iK=0; iK<p->nK; iK++ ){
+                p->PSD_MK[iMu][iK] = p->PSD_LMK[iL][iMu][iK];  
+            }
+        }
 
 
 
@@ -1171,9 +1186,13 @@ assumes electrons -- generalize this...
             if (DoIt) {
                 p->PSD_EA[m][k]  = Lgm_P2F_GetPsdAtMuAndK( p->MuofE[m][k], p->KofA[k], p->A[k], p );
                 // Now do conversion from units of PSD to Flux
-                p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
+                if ( p->PSD_EA[m][k] < 0.0 ) {
+                    p->FLUX_EA[m][k] = -9e99;
+                } else {
+                    p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
+                }
 //if (m==2)
-//printf("p->MuofE[m][k] = %g p->KofA[k], p->A[k] = %g %g       p->PSD_EA[m][k] = %g\n", p->MuofE[m][k], p->KofA[k], p->A[k], p->PSD_EA[m][k]);
+//printf("p->MuofE[m][k] = %g p->KofA[k], p->A[k] = %g %g       p->PSD_EA[m][k] = %g  p->FLUX_EA[m][k] = %g\n", p->MuofE[m][k], p->KofA[k], p->A[k], p->PSD_EA[m][k], p->FLUX_EA[m][k]);
             } else {
                 p->PSD_EA[m][k] = 0.0;
             }
@@ -1229,12 +1248,12 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     /*
      * Interpolate on K first to get a 1D array of f(mu).
      */
-    if ( K < p->K[0] ) {
-        return(-9e99);
-        i0 = 0; i1 = 1;
-    } else if ( K > p->K[p->nK - 1] ) {
+    if ( K > p->K[p->nK - 1] ) {
         return(-9e99);
         i0 = p->nK - 2; i1 = p->nK - 1;
+    } else if ( K < p->K[0] ) {
+        return(-9e99);
+        i0 = 0; i1 = 1;
     } else {
         for (i=1; i<p->nK; i++) {
             if ( K < p->K[i] ) {
@@ -1255,13 +1274,14 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         K1   = p->K[i1];
         y0   = p->PSD_MK[j][i0];
         y1   = p->PSD_MK[j][i1];
+//printf("y0, y1 = %g %g\n", y0, y1);
         if ( (y0>0.0)&&(y1>0.0) ){
             slp  = (y1-y0)/(K1-K0);
             g = slp*(K-K1) + y1;
             if ( g > 1e-40 ) {
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = Lgm_Mu_to_Ek( p->Mu[j], A, p->B, LGM_Ee0 );
-                //printf("i0, i1 = %d %d   K0, K1 = %g %g   y0, y1, slp = %g %g %g   K = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", i0, i1, K0, K1, y0, y1, slp, K,  FitData->n, FitData->E[ FitData->n ], FitData->n , FitData->g[ FitData->n ]);
+//                printf("i0, i1 = %d %d   K0, K1 = %g %g   y0, y1, slp = %g %g %g   K = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", i0, i1, K0, K1, y0, y1, slp, K,  FitData->n, FitData->E[ FitData->n ], FitData->n , FitData->g[ FitData->n ]);
                 //printf("%g %g\n", FitData->E[ FitData->n ], FitData->g[ FitData->n ]);
                 ++(FitData->n);
             }
@@ -1652,48 +1672,48 @@ int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
 
 
 
-void Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {                                                                                                                      
-                                                                                                                                                                                            
-    gsl_interp_accel    *acc;                                                                                                                                                               
-    gsl_spline          *spline;                                                                                                                                                            
-    double              *xa2, *ya2;                                                                                                                                                         
-    int                 i, Flag;                                                                                                                                                            
-                                                                                                                                                                                            
-    Flag = 0;                                                                                                                                                                               
-    if ( xa[1] < xa[0] ) {                                                                                                                                                                  
-                                                                                                                                                                                            
-        xa2 = (double *)calloc( n, sizeof(double) );                                                                                                                                        
-        ya2 = (double *)calloc( n, sizeof(double) );                                                                                                                                        
-                                                                                                                                                                                            
-        for (i=0; i<n; i++){                                                                                                                                                                
-            xa2[i] = xa[n-1-i];                                                                                                                                                             
-            ya2[i] = ya[n-1-i];                                                                                                                                                             
-        }                                                                                                                                                                                   
-                                                                                                                                                                                            
-        Flag = 1;                                                                                                                                                                           
-                                                                                                                                                                                            
-    } else {                                                                                                                                                                                
-                                                                                                                                                                                            
-        xa2 = xa;                                                                                                                                                                           
-        ya2 = ya;                                                                                                                                                                           
-                                                                                                                                                                                            
-    }                                                                                                                                                                                       
-                                                                                                                                                                                            
-                                                                                                                                                                                            
-    acc    = gsl_interp_accel_alloc( );                                                                                                                                                     
-    spline = gsl_spline_alloc( gsl_interp_akima, n );                                                                                                                                       
-    gsl_spline_init( spline, xa2, ya2, n );                                                                                                                                                 
-    *y = gsl_spline_eval( spline, x, acc );                                                                                                                                                 
-    gsl_spline_free( spline );                                                                                                                                                              
-    gsl_interp_accel_free( acc );                                                                                                                                                           
-                                                                                                                                                                                            
-    if ( Flag ){                                                                                                                                                                            
-        free( xa2 );                                                                                                                                                                        
-        free( ya2 );                                                                                                                                                                        
-    }                                                                                                                                                                                       
-                                                                                                                                                                                            
-    return;                                                                                                                                                                                 
-                                                                                                                                                                                            
-}    
+void Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
+
+    gsl_interp_accel    *acc;
+    gsl_spline          *spline;
+    double              *xa2, *ya2;
+    int                 i, Flag;
+
+    Flag = 0;
+    if ( xa[1] < xa[0] ) {
+
+        xa2 = (double *)calloc( n, sizeof(double) );
+        ya2 = (double *)calloc( n, sizeof(double) );
+
+        for (i=0; i<n; i++){
+            xa2[i] = xa[n-1-i];
+            ya2[i] = ya[n-1-i];
+        }
+
+        Flag = 1;
+
+    } else {
+
+        xa2 = xa;
+        ya2 = ya;
+
+    }
+
+
+    acc    = gsl_interp_accel_alloc( );
+    spline = gsl_spline_alloc( gsl_interp_akima, n );
+    gsl_spline_init( spline, xa2, ya2, n );
+    *y = gsl_spline_eval( spline, x, acc );
+    gsl_spline_free( spline );
+    gsl_interp_accel_free( acc );
+
+    if ( Flag ){
+        free( xa2 );
+        free( ya2 );
+    }
+
+    return;
+
+}
 
 

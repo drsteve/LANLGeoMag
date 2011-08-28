@@ -20,3 +20,4 @@ install-sh
 libLanlGeoMag/.deps/
 *.o
 *.lo
+*.png
