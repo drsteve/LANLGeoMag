@@ -21,6 +21,13 @@ git pull
 git push
 
 
+Prerequisites
+=============
+
+git
+libperl-dev
+
+
 Compiling
 =========
 
