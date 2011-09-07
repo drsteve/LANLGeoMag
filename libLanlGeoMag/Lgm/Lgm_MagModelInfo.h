@@ -91,10 +91,10 @@ typedef struct Lgm_MagModelInfo {
     double		Hmax;
     FILE	    *fp;
     double      W[6];
-    double      G1, G2;
-    int			Kp;
-    double      Dst;
-    double      P;
+    double      G1, G2, G3;
+    int			Kp, aKp3;
+    double      fKp, Dst;
+    double      V, Den, P;
     double      Bx, By, Bz;
     double      T96MOD_V[11];       /* free params for T96_MOD */
 
@@ -223,6 +223,8 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
     double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
 
+    double      Lgm_MagStep_Tol;        // tolerance for Magstep (ODE solver).
+
 
     /*
      *  These variables are needed to make I_integrand() reentrant/thread-safe.
@@ -235,8 +237,9 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector  Lgm_I_integrand_u_scale;
     int         Lgm_n_I_integrand_Calls;
     int         Lgm_I_Integrator;
-    double      Lgm_I_Integrator_epsrel;
-    double      Lgm_I_Integrator_epsabs;
+
+    double      Lgm_I_Integrator_epsrel;        // Quadpack epsrel tolerance for I_integrator
+    double      Lgm_I_Integrator_epsabs;        // Quadpack epsabs tolerance for I_integrator
 
     /*
      *  These variables are needed to make Sb_integrand() reentrant/thread-safe.
@@ -249,8 +252,8 @@ typedef struct Lgm_MagModelInfo {
     int         Lgm_n_Sb_integrand_Calls;
     int         Lgm_Sb_Integrator;              // This variable is not currently used (for now I force
                                                 // Sb to use DQAGP. )
-    double      Lgm_Sb_Integrator_epsrel;
-    double      Lgm_Sb_Integrator_epsabs;
+    double      Lgm_Sb_Integrator_epsrel;       // Quadpack epsrel tolerance for Sb_integrator
+    double      Lgm_Sb_Integrator_epsabs;       // Quadpack epsabs tolerance for Sb_integrator
 
 
 
@@ -359,6 +362,7 @@ int  Lgm_TraceLine(  Lgm_Vector *, Lgm_Vector *, double, double, double, int, Lg
 int  Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double, int, Lgm_MagModelInfo * );
 int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info );
 void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
+void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 int  InitSpline( Lgm_MagModelInfo *Info );
 int  FreeSpline( Lgm_MagModelInfo *Info );

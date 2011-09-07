@@ -17,6 +17,7 @@ from lgmpy.Closed_Field import Closed_Field
 from Lgm_OP77 import OP77
 from Lgm_T89 import T89
 from lgmpy.Lstar import get_Lstar
+from lgmpy.magcoords import coordTrans
 
 #package info
 __version__ = '0.1dev'

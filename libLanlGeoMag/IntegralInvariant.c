@@ -354,7 +354,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 
     while ( !done ) {
 
-        Lgm_MagStep( &mInfo->Lgm_I_integrand_P, &mInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, mInfo->Bfield, mInfo );
+        Lgm_MagStep( &mInfo->Lgm_I_integrand_P, &mInfo->Lgm_I_integrand_u_scale, Htry, &Hdid, &Hnext, mInfo->Lgm_MagStep_Tol, sgn, &sdid, &reset, mInfo->Bfield, mInfo );
         Hdone += Hdid; // positive qnty
 
         mInfo->Lgm_I_integrand_S += sgn*Hdid;
@@ -457,7 +457,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
@@ -533,7 +534,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );
@@ -605,7 +607,8 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                 if ( Lgm_TraceToMirrorPoint( &Pa, &Pb, &SS, mInfo->Bm, 1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) > 0 ) {
 
                     r  = Lgm_Magnitude( &Pb );
-                    mInfo->Hmax = SS/200.0;
+                    //mInfo->Hmax = SS/200.0;
+                    mInfo->Hmax = SS/(double)mInfo->nDivs;
                     Lgm_TraceLine2( &Pa, &Pb, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, 1e-7, FALSE, mInfo );
 
                     ReplaceFirstPoint( 0.0, mInfo->Bm, &Pa, mInfo );

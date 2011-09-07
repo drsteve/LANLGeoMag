@@ -7,10 +7,10 @@
 CFLAGS =  -mfpmath=387 `pkg-config --cflags gtk+-2.0 gtkglext-1.0 lgm` 
 
 FILES  =  support.o ReadPng.o trackball.o MakeTube.o Atmosphere.o Ellipsoid.o Sphere.o xvgifwr2.o \
-		  ReadWriteMagEpehmData.o IridiumFlare.o ComputeZPSTransMatrix.o SatSelector_Interface.o  \
+		  IridiumFlare.o ComputeZPSTransMatrix.o SatSelector_Interface.o  \
 		  SatSelector_Callbacks.o SaveRasterFileDialog.o OpenMagEphemFile.o
 
-LIBS   = -lGLEW `pkg-config --cflags --libs gtk+-2.0 gthread-2.0 gtkglext-1.0 lgm`
+LIBS   = -g -lGLEW `pkg-config --cflags --libs gtk+-2.0 gthread-2.0 gtkglext-1.0 lgm`
 CC     = gcc 
 
 all: ViewDriftShell

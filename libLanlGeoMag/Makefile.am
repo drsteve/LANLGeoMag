@@ -3,11 +3,12 @@ SUBDIRS = Lgm
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
 # Location to keep Eop-related stuff
-LGM_EOP_DATA_DIR = @prefix@/share/LanlGeoMag/EopData
-includedir       = @prefix@/include/Lgm
-#libdir           = @prefix@/lib
-pkgconfigdir     = $(libdir)/pkgconfig
-pkgconfig_DATA   = lgm.pc
+LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
+LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
+includedir         = @prefix@/include/Lgm
+#libdir             = @prefix@/lib
+pkgconfigdir       = $(libdir)/pkgconfig
+pkgconfig_DATA     = lgm.pc
 
 if LINUX
     CRONDIR = /etc/cron.daily
@@ -27,8 +28,10 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c 
                             TS04_opt.c Tsyg2004_Optimized.c Lgm_PolyRoots.c Lgm_SummersDiffCoeff.c\
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c \
-			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c 
-include_HEADERS = DynamicMemory.h
+			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
+                            Lgm_QinDenton.c Daa_param.c Lgm_Misc.c Lgm_HDF5.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
+                            
+include_HEADERS = Lgm/*.h
 
 EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/finals.daily EopData/finals2000A.all EopData/finals.all \
@@ -36,8 +39,10 @@ EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/eopc04_IAU2000.62-now EopData/GetEopFiles.in \
 	EopData/Lgm_LeapSecondDates.dat
 
+QINDENTON_DIR = QinDenton
+
 #EXTRA_DIST = EopData
-EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list
+EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list $(QINDENTON_DIR)
 
 
 
@@ -57,4 +62,6 @@ install-exec-hook:
 	cp EopData/finals.all $(LGM_EOP_DATA_DIR)/.
 	cp EopData/finals.daily $(LGM_EOP_DATA_DIR)/.
 	cp EopData/tai-utc.dat $(LGM_EOP_DATA_DIR)/.
+	mkdir -p $(LGM_INDEX_DATA_DIR)
+	rsync -ar QinDenton $(LGM_INDEX_DATA_DIR)/.
 #	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles

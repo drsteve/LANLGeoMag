@@ -3,7 +3,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS;
     char        Str[80];
@@ -685,7 +685,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %51s",  " +---- Mag. Field at South Mag. Footpoint GSM ----+" );
     fprintf( fp, " %12s",  " +-S.L.Cone-+" );
     fprintf( fp, " %38s",  " +----- Minimum |B| Point GSM -------+" );
-    fprintf( fp, " %51s",  " +---- Magnetic Field at Minimum |B| Pointint ----+" );
+    fprintf( fp, " %51s",  " +---- Magnetic Field at Minimum |B| Point    ----+" );
 
     fprintf(fp, "\n");
 

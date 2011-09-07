@@ -70,6 +70,7 @@
  */
 double mypow( double x, double e ) {
 
+/*
     static double xmin=9e99, xmax=-9e99;
 
     if ( (x<xmin) && (x >= 0.0) ) {
@@ -81,6 +82,7 @@ double mypow( double x, double e ) {
         xmax = x;
         printf("new xmax = %g\n", xmax);
     }
+*/
     
 
     return( pow( x, e ) );

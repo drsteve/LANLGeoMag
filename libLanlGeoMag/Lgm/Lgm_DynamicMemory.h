@@ -123,7 +123,7 @@
     register type *pdata;\
     pdata = (type *)calloc( col, sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
-        fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for data\n");\
+        fprintf(stderr, "LGM_ARRAY_1D Macro: Could not allocate space for data\n");\
         exit(1);\
     }\
     prow = pdata;\
@@ -139,7 +139,7 @@
  */
 #define LGM_ARRAY_2D( prow, row, col, type ) {\
     register type *pdata;\
-    int      i;\
+    int      mi;\
     pdata = (type *)calloc( row*col, sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for data\n");\
@@ -150,8 +150,8 @@
         fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
-    for (i=0; i<row; i++){\
-        prow[i] = pdata;\
+    for (mi=0; mi<row; mi++){\
+        prow[mi] = pdata;\
         pdata += col;\
     }\
 }\

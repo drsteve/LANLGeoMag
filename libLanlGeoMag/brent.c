@@ -72,7 +72,7 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         // x to u. (From point Px to Pu.)
         P    = Px;
         Htry = du;
-        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-7, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
         f->Info->Bfield( &P, &Btmp, f->Info );
         B = Lgm_Magnitude( &Btmp );
         Pu = P;
@@ -143,8 +143,7 @@ int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_V
 
 
 	if ( ((fa > 0.0) && (fb > 0.0)) || ((fa < 0.0) && (fb < 0.0)) ) {
-printf("fa, fb = %g %g\n", fa, fb);
-		fprintf(stderr, "Root not bracketed in Lgm_zBrent, tol = %g\n", tol);
+		fprintf(stderr, "Root not bracketed in Lgm_zBrent, fa, fb = %g %g tol = %g\n", fa, fb, tol);
         return(0);
     }
 
@@ -167,6 +166,8 @@ printf("fa, fb = %g %g\n", fa, fb);
 		tol1 = 2.0*EPS*fabs(b)+0.5*tol;
 		xm = 0.5*(c-b);
 		if ( (fabs(xm) <= tol1) || (fb == 0.0) ) {
+		//if ( (fabs(fb) <= tol) || (fb == 0.0) ) {
+//printf("xm = %g    fb = %g\n", xm, fb);
 //printf("c, b   = %lf %lf\n", c, b);
 //printf("fc, fb = %g %g\n", fc, fb);
             *Sz = b;
@@ -217,12 +218,13 @@ printf("fa, fb = %g %g\n", fa, fb);
 //        if ( dd < 0.0 ) sgn *= -1.0;
 //        Htry = fabs(dd);
         Htry = dd;
-        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, 1.0e-8, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+if (Htry != Hdid) printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
         fb = f->func( &Pb, f->Val, f->Info );
         //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 
 	}
-	printf("Lgm_zBrent(): Maximum number of iterations exceeded\n");
+	printf("Lgm_zBrent(): Maximum number of iterations exceeded, iter=%d. \n", iter);
     *Sz = b;
     *Fz = fb;
     *Pz = Pb;
@@ -254,7 +256,7 @@ int Lgm_zBrent(double S1, double S2, double F1, double F2, BrentFuncInfo *f, dou
 
 
 	if ( ((fa > 0.0) && (fb > 0.0)) || ((fa < 0.0) && (fb < 0.0)) ) {
-printf("fa, fb = %g %g\n", fa, fb);
+//printf("fa, fb = %g %g\n", fa, fb);
 		fprintf(stderr, "Root not bracketed in Lgm_zBrent, tol = %g\n", tol);
         return(0);
     }

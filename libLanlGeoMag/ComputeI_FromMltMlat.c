@@ -15,7 +15,6 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
      *  SM coords. All of my tracing routines assume GSM,
      *  so convert to GSM.
      */
-    //printf("Bm, MLT, b, r = %g %g %g %g\n", Bm, MLT, b, r );
 //printf("LstarInfo->mInfo->Lgm_FindBmRadius_Tol = %g\n", LstarInfo->mInfo->Lgm_FindBmRadius_Tol);
     if ( !FindBmRadius( Bm, MLT, mlat, r, LstarInfo->mInfo->Lgm_FindBmRadius_Tol, LstarInfo ) ) {
 
@@ -23,7 +22,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  Couldnt get a valid Bm. (The bracket is pretty huge,so
          *  we probably ought to believe there really isnt a valid one.)
          */
-        printf("%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
+        printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
         I = 9e99;
 
     } else {
@@ -38,9 +37,9 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         w.x = (*r)*cl*cos(Phi); w.y = (*r)*cl*sin(Phi); w.z = (*r)*sl;
         Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
         if (LstarInfo->VerbosityLevel > 4) {
-            printf("%sResults of FindBmRadius: Bm, MLT, mlat, r = %g %g %g %g%s\n", LstarInfo->PreStr, Bm, MLT, mlat, (*r), LstarInfo->PostStr);
-            printf("%sResults of FindBmRadius: u_sm  = %g %g %g%s\n", LstarInfo->PreStr, w.x, w.y, w.z, LstarInfo->PostStr);
-            printf("%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
+            printf("\t%sResults of FindBmRadius: Bm, MLT, mlat, r = %g %g %g %g%s\n", LstarInfo->PreStr, Bm, MLT, mlat, (*r), LstarInfo->PostStr);
+            printf("\t%sResults of FindBmRadius: u_sm  = %g %g %g%s\n", LstarInfo->PreStr, w.x, w.y, w.z, LstarInfo->PostStr);
+            printf("\t%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
         }
 
 
@@ -61,14 +60,15 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  To find the other mirror point, we need to know which way Bmin is.
          *  Lgm_TraceToMirrorPoint() should do the rest is for us.
          */
-        Htry = 1e-3; // we probably dont ever need to split the mirror points to any finer precision than this(?).
-        u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+        Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+        //u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+        u_scale.x =  1.0;  u_scale.y = 1.0; u_scale.z = 1.0;
         P = Pmirror1;
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Bs = Lgm_Magnitude( &Bvec );
 //printf("Bs-Bm = %g\n", Bs-Bm);
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( LGM_BAD_TRACE );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Be  = Lgm_Magnitude( &Bvec );
@@ -85,7 +85,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Bs = Lgm_Magnitude( &Bvec );
 
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( LGM_BAD_TRACE );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Be  = Lgm_Magnitude( &Bvec );
@@ -101,16 +101,17 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         }
 
         SS1 = Hdid;
-//SS1 = 0.0;
+        //SS1 = 0.0;
 
 
 
-//        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
         SS2 = 0.0;
-        if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+//        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
+        if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 )  {
 
             SS = SS1 + SS2;
-//printf("SS = %g\n", SS);
+//printf("SS1, SS2, SS = %g %g %g   sgn = %g\n", SS1, SS2, SS, sgn);
+//printf("%g %g\n", mlat, SS);
 
             if ( sgn < 0.0 ) {
                 LstarInfo->mInfo->Pm_North = Pmirror1;
@@ -118,6 +119,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             } else {
                 LstarInfo->mInfo->Pm_North = Pmirror2;
                 LstarInfo->mInfo->Pm_South = Pmirror1;
+//printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGg\n");
             }
             SS = fabs( SS );
             if (SS < 1e-7) {
@@ -127,6 +129,14 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 return(0.0);
             }
 
+//Lgm_Vector vvv;
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_South, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );
+//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
+//printf("Pm_South_sm = %.15g %.15g %.15g      B-Bm = %.15g\n", vvv.x, vvv.y, vvv.z, Lgm_Magnitude( &Bvec)-LstarInfo->mInfo->Bm );
+//LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("Pm_North_sm = %.15g %.15g %.15g      B-Bm = %.15g\n", vvv.x, vvv.y, vvv.z, Lgm_Magnitude( &Bvec)-LstarInfo->mInfo->Bm );
+//printf("%.15g %.15g\n", mlat, LstarInfo->mInfo->Pm_North.z);
 
             /*
              *  Compute I
@@ -143,9 +153,9 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             //LstarInfo->mInfo->Hmax = 0.1;
             LstarInfo->mInfo->Hmax = 0.1;
 
-//            printf("0. HERE: Pmin, Pm_North, Pm_South = %g %g %g   %g %g %g   %g %g %g   SS = %g\n",   LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z,
-//                                                                                                       LstarInfo->mInfo->Pm_North.x,  LstarInfo->mInfo->Pm_North.y,  LstarInfo->mInfo->Pm_North.z,
-//                                                                                                       LstarInfo->mInfo->Pm_South.x,  LstarInfo->mInfo->Pm_South.y,  LstarInfo->mInfo->Pm_South.z, SS );
+            //printf("0. HERE: Pmin, Pm_North, Pm_South = %g %g %g   %g %g %g   %g %g %g   SS = %g\n",   LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z,
+            //                                                                                           LstarInfo->mInfo->Pm_North.x,  LstarInfo->mInfo->Pm_North.y,  LstarInfo->mInfo->Pm_North.z,
+            //                                                                                           LstarInfo->mInfo->Pm_South.x,  LstarInfo->mInfo->Pm_South.y,  LstarInfo->mInfo->Pm_South.z, SS );
 
             if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
@@ -155,15 +165,16 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                  *
                  *  Note we start at Pm_South and trace to Pm_North (which is at an altitude of (r-1.0) Re above the Earth.
                  */
-                LstarInfo->mInfo->Hmax = SS/200.0;
+                //LstarInfo->mInfo->Hmax = SS/200.0;
+                LstarInfo->mInfo->Hmax = SS/(double)LstarInfo->mInfo->nDivs;
 //printf("LstarInfo->mInfo->Hmax = %g\n", LstarInfo->mInfo->Hmax);
 
 
 
                 // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
-                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
-                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
-                if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
+                //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+                if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
 
 
                 /*
@@ -171,6 +182,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                  */
                 LstarInfo->mInfo->Sm_South = 0.0;
                 LstarInfo->mInfo->Sm_North = SS;
+//printf("LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North = %g %g\n", LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North);
 
                 /*
                  *  Add the mirror points explicity. Update: Actually the
@@ -187,7 +199,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                      *  Do I integral with interped integrand.
                      */
                     I = Iinv_interped( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     FreeSpline( LstarInfo->mInfo );
 
                 } else {
@@ -211,9 +223,11 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (full integral): %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
             }
 
+        } else {
+            I = 9e99;
         }
 
-    }
+    } 
 
 
 

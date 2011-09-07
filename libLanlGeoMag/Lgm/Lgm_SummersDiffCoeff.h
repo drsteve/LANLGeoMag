@@ -61,44 +61,46 @@
 
 typedef struct Lgm_SummersInfo {
 
-    double  Alpha0;
+    double  Alpha0;         //!< Equatorial pitch angle, \f$ \alpha_\circ \f$, [radians].
 
-    double  SinAlpha0;
-    double  CosAlpha0;
+    double  SinAlpha0;      //!< \f$ \sin\alpha_\circ \f$
+    double  CosAlpha0;      //!< \f$ \cos\alpha_\circ \f$
 
-    double  SinAlpha02;
-    double  CosAlpha02;
+    double  SinAlpha02;     //!< \f$ \sin^2\alpha_\circ \f$
+    double  CosAlpha02;     //!< \f$ \cos^2\alpha_\circ \f$
 
-    double  TanAlpha0;
-    double  TanAlpha02;
+    double  TanAlpha0;      //!< \f$ \tan\alpha_\circ \f$
+    double  TanAlpha02;     //!< \f$ \tan^2\alpha_\circ \f$
 
-    double  E;
-    double  L;
-    double  aStarEq;
-    double  dB;
-    double  Omega_eEq;
-    double  Omega_SigEq;
-    double  w1;
-    double  w2;
-    double  wm;
-    double  dw;
-    double  sig;
-    double  s;          // s=1 for R-mode, s=-1 for L-mode
-    double  Lambda;     // lambda=-1 for electrons lambda=Eps for protons (Eps=me/mp)
-    double  Rho;        // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw )
-    double  Sig;        // Sig -- seetext above eqn (30).
+    double  E;              //!< Normalized dimensionless energy, \f$ E_k/E_\sigma\circ \f$, where \f$ E_\sigma\circ \f$ is rest energy of species.
+    double  L;              //!< Dipole L-shell value
+    double  aStarEq;        //!< Summer's \f$ \alpha^* \f$ value which is \f$ \Omega_e/\omega^2_{pe} \f$.
+//    double  dB;           //!< Value of wave amplitude [nT].
+    void   *BwFuncData;     //!< Pointer to data that may be needed by BwFunc()
+    double (*BwFunc)();     //!< Function to return Bw as a function of latitude.
+    double  Omega_eEq;      //!< Equatorial gyrofrequency of electrons [Hz].
+    double  Omega_SigEq;    //!< Equatorial gyrofrequency of species [Hz].
+    double  w1;             //!< Lower frequency cutoff [Hz].
+    double  w2;             //!< Upper frequency cutoff [Hz].
+    double  wm;             //!< Frequancy of maximum wave power.
+    double  dw;             //!< Measure of width of guassian wavre frequency distribution.
+    double  MaxWaveLat;     //!< Latitudinal cuttoff for waves. I.e. assume no waves at lats greater than +MaxWaveLat or less than -MaxWaveLat.
+    double  Sig;            //!< Additional paramter to define 'semi-bandwidth' which is equal to \f$ \sigma d\omega \f$.
+    double  s;              //!< Defines wave mode (s=1 for R-mode, s=-1 for L-mode).
+    double  Lambda;         //!< Defines sepcies (\f$ \lambda=-1 \f$ for electrons \f$ \lambda = \epsilon \f$ for protons (\f$\epsilon =m_e/m_p \f$).
+    double  Rho;            //!< Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw )
 
 } Lgm_SummersInfo;
 
-int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  double dB, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
+int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo );
-double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xm, double dx, double Lambda, double s, double aStar );
-double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xm, double dx, double Lambda, double s, double aStar );
-double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xm, double dx, double Lambda, double s, double aStar );
+double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
+double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
+double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
 
 #endif

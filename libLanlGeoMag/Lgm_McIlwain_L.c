@@ -140,7 +140,8 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                     } else if ( mInfo->UseInterpRoutines ) {
                         if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(-9e99);
                         ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
-                        AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );
+                        ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_South, mInfo );
+                        //AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );
                         if ( InitSpline( mInfo ) ) {
 
                             /*

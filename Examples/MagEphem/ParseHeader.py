@@ -4,7 +4,7 @@ import spacepy
 import re
 import json
 
-filename = 'JSON.txt'
+filename = '19760724_1976-059.mod.txt'
 with open(filename, 'r') as f:
     Lines = f.read()
 

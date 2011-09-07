@@ -116,7 +116,8 @@ typedef struct Lgm_LstarInfo {
 
 void        SetLstarTolerances( int Quality, Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo  *InitLstarInfo( int VerbosityLevel );
-void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
+//void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
+void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo   *LstarInfo );
 
 void FreeLstarInfo( Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );
@@ -124,7 +125,7 @@ Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );
 int         Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_LstarInfo *LstarInfo );
 int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 int 	    FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo );
-int 	    FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, Lgm_LstarInfo *LstarInfo );
+int 	    FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, Lgm_LstarInfo *LstarInfo );
 double      ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
 void 	    spline( double *x, double *y, int n, double yp1, double ypn, double *y2);
 void 	    splint( double *xa, double *ya, double *y2a, int n, double x, double *y);

@@ -7,7 +7,7 @@
 #include <Lgm/Lgm_Quat.h>
 #include <Lgm/Lgm_Sgp.h>
 #include "Atmosphere.h"
-#include "DynamicMemory.h"
+#include <Lgm/Lgm_DynamicMemory.h>
 #include "NamedMaterials.h"
 
 #include <string.h>

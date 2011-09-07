@@ -3,7 +3,7 @@ Overview
 ========
 Data model for magnetic field data.
 
-The SpaceData class is a derived dictionary used to hold information in a comman
+The SpaceData class is a derived dictionary used to hold information in a common
 format
 """
 __author__ = 'Brian Larsen'
