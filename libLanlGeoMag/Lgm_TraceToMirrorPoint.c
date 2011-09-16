@@ -395,7 +395,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
         /*
          *  Use Brent's method
          */
-        printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+        //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
         double      Sz, Fz;
         Lgm_Vector  Pz;
         BrentFuncInfoP    f;
@@ -410,7 +410,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
 tol = 1e-10;
         Lgm_zBrentP( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
         Fb = Fz; Sb = Sz; Pb = Pz;
-        printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+        //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     }
 
     }

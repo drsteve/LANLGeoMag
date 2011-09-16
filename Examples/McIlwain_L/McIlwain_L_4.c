@@ -17,7 +17,7 @@ int main(){
     mInfo->Bfield = Lgm_B_JensenCain1960;
     mInfo->Bfield = Lgm_B_cdip;
     mInfo->Bfield = Lgm_B_igrf;
-    mInfo->VerbosityLevel = 2;
+    mInfo->VerbosityLevel = 0;
 //    mInfo->MaxDiv = 0.1;
 
 //    mInfo->Lgm_I_Integrator = DQAGS;
