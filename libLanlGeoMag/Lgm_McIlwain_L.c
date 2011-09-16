@@ -104,7 +104,6 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
 
 
-                //if ( Lgm_TraceToMirrorPoint( &(mInfo->Pm_South), &(mInfo->Pm_North), &dSb, mInfo->Bm,  1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) >= 0 ) {
                 if ( Lgm_TraceToMirrorPoint( &(mInfo->Pmin), &(mInfo->Pm_North), &dSb, mInfo->Bm,  1.0, mInfo->Lgm_TraceToMirrorPoint_Tol, mInfo ) >= 0 ) {
 
                     if (mInfo->VerbosityLevel > 0) {
@@ -169,8 +168,11 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                 }
 
+            } else {
+                printf("Could not find southern mirror point.\n");
             }
-        }
+
+        } 
 
 
 

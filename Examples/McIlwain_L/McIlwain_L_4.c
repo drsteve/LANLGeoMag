@@ -13,10 +13,11 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
 
-    mInfo->Lgm_LossConeHeight = 100.0;
+    mInfo->Lgm_LossConeHeight = -1000.0;
     mInfo->Bfield = Lgm_B_JensenCain1960;
+    mInfo->Bfield = Lgm_B_cdip;
     mInfo->Bfield = Lgm_B_igrf;
-    mInfo->VerbosityLevel = 0;
+    mInfo->VerbosityLevel = 2;
 //    mInfo->MaxDiv = 0.1;
 
 //    mInfo->Lgm_I_Integrator = DQAGS;
@@ -30,12 +31,14 @@ int main(){
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     n = 0;
-    for ( glon=0.0; glon<360; glon += 60.0 ){
-        for ( glat=-60.0; glat <=60.0; glat += 20.0 ){
-            for ( alt=200.0; alt<=1000.0; alt += 200.0 ){
+    for ( glon=75.0; glon<=75; glon += 60.0 ){
+        //for ( glat=-60.0; glat <=60.0; glat += 20.0 ){
+        for ( glat=35.0; glat <=90.0; glat += 20.0 ){
+            for ( alt=150.0; alt<=150.0; alt += 200.0 ){
     
                 Lgm_GEOD_to_WGS84( glat, glon, alt, &u );
                 Lgm_Convert_Coords( &u, &v, GEO_TO_GSM, c );
+//printf("v = %g %g %g     R = %g     %g\n", v.x, v.y, v.z, Lgm_Magnitude( &v ), (Lgm_Magnitude( &v )-1.0)*Re );
         
 
                 a = 90.0;
