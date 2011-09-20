@@ -55,6 +55,6 @@ try:
                     headers)
 except OSError:
     print("ctypesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
-#finally:
-#    print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
-#    shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+finally:
+    print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
+    shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
