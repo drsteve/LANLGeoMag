@@ -13,7 +13,7 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
 
-    mInfo->Lgm_LossConeHeight = -1000.0;
+    mInfo->Lgm_LossConeHeight = 100.0;
     mInfo->Bfield = Lgm_B_JensenCain1960;
     mInfo->Bfield = Lgm_B_cdip;
     mInfo->Bfield = Lgm_B_igrf;
@@ -27,7 +27,7 @@ int main(){
 //    mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-5;
 
     Date = 20110101;
-    UTC = 6.0;
+    UTC  = 6.0;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     n = 0;
@@ -50,7 +50,7 @@ int main(){
             }
         }
     }
-    printf("n = %ld\n", n);
+    //printf("n = %ld\n", n);
 
     return(0);
 }
