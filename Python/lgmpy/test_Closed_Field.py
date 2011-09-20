@@ -60,11 +60,11 @@ class Closed_FieldTests(unittest.TestCase):
         """Closed_Field extended_out flag should have known behaviour (regression)"""
         data = Closed_Field.Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
-        numpy.testing.assert_array_almost_equal(data[1],
+        numpy.testing.assert_allclose(data[1],
                 [-0.06195451,  0.39503915,  0.93137369])
-        numpy.testing.assert_array_almost_equal(data[2],
+        numpy.testing.assert_allclose(data[2],
                 [ 0.76608872,  0.33493643, -0.57105222])
-        numpy.testing.assert_array_almost_equal(data[3],
+        numpy.testing.assert_allclose(data[3],
                 [ 2.27943481,  2.80962393,  1.12454726])
         self.assertAlmostEqual(data[4], 3.7346369909011456)
 
