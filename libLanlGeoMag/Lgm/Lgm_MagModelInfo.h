@@ -82,6 +82,14 @@
 #define LGM_EXTMODEL_TS04    4
 #define LGM_EXTMODEL_OP77    5
 
+
+// Derivative schemes
+#define LGM_DERIV_TWO_POINT     0
+#define LGM_DERIV_FOUR_POINT    1
+#define LGM_DERIV_SIX_POINT     2
+
+
+
 typedef struct Lgm_MagModelInfo {
 
     Lgm_CTrans  *c;                 /* This contains all time info and a bunch more stuff */
@@ -567,6 +575,17 @@ void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
  */
 int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
 
+
+
+/*
+ * Various B-related routines
+ */
+void    Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_GradB2( Lgm_Vector *u0, Lgm_Vector *GradB, Lgm_Vector *GradB_para, Lgm_Vector *GradB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_Vector *CurlB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagModelInfo *m );
 
 
 
