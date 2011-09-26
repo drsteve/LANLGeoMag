@@ -10,7 +10,7 @@
 #endif
 
 #ifndef LGM_e
-#define LGM_e           1.60217648740e-19           // Elementary charge, Coulombs (or s·A)
+#define LGM_e           1.60217656535e-19           // Elementary charge, Coulombs (or s·A)
 #endif
 
 

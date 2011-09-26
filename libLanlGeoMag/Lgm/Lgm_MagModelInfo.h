@@ -14,7 +14,9 @@
 #define LGM_OXYGEN_MASS     (15.9994*AMU)       /* kg */
 #define RE                  (6378.135e3)        /* Earth Radius, m */
 #define LGM_CC              (2.99792458e8)      /* Speed of Light, m/s */
-#define LGM_EE              (1.6022e-19)        /* electron charge, C */
+#ifndef LGM_e
+#define LGM_e               (1.60217656535e-19) /* electron charge, C */
+#endif
 #define nT_Per_Gauss        (1e5)               /* 1e5 nT == 1 Gauss */
 
 
