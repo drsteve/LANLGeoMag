@@ -8,7 +8,7 @@
  *      Compute the gradient of B at a given point and time.
  *
  *  \details
- *      Computes \f[ \nabla\B \f]
+ *      Computes \f[ \nabla B \f]
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -93,7 +93,7 @@ void Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lg
  *      Compute the gradient of B and it's parallel and perpendicular components at a given point and time.
  *
  *  \details
- *      Computes \f[ \nabla\B \f], \f[ (\nabla\B)_\parallel \f], and \f[ (\nabla\B)_\perp \f]
+ *      Computes \f[ \nabla B \f], \f[ (\nabla B)_\parallel \f], and \f[ (\nabla B)_\perp \f]
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -156,7 +156,7 @@ void Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, d
  *      Compute the curl of B at a given point and time.
  *
  *  \details
- *      Computes \f[ \nabla\times\B \f]
+ *      Computes \f[ \nabla\times B \f]
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -277,7 +277,7 @@ void Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lg
  *      Compute the curl of B and it's parallel and perpendicular components at a given point and time.
  *
  *  \details
- *      Computes \f[ \nabla\times\B \f], \f[ (\nabla\times\B)_\parallel \f], and \f[ (\nabla\times\B)_\perp \f]
+ *      Computes \f[ \nabla\times B \f], \f[ (\nabla\times B)_\parallel \f], and \f[ (\nabla\times B)_\perp \f]
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -325,7 +325,7 @@ void Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_
  *      Compute the divergence of B at a given point and time.
  *
  *  \details
- *      Computes \f[ \nabla\cdot\B \f]. My Maxwell's equations it should be
+ *      Computes \f[ \nabla\cdot B \f]. My Maxwell's equations it should be
  *      zero. This routine is more for verification/validation purposes.
  *
  *
