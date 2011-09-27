@@ -5,10 +5,10 @@
 
 /**
  *  \brief
- *      Compute the gradient of B at a given point and time.
+ *      Compute the gradient of B at a given point.
  *
  *  \details
- *      Computes \f[ \nabla B \f]
+ *      Computes \f$ \nabla B \f$.
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -90,10 +90,10 @@ void Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lg
 
 /**
  *  \brief
- *      Compute the gradient of B and it's parallel and perpendicular components at a given point and time.
+ *      Compute the gradient of B and it's parallel and perpendicular components at a given point.
  *
  *  \details
- *      Computes \f[ \nabla B \f], \f[ (\nabla B)_\parallel \f], and \f[ (\nabla B)_\perp \f]
+ *      Computes \f$ \nabla B \f$, \f$ (\nabla B)_\parallel \f$, and \f$ (\nabla B)_\perp \f$.
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -153,10 +153,10 @@ void Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, d
 
 /**
  *  \brief
- *      Compute the curl of B at a given point and time.
+ *      Compute the curl of B at a given point.
  *
  *  \details
- *      Computes \f[ \nabla\times B \f]
+ *      Computes \f$ \nabla\times B \f$.
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -274,10 +274,10 @@ void Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lg
 
 /**
  *  \brief
- *      Compute the curl of B and it's parallel and perpendicular components at a given point and time.
+ *      Compute the curl of B and it's parallel and perpendicular components at a given point.
  *
  *  \details
- *      Computes \f[ \nabla\times B \f], \f[ (\nabla\times B)_\parallel \f], and \f[ (\nabla\times B)_\perp \f]
+ *      Computes \f$ \nabla\times B \f$, \f$ (\nabla\times B)_\parallel \f$, and \f$ (\nabla\times B)_\perp \f$.
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -322,11 +322,13 @@ void Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_
 
 /**
  *  \brief
- *      Compute the divergence of B at a given point and time.
+ *      Compute the divergence of B at a given point.
  *
  *  \details
- *      Computes \f[ \nabla\cdot B \f]. My Maxwell's equations it should be
- *      zero. This routine is more for verification/validation purposes.
+ *      Computes \f$ \nabla\cdot B \f$. By Maxwell's equations it should be
+ *      zero. This routine is more for verification/validation purposes. Note
+ *      that the dipole fields all return veru small numbers (essentially
+ *      zero). T87 and T89 do also, T04s and OP77 dont seem to though...
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -409,3 +411,86 @@ void Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagM
 
 }
 
+
+
+/**
+ *  \brief
+ *      Compute the instantaneous gradient and curvature drift velocity of the guiding center.
+ *
+ *
+ *
+ *  \details
+ *      The gradient and curvature drift velocity of the guiding center is given by;
+ *          \f[
+ *              V_s = {mv^2\overqB^2}\left{\left(1-{B\over
+ *              2B_m}\right){\vec{B}\times\nabla B\over B} + \left(1-{B\over
+ *              B_m}\right){(\nabla\times \vec{B})_perp} \right}
+ *          \f]
+ *      (e.g. see Sukhtina, M.A., "One the calculation of the magnetic srift
+ *      velocity of particles with arbitrary pitch angles, Planet Space Sci.
+ *      41, 327--331, 1993.) With \f$\eta = T/E_0\f$, where \f$T\f$ is the
+ *      particle's kinetic energy, and \f$E_0\f$ its rest energy, this can be
+ *      rewritten as,
+ *          \f[
+ *              V_s = {\eta (2+\eta)\over (1+\eta)}E_0\overqB^2}\left{\left(1-{B\over
+ *              2B_m}\right){\vec{B}\times\nabla B\over B} + \left(1-{B\over
+ *              B_m}\right){(\nabla\times \vec{B})_perp} \right}
+ *          \f]
+ *
+ *
+ *      \param[in]      u0          Position (in GSM) to use. [Re]
+ *      \param[out]     Vel         The computed drift velocity in GSM coords. [km/s]
+ *      \param[in]      q           Charge of the particle. [C]
+ *      \param[in]      T           Kinetic energy of the particle. [MeV]
+ *      \param[in]      E0          Rest energy of the particle. [MeV]
+ *      \param[in]      Bm          Magnitude of B-field at mirror point for particle. [nT]
+ *      \param[in]      DerivScheme Derivative scheme to use (can be one of LGM_DERIV_SIX_POINT, LGM_DERIV_FOUR_POINT, or LGM_DERIV_TWO_POINT).
+ *      \param[in]      h           The delta (in Re) to use for grid spacing in the derivative scheme.
+ *      \param[in,out]  m           A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *
+ *      \author         Mike Henderson
+ *      \date           2011
+ *
+ */
+void Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double T, double E0, double Bm, int DerivScheme, double h, Lgm_MagModelInfo *m ) {
+
+    double      B, BoverBm, g, eta;
+    Lgm_Vector  CurlB, CurlB_para, CurlB_perp, GradB, Bvec, Q, R, S;
+    Lgm_Vector  B_Cross_GradB;
+
+    m->Bfield( u0, &Bvec, m );
+    B = Lgm_Magnitude( &Bvec );
+    BoverBm = B/Bm;
+
+
+    /*
+     * Compute (B cross GradB)/B 
+     */
+    Lgm_GradB( u0, &GradB, DerivScheme, h, m );
+    Lgm_CrossProduct( &Bvec, &GradB, &B_Cross_GradB );
+
+
+    /*
+     * Compute (curl B)_perp
+     */
+    Lgm_CurlB2( u0, &CurlB, &CurlB_para, &CurlB_perp, DerivScheme, h, m );
+
+
+    /*
+     * Compute instantaneous gradient/curv drift Velocity.
+     */
+    Q = B_Cross_GradB;
+    g = (1.0-0.5*BoverBm)/B;
+    Lgm_ScaleVector( &Q, g );
+
+    R = CurlB_perp;
+    g = 1.0-BoverBm;
+    Lgm_ScaleVector( &R, g );
+
+    Lgm_VecAdd( &S, &Q, &R );
+    eta = T/E0; // kinetic energy over rest energy
+    g = eta*(2.0+eta)/(1.0+eta)*E0/(q*B*B)*LGM_e*1e9/Re;
+    Lgm_ScaleVector( &S, g );
+
+}

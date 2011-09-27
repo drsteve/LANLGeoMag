@@ -1,4 +1,4 @@
-all: B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+all: B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB Vcg
 
 
 B: B.c
@@ -22,5 +22,8 @@ CurlB2: CurlB2.c
 DivB: DivB.c
 	gcc DivB.c `pkg-config --cflags --libs lgm` -o DivB -Wall
 
+Vcg: Vcg.c
+	gcc Vcg.c `pkg-config --cflags --libs lgm` -o Vcg -Wall
+
 clean:
-	rm B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+	rm B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB Vcg

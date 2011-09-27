@@ -754,7 +754,7 @@ Sb = 1.0;
 
             double K = LstarInfo->KineticEnergy;       // keV
 K = 1000.0; //keV
-            K *= 1e3*EE;                        // Joules
+            K *= 1e3*LGM_e;                        // Joules
             double M = LstarInfo->Mass;                // kg
 M = ELECTRON_MASS; // kg
 

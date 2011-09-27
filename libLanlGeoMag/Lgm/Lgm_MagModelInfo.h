@@ -2,20 +2,12 @@
 #define LGM_MAG_MODEL_INFO_H
 
 #include <math.h>
-#include "Lgm_QuadPack.h"
-#include "Lgm_CTrans.h"
-#include "Lgm_Octree.h"
+#include "Lgm/Lgm_QuadPack.h"
+#include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_Octree.h"
+#include "Lgm/Lgm_Constants.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
-
-#define LGM_ELECTRON_MASS   (9.10938188e-31)    /* Electron Mass , kg */
-#define LGM_AMU             (1.660538e-27)      /* kg */
-#define LGM_PROTON_MASS     (1.00794*AMU)       /* kg */
-#define LGM_OXYGEN_MASS     (15.9994*AMU)       /* kg */
-#define RE                  (6378.135e3)        /* Earth Radius, m */
-#define LGM_CC              (2.99792458e8)      /* Speed of Light, m/s */
-#define LGM_EE              (1.6022e-19)        /* electron charge, C */
-#define nT_Per_Gauss        (1e5)               /* 1e5 nT == 1 Gauss */
 
 
 #ifndef TRUE
