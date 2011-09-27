@@ -4,47 +4,8 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_PolyRoots.h"
+#include "Lgm/Lgm_Constants.h"
 
-#ifndef LGM_c
-#define LGM_c           2.99792458e8                // Spped of light  m/s
-#endif
-
-#ifndef LGM_e
-#define LGM_e           1.60217656535e-19           // Elementary charge, Coulombs (or s·A)
-#endif
-
-
-#ifndef LGM_Eps0
-#define LGM_Eps0        8.854187817620e-12          // Permittivity of free space, A^2·s^4·kg^−1·m^−3
-#endif
-
-#ifndef LGM_U
-#define LGM_U           (1.66053878283e-27)         // Atomic mass unit, kg
-#endif
-
-#ifndef LGM_ELECTRON_MASS
-#define LGM_ELECTRON_MASS   9.1093821545e-31    // Rest mass of electron, kg
-#endif
-
-#ifndef LGM_PROTON_MASS
-#define LGM_PROTON_MASS  (1.0072764667710*LGM_U)    // Proton rest mass,  kg
-#endif
-
-#ifndef LGM_EPS
-#define LGM_EPS  0.000544617021983          // me/mp
-#endif
-
-#ifndef LGM_OXYGEN_MASS
-#define LGM_OXYGEN_MASS (15.9994*LGM_U)     // Oxygen rest mass,  kg
-#endif
-
-#ifndef LGM_Ee0
-#define LGM_Ee0     0.510998910             // Electron rest energy in MeV
-#endif
-
-#ifndef LGM_Ep0
-#define LGM_Ep0   938.27201323              // Proton rest energy in MeV
-#endif
 
 #ifndef M_CDIP
 #define M_CDIP  30040.680710                // dipole moment (in nT) for center dipole field (computed for Aug 12, 2004  12.34567 UTC) Need to generalize this.
