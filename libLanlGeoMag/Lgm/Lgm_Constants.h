@@ -47,5 +47,9 @@
 #define nT_Per_Gauss        (1e5)                       // 1e5 nT == 1 Gauss
 #endif
 
+#ifndef Joules_Per_eV
+#define Joules_Per_eV        (1.60217648740e-19)         // 1 eV = 1.60217648740e-19 Joules
+#endif
+
 
 #endif

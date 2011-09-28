@@ -465,14 +465,14 @@ void Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double 
 
 
     /*
-     * Compute (B cross GradB)/B 
+     * Compute B cross GradB  [nT/Re]
      */
     Lgm_GradB( u0, &GradB, DerivScheme, h, m );
     Lgm_CrossProduct( &Bvec, &GradB, &B_Cross_GradB );
 
 
     /*
-     * Compute (curl B)_perp
+     * Compute (curl B)_perp [nT/Re]
      */
     Lgm_CurlB2( u0, &CurlB, &CurlB_para, &CurlB_perp, DerivScheme, h, m );
 
@@ -482,15 +482,20 @@ void Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double 
      */
     Q = B_Cross_GradB;
     g = (1.0-0.5*BoverBm)/B;
-    Lgm_ScaleVector( &Q, g );
+    Lgm_ScaleVector( &Q, g ); // [nT/Re]
 
     R = CurlB_perp;
     g = 1.0-BoverBm;
-    Lgm_ScaleVector( &R, g );
+    Lgm_ScaleVector( &R, g ); // [nT/Re]
 
-    Lgm_VecAdd( &S, &Q, &R );
+    Lgm_VecAdd( &S, &Q, &R ); // [nT/Re]
     eta = T/E0; // kinetic energy over rest energy
-    g = eta*(2.0+eta)/(1.0+eta)*E0/(q*B*B)*LGM_e*1e9/Re;
-    Lgm_ScaleVector( &S, g );
+    g = eta*(2.0+eta)/(1.0+eta)*E0*1e6*Joules_Per_eV/(q*B*B); // [ N m / (A s nT^2) ]  
+    // gS would have units of [ N m / (A s nT Re) ], so convert nT and Re to SI
+    // to get a final answer in m/s. Then convert to km/s.
+    g *= 1e9/(Re*1e6);        
+    Lgm_ScaleVector( &S, g ); // [ N m / (A s T m) ] = [ N m / (A s (N/(A m) m) ] = [ m/s ]
+    *Vel = S;
+
 
 }

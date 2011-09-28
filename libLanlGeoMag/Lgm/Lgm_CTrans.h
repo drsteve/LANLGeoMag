@@ -27,8 +27,8 @@
 
 
 
-#define Re              6378.137 	// This is consistent with equatorial
-                                        // radius in the WGS84 model
+#define Re              6378.137 	    // This is consistent with equatorial
+                                        // radius in the WGS84 model [km]
 
 #define AU              149.5978700e6   // Astronomical Unit in km
 
