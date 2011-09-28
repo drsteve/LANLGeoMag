@@ -46,6 +46,7 @@ while len(libname) > 0:
     elif name.split(os.path.extsep)[-1] == 'dylib':
         library_name = name
 
+ctypesgen_worked=False
 try:
     subprocess.call(['ctypesgen.py',
                      '-l' + library_name,
@@ -53,8 +54,23 @@ try:
                      '-o', 'Lgm_Wrap.py.bak'] +
                     includes + libpaths +
                     headers)
+    ctypesgen_worked = True
 except OSError:
-    print("ctypesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
-finally:
-    print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
-    shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+    for path in sys.path:
+        try:
+            subprocess.call(['python', path + '/../../../bin/' + 'ctypesgen.py',
+
+                             '-l' + library_name,
+                             '--no-macro-warnings',
+                             '-o', 'Lgm_Wrap.py.bak'] +
+                            includes + libpaths +
+                            headers)
+            ctypesgen_worked = True
+        except OSError:
+            pass
+
+if not ctypesgen_worked:
+    print('ctypesgen not found')
+#finally:
+print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
+shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
