@@ -2,20 +2,12 @@
 #define LGM_MAG_MODEL_INFO_H
 
 #include <math.h>
-#include "Lgm_QuadPack.h"
-#include "Lgm_CTrans.h"
-#include "Lgm_Octree.h"
+#include "Lgm/Lgm_QuadPack.h"
+#include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_Octree.h"
+#include "Lgm/Lgm_Constants.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
-
-#define LGM_ELECTRON_MASS   (9.10938188e-31)    /* Electron Mass , kg */
-#define LGM_AMU             (1.660538e-27)      /* kg */
-#define LGM_PROTON_MASS     (1.00794*AMU)       /* kg */
-#define LGM_OXYGEN_MASS     (15.9994*AMU)       /* kg */
-#define RE                  (6378.135e3)        /* Earth Radius, m */
-#define LGM_CC              (2.99792458e8)      /* Speed of Light, m/s */
-#define LGM_EE              (1.6022e-19)        /* electron charge, C */
-#define nT_Per_Gauss        (1e5)               /* 1e5 nT == 1 Gauss */
 
 
 #ifndef TRUE
@@ -46,6 +38,15 @@
 #define 	LGM_MAGSTEP_SCLMAX 	0.1
 #define 	LGM_MAGSTEP_SAFE1	0.25
 #define 	LGM_MAGSTEP_SAFE2	0.70
+
+#define 	LGM_VELSTEP_KMAX	16
+#define 	LGM_VELSTEP_IMAX	(LGM_VELSTEP_KMAX+1)
+#define 	LGM_VELSTEP_JMAX	(LGM_VELSTEP_KMAX+2)
+#define 	LGM_VELSTEP_REDMAX 	1.0e-5
+#define 	LGM_VELSTEP_REDMIN 	0.7
+#define 	LGM_VELSTEP_SCLMAX 	0.1
+#define 	LGM_VELSTEP_SAFE1	0.25
+#define 	LGM_VELSTEP_SAFE2	0.70
 
 #define     DQAGS   0   // Quadpack routine (works well for I. Dont use for Sb)
 #define     DQAGP   1   // Quadpack routine (works well for Sb. Overkill for I)
@@ -81,6 +82,14 @@
 #define LGM_EXTMODEL_T01S    3
 #define LGM_EXTMODEL_TS04    4
 #define LGM_EXTMODEL_OP77    5
+
+
+// Derivative schemes
+#define LGM_DERIV_TWO_POINT     0
+#define LGM_DERIV_FOUR_POINT    1
+#define LGM_DERIV_SIX_POINT     2
+
+
 
 typedef struct Lgm_MagModelInfo {
 
@@ -222,8 +231,23 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
     double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
     double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
-
     double      Lgm_MagStep_Tol;        // tolerance for Magstep (ODE solver).
+
+    /*
+     *  These variables are needed to make Lgm_MagStep2() reentrant/thread-safe.
+     *  They basically used to be static declarations within Lgm_MagStep2()
+     */
+    long int    Lgm_nVelEvals; // records number of Bfield evals between resets
+    double      Lgm_VelStep_eps_old;
+    int	        Lgm_VelStep_FirstTimeThrough;
+    int         Lgm_VelStep_kmax;
+    int         Lgm_VelStep_kopt;
+    double      Lgm_VelStep_snew;
+    double      Lgm_VelStep_A[LGM_VELSTEP_JMAX+1];
+    double      Lgm_VelStep_alpha[LGM_VELSTEP_IMAX+1][LGM_VELSTEP_IMAX+1];
+    double      Lgm_VelStep_d[LGM_VELSTEP_JMAX][LGM_VELSTEP_JMAX];
+    double      Lgm_VelStep_x[LGM_VELSTEP_JMAX];
+    double      Lgm_VelStep_Tol;        // tolerance for Magstep (ODE solver).
 
 
     /*
@@ -379,6 +403,11 @@ void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_M
 int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
               int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 
+
+int Lgm_ModMid2( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
+	     int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+int  Lgm_VelStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
+              int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 
 
 /*
@@ -567,6 +596,18 @@ void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
  */
 int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
 
+
+
+/*
+ * Various B-related routines
+ */
+void    Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_GradB2( Lgm_Vector *u0, Lgm_Vector *GradB, Lgm_Vector *GradB_para, Lgm_Vector *GradB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_Vector *CurlB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double T, double E0, double Bm, int DerivScheme, double h, Lgm_MagModelInfo *m );
 
 
 

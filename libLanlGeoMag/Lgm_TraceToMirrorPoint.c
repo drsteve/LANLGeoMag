@@ -43,9 +43,11 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     double	    Ra, Rb, Height;
     Lgm_Vector	w, Pa, Pb, P, Bvec, Pmin;
     int		    done, FoundBracket, reset, nIts;
+    double      MinValidHeight;
 
     reset = TRUE;
     Fmin = 9e99;
+    MinValidHeight = ( Info->Lgm_LossConeHeight < 0.0 ) ? Info->Lgm_LossConeHeight : 0.0;
 
     if ( Info->VerbosityLevel > 4 ) {
         printf( "\n\n**************** Start Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n", Info->VerbosityLevel );
@@ -61,7 +63,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     Lgm_WGS84_to_GeodHeight( &w, &Height );
     if ( Height < LC_TOL*Info->Lgm_LossConeHeight ) {
         if ( Info->VerbosityLevel > 1 )
-        printf("    Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
+        printf("    Lgm_TraceToMirrorPoint: Initial Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         return(-1); // below loss cone height -> particle is in loss cone!
     }
 
@@ -104,11 +106,12 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      */
     Info->Bfield( u, &Bvec, Info );
     Pa = *u;
+    Pb.x = Pb.y = Pb.z = 0.0;
     Ra = Lgm_Magnitude( &Pa );
     Fa = Lgm_Magnitude( &Bvec ) - Bm;
     Sa = 0.0;
     if ( Info->VerbosityLevel > 4 )  {
-        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g\n\n", u->x, u->y, u->z, Ra, Fa );
+        printf("    TraceToMirrorPoint: Starting Point: %15g %15g %15g   R, F (=B-Bm) = %g %g   B, Bm = %g %g\n\n", u->x, u->y, u->z, Ra, Fa, Lgm_Magnitude( &Bvec ), Bm );
     }
 
 
@@ -196,6 +199,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
 
+
     // Allow larger step sizes. Also, we can go beyond Bm to get the bracket.
     Hmax = 0.5;
     Htry = 0.25;
@@ -270,7 +274,9 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
         // Set Htry adaptively. But make sure we wont descend below the Earth's surface.
         Htry = Hnext;
-        if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
+double Rvalidmin = 1.0 + MinValidHeight/Re;
+        //if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
+        if (Htry > (R-Rvalidmin)) Htry = 0.95*(R-Rvalidmin);
 
 
         // If Htry gets to be too small, there is probably something wrong.
@@ -284,9 +290,12 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
             printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
         }
 
-        if ( Height < 0.0 ) {
+        //if ( Height < 0.0 ) {
+        if ( Height < MinValidHeight ) {
+
             if ( Info->VerbosityLevel > 1 ) {
-                printf("    Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth. (Height = %g) \n", Height );
+                //printf("    Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth while finding bracket. (Height = %g) \n", Height );
+                printf("    Lgm_TraceToMirrorPoint: Current Height is below surface of the Earth while finding bracket. (Height = %g) \n", Height );
             }
             if ( Info->VerbosityLevel > 4 ) {
                 printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
@@ -423,7 +432,9 @@ tol = 1e-10;
 	if ( Height < LC_TOL*Info->Lgm_LossConeHeight ) {
         // dropped below loss cone height -> particle is in loss cone!
         if ( Info->VerbosityLevel > 1 ) {
-            printf("    Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
+            printf("    v_gsm = %g %g %g\n", v->x, v->y, v->z);
+            printf("    v_wgs84 = %g %g %g   Height = %g\n", w.x, w.y, w.z, Height);
+            printf("    MIKE Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         }
         if ( Info->VerbosityLevel > 4 ) {
             printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );

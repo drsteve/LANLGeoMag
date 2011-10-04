@@ -38,10 +38,10 @@ class Lgm_OP77_OP77(unittest.TestCase):
 
     def test_OP77(self):
         """the OP77 simple static wrapper should work (regression)"""
-        np.testing.assert_array_almost_equal( Lgm_OP77.OP77(self.pos, self.dt, ),
+        np.testing.assert_allclose( Lgm_OP77.OP77(self.pos, self.dt, ),
             [-18.399869809240773, -1.8653978151945658, 85.951037824012488])
         ans = np.array([[-18.399869809240773, -1.8653978151945658, 85.951037824012488]*2])
-        np.testing.assert_array_almost_equal(Lgm_OP77.OP77([self.pos]*2,
+        np.testing.assert_allclose(Lgm_OP77.OP77([self.pos]*2,
                                     [self.dt]*2), ans.reshape(2,3))
 
 
@@ -76,7 +76,7 @@ class Lgm_OP77Tests(unittest.TestCase):
         """First simple in/out tests of OP77 (regression)"""
         ans = np.array([-18.399869809240773, -1.8653978151945658, 85.951037824012488])
         B = Lgm_OP77.Lgm_OP77(self.pos, self.dt)
-        np.testing.assert_array_almost_equal(ans, np.array(B['B'].tolist()))
+        np.testing.assert_allclose(ans, np.array(B['B'].tolist()))
 
     def test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""

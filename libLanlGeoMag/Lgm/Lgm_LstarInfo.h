@@ -13,7 +13,6 @@
 #define OXYGEN_MASS     (15.9994*AMU)       /* kg */
 #define RE              (6378.135e3)        /* Earth Radius, m */
 #define CC              (2.99792458e8)      /* Speed of Light, m/s */
-#define EE              (1.6022e-19)        /* electron charge, C */
 
 
 

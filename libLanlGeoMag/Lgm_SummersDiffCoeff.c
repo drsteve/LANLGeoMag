@@ -164,8 +164,14 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFunc
      */
     Rho = ( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )/M_2_SQRTPI;
 
+    /*
+     * convert w1, w2, wm, dw to radians/second
+     */
 
-
+    w1 = w1*M_2PI ;
+    w2 = w2*M_2PI ;
+    wm = wm*M_2PI ;
+    dw = dw*M_2PI ;
 
     /*
      *  Quadpack integration tolerances.
@@ -424,7 +430,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
     aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
     Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq*BoverBeq;                  // Local gyro-frequency for given species.
+    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
     x1        = w1/fabs(Omega_e);                               // Local value of x1.
     x2        = w2/fabs(Omega_e);                               // Local value of x1.
     xm        = wm/fabs(Omega_e);                               // Local value of xm.
@@ -532,7 +538,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
     aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
     Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq*BoverBeq;                  // Local gyro-frequency for given species.
+    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
     x1        = w1/fabs(Omega_e);                               // Local value of x1.
     x2        = w2/fabs(Omega_e);                               // Local value of x1.
     xm        = wm/fabs(Omega_e);                               // Local value of xm.
@@ -625,7 +631,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
     aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
     Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq*BoverBeq;                  // Local gyro-frequency for given species.
+    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
     x1        = w1/fabs(Omega_e);                               // Local value of x1.
     x2        = w2/fabs(Omega_e);                               // Local value of x1.
     xm        = wm/fabs(Omega_e);                               // Local value of xm.

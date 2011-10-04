@@ -1,7 +1,7 @@
 #include <math.h>
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 /*
- * Daa_param.c
+ * Lgm_DaaBounceAvg_param()
  */
 
 /**
@@ -49,7 +49,7 @@
  *
  */
 
-double Daa_param(double dB, double alpha, double f_cen, double E_MeV, double L, double gamma)
+double Lgm_DaaBounceAvg_param(double dB, double alpha, double f_cen, double E_MeV, double L, double gamma)
 {
 
   /*
