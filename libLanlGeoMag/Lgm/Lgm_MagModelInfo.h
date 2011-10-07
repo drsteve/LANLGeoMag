@@ -248,6 +248,14 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_VelStep_d[LGM_VELSTEP_JMAX][LGM_VELSTEP_JMAX];
     double      Lgm_VelStep_x[LGM_VELSTEP_JMAX];
     double      Lgm_VelStep_Tol;        // tolerance for Magstep (ODE solver).
+    double      Lgm_VelStep_Alpha;
+    double      Lgm_VelStep_SinAlpha;
+    double      Lgm_VelStep_q;                                                                                                                                                            
+    double      Lgm_VelStep_T;                                                                                                                                                            
+    double      Lgm_VelStep_E0;                                                                                                                                                           
+    double      Lgm_VelStep_Bm;                                                                                                                                                           
+    double      Lgm_VelStep_h;                                                                                                                                                            
+    int         Lgm_VelStep_DerivScheme;
 
 
     /*
@@ -607,7 +615,7 @@ void    Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h,
 void    Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_Vector *CurlB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagModelInfo *m );
-void    Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double T, double E0, double Bm, int DerivScheme, double h, Lgm_MagModelInfo *m );
+int     Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, Lgm_MagModelInfo *m );
 
 
 

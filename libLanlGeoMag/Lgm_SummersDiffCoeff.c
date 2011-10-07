@@ -1,6 +1,7 @@
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 
 
+
 /**
  *  \brief
  *      Compute the electron plasma frequency, \f$\omega_{pe}\f$.
@@ -118,11 +119,15 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *
  *  \details
  *
+ *      \param[in]      Version     Version of Summers Model to use. Can be LGM_SUMMERS_2005 or LGM_SUMMERS_2007.
  *      \param[in]      Alpha0      Equatoria PA in Degrees.
  *      \param[in]      Ek          Kinetic energy in MeV.
  *      \param[in]      L           L-shell parameter (dimensionless).
  *      \param[in]      BwFuncData  A (void *) pointer to data that the user may need to use in BwFunc().
  *      \param[in]      BwFunc      A user-defined function that returns Bw as a function of Latitude in units of nT. Prototype is "double BwFunc( double Lat, void *Data )".
+ *      \param[in]      n1          Ratio of Hydrogen number density to Electron number density (note that n1+n2+n3=1).
+ *      \param[in]      n2          Ratio of Helium number density to Electron number density (note that n1+n2+n3=1).
+ *      \param[in]      n3          Ratio of Oxygen number density to Electron number density (note that n1+n2+n3=1).
  *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter \f$\Omega_\sigma/\omega_{pe}\f$.
  *      \param[in]      w1          Lower limit of freq. band, [Hz].
  *      \param[in]      w2          Lower limit of freq. band, [Hz].
@@ -135,18 +140,33 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \param[out]     Dap_ba      Bounce-averaged value of Dap.
  *      \param[out]     Dpp_ba      Bounce-averaged value of Dpp.
  *
- *      \return         void
+ *      \return         0 if successful. <0 otherwise.
  *
  *      \author         M. Henderson
  *      \date           2011
  *
  */
-int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
     double           T0, T1, T, a, b, E, s, Lambda, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
-    double           epsabs, epsrel, result, abserr, resabs, resasc, work[2001], points[3];
-    int              npts=4, key=6, limit=500, lenw=4*limit, iwork[501], last, ier, neval;
+    double           epsabs, epsrel, result, abserr, resabs, resasc, work[2002], points[10];
+    double           ySing, a_new, b_new;
+    int              npts2=4, key=6, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
     Lgm_SummersInfo *si=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
+
+    si->Version = Version;
+    si->n1 = n1;
+    si->n2 = n2;
+    si->n3 = n3;
+    if ( Version == LGM_SUMMERS_2007 ){
+        if ( fabs(1.0-(n1+n2+n3)) > 1e-8 ) {
+            printf("Lgm_SummersDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            return(-1);
+        }
+    }
+
+
+
 
     if ( (fabs(Alpha0-90.0) < 1e-8)||(fabs(Alpha0) < 1e-8) ) {
 
@@ -179,6 +199,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFunc
      */
     epsabs = 1e-10;
     epsrel = 1e-3;
+epsabs = 1e-4;
 
 
     /*
@@ -237,6 +258,7 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFunc
      */
     a = 0.0;                                            // radians
     b = acos( Lgm_CdipMirrorLat( si->SinAlpha0 ) );     // radians
+    b = ( b < si->MaxWaveLat ) ? b : si->MaxWaveLat;
     if ( fabs(a-b) < 1e-9 ) {
 
         *Daa_ba = 0.0;
@@ -248,16 +270,32 @@ int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFunc
 
 
         /*
-         *  Perform integrations. The points[] array contains a list of point in
-         *  the integrand where integrable singularities occur. dqagp() will avoid
-         *  computing integrand at exactly these points (dqagp() is an
+         *  Perform integrations. The points[] array contains a list of point
+         *  in the integrand where integrable singularities occur. dqagp() uses
+         *  these to break up the integral at these points (dqagp() is an
          *  extrapolation algorithm so it handles singularities very well.)
+         *  Note: the value of npts2 must be 2+ the number of points added.
+         *  This is because it adds the endpoints internally (so dont add those
+         *  here).
          */
-        points[1] = b; npts=2;
-        dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a, b, npts, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a, b, npts, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a, b, npts, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        npts2 = 2;
+        dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+
+        Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+//printf("a_new, b_new = %g %g\n", a_new, b_new);
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, FALSE, a, b, &points[1], &ySing );
+        dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+
+    
+        Lgm_SummersFindCutoffs( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+//printf("a_new, b_new = %g %g\n", a_new, b_new);
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+        dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+
+        Lgm_SummersFindCutoffs( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+//printf("a_new, b_new = %g %g\n", a_new, b_new);
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, FALSE, a, b, &points[1], &ySing );
+        dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
         /*
@@ -381,6 +419,8 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
     double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, aStarEq;
     double  Daa, Da0a0, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
+    double  n1, n2, n3;
+    int     Version;
     Lgm_SummersInfo *si;
 
 
@@ -407,6 +447,10 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     s           = si->s;             //
     Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
     Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
+    n1          = si->n1;            // nH/Ne
+    n2          = si->n2;            // nHe/Ne
+    n3          = si->n3;            // nO/Ne
+    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
@@ -440,7 +484,25 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     /*
      * Compute the local Daa
      */
-    Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+    if ( Version == LGM_SUMMERS_2005 ) {
+
+        Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+
+    } else if ( Version == LGM_SUMMERS_2007 ) {
+
+        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
+            Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        } else {
+            printf("SummersIntegrand_Gaa: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            //return(-1);
+        }
+
+    } else {
+
+        printf("SummersIntegrand_Gaa: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
+        //return(-1);
+
+    }
 
 
     /*
@@ -489,6 +551,8 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
     double  SinAlpha02, CosAlpha2, TanAlpha, TanAlpha0, Ek_in, L, aStarEq;
     double  Dap, Da0p, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
+    double  n1, n2, n3;
+    int     Version;
     Lgm_SummersInfo *si;
 
 
@@ -515,6 +579,10 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     s           = si->s;             //
     Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
     Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
+    n1          = si->n1;            // nH/Ne
+    n2          = si->n2;            // nHe/Ne
+    n3          = si->n3;            // nO/Ne
+    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
@@ -545,9 +613,27 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     dx        = dw/fabs(Omega_e);                               // Local value of dx.
 
     /*
-     * Compute the local Daa
+     * Compute the local Dap
      */
-    Dap = Lgm_SummersDapLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+    if ( Version == LGM_SUMMERS_2005 ) {
+
+        Dap = Lgm_SummersDapLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+
+    } else if ( Version == LGM_SUMMERS_2007 ) {
+
+        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
+            Dap = Lgm_SummersDapLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        } else {
+            printf("SummersIntegrand_Gap: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            return(-1);
+        }
+
+    } else {
+
+        printf("SummersIntegrand_Gap: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
+        return(-1);
+
+    }
 
 
     /*
@@ -562,6 +648,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0p * CosLat*v/sqrt(1-BoverBm);
 
+//printf("%g %g\n", Lat, f);
 //printf("Lat, f = %.15g %.15g\n", Lat*DegPerRad, log10(fabs(f))  );
     return( f );
 
@@ -586,6 +673,8 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
     double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, aStarEq;
     double  Dpp, f, aStar, E, dB, B, dBoverB2, Lambda, s, Rho, Sig;
+    double  n1, n2, n3;
+    int     Version;
     Lgm_SummersInfo *si;
 
 
@@ -611,6 +700,10 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     s           = si->s;             //
     Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
     Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
+    n1          = si->n1;            // nH/Ne
+    n2          = si->n2;            // nHe/Ne
+    n3          = si->n3;            // nO/Ne
+    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
@@ -638,9 +731,27 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     dx        = dw/fabs(Omega_e);                               // Local value of dx.
 
     /*
-     * Compute the local Daa
+     * Compute the local Dpp
      */
-    Dpp = Lgm_SummersDppLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+    if ( Version == LGM_SUMMERS_2005 ) {
+
+        Dpp = Lgm_SummersDppLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+
+    } else if ( Version == LGM_SUMMERS_2007 ) {
+
+        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
+            Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        } else {
+            printf("SummersIntegrand_Gpp: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            return(-1);
+        }
+
+    } else {
+
+        printf("SummersIntegrand_Gpp: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
+        return(-1);
+
+    }
 
 
     /*
@@ -743,17 +854,19 @@ int sum_res = 0;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
-    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
-    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
-    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
+    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( fabs(creal(z1)) > 0.0 ) ) z[nRoots++] = z1;
+    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( fabs(creal(z2)) > 0.0 ) ) z[nRoots++] = z2;
+    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( fabs(creal(z3)) > 0.0 ) ) z[nRoots++] = z3;
+    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( fabs(creal(z4)) > 0.0 ) ) z[nRoots++] = z4;
+
+
 /*
-int ii;
-nRoots = 0;
-for (ii=0; ii<num; ii++){
-    if ( ( fabs(cimag(zz[ii])) < 1e-10 ) && ( fabs(creal(zz[ii])) > 0.0 ) ) z[nRoots++] = zz[ii];
-}
-*/
+    int ii;
+    for (ii=0; ii<nRoots; ii++){
+        printf("z[%d] = %g + %g I\n", ii, creal( z[ii] ), cimag( z[ii] ) );
+    }
+ */
+
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -899,10 +1012,10 @@ int sum_res = 0;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
-    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
-    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
-    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
+    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( fabs(creal(z1)) > 0.0 ) ) z[nRoots++] = z1;
+    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( fabs(creal(z2)) > 0.0 ) ) z[nRoots++] = z2;
+    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( fabs(creal(z3)) > 0.0 ) ) z[nRoots++] = z3;
+    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( fabs(creal(z4)) > 0.0 ) ) z[nRoots++] = z4;
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -1054,10 +1167,10 @@ int sum_res = 1;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
-    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
-    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
-    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
+    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( fabs(creal(z1)) > 0.0 ) ) z[nRoots++] = z1;
+    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( fabs(creal(z2)) > 0.0 ) ) z[nRoots++] = z2;
+    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( fabs(creal(z3)) > 0.0 ) ) z[nRoots++] = z3;
+    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( fabs(creal(z4)) > 0.0 ) ) z[nRoots++] = z4;
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -1129,3 +1242,1049 @@ if ((x>xl)&&(x<xh)) {
     return(Dpp);
 
 }
+
+
+/**
+ *  \brief
+ *      Computes the local Summer's [2007] Daa diffusion coefficient.
+ *
+ *  \details
+ *      The derivative of the dispersion relation is not given by Summers et al. [2007], so here it is;
+ *
+ *          \f[
+ *              2 y(x) y'(x)=\left(\frac{\frac{e  n_1 }{(e
+ *                  s+x)^2}+\frac{1}{(s-x)^2}+\frac{4 e  n_2 }{(e s+4 x)^2}+\frac{16 e
+ *                   n_3 }{(e s+16 x)^2}}{ \alpha^*  x}-\frac{-\frac{e  n_1 }{e
+ *                  s+x}+\frac{1}{s-x}-\frac{e  n_2 }{e s+4 x}-\frac{e  n_3 }{e s+16
+ *                  x}}{ \alpha^*  x^2}\right) x^2+2 \left(\frac{-\frac{e  n_1 }{e
+ *                  s+x}+\frac{1}{s-x}-\frac{e  n_2 }{e s+4 x}-\frac{e  n_3 }{e s+16
+ *                  x}}{ \alpha^*  x}+1\right) x
+ *          \f]
+ *
+ *      Let, \f$ 2 y(x) y'(x) = Q\f$ so that,
+ *
+ *          \f[
+ *              Q = \left(\frac{\frac{e  n_1 }{(e s+x)^2}+\frac{1}{(s-x)^2}+\frac{4 e
+ *                   n_2 }{(e s+4 x)^2}+\frac{16 e  n_3 }{(e s+16 x)^2}}{ \alpha^*
+ *                  x}-\frac{-\frac{e  n_1 }{e s+x}+\frac{1}{s-x}-\frac{e  n_2 }{e s+4
+ *                  x}-\frac{e  n_3 }{e s+16 x}}{ \alpha^*  x^2}\right) x^2+2
+ *                  \left(\frac{-\frac{e  n_1 }{e s+x}+\frac{1}{s-x}-\frac{e  n_2 }{e
+ *                  s+4 x}-\frac{e  n_3 }{e s+16 x}}{ \alpha^*  x}+1\right) x
+ *          \f]
+ *
+ *      Then, \f$ W=1/Q \f$ gives,
+ *
+ *          \f[
+ *              W = \frac{ \alpha^*  (s-x)^2 (e s+x)^2 (e s+4 x)^2 (e s+16 x)^2}{s^5 \left(2
+ *                   \alpha^*  x s^3-\left(4  \alpha^*
+ *                  x^2+ n_1 + n_2 + n_3 -1\right) s^2+2 x \left( \alpha^*
+ *                  x^2+ n_1 + n_2 + n_3 \right) s-( n_1 + n_2 + n_3 )
+ *                  x^2\right) e^6+2 s^4 x \left(42  \alpha^*  x s^3-\left(84  \alpha^*
+ *                  x^2+20  n_1 +17  n_2 +5  n_3 -21\right) s^2+2 x \left(21
+ *                   \alpha^*  x^2+20  n_1 +17  n_2 +5  n_3 \right) s-(20
+ *                   n_1 +17  n_2 +5  n_3 ) x^2\right) e^5+3 s^3 x^2 \left(406
+ *                   \alpha^*  x s^3-\left(812  \alpha^*  x^2+176  n_1 +107
+ *                   n_2 +11  n_3 -203\right) s^2+2 x \left(203  \alpha^*  x^2+176
+ *                   n_1 +107  n_2 +11  n_3 \right) s-(176  n_1 +107
+ *                   n_2 +11  n_3 ) x^2\right) e^4+8 s^2 x^3 \left(914  \alpha^*  x
+ *                  s^3-\left(1828  \alpha^*  x^2+320  n_1 +68  n_2 +5
+ *                   n_3 -457\right) s^2+2 x \left(457  \alpha^*  x^2+320  n_1 +68
+ *                   n_2 +5  n_3 \right) s-(320  n_1 +68  n_2 +5  n_3 )
+ *                  x^2\right) e^3+16 s x^4 \left(1218  \alpha^*  x s^3-\left(2436
+ *                   \alpha^*  x^2+256  n_1 +16  n_2 + n_3 -609\right) s^2+2 x
+ *                  \left(609  \alpha^*  x^2+256  n_1 +16  n_2 + n_3 \right)
+ *                  s-(256  n_1 +16  n_2 + n_3 ) x^2\right) e^2+10752 s x^5
+ *                  \left(2  \alpha^*  x^3-4  \alpha^*  s x^2+2  \alpha^*  s^2
+ *                  x+s\right) e+4096 x^6 \left(2  \alpha^*  x^3-4  \alpha^*  s x^2+2
+ *                   \alpha^*  s^2 x+s\right)}
+ *          \f]
+ *
+ *      Define, \f$ P =  \alpha^*  (s-x)^2 (e s+x)^2 (e s+4 x)^2 (e s+16 x)^2 \f$, so that \f$ W = P/H \f$, where,
+ *
+ *          \f[
+ *              H = s^5 \left(2  \alpha^*  x s^3-\left(4  \alpha^*
+ *                  x^2+ n_1 + n_2 + n_3 -1\right) s^2+2 x \left( \alpha^*
+ *                  x^2+ n_1 + n_2 + n_3 \right) s-( n_1 + n_2 + n_3 )
+ *                  x^2\right) e^6+2 s^4 x \left(42  \alpha^*  x s^3-\left(84  \alpha^*
+ *                  x^2+20  n_1 +17  n_2 +5  n_3 -21\right) s^2+2 x \left(21
+ *                   \alpha^*  x^2+20  n_1 +17  n_2 +5  n_3 \right) s-(20
+ *                   n_1 +17  n_2 +5  n_3 ) x^2\right) e^5+3 s^3 x^2 \left(406
+ *                   \alpha^*  x s^3-\left(812  \alpha^*  x^2+176  n_1 +107
+ *                   n_2 +11  n_3 -203\right) s^2+2 x \left(203  \alpha^*  x^2+176
+ *                   n_1 +107  n_2 +11  n_3 \right) s-(176  n_1 +107
+ *                   n_2 +11  n_3 ) x^2\right) e^4+8 s^2 x^3 \left(914  \alpha^*  x
+ *                  s^3-\left(1828  \alpha^*  x^2+320  n_1 +68  n_2 +5
+ *                   n_3 -457\right) s^2+2 x \left(457  \alpha^*  x^2+320  n_1 +68
+ *                   n_2 +5  n_3 \right) s-(320  n_1 +68  n_2 +5  n_3 )
+ *                  x^2\right) e^3+16 s x^4 \left(1218  \alpha^*  x s^3-\left(2436
+ *                   \alpha^*  x^2+256  n_1 +16  n_2 + n_3 -609\right) s^2+2 x
+ *                  \left(609  \alpha^*  x^2+256  n_1 +16  n_2 + n_3 \right)
+ *                  s-(256  n_1 +16  n_2 + n_3 ) x^2\right) e^2+10752 s x^5
+ *                  \left(2  \alpha^*  x^3-4  \alpha^*  s x^2+2  \alpha^*  s^2
+ *                  x+s\right) e+4096 x^6 \left(2  \alpha^*  x^3-4  \alpha^*  s x^2+2
+ *                   \alpha^*  s^2 x+s\right)
+ *          \f]
+ *      Collect terms in powers of \f$x\f$, and note that \f$s=\pm 1\f$. This gives,
+ *
+ *          \f{eqnarray*}{
+ *              H &=& 8192  \alpha^*  x^9\\
+ *                &+& (21504  \alpha^*  e s-16384  \alpha^*  s) x^8\\
+ *                &+& \left(19488  \alpha^*  e^2-43008  \alpha^*  e+8192 \alpha^* \right) x^7\\
+ *                &+& \left(7312  \alpha^*  s e^3-38976  \alpha^*  s e^2-16 (256  n_1 +16  n_2 + n_3 ) s e^2+21504  \alpha^*  s e+4096 s\right) x^6\\
+ *                &+& \left(1218  \alpha^*  e^4-14624  \alpha^*  e^3-8 (320  n_1 +68  n_2 +5  n_3 ) e^3+19488  \alpha^*  e^2+8192 n_1  e^2+512  n_2  e^2+32  n_3  e^2+10752 e\right) x^5\\
+ *                &+& \left(84  \alpha^*  s e^5-2436  \alpha^*  s e^4-3 (176 n_1 +107  n_2 +11  n_3 ) s e^4+7312  \alpha^*  s e^3+5120 n_1  s e^3+1088  n_2  s e^3+80  n_3  s e^3-4096  n_1  s e^2-256  n_2  s e^2-16  n_3  s e^2+9744 s e^2\right) x^4\\
+ *                &+& \left(2 \alpha^*  e^6-168  \alpha^*  e^5-2 (20  n_1 +17  n_2 +5 n_3 ) e^5+1218  \alpha^*  e^4+1056  n_1  e^4+642  n_2 e^4+66  n_3  e^4-2560  n_1  e^3-544  n_2  e^3-40  n_3 e^3+3656 e^3\right) x^3\\
+ *                &+& \left(-4  \alpha^*  s e^6-( n_1 + n_2 + n_3 ) s e^6+84  \alpha^*  s e^5+80 n_1  s e^5+68  n_2  s e^5+20  n_3  s e^5-528  n_1  s e^4-321  n_2  s e^4-33  n_3  s e^4+609 s e^4\right) x^2\\
+ *                &+& \left(2 \alpha^*  e^6+2  n_1  e^6+2  n_2  e^6+2  n_3  e^6-40 n_1  e^5-34  n_2  e^5-10  n_3  e^5+42 e^5\right) x\\
+ *                &+& e^6 s-e^6 n_1  s-e^6  n_2  s-e^6  n_3  s
+ *          \f}
+ *
+ *      Let \f$ H =  \Sigma_{i=0}^{8} h_i x^i  \f$. This gives,
+ *
+ *          \f{eqnarray*}{
+ *              h_0 &=& -e^6 ( n_1 + n_2 + n_3 -1) s\\
+ *              h_1 &=& 2 e^5 ( \alpha^*  e+ n_2  e+ n_3  e+(e-20)  n_1 -17 n_2 -5  n_3 +21)\\
+ *              h_2 &=& e^4 \left(-4  \alpha^*  e^2-( n_1 + n_2 + n_3 ) e^2+84 \alpha^*  e+80  n_1  e+68  n_2  e+20  n_3  e-528 n_1 -321  n_2 -33  n_3 +609\right) s\\
+ *              h_3 &=& 2 e^3 \left(-17  n_2  e^2-5  n_3  e^2+ \alpha^*  \left(e^2-84 e+609\right) e+321  n_2  e+33  n_3  e-4 \left(5 e^2-132 e+320\right)  n_1 -272  n_2 -20  n_3 +1828\right)\\
+ *              h_4 &=& e^2 \left(-321  n_2  e^2-33  n_3  e^2+4  \alpha^*  \left(21 e^2-609 e+1828\right) e+1088  n_2  e+80  n_3  e-16 \left(33 e^2-320 e+256\right)  n_1 -256  n_2 -16  n_3 +9744\right) s\\
+ *              h_5 &=& 2 e \left( \alpha^*  e \left(609 e^2-7312 e+9744\right)-4 \left((320 n_1 +68  n_2 +5  n_3 ) e^2-4 (256  n_1 +16 n_2 + n_3 ) e-1344\right)\right)\\
+ *              h_6 &=& 16 \left(-(256  n_1 +16  n_2 + n_3 ) e^2+ \alpha^*  \left(457 e^2-2436 e+1344\right) e+256\right) s\\
+ *              h_7 &=& 32  \alpha^*  \left(609 e^2-1344 e+256\right)\\
+ *              h_8 &=& 1024  \alpha^*  (21 e-16) s\\
+ *              h_9 &=& 8192  \alpha^*
+ *          \f}
+ *
+ *
+ *  Then, collecting terms in powers of \f$ e\f$, and defining,
+ *
+ *          \f{eqnarray*}{
+ *              q0 &=& 16  n_1 +4  n_2 + n_3 \\
+ *              q1 &=&  n_1 + n_2 + n_3 \\
+ *              q2 &=& 20  n_1 +17  n_2 +5  n_3 \\
+ *              q3 &=& 176  n_1 +107  n_2 +11  n_3 \\
+ *              q4 &=& 256  n_1 +16  n_2 + n_3 \\
+ *              q5 &=& 320  n_1 +68  n_2 +5  n_3
+ *          \f}
+ *
+ *  We have,
+ *
+ *
+ *          \f{eqnarray*}{
+ *              h_0 &=& e^6 (1- q_1 ) s\\
+ *              h_1 &=& 2 e^5 (e ( \alpha^* + q_1 )- q_2 +21)\\
+ *              h_2 &=& e^4 \left((-4  \alpha^* - q_1 ) e^2+4 (21  \alpha^* + q_2 ) e+3 (203- q_3 )\right) s\\
+ *              h_3 &=& 2 e^3 \left( \alpha^*  e^3+(-84  \alpha^* - q_2 ) e^2+3 (203  \alpha^* + q_3 ) e+4 (457- q_5 )\right)\\
+ *              h_4 &=& e^2 \left(84  \alpha^*  e^3+3 (-812  \alpha^* - q_3 ) e^2+16 (457  \alpha^* + q_5 ) e+16 (609- q_4 )\right) s\\
+ *              h_5 &=& e \left(1218  \alpha^*  e^3-8 (1828  \alpha^* + q_5 ) e^2+32 (609  \alpha^* + q_4 ) e+10752\right)\\
+ *              h_6 &=& 16 \left(457  \alpha^*  e^3+(-2436  \alpha^* - q_4 ) e^2+1344  \alpha^*  e+256\right) s\\
+ *              h_7 &=& 32  \alpha^*  \left(609 e^2-1344 e+256\right)\\
+ *              h_8 &=& 1024  \alpha^*  (21 e-16) s\\
+ *              h_9 &=& 8192  \alpha^*
+ *          \f}
+ *
+ *  But, note that by definition, \f$ q_1 = 0\f$. Therefore \f$ h_0 = 0\f$. Define \f$ H = xG = x\Sigma_{i=0}^{8} g_i x^i \f$, so that;
+ *
+ *          \f{eqnarray*}{
+ *              g_0 &=& 2 e^5 ( \alpha^*  e- q_2 +21)\\
+ *              g_1 &=& e^4 \left(-4  \alpha^*  e^2+4 (21  \alpha^* + q_2 ) e+3 (203- q_3 )\right) s\\
+ *              g_2 &=& 2 e^3 \left( \alpha^*  e^3+(-84  \alpha^* - q_2 ) e^2+3 (203  \alpha^* + q_3 ) e+4 (457- q_5 )\right)\\
+ *              g_3 &=& e^2 \left(84  \alpha^*  e^3+3 (-812  \alpha^* - q_3 ) e^2+16 (457  \alpha^* + q_5 ) e+16 (609- q_4 )\right) s\\
+ *              g_4 &=& e \left(1218  \alpha^*  e^3-8 (1828  \alpha^* + q_5 ) e^2+32 (609  \alpha^* + q_4 ) e+10752\right)\\
+ *              g_5 &=& 16 \left(457  \alpha^*  e^3+(-2436  \alpha^* - q_4 ) e^2+1344  \alpha^*  e+256\right) s\\
+ *              g_6 &=& 32  \alpha^*  \left(609 e^2-1344 e+256\right)\\
+ *              g_7 &=& 1024  \alpha^*  (21 e-16) s\\
+ *              g_8 &=& 8192  \alpha^*
+ *          \f}
+ *
+ *
+ *  Putting all of this together we have,
+ *
+ *      \f{eqnarray*}{
+ *          {dx\over dy} &=& {2 y P\over xG } \\
+ *          {dx\over dy} &=& {2 y \alpha^*  (s-x)^2 (e s+x)^2 (e s+4 x)^2 (e s+16 x)^2   \over x \Sigma_{i=0}^{8} g_i x^i }
+ *      \f}
+ *
+ *
+ *  Also, with these defintions, the dispersion relation can be simplified to (see equation (18) in Summers et al. [2007]),
+ *
+ *      \f[
+ *          \Sigma_{i=0}^{6} A_i x^i = 0
+ *      \f]
+ *
+ *
+ *  where,
+ *
+ *      \f{eqnarray*}{
+ *          A_1 &=& \frac{128 a+4  (1-\xi^2)   p_1  s}{ (64(1-\xi^2))} \\
+ *          A_2 &=& \frac{64  a^2 +21 e  (1-\xi^2)   p_2 +8 a  p_1  s+\frac{A  \xi^2 }{ \alpha^* }}{ (64(1-\xi^2))}\\
+ *          A_3 &=& \frac{42 a e  p_2 +4  a^2   p_1  s+ e^2   (1-\xi^2)   p_3  s+\frac{B  \xi^2 }{ \alpha^* }}{ (64(1-\xi^2))}\\
+ *          A_4 &=& \frac{- e^3   (1-\xi^2) +21  a^2  e  p_2 +2 a  e^2   p_3  s+\frac{C  \xi^2 }{ \alpha^* }}{ (64(1-\xi^2))}\\
+ *          A_5 &=& \frac{a  e^2  (a  p_3  s-2 e)}{ (64(1-\xi^2))}\\
+ *          A_6 &=& -\frac{ a^2   e^3 }{ (64(1-\xi^2))}
+ *      \f}
+ *
+ *
+ *
+ *
+ *
+ *  and,
+ *
+ *      \f{eqnarray*}{
+ *          A &=& 4 e q_0 + 64\\
+ *          B &=& e (4 (21-q_0) + e  q_2 ) s\\
+ *          C &=& e^2 (21- q_2  ) \\
+ *          p_1 &=& 21 e - 16 \\
+ *          p_2 &=&  e - 4 \\
+ *          p_3 &=&  e - 21
+ *      \f}
+ *
+ *
+ *
+ *      \param[in]      SinAlpha2   \f$\sin^2(\alpha)\f$, where \f$\alpha\f$ is the local particle pitch angle.
+ *      \param[in]      E           Dimensionless energy Ek/E0 (kinetic energy over rest mass).
+ *      \param[in]      dBoverB2    Ratio of wave amplitude, dB to local background field, B.
+ *      \param[in]      BoverBeq    Ratio of local B to Beq.
+ *      \param[in]      Omega_e     Local gyro-frequency of electrons.
+ *      \param[in]      Omega_Sig   Local gyro-frequency of particle species we are interested in.
+ *      \param[in]      Rho         This is \f$0.5 \sqrt(\pi) ( \mbox{erf}((wm-w1)/dw) + \mbox{erf}(wm-w1)/dw) )\f$.
+ *      \param[in]      Sig         Blah.
+ *      \param[in]      xm          Blah.
+ *      \param[in]      dx          Blah.
+ *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
+ *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
+ *      \param[in]      n1          Ratio of H+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n2          Ratio of He+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n3          Ratio of O+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      aStar       Local value of the aStar parameter ( \f$ \alpha^* \f$ ) in the Summer's papers.
+ *
+ *      \return         Local value of Daa
+ *
+ *      \author         M. Henderson
+ *      \date           2010-2011
+ *
+ */
+double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+
+    int             nReal, nRoots, n, nn, i, num;
+    double          q0, q2, q3, q4, q5;
+    double          p1, p2, p3;
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
+    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
+    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double          Daa, R, x0, y0, Ep1, Ep12, sss, u, arg;
+    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
+    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+
+    /*
+     * Solve for resonant roots.
+     */
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    Beta2 = E*(E+2.0) / Gamma2;
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
+    Xsi2  = Beta2*Mu2;
+    OneMinusXsi2 = (1.0 - Xsi2);
+    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
+
+    q0 = 16.0*n1 + 4.0*n2 + n3;
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
+
+    p1 = 21.0*e - 16.0;
+    p2 = e - 4.0;
+    p3 = e - 21.0;
+
+    A = 64.0 + 4.0*e*q0;
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );
+    C = e2*( 21.0 - q2 );
+
+    A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
+    A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
+    A3 = ( 42*a*e*p2 + 4*aa*s*p1 + e2*s*p3*OneMinusXsi2 + (B*Xsi2)/aStar  ) / OneMinusXsi2Times64;
+    A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
+    A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
+    A6 = -aa*e3 / OneMinusXsi2Times64;
+
+    nn = 6;
+    Coeff[0] = 1.0;
+    Coeff[1] = A1;
+    Coeff[2] = A2;
+    Coeff[3] = A3;
+    Coeff[4] = A4;
+    Coeff[5] = A5;
+    Coeff[6] = A6;
+    num = Lgm_PolyRoots( Coeff, nn, zz );
+
+
+
+
+    R  = dBoverB2;   // The ratio (dB/B)^2
+
+
+// This is another hard-wired input parameter. Fix.
+int sum_res = 0;
+
+
+
+    /*
+     * Gather applicable roots together into the z[] array
+     */
+    nRoots = 0;
+    for ( i=0; i<6; i++ ) {
+        if ( ( fabs(cimag(zz[i])) < 1e-8 ) && ( fabs(creal(zz[i]) > 0.0) ) ) z[nRoots++] = zz[i];
+    }
+
+
+/*
+    int ii;
+    for (ii=0; ii<nRoots; ii++){
+        printf("z[%d] = %g + %g I\n", ii, creal( z[ii] ), cimag( z[ii] ) );
+    }
+ */
+
+
+    if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
+
+        /*
+         *  No resonant roots were found
+         */
+        Daa = 0.0;
+
+
+    } else if ( Mu2 <= 1e-16 ) {
+
+        /*
+         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
+         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         */
+        x0 = 1.0/Gamma;
+        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+
+        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
+        arg = (x0-xm)/dx;
+        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
+
+        Daa = ( sum_res ) ? 2.0*Dcore : Dcore;
+
+    } else {
+
+        /*
+         *  We have resonant roots and we are not at 90Deg.
+         */
+        q3 = 176.0*n1 + 107.0*n2 + 11.0*n3;
+        q4 = 256.0*n1 +  16.0*n2 +    n3;
+        q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
+
+        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
+        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
+        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
+        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
+        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        g7 = 1024.0*aStar*s*p1;
+        g8 = 8192.0*aStar;
+
+        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
+        fac = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/Ep12;
+
+        /*
+         * Execute sum over resonant roots.
+         */
+        BetaMu = sqrt(Xsi2);
+        Beta   = sqrt(Beta2);
+        Mu     = sqrt(Mu2);
+        for ( Daa=0.0, n=0; n<nRoots; n++ ){
+
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            y = ( x+a )/BetaMu;
+if ((x>xl)&&(x<xh)) {
+//if (y<0){
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+
+            F = 2.0*y*aStar*sss*sss/(x*g);
+
+            u = 1.0 - x*Mu/(y*Beta);
+            arg = (x-xm)/dx;
+            Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+//}
+}
+
+        }
+        Daa *= fac;
+
+
+
+    }
+
+    return(Daa);
+
+}
+
+/**
+ *  \brief
+ *      Computes the local Summer's [2007] Dap diffusion coefficient.
+ *
+ *  \details
+ *
+ *
+ *
+ *
+ *      \param[in]      SinAlpha2   \f$\sin^2(\alpha)\f$, where \f$\alpha\f$ is the local particle pitch angle.
+ *      \param[in]      E           Dimensionless energy Ek/E0 (kinetic energy over rest mass).
+ *      \param[in]      dBoverB2    Ratio of wave amplitude, dB to local background field, B.
+ *      \param[in]      BoverBeq    Ratio of local B to Beq.
+ *      \param[in]      Omega_e     Local gyro-frequency of electrons.
+ *      \param[in]      Omega_Sig   Local gyro-frequency of particle species we are interested in.
+ *      \param[in]      Rho         This is \f$0.5 \sqrt(\pi) ( \mbox{erf}((wm-w1)/dw) + \mbox{erf}(wm-w1)/dw) )\f$.
+ *      \param[in]      Sig         Blah.
+ *      \param[in]      xm          Blah.
+ *      \param[in]      dx          Blah.
+ *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
+ *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
+ *      \param[in]      n1          Ratio of H+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n2          Ratio of He+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n3          Ratio of O+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      aStar       Local value of the aStar parameter ( \f$ \alpha^* \f$ ) in the Summer's papers.
+ *
+ *      \return         Local value of Dap
+ *
+ *      \author         M. Henderson
+ *      \date           2010-2011
+ *
+ */
+double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+
+    int             nReal, nRoots, n, nn, i, num;
+    double          q0, q2, q3, q4, q5;
+    double          p1, p2, p3;
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
+    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
+    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double          Dap, R, x0, y0, Ep1, Ep12, sss, u, arg, SinAlpha;
+    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
+    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+
+    /*
+     * Solve for resonant roots.
+     */
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    Beta2 = E*(E+2.0) / Gamma2;
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
+    Xsi2  = Beta2*Mu2;
+    OneMinusXsi2 = (1.0 - Xsi2);
+    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
+
+    q0 = 16.0*n1 + 4.0*n2 + n3;
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
+
+    p1 = 21.0*e - 16.0;
+    p2 = e - 4.0;
+    p3 = e - 21.0;
+
+    A = 64.0 + 4.0*e*q0;
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );
+    C = e2*( 21.0 - q2 );
+
+    A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
+    A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
+    A3 = ( 42*a*e*p2 + 4*aa*s*p1 + e2*s*p3*OneMinusXsi2 + (B*Xsi2)/aStar  ) / OneMinusXsi2Times64;
+    A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
+    A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
+    A6 = -aa*e3 / OneMinusXsi2Times64;
+
+    nn = 6;
+    Coeff[0] = 1.0;
+    Coeff[1] = A1;
+    Coeff[2] = A2;
+    Coeff[3] = A3;
+    Coeff[4] = A4;
+    Coeff[5] = A5;
+    Coeff[6] = A6;
+    num = Lgm_PolyRoots( Coeff, nn, zz );
+
+
+
+
+    R  = dBoverB2;   // The ratio (dB/B)^2
+
+
+// This is another hard-wired input parameter. Fix.
+int sum_res = 0;
+
+
+
+    /*
+     * Gather applicable roots together into the z[] array
+     */
+    nRoots = 0;
+    for ( i=0; i<6; i++ ) {
+        if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( fabs(creal(zz[i])) > 0.0 ) ) z[nRoots++] = zz[i];
+    }
+/*
+int ii;
+nRoots = 0;
+for (ii=0; ii<num; ii++){
+    if ( ( fabs(cimag(zz[ii])) < 1e-10 ) && ( fabs(creal(zz[ii])) > 0.0 ) ) z[nRoots++] = zz[ii];
+}
+*/
+
+
+    if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
+
+        /*
+         *  No resonant roots were found
+         */
+        Dap = 0.0;
+
+
+    } else if ( Mu2 <= 1e-16 ) {
+
+        /*
+         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
+         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         */
+        x0 = 1.0/Gamma;
+        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+
+        Beta  = sqrt(Beta2);
+        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
+        arg   = (x0-xm)/dx;
+        Dcore = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
+        Dap   = ( sum_res ) ? 2.0*Dcore : Dcore;
+
+    } else {
+
+        /*
+         *  We have resonant roots and we are not at 90Deg.
+         */
+        q3 = 176.0*n1 + 107.0*n2 + 11.0*n3;
+        q4 = 256.0*n1 +  16.0*n2 +    n3;
+        q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
+
+        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
+        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
+        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
+        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
+        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        g7 = 1024.0*aStar*s*p1;
+        g8 = 8192.0*aStar;
+
+
+
+
+
+        /*
+         * Execute sum over resonant roots.
+         */
+        Beta   = sqrt(Beta2);
+        if (SinAlpha2 < 0.0) SinAlpha = 0.0;
+        else if ( SinAlpha2 > 1.0) SinAlpha = 1.0;
+        else SinAlpha = sqrt( SinAlpha2 );
+
+        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
+        fac = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*SinAlpha/Ep12 /Beta;
+        BetaMu = sqrt(Xsi2);
+        Mu     = sqrt(Mu2);
+
+        for ( Dap=0.0, n=0; n<nRoots; n++ ){
+
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            y = ( x+a )/BetaMu;
+if ((x>xl)&&(x<xh)) {
+//if (y<0){
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+
+            F = 2.0*y*a*sss*sss/(x*g);
+
+            u = 1.0 - x*Mu/(y*Beta);
+            arg = (x-xm)/dx;
+            // if fabs(BetaMu - F) gets too small, we will get a singularity.
+            Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+//}
+}
+
+        }
+        Dap *= fac;
+
+
+
+    }
+
+    return(Dap);
+
+}
+
+/**
+ *  \brief
+ *      Computes the local Summer's [2007] Dpp diffusion coefficient.
+ *
+ *  \details
+ *
+ *
+ *
+ *
+ *      \param[in]      SinAlpha2   \f$\sin^2(\alpha)\f$, where \f$\alpha\f$ is the local particle pitch angle.
+ *      \param[in]      E           Dimensionless energy Ek/E0 (kinetic energy over rest mass).
+ *      \param[in]      dBoverB2    Ratio of wave amplitude, dB to local background field, B.
+ *      \param[in]      BoverBeq    Ratio of local B to Beq.
+ *      \param[in]      Omega_e     Local gyro-frequency of electrons.
+ *      \param[in]      Omega_Sig   Local gyro-frequency of particle species we are interested in.
+ *      \param[in]      Rho         This is \f$0.5 \sqrt(\pi) ( \mbox{erf}((wm-w1)/dw) + \mbox{erf}(wm-w1)/dw) )\f$.
+ *      \param[in]      Sig         Blah.
+ *      \param[in]      xm          Blah.
+ *      \param[in]      dx          Blah.
+ *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
+ *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
+ *      \param[in]      n1          Ratio of H+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n2          Ratio of He+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      n3          Ratio of O+ Number Density to Electron Number Density. (n1+n2+n3 must add to 1).
+ *      \param[in]      aStar       Local value of the aStar parameter ( \f$ \alpha^* \f$ ) in the Summer's papers.
+ *
+ *      \return         Local value of Dpp
+ *
+ *      \author         M. Henderson
+ *      \date           2010-2011
+ *
+ */
+double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+
+    int             nReal, nRoots, n, nn, i, num;
+    double          q0, q2, q3, q4, q5;
+    double          p1, p2, p3;
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
+    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
+    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double          Dpp, R, x0, y0, Ep1, Ep12, sss, u, arg;
+    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
+    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+
+    /*
+     * Solve for resonant roots.
+     */
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    Beta2 = E*(E+2.0) / Gamma2;
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
+    Xsi2  = Beta2*Mu2;
+    OneMinusXsi2 = (1.0 - Xsi2);
+    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
+
+    q0 = 16.0*n1 + 4.0*n2 + n3;
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
+
+    p1 = 21.0*e - 16.0;
+    p2 = e - 4.0;
+    p3 = e - 21.0;
+
+    A = 64.0 + 4.0*e*q0;
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );
+    C = e2*( 21.0 - q2 );
+
+    A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
+    A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
+    A3 = ( 42*a*e*p2 + 4*aa*s*p1 + e2*s*p3*OneMinusXsi2 + (B*Xsi2)/aStar  ) / OneMinusXsi2Times64;
+    A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
+    A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
+    A6 = -aa*e3 / OneMinusXsi2Times64;
+
+    nn = 6;
+    Coeff[0] = 1.0;
+    Coeff[1] = A1;
+    Coeff[2] = A2;
+    Coeff[3] = A3;
+    Coeff[4] = A4;
+    Coeff[5] = A5;
+    Coeff[6] = A6;
+    num = Lgm_PolyRoots( Coeff, nn, zz );
+
+
+
+
+    R  = dBoverB2;   // The ratio (dB/B)^2
+
+
+// This is another hard-wired input parameter. Fix.
+int sum_res = 0;
+
+
+
+    /*
+     * Gather applicable roots together into the z[] array
+     */
+    nRoots = 0;
+    for ( i=0; i<6; i++ ) {
+        if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( fabs(creal(zz[i])) > 0.0 ) ) z[nRoots++] = zz[i];
+    }
+/*
+int ii;
+nRoots = 0;
+for (ii=0; ii<num; ii++){
+    if ( ( fabs(cimag(zz[ii])) < 1e-10 ) && ( fabs(creal(zz[ii])) > 0.0 ) ) z[nRoots++] = zz[ii];
+}
+*/
+
+
+    if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
+
+        /*
+         *  No resonant roots were found
+         */
+        Dpp = 0.0;
+
+
+    } else if ( Mu2 <= 1e-16 ) {
+
+        /*
+         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
+         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         */
+        x0 = 1.0/Gamma;
+        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+
+        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
+        arg   = (x0-xm)/dx;
+        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
+        Dpp   = ( sum_res ) ? 2.0*Dcore : Dcore;
+
+    } else {
+
+        /*
+         *  We have resonant roots and we are not at 90Deg.
+         */
+        q3 = 176.0*n1 + 107.0*n2 + 11.0*n3;
+        q4 = 256.0*n1 +  16.0*n2 +    n3;
+        q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
+
+        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
+        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
+        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
+        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
+        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        g7 = 1024.0*aStar*s*p1;
+        g8 = 8192.0*aStar;
+
+        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
+        fac = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/Ep12;
+
+        /*
+         * Execute sum over resonant roots.
+         */
+        Beta   = sqrt(Beta2);
+        BetaMu = sqrt(Xsi2);
+        Mu     = sqrt(Mu2);
+        for ( Dpp=0.0, n=0; n<nRoots; n++ ){
+
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            y = ( x+a )/BetaMu;
+if ((x>xl)&&(x<xh)) {
+//if (y<0){
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+
+            F = 2.0*y*a*sss*sss/(x*g);
+
+            u = 1.0 - x*Mu/(y*Beta);
+            arg = (x-xm)/dx;
+            Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+//}
+}
+
+        }
+        Dpp *= fac;
+
+
+
+    }
+
+    return(Dpp);
+
+}
+
+
+
+/**
+ *  \brief
+ *      Finds singularities in the integrands
+ *
+ *  \details
+ */
+int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y ) {
+
+    int     done, founda, foundb, foundc, Found;
+    double  a, b, c, d, fa, fb, fc, fd, inc, D1, D2, DELTA;
+
+    inc = 0.1*RadPerDeg;
+
+
+    /*
+     * Find a non-zero starting point
+     */
+    a = Lat0; done = FALSE; founda = FALSE;
+    while ( !done ) {
+        a += inc;
+        if ( a > Lat1 ){
+            done = TRUE;
+        } else {
+            fa = fabs( f( a, qpInfo ) );
+            if ( fa > 0.0 ) {
+                founda = TRUE;
+                done   = TRUE;
+            }
+        }
+    }
+
+
+    /*
+     * Keep stepping to get a higher point
+     */
+    b = a; done = FALSE; foundb = FALSE;
+    while ( !done ) {
+        b += inc;
+        if ( b > Lat1 ){
+            done = TRUE;
+        } else {
+            fb = fabs( f( b, qpInfo ) );
+            if ( fb > fa ) {
+                foundb = TRUE;
+                done   = TRUE;
+            }
+        }
+    }
+
+    /*
+     * Keep stepping to get a lower point than b
+     */
+    c = b; done = FALSE; foundc = FALSE;
+    while ( !done ) {
+        c += inc;
+        if ( c > Lat1 ){
+            done = TRUE;
+        } else {
+            fc = fabs( f( c, qpInfo ) );
+            if ( fc < fb ) {
+                foundc = TRUE;
+                done   = TRUE;
+            }
+        }
+    }
+
+    //printf("Found Bracket: %g %g %g %g %g %g\n", a, b, c, fa, fb, fc );
+
+
+    done = FALSE;
+    while (!done) {
+
+        D1 = b-a;
+        D2 = c-b;
+
+        if ( fabs(c-a) < 1e-14 ) {
+            done = TRUE;
+        } else {
+
+            // bisect largest interval
+            if ( D1 > D2 ) {
+                d = a+0.5*D1; fd = fabs( f( d, qpInfo ) );
+
+                if ( (fd>fb) ) {
+                    b = d; fb = fd;
+                } else {
+                    a = d; fa = fd;
+                }
+            } else {
+                d = b+0.5*D2; fd = fabs( f( d, qpInfo ) );
+
+                if ( (fd>fb) ) {
+                    b = d; fb = fd;
+                } else {
+                    c = d; fc = fd;
+                }
+            }
+            //printf("a, b, c, d = %g %g %g %g\n", a, b, c, d);
+
+        }
+
+    }
+
+    *x = b;
+    *y = fb;
+
+    if ( isinf( fb ) ) {
+        if ( ( *x <= Lat0 ) || ( *x >= Lat1 )  ) {
+            // singularity at endpoint (dqagp already deals with this case).
+            Found = FALSE; 
+        } else {
+            Found = TRUE;
+        }
+    } else {
+        DELTA = fb - fabs(f( b-1e-4, qpInfo ));
+        Found = ( DELTA > 1.0 ) ?  1 : 0;
+    }
+
+    if ( Found ) {
+        if (Verbose) printf("Singularity at Lat = %g  val = %g\n", *x, *y);
+        return(1);
+    } else {
+        return(0);
+    }
+
+}
+
+
+
+/**
+ *  \brief
+ *      Finds singularities in the integrands
+ *
+ *  \details
+ */
+int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b ) {
+
+    int     done, founda, foundb, foundc, Found;
+    double  x, x0, x1, fx, fx0, fx1, inc, D;
+
+    inc = 0.1*RadPerDeg;
+
+    fx = fabs( f( Lat0, qpInfo ) );
+    if ( fx > 0.0 ) {
+
+        *a = Lat0;
+
+    } else {
+
+        /*
+         * Find a non-zero starting point
+         */
+        x0 = x1 = Lat0; done = FALSE; founda = FALSE;
+        while ( !done ) {
+            if ( x1 < Lat1 ){
+                fx1 = fabs( f( x1, qpInfo ) );
+                if ( fx1 > 0.0 ) {
+                    done = TRUE;
+                    founda = TRUE;
+                } else {
+                    x0 = x1; fx0 = fx1;
+                    x1 += inc;
+                }
+            } else {
+                done = TRUE;
+            }
+        }
+        
+        if ( founda ) {
+            /*
+             * Refine the point
+             */
+            done = FALSE;
+            while( !done ) {
+                D = x1-x0;
+                if ( fabs(D) < 1e-8 ) {
+                    done = TRUE;
+                } else {
+                    x = x0 +0.5*D;
+                    fx = fabs( f( x, qpInfo ) );
+                    if ( fx > 0.0 ) {
+                        x1 = x; fx1 = fx;
+                    } else {
+                        x0 = x; fx0 = fx;
+                    }
+                }
+            }
+            *a = x1;
+        } else {
+            *a = Lat1;
+            return(1);
+        }
+    }
+
+
+    fx = fabs( f( Lat1, qpInfo ) );
+    if ( fx > 0.0 ) {
+
+        *b = Lat1;
+
+    } else {
+
+        /*
+         * Find a non-zero ending point
+         */
+        x0 = x1 = Lat1; done = FALSE; foundb = FALSE;
+        while ( !done ) {
+            if ( x0 > Lat0 ){
+                fx0 = fabs( f( x0, qpInfo ) );
+                if ( fx0 > 0.0 ) {
+                    done = TRUE;
+                    foundb = TRUE;
+                } else {
+                    x1 = x0; fx1 = fx0;
+                    x0 -= inc;
+                }
+            } else {
+                done = TRUE;
+            }
+        }
+
+        if ( foundb ) {
+        
+            /*
+             * Refine the point
+             */
+            done = FALSE;
+            while( !done ) {
+                D = x1-x0;
+                if ( fabs(D) < 1e-8 ) {
+                    done = TRUE;
+                } else {
+                    x = x0 + 0.5*D;
+                    fx = fabs( f( x, qpInfo ) );
+                    if ( fx > 0.0 ) {
+                        x0 = x; fx0 = fx;
+                    } else {
+                        x1 = x; fx1 = fx;
+                    }
+                }
+            }
+            *b = x0;
+        } else {
+            *b = Lat0;
+            return(1);
+        }
+
+    }
+
+    return(1);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

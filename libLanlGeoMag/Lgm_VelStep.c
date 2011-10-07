@@ -36,7 +36,7 @@ int Lgm_ModMid2( Lgm_Vector *u, Lgm_Vector *Vel0, Lgm_Vector *v, double H, int n
     for ( m = 1; m < n; ++m ) {
 
         if ( (*Velocity)(&z1, &Vel, Info) == 0 ) {
-            // bail if B-field eval had issues.
+            // bail if Velocity eval had issues.
             printf("Lgm_ModMid2(): Velocity evaluation during midpoint phase (m = %d and z1 = %g %g %g) returned with errors (returning with 0)\n", m, z1.x, z1.y, z1.z );
             return(0);
         }
@@ -136,7 +136,7 @@ int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale,
 
 
     if ( fabs(Htry) < 1e-16 ) {
-        printf("Lgm_MagStep2(): Requested stepsize is very small (returning with -1). Htry = %g\n", Htry );
+        printf("Lgm_VelStep2(): Requested stepsize is very small (returning with -1). Htry = %g\n", Htry );
         return(-1);
     }
 
@@ -185,16 +185,18 @@ int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     u0 = *u;
     if ( (*Velocity)(&u0, &Vel0, Info) == 0 ) {
         // bail if Velocity eval had issues.
-        printf("Lgm_MagStep2(): Velocity evaluation at u0 = %g %g %g returned with errors (returning with -1)\n", u0.x, u0.y, u0.z );
+        printf("Lgm_VelStep2(): Velocity evaluation at u0 = %g %g %g returned with errors (returning with -1)\n", u0.x, u0.y, u0.z );
         return(-1);
     }
     ++(Info->Lgm_nVelEvals);
     Speed = Lgm_Magnitude(&Vel0);
     if ( Speed < 1e-16 ) {
         // bail if B-field magnitude is too small
-        printf("Lgm_MagStep2(): Speed too small at u0 = %g %g %g (Speed = %g) (returning with -1).\n", u0.x, u0.y, u0.z, Speed );
+        printf("Lgm_VelStep2(): Speed too small at u0 = %g %g %g (Speed = %g) (returning with -1).\n", u0.x, u0.y, u0.z, Speed );
         return(-1);
     }
+//printf("u0 = %g %g %g\n", u0.x, u0.y, u0.z );
+//printf("Vel0 = %g %g %g\n", Vel0.x, Vel0.y, Vel0.z );
 
     if ( (*s != Info->Lgm_VelStep_snew) || (H != *Hnext) || ( *reset ) ) {
         Info->Lgm_VelStep_snew = 0.0;
@@ -226,7 +228,7 @@ int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale,
             n  = Seq[k];
             n2 = (double)(n*n);
             h2 = H*H;
-            if ( !Lgm_ModMid( &u0, &Vel0, &v, H, n, sgn, Velocity, Info ) ) return(-1); // bail if Lgm_ModMid2() had issues.
+            if ( !Lgm_ModMid2( &u0, &Vel0, &v, H, n, sgn, Velocity, Info ) ) return(-1); // bail if Lgm_ModMid2() had issues.
             sss = h2/n2;
             Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
             
