@@ -82,9 +82,8 @@ w2 = 0.3*Omega_e/M_2PI;
     //MaxWaveLat = 35.0;      // Degrees
     MaxWaveLat = 90.0;      // Degrees
 
-    n1 = 0.7;
-    n2 = 0.1;
-    n3 = 0.2;
+    n1 = 0.7; n2 = 0.1; n3 = 0.2;
+    n1 = 1.0; n2 = 0.0; n3 = 0.0;
 
     int nAlpha  = 500; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
     int nEnergy = 500; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
