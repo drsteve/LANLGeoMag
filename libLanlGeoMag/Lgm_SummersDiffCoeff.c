@@ -862,10 +862,10 @@ int sum_res = 0;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( fabs(creal(z1)) > 0.0 ) ) z[nRoots++] = z1;
-    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( fabs(creal(z2)) > 0.0 ) ) z[nRoots++] = z2;
-    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( fabs(creal(z3)) > 0.0 ) ) z[nRoots++] = z3;
-    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( fabs(creal(z4)) > 0.0 ) ) z[nRoots++] = z4;
+    if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
+    if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
+    if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
+    if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
 
 
 /*
@@ -1506,7 +1506,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 
     A = 64.0 + 4.0*e*q0;
     B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( 21.0 - q2 );
+    C = e2*( 21.0 - q2 + e );
 
     A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
     A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
@@ -1514,6 +1514,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
     A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
     A6 = -aa*e3 / OneMinusXsi2Times64;
+printf("A1, A2, A3, A4, A5, A6 = %g %g %g %g %g %g\n", A1, A2, A3, A4, A5, A6 );                                                                  
 
     nn = 6;
     Coeff[0] = 1.0;
@@ -1526,6 +1527,32 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     num = Lgm_PolyRoots( Coeff, nn, zz );
 
 
+/*                                                                                                                                    
+ * Solve for resonant roots.                                                                                                          
+ */                                                                                                                                   
+Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                  
+Beta2 = E*(E+2.0) / Gamma2;                                                                                                           
+Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                 
+a     = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                          
+b     = (1.0 + LGM_EPS)/aStar;                                                                                                        
+                                                                                                                                      
+BetaMu2 = Beta2*Mu2;                                                                                                                  
+OneMinusBetaMu2 = 1.0 - BetaMu2;                                                                                                      
+                                                                                                                                      
+sEpsMinusOne = s*(LGM_EPS - 1.0);                                                                                                     
+                                                                                                                                      
+double a1, a2, a3, a4;
+a1 = ( apa + sEpsMinusOne*OneMinusBetaMu2 ) / OneMinusBetaMu2;                                                                        
+a2 = ( aa + apa*sEpsMinusOne - LGM_EPS + BetaMu2*(b+LGM_EPS) ) / OneMinusBetaMu2;                                                     
+a3 = ( aa*sEpsMinusOne - apa*LGM_EPS ) / OneMinusBetaMu2;                                                                             
+a4 = -aa*LGM_EPS / OneMinusBetaMu2;                                                                                                   
+printf("a1, a2, a3, a4 = %g %g %g %g\n", a1, a2, a3, a4 );                                                                          
+                                                                                                                                      
+nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );                                                                       
+printf("z1 = %g + %g I\n", creal( z1 ), cimag( z1 ) );
+printf("z2 = %g + %g I\n", creal( z2 ), cimag( z2 ) );
+printf("z3 = %g + %g I\n", creal( z3 ), cimag( z3 ) );
+printf("z4 = %g + %g I\n", creal( z4 ), cimag( z4 ) );
 
 
     R  = dBoverB2;   // The ratio (dB/B)^2
@@ -1541,17 +1568,23 @@ int sum_res = 0;
      */
     nRoots = 0;
     for ( i=0; i<6; i++ ) {
-        if ( ( fabs(cimag(zz[i])) < 1e-8 ) && ( fabs(creal(zz[i]) > 0.0) ) ) z[nRoots++] = zz[i];
+        if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
     }
 
 
-/*
     int ii;
     for (ii=0; ii<nRoots; ii++){
         printf("z[%d] = %g + %g I\n", ii, creal( z[ii] ), cimag( z[ii] ) );
     }
+printf("\n\n\n\n\n");
+/*
  */
 
+nRoots = 0;
+if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
+if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
+if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
+if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
 
@@ -1700,7 +1733,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 
     A = 64.0 + 4.0*e*q0;
     B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( 21.0 - q2 );
+    C = e2*( 21.0 - q2 + e );
 
     A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
     A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
@@ -1708,6 +1741,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
     A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
     A6 = -aa*e3 / OneMinusXsi2Times64;
+//printf("OneMinusXsi2Times64 = %g A, B, C = %g %g %g   A1, A2, A3, A4, A5, A6 = %g %g %g %g %g %g\n", OneMinusXsi2Times64, A, B, C, A1, A2, A3, A4, A5, A6);
 
     nn = 6;
     Coeff[0] = 1.0;
@@ -1904,7 +1938,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 
     A = 64.0 + 4.0*e*q0;
     B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( 21.0 - q2 );
+    C = e2*( 21.0 - q2 + e );
 
     A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
     A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
@@ -1923,6 +1957,28 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     Coeff[6] = A6;
     num = Lgm_PolyRoots( Coeff, nn, zz );
 
+/*                                                                                                                                    
+ * Solve for resonant roots.                                                                                                          
+ */                                                                                                                                   
+Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                  
+Beta2 = E*(E+2.0) / Gamma2;                                                                                                           
+Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                 
+a     = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                          
+b     = (1.0 + LGM_EPS)/aStar;                                                                                                        
+                                                                                                                                      
+BetaMu2 = Beta2*Mu2;                                                                                                                  
+OneMinusBetaMu2 = 1.0 - BetaMu2;                                                                                                      
+                                                                                                                                      
+sEpsMinusOne = s*(LGM_EPS - 1.0);                                                                                                     
+                                                                                                                                      
+double a1, a2, a3, a4;
+a1 = ( apa + sEpsMinusOne*OneMinusBetaMu2 ) / OneMinusBetaMu2;                                                                        
+a2 = ( aa + apa*sEpsMinusOne - LGM_EPS + BetaMu2*(b+LGM_EPS) ) / OneMinusBetaMu2;                                                     
+a3 = ( aa*sEpsMinusOne - apa*LGM_EPS ) / OneMinusBetaMu2;                                                                             
+a4 = -aa*LGM_EPS / OneMinusBetaMu2;                                                                                                   
+//printf("a1, a2, a3, a4 = %g %g %g %g\n", a1, a2, a3, a4 );                                                                          
+                                                                                                                                      
+nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );                                                                       
 
 
 
@@ -1958,6 +2014,11 @@ for (ii=0; ii<num; ii++){
 }
 return((double)nRoots);
 */
+nRoots = 0;
+if ( ( fabs(cimag(z1)) < 1e-10 ) && ( creal(z1) > 0.0 ) ) z[nRoots++] = z1;
+if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
+if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
+if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
 
