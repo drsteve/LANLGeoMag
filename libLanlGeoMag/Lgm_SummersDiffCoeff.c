@@ -197,9 +197,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
      *  Quadpack integration tolerances.
 1e-10 seems exccessive.
      */
-    epsabs = 1e-10;
+    epsabs = 1e-3;
     epsrel = 1e-3;
-epsabs = 1e-4;
 
 
     /*
@@ -282,20 +281,28 @@ epsabs = 1e-4;
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
         Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-//printf("a_new, b_new = %g %g\n", a_new, b_new);
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, FALSE, a, b, &points[1], &ySing );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+printf("a, b = %g %g\n", a*DegPerRad, b*DegPerRad);
+printf("a_new, b_new = %g %g\n\n", a_new*DegPerRad, b_new*DegPerRad);
         dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
     
         Lgm_SummersFindCutoffs( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-//printf("a_new, b_new = %g %g\n", a_new, b_new);
         npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+printf("a, b = %g %g\n", a*DegPerRad, b*DegPerRad);
+printf("a_new, b_new = %g %g\n\n", a_new*DegPerRad, b_new*DegPerRad);
         dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+/*
+*/
 
         Lgm_SummersFindCutoffs( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-//printf("a_new, b_new = %g %g\n", a_new, b_new);
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, FALSE, a, b, &points[1], &ySing );
-        dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+//printf("a, b = %g %g\n", a*DegPerRad, b*DegPerRad);
+//printf("a_new, b_new = %g %g\n\n", a_new*DegPerRad, b_new*DegPerRad);
+//npts2 = 2;
+//printf(" npts2=%d\n", npts2);
+//        dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
         /*
@@ -648,7 +655,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0p * CosLat*v/sqrt(1-BoverBm);
 
-//printf("%g %g\n", Lat, f);
+//printf("%g %g\n", Lat*DegPerRad, f);
 //printf("Lat, f = %.15g %.15g\n", Lat*DegPerRad, log10(fabs(f))  );
     return( f );
 
@@ -760,6 +767,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     f = Dpp * CosLat*v/sqrt(1-BoverBm);
 
 
+//printf("%.15lf %.15lf\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -1472,7 +1480,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
     double          Daa, R, x0, y0, Ep1, Ep12, sss, u, arg;
-    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
     double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
     double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
@@ -1559,6 +1567,7 @@ int sum_res = 0;
          *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
          *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
          */
+//THIS IS FOR A H+ PLASMA
         x0 = 1.0/Gamma;
         y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
 
@@ -1598,11 +1607,11 @@ int sum_res = 0;
         Mu     = sqrt(Mu2);
         for ( Daa=0.0, n=0; n<nRoots; n++ ){
 
-            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
 if ((x>xl)&&(x<xh)) {
 //if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
             sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
             F = 2.0*y*aStar*sss*sss/(x*g);
@@ -1665,7 +1674,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
     double          Dap, R, x0, y0, Ep1, Ep12, sss, u, arg, SinAlpha;
-    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
     double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
     double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
@@ -1726,7 +1735,7 @@ int sum_res = 0;
      */
     nRoots = 0;
     for ( i=0; i<6; i++ ) {
-        if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( fabs(creal(zz[i])) > 0.0 ) ) z[nRoots++] = zz[i];
+        if ( ( fabs(cimag(zz[i])) < 1e-8 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
     }
 /*
 int ii;
@@ -1751,6 +1760,7 @@ for (ii=0; ii<num; ii++){
          *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
          *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
          */
+//THIS IS WRONG FIX
         x0 = 1.0/Gamma;
         y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
 
@@ -1798,14 +1808,16 @@ for (ii=0; ii<num; ii++){
 
         for ( Dap=0.0, n=0; n<nRoots; n++ ){
 
-            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
 if ((x>xl)&&(x<xh)) {
 //if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+//printf("x*g=%g\n", x*g);
             sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
-            F = 2.0*y*a*sss*sss/(x*g);
+            F = 2.0*y*aStar*sss*sss/(x*g);
+//printf("F=%g x, y = %g %g x/y = %g   fabs( BetaMu - F ) = %g\n", F, x, y, x/y, fabs( BetaMu - F ));
 
             u = 1.0 - x*Mu/(y*Beta);
             arg = (x-xm)/dx;
@@ -1866,7 +1878,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
     double          Dpp, R, x0, y0, Ep1, Ep12, sss, u, arg;
-    double          x, x2, x3, x4, x5, x6, x7, x8, x9;
+    double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
     double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
     double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
@@ -1926,17 +1938,26 @@ int sum_res = 0;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    for ( i=0; i<6; i++ ) {
+    for ( i=0; i<num; i++ ) {
         if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( fabs(creal(zz[i])) > 0.0 ) ) z[nRoots++] = zz[i];
+        //if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
     }
+/*
+printf("num = %d nRoots = %d  A0-6 = %g %g %g %g %g %g\n", num, nRoots, A1, A2, A3, A4, A5, A6);
+int ii;
+for (ii=0; ii<nRoots; ii++){
+printf("     %02d:  %.15lf + %.15lf I \n", ii, creal(z[ii]), cimag(z[ii]) );
+}
+*/
+
 /*
 int ii;
 nRoots = 0;
 for (ii=0; ii<num; ii++){
     if ( ( fabs(cimag(zz[ii])) < 1e-10 ) && ( fabs(creal(zz[ii])) > 0.0 ) ) z[nRoots++] = zz[ii];
 }
+return((double)nRoots);
 */
-
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
 
@@ -1952,6 +1973,7 @@ for (ii=0; ii<num; ii++){
          *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
          *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
          */
+//THIS IS WRONG FIX THIS IS FOR SINGLE SPECIES PLASMA
         x0 = 1.0/Gamma;
         y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
 
@@ -1959,6 +1981,7 @@ for (ii=0; ii<num; ii++){
         arg   = (x0-xm)/dx;
         Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
         Dpp   = ( sum_res ) ? 2.0*Dcore : Dcore;
+Dpp = 0.0;
 
     } else {
 
@@ -1980,7 +2003,7 @@ for (ii=0; ii<num; ii++){
         g8 = 8192.0*aStar;
 
         Ep1 = E+1.0; Ep12 = Ep1*Ep1;
-        fac = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/Ep12;
+        fac = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*SinAlpha2/Ep12 /Beta2; 
 
         /*
          * Execute sum over resonant roots.
@@ -1990,14 +2013,14 @@ for (ii=0; ii<num; ii++){
         Mu     = sqrt(Mu2);
         for ( Dpp=0.0, n=0; n<nRoots; n++ ){
 
-            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4; x9 = x4*x5;
+            x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
 if ((x>xl)&&(x<xh)) {
 //if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8 + g9*x9;
+            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
             sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
-            F = 2.0*y*a*sss*sss/(x*g);
+            F = 2.0*y*aStar*sss*sss/(x*g);
 
             u = 1.0 - x*Mu/(y*Beta);
             arg = (x-xm)/dx;
@@ -2137,7 +2160,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     }
 
     if ( Found ) {
-        if (Verbose) printf("Singularity at Lat = %g  val = %g\n", *x, *y);
+        if (Verbose) printf("Singularity at Lat = %g  val = %g\n", (*x)*DegPerRad, *y);
         return(1);
     } else {
         return(0);
