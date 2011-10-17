@@ -59,7 +59,6 @@ except OSError:
     for path in sys.path:
         try:
             subprocess.call(['python', path + '/../../../bin/' + 'ctypesgen.py',
-
                              '-l' + library_name,
                              '--no-macro-warnings',
                              '-o', 'Lgm_Wrap.py.bak'] +
@@ -71,6 +70,9 @@ except OSError:
 
 if not ctypesgen_worked:
     print('ctypesgen not found')
-#finally:
 print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
-shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+try:
+    shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+except OSError:
+            print("ctypesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
+
