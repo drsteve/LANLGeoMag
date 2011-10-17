@@ -31,6 +31,14 @@
 #define LGM_EPS             0.000544617021983          // me/mp
 #endif
 
+#ifndef LGM_EPS2
+#define LGM_EPS2            2.966077006336315e-7       // (me/mp)^2
+#endif
+
+#ifndef LGM_EPS3
+#define LGM_EPS3            1.615376026163136e-10      // (me/mp)^3
+#endif
+
 #ifndef LGM_OXYGEN_MASS
 #define LGM_OXYGEN_MASS     (15.9994*LGM_U)             // Oxygen rest mass,  kg
 #endif

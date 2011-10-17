@@ -726,6 +726,10 @@ int  Lgm_PolyRoots( double *a, int n, double complex *z ){
         z[i] = wr[i] + wi[i]*I;
     }
 
+    free( x );
+    free( wr );
+    free( wi );
+
     return( numr );
 
 }

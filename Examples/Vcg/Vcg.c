@@ -1,7 +1,4 @@
 #include <Lgm_MagModelInfo.h>
-
-/* BAL 04-Jan-2011 modified for more cases */
-
 int main(){
 
 
@@ -46,6 +43,13 @@ int main(){
     printf(" %12s", "      (Vcg)y");
     printf(" %12s", "      (Vcg)z\n");
 
+    mInfo->Lgm_VelStep_Alpha       = 40.0;                  // Pitch Angle in Degrees
+    mInfo->Lgm_VelStep_SinAlpha    = sin(mInfo->Lgm_VelStep_Alpha*RadPerDeg);  // SinPitchAngle
+    mInfo->Lgm_VelStep_q           = -LGM_e;                // Electron charge
+    mInfo->Lgm_VelStep_E0          = LGM_Ee0;               // Electron rest energy
+    mInfo->Lgm_VelStep_T           = 0.1;                   // 100 keV Kinetic Energy
+    mInfo->Lgm_VelStep_DerivScheme = LGM_DERIV_SIX_POINT;   // Derivative scheme to use
+    mInfo->Lgm_VelStep_h           = 1e-3;                  // delta-h for use in derivative scheme
 
     for (i=0; i<=5; i++) {
 
@@ -54,15 +58,9 @@ int main(){
         Lgm_Convert_Coords( &u, &w, SM_TO_GSM, mInfo->c );
         mInfo->Bfield( &w, &Bvec, mInfo );
         B = Lgm_Magnitude( &Bvec );
+        mInfo->Lgm_VelStep_Bm = B/(mInfo->Lgm_VelStep_SinAlpha*mInfo->Lgm_VelStep_SinAlpha);
 
-        Alpha    = 90.0;    // Degrees
-        q        = -LGM_e;   // Electron charge
-        E0       = LGM_Ee0; // Electron rest energy
-        T        = 0.1;    // 100 keV Kinetic Energy
-        SinAlpha = sin(Alpha*RadPerDeg);
-        Bm       = B/(SinAlpha*SinAlpha);
-
-        Lgm_GradAndCurvDriftVel( &w, &Vcg,  q, T, E0, Bm, LGM_DERIV_SIX_POINT, 1e-3, mInfo );
+        Lgm_GradAndCurvDriftVel( &w, &Vcg,  mInfo );
 
         printf( " %10g %10g %10g", u.x, u.y, u.z );
         printf( " %10g %10g %10g", Bvec.x, Bvec.y, Bvec.z );
