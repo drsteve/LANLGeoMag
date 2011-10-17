@@ -644,7 +644,8 @@ void Lgm_PolyRoots_GetQuads( double *a, int n, double *quad, double *x ) {
         do {
 
             Lgm_PolyRoots_FindQuad( z, m, b, quad, &err, &iter );
-            if ( (err > 1e-7) || (iter > LGM_POLYROOTS_MAXITER) ) {
+//            if ( (err > 1e-7) || (iter > LGM_POLYROOTS_MAXITER) ) {
+            if ( (err > 1e-10) || (iter > LGM_POLYROOTS_MAXITER) ) {
                 Lgm_PolyRoots_DiffPoly( z, m, b );
                 iter = 0;
                 Lgm_PolyRoots_Recurse( z, m, b, m-1, quad, &err, &iter );

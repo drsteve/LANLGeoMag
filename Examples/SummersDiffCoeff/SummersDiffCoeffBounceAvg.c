@@ -37,6 +37,7 @@ double MyBwFunc( double Lat, void *Data ) {
 //   Bw = c[0];
 //    Bw = (double)powFastLookup( y, MyInfo->fp );
 
+    return( 50.0/1000.0 );
     return( Bw/1000.0 );
 }
 
@@ -60,7 +61,7 @@ int main( ) {
     Ek    = 1.000;  // Kinetic energy in MeV.
     L     = 4.5;    // L-shell parameter (dimensionless);.
     aStar = .16;    // Summer's cold plasma parameter
-    aStar = 1.0/4.6;
+    aStar = 1.0/(3.8*3.8);
 
 
     // Get Omega_e
@@ -72,14 +73,6 @@ int main( ) {
     dB       = 1.0;             // mean wave amplitude in nT.
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
     Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-
-    
-
-
-
-
-
-
     Sig = 2.0;
     wm  = 0.2*Omega_e/M_2PI;     // Hz
     dw  = 0.1*Omega_e/M_2PI;     // Hz
@@ -87,26 +80,22 @@ int main( ) {
     w2  = wm + Sig*dw/M_2PI;      // Hz
 w1 = 0.1*Omega_e/M_2PI;
 w2 = 0.3*Omega_e/M_2PI;
-    //MaxWaveLat = 35.0;      // Degrees
-    MaxWaveLat = 90.0;      // Degrees
+    MaxWaveLat = 15.0;      // Degrees
 
-    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
-    n1 = 1.0; n2 = 0.0; n3 = 0.0;
-
+    /*
+     *   Li et al. Figure 4b
+     */
     dB       = 1.0;             // mean wave amplitude in nT.
     WaveMode = LGM_L_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
-    Species  = LGM_PROTONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
     wm = 3.7*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
     dw = .25*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
     w1 = 3.45*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
     w2 = 3.95*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
-
-    aStar = 1.0/sqrt(15.0);
-
-
-
-
+    MaxWaveLat = 15.0;      // Degrees
+    aStar = 1.0/(15.0*15.0);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
 
@@ -124,15 +113,16 @@ w2 = 0.3*Omega_e/M_2PI;
     LGM_ARRAY_2D( ImageDpp,     nEnergy, nAlpha, double );
 
     { /***** Start Parallel Execution ****/
-//        #pragma omp parallel private(logEk, Ek, i, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)
-//        #pragma omp for schedule(dynamic, 8)
+        #pragma omp parallel private(logEk, Ek, i, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)
+        #pragma omp for schedule(dynamic, 8)
         for (i=0; i<nEnergy; i++ ){
             logEk = logEk0 + i*dlogEk;
             Ek = pow( 10.0, logEk );
             for (j=0; j<nAlpha; j++ ){
                 Alpha = Alpha0 + j*dAlpha;
 
-if ( (j==100)&&(i==100)){
+//if ( j==44){
+//if ( (j==34)&&(i==32)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
                 Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,
@@ -145,7 +135,7 @@ if ( (j==100)&&(i==100)){
                     ImageDap_pos[i][j] = Dap_ba;
                 }
                 ImageDpp[i][j]     = Dpp_ba;
-}
+//}
             }
         }
     } /***** End Parallel Execution ****/
