@@ -96,6 +96,7 @@ w2 = 0.3*Omega_e/M_2PI;
     w2 = 3.95*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
     MaxWaveLat = 15.0;      // Degrees
     aStar = 1.0/(15.0*15.0);
+aStar = 0.01;
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
@@ -106,8 +107,8 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
-    int nAlpha  = 50; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 50; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+    int nAlpha  = 100; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -122,8 +123,7 @@ w2 = 0.3*Omega_e/M_2PI;
             for (j=0; j<nAlpha; j++ ){
                 Alpha = Alpha0 + j*dAlpha;
 
-//if ( j==44){
-//if ( (j==34)&&(i==32)){
+//if ( (j==5)&&(i==40)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
                 Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,

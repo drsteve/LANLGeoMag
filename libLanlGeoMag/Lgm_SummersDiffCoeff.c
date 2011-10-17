@@ -1,5 +1,6 @@
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 
+#include <gsl/gsl_poly.h>
 
 
 /**
@@ -282,6 +283,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
         Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+//printf("a_new, b_new = %g %g\n", a_new*DegPerRad, b_new*DegPerRad);
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -1479,7 +1481,8 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          p1, p2, p3, p4;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
-    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double complex  z1, z2, z3, z4, z5, z6, z[7], zz[7];
+    double          gsl_z[20];
     double          Daa, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
@@ -1520,6 +1523,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 
 
 
+    /*
     nn = 6;
     Coeff[0] = 1.0;
     Coeff[1] = A1;
@@ -1530,24 +1534,33 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     Coeff[6] = A6;
     for ( i=0; i<6; i++ ) zz[i] = 0.0 + 0.0*I;
     num = Lgm_PolyRoots( Coeff, nn, zz );
+    */
 
-    R  = dBoverB2;   // The ratio (dB/B)^2
-
-
-// This is another hard-wired input parameter. Fix.
-int sum_res = 0;
-
-
+    Coeff[0] = A6;
+    Coeff[1] = A5;
+    Coeff[2] = A4;
+    Coeff[3] = A3;
+    Coeff[4] = A2;
+    Coeff[5] = A1;
+    Coeff[6] = 1.0;
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_poly_complex_workspace_free( w );
+    for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
     /*
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    for ( i=0; i<num; i++ ) {
+    for ( i=0; i<6; i++ ) {
         if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
     }
 
 
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 0;
+
+    R  = dBoverB2;   // The ratio (dB/B)^2
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
 
@@ -1668,7 +1681,8 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          p1, p2, p3;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
-    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double complex  z1, z2, z3, z4, z5, z6, z[7], zz[7];
+    double          gsl_z[20];
     double          Dap, R, x0, y0, Ep1, Ep12, sss, u, arg, SinAlpha;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
@@ -1707,22 +1721,41 @@ C = e2*( 21.0 - q2 - e );
     A6 = -aa*e3 / OneMinusXsi2Times64;
 //printf("OneMinusXsi2Times64 = %g A, B, C = %g %g %g   A1, A2, A3, A4, A5, A6 = %g %g %g %g %g %g\n", OneMinusXsi2Times64, A, B, C, A1, A2, A3, A4, A5, A6);
 
+    /*
     nn = 6;
-    Coeff[0] = 1.0;
-    Coeff[1] = A1;
-    Coeff[2] = A2;
-    Coeff[3] = A3;
-    Coeff[4] = A4;
-    Coeff[5] = A5;
-    Coeff[6] = A6;
+    Coeff[0] = 1.0;  // x^6 coeff.
+    Coeff[1] = A1;   // x^5 coeff.
+    Coeff[2] = A2;   // x^4 coeff.
+    Coeff[3] = A3;   // x^3 coeff.
+    Coeff[4] = A4;   // x^2 coeff.
+    Coeff[5] = A5;   // x^1 coeff.
+    Coeff[6] = A6;   // x^0 coeff.
     num = Lgm_PolyRoots( Coeff, nn, zz );
+    */
+
+    Coeff[0] = A6;
+    Coeff[1] = A5;
+    Coeff[2] = A4;
+    Coeff[3] = A3;
+    Coeff[4] = A2;
+    Coeff[5] = A1;
+    Coeff[6] = 1.0;
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_poly_complex_workspace_free( w );
+    for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
+
     /*
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
     for ( i=0; i<6; i++ ) {
-        if ( ( fabs(cimag(zz[i])) < 1e-8 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
+        if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) > 0.0 ) ) z[nRoots++] = zz[i];
     }
+
+
+
+
 
 
     R  = dBoverB2;   // The ratio (dB/B)^2
@@ -1864,6 +1897,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double          gsl_z[20];
     double          Dpp, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
@@ -1900,6 +1934,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
     A6 = -aa*e3 / OneMinusXsi2Times64;
 
+    /*
     nn = 6;
     Coeff[0] = 1.0;
     Coeff[1] = A1;
@@ -1909,12 +1944,20 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     Coeff[5] = A5;
     Coeff[6] = A6;
     num = Lgm_PolyRoots( Coeff, nn, zz );
+    */
 
-    R  = dBoverB2;   // The ratio (dB/B)^2
+    Coeff[0] = A6;
+    Coeff[1] = A5;
+    Coeff[2] = A4;
+    Coeff[3] = A3;
+    Coeff[4] = A2;
+    Coeff[5] = A1;
+    Coeff[6] = 1.0;
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_poly_complex_workspace_free( w );
+    for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
-
-// This is another hard-wired input parameter. Fix.
-int sum_res = 0;
 
 
 
@@ -1922,9 +1965,18 @@ int sum_res = 0;
      * Gather applicable roots together into the z[] array
      */
     nRoots = 0;
-    for ( i=0; i<num; i++ ) {
+    for ( i=0; i<6; i++ ) {
         if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) ) > 0.0  ) z[nRoots++] = zz[i];
     }
+
+
+
+
+
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 0;
+
+    R  = dBoverB2;   // The ratio (dB/B)^2
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
 

@@ -1,6 +1,7 @@
 #ifndef LGM_SUMMERS_DIFF_COEFF_H
 #define LGM_SUMMERS_DIFF_COEFF_H
 #include <math.h>
+#include <gsl/gsl_poly.h>
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_PolyRoots.h"
