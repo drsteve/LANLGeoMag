@@ -6,7 +6,6 @@ from distutils.core import setup
 # TODO can this be done smarter?
 import make_Lgm_Wrap
 import os 
-os.system('python make_Lgm_Wrap.py')
 
 # this is where extra stuff goes for the install
 # like ctypesgen and the quilt patch if I want to go that way
