@@ -37,7 +37,8 @@ double MyBwFunc( double Lat, void *Data ) {
 //   Bw = c[0];
 //    Bw = (double)powFastLookup( y, MyInfo->fp );
 
-    return( 50.0/1000.0 );
+if (Lat*DegPerRad > 15.0) return(0.0);
+else return( 50.0/1000.0 );
     return( Bw/1000.0 );
 }
 
@@ -105,8 +106,8 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
-    int nAlpha  = 500; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 500; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+    int nAlpha  = 50; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 50; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -128,7 +129,7 @@ w2 = 0.3*Omega_e/M_2PI;
                 Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,
                                          dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
                 ImageDaa[i][j]     = Daa_ba;
-                printf("i, j, Alpha = %g Dpp_ba = %d %d %g\n", i, j, Alpha, Dpp_ba);
+                printf("i = %d , j = %d , E = %g  Alpha = %g Dpp_ba = %g\n", i, j, Ek, Alpha, Dpp_ba);
                 if ( Dap_ba < 0.0 ) {
                     ImageDap_neg[i][j] = fabs(Dap_ba);
                 } else {
