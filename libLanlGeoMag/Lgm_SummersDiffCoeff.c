@@ -282,8 +282,10 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
+//printf("a, b = %g %g\n", a, b);
         Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+//printf("a_new, b_new = %g %g\n", a_new, b_new);
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -527,6 +529,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0a0 * CosLat*v/sqrt(1-BoverBm);
 
+//printf("%g %g\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -2145,7 +2148,7 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
     *b = Lat1;
 
 
-    inc = 0.5*RadPerDeg;
+    inc = 0.1*RadPerDeg;
 
     fx = fabs( f( Lat0, qpInfo ) );
     if ( fx != 0.0 ) {
