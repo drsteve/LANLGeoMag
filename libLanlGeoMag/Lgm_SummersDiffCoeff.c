@@ -281,9 +281,9 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         npts2 = 2;
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
+
         Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
-//printf("a_new, b_new = %g %g\n", a_new*DegPerRad, b_new*DegPerRad);
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -1459,7 +1459,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  */
 double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
-    int             nReal, nRoots, n, nn, i, num;
+    int             nReal, nRoots, n, nn, i, num, gsl_err;
     double          q0, q2, q3, q4, q5;
     double          p1, p2, p3, p4;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
@@ -1510,7 +1510,8 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
      * Solve for resonant roots.
      */
     gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
-    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_err = gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    //if (gsl_err != GSL_SUCCESS ) printf("CRAP!\n");
     gsl_poly_complex_workspace_free( w );
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
@@ -1559,7 +1560,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         } else {
             Daa = 0.0;
         }
-        
+
     } else {
 
         /*
@@ -1661,46 +1662,46 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
     double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
 
-    /*                                                                                                                                                                                                           
-     * Solve for resonant roots.                                                                                                                                                                                 
-     */                                                                                                                                                                                                          
-    Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                                                                                         
-    Beta2 = E*(E+2.0) / Gamma2;                                                                                                                                                                                  
-    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                                                                                        
-    xi2  = Beta2*Mu2;                                                                                                                                                                                            
-    OneMinusxi2 = (1.0 - xi2);                                                                                                                                                                                   
-    OneMinusxi2Times64 = 64.0*OneMinusxi2;                                                                                                                                                                       
-    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                                                                                                    
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;                                                                                                                                       
-                                                                                                                                                                                                                 
-    q0 = 16.0*n1 + 4.0*n2 + n3;                                                                                                                                                                                  
-    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;                                                                                                                                                                             
-                                                                                                                                                                                                                 
-    p1 = 21.0*e - 16.0;                                                                                                                                                                                          
-    p2 = e - 4.0;                                                                                                                                                                                                
-    p3 = e - 21.0;                                                                                                                                                                                               
-    p4 = e + 21.0;                                                                                                                                                                                               
-                                                                                                                                                                                                                 
-    A = 64.0 + 4.0*e*q0;                                                                                                                                                                                         
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );                                                                                                                                                                            
-    C = e2*( p4 - q2 );                                                                                                                                                                                          
-                                                                                                                                                                                                                 
-    xi2OveraStar = xi2/aStar;                                                                                                                                                                                    
-                                                                                                                                                                                                                 
-    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff                                                                                       
-    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff                                                                                       
-    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff                                                                                       
-    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff                                                                                       
-    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff                                                                                       
-    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff                                                                                       
-    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff                                                                                       
-                                                                                                                                                                                                                 
-    /*                                                                                                                                                                                                           
-     * Solve for resonant roots.                                                                                                                                                                                 
-     */                                                                                                                                                                                                          
-    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );                                                                                                                                       
-    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );                                                                                                                                                                
-    gsl_poly_complex_workspace_free( w );                                                                                                                                                                        
+    /*
+     * Solve for resonant roots.
+     */
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    Beta2 = E*(E+2.0) / Gamma2;
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
+    xi2  = Beta2*Mu2;
+    OneMinusxi2 = (1.0 - xi2);
+    OneMinusxi2Times64 = 64.0*OneMinusxi2;
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
+
+    q0 = 16.0*n1 + 4.0*n2 + n3;
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
+
+    p1 = 21.0*e - 16.0;
+    p2 = e - 4.0;
+    p3 = e - 21.0;
+    p4 = e + 21.0;
+
+    A = 64.0 + 4.0*e*q0;
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );
+    C = e2*( p4 - q2 );
+
+    xi2OveraStar = xi2/aStar;
+
+    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
+    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
+
+    /*
+     * Solve for resonant roots.
+     */
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_poly_complex_workspace_free( w );
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
     /*
@@ -1857,46 +1858,46 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
     double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
 
-    /*                                                                                                                                                                                                           
-     * Solve for resonant roots.                                                                                                                                                                                 
-     */                                                                                                                                                                                                          
-    Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                                                                                         
-    Beta2 = E*(E+2.0) / Gamma2;                                                                                                                                                                                  
-    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                                                                                        
-    xi2  = Beta2*Mu2;                                                                                                                                                                                            
-    OneMinusxi2 = (1.0 - xi2);                                                                                                                                                                                   
-    OneMinusxi2Times64 = 64.0*OneMinusxi2;                                                                                                                                                                       
-    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                                                                                                    
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;                                                                                                                                       
-                                                                                                                                                                                                                 
-    q0 = 16.0*n1 + 4.0*n2 + n3;                                                                                                                                                                                  
-    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;                                                                                                                                                                             
-                                                                                                                                                                                                                 
-    p1 = 21.0*e - 16.0;                                                                                                                                                                                          
-    p2 = e - 4.0;                                                                                                                                                                                                
-    p3 = e - 21.0;                                                                                                                                                                                               
-    p4 = e + 21.0;                                                                                                                                                                                               
-                                                                                                                                                                                                                 
-    A = 64.0 + 4.0*e*q0;                                                                                                                                                                                         
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );                                                                                                                                                                            
-    C = e2*( p4 - q2 );                                                                                                                                                                                          
-                                                                                                                                                                                                                 
-    xi2OveraStar = xi2/aStar;                                                                                                                                                                                    
-                                                                                                                                                                                                                 
-    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff                                                                                       
-    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff                                                                                       
-    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff                                                                                       
-    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff                                                                                       
-    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff                                                                                       
-    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff                                                                                       
-    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff                                                                                       
-                                                                                                                                                                                                                 
-    /*                                                                                                                                                                                                           
-     * Solve for resonant roots.                                                                                                                                                                                 
-     */                                                                                                                                                                                                          
-    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );                                                                                                                                       
-    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );                                                                                                                                                                
-    gsl_poly_complex_workspace_free( w );                                                                                                                                                                        
+    /*
+     * Solve for resonant roots.
+     */
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    Beta2 = E*(E+2.0) / Gamma2;
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
+    xi2  = Beta2*Mu2;
+    OneMinusxi2 = (1.0 - xi2);
+    OneMinusxi2Times64 = 64.0*OneMinusxi2;
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
+
+    q0 = 16.0*n1 + 4.0*n2 + n3;
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
+
+    p1 = 21.0*e - 16.0;
+    p2 = e - 4.0;
+    p3 = e - 21.0;
+    p4 = e + 21.0;
+
+    A = 64.0 + 4.0*e*q0;
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );
+    C = e2*( p4 - q2 );
+
+    xi2OveraStar = xi2/aStar;
+
+    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
+    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
+
+    /*
+     * Solve for resonant roots.
+     */
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
+    gsl_poly_complex_workspace_free( w );
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
 
@@ -2131,7 +2132,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
 
 /**
  *  \brief
- *      Finds singularities in the integrands
+ *      Finds where integrand is non-zero on eaither end.
  *
  *  \details
  */
@@ -2140,11 +2141,14 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
     int     done, founda, foundb, foundc, Found;
     double  x, x0, x1, fx, fx0, fx1, inc, D;
 
+    *a = Lat0;
+    *b = Lat1;
+
 
     inc = 0.5*RadPerDeg;
 
     fx = fabs( f( Lat0, qpInfo ) );
-    if ( fx > 0.0 ) {
+    if ( fx != 0.0 ) {
 
         *a = Lat0;
 
@@ -2197,7 +2201,7 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
 
 
     fx = fabs( f( Lat1, qpInfo ) );
-    if ( fx > 0.0 ) {
+    if ( (fx != 0.0)  ) {
 
         *b = Lat1;
 

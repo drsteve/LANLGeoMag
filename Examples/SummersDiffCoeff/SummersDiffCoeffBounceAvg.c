@@ -26,16 +26,8 @@ double MyBwFunc( double Lat, void *Data ) {
 
     // typecast generic data structure type to one we expect
     MyInfo = (MyBwFuncInfo *)Data;
-    y = 0.75 + 0.04*Lat*DegPerRad;
-
-    Bw = pow( 10.0, y );
-//    Bw = (double)Lgm_FastPowPoly( 10.0, y );
-//    a[0] = 10.0; a[1] = 10.0; a[2] = 10.0; a[3] = 10.0;
-//    b[0] = y; b[1] = y+0.1; b[2] = y+0.2; b[3] = y+0.3;
-//    Lgm_FastPowPoly_v( a, b, c );
-    
-//   Bw = c[0];
-//    Bw = (double)powFastLookup( y, MyInfo->fp );
+//    y = 0.75 + 0.04*Lat*DegPerRad;
+//    Bw = pow( 10.0, y );
 
 if (Lat*DegPerRad > 15.0) return(0.0);
 else return( 50.0/1000.0 );
@@ -99,8 +91,19 @@ w2 = 0.3*Omega_e/M_2PI;
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
-
-
+    /*
+     *   Li et al. Figure 2c
+     */
+    dB       = 50.0/1000.0;     // mean wave amplitude in nT.
+    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    wm = 0.35*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    dw = .15*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    w1 = 0.05*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    w2 = 0.65*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    MaxWaveLat = 15.0;      // Degrees
+    aStar = 1.0/(3.8*3.8);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
 
@@ -122,13 +125,13 @@ w2 = 0.3*Omega_e/M_2PI;
             for (j=0; j<nAlpha; j++ ){
                 Alpha = Alpha0 + j*dAlpha;
 
-//if ( (j==5)&&(i==40)){
+//if ( (j==70)&&(i==81)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
                 Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,
                                          dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
                 ImageDaa[i][j]     = Daa_ba;
-                printf("i = %d , j = %d , E = %g  Alpha = %g Dpp_ba = %g\n", i, j, Ek, Alpha, Dpp_ba);
+                printf("i = %d , j = %d , E = %g  Alpha = %g Daa_ba = %g\n", i, j, Ek, Alpha, Daa_ba);
                 if ( Dap_ba < 0.0 ) {
                     ImageDap_neg[i][j] = fabs(Dap_ba);
                 } else {
