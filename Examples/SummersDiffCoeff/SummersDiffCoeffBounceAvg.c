@@ -96,7 +96,6 @@ w2 = 0.3*Omega_e/M_2PI;
     w2 = 3.95*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
     MaxWaveLat = 15.0;      // Degrees
     aStar = 1.0/(15.0*15.0);
-aStar = 0.01;
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 

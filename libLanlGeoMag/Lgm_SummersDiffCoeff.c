@@ -206,9 +206,9 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
      *  Pack integrand parameters into structure
      */
     if ( WaveMode == LGM_R_MODE_WAVE ) {
-        si->s = 1.0;
+        si->s = 1;
     } else if ( WaveMode == LGM_L_MODE_WAVE ) {
-        si->s = -1.0;
+        si->s = -1;
     } else {
         printf("Lgm_SummersDxxBounceAvg(): Unknown wavemode = %d\n", WaveMode );
         return(0);
@@ -806,14 +806,14 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar ) {
+double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, a1, a2, a3, a4, a, aa, apa, b;
     double complex  z1, z2, z3, z4, z[4];
     double          Daa, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
-    double          x, x2, x3, x4, y, g, F, Dcore, fac;
+    double          x, x2, x3, x4, y, g, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -836,29 +836,11 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
 
     nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );
 
-
-/*
-double aaa[4];
-int    nn=4;
-double complex zz[4];
-int num = 0;
-aaa[0] = 1.0;
-aaa[1] = a1;
-aaa[2] = a2;
-aaa[3] = a3;
-aaa[4] = a4;
-num = Lgm_PolyRoots( aaa, nn, zz );
-*/
-
-
-
-
     R  = dBoverB2;   // The ratio (dB/B)^2
 
 
-// This is another hard-wired input parameter. Fix.
-int sum_res = 0;
-
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 0;
 
 
     /*
@@ -869,15 +851,6 @@ int sum_res = 0;
     if ( ( fabs(cimag(z2)) < 1e-10 ) && ( creal(z2) > 0.0 ) ) z[nRoots++] = z2;
     if ( ( fabs(cimag(z3)) < 1e-10 ) && ( creal(z3) > 0.0 ) ) z[nRoots++] = z3;
     if ( ( fabs(cimag(z4)) < 1e-10 ) && ( creal(z4) > 0.0 ) ) z[nRoots++] = z4;
-
-
-/*
-    int ii;
-    for (ii=0; ii<nRoots; ii++){
-        printf("z[%d] = %g + %g I\n", ii, creal( z[ii] ), cimag( z[ii] ) );
-    }
- */
-
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -891,17 +864,27 @@ int sum_res = 0;
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
-        arg = (x0-xm)/dx;
-        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+            Ep1 = E+1.0; Ep12 = Ep1*Ep1;
+            arg = (x0-xm)/dx;
+            DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
+            Daa = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Daa = 0.0;
+        }
 
-        Daa = ( sum_res ) ? 2.0*Dcore : Dcore;
 
     } else {
 
@@ -927,23 +910,19 @@ int sum_res = 0;
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-            xms  = x - s;
-            xpse = x + s*LGM_EPS;
-            F = y*xms*xms*xpse*xpse/(x*g);
+            if ((x>xl)&&(x<xh)) {
+                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                xms  = x - s;
+                xpse = x + s*LGM_EPS;
+                F = y*xms*xms*xpse*xpse/(x*g);
 
-            u = 1.0 - x*Mu/(y*Beta);
-            arg = (x-xm)/dx;
-            Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                u = 1.0 - x*Mu/(y*Beta);
+                arg = (x-xm)/dx;
+                Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Daa *= fac;
-
-
 
     }
 
@@ -980,14 +959,14 @@ if ((x>xl)&&(x<xh)) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar ) {
+double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, a1, a2, a3, a4, a, aa, apa, b, SinAlpha;
     double complex  z1, z2, z3, z4, z[4];
     double          Dap, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
-    double          x, x2, x3, x4, y, g, F, Dcore, fac;
+    double          x, x2, x3, x4, y, g, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -1007,16 +986,13 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
     a2 = ( aa + apa*sEpsMinusOne - LGM_EPS + BetaMu2*(b+LGM_EPS) ) / OneMinusBetaMu2;
     a3 = ( aa*sEpsMinusOne - apa*LGM_EPS ) / OneMinusBetaMu2;
     a4 = -aa*LGM_EPS / OneMinusBetaMu2;
-    //printf("a1, a2, a3, a4 = %g %g %g %g\n", a1, a2, a3, a4 );
 
     nReal = Lgm_QuarticRoots( a1, a2, a3, a4, &z1, &z2, &z3, &z4 );
 
     R  = dBoverB2;   // The ratio (dB/B)^2
 
-
-// This is another hard-wired input parameter. Fix.
-int sum_res = 0;
-
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 0;
 
 
     /*
@@ -1040,18 +1016,27 @@ int sum_res = 0;
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (37) for Dap/p.
-CHECK THAT THIS IS USING (A2) and (A3) CORRECTLY.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Beta  = sqrt(Beta2);
-        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
-        arg   = (x0-xm)/dx;
-        Dcore = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
-        Dap   = ( sum_res ) ? 2.0*Dcore : Dcore;
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+            Beta  = sqrt(Beta2);
+            Ep1   = E+1.0; Ep12 = Ep1*Ep1; arg   = (x0-xm)/dx;
+            DD = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
+            Dap   = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Dap = 0.0;
+        }
+
 
     } else {
 
@@ -1080,23 +1065,19 @@ CHECK THAT THIS IS USING (A2) and (A3) CORRECTLY.
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-            xms  = x - s;
-            xpse = x + s*LGM_EPS;
-            F = y*xms*xms*xpse*xpse/(x*g);
+            if ((x>xl)&&(x<xh)) {
+                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                xms  = x - s;
+                xpse = x + s*LGM_EPS;
+                F = y*xms*xms*xpse*xpse/(x*g);
 
-            u = 1.0 - x*Mu/(y*Beta);
-            arg = (x-xm)/dx;
-            Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                u = 1.0 - x*Mu/(y*Beta);
+                arg = (x-xm)/dx;
+                Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Dap *= fac;
-
-
 
     }
 
@@ -1135,14 +1116,14 @@ if ((x>xl)&&(x<xh)) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar ) {
+double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, a1, a2, a3, a4, a, aa, apa, b, SinAlpha;
     double complex  z1, z2, z3, z4, z[4];
     double          Dpp, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
-    double          x, x2, x3, x4, y, g, F, Dcore, fac;
+    double          x, x2, x3, x4, y, g, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -1168,11 +1149,8 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
 
     R  = dBoverB2;   // The ratio (dB/B)^2
 
-
-// This is another hard-wired input parameter. Fix.
-int sum_res = 1;
-
-
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 1;
 
     /*
      * Gather applicable roots together into the z[] array
@@ -1195,17 +1173,26 @@ int sum_res = 1;
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (37) for Dpp/p^2.
-CHECK THAT THIS IS USING (A2) and (A3) CORRECTLY.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
-        arg   = (x0-xm)/dx;
-        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
-        Dpp   = ( sum_res ) ? 2.0*Dcore : Dcore;
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+            Ep1   = E+1.0; Ep12 = Ep1*Ep1; arg   = (x0-xm)/dx;
+            DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
+            Dpp   = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Dpp = 0.0;
+        }
+
 
     } else {
 
@@ -1231,22 +1218,18 @@ CHECK THAT THIS IS USING (A2) and (A3) CORRECTLY.
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-            xms  = x - s;
-            xpse = x + s*LGM_EPS;
-            F = y*xms*xms*xpse*xpse/(x*g);
+            if ((x>xl)&&(x<xh)) {
+                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                xms  = x - s;
+                xpse = x + s*LGM_EPS;
+                F = y*xms*xms*xpse*xpse/(x*g);
 
-            arg = (x-xm)/dx;
-            Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                arg = (x-xm)/dx;
+                Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Dpp *= fac;
-
-
 
     }
 
@@ -1474,7 +1457,7 @@ if ((x>xl)&&(x<xh)) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
     int             nReal, nRoots, n, nn, i, num;
     double          q0, q2, q3, q4, q5;
@@ -1486,8 +1469,8 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          Daa, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
-    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
-    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+    double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
+    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
 
     /*
      * Solve for resonant roots.
@@ -1495,9 +1478,9 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     Gamma = E+1.0; Gamma2 = Gamma*Gamma;
     Beta2 = E*(E+2.0) / Gamma2;
     Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
-    Xsi2  = Beta2*Mu2;
-    OneMinusXsi2 = (1.0 - Xsi2);
-    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
+    xi2  = Beta2*Mu2;
+    OneMinusxi2 = (1.0 - xi2);
+    OneMinusxi2Times64 = 64.0*OneMinusxi2;
     a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
     e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
 
@@ -1513,40 +1496,24 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     B = e*s*( 4.0*(21.0-q0) + e*q2 );
     C = e2*( p4 - q2 );
 
+    xi2OveraStar = xi2/aStar;
 
-    A1 = ( 128.0*a + 4.0*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
-    A2 = (64.0*aa + 21.0*e*p2*OneMinusXsi2 + 8.0*a*s*p1 + A*Xsi2/aStar ) / OneMinusXsi2Times64;
-    A3 = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusXsi2 + B*Xsi2/aStar  ) / OneMinusXsi2Times64;
-    A4 = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
-    A5 = a*e2*( a*s*p3 - 2.0*e ) / OneMinusXsi2Times64;
-    A6 = -aa*e3 / OneMinusXsi2Times64;
-
-
+    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
+    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
 
     /*
-    nn = 6;
-    Coeff[0] = 1.0;
-    Coeff[1] = A1;
-    Coeff[2] = A2;
-    Coeff[3] = A3;
-    Coeff[4] = A4;
-    Coeff[5] = A5;
-    Coeff[6] = A6;
-    for ( i=0; i<6; i++ ) zz[i] = 0.0 + 0.0*I;
-    num = Lgm_PolyRoots( Coeff, nn, zz );
-    */
-
-    Coeff[0] = A6;
-    Coeff[1] = A5;
-    Coeff[2] = A4;
-    Coeff[3] = A3;
-    Coeff[4] = A2;
-    Coeff[5] = A1;
-    Coeff[6] = 1.0;
+     * Solve for resonant roots.
+     */
     gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
     gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
     gsl_poly_complex_workspace_free( w );
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
+
 
     /*
      * Gather applicable roots together into the z[] array
@@ -1573,19 +1540,26 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-//THIS IS FOR A H+ PLASMA
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Ep1 = E+1.0; Ep12 = Ep1*Ep1;
-        arg = (x0-xm)/dx;
-        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
-
-        Daa = ( sum_res ) ? 2.0*Dcore : Dcore;
-
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            Ep1 = E+1.0; Ep12 = Ep1*Ep1; arg = (x0-xm)/dx;
+            DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
+            Daa = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Daa = 0.0;
+        }
+        
     } else {
 
         /*
@@ -1611,25 +1585,23 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         /*
          * Execute sum over resonant roots.
          */
-        BetaMu = sqrt(Xsi2);
+        BetaMu = sqrt(xi2);
         Beta   = sqrt(Beta2);
         Mu     = sqrt(Mu2);
         for ( Daa=0.0, n=0; n<nRoots; n++ ){
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+            if ((x>xl)&&(x<xh)) {
+                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
-            F = 2.0*y*aStar*sss*sss/(x*g);
+                F = 2.0*y*aStar*sss*sss/(x*g);
 
-            u = 1.0 - x*Mu/(y*Beta);
-            arg = (x-xm)/dx;
-            Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                u = 1.0 - x*Mu/(y*Beta);
+                arg = (x-xm)/dx;
+                Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Daa *= fac;
@@ -1674,11 +1646,11 @@ if ((x>xl)&&(x<xh)) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
     int             nReal, nRoots, n, nn, i, num;
     double          q0, q2, q3, q4, q5;
-    double          p1, p2, p3;
+    double          p1, p2, p3, p4;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[7], zz[7];
@@ -1686,63 +1658,49 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          Dap, R, x0, y0, Ep1, Ep12, sss, u, arg, SinAlpha;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
-    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
-    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+    double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
+    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
 
-    /*
-     * Solve for resonant roots.
-     */
-    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
-    Beta2 = E*(E+2.0) / Gamma2;
-    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
-    Xsi2  = Beta2*Mu2;
-    OneMinusXsi2 = (1.0 - Xsi2);
-    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
-    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
-
-    q0 = 16.0*n1 + 4.0*n2 + n3;
-    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
-
-    p1 = 21.0*e - 16.0;
-    p2 = e - 4.0;
-    p3 = e - 21.0;
-
-    A = 64.0 + 4.0*e*q0;
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( 21.0 - q2 + e );
-C = e2*( 21.0 - q2 - e );
-
-    A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
-    A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
-    A3 = ( 42*a*e*p2 + 4*aa*s*p1 + e2*s*p3*OneMinusXsi2 + (B*Xsi2)/aStar  ) / OneMinusXsi2Times64;
-    A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
-    A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
-    A6 = -aa*e3 / OneMinusXsi2Times64;
-//printf("OneMinusXsi2Times64 = %g A, B, C = %g %g %g   A1, A2, A3, A4, A5, A6 = %g %g %g %g %g %g\n", OneMinusXsi2Times64, A, B, C, A1, A2, A3, A4, A5, A6);
-
-    /*
-    nn = 6;
-    Coeff[0] = 1.0;  // x^6 coeff.
-    Coeff[1] = A1;   // x^5 coeff.
-    Coeff[2] = A2;   // x^4 coeff.
-    Coeff[3] = A3;   // x^3 coeff.
-    Coeff[4] = A4;   // x^2 coeff.
-    Coeff[5] = A5;   // x^1 coeff.
-    Coeff[6] = A6;   // x^0 coeff.
-    num = Lgm_PolyRoots( Coeff, nn, zz );
-    */
-
-    Coeff[0] = A6;
-    Coeff[1] = A5;
-    Coeff[2] = A4;
-    Coeff[3] = A3;
-    Coeff[4] = A2;
-    Coeff[5] = A1;
-    Coeff[6] = 1.0;
-    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
-    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
-    gsl_poly_complex_workspace_free( w );
+    /*                                                                                                                                                                                                           
+     * Solve for resonant roots.                                                                                                                                                                                 
+     */                                                                                                                                                                                                          
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                                                                                         
+    Beta2 = E*(E+2.0) / Gamma2;                                                                                                                                                                                  
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                                                                                        
+    xi2  = Beta2*Mu2;                                                                                                                                                                                            
+    OneMinusxi2 = (1.0 - xi2);                                                                                                                                                                                   
+    OneMinusxi2Times64 = 64.0*OneMinusxi2;                                                                                                                                                                       
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                                                                                                    
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;                                                                                                                                       
+                                                                                                                                                                                                                 
+    q0 = 16.0*n1 + 4.0*n2 + n3;                                                                                                                                                                                  
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;                                                                                                                                                                             
+                                                                                                                                                                                                                 
+    p1 = 21.0*e - 16.0;                                                                                                                                                                                          
+    p2 = e - 4.0;                                                                                                                                                                                                
+    p3 = e - 21.0;                                                                                                                                                                                               
+    p4 = e + 21.0;                                                                                                                                                                                               
+                                                                                                                                                                                                                 
+    A = 64.0 + 4.0*e*q0;                                                                                                                                                                                         
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );                                                                                                                                                                            
+    C = e2*( p4 - q2 );                                                                                                                                                                                          
+                                                                                                                                                                                                                 
+    xi2OveraStar = xi2/aStar;                                                                                                                                                                                    
+                                                                                                                                                                                                                 
+    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff                                                                                       
+    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff                                                                                       
+    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff                                                                                       
+    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff                                                                                       
+    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff                                                                                       
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff                                                                                       
+    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff                                                                                       
+                                                                                                                                                                                                                 
+    /*                                                                                                                                                                                                           
+     * Solve for resonant roots.                                                                                                                                                                                 
+     */                                                                                                                                                                                                          
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );                                                                                                                                       
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );                                                                                                                                                                
+    gsl_poly_complex_workspace_free( w );                                                                                                                                                                        
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
 
     /*
@@ -1754,16 +1712,11 @@ C = e2*( 21.0 - q2 - e );
     }
 
 
-
-
-
-
     R  = dBoverB2;   // The ratio (dB/B)^2
 
 
-// This is another hard-wired input parameter. Fix.
-int sum_res = 0;
-
+    // This is another hard-wired input parameter. Fix.
+    int sum_res = 0;
 
 
     if ( ( nRoots == 0 ) && ( Mu2 > 1e-16 ) ){
@@ -1777,18 +1730,27 @@ int sum_res = 0;
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-//THIS IS WRONG FIX
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Beta  = sqrt(Beta2);
-        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
-        arg   = (x0-xm)/dx;
-        Dcore = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
-        Dap   = ( sum_res ) ? 2.0*Dcore : Dcore;
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            Beta  = sqrt(Beta2);
+            Ep1   = E+1.0; Ep12 = Ep1*Ep1;
+            arg   = (x0-xm)/dx;
+            DD = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
+            Dap   = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Dap = 0.0;
+        }
 
     } else {
 
@@ -1810,9 +1772,6 @@ int sum_res = 0;
         g8 = 8192.0*aStar;
 
 
-
-
-
         /*
          * Execute sum over resonant roots.
          */
@@ -1823,33 +1782,27 @@ int sum_res = 0;
 
         Ep1 = E+1.0; Ep12 = Ep1*Ep1;
         fac = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*SinAlpha/Ep12 /Beta;
-        BetaMu = sqrt(Xsi2);
+        BetaMu = sqrt(xi2);
         Mu     = sqrt(Mu2);
 
         for ( Dap=0.0, n=0; n<nRoots; n++ ){
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-//printf("x*g=%g\n", x*g);
-            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+            if ((x>xl)&&(x<xh)) {
+                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
-            F = 2.0*y*aStar*sss*sss/(x*g);
-//printf("F=%g x, y = %g %g x/y = %g   fabs( BetaMu - F ) = %g\n", F, x, y, x/y, fabs( BetaMu - F ));
+                F = 2.0*y*aStar*sss*sss/(x*g);
 
-            u = 1.0 - x*Mu/(y*Beta);
-            arg = (x-xm)/dx;
-            // if fabs(BetaMu - F) gets too small, we will get a singularity.
-            Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                u = 1.0 - x*Mu/(y*Beta);
+                arg = (x-xm)/dx;
+                // if fabs(BetaMu - F) gets too small, we will get a singularity.
+                Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Dap *= fac;
-
-
 
     }
 
@@ -1889,11 +1842,11 @@ if ((x>xl)&&(x<xh)) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
     int             nReal, nRoots, n, nn, i, num;
     double          q0, q2, q3, q4, q5;
-    double          p1, p2, p3;
+    double          p1, p2, p3, p4;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
     double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
     double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
@@ -1901,64 +1854,50 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     double          Dpp, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
     double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
-    double          Xsi2, OneMinusXsi2, OneMinusXsi2Times64;
-    double          y, F, Dcore, fac, e, e2, e3, e4, e5, e6;
+    double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
+    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
 
-    /*
-     * Solve for resonant roots.
-     */
-    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
-    Beta2 = E*(E+2.0) / Gamma2;
-    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)
-    Xsi2  = Beta2*Mu2;
-    OneMinusXsi2 = (1.0 - Xsi2);
-    OneMinusXsi2Times64 = 64.0*OneMinusXsi2;
-    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
-
-    q0 = 16.0*n1 + 4.0*n2 + n3;
-    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
-
-    p1 = 21.0*e - 16.0;
-    p2 = e - 4.0;
-    p3 = e - 21.0;
-
-    A = 64.0 + 4.0*e*q0;
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( 21.0 - q2 + e );
-
-    A1 = ( 128*a + 4*s*OneMinusXsi2*p1 ) / OneMinusXsi2Times64;
-    A2 = (64*aa + 21*e*p2*OneMinusXsi2 + 8*a*s*p1 + (A*Xsi2)/aStar ) / OneMinusXsi2Times64;
-    A3 = ( 42*a*e*p2 + 4*aa*s*p1 + e2*s*p3*OneMinusXsi2 + (B*Xsi2)/aStar  ) / OneMinusXsi2Times64;
-    A4 = ( 21*aa*e*p2 + 2*a*e2*s*p3 - e3*OneMinusXsi2 + C*Xsi2/aStar) / OneMinusXsi2Times64;
-    A5 = a*e2*( a*s*p3 - 2*e ) / OneMinusXsi2Times64;
-    A6 = -aa*e3 / OneMinusXsi2Times64;
-
-    /*
-    nn = 6;
-    Coeff[0] = 1.0;
-    Coeff[1] = A1;
-    Coeff[2] = A2;
-    Coeff[3] = A3;
-    Coeff[4] = A4;
-    Coeff[5] = A5;
-    Coeff[6] = A6;
-    num = Lgm_PolyRoots( Coeff, nn, zz );
-    */
-
-    Coeff[0] = A6;
-    Coeff[1] = A5;
-    Coeff[2] = A4;
-    Coeff[3] = A3;
-    Coeff[4] = A2;
-    Coeff[5] = A1;
-    Coeff[6] = 1.0;
-    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );
-    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );
-    gsl_poly_complex_workspace_free( w );
+    /*                                                                                                                                                                                                           
+     * Solve for resonant roots.                                                                                                                                                                                 
+     */                                                                                                                                                                                                          
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;                                                                                                                                                                         
+    Beta2 = E*(E+2.0) / Gamma2;                                                                                                                                                                                  
+    Mu2   = 1.0-SinAlpha2; if (Mu2<0.0) Mu2 = 0.0; // Mu2 is cos^2(Alpha)                                                                                                                                        
+    xi2  = Beta2*Mu2;                                                                                                                                                                                            
+    OneMinusxi2 = (1.0 - xi2);                                                                                                                                                                                   
+    OneMinusxi2Times64 = 64.0*OneMinusxi2;                                                                                                                                                                       
+    a  = s*Lambda/Gamma; aa = a*a; apa = a+a;                                                                                                                                                                    
+    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;                                                                                                                                       
+                                                                                                                                                                                                                 
+    q0 = 16.0*n1 + 4.0*n2 + n3;                                                                                                                                                                                  
+    q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;                                                                                                                                                                             
+                                                                                                                                                                                                                 
+    p1 = 21.0*e - 16.0;                                                                                                                                                                                          
+    p2 = e - 4.0;                                                                                                                                                                                                
+    p3 = e - 21.0;                                                                                                                                                                                               
+    p4 = e + 21.0;                                                                                                                                                                                               
+                                                                                                                                                                                                                 
+    A = 64.0 + 4.0*e*q0;                                                                                                                                                                                         
+    B = e*s*( 4.0*(21.0-q0) + e*q2 );                                                                                                                                                                            
+    C = e2*( p4 - q2 );                                                                                                                                                                                          
+                                                                                                                                                                                                                 
+    xi2OveraStar = xi2/aStar;                                                                                                                                                                                    
+                                                                                                                                                                                                                 
+    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff                                                                                       
+    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff                                                                                       
+    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff                                                                                       
+    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff                                                                                       
+    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff                                                                                       
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff                                                                                       
+    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff                                                                                       
+                                                                                                                                                                                                                 
+    /*                                                                                                                                                                                                           
+     * Solve for resonant roots.                                                                                                                                                                                 
+     */                                                                                                                                                                                                          
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 7 );                                                                                                                                       
+    gsl_poly_complex_solve( Coeff, 7, w, gsl_z );                                                                                                                                                                
+    gsl_poly_complex_workspace_free( w );                                                                                                                                                                        
     for (i=0; i<6; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
-
-
 
 
     /*
@@ -1968,9 +1907,6 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     for ( i=0; i<6; i++ ) {
         if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) ) > 0.0  ) z[nRoots++] = zz[i];
     }
-
-
-
 
 
     // This is another hard-wired input parameter. Fix.
@@ -1989,18 +1925,26 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     } else if ( Mu2 <= 1e-16 ) {
 
         /*
-         *  Alpha is essentially 90Deg. Use the limiting forms given by Eqns
-         *  (36)-(38) of Summers2005. This is Eqn (36) for Daa.
+         *  If cos(alpha) is zero, then the resonance condition becomnes x = -a = s*Lambda/Gamma.
+         *  And x>0 in this case will only happen for (R-MODE with electrons) and (L-MODE with protons)
          */
-//THIS IS WRONG FIX THIS IS FOR SINGLE SPECIES PLASMA
-        x0 = 1.0/Gamma;
-        y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
+        if          ( (s ==  1) && ( Lambda < 0.0 ) ) {  // R-MODE with electrons
+            x0 = 1.0/Gamma;
+        } else if   ( (s == -1) && ( Lambda > 0.0 ) ) { // L-MODE with protons
+            x0 = Lambda/Gamma;
+        } else {
+            x0 = 0.0;
+        }
 
-        Ep1   = E+1.0; Ep12 = Ep1*Ep1;
-        arg   = (x0-xm)/dx;
-        Dcore = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
-        Dpp   = ( sum_res ) ? 2.0*Dcore : Dcore;
-Dpp = 0.0;
+        if ( x0 > 1e-12 ) {
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            Ep1   = E+1.0; Ep12 = Ep1*Ep1;
+            arg   = (x0-xm)/dx;
+            DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
+            Dpp   = ( sum_res ) ? 2.0*DD : DD;
+        } else {
+            Dpp = 0.0;
+        }
 
     } else {
 
@@ -2028,29 +1972,25 @@ Dpp = 0.0;
          * Execute sum over resonant roots.
          */
         Beta   = sqrt(Beta2);
-        BetaMu = sqrt(Xsi2);
+        BetaMu = sqrt(xi2);
         Mu     = sqrt(Mu2);
         for ( Dpp=0.0, n=0; n<nRoots; n++ ){
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
-if ((x>xl)&&(x<xh)) {
-//if (y<0){
-            g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-            sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+            if ((x>xl)&&(x<xh)) {
+                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
 
-            F = 2.0*y*aStar*sss*sss/(x*g);
+                F = 2.0*y*aStar*sss*sss/(x*g);
 
-            u = 1.0 - x*Mu/(y*Beta);
-            arg = (x-xm)/dx;
-            Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
-//}
-}
+                u = 1.0 - x*Mu/(y*Beta);
+                arg = (x-xm)/dx;
+                Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+            }
 
         }
         Dpp *= fac;
-
-
 
     }
 
