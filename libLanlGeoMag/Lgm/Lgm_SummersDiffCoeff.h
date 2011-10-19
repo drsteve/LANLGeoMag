@@ -25,6 +25,17 @@
 #define LGM_SUMMERS_2005    2005
 #define LGM_SUMMERS_2007    2007
 
+// Derivative schemes
+#ifndef LGM_DERIV_TWO_POINT
+#define LGM_DERIV_TWO_POINT     0
+#endif
+#ifndef LGM_DERIV_FOUR_POINT
+#define LGM_DERIV_FOUR_POINT    1
+#endif
+#ifndef LGM_DERIV_SIX_POINT
+#define LGM_DERIV_SIX_POINT     2
+#endif
+
 typedef struct Lgm_SummersInfo {
 
     int     Version;        //!< Vewrsion of Summers model to use. Can be LGM_SUMMERS_2005 or LGM_SUMMERS_2007.
@@ -62,7 +73,8 @@ typedef struct Lgm_SummersInfo {
 
 } Lgm_SummersInfo;
 
-int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );

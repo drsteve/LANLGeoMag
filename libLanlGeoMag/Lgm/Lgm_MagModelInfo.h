@@ -85,9 +85,15 @@
 
 
 // Derivative schemes
+#ifndef LGM_DERIV_TWO_POINT
 #define LGM_DERIV_TWO_POINT     0
+#endif
+#ifndef LGM_DERIV_FOUR_POINT
 #define LGM_DERIV_FOUR_POINT    1
+#endif
+#ifndef LGM_DERIV_SIX_POINT
 #define LGM_DERIV_SIX_POINT     2
+#endif
 
 
 
@@ -250,11 +256,11 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_VelStep_Tol;        // tolerance for Magstep (ODE solver).
     double      Lgm_VelStep_Alpha;
     double      Lgm_VelStep_SinAlpha;
-    double      Lgm_VelStep_q;                                                                                                                                                            
-    double      Lgm_VelStep_T;                                                                                                                                                            
-    double      Lgm_VelStep_E0;                                                                                                                                                           
-    double      Lgm_VelStep_Bm;                                                                                                                                                           
-    double      Lgm_VelStep_h;                                                                                                                                                            
+    double      Lgm_VelStep_q;
+    double      Lgm_VelStep_T;
+    double      Lgm_VelStep_E0;
+    double      Lgm_VelStep_Bm;
+    double      Lgm_VelStep_h;
     int         Lgm_VelStep_DerivScheme;
 
 

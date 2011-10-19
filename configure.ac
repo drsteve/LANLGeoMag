@@ -7,7 +7,7 @@ AC_PREREQ([2.59])
 THE_PKG_RELEASE=0
 PKG_RELEASE=$THE_PKG_RELEASE
 AC_SUBST([PKG_RELEASE])
-AC_INIT([LanlGeoMag], [1.5.12], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag], [1.5.13], [mghenderson@lanl.gov])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG([C])

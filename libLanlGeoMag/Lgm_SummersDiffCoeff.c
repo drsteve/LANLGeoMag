@@ -118,7 +118,6 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      This routine computes \f$ <D_{\alpha_\circ\alpha_\circ}>,
  *      <D_{\alpha_\circ p}>, <D_{pp}> \f$.
  *
- *  \details
  *
  *      \param[in]      Version     Version of Summers Model to use. Can be LGM_SUMMERS_2005 or LGM_SUMMERS_2007.
  *      \param[in]      Alpha0      Equatoria PA in Degrees.
@@ -160,7 +159,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     si->n2 = n2;
     si->n3 = n3;
     if ( Version == LGM_SUMMERS_2007 ){
-        if ( fabs(1.0-(n1+n2+n3)) > 1e-8 ) {
+        if ( fabs(1.0-(n1+n2+n3)) > 1e-10 ) {
             printf("Lgm_SummersDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
             return(-1);
         }
@@ -196,7 +195,6 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
     /*
      *  Quadpack integration tolerances.
-1e-10 seems exccessive.
      */
     epsabs = 1e-3;
     epsrel = 1e-3;
@@ -282,10 +280,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
-//printf("a, b = %g %g\n", a, b);
         Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
-//printf("a_new, b_new = %g %g\n", a_new, b_new);
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -332,6 +328,89 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
 }
 
+/**
+ *  \brief
+ *      Computes derivatives of the bounce-averaged Summer's [2005, 2007] diffusion coefficients
+ *      in a pure centered dipole field.
+ *
+ *  \details
+ *
+ *
+ *      \param[in]      Version     Version of Summers Model to use. Can be LGM_SUMMERS_2005 or LGM_SUMMERS_2007.
+ *      \param[in]      Alpha0      Equatoria PA in Degrees.
+ *      \param[in]      Ek          Kinetic energy in MeV.
+ *      \param[in]      L           L-shell parameter (dimensionless).
+ *      \param[in]      BwFuncData  A (void *) pointer to data that the user may need to use in BwFunc().
+ *      \param[in]      BwFunc      A user-defined function that returns Bw as a function of Latitude in units of nT. Prototype is "double BwFunc( double Lat, void *Data )".
+ *      \param[in]      n1          Ratio of Hydrogen number density to Electron number density (note that n1+n2+n3=1).
+ *      \param[in]      n2          Ratio of Helium number density to Electron number density (note that n1+n2+n3=1).
+ *      \param[in]      n3          Ratio of Oxygen number density to Electron number density (note that n1+n2+n3=1).
+ *      \param[in]      aStarEq     Equatorial value of the cold plasma parameter \f$\Omega_\sigma/\omega_{pe}\f$.
+ *      \param[in]      w1          Lower limit of freq. band, [Hz].
+ *      \param[in]      w2          Lower limit of freq. band, [Hz].
+ *      \param[in]      wm          Midpoint of freq. band, [Hz].
+ *      \param[in]      dw          Width of freq. band, [Hz].
+ *      \param[in]      WaveMode    Mode of the wave. Can be LGM_R_MODE_WAVE or LGM_L_MODE_WAVE
+ *      \param[in]      Species     Particle species. Can be LGM_ELECTRONS, LGM_PROTONS, or ....?
+ *      \param[in]      MaxWaveLat  Latitude (+/-) that waves exist up to. [Degrees].
+ *      \param[out]     Daa_ba      Bounce-averaged value of Daa.
+ *      \param[out]     Dap_ba      Bounce-averaged value of Dap.
+ *      \param[out]     Dpp_ba      Bounce-averaged value of Dpp.
+ *
+ *      \return         0 if successful. <0 otherwise.
+ *
+ *      \author         M. Henderson
+ *      \date           2011
+ *
+ */
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap) {
+
+    double  a, h, H, faa[7], fap[7], Daa_ba, Dap_ba, Dpp_ba;
+    int     i, N;
+
+    /*
+     * Select the derivative scheme to use.
+     *      f_0^(1) = 1/(60h)  ( f_3 - 9f_2 + 45f_1  - 45f_-1 + 9f_-2 - f_-3 )
+     * See page 450 of CRC standard Math tables 28th edition.
+     */
+    switch ( DerivScheme ) {
+        case LGM_DERIV_SIX_POINT:
+            N = 3;
+            break;
+        case LGM_DERIV_FOUR_POINT:
+            N = 2;
+            break;
+        case LGM_DERIV_TWO_POINT:
+            N = 1;
+            break;
+    }
+
+    /*
+     * Compute points in alpha grid use ha as spacing
+     */
+    h = ha;
+    for (i=-N; i<=N; ++i){
+        a = Alpha0; H = (double)i*h; a += H;
+        Lgm_SummersDxxBounceAvg( Version, a, Ek, L, BwFuncData, BwFunc, n1, n2, n3, aStarEq, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
+        faa[i+N] = Daa_ba;
+        fap[i+N] = Dap_ba;
+    }
+
+    if (DerivScheme == LGM_DERIV_SIX_POINT){
+        *dDaa = (faa[6] - 9.0*faa[5] + 45.0*faa[4] - 45.0*faa[2] + 9.0*faa[1] - faa[0])/(60.0*h);
+        *dDap = (fap[6] - 9.0*fap[5] + 45.0*fap[4] - 45.0*fap[2] + 9.0*fap[1] - fap[0])/(60.0*h);
+    } else if (DerivScheme == LGM_DERIV_FOUR_POINT){
+        *dDaa = (-faa[4] + 8.0*faa[3] - 8.0*faa[1] + faa[0])/(12.0*h);
+        *dDap = (-fap[4] + 8.0*fap[3] - 8.0*fap[1] + fap[0])/(12.0*h);
+    } else if (DerivScheme == LGM_DERIV_TWO_POINT){
+        *dDaa = (faa[2] - faa[0])/(2.0*h);
+        *dDap = (fap[2] - fap[0])/(2.0*h);
+    }
+
+
+    return(1);
+
+}
 
 
 
@@ -502,12 +581,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
     } else if ( Version == LGM_SUMMERS_2007 ) {
 
-        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
-            Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
-        } else {
-            printf("SummersIntegrand_Gaa: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
-            //return(-1);
-        }
+        Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
 
     } else {
 
@@ -634,12 +708,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     } else if ( Version == LGM_SUMMERS_2007 ) {
 
-        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
-            Dap = Lgm_SummersDapLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
-        } else {
-            printf("SummersIntegrand_Gap: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
-            return(-1);
-        }
+        Dap = Lgm_SummersDapLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
 
     } else {
 
@@ -752,12 +821,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
     } else if ( Version == LGM_SUMMERS_2007 ) {
 
-        if ( fabs(1.0-(n1+n2+n3)) < 1e-8 ) {
-            Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
-        } else {
-            printf("SummersIntegrand_Gpp: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
-            return(-1);
-        }
+        Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
 
     } else {
 
