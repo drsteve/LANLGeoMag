@@ -120,6 +120,7 @@ typedef struct Lgm_FluxToPsd {
      */
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
+    int          nMaxwellians;       //!< Number of maxwellians to use in fitting
 
 
 
@@ -196,6 +197,7 @@ typedef struct Lgm_PsdToFlux {
      */
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
+    int          nMaxwellians;       //!< Number of maxwellians to use in fitting
 
 
 
