@@ -1649,6 +1649,84 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
 }
 
+/**
+ *   Routine to write out a GIF image
+ */
+void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double **Image ){
+
+    double           Val, dVal;
+    int              w, h;
+    unsigned char   *uImage, uVal, Filename[1024];
+    FILE            *fp_gif, *fp_info;
+
+    int             LogScale;
+
+    LogScale = FALSE;
+    LogScale = TRUE;
+
+
+    //printf("Min, Max = %g %g\n", Min, Max);
+
+    sprintf( Filename, "%s.info", FilenameBase);
+    fp_info = fopen( Filename, "w" );
+    fprintf( fp_info, "Min: %g\n", Min );
+    fprintf( fp_info, "Max: %g\n", Max );
+    fclose( fp_info );
+
+
+
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+
+            if ( LogScale ) {
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+            } else {
+                Val = Image[h][w];
+            }
+            if ( Val < -1e99 ) {
+                uVal = 0;
+            } else {
+                dVal = (Val - Min)/(Max-Min)*255.0;
+                if (dVal > 255.0) {
+                    uVal = 255;
+                } else if ( dVal < 0.0 ) {
+                    uVal = 0;
+                } else {
+                    uVal = (unsigned char)dVal;
+                }
+            }
+            *(uImage + W*(H-1-h) + w) = uVal;
+
+        }
+    }
+
+    sprintf( Filename, "%s.gif", FilenameBase);
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    fclose(fp_gif);
+
+    free( uImage );
+
+
+
+    // dump a colorbar image
+    W = 10; H = 256;
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+            *(uImage + W*(H-1-h) + w) = h;
+        }
+    }
+    sprintf( Filename, "%s_Bar.gif", FilenameBase);
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    fclose(fp_gif);
+    free( uImage );
+
+}
+
 
 
 /**
