@@ -2665,6 +2665,7 @@ void CreateSats() {
                     }
                 glEnd();
 
+/*
 for (i=0; i<Group->nSat; i++){
 if ( (!strstr(Group->Sat[i].TLE.Name, " R/B") && !strstr(Group->Sat[i].TLE.Name, " DEB")) && Group->DrawSatellites ){ // Satellites
 glEnable(GL_LIGHTING);
@@ -2677,6 +2678,7 @@ SolidCone( &Ugsm, 30.0, 240, 1 );
 glDisable(GL_LIGHTING);
 }
 }
+*/
 
             }
 
