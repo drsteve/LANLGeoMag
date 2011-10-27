@@ -35,6 +35,7 @@ MOSTLYCLEANFILES = $(DX_CLEANFILES)
 #	view_drift_shell_file_list $(DX_CONFIG)
 EXTRA_DIST = lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
 	example_file_list \
+    Python
 	$(DX_CONFIG)
 
 ACLOCAL_AMFLAGS = -I m4 

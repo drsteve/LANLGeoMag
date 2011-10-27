@@ -2003,6 +2003,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 
         /*
          *  We have resonant roots and we are not at 90Deg.
+         *  These could be cached.
          */
         q3 = 176.0*n1 + 107.0*n2 + 11.0*n3;
         q4 = 256.0*n1 +  16.0*n2 +      n3;
