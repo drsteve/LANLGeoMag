@@ -148,10 +148,10 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  */
 int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
-    double           T0, T1, T, a, b, E, s, Lambda, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
-    double           epsabs, epsrel, result, abserr, resabs, resasc, work[2002], points[10];
+    double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
+    double           epsabs, epsrel, abserr, work[2002], points[10];
     double           ySing, a_new, b_new;
-    int              npts2=4, key=6, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
+    int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
     Lgm_SummersInfo *si=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
 
     si->Version = Version;
@@ -275,6 +275,12 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          *  Note: the value of npts2 must be 2+ the number of points added.
          *  This is because it adds the endpoints internally (so dont add those
          *  here).
+         *
+         *  An approximate form of T( SinAlpha0 ), related to bounce period is given in 
+         *  Schultz and Lanzeroti (Eqns 1.28a-d). Here we do it exactly.
+         *      T0 = 1.38017299815047317375;
+         *      T1 = 0.74048048969306104115;
+         *      T  = T0 - 0.5*(T0-T1)*(si->SinAlpha0 + sqrt(si->SinAlpha0));
          */
         npts2 = 2;
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
@@ -304,18 +310,6 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         } else {
             *Dpp_ba = 0.0;
         }
-
-
-        /*
-         *  Calculate T( SinAlpha0 ), related to bounce period.
-         *  Schultz and Lanzeroti Eqns 1.28a-d)
-         */
-        //T0 = 1.38017299815047317375;
-        //T1 = 0.74048048969306104115;
-        //printf("T = %g\n", T);
-        //T  = T0 - 0.5*(T0-T1)*(si->SinAlpha0 + sqrt(si->SinAlpha0));
-        //printf("T = %g\n", T);
-
 
         *Daa_ba /= T;
         *Dap_ba /= T;
@@ -446,26 +440,22 @@ int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, doub
 double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, arg;
-    double  BoverBeq, BoverBm, SinAlpha2;
-    double  SinAlpha02, Ek_in, L, aStarEq;
-    double  f;
+    double  BoverBeq, BoverBm, f;
     Lgm_SummersInfo *si;
 
     /*
-     * Pull parameters for integrand from Lgm_SummersInfo structure.
+     * Get pointer to parameters for integrand from Lgm_SummersInfo structure.
+     *  si->SinAlpha02      pre-computed sin^2( Alpha0 )
      */
     si  = (Lgm_SummersInfo *)qpInfo;
-    SinAlpha02 = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
 
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
     arg = 4.0 - 3.0*CosLat2;
     v = (arg < 0.0 ) ? 0.0 : sqrt( arg );
 
-    BoverBeq  = v/CosLat6;              // B/Beq
-    BoverBm   = BoverBeq*SinAlpha02;    // B/Bm = B/Beq * sin^2(Alpha0)
-    //SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
-    //if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
+    BoverBeq  = v/CosLat6;               // B/Beq
+    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)
 
     /*
      * We dont need to worry about the possibility that 1-B/Bm is 0 which gives
@@ -474,7 +464,6 @@ double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
      * integrator.
      */
     f = CosLat*v/sqrt(1.0-BoverBm);
-//printf("Lat = %.15g    BoverBm = %.15g    f = %.15g\n", Lat*DegPerRad, BoverBm, f );
 
     return( f );
 
@@ -507,49 +496,48 @@ double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, x1, x2, xm, dx;
-    double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
-    double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, aStarEq;
-    double  Daa, Da0a0, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
-    double  n1, n2, n3;
-    int     Version;
+    double  BoverBeq, BoverBm, SinAlpha2, CosAlpha2, TanAlpha2;
+    double  Daa, Da0a0, f, aStar, dB, B, dBoverB2;
     Lgm_SummersInfo *si;
 
 
     /*
-     * Pull parameters for integrand from Lgm_SummersInfo structure.
+     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.
+     *
+     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )
+     *  si->TanAlpha02  pre-computed tan^2( Alpha0 )
+     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)
+     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).
+     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.
+     *  si->Omega_eEq   Equatorial electron gyro-frequency.
+     *  si->Omega_SigEq Equatorial gyro-frequency for given species.
+     *  si->w1          lower cutoff frequency.
+     *  si->w2          upper cutoff frequency.
+     *  si->wm          frequency of max power.
+     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).
+     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.
+     *  si->s           +1 for R-mode -1 for L-mode.
+     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
+     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).
+     *  si->n1          nH/Ne
+     *  si->n2          nHe/Ne
+     *  si->n3          nO/Ne
+     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
      */
     si  = (Lgm_SummersInfo *)qpInfo;
-    MaxWaveLat  = si->MaxWaveLat;    // Latitudinal cutoff for waves.
-    if ( fabs(Lat) > MaxWaveLat ) return(0.0);
-    SinAlpha02  = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
-    TanAlpha02  = si->TanAlpha02;    // pre-computed tan^2( Alpha0 )
-    E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
-    L           = si->L;
-    aStarEq     = si->aStarEq;
-//    dB          = si->dB;
-    dB          = si->BwFunc( Lat, si->BwFuncData );
-    Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
-    Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
-    w1          = si->w1;            // lower cutoff frequency.
-    w2          = si->w2;            // upper cutoff frequency.
-    wm          = si->wm;            // frequency of max power.
-    dw          = si->dw;            // frequency bandwidth. (Semi bandwidth is sigma*dw).
-    Lambda      = si->Lambda;        //
-    s           = si->s;             //
-    Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
-    Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
-    n1          = si->n1;            // nH/Ne
-    n2          = si->n2;            // nHe/Ne
-    n3          = si->n3;            // nO/Ne
-    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
+
+    // Return 0.0 if Lat is greater than Latitudinal cutoff for waves.
+    if ( fabs(Lat) > si->MaxWaveLat ) return(0.0);
+
+
+    // Compute dipole-related params
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
     v = sqrt(4.0 - 3.0*CosLat2);
-
-    BoverBeq  = v/CosLat6;              // B/Beq
-    BoverBm   = BoverBeq*SinAlpha02;    // B/Bm = B/Beq * sin^2(Alpha0)
-    SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
+    BoverBeq  = v/CosLat6;               // B/Beq
+    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;                 // sin^2(Alpha) = B/Bm
     if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
     CosAlpha2 = 1.0-SinAlpha2;
     if (CosAlpha2 < 0.0) { CosAlpha2 = 0.0; } // Somewhat moot, because this case will lead to TanAlpha2 = infty
@@ -561,32 +549,34 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      * Assume wave frequency distribution (i.e. defined by the 'w' quantities,
      * e.g. w1, w2, wm, dw) is constant along the field lines.
      */
-    B         = BoverBeq*M_CDIP/(L*L*L);     // local value of B (warning, hard-coded M value).
-    dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
-    aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
-    Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
-    x1        = w1/fabs(Omega_e);                               // Local value of x1.
-    x2        = w2/fabs(Omega_e);                               // Local value of x1.
-    xm        = wm/fabs(Omega_e);                               // Local value of xm.
-    dx        = dw/fabs(Omega_e);                               // Local value of dx.
+    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).
+    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.
+    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.
+    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.
+    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.
+    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.
+    x1        = si->w1/Omega_e;        // Local value of x1.
+    x2        = si->w2/Omega_e;        // Local value of x1.
+    xm        = si->wm/Omega_e;        // Local value of xm.
+    dx        = si->dw/Omega_e;        // Local value of dx.
 
 
     /*
      * Compute the local Daa
      */
-    if ( Version == LGM_SUMMERS_2005 ) {
+    if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+        Daa = Lgm_SummersDaaLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
-    } else if ( Version == LGM_SUMMERS_2007 ) {
+    } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
 
-        printf("SummersIntegrand_Gaa: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
-        //return(-1);
+        printf("SummersIntegrand_Gaa: Unknown version of Summers Diff. Coeff Model. Version = %d\n", si->Version );
 
     }
 
@@ -595,7 +585,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      * Compute Da0a0. The TanAlpha02/TanAlpha2 term (which is (dAlphaeq/dAlpha)^2 )
      * converts D_Alpha,Alpha to D_Alpha_eq,Alpha_eq.
      */
-    Da0a0 = Daa*TanAlpha02/TanAlpha2;
+    Da0a0 = Daa*si->TanAlpha02/TanAlpha2;
 
 
     /*
@@ -603,7 +593,6 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0a0 * CosLat*v/sqrt(1-BoverBm);
 
-//printf("%g %g\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -635,49 +624,48 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, x1, x2, xm, dx;
-    double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
-    double  SinAlpha02, CosAlpha2, TanAlpha, TanAlpha0, Ek_in, L, aStarEq;
-    double  Dap, Da0p, f, aStar, E, dB, B, dBoverB2, s, Lambda, Rho, Sig;
-    double  n1, n2, n3;
-    int     Version;
+    double  BoverBeq, BoverBm, SinAlpha2, CosAlpha2, TanAlpha; 
+    double  Dap, Da0p, f, aStar, dB, B, dBoverB2;
     Lgm_SummersInfo *si;
 
-
-    /*
-     * Pull parameters for integrand from Lgm_SummersInfo structure.
-     */
+    /*                                                                                                                                                                                                 
+     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.                                                                                                                   
+     *                                                                                                                                                                                                 
+     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )                                                                                                                                                   
+     *  si->TanAlpha0   pre-computed tan( Alpha0 )                                                                                                                                                   
+     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)                                                                                                                   
+     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).                                                                                                                     
+     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.                                                                                                                            
+     *  si->Omega_eEq   Equatorial electron gyro-frequency.                                                                                                                                            
+     *  si->Omega_SigEq Equatorial gyro-frequency for given species.                                                                                                                                   
+     *  si->w1          lower cutoff frequency.                                                                                                                                                        
+     *  si->w2          upper cutoff frequency.                                                                                                                                                        
+     *  si->wm          frequency of max power.                                                                                                                                                        
+     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).                                                                                                                             
+     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.                                                                                                                                 
+     *  si->s           +1 for R-mode -1 for L-mode.                                                                                                                                                   
+     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007                                                                                            
+     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).                                                                                                                                
+     *  si->n1          nH/Ne                                                                                                                                                                          
+     *  si->n2          nHe/Ne                                                                                                                                                                         
+     *  si->n3          nO/Ne                                                                                                                                                                          
+     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).                                                                                                                  
+     */                     
     si  = (Lgm_SummersInfo *)qpInfo;
-    MaxWaveLat  = si->MaxWaveLat;    // Latitudinal cutoff for waves.
-    if ( fabs(Lat) > MaxWaveLat ) return(0.0); // Return 0 if beyond cutoff latitude.
-    SinAlpha02  = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
-    TanAlpha0   = si->TanAlpha0;     // pre-computed tan( Alpha0 )
-    E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
-    L           = si->L;
-    aStarEq     = si->aStarEq;
-//    dB          = si->dB;
-    dB          = si->BwFunc( Lat, si->BwFuncData );
-    Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
-    Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
-    w1          = si->w1;            // lower cutoff frequency.
-    w2          = si->w2;            // upper cutoff frequency.
-    wm          = si->wm;            // frequency of max power.
-    dw          = si->dw;            // frequency bandwidth. (Semi bandwidth is sigma*dw).
-    Lambda      = si->Lambda;        //
-    s           = si->s;             //
-    Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
-    Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
-    n1          = si->n1;            // nH/Ne
-    n2          = si->n2;            // nHe/Ne
-    n3          = si->n3;            // nO/Ne
-    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
+
+    // Return 0.0 if Lat is greater than Latitudinal cutoff for waves.
+    if ( fabs(Lat) > si->MaxWaveLat ) return(0.0); // Return 0 if beyond cutoff latitude.
+
+
+
+    // Compute dipole-related params
     CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
     CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
     v = sqrt(4.0 - 3.0*CosLat2);
-
-    BoverBeq  = v/CosLat6;              // B/Beq
-    BoverBm   = BoverBeq*SinAlpha02;    // B/Bm = B/Beq * sin^2(Alpha0)
-    SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
+    BoverBeq  = v/CosLat6;               // B/Beq
+    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;                 // sin^2(Alpha) = B/Bm
     if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
     CosAlpha2 = 1.0-SinAlpha2;
     if (CosAlpha2 < 0.0) { CosAlpha2 = 0.0; } // Somewhat moot, because this case will lead to TanAlpha2 = infty
@@ -689,30 +677,33 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      * Assume wave frequency distribution (i.e. defined by the 'w' quantities,
      * e.g. w1, w2, wm, dw) is constant along the field lines.
      */
-    B         = BoverBeq*M_CDIP/(L*L*L);     // local value of B (warning, hard-coded M value).
-    dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
-    aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
-    Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
-    x1        = w1/fabs(Omega_e);                               // Local value of x1.
-    x2        = w2/fabs(Omega_e);                               // Local value of x1.
-    xm        = wm/fabs(Omega_e);                               // Local value of xm.
-    dx        = dw/fabs(Omega_e);                               // Local value of dx.
+    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).                                                                                                
+    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.                                                                                                        
+    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.                                                                                                                   
+    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.                                                                                                                             
+    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.                                                                                                 
+    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.                                                                                                                
+    x1        = si->w1/Omega_e;        // Local value of x1.                                                                                                                                           
+    x2        = si->w2/Omega_e;        // Local value of x1.                                                                                                                                           
+    xm        = si->wm/Omega_e;        // Local value of xm.                                                                                                                                           
+    dx        = si->dw/Omega_e;        // Local value of dx.
 
     /*
      * Compute the local Dap
      */
-    if ( Version == LGM_SUMMERS_2005 ) {
+    if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Dap = Lgm_SummersDapLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+        Dap = Lgm_SummersDapLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                           
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
-    } else if ( Version == LGM_SUMMERS_2007 ) {
+    } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Dap = Lgm_SummersDapLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        Dap = Lgm_SummersDapLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                      
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
 
-        printf("SummersIntegrand_Gap: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
+        printf("SummersIntegrand_Gap: Unknown version of Summers Diff. Coeff Model. Version = %d\n", si->Version );
         return(-1);
 
     }
@@ -722,7 +713,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      * Compute Da0p. The TanAlpha0/TanAlpha term (which is dAlphaeq/dAlpha)
      * converts D_Alpha,p to D_Alpha_eq,p.
      */
-    Da0p = Dap*TanAlpha0/TanAlpha;
+    Da0p = Dap*si->TanAlpha0/TanAlpha;
 
 
     /*
@@ -730,8 +721,6 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0p * CosLat*v/sqrt(1-BoverBm);
 
-//printf("%g %g\n", Lat*DegPerRad, f);
-//printf("Lat, f = %.15g %.15g\n", Lat*DegPerRad, log10(fabs(f))  );
     return( f );
 
 }
@@ -752,49 +741,47 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, x1, x2, xm, dx;
-    double  BoverBeq, BoverBm, SinAlpha2, Omega_eEq, Omega_SigEq, w1, w2, wm, dw, MaxWaveLat;
-    double  SinAlpha02, CosAlpha2, TanAlpha2, TanAlpha02, Ek_in, L, aStarEq;
-    double  Dpp, f, aStar, E, dB, B, dBoverB2, Lambda, s, Rho, Sig;
-    double  n1, n2, n3;
-    int     Version;
+    double  BoverBeq, BoverBm, SinAlpha2; 
+    double  Dpp, f, aStar, dB, B, dBoverB2; 
     Lgm_SummersInfo *si;
 
-
-    /*
-     * Pull parameters for integrand from Lgm_SummersInfo structure.
-     */
+    /*                                                                                                                                                                                                 
+     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.                                                                                                                   
+     *                                                                                                                                                                                                 
+     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )                                                                                                                                                   
+     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)                                                                                                                   
+     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).                                                                                                                     
+     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.                                                                                                                            
+     *  si->Omega_eEq   Equatorial electron gyro-frequency.                                                                                                                                            
+     *  si->Omega_SigEq Equatorial gyro-frequency for given species.                                                                                                                                   
+     *  si->w1          lower cutoff frequency.                                                                                                                                                        
+     *  si->w2          upper cutoff frequency.                                                                                                                                                        
+     *  si->wm          frequency of max power.                                                                                                                                                        
+     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).                                                                                                                             
+     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.                                                                                                                                 
+     *  si->s           +1 for R-mode -1 for L-mode.                                                                                                                                                   
+     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007                                                                                            
+     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).                                                                                                                                
+     *  si->n1          nH/Ne                                                                                                                                                                          
+     *  si->n2          nHe/Ne                                                                                                                                                                         
+     *  si->n3          nO/Ne                                                                                                                                                                          
+     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).                                                                                                                  
+     */                                                                                                                                                                                                
     si  = (Lgm_SummersInfo *)qpInfo;
-    MaxWaveLat  = si->MaxWaveLat;    // Latitudinal cutoff for waves.
-    if ( fabs(Lat) > MaxWaveLat ) return(0.0);
-    SinAlpha02  = si->SinAlpha02;    // pre-computed sin^2( Alpha0 )
-    E           = si->E;             // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
-    L           = si->L;
-    aStarEq     = si->aStarEq;
-//    dB          = si->dB;
-    dB          = si->BwFunc( Lat, si->BwFuncData );
-    Omega_eEq   = si->Omega_eEq;     // Equatorial electron gyro-frequency.
-    Omega_SigEq = si->Omega_SigEq;   // Equatorial gyro-frequency for given species.
-    w1          = si->w1;            // lower cutoff frequency.
-    w2          = si->w2;            // upper cutoff frequency.
-    wm          = si->wm;            // frequency of max power.
-    dw          = si->dw;            // frequency bandwidth. (Semi bandwidth is sigma*dw).
-    Lambda      = si->Lambda;        //
-    s           = si->s;             //
-    Rho         = si->Rho;           // Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
-    Sig         = si->Sig;           // Sig -- see Summers [2005], text above eqn (30).
-    n1          = si->n1;            // nH/Ne
-    n2          = si->n2;            // nHe/Ne
-    n3          = si->n3;            // nO/Ne
-    Version     = si->Version;       // Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
 
-    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
-    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
-    v = sqrt(4.0 - 3.0*CosLat2);
+    // Return 0.0 if Lat is greater than Latitudinal cutoff for waves.                                                                                                                                 
+    if ( fabs(Lat) > si->MaxWaveLat ) return(0.0);
 
-    BoverBeq  = v/CosLat6;              // B/Beq
-    BoverBm   = BoverBeq*SinAlpha02;    // B/Bm = B/Beq * sin^2(Alpha0)
-    SinAlpha2 = BoverBm;                // sin^2(Alpha) = B/Bm
-    if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
+
+    // Compute dipole-related params                                                                                                                                                                   
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;                                                                                                                                                 
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;                                                                                                                                               
+    v = sqrt(4.0 - 3.0*CosLat2);                                                                                                                                                                       
+    BoverBeq  = v/CosLat6;               // B/Beq                                                                                                                                                      
+    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)                                                                                                                               
+    SinAlpha2 = BoverBm;                 // sin^2(Alpha) = B/Bm                                                                                                                                        
+    if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }                                                                                                                                                
+
 
     /*
      * Compute local parameters from the equatorial ones that are specified.
@@ -802,30 +789,33 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      * Assume wave frequency distribution (i.e. defined by the 'w' quantities,
      * e.g. w1, w2, wm, dw) is constant along the field lines.
      */
-    B         = BoverBeq*M_CDIP/(L*L*L);     // local value of B (warning, hard-coded M value).
-    dBoverB2  = dB*dB/(B*B);                 // Local value of R = dB^2/B^2.
-    aStar     = aStarEq*BoverBeq*BoverBeq;   // Local aStar value.
-    Omega_e   = Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS );   // Local electron gyro-frequency.
-    Omega_Sig = Omega_SigEq*BoverBeq;                           // Local gyro-frequency for given species.
-    x1        = w1/fabs(Omega_e);                               // Local value of x1.
-    x2        = w2/fabs(Omega_e);                               // Local value of x1.
-    xm        = wm/fabs(Omega_e);                               // Local value of xm.
-    dx        = dw/fabs(Omega_e);                               // Local value of dx.
+    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).                                                                                                
+    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.                                                                                                        
+    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.                                                                                                                   
+    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.                                                                                                                             
+    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.                                                                                                 
+    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.                                                                                                                
+    x1        = si->w1/Omega_e;        // Local value of x1.                                                                                                                                           
+    x2        = si->w2/Omega_e;        // Local value of x1.                                                                                                                                           
+    xm        = si->wm/Omega_e;        // Local value of xm.                                                                                                                                           
+    dx        = si->dw/Omega_e;        // Local value of dx.
 
     /*
      * Compute the local Dpp
      */
-    if ( Version == LGM_SUMMERS_2005 ) {
+    if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Dpp = Lgm_SummersDppLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+        Dpp = Lgm_SummersDppLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                           
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
-    } else if ( Version == LGM_SUMMERS_2007 ) {
+    } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, n1, n2, n3, aStar );
+        Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                      
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
 
-        printf("SummersIntegrand_Gpp: Unknown version of Summers Diff. Coeff Model. Version = %d\n", Version );
+        printf("SummersIntegrand_Gpp: Unknown version of Summers Diff. Coeff Model. Version = %d\n", si->Version );
         return(-1);
 
     }
@@ -836,8 +826,6 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      */
     f = Dpp * CosLat*v/sqrt(1-BoverBm);
 
-
-//printf("%.15lf %.15lf\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -1187,9 +1175,9 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
-    double          sEpsMinusOne, a1, a2, a3, a4, a, aa, apa, b, SinAlpha;
+    double          sEpsMinusOne, a1, a2, a3, a4, a, aa, apa, b;
     double complex  z1, z2, z3, z4, z[4];
-    double          Dpp, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
+    double          Dpp, R, x0, y0, Ep1, Ep12, xms, xpse, arg, c1, c2, c3, c4;
     double          x, x2, x3, x4, y, g, F, DD, fac;
 
     /*
@@ -1526,18 +1514,18 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  */
 double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
-    int             nReal, nRoots, n, nn, i, num, gsl_err;
+    int             nRoots, n, i, gsl_err;
     double          q0, q2, q3, q4, q5;
     double          p1, p2, p3, p4;
-    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
-    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
-    double complex  z1, z2, z3, z4, z5, z6, z[7], zz[7];
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu;
+    double          A, B, C, a, aa, apa, Coeff[7];
+    double complex  z[7], zz[7];
     double          gsl_z[20];
     double          Daa, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
-    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8;
     double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
-    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
+    double          y, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -1549,29 +1537,28 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     OneMinusxi2 = (1.0 - xi2);
     OneMinusxi2Times64 = 64.0*OneMinusxi2;
     a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
 
     q0 = 16.0*n1 + 4.0*n2 + n3;
     q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
 
-    p1 = 21.0*e - 16.0;
-    p2 = e - 4.0;
-    p3 = e - 21.0;
-    p4 = e + 21.0;
+    p1 = 21.0*LGM_EPS - 16.0;
+    p2 = LGM_EPS - 4.0;
+    p3 = LGM_EPS - 21.0;
+    p4 = LGM_EPS + 21.0;
 
-    A = 64.0 + 4.0*e*q0;
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( p4 - q2 );
+    A = 64.0 + 4.0*LGM_EPS*q0;
+    B = LGM_EPS*s*( 4.0*(21.0-q0) + LGM_EPS*q2 );
+    C = LGM_EPS2*( p4 - q2 );
 
     xi2OveraStar = xi2/aStar;
 
-    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
-    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
-    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
-    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
-    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
-    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
-    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
+    Coeff[0] = -aa*LGM_EPS3 / OneMinusxi2Times64;                                                                        // A6  x^0 Coeff
+    Coeff[1] = a*LGM_EPS2*( a*s*p3 - 2.0*LGM_EPS ) / OneMinusxi2Times64;                                                 // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*LGM_EPS*p2 + 2.0*a*LGM_EPS2*s*p3 - LGM_EPS3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64; // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*LGM_EPS*p2 + 4.0*aa*s*p1 + LGM_EPS2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;   // A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*LGM_EPS*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;              // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                                  // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                                      // A0  x^6 Coeff
 
     /*
      * Solve for resonant roots.
@@ -1620,7 +1607,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         }
 
         if ( x0 > 1e-12 ) {
-            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - LGM_EPS*n1/(x0+s*LGM_EPS) - LGM_EPS*n2/(4.0*x0+s*LGM_EPS) - LGM_EPS*n3/(16.0*x0+s*LGM_EPS) )/(aStar*x0) );
             Ep1 = E+1.0; Ep12 = Ep1*Ep1; arg = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
             Daa = ( sum_res ) ? 2.0*DD : DD;
@@ -1637,13 +1624,13 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         q4 = 256.0*n1 +  16.0*n2 +    n3;
         q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
 
-        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
-        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
-        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
-        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
-        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
-        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
-        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        g0 = 2.0*LGM_EPS5*( 21.0 - q2 + LGM_EPS*aStar );
+        g1 = LGM_EPS4*s*( 3.0*(203.0 - q3) - 4.0*LGM_EPS2*aStar + 4.0*LGM_EPS*(21.0*aStar + q2) );
+        g2 = 2.0*LGM_EPS3*( aStar*LGM_EPS3 + 4.0*(457.0 - q5) + LGM_EPS2*(-84.0*aStar - q2) + 3.0*LGM_EPS*(203.0*aStar + q3) );
+        g3 = LGM_EPS2*s*( 84.0*aStar*LGM_EPS3 + 16.0*(609.0 - q4) + 16.0*LGM_EPS*(457.0*aStar + q5) + 3.0*LGM_EPS2*(-812.0*aStar - q3 ) );
+        g4 = LGM_EPS*( 10752.0 + 1218.0*aStar*LGM_EPS3 + 32.0*LGM_EPS*(609.0*aStar + q4) - 8.0*LGM_EPS2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*LGM_EPS + 457.0*aStar*LGM_EPS3  + LGM_EPS2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*LGM_EPS + 609.0*LGM_EPS2 );
         g7 = 1024.0*aStar*s*p1;
         g8 = 8192.0*aStar;
 
@@ -1662,7 +1649,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
                 g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
                 F = 2.0*y*aStar*sss*sss/(x*g);
 
@@ -1716,18 +1703,18 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
  */
 double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
-    int             nReal, nRoots, n, nn, i, num;
+    int             nRoots, n, i;
     double          q0, q2, q3, q4, q5;
     double          p1, p2, p3, p4;
-    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
-    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
-    double complex  z1, z2, z3, z4, z5, z6, z[7], zz[7];
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu;
+    double          A, B, C, a, aa, apa, Coeff[7];
+    double complex  z[7], zz[7];
     double          gsl_z[20];
     double          Dap, R, x0, y0, Ep1, Ep12, sss, u, arg, SinAlpha;
     double          x, x2, x3, x4, x5, x6, x7, x8;
-    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8;
     double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
-    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
+    double          y, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -1739,29 +1726,28 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     OneMinusxi2 = (1.0 - xi2);
     OneMinusxi2Times64 = 64.0*OneMinusxi2;
     a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
 
     q0 = 16.0*n1 + 4.0*n2 + n3;
     q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
 
-    p1 = 21.0*e - 16.0;
-    p2 = e - 4.0;
-    p3 = e - 21.0;
-    p4 = e + 21.0;
+    p1 = 21.0*LGM_EPS - 16.0;
+    p2 = LGM_EPS - 4.0;
+    p3 = LGM_EPS - 21.0;
+    p4 = LGM_EPS + 21.0;
 
-    A = 64.0 + 4.0*e*q0;
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( p4 - q2 );
+    A = 64.0 + 4.0*LGM_EPS*q0;
+    B = LGM_EPS*s*( 4.0*(21.0-q0) + LGM_EPS*q2 );
+    C = LGM_EPS2*( p4 - q2 );
 
     xi2OveraStar = xi2/aStar;
 
-    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
-    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
-    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
-    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
-    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
-    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
-    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
+    Coeff[0] = -aa*LGM_EPS3 / OneMinusxi2Times64;                                                                        // A6  x^0 Coeff
+    Coeff[1] = a*LGM_EPS2*( a*s*p3 - 2.0*LGM_EPS ) / OneMinusxi2Times64;                                                 // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*LGM_EPS*p2 + 2.0*a*LGM_EPS2*s*p3 - LGM_EPS3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64; // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*LGM_EPS*p2 + 4.0*aa*s*p1 + LGM_EPS2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;   // A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*LGM_EPS*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;              // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                                  // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                                      // A0  x^6 Coeff
 
     /*
      * Solve for resonant roots.
@@ -1810,7 +1796,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         }
 
         if ( x0 > 1e-12 ) {
-            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - LGM_EPS*n1/(x0+s*LGM_EPS) - LGM_EPS*n2/(4.0*x0+s*LGM_EPS) - LGM_EPS*n3/(16.0*x0+s*LGM_EPS) )/(aStar*x0) );
             Beta  = sqrt(Beta2);
             Ep1   = E+1.0; Ep12 = Ep1*Ep1;
             arg   = (x0-xm)/dx;
@@ -1829,13 +1815,13 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         q4 = 256.0*n1 +  16.0*n2 +    n3;
         q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
 
-        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
-        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
-        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
-        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
-        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
-        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
-        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        g0 = 2.0*LGM_EPS5*( 21.0 - q2 + LGM_EPS*aStar );
+        g1 = LGM_EPS4*s*( 3.0*(203.0 - q3) - 4.0*LGM_EPS2*aStar + 4.0*LGM_EPS*(21.0*aStar + q2) );
+        g2 = 2.0*LGM_EPS3*( aStar*LGM_EPS3 + 4.0*(457.0 - q5) + LGM_EPS2*(-84.0*aStar - q2) + 3.0*LGM_EPS*(203.0*aStar + q3) );
+        g3 = LGM_EPS2*s*( 84.0*aStar*LGM_EPS3 + 16.0*(609.0 - q4) + 16.0*LGM_EPS*(457.0*aStar + q5) + 3.0*LGM_EPS2*(-812.0*aStar - q3 ) );
+        g4 = LGM_EPS*( 10752.0 + 1218.0*aStar*LGM_EPS3 + 32.0*LGM_EPS*(609.0*aStar + q4) - 8.0*LGM_EPS2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*LGM_EPS + 457.0*aStar*LGM_EPS3  + LGM_EPS2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*LGM_EPS + 609.0*LGM_EPS2 );
         g7 = 1024.0*aStar*s*p1;
         g8 = 8192.0*aStar;
 
@@ -1859,7 +1845,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
                 g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
                 F = 2.0*y*aStar*sss*sss/(x*g);
 
@@ -1912,18 +1898,18 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
  */
 double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
 
-    int             nReal, nRoots, n, nn, i, num;
+    int             nRoots, n, i;
     double          q0, q2, q3, q4, q5;
     double          p1, p2, p3, p4;
-    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
-    double          sEpsMinusOne, A, B, C, A1, A2, A3, A4, A5, A6, a, aa, apa, b, Coeff[7];
-    double complex  z1, z2, z3, z4, z5, z6, z[6], zz[6];
+    double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu;
+    double          A, B, C, a, aa, apa, Coeff[7];
+    double complex  z[6], zz[6];
     double          gsl_z[20];
     double          Dpp, R, x0, y0, Ep1, Ep12, sss, u, arg;
     double          x, x2, x3, x4, x5, x6, x7, x8;
-    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8, g9;
+    double          g, g0, g1, g2, g3, g4, g5, g6, g7, g8;
     double          xi2, xi2OveraStar, OneMinusxi2, OneMinusxi2Times64;
-    double          y, F, DD, fac, e, e2, e3, e4, e5, e6;
+    double          y, F, DD, fac;
 
     /*
      * Solve for resonant roots.
@@ -1935,29 +1921,28 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
     OneMinusxi2 = (1.0 - xi2);
     OneMinusxi2Times64 = 64.0*OneMinusxi2;
     a  = s*Lambda/Gamma; aa = a*a; apa = a+a;
-    e  = LGM_EPS; e2 = e*e; e3 = e2*e; e4 = e2*e2; e5 = e3*e2; e6 = e3*e3;
 
     q0 = 16.0*n1 + 4.0*n2 + n3;
     q2 = 20.0*n1 + 17.0*n2 + 5.0*n3;
 
-    p1 = 21.0*e - 16.0;
-    p2 = e - 4.0;
-    p3 = e - 21.0;
-    p4 = e + 21.0;
+    p1 = 21.0*LGM_EPS - 16.0;
+    p2 = LGM_EPS - 4.0;
+    p3 = LGM_EPS - 21.0;
+    p4 = LGM_EPS + 21.0;
 
-    A = 64.0 + 4.0*e*q0;
-    B = e*s*( 4.0*(21.0-q0) + e*q2 );
-    C = e2*( p4 - q2 );
+    A = 64.0 + 4.0*LGM_EPS*q0;
+    B = LGM_EPS*s*( 4.0*(21.0-q0) + LGM_EPS*q2 );
+    C = LGM_EPS2*( p4 - q2 );
 
     xi2OveraStar = xi2/aStar;
 
-    Coeff[0] = -aa*e3 / OneMinusxi2Times64;                                                               // A6  x^0 Coeff
-    Coeff[1] = a*e2*( a*s*p3 - 2.0*e ) / OneMinusxi2Times64;                                              // A5  x^1 Coeff
-    Coeff[2] = ( 21.0*aa*e*p2 + 2.0*a*e2*s*p3 - e3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64;    // A4  x^2 Coeff
-    Coeff[3] = ( 42.0*a*e*p2 + 4.0*aa*s*p1 + e2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;// A3  x^3 Coeff
-    Coeff[4] = (64.0*aa + 21.0*e*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;     // A2  x^4 Coeff
-    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                   // A1  x^5 Coeff
-    Coeff[6] = 1.0;                                                                                       // A0  x^6 Coeff
+    Coeff[0] = -aa*LGM_EPS3 / OneMinusxi2Times64;                                                                        // A6  x^0 Coeff
+    Coeff[1] = a*LGM_EPS2*( a*s*p3 - 2.0*LGM_EPS ) / OneMinusxi2Times64;                                                 // A5  x^1 Coeff
+    Coeff[2] = ( 21.0*aa*LGM_EPS*p2 + 2.0*a*LGM_EPS2*s*p3 - LGM_EPS3*OneMinusxi2 + C*xi2OveraStar) / OneMinusxi2Times64; // A4  x^2 Coeff
+    Coeff[3] = ( 42.0*a*LGM_EPS*p2 + 4.0*aa*s*p1 + LGM_EPS2*s*p3*OneMinusxi2 + B*xi2OveraStar  ) / OneMinusxi2Times64;   // A3  x^3 Coeff
+    Coeff[4] = (64.0*aa + 21.0*LGM_EPS*p2*OneMinusxi2 + 8.0*a*s*p1 + A*xi2OveraStar ) / OneMinusxi2Times64;              // A2  x^4 Coeff
+    Coeff[5] = ( 128.0*a + 4.0*s*OneMinusxi2*p1 ) / OneMinusxi2Times64;                                                  // A1  x^5 Coeff
+    Coeff[6] = 1.0;                                                                                                      // A0  x^6 Coeff
 
     /*
      * Solve for resonant roots.
@@ -2005,7 +1990,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
         }
 
         if ( x0 > 1e-12 ) {
-            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - e*n1/(x0+s*e) - e*n2/(4.0*x0+s*e) - e*n3/(16.0*x0+s*e) )/(aStar*x0) );
+            y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - LGM_EPS*n1/(x0+s*LGM_EPS) - LGM_EPS*n2/(4.0*x0+s*LGM_EPS) - LGM_EPS*n3/(16.0*x0+s*LGM_EPS) )/(aStar*x0) );
             Ep1   = E+1.0; Ep12 = Ep1*Ep1;
             arg   = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
@@ -2020,16 +2005,19 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
          *  We have resonant roots and we are not at 90Deg.
          */
         q3 = 176.0*n1 + 107.0*n2 + 11.0*n3;
-        q4 = 256.0*n1 +  16.0*n2 +    n3;
+        q4 = 256.0*n1 +  16.0*n2 +      n3;
         q5 = 320.0*n1 +  68.0*n2 +  5.0*n3;
 
-        g0 = 2.0*e5*( 21.0 - q2 + e*aStar );
-        g1 = e4*s*( 3.0*(203.0 - q3) - 4.0*e2*aStar + 4.0*e*(21.0*aStar + q2) );
-        g2 = 2.0*e3*( aStar*e3 + 4.0*(457.0 - q5) + e2*(-84.0*aStar - q2) + 3.0*e*(203.0*aStar + q3) );
-        g3 = e2*s*( 84.0*aStar*e3 + 16.0*(609.0 - q4) + 16.0*e*(457.0*aStar + q5) + 3.0*e2*(-812.0*aStar - q3 ) );
-        g4 = e*( 10752.0 + 1218.0*aStar*e3 + 32.0*e*(609.0*aStar + q4) - 8.0*e2*(1828.0*aStar + q5) );
-        g5 = 16.0*s*( 256.0 + 1344.0*aStar*e + 457.0*aStar*e3  + e2*(-2436.0*aStar - q4 ) );
-        g6 = 32.0*aStar*( 256.0 - 1344.0*e + 609.0*e2 );
+        /*
+         * A bunch of these terms could be cached or pre-computed.
+         */
+        g0 = 2.0*LGM_EPS5*( 21.0 - q2 + LGM_EPS*aStar );
+        g1 = LGM_EPS4*s*( 3.0*(203.0 - q3) - 4.0*LGM_EPS2*aStar + 4.0*LGM_EPS*(21.0*aStar + q2) );
+        g2 = 2.0*LGM_EPS3*( aStar*LGM_EPS3 + 4.0*(457.0 - q5) + LGM_EPS2*(-84.0*aStar - q2) + 3.0*LGM_EPS*(203.0*aStar + q3) );
+        g3 = LGM_EPS2*s*( 84.0*aStar*LGM_EPS3 + 16.0*(609.0 - q4) + 16.0*LGM_EPS*(457.0*aStar + q5) + 3.0*LGM_EPS2*(-812.0*aStar - q3 ) );
+        g4 = LGM_EPS*( 10752.0 + 1218.0*aStar*LGM_EPS3 + 32.0*LGM_EPS*(609.0*aStar + q4) - 8.0*LGM_EPS2*(1828.0*aStar + q5) );
+        g5 = 16.0*s*( 256.0 + 1344.0*aStar*LGM_EPS + 457.0*aStar*LGM_EPS3  + LGM_EPS2*(-2436.0*aStar - q4 ) );
+        g6 = 32.0*aStar*( 256.0 - 1344.0*LGM_EPS + 609.0*LGM_EPS2 );
         g7 = 1024.0*aStar*s*p1;
         g8 = 8192.0*aStar;
 
@@ -2048,7 +2036,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
                 g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*e)*(4.0*x + s*e)*(16.0*x + s*e);
+                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
                 F = 2.0*y*aStar*sss*sss/(x*g);
 
@@ -2205,7 +2193,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
  */
 int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b ) {
 
-    int     done, founda, foundb, foundc, Found;
+    int     done, founda, foundb;
     double  x, x0, x1, fx, fx0, fx1, inc, D;
 
     *a = Lat0;
