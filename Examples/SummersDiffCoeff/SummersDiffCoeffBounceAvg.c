@@ -24,12 +24,14 @@ double MyBwFunc( double Lat, void *Data ) {
     double          Bw, Bw2, y;
     MyBwFuncInfo    *MyInfo;
 
+
     // typecast generic data structure type to one we expect
     MyInfo = (MyBwFuncInfo *)Data;
-    y = 0.75 + 0.04*Lat*DegPerRad;
-    Bw = pow( 10.0, y );
+//    y = 0.75 + 0.04*fabs(Lat)*DegPerRad;
+//    Bw = pow( 10.0, y );
+Bw = 25.0;
 
-if (Lat*DegPerRad > 35.0) return(0.0);
+if (Lat*DegPerRad > 15.0) return(0.0);
 else return( Bw/1000.0 );
 }
 
@@ -93,20 +95,6 @@ w2 = 0.3*Omega_e/M_2PI;
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
     /*
-     *   Li et al. Figure 2c
-     */
-    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
-    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-    wm = 0.35*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    dw = .15*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    w1 = 0.05*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
-    w2 = 0.65*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
-    MaxWaveLat = 15.0;      // Degrees
-    aStar = 1.0/(3.8*3.8);
-    n1 = 0.7; n2 = 0.2; n3 = 0.1;
-
-
-    /*
      *   Li et al. Figure 2a
      */
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
@@ -117,6 +105,20 @@ w2 = 0.3*Omega_e/M_2PI;
     w2 = 0.3*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
     MaxWaveLat = 35.0;      // Degrees
     aStar = 1.0/(4.6*4.6);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
+
+
+    /*
+     *   Li et al. Figure 2c
+     */
+    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    wm = 0.35*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    dw = .15*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    w1 = 0.05*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    w2 = 0.65*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    MaxWaveLat = 15.0;      // Degrees
+    aStar = 1.0/(3.8*3.8);
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
@@ -132,7 +134,7 @@ w2 = 0.3*Omega_e/M_2PI;
 
     { /***** Start Parallel Execution ****/
         #pragma omp parallel private(logEk, Ek, i, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)
-        #pragma omp for schedule(dynamic, 8)
+        #pragma omp for schedule(dynamic, 1)
         for (i=0; i<nEnergy; i++ ){
             logEk = logEk0 + i*dlogEk;
             Ek = pow( 10.0, logEk );
@@ -157,10 +159,10 @@ w2 = 0.3*Omega_e/M_2PI;
         }
     } /***** End Parallel Execution ****/
 
-    DumpGif( "Daa_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDaa );
-    DumpGif( "Dap_neg_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDap_neg );
-    DumpGif( "Dap_pos_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDap_pos );
-    DumpGif( "Dpp_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDpp );
+    DumpGif( "Daa_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDaa );
+    DumpGif( "Dap_neg_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_neg );
+    DumpGif( "Dap_pos_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_pos );
+    DumpGif( "Dpp_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDpp );
 
 
     LGM_ARRAY_2D_FREE( ImageDaa );
