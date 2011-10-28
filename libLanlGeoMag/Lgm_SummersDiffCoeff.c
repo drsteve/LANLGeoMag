@@ -276,7 +276,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          *  This is because it adds the endpoints internally (so dont add those
          *  here).
          *
-         *  An approximate form of T( SinAlpha0 ), related to bounce period is given in 
+         *  An approximate form of T( SinAlpha0 ), related to bounce period is given in
          *  Schultz and Lanzeroti (Eqns 1.28a-d). Here we do it exactly.
          *      T0 = 1.38017299815047317375;
          *      T1 = 0.74048048969306104115;
@@ -286,8 +286,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
-        Lgm_SummersFindCutoffs( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -295,16 +295,16 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         }
 
 
-        Lgm_SummersFindCutoffs( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
             *Dap_ba = 0.0;
         }
 
-        Lgm_SummersFindCutoffs( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             dqags( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
         } else {
@@ -566,12 +566,12 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      */
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Daa = Lgm_SummersDaaLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+        Daa = Lgm_SummersDaaLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+        Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
@@ -624,33 +624,33 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, x1, x2, xm, dx;
-    double  BoverBeq, BoverBm, SinAlpha2, CosAlpha2, TanAlpha; 
+    double  BoverBeq, BoverBm, SinAlpha2, CosAlpha2, TanAlpha;
     double  Dap, Da0p, f, aStar, dB, B, dBoverB2;
     Lgm_SummersInfo *si;
 
-    /*                                                                                                                                                                                                 
-     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.                                                                                                                   
-     *                                                                                                                                                                                                 
-     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )                                                                                                                                                   
-     *  si->TanAlpha0   pre-computed tan( Alpha0 )                                                                                                                                                   
-     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)                                                                                                                   
-     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).                                                                                                                     
-     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.                                                                                                                            
-     *  si->Omega_eEq   Equatorial electron gyro-frequency.                                                                                                                                            
-     *  si->Omega_SigEq Equatorial gyro-frequency for given species.                                                                                                                                   
-     *  si->w1          lower cutoff frequency.                                                                                                                                                        
-     *  si->w2          upper cutoff frequency.                                                                                                                                                        
-     *  si->wm          frequency of max power.                                                                                                                                                        
-     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).                                                                                                                             
-     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.                                                                                                                                 
-     *  si->s           +1 for R-mode -1 for L-mode.                                                                                                                                                   
-     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007                                                                                            
-     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).                                                                                                                                
-     *  si->n1          nH/Ne                                                                                                                                                                          
-     *  si->n2          nHe/Ne                                                                                                                                                                         
-     *  si->n3          nO/Ne                                                                                                                                                                          
-     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).                                                                                                                  
-     */                     
+    /*
+     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.
+     *
+     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )
+     *  si->TanAlpha0   pre-computed tan( Alpha0 )
+     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)
+     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).
+     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.
+     *  si->Omega_eEq   Equatorial electron gyro-frequency.
+     *  si->Omega_SigEq Equatorial gyro-frequency for given species.
+     *  si->w1          lower cutoff frequency.
+     *  si->w2          upper cutoff frequency.
+     *  si->wm          frequency of max power.
+     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).
+     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.
+     *  si->s           +1 for R-mode -1 for L-mode.
+     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
+     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).
+     *  si->n1          nH/Ne
+     *  si->n2          nHe/Ne
+     *  si->n3          nO/Ne
+     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
+     */
     si  = (Lgm_SummersInfo *)qpInfo;
 
 
@@ -677,15 +677,15 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      * Assume wave frequency distribution (i.e. defined by the 'w' quantities,
      * e.g. w1, w2, wm, dw) is constant along the field lines.
      */
-    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).                                                                                                
-    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.                                                                                                        
-    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.                                                                                                                   
-    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.                                                                                                                             
-    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.                                                                                                 
-    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.                                                                                                                
-    x1        = si->w1/Omega_e;        // Local value of x1.                                                                                                                                           
-    x2        = si->w2/Omega_e;        // Local value of x1.                                                                                                                                           
-    xm        = si->wm/Omega_e;        // Local value of xm.                                                                                                                                           
+    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).
+    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.
+    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.
+    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.
+    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.
+    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.
+    x1        = si->w1/Omega_e;        // Local value of x1.
+    x2        = si->w2/Omega_e;        // Local value of x1.
+    xm        = si->wm/Omega_e;        // Local value of xm.
     dx        = si->dw/Omega_e;        // Local value of dx.
 
     /*
@@ -693,12 +693,12 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
      */
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Dap = Lgm_SummersDapLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                           
+        Dap = Lgm_SummersDapLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Dap = Lgm_SummersDapLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                      
+        Dap = Lgm_SummersDapLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
@@ -741,46 +741,46 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
     double  CosLat, CosLat2, CosLat3, CosLat6, v, Omega_e, Omega_Sig, x1, x2, xm, dx;
-    double  BoverBeq, BoverBm, SinAlpha2; 
-    double  Dpp, f, aStar, dB, B, dBoverB2; 
+    double  BoverBeq, BoverBm, SinAlpha2;
+    double  Dpp, f, aStar, dB, B, dBoverB2;
     Lgm_SummersInfo *si;
 
-    /*                                                                                                                                                                                                 
-     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.                                                                                                                   
-     *                                                                                                                                                                                                 
-     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )                                                                                                                                                   
-     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)                                                                                                                   
-     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).                                                                                                                     
-     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.                                                                                                                            
-     *  si->Omega_eEq   Equatorial electron gyro-frequency.                                                                                                                                            
-     *  si->Omega_SigEq Equatorial gyro-frequency for given species.                                                                                                                                   
-     *  si->w1          lower cutoff frequency.                                                                                                                                                        
-     *  si->w2          upper cutoff frequency.                                                                                                                                                        
-     *  si->wm          frequency of max power.                                                                                                                                                        
-     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).                                                                                                                             
-     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.                                                                                                                                 
-     *  si->s           +1 for R-mode -1 for L-mode.                                                                                                                                                   
-     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007                                                                                            
-     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).                                                                                                                                
-     *  si->n1          nH/Ne                                                                                                                                                                          
-     *  si->n2          nHe/Ne                                                                                                                                                                         
-     *  si->n3          nO/Ne                                                                                                                                                                          
-     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).                                                                                                                  
-     */                                                                                                                                                                                                
+    /*
+     * Get a pointer toPull parameters for integrand from Lgm_SummersInfo structure.
+     *
+     *  si->SinAlpha02  pre-computed sin^2( Alpha0 )
+     *  si->E           Dimensionless energy Ek/E0 (kinetic energy over rest energy)
+     *  si->L           Dimensionless L-shell parameter (i.e. radius in eq plane).
+     *  si->aStarEq     Equatorial value of Summers' "AlphaStar" parameter.
+     *  si->Omega_eEq   Equatorial electron gyro-frequency.
+     *  si->Omega_SigEq Equatorial gyro-frequency for given species.
+     *  si->w1          lower cutoff frequency.
+     *  si->w2          upper cutoff frequency.
+     *  si->wm          frequency of max power.
+     *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).
+     *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.
+     *  si->s           +1 for R-mode -1 for L-mode.
+     *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
+     *  si->Sig         Sig -- see Summers [2005], text above eqn (30).
+     *  si->n1          nH/Ne
+     *  si->n2          nHe/Ne
+     *  si->n3          nO/Ne
+     *  si->Version     Which version to use. (LGM_SUMMERS_2005 or LGM_SUMMERS_2007).
+     */
     si  = (Lgm_SummersInfo *)qpInfo;
 
-    // Return 0.0 if Lat is greater than Latitudinal cutoff for waves.                                                                                                                                 
+    // Return 0.0 if Lat is greater than Latitudinal cutoff for waves.
     if ( fabs(Lat) > si->MaxWaveLat ) return(0.0);
 
 
-    // Compute dipole-related params                                                                                                                                                                   
-    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;                                                                                                                                                 
-    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;                                                                                                                                               
-    v = sqrt(4.0 - 3.0*CosLat2);                                                                                                                                                                       
-    BoverBeq  = v/CosLat6;               // B/Beq                                                                                                                                                      
-    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)                                                                                                                               
-    SinAlpha2 = BoverBm;                 // sin^2(Alpha) = B/Bm                                                                                                                                        
-    if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }                                                                                                                                                
+    // Compute dipole-related params
+    CosLat  = cos( Lat );     CosLat2 = CosLat*CosLat;
+    CosLat3 = CosLat2*CosLat; CosLat6 = CosLat3*CosLat3;
+    v = sqrt(4.0 - 3.0*CosLat2);
+    BoverBeq  = v/CosLat6;               // B/Beq
+    BoverBm   = BoverBeq*si->SinAlpha02; // B/Bm = B/Beq * sin^2(Alpha0)
+    SinAlpha2 = BoverBm;                 // sin^2(Alpha) = B/Bm
+    if (SinAlpha2 > 1.0) { SinAlpha2 = BoverBm = 1.0; }
 
 
     /*
@@ -789,15 +789,15 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      * Assume wave frequency distribution (i.e. defined by the 'w' quantities,
      * e.g. w1, w2, wm, dw) is constant along the field lines.
      */
-    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).                                                                                                
-    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.                                                                                                        
-    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.                                                                                                                   
-    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.                                                                                                                             
-    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.                                                                                                 
-    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.                                                                                                                
-    x1        = si->w1/Omega_e;        // Local value of x1.                                                                                                                                           
-    x2        = si->w2/Omega_e;        // Local value of x1.                                                                                                                                           
-    xm        = si->wm/Omega_e;        // Local value of xm.                                                                                                                                           
+    B         = BoverBeq*M_CDIP/(si->L*si->L*si->L); // local value of B (warning, hard-coded M value).
+    dB        = si->BwFunc( Lat, si->BwFuncData );   // Compute dB from user-supplied function.
+    dBoverB2  = dB*dB/(B*B);                         // Local value of R = dB^2/B^2.
+    aStar     = si->aStarEq*BoverBeq*BoverBeq;       // Local aStar value.
+    Omega_e   = fabs(Lgm_GyroFreq( -LGM_e, B, LGM_ELECTRON_MASS ));  // Local electron gyro-frequency.
+    Omega_Sig = si->Omega_SigEq*BoverBeq;    // Local gyro-frequency for given species.
+    x1        = si->w1/Omega_e;        // Local value of x1.
+    x2        = si->w2/Omega_e;        // Local value of x1.
+    xm        = si->wm/Omega_e;        // Local value of xm.
     dx        = si->dw/Omega_e;        // Local value of dx.
 
     /*
@@ -805,12 +805,12 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      */
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
-        Dpp = Lgm_SummersDppLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                           
+        Dpp = Lgm_SummersDppLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
-        Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,                                                                                                      
+        Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
 
     } else {
@@ -2068,7 +2068,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     int     done, founda, foundb, foundc, Found;
     double  a, b, c, d, fa, fb, fc, fd, inc, D1, D2, DELTA;
 
-    inc = 0.1*RadPerDeg;
+    inc = 0.01*RadPerDeg;
 
 
     /*
@@ -2192,28 +2192,33 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
  *
  *  \details
  */
-int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b ) {
+int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double inc, double Lat0, double Lat1, double *a, double *b ) {
 
     int     done, founda, foundb;
-    double  x, x0, x1, fx, fx0, fx1, inc, D;
+    double  x, x0, x1, fx, fx0, fx1, D;
 
     *a = Lat0;
     *b = Lat1;
 
+    founda = FALSE;
+    foundb = FALSE;
 
-    inc = 0.1*RadPerDeg;
+
+    // convert inc from deg to rads.
+    inc *= RadPerDeg;
 
     fx = fabs( f( Lat0, qpInfo ) );
     if ( fx != 0.0 ) {
 
         *a = Lat0;
+        founda = TRUE;
 
     } else {
 
         /*
          * Find a non-zero starting point
          */
-        x0 = x1 = Lat0; done = FALSE; founda = FALSE;
+        x0 = x1 = Lat0; done = FALSE;
         while ( !done ) {
             if ( x1 < Lat1 ){
                 fx1 = fabs( f( x1, qpInfo ) );
@@ -2250,8 +2255,12 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
             }
             *a = x1;
         } else {
+            /*
+             * We scanned the whole interval and found nothing. We may need to
+             * try again with a smaller inc.
+             */
             *a = Lat1;
-            return(1);
+            return(0);
         }
     }
 
@@ -2260,13 +2269,14 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
     if ( (fx != 0.0)  ) {
 
         *b = Lat1;
+        foundb = TRUE;
 
     } else {
 
         /*
          * Find a non-zero ending point
          */
-        x0 = x1 = Lat1; done = FALSE; foundb = FALSE;
+        x0 = x1 = Lat1; done = FALSE;
         while ( !done ) {
             if ( x0 > Lat0 ){
                 fx0 = fabs( f( x0, qpInfo ) );
@@ -2304,8 +2314,12 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
             }
             *b = x0;
         } else {
+            /*
+             * We scanned the whole interval and found nothing. We may need to
+             * try again with a smaller inc. Can we ever get here?
+             */
             *b = Lat0;
-            return(1);
+            return(0);
         }
 
     }
@@ -2316,9 +2330,27 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
 }
 
 
+/**
+ *  \brief
+ *      Finds where integrand is non-zero on eaither end.
+ *
+ *  \details
+ */
+int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b ) {
 
+    /*
+     * Make a series of attempts at progressively finer increments.  Another
+     * way to accellerate this would be to keep track of the cutoffs we already
+     * have and use them as a guide for future searches.
+     */
+    if ( Lgm_SummersFindCutoffs( f, qpInfo, Verbose, 2.00, Lat0, Lat1, a, b ) == TRUE ) return(1);
+    if ( Lgm_SummersFindCutoffs( f, qpInfo, Verbose, 0.10, Lat0, Lat1, a, b ) == TRUE ) return(1);
+    if ( Lgm_SummersFindCutoffs( f, qpInfo, Verbose, 0.01, Lat0, Lat1, a, b ) == TRUE ) return(1);
+    //if ( Lgm_SummersFindCutoffs( f, qpInfo, Verbose, 0.001, Lat0, Lat1, a, b ) == TRUE ) return(1);
 
+    return(0);
 
+}
 
 
 

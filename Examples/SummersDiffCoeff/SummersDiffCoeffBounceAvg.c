@@ -26,12 +26,11 @@ double MyBwFunc( double Lat, void *Data ) {
 
     // typecast generic data structure type to one we expect
     MyInfo = (MyBwFuncInfo *)Data;
-//    y = 0.75 + 0.04*Lat*DegPerRad;
-//    Bw = pow( 10.0, y );
+    y = 0.75 + 0.04*Lat*DegPerRad;
+    Bw = pow( 10.0, y );
 
-if (Lat*DegPerRad > 15.0) return(0.0);
-else return( 50.0/1000.0 );
-    return( Bw/1000.0 );
+if (Lat*DegPerRad > 35.0) return(0.0);
+else return( Bw/1000.0 );
 }
 
 
@@ -79,10 +78,10 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
+
     /*
      *   Li et al. Figure 4b
      */
-    dB       = 1.0;             // mean wave amplitude in nT.
     WaveMode = LGM_L_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
     Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
     wm = 3.7*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
@@ -96,7 +95,6 @@ w2 = 0.3*Omega_e/M_2PI;
     /*
      *   Li et al. Figure 2c
      */
-    dB       = 50.0/1000.0;     // mean wave amplitude in nT.
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
     Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
     wm = 0.35*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
@@ -108,9 +106,25 @@ w2 = 0.3*Omega_e/M_2PI;
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
+    /*
+     *   Li et al. Figure 2a
+     */
+    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    wm = 0.2*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    dw = .1*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    w1 = 0.1*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    w2 = 0.3*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    MaxWaveLat = 35.0;      // Degrees
+    aStar = 1.0/(4.6*4.6);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
-    int nAlpha  = 1000; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 1000; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+
+
+
+
+    int nAlpha  = 100; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -143,10 +157,10 @@ w2 = 0.3*Omega_e/M_2PI;
         }
     } /***** End Parallel Execution ****/
 
-    DumpGif( "Daa_E_versus_Alpha_2007", nAlpha, nEnergy, ImageDaa );
-    DumpGif( "Dap_neg_E_versus_Alpha_2007", nAlpha, nEnergy, ImageDap_neg );
-    DumpGif( "Dap_pos_E_versus_Alpha_2007", nAlpha, nEnergy, ImageDap_pos );
-    DumpGif( "Dpp_E_versus_Alpha_2007", nAlpha, nEnergy, ImageDpp );
+    DumpGif( "Daa_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDaa );
+    DumpGif( "Dap_neg_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDap_neg );
+    DumpGif( "Dap_pos_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDap_pos );
+    DumpGif( "Dpp_E_versus_Alpha_2007_2", nAlpha, nEnergy, ImageDpp );
 
 
     LGM_ARRAY_2D_FREE( ImageDaa );
