@@ -304,9 +304,9 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             } else {
-                dqags( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             }
         } else {
             *Dap_ba = 0.0;
