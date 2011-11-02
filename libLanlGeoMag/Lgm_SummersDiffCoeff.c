@@ -150,7 +150,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
     double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
     double           epsabs, epsrel, abserr, work[2002], points[10];
-    double           ySing, a_new, b_new;
+    double           ySing, a_new, b_new, B;
     int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
     Lgm_SummersInfo *si=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
 
@@ -255,8 +255,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
      *  Set integration limits
      */
     a = 0.0;                                            // radians
-    b = acos( Lgm_CdipMirrorLat( si->SinAlpha0 ) );     // radians
-    b = ( b < si->MaxWaveLat ) ? b : si->MaxWaveLat;
+    B = acos( Lgm_CdipMirrorLat( si->SinAlpha0 ) );     // radians
+    b = ( B < si->MaxWaveLat ) ? B : si->MaxWaveLat;
     if ( fabs(a-b) < 1e-9 ) {
 
         *Daa_ba = 0.0;
@@ -284,7 +284,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          */
         npts2 = 2;
         //dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqags( CdipIntegrand_Sb, (_qpInfo *)si, a, b, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( CdipIntegrand_Sb, (_qpInfo *)si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
         Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
@@ -478,6 +478,7 @@ double  CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo ) {
      */
     f = CosLat*v/sqrt(1.0-BoverBm);
 
+//printf("%g %g\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -607,6 +608,7 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     f = Da0a0 * CosLat*v/sqrt(1.0-BoverBm);
 
 //printf("%e %e\n", Lat*DegPerRad, f);
+//printf("%g %g\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -840,7 +842,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      */
     f = Dpp * CosLat*v/sqrt(1.0-BoverBm);
 
-//printf("%e %e\n", Lat*DegPerRad, f);
+//printf("%g %g\n", Lat*DegPerRad, f);
     return( f );
 
 }

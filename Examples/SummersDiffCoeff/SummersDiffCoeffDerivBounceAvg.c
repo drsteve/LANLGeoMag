@@ -108,9 +108,22 @@ w2 = 0.3*Omega_e/M_2PI;
     aStar = 1.0/(3.8*3.8);
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
+    /*                                                                                                                                                                 
+     *   Li et al. Figure 2a                                                                                                                                           
+     */                                                                                                                                                                
+    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).                                                                                
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).                                                                                             
+    wm = 0.2*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;                                                                                                      
+    dw = .1*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;                                                                                                       
+    w1 = 0.1*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;                                                                                                     
+    w2 = 0.3*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;                                                                                                     
+    MaxWaveLat = 35.0;      // Degrees                                                                                                                                 
+    aStar = 1.0/(4.6*4.6);                                                                                                                                             
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;          
 
-    int nAlpha  = 1000; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 1000; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+
+    int nAlpha  = 100; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -118,7 +131,7 @@ w2 = 0.3*Omega_e/M_2PI;
 
     { /***** Start Parallel Execution ****/
         #pragma omp parallel private(logEk, Ek, i, j, Alpha, dDaa, dDap )
-        #pragma omp for schedule(dynamic, 8)
+        #pragma omp for schedule(dynamic, 1)
         for (i=0; i<nEnergy; i++ ){
             logEk = logEk0 + i*dlogEk;
             Ek = pow( 10.0, logEk );
@@ -128,10 +141,10 @@ w2 = 0.3*Omega_e/M_2PI;
 //if ( (j==713)&&(i==1000-205)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
-                Lgm_SummersDxxDerivsBounceAvg( LGM_DERIV_SIX_POINT, 1e-2, LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, 
+                Lgm_SummersDxxDerivsBounceAvg( LGM_DERIV_SIX_POINT, 1e-1, LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, 
                     n1, n2, n3, aStar, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &dDaa, &dDap );
-                if ( (dDaa > 1e-8)  ) ImageDaa[i][j]     = dDaa;
-                printf("i = %d , j = %d , E = %g  Alpha = %g dDaa = %g\n", i, j, Ek, Alpha, dDaa);
+                ImageDaa[i][j]     = fabs(dDaa);
+                printf("i = %d , j = %d , E = %g  Alpha = %g dDaa = %e\n", i, j, Ek, Alpha, dDaa);
 /*
                 if ( Dap_ba < 0.0 ) {
                     ImageDap_neg[i][j] = fabs(Dap_ba);
