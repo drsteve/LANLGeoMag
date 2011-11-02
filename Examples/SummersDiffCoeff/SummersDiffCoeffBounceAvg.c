@@ -27,11 +27,11 @@ double MyBwFunc( double Lat, void *Data ) {
 
     // typecast generic data structure type to one we expect
     MyInfo = (MyBwFuncInfo *)Data;
-//    y = 0.75 + 0.04*fabs(Lat)*DegPerRad;
-//    Bw = pow( 10.0, y );
-Bw = 25.0;
+    y = 0.75 + 0.04*fabs(Lat)*DegPerRad;
+    Bw = pow( 10.0, y );
+//Bw = 5000.0;
 
-if (Lat*DegPerRad > 15.0) return(0.0);
+if (Lat*DegPerRad > 35.0) return(0.0);
 else return( Bw/1000.0 );
 }
 
@@ -60,7 +60,7 @@ int main( ) {
 
     // Get Omega_e
     Beq = M_CDIP/(L*L*L);   // nT
-    Omega_e = Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS );     // Omega_e, Hz
+    Omega_e = Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS );     // Omega_e, Hz
 
 
     // Set up waves
@@ -81,31 +81,7 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
-    /*
-     *   Li et al. Figure 4b
-     */
-    WaveMode = LGM_L_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
-    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-    wm = 3.7*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
-    dw = .25*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
-    w1 = 3.45*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
-    w2 = 3.95*Lgm_GyroFreq( -LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
-    MaxWaveLat = 15.0;      // Degrees
-    aStar = 1.0/(15.0*15.0);
-    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
-    /*
-     *   Li et al. Figure 2a
-     */
-    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
-    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-    wm = 0.2*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    dw = .1*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    w1 = 0.1*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
-    w2 = 0.3*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
-    MaxWaveLat = 35.0;      // Degrees
-    aStar = 1.0/(4.6*4.6);
-    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
     /*
@@ -113,15 +89,40 @@ w2 = 0.3*Omega_e/M_2PI;
      */
     WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
     Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
-    wm = 0.35*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    dw = .15*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
-    w1 = 0.05*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
-    w2 = 0.65*Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    wm = 0.35*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    dw = .15*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    w1 = 0.05*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    w2 = 0.65*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
     MaxWaveLat = 15.0;      // Degrees
     aStar = 1.0/(3.8*3.8);
     n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
+    /*
+     *   Li et al. Figure 4
+     */
+    WaveMode = LGM_L_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    wm = 3.5*Lgm_GyroFreq( LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
+    dw = .25*Lgm_GyroFreq( LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;
+    w1 = 3.25*Lgm_GyroFreq( LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
+    w2 = 3.75*Lgm_GyroFreq( LGM_e, Beq, LGM_OXYGEN_MASS )/M_2PI;;
+    MaxWaveLat = 15.0;      // Degrees
+    aStar = 1.0/(4.0*4.0);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
+
+    /*
+     *   Li et al. Figure 2a
+     */
+    WaveMode = LGM_R_MODE_WAVE; // Wave-mode type (LGM_R_MODE_WAVE or LGM_L_MODE_WAVE).
+    Species  = LGM_ELECTRONS;   // Species (LGM_ELECTRONS or LGM_PROTONS).
+    wm = 0.2*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    dw = .1*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;
+    w1 = 0.1*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    w2 = 0.3*Lgm_GyroFreq( LGM_e, Beq, LGM_ELECTRON_MASS )/M_2PI;;
+    MaxWaveLat = 35.0;      // Degrees
+    aStar = 1.0/(4.6*4.6);
+    n1 = 0.7; n2 = 0.2; n3 = 0.1;
 
 
 
@@ -136,12 +137,15 @@ w2 = 0.3*Omega_e/M_2PI;
         #pragma omp parallel private(logEk, Ek, i, j, Alpha, Daa_ba, Dap_ba, Dpp_ba)
         #pragma omp for schedule(dynamic, 1)
         for (i=0; i<nEnergy; i++ ){
+        //for (i=0; i<nEnergy; i+=10 ){
             logEk = logEk0 + i*dlogEk;
             Ek = pow( 10.0, logEk );
             for (j=0; j<nAlpha; j++ ){
+            //for (j=0; j<nAlpha; j+=2 ){
                 Alpha = Alpha0 + j*dAlpha;
 
-//if ( (j==713)&&(i==1000-205)){
+//if ( (i==20)){
+//if ( (i==1)&&(j==6)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
                 Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,
@@ -159,6 +163,12 @@ w2 = 0.3*Omega_e/M_2PI;
         }
     } /***** End Parallel Execution ****/
 
+    /*
+    DumpGif2( "Daa_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDaa );
+    DumpGif2( "Dap_neg_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDap_neg );
+    DumpGif2( "Dap_pos_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDap_pos );
+    DumpGif2( "Dpp_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDpp );
+    */
     DumpGif( "Daa_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDaa );
     DumpGif( "Dap_neg_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_neg );
     DumpGif( "Dap_pos_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_pos );

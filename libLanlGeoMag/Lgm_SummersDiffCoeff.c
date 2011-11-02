@@ -61,7 +61,7 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
      */
 
 
-    return( 1e-9*B*LGM_e/m );
+    return( 1e-9*B*q/m );
 
 }
 
@@ -196,8 +196,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     /*
      *  Quadpack integration tolerances.
      */
-    epsabs = 1e-3;
-    epsrel = 1e-3;
+    epsabs = 0.0;
+    epsrel = 1e-5;
 
 
     /*
@@ -283,13 +283,18 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          *      T  = T0 - 0.5*(T0-T1)*(si->SinAlpha0 + sqrt(si->SinAlpha0));
          */
         npts2 = 2;
-        dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        //dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( CdipIntegrand_Sb, (_qpInfo *)si, a, b, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
         Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
-            dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            if ( npts2 > 2 ) {
+                dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            } else {
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            }
         } else {
             *Daa_ba = 0.0;
         }
@@ -298,7 +303,11 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
-            dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            if ( npts2 > 2 ) {
+                dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            } else {
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            }
         } else {
             *Dap_ba = 0.0;
         }
@@ -306,7 +315,11 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
-            dqags( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            if ( npts2 > 2 ) {
+                dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            } else {
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+            }
         } else {
             *Dpp_ba = 0.0;
         }
@@ -591,8 +604,9 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     /*
      * Finally the integrand.
      */
-    f = Da0a0 * CosLat*v/sqrt(1-BoverBm);
+    f = Da0a0 * CosLat*v/sqrt(1.0-BoverBm);
 
+//printf("%e %e\n", Lat*DegPerRad, f);
     return( f );
 
 }
@@ -719,7 +733,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     /*
      * Finally the integrand.
      */
-    f = Da0p * CosLat*v/sqrt(1-BoverBm);
+    f = Da0p * CosLat*v/sqrt(1.0-BoverBm);
 
     return( f );
 
@@ -824,8 +838,9 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     /*
      * Finally the integrand.
      */
-    f = Dpp * CosLat*v/sqrt(1-BoverBm);
+    f = Dpp * CosLat*v/sqrt(1.0-BoverBm);
 
+//printf("%e %e\n", Lat*DegPerRad, f);
     return( f );
 
 }
