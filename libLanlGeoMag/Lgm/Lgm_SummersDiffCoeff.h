@@ -14,6 +14,9 @@
 #endif
 
 
+#define LGM_FRWD         1
+#define LGM_FRWD_BKWD    0
+#define LGM_BKWD        -1
 
 
 #define LGM_R_MODE_WAVE     0
@@ -70,23 +73,24 @@ typedef struct Lgm_SummersInfo {
     int     s;              //!< Defines wave mode (s=1 for R-mode, s=-1 for L-mode).
     double  Lambda;         //!< Defines sepcies (\f$ \lambda=-1 \f$ for electrons \f$ \lambda = \epsilon \f$ for protons (\f$\epsilon =m_e/m_p \f$).
     double  Rho;            //!< Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw )
+    int     Directions;     //!< Wave directionsm to include. Can be LGM_FRWD, LGM_BKWD, LGM_FRWD_BKWD
 
 } Lgm_SummersInfo;
 
-int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
-int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo );
-double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar );
-double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar );
-double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar );
-double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar );
-double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar );
-double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar );
+double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
+double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
+double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
 int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y );
 int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double inc, double Lat0, double Lat1, double *x1, double *x2 );
 int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b );

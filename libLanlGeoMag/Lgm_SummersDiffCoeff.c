@@ -146,7 +146,7 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \date           2011
  *
  */
-int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
     double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
     double           epsabs, epsrel, abserr, work[2002], points[10];
@@ -249,6 +249,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     si->dw          = dw;           // Frequency bandwidth (at equator).
     si->MaxWaveLat  = MaxWaveLat*RadPerDeg;   // Assume there are no waves at +/-MaxWaveLat.
     si->Rho         = Rho;
+    si->Directions  = Directions;
 
 
     /*
@@ -370,7 +371,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
  *      \date           2011
  *
  */
-int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap) {
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap) {
 
     double  a, h, H, faa[7], fap[7], Daa_ba, Dap_ba, Dpp_ba;
     int     i, N;
@@ -398,7 +399,7 @@ int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, doub
     h = ha;
     for (i=-N; i<=N; ++i){
         a = Alpha0; H = (double)i*h; a += H;
-        Lgm_SummersDxxBounceAvg( Version, a, Ek, L, BwFuncData, BwFunc, n1, n2, n3, aStarEq, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
+        Lgm_SummersDxxBounceAvg( Version, a, Ek, L, BwFuncData, BwFunc, n1, n2, n3, aStarEq, Directions, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
         faa[i+N] = Daa_ba;
         fap[i+N] = Dap_ba;
     }
@@ -581,12 +582,12 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
         Daa = Lgm_SummersDaaLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar, si->Directions );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
         Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
 
     } else {
 
@@ -710,12 +711,12 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
         Dap = Lgm_SummersDapLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar, si->Directions );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
         Dap = Lgm_SummersDapLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
 
     } else {
 
@@ -822,12 +823,12 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
     if ( si->Version == LGM_SUMMERS_2005 ) {
 
         Dpp = Lgm_SummersDppLocal( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar );
+                   si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, aStar, si->Directions );
 
     } else if ( si->Version == LGM_SUMMERS_2007 ) {
 
         Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
-                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar );
+                    si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
 
     } else {
 
@@ -878,7 +879,7 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
+double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
@@ -952,7 +953,7 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
             Ep1 = E+1.0; Ep12 = Ep1*Ep1;
             arg = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
-            Daa = ( sum_res ) ? 2.0*DD : DD;
+            Daa = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Daa = 0.0;
         }
@@ -983,14 +984,16 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-                xms  = x - s;
-                xpse = x + s*LGM_EPS;
-                F = y*xms*xms*xpse*xpse/(x*g);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                    xms  = x - s;
+                    xpse = x + s*LGM_EPS;
+                    F = y*xms*xms*xpse*xpse/(x*g);
 
-                u = 1.0 - x*Mu/(y*Beta);
-                arg = (x-xm)/dx;
-                Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    u = 1.0 - x*Mu/(y*Beta);
+                    arg = (x-xm)/dx;
+                    Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }
@@ -1031,7 +1034,7 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
+double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
@@ -1104,7 +1107,7 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
             Beta  = sqrt(Beta2);
             Ep1   = E+1.0; Ep12 = Ep1*Ep1; arg   = (x0-xm)/dx;
             DD = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
-            Dap   = ( sum_res ) ? 2.0*DD : DD;
+            Dap   = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Dap = 0.0;
         }
@@ -1138,14 +1141,16 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-                xms  = x - s;
-                xpse = x + s*LGM_EPS;
-                F = y*xms*xms*xpse*xpse/(x*g);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                    xms  = x - s;
+                    xpse = x + s*LGM_EPS;
+                    F = y*xms*xms*xpse*xpse/(x*g);
 
-                u = 1.0 - x*Mu/(y*Beta);
-                arg = (x-xm)/dx;
-                Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    u = 1.0 - x*Mu/(y*Beta);
+                    arg = (x-xm)/dx;
+                    Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }
@@ -1188,7 +1193,7 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar ) {
+double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions ) {
 
     int             nReal, nRoots, n;
     double          Gamma, Gamma2, Beta, Beta2, Mu, Mu2, BetaMu, BetaMu2, OneMinusBetaMu2;
@@ -1260,7 +1265,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
             y0 = x0 * sqrt( 1.0 + b*Gamma2/((Gamma-1.0)*(1.0+LGM_EPS*Gamma)) );
             Ep1   = E+1.0; Ep12 = Ep1*Ep1; arg   = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
-            Dpp   = ( sum_res ) ? 2.0*DD : DD;
+            Dpp   = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Dpp = 0.0;
         }
@@ -1291,13 +1296,15 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = x4 + c1*x3 + c2*x2 + c3*x + c4;
-                xms  = x - s;
-                xpse = x + s*LGM_EPS;
-                F = y*xms*xms*xpse*xpse/(x*g);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = x4 + c1*x3 + c2*x2 + c3*x + c4;
+                    xms  = x - s;
+                    xpse = x + s*LGM_EPS;
+                    F = y*xms*xms*xpse*xpse/(x*g);
 
-                arg = (x-xm)/dx;
-                Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    arg = (x-xm)/dx;
+                    Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }
@@ -1529,7 +1536,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions ) {
 
     int             nRoots, n, i, gsl_err;
     double          q0, q2, q3, q4, q5;
@@ -1627,7 +1634,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             y0 = x0 * sqrt( 1.0 + ( 1.0/(s-x0) - LGM_EPS*n1/(x0+s*LGM_EPS) - LGM_EPS*n2/(4.0*x0+s*LGM_EPS) - LGM_EPS*n3/(16.0*x0+s*LGM_EPS) )/(aStar*x0) );
             Ep1 = E+1.0; Ep12 = Ep1*Ep1; arg = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R/(Ep12*dx) * exp( -arg*arg );
-            Daa = ( sum_res ) ? 2.0*DD : DD;
+            Daa = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Daa = 0.0;
         }
@@ -1665,14 +1672,16 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                    sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
-                F = 2.0*y*aStar*sss*sss/(x*g);
+                    F = 2.0*y*aStar*sss*sss/(x*g);
 
-                u = 1.0 - x*Mu/(y*Beta);
-                arg = (x-xm)/dx;
-                Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    u = 1.0 - x*Mu/(y*Beta);
+                    arg = (x-xm)/dx;
+                    Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }
@@ -1718,7 +1727,7 @@ double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, do
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions ) {
 
     int             nRoots, n, i;
     double          q0, q2, q3, q4, q5;
@@ -1818,7 +1827,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             Ep1   = E+1.0; Ep12 = Ep1*Ep1;
             arg   = (x0-xm)/dx;
             DD = -M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0/(Ep12*dx*y0*Beta)  * exp( -arg*arg );
-            Dap   = ( sum_res ) ? 2.0*DD : DD;
+            Dap   = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Dap = 0.0;
         }
@@ -1861,15 +1870,17 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                    sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
-                F = 2.0*y*aStar*sss*sss/(x*g);
+                    F = 2.0*y*aStar*sss*sss/(x*g);
 
-                u = 1.0 - x*Mu/(y*Beta);
-                arg = (x-xm)/dx;
-                // if fabs(BetaMu - F) gets too small, we will get a singularity.
-                Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    u = 1.0 - x*Mu/(y*Beta);
+                    arg = (x-xm)/dx;
+                    // if fabs(BetaMu - F) gets too small, we will get a singularity.
+                    Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }
@@ -1913,7 +1924,7 @@ double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, do
  *      \date           2010-2011
  *
  */
-double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar ) {
+double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions ) {
 
     int             nRoots, n, i;
     double          q0, q2, q3, q4, q5;
@@ -2011,7 +2022,7 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
             Ep1   = E+1.0; Ep12 = Ep1*Ep1;
             arg   = (x0-xm)/dx;
             DD = M_PI_2/Rho * Omega_Sig*Omega_Sig/fabs(Omega_e) * R*x0*x0/(Ep12*dx*y0*y0*Beta2)  * exp( -arg*arg );
-            Dpp   = ( sum_res ) ? 2.0*DD : DD;
+            Dpp   = ( Directions == LGM_FRWD_BKWD ) ? 2.0*DD : DD;
         } else {
             Dpp = 0.0;
         }
@@ -2047,20 +2058,22 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
          */
         Beta   = sqrt(Beta2);
         BetaMu = sqrt(xi2);
-        Mu     = sqrt(Mu2);
+        //Mu     = sqrt(Mu2);
         for ( Dpp=0.0, n=0; n<nRoots; n++ ){
 
             x = creal( z[n] ); x2 = x*x; x3 = x2*x; x4 = x2*x2; x5 = x3*x2; x6 = x3*x3; x7 = x4*x3; x8 = x4*x4;
             y = ( x+a )/BetaMu;
             if ((x>xl)&&(x<xh)) {
-                g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
-                sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
+                if (  (Directions == LGM_FRWD_BKWD) || ((Directions == LGM_FRWD)&&(y>=0.0)) || ((Directions == LGM_BKWD)&&(y<=0.0)) ) {
+                    g = g0 + g1*x + g2*x2 + g3*x3 + g4*x4 + g5*x5 + g6*x6 + g7*x7 + g8*x8;
+                    sss = (x - s)*(x + s*LGM_EPS)*(4.0*x + s*LGM_EPS)*(16.0*x + s*LGM_EPS);
 
-                F = 2.0*y*aStar*sss*sss/(x*g);
+                    F = 2.0*y*aStar*sss*sss/(x*g);
 
-                u = 1.0 - x*Mu/(y*Beta);
-                arg = (x-xm)/dx;
-                Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                    //u = 1.0 - x*Mu/(y*Beta);
+                    arg = (x-xm)/dx;
+                    Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+                }
             }
 
         }

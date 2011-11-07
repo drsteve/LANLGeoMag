@@ -1626,7 +1626,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
     sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
 
     free( uImage );
@@ -1643,7 +1643,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
     }
     sprintf( Filename, "%s_Bar.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
     free( uImage );
 
@@ -1704,7 +1704,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
 
     sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
 
     free( uImage );
@@ -1721,7 +1721,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
     }
     sprintf( Filename, "%s_Bar.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
     free( uImage );
 

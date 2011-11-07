@@ -45,8 +45,11 @@ int main( ) {
     double          Ek, logEk, L, Beq, dB, Omega_e, wm, dw, w1, w2, MaxWaveLat;
     double          Alpha0, Alpha1, dAlpha, logEk0, logEk1, dlogEk;
     double          **ImageDaa, **ImageDap_neg, **ImageDap_pos, **ImageDpp;
+    double          **ImageDaa_Li, **ImageDpp_Li;
+    double          **ImageDaa_Diff, **ImageDpp_Diff;
     double          n1, n2, n3;
     MyBwFuncInfo    *MyInfo;
+    FILE            *fp1, *fp2;
 
 
     MyInfo = (MyBwFuncInfo *)calloc( 1, sizeof(*MyInfo));
@@ -126,7 +129,7 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
-    int nAlpha  = 100; Alpha0 = 0.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nAlpha  = 90; Alpha0 = 1.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
     int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
@@ -145,40 +148,93 @@ w2 = 0.3*Omega_e/M_2PI;
                 Alpha = Alpha0 + j*dAlpha;
 
 //if ( (i==20)){
-//if ( (i==1)&&(j==6)){
+//if ( (i==20)&&(j==86)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
-                Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, w1, w2, wm,
+                Lgm_SummersDxxBounceAvg( LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, n1, n2, n3, aStar, LGM_FRWD_BKWD, w1, w2, wm,
                                          dw, WaveMode, Species, MaxWaveLat, &Daa_ba, &Dap_ba, &Dpp_ba );
-                ImageDaa[i][j]     = Daa_ba;
+                ImageDaa[i][j]     = Daa_ba*86400.0;
                 printf("i = %d , j = %d , E = %g  Alpha = %g Daa_ba = %g\n", i, j, Ek, Alpha, Daa_ba);
                 if ( Dap_ba < 0.0 ) {
-                    ImageDap_neg[i][j] = fabs(Dap_ba);
+                    ImageDap_neg[i][j] = fabs(Dap_ba*86400.0);
                 } else {
-                    ImageDap_pos[i][j] = Dap_ba;
+                    ImageDap_pos[i][j] = Dap_ba*86400.0;
                 }
-                ImageDpp[i][j]     = Dpp_ba;
+                ImageDpp[i][j]     = Dpp_ba*86400.0*4.0;
 //}
             }
         }
     } /***** End Parallel Execution ****/
 
+    DumpGif2( "Daa_E_versus_Alpha_2007_3", -6.0, 2.0, nAlpha, nEnergy, ImageDaa );
+    DumpGif2( "Dap_neg_E_versus_Alpha_2007_3", -6.0, 2.0, nAlpha, nEnergy, ImageDap_neg );
+    DumpGif2( "Dap_pos_E_versus_Alpha_2007_3", -6.0, 2.0, nAlpha, nEnergy, ImageDap_pos );
+    DumpGif2( "Dpp_E_versus_Alpha_2007_3", -6.0, 2.0, nAlpha, nEnergy, ImageDpp );
     /*
-    DumpGif2( "Daa_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDaa );
-    DumpGif2( "Dap_neg_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDap_neg );
-    DumpGif2( "Dap_pos_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDap_pos );
-    DumpGif2( "Dpp_E_versus_Alpha_2007_3", 0.0, 4.0, nAlpha, nEnergy, ImageDpp );
-    */
     DumpGif( "Daa_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDaa );
     DumpGif( "Dap_neg_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_neg );
     DumpGif( "Dap_pos_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDap_pos );
     DumpGif( "Dpp_E_versus_Alpha_2007_3", nAlpha, nEnergy, ImageDpp );
+*/
+
+
+
+
+
+    /*
+     * Do a diff on Li's results
+     */
+    LGM_ARRAY_2D( ImageDaa_Li,     nEnergy, nAlpha, double );
+    LGM_ARRAY_2D( ImageDpp_Li,     nEnergy, nAlpha, double );
+    LGM_ARRAY_2D( ImageDaa_Diff,   nEnergy, nAlpha, double );
+    LGM_ARRAY_2D( ImageDpp_Diff,   nEnergy, nAlpha, double );
+
+
+    fp1 = fopen("Li/diffusion coef/chorus_Daa_2d_L45_lam35_day.dat","r");
+    fp2 = fopen("Li/diffusion coef/chorus_Dpp_2d_L45_lam35_day.dat","r");
+double d;
+    for (i=0; i<nEnergy; i++ ){
+        for (j=0; j<nAlpha; j++ ){
+            fscanf( fp1, "%lf", &ImageDaa_Li[i][j]);
+            fscanf( fp2, "%lf", &ImageDpp_Li[i][j]);
+            
+        }
+    }
+    fclose(fp1);
+    fclose(fp2);
+
+    for (i=0; i<nEnergy; i++ ){
+        for (j=0; j<nAlpha; j++ ){
+            d = ImageDaa_Li[i][j]/ImageDaa[i][j];
+            ImageDaa_Diff[i][j] = (d>=0.0) ? d : 0.0;
+            d = ImageDpp_Li[i][j]/ImageDpp[i][j];
+            ImageDpp_Diff[i][j] = (d>=0.0) ? d : 0.0;
+        }
+    }
+
+    DumpGif2( "Daa_E_versus_Alpha_Li", -6.0, 2.0, nAlpha, nEnergy, ImageDaa_Li );
+    DumpGif2( "Dpp_E_versus_Alpha_Li", -6.0, 2.0, nAlpha, nEnergy, ImageDpp_Li );
+    
+    DumpGif2( "Daa_E_versus_Alpha_Diff", -1.0, 1.0, nAlpha, nEnergy, ImageDaa_Diff );
+    DumpGif2( "Dpp_E_versus_Alpha_Diff", -1.0, 1.0, nAlpha, nEnergy, ImageDpp_Diff );
+    
+
+
+
+
+
+
+
 
 
     LGM_ARRAY_2D_FREE( ImageDaa );
     LGM_ARRAY_2D_FREE( ImageDap_neg );
     LGM_ARRAY_2D_FREE( ImageDap_pos );
     LGM_ARRAY_2D_FREE( ImageDpp );
+    LGM_ARRAY_2D_FREE( ImageDaa_Li );
+    LGM_ARRAY_2D_FREE( ImageDpp_Li );
+    LGM_ARRAY_2D_FREE( ImageDaa_Diff );
+    LGM_ARRAY_2D_FREE( ImageDpp_Diff );
     free( MyInfo );
 
     return(0);
