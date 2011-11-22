@@ -6,7 +6,7 @@ CC        = gcc
 
 FILES1    =  
 
-all   : MagEphemFromTLE MagEphemFromFile MagEphemFromTLE2 MagEphemFromPosition MagEphemFromPosition2
+all   : MagEphemFromTLE MagEphemFromFile MagEphemFromTLE2 MagEphemFromPosition 
 
 MagEphemFromFile : Makefile $(FILES1) MagEphemFromFile.o
 	$(CC) $(FILES1) MagEphemFromFile.o $(LIBS) $(CFLAGS) -o MagEphemFromFile
