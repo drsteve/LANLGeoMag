@@ -543,37 +543,51 @@ For now we will just go with the defaults.
      * Save the results in the f structure.
      */
 
-    Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
-    f->B = mInfo->Blocal;
-    {
-        #pragma omp parallel private(mInfo2,AlphaEq,SinA)
-        #pragma omp for schedule(dynamic, 1)
-        for ( k=0; k<nK; k++ ){
+    if ( Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo ) > 0 ) {
 
-            mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
+        f->B = mInfo->Blocal;
 
-            f->K[k]    = K[k];
-            AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
-            SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
-            if ( AlphaEq > 0.0 ) {
-                if ( SinA <= 1.0 ) {
-                    f->AofK[k] = DegPerRad*asin( SinA );
+        { // start parallel
+
+            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+            #pragma omp for schedule(dynamic, 1)
+            for ( k=0; k<nK; k++ ){
+
+                mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
+
+                f->K[k]    = K[k];
+                //printf("K[%d] = %g   f->DateTime.UTC = %g f->Position = %g %g %g\n", k, K[k], f->DateTime.Time, f->Position.x, f->Position.y, f->Position.z);
+                AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+                SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
+                if ( AlphaEq > 0.0 ) {
+                    if ( SinA <= 1.0 ) {
+                        f->AofK[k] = DegPerRad*asin( SinA );
+                    } else {
+                        f->AofK[k] = -9e99;
+                        //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                    }
                 } else {
                     f->AofK[k] = -9e99;
-                    //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                    //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
                 }
-            } else {
-                f->AofK[k] = -9e99;
-                //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+                //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+
+                Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
+
+
             }
-            //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
-            Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
+        } // end parallel
 
 
-        }
+
+        Lgm_TearDown_AlphaOfK( mInfo );
+
+    } else {
+
+        for ( k=0; k<nK; k++ ) f->AofK[k] = -9e99;
+
     }
-    Lgm_TearDown_AlphaOfK( mInfo );
 
 
     /*
