@@ -1067,6 +1067,11 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         fprintf( fp, " %12g", LGM_FILL_VALUE );
 
         fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
     }
 
@@ -1113,6 +1118,11 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         fprintf( fp, " %12g", LGM_FILL_VALUE );
         fprintf( fp, " %12g", LGM_FILL_VALUE );
 
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
         fprintf( fp, " %12g", LGM_FILL_VALUE );
         fprintf( fp, " %12g", LGM_FILL_VALUE );
         fprintf( fp, " %12g", LGM_FILL_VALUE );
