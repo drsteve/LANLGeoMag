@@ -47,7 +47,7 @@ int main( ) {
     double          **ImageDaa, **ImageDap_neg, **ImageDap_pos, **ImageDpp;
     double          **ImageDaa_Li, **ImageDpp_Li;
     double          **ImageDaa_Diff, **ImageDpp_Diff;
-    double          n1, n2, n3;
+    double          n1, n2, n3, ff, f;
     MyBwFuncInfo    *MyInfo;
     FILE            *fp1, *fp2;
 
@@ -129,8 +129,8 @@ w2 = 0.3*Omega_e/M_2PI;
 
 
 
-    int nAlpha  = 90; Alpha0 = 1.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
-    int nEnergy = 100; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
+    int nAlpha  = 1000; Alpha0 = 1.0; Alpha1 = 90.0; dAlpha = (Alpha1-Alpha0)/((double)(nAlpha-1));
+    int nEnergy = 1000; logEk0 = -1.0; logEk1 = 1.0; dlogEk = (logEk1-logEk0)/((double)(nEnergy-1));
     LGM_ARRAY_2D( ImageDaa,     nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_neg, nEnergy, nAlpha, double );
     LGM_ARRAY_2D( ImageDap_pos, nEnergy, nAlpha, double );
@@ -147,7 +147,8 @@ w2 = 0.3*Omega_e/M_2PI;
             //for (j=0; j<nAlpha; j+=2 ){
                 Alpha = Alpha0 + j*dAlpha;
 
-//if ( (i==20)){
+//if ( (i==0)&&(j==15)){
+//if ( (i==98)&&(j==27)){
 //if ( (i==20)&&(j==86)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
@@ -160,7 +161,7 @@ w2 = 0.3*Omega_e/M_2PI;
                 } else {
                     ImageDap_pos[i][j] = Dap_ba*86400.0;
                 }
-                ImageDpp[i][j]     = Dpp_ba*86400.0*4.0;
+                ImageDpp[i][j]     = Dpp_ba*86400.0/2.0;
 //}
             }
         }

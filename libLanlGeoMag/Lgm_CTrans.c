@@ -7,9 +7,14 @@
 
 #define USE_HIGH_ACCURACY_SUN 1
 
+/*
 #ifndef LGM_EOP_DATA_DIR
 #warning "hard-coding LGM_EOP_DATA_DIR because it was not in config.h"
 #define LGM_EOP_DATA_DIR    /usr/local/share/LanlGeoMag/EopData
+#endif
+*/
+#ifndef LGM_EOP_DATA_DIR
+#define LGM_EOP_DATA_DIR    DATADIR/LanlGeoMag/EopData
 #endif
 
 
@@ -61,6 +66,7 @@ Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
 
     c = (Lgm_CTrans *) calloc (1, sizeof(*c));
     Lgm_ctransDefaults(c, Verbose);
+//printf("LGM_EOP_DATA_DIR = %s\n", LGM_EOP_DATA_DIR);
 
     return c;
 

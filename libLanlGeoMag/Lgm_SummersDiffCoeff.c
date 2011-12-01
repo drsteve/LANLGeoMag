@@ -1289,7 +1289,9 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
          */
         Beta   = sqrt(Beta2);
         BetaMu = sqrt(BetaMu2);
+//BetaMu *= -1.0;
         Mu     = sqrt(Mu2);
+//Mu *= -1.0;
         for ( Dpp=0.0, n=0; n<nRoots; n++ ){
 
 
@@ -1455,11 +1457,11 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *              h_9 &=& 8192  \alpha^*
  *          \f}
  *
- *  But, note that by definition, \f$ q_1 = 0\f$. Therefore \f$ h_0 = 0\f$. Define \f$ H = xG = x\Sigma_{i=0}^{8} g_i x^i \f$, so that;
+ *  But, note that by definition, \f$ q_1 = 1\f$. Therefore \f$ h_0 = 0\f$. Define \f$ H = xG = x\Sigma_{i=0}^{8} g_i x^i \f$, so that;
  *
  *          \f{eqnarray*}{
- *              g_0 &=& 2 e^5 ( \alpha^*  e- q_2 +21)\\
- *              g_1 &=& e^4 \left(-4  \alpha^*  e^2+4 (21  \alpha^* + q_2 ) e+3 (203- q_3 )\right) s\\
+ *              g_0 &=& 2 e^5 ( 21 - q_2 + e \alpha^* )\\
+ *              g_1 &=& e^4 s \left( 3*(203 - q_3) - 4*e^2*\alpha^* + 4*e*(21*\alpha^* + q_2) \right)\\
  *              g_2 &=& 2 e^3 \left( \alpha^*  e^3+(-84  \alpha^* - q_2 ) e^2+3 (203  \alpha^* + q_3 ) e+4 (457- q_5 )\right)\\
  *              g_3 &=& e^2 \left(84  \alpha^*  e^3+3 (-812  \alpha^* - q_3 ) e^2+16 (457  \alpha^* + q_5 ) e+16 (609- q_4 )\right) s\\
  *              g_4 &=& e \left(1218  \alpha^*  e^3-8 (1828  \alpha^* + q_5 ) e^2+32 (609  \alpha^* + q_4 ) e+10752\right)\\

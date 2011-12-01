@@ -1,14 +1,16 @@
 SUBDIRS = Lgm
 
-AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" 
+AM_CFLAGS   = -fopenmp -lgomp
 
 # Location to keep Eop-related stuff
 LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
 LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
-includedir         = @prefix@/include/Lgm
-#libdir             = @prefix@/lib
+
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
+
+
 
 if LINUX
     CRONDIR = /etc/cron.daily
@@ -16,8 +18,8 @@ else
     CRONDIR = /etc/periodic/daily
 endif
 
-AM_CFLAGS = -fopenmp -lgomp
 
+#libdir                   = @prefix@/lib
 lib_LTLIBRARIES          = libLanlGeoMag.la
 libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \
 	                        Lgm_B_internal.c Lgm_CTrans.c Lgm_DateAndTime.c Lgm_Eop.c Lgm_IGRF.c Lgm_InitMagInfo.c \
@@ -31,6 +33,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c 
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
                             Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
                             
+includedir      = @prefix@/include/Lgm
 include_HEADERS = Lgm/*.h
 
 EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
@@ -39,29 +42,24 @@ EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
 	EopData/eopc04_IAU2000.62-now EopData/GetEopFiles.in \
 	EopData/Lgm_LeapSecondDates.dat
 
-QINDENTON_DIR = QinDenton
 
-#EXTRA_DIST = EopData
-EXTRA_DIST = $(EOP_DATA_FILES) eop_data_file_list $(QINDENTON_DIR)
+#QINDENTONdir   = @datadir@/LanlGeoMag/QinDenton
+#QINDENTON_DATA = QinDenton/*/*
+
+
+EOPDATAdir = @datadir@/LanlGeoMag/EopData
+EOPDATA_DATA = $(EOP_DATA_FILES)
+
+
+
+EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
+
+
+
 
 
 
 
 
 install-exec-hook:
-	mkdir -p $(LGM_EOP_DATA_DIR)
-#	sed -e "s+CHANGE_ME+$(LGM_EOP_DATA_DIR)+" EopData/GetEopFiles.in > EopData/GetEopFiles
-	chmod +x EopData/GetEopFiles
-	cp EopData/GetEopFiles $(LGM_EOP_DATA_DIR)/.
-	cp EopData/LgmEop.dat $(LGM_EOP_DATA_DIR)/.
-	cp EopData/Lgm_LeapSecondDates.dat $(LGM_EOP_DATA_DIR)/.
-	cp EopData/eopc04.62-now $(LGM_EOP_DATA_DIR)/.
-	cp EopData/eopc04_IAU2000.62-now $(LGM_EOP_DATA_DIR)/.
-	cp EopData/finals2000A.all $(LGM_EOP_DATA_DIR)/.
-	cp EopData/finals2000A.daily $(LGM_EOP_DATA_DIR)/.
-	cp EopData/finals.all $(LGM_EOP_DATA_DIR)/.
-	cp EopData/finals.daily $(LGM_EOP_DATA_DIR)/.
-	cp EopData/tai-utc.dat $(LGM_EOP_DATA_DIR)/.
-	mkdir -p $(LGM_INDEX_DATA_DIR)
 	rsync -ar QinDenton $(LGM_INDEX_DATA_DIR)/.
-#	test -w "$(CRONDIR)" && ln -sf $(LGM_EOP_DATA_DIR)/GetEopFiles $(CRONDIR)/GetEopFiles

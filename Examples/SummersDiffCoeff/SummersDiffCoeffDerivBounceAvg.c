@@ -141,8 +141,8 @@ w2 = 0.3*Omega_e/M_2PI;
 //if ( (j==713)&&(i==1000-205)){
 //if ( (j>=50)&&(j<=241)&&(i<=500-83)&&(i>=500-150)){
 //if ( (j>=241)&&(j<=241)&&(i<=500-83)&&(i>=500-83)){
-                Lgm_SummersDxxDerivsBounceAvg( LGM_DERIV_SIX_POINT, 1e-1, LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, 
-                    n1, n2, n3, aStar, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &dDaa, &dDap );
+                //Lgm_SummersDxxDerivsBounceAvg( LGM_DERIV_SIX_POINT, 1e-1, LGM_SUMMERS_2007, Alpha, Ek, L, (void *)MyInfo, MyBwFunc, 
+                //    n1, n2, n3, aStar, w1, w2, wm, dw, WaveMode, Species, MaxWaveLat, &dDaa, &dDap );
                 ImageDaa[i][j]     = fabs(dDaa);
                 printf("i = %d , j = %d , E = %g  Alpha = %g dDaa = %e\n", i, j, Ek, Alpha, dDaa);
 /*
