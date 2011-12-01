@@ -499,21 +499,12 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *      \warning    Still working on this code. It is not finished.
  *
  */
-void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f ) {
 
     int                 k, m, DoIt;
     double              AlphaEq, SinA;
-    Lgm_MagModelInfo    *mInfo, *mInfo2;
+    Lgm_MagModelInfo    *mInfo2;
 
-    /*
-     * Init mInfo
-This is no good! How does user define mag model etc...?
-I think there needs to be a Lgm_MagModelInfo struct in f
-Then add a routine to set stuff up in there. Or just use the ones we have already....
-For now we will just go with the defaults.
-     */
-    mInfo = Lgm_InitMagInfo();
-//mInfo->Bfield = Lgm_B_edip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -646,9 +637,6 @@ assumes electrons -- generalize this...
         DumpGif( "Lgm_FluxToPsd_PSD_MK", f->nK, f->nMu, f->PSD_MK );
     }
 
-
-// FIX this... The create and destroy of this should not be in here...
-    Lgm_FreeMagInfo( mInfo );
 
     f->Alloced2 = TRUE;
 
@@ -1042,23 +1030,12 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
  *      \warning    Still working on this code. It is not finished.
  *
  */
-void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p ) {
+void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_MagModelInfo *mInfo, Lgm_PsdToFlux *p ) {
 
     int                 k, m, DoIt, i, iL, iMu, iK, done;
     double              SinAlphaEq, AlphaEq, p2c2, Lstar;
-    Lgm_MagModelInfo    *mInfo, *mInfo2;
+    Lgm_MagModelInfo    *mInfo2;
 
-    /*
-     * Init mInfo
-NOTE NOTE
-This is no good! How does user define mag model etc...?
-I think there needs to be a Lgm_MagModelInfo struct in f
-Then add a routine to set stuff up in there. Or just use the ones we have already....
-For now we will just go with the defaults.
-NOTE NOTE
-     */
-    mInfo = Lgm_InitMagInfo();
-//mInfo->Bfield = Lgm_B_edip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -1237,9 +1214,6 @@ assumes electrons -- generalize this...
         DumpGif( "Lgm_PsdToFlux_FLUX_EA", p->nA, p->nE, p->FLUX_EA );
     }
 
-
-// FIX this... The create and destroy of this should not be in here...
-    Lgm_FreeMagInfo( mInfo );
 
     p->Alloced2 = TRUE;
 
