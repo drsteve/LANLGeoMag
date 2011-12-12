@@ -210,6 +210,7 @@ int     LgmSgp_TleChecksum( char *Line );
 void    Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int Verbosity );
 int     LgmSgp_ReadTlesFromFile( char *Filename, int *nTLEs, _SgpTLE *TLEs, int Verbosity );
 int     LgmSgp_ReadTlesFromStrings( char *Line0, char *Line1, char *Line2, int *nTLEs, _SgpTLE *TLEs, int Verbosity );
+int     LgmSgp_FindTLEforGivenTime( int nTLEs, _SgpTLE *TLEs, int SortOrder, double JD, int Verbosity );
 
 
 
