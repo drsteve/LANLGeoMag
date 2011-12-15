@@ -62,4 +62,5 @@ EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
 
 
 install-exec-hook:
+	mkdir -p $(LGM_INDEX_DATA_DIR)
 	rsync -ar QinDenton $(LGM_INDEX_DATA_DIR)/.
