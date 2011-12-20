@@ -94,13 +94,15 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 }
 
 
+void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
+    Lgm_free_ctrans( Info->c );
+//what about any splines that may have been alloc'd?
+}
+
 
 void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info ) {
-
-    Lgm_free_ctrans( Info->c );
+    Lgm_FreeMagInfo_children( Info );
     free( Info );
-//what about any splines that may have been alloc'd?
-
 }
 
 

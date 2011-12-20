@@ -713,6 +713,7 @@ typedef struct Lgm_CTrans {
 
 
 void        Lgm_free_ctrans( Lgm_CTrans *c );
+void        Lgm_free_ctrans_children( Lgm_CTrans *c );
 Lgm_CTrans  *Lgm_init_ctrans( int );
 Lgm_CTrans  *Lgm_CopyCTrans( Lgm_CTrans *s );
 void        Lgm_ctransDefaults(Lgm_CTrans *, int);
