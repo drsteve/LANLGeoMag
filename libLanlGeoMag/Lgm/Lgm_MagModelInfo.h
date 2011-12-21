@@ -388,6 +388,7 @@ int Lgm_zBrent(double x1, double x2, double f1, double f2, BrentFuncInfo *fInfo,
 Lgm_MagModelInfo *Lgm_InitMagInfo( );
 void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo );
 
+void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info );
 void Lgm_FreeMagInfo( Lgm_MagModelInfo  *Info );
 Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s );
 

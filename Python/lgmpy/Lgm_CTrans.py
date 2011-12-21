@@ -15,9 +15,8 @@ from ctypes import pointer
 import datetime
 
 import numpy
-import spacepy.toolbox as tb
 
-from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults
+from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children
 
 
 class Lgm_Coords(list):
@@ -67,7 +66,10 @@ class Lgm_CTrans(Lgm_CTrans):
     def __init__(self, Verbose=False):
         # initialize to the values set in c so we don't have to maintain two places
         Lgm_ctransDefaults(pointer(self), Verbose)
-
+        
+    def __del__(self):
+        Lgm_free_ctrans_children(pointer(self))
+    
 def dateToDateLong(inval):
     """
     convert a python date or datetime object to a Date (long) object that

@@ -18,17 +18,15 @@
 #endif
 
 
-
-void Lgm_free_ctrans( Lgm_CTrans *c ) {
-
-
-
+void Lgm_free_ctrans_children( Lgm_CTrans *c ) {
     free( c->l.LeapSecondDates );
     free( c->l.LeapSecondJDs );
     free( c->l.LeapSeconds );
+}
 
+void Lgm_free_ctrans( Lgm_CTrans *c ) {
+    Lgm_free_ctrans_children(c);
     free(c);
-
 }
 
 
