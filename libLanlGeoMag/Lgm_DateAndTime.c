@@ -998,7 +998,7 @@ void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
     sprintf( SecFracStr, "%.*lf", (p>=20)?20:p, SFRAC );
     if ( leapsec && (TotalSeconds>=86400.0) && (TotalSeconds<86401.0) ){
         HH = 23; MM = 59; SS = 60;
-   } else {
+    } else {
         if (SS==(60))  { SS=0; ++MM; }
         if (MM==60)  { MM=0; ++HH; }
     }
@@ -1455,3 +1455,17 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 }
 
+
+/*
+ *  Convert JD directly to a UTC DateTime structure.
+ */
+void Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c ){
+
+    long int Date;
+    int      Year, Month, Day;
+    double  Time;
+
+    Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
+    Lgm_Make_UTC( Date, Time, UTC, c );
+
+}
