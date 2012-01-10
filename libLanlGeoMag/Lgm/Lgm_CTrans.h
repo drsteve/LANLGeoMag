@@ -37,10 +37,10 @@
 #define LGM_1_OVER_GOLD         0.61803398874989484820  // 1/Phi
 #define LGM_1_MINUS_1_OVER_GOLD 0.38196601125010515180  // 1-1/Phi
 
-#define LGM_ERROR       -1       // generic error flag
-#define LGM_FILL_VALUE (-1e31)   // Value to flag undefined or bad data
-#define LGM_LARGE_NEG_DBL(-9e99) // A large negative double value
-#define LGM_LARGE_POS_DBL(9e99)  // A large positive double value
+#define LGM_ERROR             -1  // generic error flag
+#define LGM_FILL_VALUE    (-1e31) // Value to flag undefined or bad data
+#define LGM_LARGE_NEG_DBL (-9e99) // A large negative double value
+#define LGM_LARGE_POS_DBL (9e99)  // A large positive double value
 
 #define  LGM_JD_J2000   2451545.0 // Julian Date of J2000 ( i.e. 12:00:00 TT on Jan 1 2000 (or 2000 Jan 1.5 TT ) )
 #define  LGM_JD_GPS0    2444245.0 // Julian Date of introduction of GPS time. (0h, Jan 6, 1980)
@@ -794,8 +794,8 @@ void          Lgm_TAI_to_GPS( Lgm_DateTime *TAI, Lgm_DateTime *GPS, Lgm_CTrans *
 void          Lgm_GPS_to_TAI( Lgm_DateTime *GPS, Lgm_DateTime *TAI, Lgm_CTrans *c );
 void          Lgm_UTC_to_GPS( Lgm_DateTime *UTC, Lgm_DateTime *GPS, Lgm_CTrans *c );
 void          Lgm_GPS_to_UTC( Lgm_DateTime *GPS, Lgm_DateTime *UTC, Lgm_CTrans *c );
-void          Lgm_Print_DateTime( Lgm_DateTime DT, int Style, int p );
-void          Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p );
+void          Lgm_Print_DateTime( Lgm_DateTime *DT, int Style, int p );
+void          Lgm_DateTimeToString( char *Str, Lgm_DateTime *DT, int Style, int p );
 void          Lgm_Print_SimpleTime( Lgm_DateTime *DT, int p, char * );
 //int         Lgm_DayofWeek( int, int, int, char *, Lgm_CTrans *c );
 int           Lgm_DayOfWeek( int Year, int Month, int Day, char *dowstr );

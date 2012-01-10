@@ -15,6 +15,8 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
 
 void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity) {
 
+    int i;
+
     MagEphemInfo->LstarInfo = InitLstarInfo( Verbosity );
 
 
@@ -30,6 +32,24 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
     LGM_ARRAY_1D( MagEphemInfo->Tb,           MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->K,            MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->nShellPoints, MaxPitchAngles, int );
+    LGM_ARRAY_1D( MagEphemInfo->LHilton,      MaxPitchAngles, double );
+    LGM_ARRAY_1D( MagEphemInfo->LMcIlwain,    MaxPitchAngles, double );
+    LGM_ARRAY_1D( MagEphemInfo->Lstar,        MaxPitchAngles, double );
+
+    for ( i=0; i<MaxPitchAngles; ++i ){
+        MagEphemInfo->Pmn_gsm[i].x = MagEphemInfo->Pmn_gsm[i].y = MagEphemInfo->Pmn_gsm[i].z = LGM_FILL_VALUE;
+        MagEphemInfo->Pms_gsm[i].x = MagEphemInfo->Pms_gsm[i].y = MagEphemInfo->Pms_gsm[i].z = LGM_FILL_VALUE;
+        MagEphemInfo->Alpha[i]     = LGM_FILL_VALUE;
+        MagEphemInfo->Bm[i]        = LGM_FILL_VALUE;
+        MagEphemInfo->I[i]         = LGM_FILL_VALUE;
+        MagEphemInfo->Sb[i]        = LGM_FILL_VALUE;
+        MagEphemInfo->Tb[i]        = LGM_FILL_VALUE;
+        MagEphemInfo->K[i]         = LGM_FILL_VALUE;
+        MagEphemInfo->nShellPoints[i] = 0;
+        MagEphemInfo->LHilton[i]   = LGM_FILL_VALUE;
+        MagEphemInfo->LMcIlwain[i] = LGM_FILL_VALUE;
+        MagEphemInfo->Lstar[i]     = LGM_FILL_VALUE;
+    }
 
     LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Pn, MaxPitchAngles, 100, Lgm_Vector );
     LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Sn, MaxPitchAngles, 100, double );
@@ -60,9 +80,6 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
     LGM_ARRAY_3D( MagEphemInfo->y_gsm,      MaxPitchAngles, 48, 1000, double );
     LGM_ARRAY_3D( MagEphemInfo->z_gsm,      MaxPitchAngles, 48, 1000, double );
 
-    LGM_ARRAY_1D( MagEphemInfo->LHilton,   MaxPitchAngles, double );
-    LGM_ARRAY_1D( MagEphemInfo->LMcIlwain, MaxPitchAngles, double );
-    LGM_ARRAY_1D( MagEphemInfo->Lstar,     MaxPitchAngles, double );
 
 }
 

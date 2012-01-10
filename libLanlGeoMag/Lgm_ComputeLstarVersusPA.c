@@ -21,17 +21,17 @@ int Colors[9] = { 224, 209, 21, 46, 55, 104, 22, 185, 23 };
 /*
  *      Input Variables:
  *
- *                      Date: 
- *                       UTC: 
+ *                      Date:
+ *                       UTC:
  *                         u:  Input position vector in GSM
- *                    nAlpha:  Number of Pitch Angles to compute 
- *                     Alpha:  Pitch Angles to compute 
+ *                    nAlpha:  Number of Pitch Angles to compute
+ *                     Alpha:  Pitch Angles to compute
  *                   Quality:  Quality factor (0-8)
  *
  *      Input/OutPut Variables:
  *
  *              MagEphemInfo:  Structure used to input and output parameters/settings/results to/from routine.
- *  
+ *
  */
 void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
@@ -61,7 +61,7 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
 
 
 
-    // set coord transformation 
+    // set coord transformation
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c );
 
 
@@ -73,6 +73,10 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
 
+    for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
+        sa = sin( MagEphemInfo->Alpha[i]*RadPerDeg ); sa2 = sa*sa;
+        MagEphemInfo->Bm[i] = Blocal/sa2;
+    }
 
 
     /*
@@ -93,6 +97,15 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
         MagEphemInfo->Mused         = MagEphemInfo->Mcurr;
+    }
+    if ( TraceFlag != 1 ) {
+        /*
+         * FL not closed.
+         */
+        for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
+            MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
+            MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+        }
     }
     if ( TraceFlag == 1 ) {
 
@@ -115,7 +128,7 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
              *  Do all of the PAs in parallel. To control how many threads get run
              *  use the enironment variable OMP_NUM_THREADS. For example,
              *          setenv OMP_NUM_THREADS 8
-             *  will use 8 threads to do the loop in parallel. Be very careful what gets 
+             *  will use 8 threads to do the loop in parallel. Be very careful what gets
              *  set private here -- the threads must not interfere with each other.
              */
             #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk,PreStr,PostStr)
@@ -138,16 +151,13 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
                 PreStr = LstarInfo3->PreStr; PostStr = LstarInfo3->PostStr;
 
                 /*
-                 *  Set Pitch Angle, sin, sin^2, and Bmirror
+                 *  Set Bmirror
                  */
-                sa = sin( MagEphemInfo->Alpha[i]*RadPerDeg ); sa2 = sa*sa;
-
-                LstarInfo3->mInfo->Bm = Blocal/sa2; 
+                LstarInfo3->mInfo->Bm = MagEphemInfo->Bm[i];
                 NewTimeLstarInfo( Date, UTC, MagEphemInfo->Alpha[i], LstarInfo3->mInfo->Bfield, LstarInfo3 );
-                MagEphemInfo->Bm[i] = LstarInfo3->mInfo->Bm;
 
                 /*
-                 *  Compute L* 
+                 *  Compute L*
                  */
                 if ( LSimple < LstarInfo3->LSimpleMax ){
 
@@ -161,7 +171,7 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
 //////////////////////////////NOTE
 //////////////////////////////NOTE   We are giving Lstar the Min B point ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //////////////////////////////NOTE
-//////////////////////////////NOTE 
+//////////////////////////////NOTE
 //////////////////////////////NOTE
                     LS_Flag = Lstar( &v3, LstarInfo2);
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
@@ -172,7 +182,8 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
                     MagEphemInfo->I[i] = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
 
-                    printf("\t\t%sL* for Pitch Angle: Alpha[%d] = %g Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, i, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+                    //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+                    printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
 
                     /*
                      * Save results to the MagEphemInfo structure.
@@ -229,16 +240,17 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
                 } else {
                     printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo3->LSimpleMax );
                     MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
+printf("Bm = %g\n", MagEphemInfo->Bm[i]);
                     MagEphemInfo->I[i]     = LGM_FILL_VALUE;
                     MagEphemInfo->nShellPoints[i] = 0;
-                    
+
                 }
 
 
                 FreeLstarInfo( LstarInfo3 );
             }
 
-        } 
+        }
         // ***** END PARALLEL EXECUTION *****
 
 
