@@ -205,6 +205,9 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         fclose(fp);
 
     } else {
+        /*
+         * Provides a fallback in case the Lgm_LeapSecondDates.dat was not present.
+         */
         N = 25;
         l->nLeapSecondDates = N;
         l->LeapSecondDates  = (long int *) malloc( N*sizeof(long int) );

@@ -1,10 +1,12 @@
-SUBDIRS = Lgm
+SUBDIRS = Lgm EopData
 
 AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" 
 AM_CFLAGS   = -fopenmp -lgomp
 
-# Location to keep Eop-related stuff
+# Directory where Eop-related stuff will be installed
 LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
+
+# Directory where Index-related stuff will be installed
 LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
 
 pkgconfigdir       = $(libdir)/pkgconfig
@@ -33,23 +35,6 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c 
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
                             Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
                             
-includedir      = @prefix@/include/Lgm
-include_HEADERS = Lgm/*.h
-
-EOP_DATA_FILES = EopData/GetEopFiles EopData/LgmEop.dat EopData/eopc04.62-now \
-	EopData/finals.daily EopData/finals2000A.all EopData/finals.all \
-	EopData/finals2000A.daily EopData/tai-utc.dat \
-	EopData/eopc04_IAU2000.62-now EopData/GetEopFiles.in \
-	EopData/Lgm_LeapSecondDates.dat
-
-
-#QINDENTONdir   = @datadir@/LanlGeoMag/QinDenton
-#QINDENTON_DATA = QinDenton/*/*
-
-
-EOPDATAdir = @datadir@/LanlGeoMag/EopData
-EOPDATA_DATA = $(EOP_DATA_FILES)
-
 
 
 EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
@@ -62,5 +47,6 @@ EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
 
 
 install-exec-hook:
+#	chmod +x $(EOPDATAdir)/GetEopFiles; $(EOPDATAdir)/GetEopFiles
 	mkdir -p $(LGM_INDEX_DATA_DIR)
 	rsync -ar QinDenton $(LGM_INDEX_DATA_DIR)/.

@@ -103,6 +103,7 @@ AC_CHECK_FUNCS([floor memset pow sqrt strstr])
 
 AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/Lgm/Makefile
+                 libLanlGeoMag/EopData/Makefile
                  libLanlGeoMag/Makefile
                  tests/Makefile
                  libLanlGeoMag/EopData/GetEopFiles
