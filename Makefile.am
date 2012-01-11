@@ -23,7 +23,8 @@ if DX_COND_man
 # versions.                                                                                                                                                                                                      
 
 #dist_man1_MANS = @DX_DOCDIR@/man/man1/doxample.c.1                                                                                                                                                               
-#$(dist_man1_MANS): doxygen-doc                                                                                                                                                                                   
+$(dist_man1_MANS): doxygen-doc                                                                                                                                                                                   
+#$(man3_MANS): doxygen-doc
 
 endif                                           
 
