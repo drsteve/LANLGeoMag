@@ -9,7 +9,14 @@ EOPDATA_DATA = GetEopFiles LgmEop.dat eopc04.62-now finals.daily \
 # Data install hooks are guaranteed to be run after the data is actually
 # installed (Dont use install-exec-hook -- that one isnt guaranteed to run
 # after the data install.)
+#	if [ $(ENABLE_EOP_CRON) -eq 1 ]; then \
 #
+ENABLE_EOP_CRON = @ENABLE_EOP_CRON@
+DAILY_CRON_DIR  = @DAILY_CRON_DIR@
 install-data-hook:
 	chmod +x $(EOPDATAdir)/GetEopFiles;
 	$(EOPDATAdir)/GetEopFiles 
+	if [ $(ENABLE_EOP_CRON) -eq 1 ]; then \
+	ln -s $(EOPDATAdir)/GetEopFiles $(DAILY_CRON_DIR)/GetEopFiles;\
+	fi;
+	

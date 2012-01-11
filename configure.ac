@@ -40,6 +40,51 @@ DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile)
 
+
+
+AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
+AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
+
+DAILY_CRON_DIR=""
+case "$host_os" in
+linux*) 
+    AM_CONDITIONAL(LINUX, true)
+    DAILY_CRON_DIR="/etc/cron.daily"
+    #AC_DEFINE(LINUX,1,[This is a Linux system])
+    #AC_DEFINE_UNQUOTED(LINUX,1,[This is a LINUX system])
+    #AM_CONDITIONAL(HAVE_GNU_LD, true)    
+    #AM_CONDITIONAL(SOMEBSD, false)
+    #XTRA_CPPLIBS=-lstdc++
+    #LIBEXT=.so
+    ;;
+apple*)
+    AM_CONDITIONAL(APPLE, true)
+    DAILY_CRON_DIR="/etc/periodic/daily"
+    #AC_DEFINE_UNQUOTED(APPLE,1,[This is an Apple system])
+    #AM_CONDITIONAL(HAVE_GNU_LD, false)
+    #AM_CONDITIONAL(SOMEBSD, false)
+    #CFLAGS="-fno-common $CFLAGS"
+    #LIBEXT=.so
+    ;;
+esac
+
+
+
+
+dnl Example of default-enabled feature
+AC_ARG_ENABLE([eopcron], AS_HELP_STRING([--enable-eopcron], [Enable running GetEopDataFiles via cron]))
+
+ENABLE_EOP_CRON=0
+AS_IF([test "x$enable_eopcron" == "xyes"], [
+    ENABLE_EOP_CRON=1
+])
+AC_SUBST([ENABLE_EOP_CRON])
+AC_SUBST([DAILY_CRON_DIR])
+
+
+
+
+
 dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 AC_MSG_NOTICE([Adding perl LIBS ${PERL_LDFLAGS}])
@@ -52,7 +97,7 @@ AC_MSG_NOTICE([Adding perl CFLAGS ${PERL_CFLAGS}])
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 
 dnl Add LDFLAGS for gsl
-dnl GSL_LDFLAGS=-lgsl 
+dnl GSL_LDFLAGS=-lgsl
 GSL_LDFLAGS=-lgsl
 LDFLAGS=${LDFLAGS}\ ${GSL_LDFLAGS}
 GSLCBLAS_LDFLAGS=-lgslcblas
@@ -66,8 +111,6 @@ HDF5_LDFLAGS="-lhdf5"
 LDFLAGS=${LDFLAGS}\ ${HDF5_LDFLAGS}
 
 
-AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
-AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
 
 # Checks for programs.
 AC_PROG_CC
