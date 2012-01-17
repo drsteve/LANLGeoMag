@@ -6,6 +6,13 @@ use POSIX;
 
 {
 
+    $Force = 0;
+    $Args = join( ' ', @ARGV ); $Args .= ' ';
+    if ( ($Args =~ "-F ") || ($Args =~ "--Force ")) { 
+        print "Forcing file retrieval\n";
+        $Force = 1; 
+    }
+
     #$LGM_EOP_DATA_DIR          = "/usr/local/share/LanlGeoMag/EopData";
     #$LGM_EOP_DATA_DIR          = "CHANGE_ME";
     $prefix                    = "@prefix@";
@@ -40,16 +47,16 @@ use POSIX;
     $nFiles   = 7;
 
     @SrcDir  = (    'http://maia.usno.navy.mil/ser7/',
-                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/',
-                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04/',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04/',
                     'http://maia.usno.navy.mil/ser7/',
                     'http://maia.usno.navy.mil/ser7/',
                     'http://maia.usno.navy.mil/ser7/',
                     'http://maia.usno.navy.mil/ser7/' );
 
     @SrcFile = (    'http://maia.usno.navy.mil/ser7/tai-utc.dat',
-                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04.62-now',
-                    'http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04_IAU2000.62-now',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04/eopc04.62-now',
+                    'http://hpiers.obspm.fr/eoppc/eop/eopc04/eopc04_IAU2000.62-now',
                     'http://maia.usno.navy.mil/ser7/finals.daily',
                     'http://maia.usno.navy.mil/ser7/finals2000A.daily',
                     'http://maia.usno.navy.mil/ser7/finals.all',
@@ -76,16 +83,15 @@ use POSIX;
     }
 
 
-    @t = (); @t_JD = (); @t_URL = (); 
+    @t = (); @t_JD = (); @t_URL = ();
     for ($i=0; $i<$nFiles; $i++ ) {
         ($t[$i], $t_JD[$i], $t_URL[$i]) = GetFileModTime( $SrcDir[$i], $DstFile[$i] );
-        if ( index( $told[$i], $t[$i] ) < 0) { $Reload[$i] = 1; } else { $Reload[$i] = 0; }
+        if ( (index( $told[$i], $t[$i] ) < 0) || ( $Force == 1 ) ) { $Reload[$i] = 1; } else { $Reload[$i] = 0; }
     }
 
 
 
 
-    
     for ($i=0; $i<$nFiles; $i++ ){
         if ( $Reload[$i] || !( -s $DstFile[$i]) ) {
             print ">>> Downloading $SrcFile[$i] => $DstFile[$i]\n";
@@ -119,10 +125,10 @@ use POSIX;
                 $DAT_A[$nDAT_VALS]   = $5;
                 $DAT_B[$nDAT_VALS]   = $6;
                 $DAT_C[$nDAT_VALS]   = $7;
-                if ( $Year >= 1972 ) { 
-                    $LeapSeconds[$nLeapSecondDates] = int($DAT_A[$nDAT_VALS]); 
-                    $LeapSecondJDs[$nLeapSecondDates] = $DAT_JD[$nDAT_VALS]; 
-                    $LeapSecondDates[ $nLeapSecondDates++ ] = $Year*10000 + $MonthNum{ $Month }*100 + $Day; 
+                if ( $Year >= 1972 ) {
+                    $LeapSeconds[$nLeapSecondDates] = int($DAT_A[$nDAT_VALS]);
+                    $LeapSecondJDs[$nLeapSecondDates] = $DAT_JD[$nDAT_VALS];
+                    $LeapSecondDates[ $nLeapSecondDates++ ] = $Year*10000 + $MonthNum{ $Month }*100 + $Day;
                 }
                 #print "$1 $2 $3 $DAT_JD[$nDAT_VALS] $DAT_MJD[$nDAT_VALS] $DAT_A[$nDAT_VALS] $DAT_B[$nDAT_VALS] $DAT_C[$nDAT_VALS]\n";
                 ++$nDAT_VALS;
@@ -168,13 +174,92 @@ use POSIX;
     }
 
 
-    # 
+    #
     # print out header
     #
     if ( open( OUT, ">$LgmEopDatFile" ) ) {
         ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime;
         $TimeStamp = sprintf("%3s %3s %02d %4d %02d:%02d:%02d UTC", $WeekDay[$wday], $MonthName[$mon], $mday, $year+1900, $hour, $min, $sec);
         $cJD = Date_to_JD( $year+1900, $mon+1, $mday, $hour + $min/60.0 + $sec/3600.0);
+        # formatting within the print qq is important -- do not indent.
+        print OUT qq|# {
+#      "Date":         { "DESCRIPTION": "The date in ISO 8601 compliant format (YYYYMMDD). Time is 0 UTC",
+#                               "NAME": "IsoDate",
+#                              "TITLE": "ISO Date",
+#                              "LABEL": "Date",
+#                              "UNITS": "UTC",
+#                       "START_COLUMN": 0 },
+#
+#         "MJD":       { "DESCRIPTION": "Modified Julian Date. In decimal days.",
+#                               "NAME": "MJD",
+#                              "TITLE": "Modified Julian Date",
+#                              "LABEL": "Modified Julian Date",
+#                       "START_COLUMN": 1,
+#                              "UNITS": "Days" },
+#
+#          "xp":       { "DESCRIPTION": "Pole position. Measured positive south along the 0 deg. longitude meridian (this is the IERS Reference Meridian.)",
+#                               "NAME": "xp",
+#                              "TITLE": "xp",
+#                              "LABEL": "xp, [ arc-seconds ]",
+#                       "START_COLUMN": 2,
+#                              "UNITS": "Arc Seconds" },
+#
+#          "yp":       { "DESCRIPTION": "Pole position. Measured positive south along the 270 deg. E meridian.",
+#                               "NAME": "yp",
+#                              "TITLE": "yp",
+#                              "LABEL": "yp, [ arc-seconds ]",
+#                       "START_COLUMN": 3,
+#                              "UNITS": "Arc Seconds" },
+#
+# "UT1_Minus_UTC":     { "DESCRIPTION": "Difference between UT1 and UTC (UT1-UTC)",
+#                               "NAME": "UT1_Minus_UTC",
+#                              "TITLE": "UT1-UTC",
+#                              "LABEL": "UT1-UTC, [ s ]",
+#                       "START_COLUMN": 4,
+#                              "UNITS": "s" },
+#
+#           "LOD":     { "DESCRIPTION": "Length of Day - 86400s",
+#                               "NAME": "LOD",
+#                              "TITLE": "LOD",
+#                              "LABEL": "Length of Day - 86400, [ s ]",
+#                       "START_COLUMN": 5,
+#                              "UNITS": "s" },
+#
+#          "dPSi":     { "DESCRIPTION": "EOP Nutation correction. (Additional small correction to DeltaPsi nutation value.)",
+#                               "NAME": "dPSi",
+#                              "TITLE": "dPsi",
+#                              "LABEL": "dPSi, [ arc-seconds]",
+#                       "START_COLUMN": 6,
+#                              "UNITS": "Arc Seconds" },
+#
+#          "dEps":     { "DESCRIPTION": "EOP Obliquity correction. (Additional small correction to DeltaEps obliquity value.)",
+#                               "NAME": "dEps",
+#                              "TITLE": "dEps",
+#                              "LABEL": "dEps, [ arc-seconds]",
+#                       "START_COLUMN": 7,
+#                              "UNITS": "Arc Seconds" },
+#
+#            "dX":     { "DESCRIPTION": "EOP X correction. Used in IAU-2000 reduction theory. Correction to X coord. of the Celestial Intermediate Pole (CIP) in the Celestial Intermedite Reference System",
+#                               "NAME": "dX",
+#                              "TITLE": "dX",
+#                              "LABEL": "dX, [ arc-seconds]",
+#                       "START_COLUMN": 8,
+#                              "UNITS": "Arc Seconds" },
+#
+#            "dY":     { "DESCRIPTION": "EOP Y correction. Used in IAU-2000 reduction theory. Correction to Y coord. of the Celestial Intermediate Pole (CIP) in the Celestial Intermedite Reference System",
+#                               "NAME": "dY",
+#                              "TITLE": "dY",
+#                              "LABEL": "dY, [ arc-seconds]",
+#                       "START_COLUMN": 9,
+#                              "UNITS": "Arc Seconds" },
+#
+#           "DAT":     { "DESCRIPTION": "Difference between TAI and UTC (TAI − UTC). I.e. -- number of leap seconds",
+#                               "NAME": "DAT",
+#                              "TITLE": "TAI − UTC",
+#                              "LABEL": "TAI − UTC, [ s ]",
+#                       "START_COLUMN": 10,
+#                              "UNITS": "s" }
+# }|;
         print OUT "#\n";
         print OUT "#                                ************************************************\n";
         print OUT "#                                 LanlGeoMag Merged Earth Orientation Parameters\n";
@@ -213,7 +298,7 @@ use POSIX;
                 if ( $file2_opened ) { ($yyyy2, $mm2, $dd2, $MJD2, $xp2, $yp2, $DUT12, $LOD2, $dX, $dY) = split(" ", $line2); }
                 $DAT = Get_DAT( $MJD );
                 printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
-            } 
+            }
         }
         close( IN1 );
         if ( $file2_opened ) { close( IN2 ); }
@@ -227,7 +312,7 @@ use POSIX;
     #  Process the 'finals.daily' and 'finals2000A.daily' files to get predicts
     #
     #    The format of the finals.data, finals.daily, and finals.all files is:
-    #    
+    #
     #    Col.#    Format  Quantity
     #    -------  ------  -------------------------------------------------------------
     #    1-2      I2      year (to get true calendar year, add 1900 for MJD<=51543 or add 2000 for MJD>=51544)
@@ -265,7 +350,7 @@ use POSIX;
     #    176-185  F10.3   Bull. B dEPSILON (msec. of arc)
     #
     #    The format of the finals2000A.data, finals2000A.daily, and finals2000A.all files is:
-    #    
+    #
     #    Col.#    Format  Quantity
     #    -------  ------  -------------------------------------------------------------
     #    1-2      I2      year (to get true calendar year, add 1900 for MJD<=51543 or add 2000 for MJD>=51544)
@@ -339,7 +424,7 @@ use POSIX;
             if ( $MJD > $LastMJD ) {
                 $DAT = Get_DAT( $MJD );
                 printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
-            } 
+            }
 
         }
         close( IN1 );
@@ -392,7 +477,7 @@ use POSIX;
             if ( ($MJD > $LastMJD) && $MoreData ) {
                 $DAT = Get_DAT( $MJD );
                 printf( OUT "%4d%02d%02d %7d %11.6f %11.6f %11.7f %11.7f %11.6f %11.6f %11.6f %11.6f %f\n", $yyyy, $mm, $dd, $MJD, $xp, $yp, $DUT1, $LOD, $dPsi, $dEps, $dX, $dY, $DAT );
-            } 
+            }
 
         }
         close( IN1 );
@@ -432,7 +517,7 @@ sub GetURL {
     $ua->agent('Firefox/3.5.8');
     $ua->proxy(['http'], $Proxy);
     $ua->timeout(15);
- 
+
     my $request = HTTP::Request->new('GET');
     $request->url($url);
 
@@ -469,7 +554,7 @@ sub GetFileModTime {
     $ua->agent('Firefox/3.5.8');
     $ua->proxy(['http'], $Proxy);
     $ua->timeout(15);
- 
+
     my $request = HTTP::Request->new('GET');
     $request->url($dir);
 
@@ -489,7 +574,7 @@ sub GetFileModTime {
             $hh     = $4;
             $mm     = $5;
             $JD     = Date_to_JD( $y, $mon, $mday, $hh+$mm/60.0 );
-            $tstamp = sprintf("%3s %02d %4d %02d:%02d", $MonthName[$mon-1], $mday, $y, $hh, $mm ); 
+            $tstamp = sprintf("%3s %02d %4d %02d:%02d", $MonthName[$mon-1], $mday, $y, $hh, $mm );
             $URL    = "$dir$File";
         }
     }
@@ -545,27 +630,27 @@ sub Date_to_JD {
 
 
 
-#                                  
+#
 #                                ************************************************
-#                                 LanlGeoMag Merged Earth Orientation Parameters 
-#                                   FILE CREATED: Thu May 28 2009 18:24:59 UTC   
-#                                        (Julian Date: 2454980.09513889 )        
+#                                 LanlGeoMag Merged Earth Orientation Parameters
+#                                   FILE CREATED: Thu May 28 2009 18:24:59 UTC
+#                                        (Julian Date: 2454980.09513889 )
 #                                ************************************************
-#                                                                                
-# Data extracted from the following files with modification times as indicated;  
-#                                                                                
+#
+# Data extracted from the following files with modification times as indicated;
+#
 #   (Last mod.: Jul 07 2008 09:38) (JD: 2454654.901389) (Age: 325.366 days) http://maia.usno.navy.mil/ser7/tai-utc.dat
 #   (Last mod.: May 28 2009 10:47) (JD: 2454979.949306) (Age:   0.318 days) http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04.62-now
 #   (Last mod.: May 28 2009 10:47) (JD: 2454979.949306) (Age:   0.318 days) http://hpiers.obspm.fr/eoppc/eop/eopc04_05/eopc04_IAU2000.62-now
-#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.all                       
-#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.daily                     
-#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.all                  
-#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.daily                
-#                                                                                                                                           
-#                   INTERNATIONAL EARTH ROTATION AND REFERENCE SYSTEMS SERVICE                                                              
-#                        EARTH ORIENTATION PARAMETERS                                                                                       
-#                          EOP (IERS) 05 C04                                                                                                
-#                                                                                                                                           
-# Date      MJD        xp          yp       UT1-UTC       LOD         dPsi        dEps         dX          dY       DAT                     
-#(0 UTC)                "           "          s           s            "           "           "           "        s                      
-#19620101   37665   -0.012700    0.213000   0.0326338   0.0017230    0.064041    0.006305    0.000000    0.000000 1.845858                   
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.all
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals.daily
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.all
+#   (Last mod.: May 28 2009 14:17) (JD: 2454980.095139) (Age:   0.172 days) http://maia.usno.navy.mil/ser7/finals2000A.daily
+#
+#                   INTERNATIONAL EARTH ROTATION AND REFERENCE SYSTEMS SERVICE
+#                        EARTH ORIENTATION PARAMETERS
+#                          EOP (IERS) 05 C04
+#
+# Date      MJD        xp          yp       UT1-UTC       LOD         dPsi        dEps         dX          dY       DAT
+#(0 UTC)                "           "          s           s            "           "           "           "        s
+#19620101   37665   -0.012700    0.213000   0.0326338   0.0017230    0.064041    0.006305    0.000000    0.000000 1.845858

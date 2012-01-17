@@ -81,7 +81,7 @@ int main( ) {
         SinAlpha = sin(Alpha*M_PI/180.0);
         SinAlpha2 = SinAlpha*SinAlpha;
 
-        Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
+        //Daa = Lgm_SummersDaaLocal( SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, x1, x2, xm, dx, Lambda, s, aStar );
 
         Alpha0 = DegPerRad*asin( sqrt( SinAlpha2/BoverBeq ) );
 

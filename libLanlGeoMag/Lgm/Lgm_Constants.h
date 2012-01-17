@@ -28,7 +28,23 @@
 #endif
 
 #ifndef LGM_EPS
-#define LGM_EPS             0.000544617021983          // me/mp
+#define LGM_EPS             0.000544617021954       // me/mp
+#endif
+
+#ifndef LGM_EPS2
+#define LGM_EPS2            2.966077006016041e-7    // (me/mp)^2
+#endif
+
+#ifndef LGM_EPS3
+#define LGM_EPS3            1.615376025901495e-10   // (me/mp)^3
+#endif
+
+#ifndef LGM_EPS4
+#define LGM_EPS4            8.797612805617079e-14  // (me/mp)^3
+#endif
+
+#ifndef LGM_EPS5
+#define LGM_EPS5            4.791329686495997e-17  // (me/mp)^3
 #endif
 
 #ifndef LGM_OXYGEN_MASS

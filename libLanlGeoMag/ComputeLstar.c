@@ -341,6 +341,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     PostStr = LstarInfo->PostStr;
 
 
+    /*
+     * Initialize some values to FILL in case we bail early
+     */
+    LstarInfo->LS = LGM_FILL_VALUE;
+
 
     if (LstarInfo->VerbosityLevel > 0) {
         printf("\n\n\t\t%s        Computing L* for, Date: %ld, UT: %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, LstarInfo->mInfo->c->UTC.Time, PostStr );
@@ -356,6 +361,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     if ((LstarInfo->PitchAngle < 0.0)||(LstarInfo->PitchAngle>90.0)) return(-1);
 
+    for (k=0; k<200; k++){
+        LstarInfo->I[k] = LGM_FILL_VALUE;
+    }
 
 
     /*
@@ -393,7 +401,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 printf("\t\t%sMag. Field Strength, Bm at Pm_South (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
             }
 
-            //if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
 
@@ -507,6 +514,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	        return(-2);
 
         }
+
+    } else {
+
+	        printf("\t\t%sOpen Field Line%s\n", PreStr, PostStr );
+	        return(-5);
 
     }
 

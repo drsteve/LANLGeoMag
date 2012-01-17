@@ -243,8 +243,10 @@ double	*work;
     if( (leniw < (3*npts2-2)) || (lenw < (leniw*2-npts2)) || (npts2 < 2) ) {
 
         if (*ier == 6) lvl = 1;
-        if (*ier != 0) fprintf(stderr, "Abnormal return from dqagp, ier = %d,  lvl = %d\n", *ier, lvl);
-printf("leniw = %d    lenw = %d    npts2 = %d\n", leniw, lenw, npts2);
+        if (*ier != 0) {
+            fprintf(stderr, "Abnormal return from dqagp, ier = %d,  lvl = %d\n", *ier, lvl);
+            PrintQuadpackError( *ier );
+        }
         return(-1);
 
     } else {
@@ -274,7 +276,7 @@ printf("leniw = %d    lenw = %d    npts2 = %d\n", leniw, lenw, npts2);
 
     if(*ier == 6) lvl = 1;
     if(*ier != 0){ 
-	fprintf(stderr, "Abnormal return from dqagp, ier = %d,  lvl = %d\n", *ier, lvl);
+	    fprintf(stderr, "Abnormal return from dqagp, ier = %d,  lvl = %d\n", *ier, lvl);
         return(-1);
     } else {
         return(1);

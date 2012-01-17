@@ -4,6 +4,7 @@
 #include "Lgm_CTrans.h"
 #include "Lgm_Vec.h"
 #include "Lgm_MaxwellJuttner.h"
+#include "Lgm_MagModelInfo.h"
 static unsigned char Rainbow2_Red[] = { 0, 34, 35, 35, 36, 37, 38, 39, 39, 40, 40, 41,
 41, 42, 42, 42, 42, 42, 42, 42, 41, 41, 41, 40, 40, 39, 38, 38, 37, 37, 36, 35,
 35, 34, 33, 33, 32, 32, 31, 30, 30, 29, 28, 28, 27, 27, 26, 25, 25, 24, 24, 23,
@@ -50,6 +51,37 @@ static unsigned char Rainbow2_Blu[] = { 0, 89, 93, 96, 99, 102, 106, 109, 113, 1
 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static unsigned char Rainbow3_Red[] = {
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,7,11,15,19,23,27,31,35,39,43,47,51,55,59,63,67,71,75,79,83,87,91,95
+,99,103,107,111,115,119,123,127,131,135,139,143,147,151,155,159,163,167,171,175,179,183,187,191,195,199,203,207,211,215,219,223,227,231,235,239,243,247,251,255,255
+,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
+,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,250,246,241,237,233,228,224,219,215,211,206,202,197,193,189,184,180,175,171
+,167,162,158,153,149,145,140,136,131,131};
+
+
+
+static unsigned char Rainbow3_Grn[] = {
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,7,11,15,19,23,27
+,31,35,39,43,47,51,55,59,63,67,71,75,79,83,87,91,95,99,103,107,111,115,119,123,127,131,135,139,143,147,151,155,159,163,167,171,175,179,183,187,191
+,195,199,203,207,211,215,219,223,227,231,235,239,243,247,251,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
+,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,251
+,247,243,239,235,231,227,223,219,215,211,207,203,199,195,191,187,183,179,175,171,167,163,159,155,151,147,143,139,135,131,127,123,119,115,111,107,103,99,95,91,87
+,83,79,75,71,67,63,59,55,51,47,43,39,35,31,27,23,19,15,11,7,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+,0,0,0,0,0,0,0,0,0,0};
+
+
+
+static unsigned char Rainbow3_Blu[] = {
+131,131,135,139,143,147,151,155,159,163,167,171,175,179,183,187,191,195,199,203,207,211,215,219,223,227,231,235,239,243,247,251,255,255,255,255,255,255,255,255,255
+,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
+,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,251,247,243,239,235,231,227,223,219,215,211,207,203,199,195,191,187,183,179,175,171,167,163,159
+,155,151,147,143,139,135,131,127,123,119,115,111,107,103,99,95,91,87,83,79,75,71,67,63,59,55,51,47,43,39,35,31,27,23,19,15,11,7,3,0,0
+,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+,0,0,0,0,0,0,0,0,0,0};
 
 
 #define LGM_Ee0     0.510998910  // Electron rest energy in MeV
@@ -110,7 +142,7 @@ typedef struct Lgm_FluxToPsd {
 
     int          Alloced2;          //!< If true, the arrays are alloced.
 
-    
+
 
 
 
@@ -120,6 +152,7 @@ typedef struct Lgm_FluxToPsd {
      */
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
+    int          nMaxwellians;       //!< Number of maxwellians to use in fitting
 
 
 
@@ -186,7 +219,7 @@ typedef struct Lgm_PsdToFlux {
 
     int          Alloced2;          //!< If true, the arrays are alloced.
 
-    
+
 
 
 
@@ -196,6 +229,7 @@ typedef struct Lgm_PsdToFlux {
      */
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
+    int          nMaxwellians;       //!< Number of maxwellians to use in fitting
 
 
 
@@ -208,7 +242,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics );
 void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
-void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *p );
+void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f );
 double         Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f );
 
 
@@ -217,7 +251,7 @@ Lgm_PsdToFlux  *Lgm_P2F_CreatePsdToFlux( int DumpDiagnostics );
 void            Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p );
 void            Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p );
 void            Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double *K, int nK, Lgm_PsdToFlux *p );
-void            Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p );
+void            Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_MagModelInfo *mInfo, Lgm_PsdToFlux *p );
 double          Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p );
 
 
@@ -225,6 +259,7 @@ double          Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdTo
 
 
 void    DumpGif( char *Filename, int W, int H, double **Image );
+void    DumpGif2( char *Filename, double Min, double Max, int W, int H, double **Image );
 double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 );
 double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 );
 double  Lgm_p2c2( double Ek, double E0 );
@@ -233,6 +268,9 @@ double  Lgm_gamma( double Ek, double E0 );
 double  Lgm_PsdToDiffFlux( double f, double p2c2 );
 double  Lgm_DiffFluxToPsd( double j, double p2c2 );
 int     Lgm_GeometricSeq( double a, double b, int n, double *G );
+void    Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y );
+
+
 
 
 

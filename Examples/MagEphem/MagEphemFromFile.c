@@ -15,14 +15,26 @@
 #include <Lgm_Eop.h>
 #include <Lgm_QinDenton.h>
 #include <Lgm_Misc.h>
+#include <Lgm_HDF5.h>
 
+void StringSplit( char *Str, char *StrArray[], int len, int *n ); 
 
 
 #define KP_DEFAULT 0
 
-const  char *argp_program_version     = "MagEphemFromFile 1.0";
+const  char *argp_program_version     = "MagEphemFromFile 1.0 (August 25, 2011)";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
-static char doc[] = "Computes magnetic ephemerii of S/C from input file that contains S/C position in GEO Lat/Lon/Rad";
+static char doc[] = "\nComputes magnetic ephemerii of S/C from input file that contains S/C position"
+                    " in GEO Lat/Lon/Rad.\n\n InFile and OutFile are paths to files that may contain"
+                    " variables that will be substituted if a time range is given.  The"
+                    " available time variables are '%YYYY', '%MM', and '%DD' which correspond"
+                    " repectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of"
+                    " month. %B will also get substituted by the list of birds given in the -b option.\n"
+                    " Here is an example using time-variables,\n\n \t./MagEphemFromFile -S 20020901 -E 20020930\n"
+                    " \t\t/home/jsmith/EphemData/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt\n"
+                    " \t\t/home/jsmith/MagEphemData/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt.\n\n Directories"
+                    " in the output file will be created if they don't already exist.\n\n";
+
 
 // Mandatory arguments
 #define     nArgs   2
@@ -43,7 +55,8 @@ static char ArgsDoc[] = "InFile OutFile";
 static struct argp_option Options[] = {
     {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
     {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Default is T89."    },
-    {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"2.5, 90, 36\"." },
+    {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,                                      "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\"."   },
+    {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
     {"StartDate",       'S',    "yyyymmdd",                   0,                                      "StartDate "                              },
@@ -79,6 +92,7 @@ struct Arguments {
     int         Append;
     int         UseEop;
 
+    char        Birds[4096];
     long int    StartDate;
     long int    EndDate;
 };
@@ -91,6 +105,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
       know is a pointer to our arguments structure. */
     struct Arguments *arguments = state->input;
     switch( key ) {
+        case 'b': // Birds                                                                                                                                                                                       
+            strncpy( arguments->Birds, arg, 4095 );                                                                                                                                                              
+            break;          
         case 'S': // start date
             sscanf( arg, "%ld", &arguments->StartDate );
             break;
@@ -171,6 +188,8 @@ int main( int argc, char *argv[] ){
     char             IntModel[20], ExtModel[20], CoordSystem[80], Line[5000];
     int              AppendMode, UseEop, Colorize, Force;
     FILE             *fp_in, *fp_MagEphem;
+    int              nBirds, iBird;                                                                                                                                                                              
+    char             **Birds, Bird[80];
     double           Inc, Alpha[1000], FootpointHeight, GeoLat, GeoLon, GeoRad;
     int              nAlpha, Quality;
     long int         StartDate, EndDate, Date;
@@ -179,13 +198,35 @@ int main( int argc, char *argv[] ){
     Lgm_MagEphemInfo *MagEphemInfo;
     Lgm_QinDentonOne p;
 
+    hid_t           file;
+    hid_t           space;
+    hid_t           atype;
+    hid_t           DataSet, MemSpace;
+    herr_t          status;
+    hsize_t         Dims[4], Offset[4], SlabSize[4];
+    int             iT;
+    char            **H5_IsoTimes;
+    double          *H5_JD;
+    double          UGSM_ARR[3];
+    Lgm_Vector      *H5_Ugsm;
+    int             H5_nT;
+    int             H5_nAlpha;
+    double          *H5_Alpha;
+    double          **H5_Lstar;
+    double          **H5_K;
+
+    // kludge.
+    LGM_ARRAY_2D( H5_IsoTimes, 500, 80, char );
+    LGM_ARRAY_1D( H5_JD, 500, double );
+    LGM_ARRAY_1D( H5_Ugsm, 500, Lgm_Vector );
+
 
     /*
      * Default option values.
      */
     arguments.StartPA         = 90;     // start at 90.0 Deg.
-    arguments.EndPA           = 2.5;    // stop at 2.5 Deg.
-    arguments.nPA             = 36;     // 36 pitch angles
+    arguments.EndPA           = 5.0;    // stop at 2.5 Deg.
+    arguments.nPA             = 18;     // 18 pitch angles
     arguments.silent          = 0;
     arguments.verbose         = 0;
     arguments.Quality         = 3;
@@ -236,6 +277,8 @@ int main( int argc, char *argv[] ){
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
 
+    LGM_ARRAY_2D( Birds, 20, 80, char );                                                                                                                                                                         
+    StringSplit( arguments.Birds, Birds, 80, &nBirds );
 
     /*
      *  Print summary of our options
@@ -264,6 +307,18 @@ int main( int argc, char *argv[] ){
         if ( (StartDate > 0)&&(EndDate > 0) ){
             printf( "\t              StartDate: %ld\n", StartDate );
             printf( "\t                EndDate: %ld\n", EndDate );
+        }
+
+        if ( nBirds > 1  ){                                                                                                                                                                                      
+            printf( "\t                  Birds:" );                                                                                                                                                              
+            for (iBird=0; iBird<nBirds-1; iBird++) printf(" %s,", Birds[iBird]);                                                                                                                                 
+            printf(" %s\n", Birds[iBird]);                                                                                                                                                                       
+        } else if ( nBirds == 1  ){                                                                                                                                                                              
+            printf( "\t                   Bird:" );                                                                                                                                                              
+            printf(" %s\n", Birds[0]);                                                                                                                                                                           
+        } else {
+            printf("At least one bird name must be supplied with -b option.\n");
+            exit(0);
         }
     }
 
@@ -312,222 +367,439 @@ int main( int argc, char *argv[] ){
      * Set pitch angles in MagEphemInfo structure
      */
     MagEphemInfo->nAlpha = nAlpha;
-    for (i=0; i<nAlpha; i++) MagEphemInfo->Alpha[i] = Alpha[i];
+    LGM_ARRAY_1D( H5_Alpha, nAlpha, double );
+    H5_nAlpha = nAlpha;
+    for (i=0; i<nAlpha; i++) {
+        MagEphemInfo->Alpha[i] = Alpha[i];
+        H5_Alpha[i] = Alpha[i];
+    }
+    LGM_ARRAY_2D( H5_Lstar, 500, nAlpha, double );
+    LGM_ARRAY_2D( H5_K,     500, nAlpha, double );
 
 
-    int SubstituteDates = TRUE;
-    if ( (StartDate > 0)&&(EndDate > 0) ){ 
+
+    int SubstituteVars = TRUE;
+    if ( (StartDate > 0)&&(EndDate > 0) ){
         Lgm_Doy( StartDate, &sYear, &sMonth, &sDay, &sDoy);
         sJD = Lgm_JD( sYear, sMonth, sDay, 12.0, LGM_TIME_SYS_UTC, c );
 
         Lgm_Doy( EndDate, &eYear, &eMonth, &eDay, &eDoy);
         eJD = Lgm_JD( eYear, eMonth, eDay, 12.0, LGM_TIME_SYS_UTC, c );
 
-        SubstituteDates = TRUE;
+        SubstituteVars = TRUE;
     } else {
         // only do a single file
         sJD = eJD = 0;
-        SubstituteDates = FALSE;
+        SubstituteVars = FALSE;
     }
 
     char *BaseDir, NewStr[2048], Str[24], Command[4096];
-    char *OutFile = (char *)calloc( 2056, sizeof( char ) );
-    char *InFile  = (char *)calloc( 2056, sizeof( char ) );
+    char *OutFile    = (char *)calloc( 2056, sizeof( char ) );
+    char *HdfOutFile = (char *)calloc( 2056, sizeof( char ) );
+    char *InFile     = (char *)calloc( 2056, sizeof( char ) );
 
     for ( JD = sJD; JD <= eJD; JD += 1.0 ) {
 
         Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
 
-        strcpy( InFile, InputFilename );
-        strcpy( OutFile, OutputFilename );
-
-        if ( SubstituteDates ) {
-
-            // Substitute times in the files.
-            NewStr[0] = '\0';
-            sprintf( Str, "%4d", Year );   Lgm_ReplaceSubString( NewStr, InFile, "%YYYY", Str );  strcpy( InFile, NewStr );
-            sprintf( Str, "%02d", Month ); Lgm_ReplaceSubString( NewStr, InFile, "%MM", Str );   strcpy( InFile, NewStr );
-            sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, InFile, "%DD", Str );   strcpy( InFile, NewStr );
-
-            sprintf( Str, "%4d", Year );   Lgm_ReplaceSubString( NewStr, OutFile, "%YYYY", Str );  strcpy( OutFile, NewStr );
-            sprintf( Str, "%02d", Month ); Lgm_ReplaceSubString( NewStr, OutFile, "%MM", Str );   strcpy( OutFile, NewStr );
-            sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, OutFile, "%DD", Str );   strcpy( OutFile, NewStr );
-
-        } 
 
 
+        /*                                                                                                                                                                                                   
+         * loop over all birds                                                                                                                                                                               
+         */                                                                                                                                                                                                  
+         for ( iBird = 0; iBird < nBirds; iBird++ ) {                                                                                                                                                         
+                                                                                                                                                                                                                 
+            strcpy( InFile, InputFilename );
+            strcpy( OutFile, OutputFilename );
+            strcpy( Bird, Birds[ iBird ] );                                                                                                                                                                  
+            strcpy( InFile, InputFilename );
 
-        if ( SubstituteDates ) {
-            printf( "\n\n      Processing Date: %4d-%02d-%02d\n", Year, Month, Day );
-        } else {
-            printf( "\n\n      Processing File: %s\n", InFile );
-        }
-        printf( "      -------------------------------------------------------------------------------------------\n");
-        printf( "           Input File: %s\n", InFile);
-        printf( "          Output File: %s\n\n", OutFile);
+            if ( SubstituteVars ) {
 
+                // Substitute times in the files.
+                NewStr[0] = '\0';
+                sprintf( Str, "%4d", Year );   Lgm_ReplaceSubString( NewStr, InFile, "%YYYY", Str );  strcpy( InFile, NewStr );
+                sprintf( Str, "%02d", Month ); Lgm_ReplaceSubString( NewStr, InFile, "%MM", Str );   strcpy( InFile, NewStr );
+                sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, InFile, "%DD", Str );   strcpy( InFile, NewStr );
+                Lgm_ReplaceSubString( NewStr, InFile, "%B", Bird );    strcpy( InFile, NewStr );
 
-        // Create Base directory if it hasnt been created yet.
-        char *dirc = strdup( OutFile );
-        BaseDir    = dirname(dirc);
-        sprintf( Command, "mkdir -p %s", BaseDir); system( Command );
-        free( dirc );
+                sprintf( Str, "%4d", Year );   Lgm_ReplaceSubString( NewStr, OutFile, "%YYYY", Str );  strcpy( OutFile, NewStr );
+                sprintf( Str, "%02d", Month ); Lgm_ReplaceSubString( NewStr, OutFile, "%MM", Str );   strcpy( OutFile, NewStr );
+                sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, OutFile, "%DD", Str );   strcpy( OutFile, NewStr );
+                Lgm_ReplaceSubString( NewStr, OutFile, "%B", Bird );    strcpy( OutFile, NewStr );
 
-
-        /*
-         *   Check to see if OutFile exists or not.
-         */
-        int     StatError, FileExists;
-        struct stat StatBuf;
-        StatError = stat( OutFile, &StatBuf );
-
-        if ( StatError != -1 ) {
-
-            FileExists = TRUE;
-            printf("\n\n\tOutfile already exists: %s\n", OutFile );
-            if ( StatBuf.st_size < 1000LL ){
-                printf("\t             File size:  %lld B\n", (long long)StatBuf.st_size );
-            } else if ( StatBuf.st_size < 1000000LL ){
-                printf("\t             File size:  %g kB\n", (double)StatBuf.st_size/1.0e3 );
-            } else if ( StatBuf.st_size < 1000000000LL ){
-                printf("\t             File size:  %g MB\n", (double)StatBuf.st_size/1.0e6 );
-            } else {
-                printf("\t             File size:  %g GB\n", (double)StatBuf.st_size/1.0e9 );
             }
-            printf("\t    Last status change:  %s", ctime(&StatBuf.st_ctime));
-            printf("\t      Last file access:  %s", ctime(&StatBuf.st_atime));
-            printf("\tLast file modification:  %s", ctime(&StatBuf.st_mtime));
 
-        } 
+            sprintf( HdfOutFile, "%s.h5", OutFile );
 
-        if ( !FileExists || Force ) {
+
+
+            if ( SubstituteVars ) {
+                printf( "\n\n      Processing Date: %4d-%02d-%02d    Bird: %s\n", Year, Month, Day, Bird );
+            } else {
+                printf( "\n\n      Processing File: %s\n", InFile );
+            }
+            printf( "      -------------------------------------------------------------------------------------------\n");
+            printf( "           Input File: %s\n", InFile);
+            printf( "          Output File: %s\n", OutFile);
+            printf( "     HDF5 Output File: %s\n\n", HdfOutFile);
+
+
+            // Create Base directory if it hasnt been created yet.
+            char *dirc = strdup( OutFile );
+            BaseDir    = dirname(dirc);
+            sprintf( Command, "mkdir -p %s", BaseDir); system( Command );
+            free( dirc );
 
 
             /*
-             * Open input file for reading
+             *   Check to see if OutFile exists or not.
              */
-            if ( (fp_in = fopen( InFile, "r" ) ) == NULL ){
+            int     StatError, FileExists;
+            struct stat StatBuf;
+            StatError = stat( OutFile, &StatBuf );
 
-                printf("\tCould not open file %s for reading\n", InFile );
+            FileExists = FALSE;
+            if ( StatError != -1 ) {
 
-            } else {
-
-                printf( "\t    Reading from file: %s\n", InFile );
-
-
-                /*
-                 * Open Mag Ephem file for writing
-                 */
-                fp_MagEphem = fopen( OutFile, "wb" );
-                Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", IntModel, ExtModel, MagEphemInfo );
-                printf("\t      Writing to file: %s\n", OutFile );
-
-                if ( UseEop ) {
-                    // Read in the EOP vals
-                    Lgm_read_eop( e );
+                FileExists = TRUE;
+                if ( !Force ) {
+                    printf("\n\n\tOutfile already exists (use -F option to force processing): %s\n", OutFile );
+                } else {
+                    printf("\n\n\tWarning. Existing Outfile will be overwritten: %s \n", OutFile );
                 }
 
+                if ( StatBuf.st_size < 1000LL ){
+                    printf("\t\t             File size:  %lld B\n", (long long)StatBuf.st_size );
+                } else if ( StatBuf.st_size < 1000000LL ){
+                    printf("\t\t             File size:  %g kB\n", (double)StatBuf.st_size/1.0e3 );
+                } else if ( StatBuf.st_size < 1000000000LL ){
+                    printf("\t\t             File size:  %g MB\n", (double)StatBuf.st_size/1.0e6 );
+                } else {
+                    printf("\t\t             File size:  %g GB\n", (double)StatBuf.st_size/1.0e9 );
+                }
+                printf("\t\t    Last status change:  %s", ctime(&StatBuf.st_ctime));
+                printf("\t\t      Last file access:  %s", ctime(&StatBuf.st_atime));
+                printf("\t\tLast file modification:  %s", ctime(&StatBuf.st_mtime));
+                printf("\n");
+
+            }
+
+            if ( !FileExists || Force ) {
+
 
                 /*
-                 *  Loop over the times/positions given. Here we assume the file contains, Time and 3 columns: X, Y, Z.
-                 *  The meaning of the X, Y, Z columns are dependent upon what CoordSystem is set to;
-                 *     
-                 *        CoordSystem          X                    Y               Z
-                 *        ------------------------------------------------------------------
-                 *          LATLONRAD       Latitude (Deg.)   Longitude (Deg.)  Radius (Re)
-                 *             SM              Xsm                 Ysm             Zsm
-                 *            GSM              Xsm                 Ysm             Zsm
-                 *            GEI2000          Xgsm                Ygsm            Zgsm
-                 *            GSE              Xgse                Ygse            Zgse
-                 *
-                 *      Add more as needed....
+                 * Open input file for reading
                  */
-                while ( fgets( Line, 4096, fp_in ) != NULL ) {
+                if ( (fp_in = fopen( InFile, "r" ) ) == NULL ){
 
-                    if ( Line[0] != '#' ) {
+                    printf("\tCould not open file %s for reading\n", InFile );
 
-                        sscanf( Line, "%s %lf %lf %lf", IsoTimeString, &X, &Y, &Z );
+                } else {
 
-                        // convert ISO time to DateTime
-                        IsoTimeStringToDateTime( IsoTimeString, &UTC, c );
-
-                        if ( UseEop ) {
-                            // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
-                            Lgm_get_eop_at_JD( UTC.JD, &eop, e );
-
-                            // Set the EOP vals in the CTrans structure.
-                            Lgm_set_eop( &eop, c );
-                        }
-
-                        // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 );
-                        Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
-
-                        // Set up the trans matrices
-                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-
-                        if ( strcmp( CoordSystem, "LATLONRAD" ) ){
-                            // Convert GEO->GSM coords.
-                            GeoLat = X*RadPerDeg; GeoLon = Y*RadPerDeg; GeoRad = Z;
-                            U.x = GeoRad*cos(GeoLon)*cos(GeoLat);
-                            U.y = GeoRad*sin(GeoLon)*cos(GeoLat);
-                            U.z = GeoRad*sin(GeoLat);
-                            Lgm_Convert_Coords( &U, &Ugsm, GEO_TO_GSM, c );
-                        } else if ( strcmp( CoordSystem, "SM" ) ){
-                            // Convert SM->GSM coords.
-                            U.x = X; U.y = Y; U.z = Z;
-                            Lgm_Convert_Coords( &U, &Ugsm, SM_TO_GSM, c );
-                        } else if ( strcmp( CoordSystem, "GSM" ) ){
-                            // No conversion needed.
-                            Ugsm.x = X; Ugsm.y = Y; Ugsm.z = Z;
-                        } else if ( strcmp( CoordSystem, "GEI2000" ) ){
-                            // Convert GEI2000->GSM coords.
-                            U.x = X; U.y = Y; U.z = Z;
-                            Lgm_Convert_Coords( &U, &Ugsm, GEI2000_TO_GSM, c );
-                        } else if ( strcmp( CoordSystem, "GSE" ) ){
-                            // Convert GEI->GSM coords.
-                            U.x = X; U.y = Y; U.z = Z;
-                            Lgm_Convert_Coords( &U, &Ugsm, GSE_TO_GSM, c );
-                        }
-    
+                    printf( "\t    Reading from file: %s\n", InFile );
 
 
+                    /*
+                     * Open Mag Ephem file for writing
+                     */
+                    fp_MagEphem = fopen( OutFile, "wb" );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", IntModel, ExtModel, MagEphemInfo );
+                    printf("\t      Writing to file: %s\n", OutFile );
 
-                        /*
-                         * Compute L*s, Is, Bms, Footprints, etc...
-                         * These quantities are stored in the MagEphemInfo Structure
-                         */
-                        printf("\n\n\t\tDate, UTC: %ld %g   Ugsm: %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
-                        printf("\t\t------------------------------------------------------------------\n");
-                        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
-
-                        Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
-
-                        if ( nAlpha > 0 ){
-                            WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
-                        }
-
+                    if ( UseEop ) {
+                        // Read in the EOP vals
+                        Lgm_read_eop( e );
                     }
 
 
+                    /*
+                     *  Loop over the times/positions given. Here we assume the file contains, Time and 3 columns: X, Y, Z.
+                     *  The meaning of the X, Y, Z columns are dependent upon what CoordSystem is set to;
+                     *
+                     *        CoordSystem          X                    Y               Z
+                     *        ------------------------------------------------------------------
+                     *          LATLONRAD       Latitude (Deg.)   Longitude (Deg.)  Radius (Re)
+                     *             SM              Xsm                 Ysm             Zsm
+                     *            GSM              Xsm                 Ysm             Zsm
+                     *            GEI2000          Xgsm                Ygsm            Zgsm
+                     *            GSE              Xgse                Ygse            Zgse
+                     *
+                     *      Add more as needed....
+                     */
+                    H5_nT = 0;
+                    while ( fgets( Line, 4096, fp_in ) != NULL ) {
+
+                        if ( Line[0] != '#' ) {
+
+                            sscanf( Line, "%s %lf %lf %lf", IsoTimeString, &X, &Y, &Z );
+
+                            // convert ISO time to DateTime
+                            IsoTimeStringToDateTime( IsoTimeString, &UTC, c );
+
+                            if ( UseEop ) {
+                                // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+                                Lgm_get_eop_at_JD( UTC.JD, &eop, e );
+
+                                // Set the EOP vals in the CTrans structure.
+                                Lgm_set_eop( &eop, c );
+                            }
+
+                            // Set mag model parameters
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 );
+                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+
+                            // Set up the trans matrices
+                            Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+
+                            if ( !strcmp( CoordSystem, "LATLONRAD" ) ){
+                                // Convert GEO->GSM coords.
+                                GeoLat = X*RadPerDeg; GeoLon = Y*RadPerDeg; GeoRad = Z;
+                                U.x = GeoRad*cos(GeoLon)*cos(GeoLat);
+                                U.y = GeoRad*sin(GeoLon)*cos(GeoLat);
+                                U.z = GeoRad*sin(GeoLat);
+                                Lgm_Convert_Coords( &U, &Ugsm, GEO_TO_GSM, c );
+                            } else if ( !strcmp( CoordSystem, "SM" ) ){
+                                // Convert SM->GSM coords.
+                                U.x = X; U.y = Y; U.z = Z;
+                                Lgm_Convert_Coords( &U, &Ugsm, SM_TO_GSM, c );
+                            } else if ( !strcmp( CoordSystem, "GSM" ) ){
+                                // No conversion needed.
+                                Ugsm.x = X; Ugsm.y = Y; Ugsm.z = Z;
+                            } else if ( !strcmp( CoordSystem, "GEI2000" ) ){
+                                // Convert GEI2000->GSM coords.
+                                U.x = X; U.y = Y; U.z = Z;
+                                Lgm_Convert_Coords( &U, &Ugsm, GEI2000_TO_GSM, c );
+                            } else if ( !strcmp( CoordSystem, "GSE" ) ){
+                                // Convert GEI->GSM coords.
+                                U.x = X; U.y = Y; U.z = Z;
+                                Lgm_Convert_Coords( &U, &Ugsm, GSE_TO_GSM, c );
+                            }
+
+
+
+
+                            /*
+                             * Compute L*s, Is, Bms, Footprints, etc...
+                             * These quantities are stored in the MagEphemInfo Structure
+                             */
+                            printf("\n\n\t\tDate, UTC: %ld %g   Ugsm: %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
+                            printf("\t\t------------------------------------------------------------------\n");
+                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+
+                            Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
+
+
+                            if ( nAlpha > 0 ){
+                                WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
+                            }
+
+
+
+
+                            // Fill arrays for dumping out as HDF5 files
+                            strcpy( H5_IsoTimes[H5_nT], IsoTimeString );
+                            H5_JD[H5_nT]   = UTC.JD;
+                            H5_Ugsm[H5_nT] = Ugsm;
+                            for (i=0; i<nAlpha; i++){
+                                H5_Lstar[H5_nT][i] = MagEphemInfo->Lstar[i];
+                                if (MagEphemInfo->Bm[i]>0.0) {
+                                    H5_K[H5_nT][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
+                                } else {
+                                    H5_K[H5_nT][i] = -1e99;
+                                }
+                            }
+
+
+                            ++H5_nT;
+
+                        }
+
+
+                    }
+                    fclose(fp_in);
+                    fclose(fp_MagEphem);
+
+
+                    // Create HDF5 file
+                    file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+
+                    // Create IsoTime Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "IsoTime", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+                    // Create JD Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "JulianDate", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Ugsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Ugsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Alpha Dataset
+                    Dims[0] = H5_nAlpha;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Alpha", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Lstar Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Lstar", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create K Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "K", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+
+                    // Write IsoTime Strings
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "IsoTime", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &H5_IsoTimes[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
+
+                    // Write JD
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "JulianDate", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_JD[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write Ugsm
+                    SlabSize[0] = 1; SlabSize[1] = 3;
+                    DataSet  = H5Dopen( file, "Ugsm", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            UGSM_ARR[0] = H5_Ugsm[iT].x; UGSM_ARR[1] = H5_Ugsm[iT].y; UGSM_ARR[2] = H5_Ugsm[iT].z;
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &UGSM_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Alpha
+                    SlabSize[0] = H5_nAlpha;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Alpha", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Alpha[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write Lstar
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "Lstar", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Lstar[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write K
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "K", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_K[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    
+                    H5Fclose( file );
                 }
-                fclose(fp_in);
-                fclose(fp_MagEphem);
+
             }
+        } // end birds loop
+    } // end JD loop
 
-        }
-    }
 
-    
     free( OutFile );
     free( InFile );
 
     Lgm_free_ctrans( c );
     Lgm_destroy_eop( e );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
+    LGM_ARRAY_2D_FREE( Birds );
 
+    LGM_ARRAY_2D_FREE( H5_IsoTimes );
+    LGM_ARRAY_1D_FREE( H5_JD );
+    LGM_ARRAY_1D_FREE( H5_Ugsm );
+    LGM_ARRAY_1D_FREE( H5_Alpha );
+    LGM_ARRAY_2D_FREE( H5_Lstar );
+    LGM_ARRAY_2D_FREE( H5_K );
+    
 
 
     return(0);
 }
 
+void StringSplit( char *Str, char **StrArray, int len, int *n ) {                                                                                                                                                
+                                                                                                                                                                                                                 
+    int         nStr;                                                                                                                                                                                            
+    const char  delimiters[] = " .,;:!";                                                                                                                                                                         
+    char        *token, *ss;                                                                                                                                                                                     
+                                                                                                                                                                                                                 
+    *n   = 0;                                                                                                                                                                                                    
+    ss   = Str;                                                                                                                                                                                                  
+    nStr = strlen( Str );                                                                                                                                                                                        
+    while ( ( token = strtok( ss, delimiters ) ) != NULL ) {                                                                                                                                                     
+        strncpy( StrArray[*n], token, len-1 );                                                                                                                                                                   
+        if ( nStr >= len ) StrArray[*n][len-1] = '\0';                                                                                                                                                           
+        ++(*n);                                                                                                                                                                                                  
+        ss = NULL;                                                                                                                                                                                               
+    }                                                                                                                                                                                                            
+                                                                                                                                                                                                                 
+} 

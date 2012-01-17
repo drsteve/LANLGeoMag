@@ -4,13 +4,14 @@ LIBS      = `pkg-config --libs lgm`
 CFLAGS    = `pkg-config --cflags lgm`
 CC        = gcc
 
-FILES1    =  ComputeFieldQuantities.c
+FILES1    =  
 
-all   : Lstar
+all   : Lstar 
 
-LstarVersusPA : Makefile $(FILES1) Lstar.o
+Lstar : Makefile $(FILES1) Lstar.o
 	$(CC) $(FILES1) Lstar.o $(LIBS) $(CFLAGS) -o Lstar
 
 
+
 clean :
-	rm Lstar*.o
+	rm Lstar *.o

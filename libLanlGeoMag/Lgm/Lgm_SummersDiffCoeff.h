@@ -1,6 +1,8 @@
 #ifndef LGM_SUMMERS_DIFF_COEFF_H
 #define LGM_SUMMERS_DIFF_COEFF_H
 #include <math.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_poly.h>
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_PolyRoots.h"
@@ -12,6 +14,9 @@
 #endif
 
 
+#define LGM_FRWD         1
+#define LGM_FRWD_BKWD    0
+#define LGM_BKWD        -1
 
 
 #define LGM_R_MODE_WAVE     0
@@ -20,8 +25,23 @@
 #define LGM_ELECTRONS       0
 #define LGM_PROTONS         1
 
+#define LGM_SUMMERS_2005    2005
+#define LGM_SUMMERS_2007    2007
+
+// Derivative schemes
+#ifndef LGM_DERIV_TWO_POINT
+#define LGM_DERIV_TWO_POINT     0
+#endif
+#ifndef LGM_DERIV_FOUR_POINT
+#define LGM_DERIV_FOUR_POINT    1
+#endif
+#ifndef LGM_DERIV_SIX_POINT
+#define LGM_DERIV_SIX_POINT     2
+#endif
+
 typedef struct Lgm_SummersInfo {
 
+    int     Version;        //!< Vewrsion of Summers model to use. Can be LGM_SUMMERS_2005 or LGM_SUMMERS_2007.
     double  Alpha0;         //!< Equatorial pitch angle, \f$ \alpha_\circ \f$, [radians].
 
     double  SinAlpha0;      //!< \f$ \sin\alpha_\circ \f$
@@ -35,6 +55,9 @@ typedef struct Lgm_SummersInfo {
 
     double  E;              //!< Normalized dimensionless energy, \f$ E_k/E_\sigma\circ \f$, where \f$ E_\sigma\circ \f$ is rest energy of species.
     double  L;              //!< Dipole L-shell value
+    double  n1;             //!< Ratio of Hydrogen number density to Electron number density (note that n1+n2+n3=1).
+    double  n2;             //!< Ratio of Helium number density to Electron number density (note that n1+n2+n3=1).
+    double  n3;             //!< Ratio of Oxygen number density to Electron number density (note that n1+n2+n3=1).
     double  aStarEq;        //!< Summer's \f$ \alpha^* \f$ value which is \f$ \Omega_e/\omega^2_{pe} \f$.
 //    double  dB;           //!< Value of wave amplitude [nT].
     void   *BwFuncData;     //!< Pointer to data that may be needed by BwFunc()
@@ -47,21 +70,28 @@ typedef struct Lgm_SummersInfo {
     double  dw;             //!< Measure of width of guassian wavre frequency distribution.
     double  MaxWaveLat;     //!< Latitudinal cuttoff for waves. I.e. assume no waves at lats greater than +MaxWaveLat or less than -MaxWaveLat.
     double  Sig;            //!< Additional paramter to define 'semi-bandwidth' which is equal to \f$ \sigma d\omega \f$.
-    double  s;              //!< Defines wave mode (s=1 for R-mode, s=-1 for L-mode).
+    int     s;              //!< Defines wave mode (s=1 for R-mode, s=-1 for L-mode).
     double  Lambda;         //!< Defines sepcies (\f$ \lambda=-1 \f$ for electrons \f$ \lambda = \epsilon \f$ for protons (\f$\epsilon =m_e/m_p \f$).
     double  Rho;            //!< Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw )
+    int     Directions;     //!< Wave directionsm to include. Can be LGM_FRWD, LGM_BKWD, LGM_FRWD_BKWD
 
 } Lgm_SummersInfo;
 
-int Lgm_SummersDxxBounceAvg( double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double aStarEq,  double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);             
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo );
 double SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo );
-double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
-double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
-double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, double s, double aStar );
-
+double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double aStar, int Directions );
+double Lgm_SummersDaaLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
+double Lgm_SummersDapLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
+double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double xl, double xh, double xm, double dx, double Lambda, int s, double n1, double n2, double n3, double aStar, int Directions );
+int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y );
+int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double inc, double Lat0, double Lat1, double *x1, double *x2 );
+int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b );
 #endif

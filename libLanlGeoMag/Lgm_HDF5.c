@@ -11,6 +11,40 @@
  *
  *
  */
+void Lgm_WriteStringAttr( hid_t DataSet, char *AttrNAme, char *Str ) {
+
+    hid_t   space, type, Attr;
+    hsize_t Dims[1] = {1};
+    herr_t  status;
+
+    space = H5Screate_simple(1, Dims, NULL);
+    type    = H5Tcopy( H5T_C_S1 );
+    status  = H5Tset_size( type, strlen(Str) );
+    status  = H5Tset_strpad( type, H5T_STR_NULLPAD );
+    status  = H5Tset_cset( type, H5T_CSET_ASCII );
+    Attr    = H5Acreate( DataSet, AttrNAme, type, space, H5P_DEFAULT, H5P_DEFAULT);
+    status  = H5Awrite( Attr, type, &Str[0] );
+    status  = H5Aclose( Attr );
+    status  = H5Tclose( type );
+    status  = H5Sclose( space );
+
+    return;
+}
+
+void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val ) {
+
+    hid_t   space, Attr;
+    hsize_t Dims[1] = {1};
+    herr_t  status;
+
+    space = H5Screate_simple(1, Dims, NULL);
+    Attr    = H5Acreate( DataSet, AttrNAme, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT);
+    status  = H5Awrite( Attr, H5T_NATIVE_DOUBLE, &Val );
+    status  = H5Aclose( Attr );
+    status  = H5Sclose( space );
+
+    return;
+}
 
 
 
@@ -50,7 +84,7 @@
  *      \note           A 1D array of strings in C is actually a 2D array of
  *                      chars. This is why this uses 2D memory allocation macros.
  *
- *      \author         Mike Henderson 
+ *      \author         Mike Henderson
  *      \date           2011
  *
  */
@@ -148,7 +182,7 @@ char **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *      \return         Returns a pointer to an array of doubles.
  *                      The user must free this with LGM_ARRAY_1D_FREE( ).
  *
- *      \author         Mike Henderson 
+ *      \author         Mike Henderson
  *      \date           2011
  *
  */
@@ -211,7 +245,7 @@ double *Get_DoubleDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *      \return         Returns a pointer to a 2D array of doubles.
  *                      The user must free this with LGM_ARRAY_2D_FREE( ).
  *
- *      \author         Mike Henderson 
+ *      \author         Mike Henderson
  *      \date           2011
  *
  */

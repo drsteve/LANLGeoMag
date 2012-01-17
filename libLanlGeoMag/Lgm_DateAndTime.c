@@ -205,6 +205,9 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         fclose(fp);
 
     } else {
+        /*
+         * Provides a fallback in case the Lgm_LeapSecondDates.dat was not present.
+         */
         N = 25;
         l->nLeapSecondDates = N;
         l->LeapSecondDates  = (long int *) malloc( N*sizeof(long int) );
@@ -957,22 +960,22 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
  *                    Controls how many decimals to print for the seconds.
  *                    Max of 20 (-- although prob more than machine prec.)
  */
-void Lgm_Print_DateTime( Lgm_DateTime DT, int Style, int p ){
+void Lgm_Print_DateTime( Lgm_DateTime *DT, int Style, int p ){
     char *Str= calloc( 128, sizeof(char) );
     Lgm_DateTimeToString( Str, DT, Style, p );
     printf("%s", Str);
     free(Str);
 }
-void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
+void Lgm_DateTimeToString( char *Str, Lgm_DateTime *DT, int Style, int p ){
     int         HH, MM, SS, sgn, leapsec;
     int         Year, Month, d;
     double      S, SFRAC, Seconds, TotalSeconds;
     char        SecFracStr[30];
 
-    leapsec = (int)(DT.DaySeconds - 86400.0);
+    leapsec = (int)(DT->DaySeconds - 86400.0);
 
     // Total Number of Seconds - leapsecs
-    Seconds = DT.Time*3600.0;
+    Seconds = DT->Time*3600.0;
     TotalSeconds = Seconds;
     
     // Hours
@@ -983,7 +986,7 @@ void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
     MM = (int)(Seconds/60.0);
     Seconds -= MM*60.0;
 
-//    Lgm_UT_to_HMSd( DT.Time, &sgn, &HH, &MM, &S );
+//    Lgm_UT_to_HMSd( DT->Time, &sgn, &HH, &MM, &S );
     sgn = 1;
 
 
@@ -998,12 +1001,12 @@ void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
     sprintf( SecFracStr, "%.*lf", (p>=20)?20:p, SFRAC );
     if ( leapsec && (TotalSeconds>=86400.0) && (TotalSeconds<86401.0) ){
         HH = 23; MM = 59; SS = 60;
-   } else {
+    } else {
         if (SS==(60))  { SS=0; ++MM; }
         if (MM==60)  { MM=0; ++HH; }
     }
 
-     d = DT.Date; Year = d/10000;
+     d = DT->Date; Year = d/10000;
      d = d - Year*10000; Month = d/100;
      d = d - Month*100;
 
@@ -1011,49 +1014,49 @@ void Lgm_DateTimeToString( char *Str, Lgm_DateTime DT, int Style, int p ){
     // Styles 0, 1, and 2 are ISO compliant...(check?)
     if ( p <= 0 ) {
         if ( Style == 0 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
                 sprintf( Str, "%02d-%02d-%02dT%02d:%02d:%02dZ", Year, Month, d, HH, MM, SS );
             else 
                 sprintf( Str, "%02d-%02d-%02dT%02d:%02d:%02d", Year, Month, d, HH, MM, SS );
         } else if ( Style == 1 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
-                sprintf( Str, "%8ldT%02d%02d%02dZ", DT.Date, HH, MM, SS );
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
+                sprintf( Str, "%8ldT%02d%02d%02dZ", DT->Date, HH, MM, SS );
             else 
-                sprintf( Str, "%8ldT%02d%02d%02d", DT.Date, HH, MM, SS );
+                sprintf( Str, "%8ldT%02d%02d%02d", DT->Date, HH, MM, SS );
         } else if ( Style == 2 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
-                sprintf( Str, "%8ld %02d:%02d:%02dZ", DT.Date, HH, MM, SS );
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
+                sprintf( Str, "%8ld %02d:%02d:%02dZ", DT->Date, HH, MM, SS );
             else 
-                sprintf( Str, "%8ld %02d:%02d:%02d", DT.Date, HH, MM, SS );
+                sprintf( Str, "%8ld %02d:%02d:%02d", DT->Date, HH, MM, SS );
         } else if ( Style == 3 ) {
-            if (sgn<0) sprintf( Str, "%8ld -%02d:%02d:%02d", DT.Date, HH, MM, SS );
-            else       sprintf( Str, "%8ld  %02d:%02d:%02d", DT.Date, HH, MM, SS );
+            if (sgn<0) sprintf( Str, "%8ld -%02d:%02d:%02d", DT->Date, HH, MM, SS );
+            else       sprintf( Str, "%8ld  %02d:%02d:%02d", DT->Date, HH, MM, SS );
         } else {
-            if (sgn<0) sprintf( Str, "%8ld -%02d\u02b0 %02d\u1d50 %02d\u02e2", DT.Date, HH, MM, SS );
-            else       sprintf( Str, "%8ld  %02d\u02b0 %02d\u1d50 %02d\u02e2", DT.Date, HH, MM, SS );
+            if (sgn<0) sprintf( Str, "%8ld -%02d\u02b0 %02d\u1d50 %02d\u02e2", DT->Date, HH, MM, SS );
+            else       sprintf( Str, "%8ld  %02d\u02b0 %02d\u1d50 %02d\u02e2", DT->Date, HH, MM, SS );
         }
     } else {
         if ( Style == 0 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
                 sprintf( Str, "%02d-%02d-%02dT%02d:%02d:%02d.%sZ", Year, Month, d, HH, MM, SS, strstr(SecFracStr, ".")+1 );
             else 
                 sprintf( Str, "%02d-%02d-%02dT%02d:%02d:%02d.%s", Year, Month, d, HH, MM, SS, strstr(SecFracStr, ".")+1 );
         } else if ( Style == 1 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
-                sprintf( Str, "%8ldT%02d%02d%02d.%sZ", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
+                sprintf( Str, "%8ldT%02d%02d%02d.%sZ", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
             else 
-                sprintf( Str, "%8ldT%02d%02d%02d.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+                sprintf( Str, "%8ldT%02d%02d%02d.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
         } else if ( Style == 2 ) {
-            if ( DT.TimeSystem == LGM_TIME_SYS_UTC )
-                sprintf( Str, "%8ld %02d:%02d:%02d.%sZ", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            if ( DT->TimeSystem == LGM_TIME_SYS_UTC )
+                sprintf( Str, "%8ld %02d:%02d:%02d.%sZ", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
             else 
-                sprintf( Str, "%8ld %02d:%02d:%02d.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+                sprintf( Str, "%8ld %02d:%02d:%02d.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
         } else if ( Style == 3 ) {
-            if (sgn<0) sprintf( Str, "%8ld -%02d:%02d:%02d.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
-            else       sprintf( Str, "%8ld  %02d:%02d:%02d.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            if (sgn<0) sprintf( Str, "%8ld -%02d:%02d:%02d.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            else       sprintf( Str, "%8ld  %02d:%02d:%02d.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
         } else {
-            if (sgn<0) sprintf( Str, "%8ld -%02d\u02b0 %02d\u1d50 %02d\u02e2.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
-            else       sprintf( Str, "%8ld  %02d\u02b0 %02d\u1d50 %02d\u02e2.%s", DT.Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            if (sgn<0) sprintf( Str, "%8ld -%02d\u02b0 %02d\u1d50 %02d\u02e2.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
+            else       sprintf( Str, "%8ld  %02d\u02b0 %02d\u1d50 %02d\u02e2.%s", DT->Date, HH, MM, SS, strstr(SecFracStr, ".")+1 );
         }
     }
 
@@ -1455,3 +1458,17 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 }
 
+
+/*
+ *  Convert JD directly to a UTC DateTime structure.
+ */
+void Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c ){
+
+    long int Date;
+    int      Year, Month, Day;
+    double  Time;
+
+    Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
+    Lgm_Make_UTC( Date, Time, UTC, c );
+
+}

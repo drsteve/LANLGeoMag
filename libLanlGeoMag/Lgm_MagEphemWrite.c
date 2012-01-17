@@ -935,7 +935,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     Lgm_Set_Coord_Transforms( m->Date, m->UTC, c );
     Lgm_Make_UTC( m->Date, m->UTC, &DT_UTC, c );
-    Lgm_DateTimeToString( Str, DT_UTC, 0, 4 );
+    Lgm_DateTimeToString( Str, &DT_UTC, 0, 4 );
     
 
     fprintf( fp, "%25s",     Str );          // Date+Time in ISO 8601 format
@@ -1067,6 +1067,11 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         fprintf( fp, " %12g", LGM_FILL_VALUE );
 
         fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
     }
 
@@ -1123,6 +1128,11 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         fprintf( fp, " %12g", LGM_FILL_VALUE );
 
         fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
+
+        fprintf( fp, " %12g", LGM_FILL_VALUE );
 
     }
 
@@ -1161,7 +1171,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     // McIlwain L (computed from I, Bm, M)
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { 
-        L = ( m->I[i] > 0.0 ) ? LFromIBmM_McIlwain(m->I[i], m->Bm[i], m->Mused ) : 0.0;
+        L = ( m->I[i] > 0.0 ) ? LFromIBmM_McIlwain(m->I[i], m->Bm[i], m->Mused ) : LGM_FILL_VALUE;
         fprintf(fp, " %12g", L);
     }
 

@@ -117,13 +117,14 @@ def findTLEinfiles(args, **kwargs):
         if y > 50: Epoch = e+1900000.0
         else: Epoch = e+2000000.0
 
-        if Epoch <= TargetEpoch:
+        if Epoch <= kwargs['TargetEpoch']:
             t = TLEs[i]
             break
-        
-    print t[2]
-    print t[0]
-    print t[1]
+    
+    if kwargs['Verbose']:
+        print t[2]
+        print t[0]
+        print t[1]
 
     # close OutputFile if we open one.
     if kwargs['DumpToFile']:
@@ -161,6 +162,10 @@ if __name__ == '__main__':
                             help="Filename to dump output to. Stdout is assumed if "\
                                 "no file given.",    
                             metavar="OUTFILE")
+    
+    parser.add_option("-v", "--Verbose",   dest="Verbose", 
+                            help="Give verbose output [default=True] ",    
+                            metavar="OUTFILE")
 
     # Parse the args that were (potenitally) given to us on the command line
     (options, args) = parser.parse_args()
@@ -179,6 +184,10 @@ if __name__ == '__main__':
     if options.OutputFile != None:
         kwargs['OutputFile'] = options.OutputFile
         kwargs['DumpToFile'] = True
+    if options.Verbose != None:
+        kwargs['Verbose'] = options.Verbose
+    else:
+        kwargs['Verbose'] = True
 
     kwargs['PurgeDuplicates'] = True
 
@@ -188,7 +197,7 @@ if __name__ == '__main__':
         exit()
     else:
         dt = datetime.datetime.strptime(options.ISO_DateTime, "%Y-%m-%dT%H:%M:%S")
-        TargetEpoch = int(dt.strftime('%Y%j')) + dt.hour/24.0 + dt.minute/1440.0 + dt.second/86400.0
+        kwargs['TargetEpoch'] = int(dt.strftime('%Y%j')) + dt.hour/24.0 + dt.minute/1440.0 + dt.second/86400.0
         
     # If ParseMethod is still None, then there was a probable getting command-line
     # args -- bail.

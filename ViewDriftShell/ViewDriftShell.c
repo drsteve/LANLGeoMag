@@ -2665,6 +2665,7 @@ void CreateSats() {
                     }
                 glEnd();
 
+/*
 for (i=0; i<Group->nSat; i++){
 if ( (!strstr(Group->Sat[i].TLE.Name, " R/B") && !strstr(Group->Sat[i].TLE.Name, " DEB")) && Group->DrawSatellites ){ // Satellites
 glEnable(GL_LIGHTING);
@@ -2677,6 +2678,7 @@ SolidCone( &Ugsm, 30.0, 240, 1 );
 glDisable(GL_LIGHTING);
 }
 }
+*/
 
             }
 
@@ -3952,7 +3954,7 @@ glFrontFace(GL_CCW);
     Lgm_UT_to_hmsms( CurrentUT, &CurrentHour, &CurrentMin, &CurrentSec, &CurrentMilliSec );
 //Lgm_CTrans *c = Lgm_init_ctrans(0);
 //Lgm_DateTime *DateTime = Lgm_DateTime_Create( CurrentYear, CurrentMonth, CurrentDay, CurrentUT, LGM_TIME_SYS_UTC, c );
-//Lgm_DateTimeToString( Str, *DateTime, 0, 3 );
+//Lgm_DateTimeToString( Str, DateTime, 0, 3 );
 //free(c);
     sprintf(Str, "Time: %02d:%02d:%02d.%03d UTC", CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec );
     cairo_move_to( cr, 15.0, y ); cairo_show_text( cr, Str);

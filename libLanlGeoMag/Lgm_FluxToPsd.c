@@ -15,9 +15,11 @@
 
 typedef struct _FitData {
 
+    int     nMaxwellians;
     int     n;
     double  *E;
     double  *g;
+
 
 } _FitData;
 
@@ -311,6 +313,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
     f->DumpDiagnostics = DumpDiagnostics;
 
     f->Extrapolate = TRUE;
+    f->nMaxwellians = 2;
 
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;
@@ -496,21 +499,12 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *      \warning    Still working on this code. It is not finished.
  *
  */
-void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f ) {
 
     int                 k, m, DoIt;
     double              AlphaEq, SinA;
-    Lgm_MagModelInfo    *mInfo, *mInfo2;
+    Lgm_MagModelInfo    *mInfo2;
 
-    /*
-     * Init mInfo
-This is no good! How does user define mag model etc...?
-I think there needs to be a Lgm_MagModelInfo struct in f
-Then add a routine to set stuff up in there. Or just use the ones we have already....
-For now we will just go with the defaults.
-     */
-    mInfo = Lgm_InitMagInfo();
-//mInfo->Bfield = Lgm_B_edip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -540,37 +534,51 @@ For now we will just go with the defaults.
      * Save the results in the f structure.
      */
 
-    Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo );
-    f->B = mInfo->Blocal;
-    {
-        #pragma omp parallel private(mInfo2,AlphaEq,SinA)
-        #pragma omp for schedule(dynamic, 1)
-        for ( k=0; k<nK; k++ ){
+    if ( Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo ) > 0 ) {
 
-            mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
+        f->B = mInfo->Blocal;
 
-            f->K[k]    = K[k];
-            AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
-            SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
-            if ( AlphaEq > 0.0 ) {
-                if ( SinA <= 1.0 ) {
-                    f->AofK[k] = DegPerRad*asin( SinA );
+        { // start parallel
+
+            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+            #pragma omp for schedule(dynamic, 1)
+            for ( k=0; k<nK; k++ ){
+
+                mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
+
+                f->K[k]    = K[k];
+                //printf("K[%d] = %g   f->DateTime.UTC = %g f->Position = %g %g %g\n", k, K[k], f->DateTime.Time, f->Position.x, f->Position.y, f->Position.z);
+                AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+                SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
+                if ( AlphaEq > 0.0 ) {
+                    if ( SinA <= 1.0 ) {
+                        f->AofK[k] = DegPerRad*asin( SinA );
+                    } else {
+                        f->AofK[k] = -9e99;
+                        //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                    }
                 } else {
                     f->AofK[k] = -9e99;
-                    //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                    //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
                 }
-            } else {
-                f->AofK[k] = -9e99;
-                //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+                //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
+
+                Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
+
+
             }
-            //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
-            Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
+        } // end parallel
 
 
-        }
+
+        Lgm_TearDown_AlphaOfK( mInfo );
+
+    } else {
+
+        for ( k=0; k<nK; k++ ) f->AofK[k] = -9e99;
+
     }
-    Lgm_TearDown_AlphaOfK( mInfo );
 
 
     /*
@@ -630,28 +638,23 @@ assumes electrons -- generalize this...
     }
 
 
-// FIX this... The create and destroy of this should not be in here...
-    Lgm_FreeMagInfo( mInfo );
-
     f->Alloced2 = TRUE;
 
     return;
 
 }
 
-double  Model( double *x, double E ) {
+double  Model( double *x, int n, double E ) {
 
-    double  n1, T1, n2, T2, val;
+    int i;
+    double  nn, TT, val;
 
-    n1 = pow( 10.0,  x[1] );
-    T1 = fabs( x[2] );
-
-    n2 = pow( 10.0,  x[3] );
-    T2 = fabs( x[4] );
-
-    val = Lgm_MaxJut( n1, T1, E, LGM_Ee0 )
-            + Lgm_MaxJut( n2, T2, E, LGM_Ee0 );
-//    val = Lgm_MaxJut( n1, T1, E, LGM_Ee0 );
+    // Sum of maxwellians
+    for ( val=0.0, i=0; i<n; i++){
+        nn = pow( 10.0,  x[2*i+1] );
+        TT = fabs( x[2*i+2] );
+        val += Lgm_MaxJut( nn, TT, E, LGM_Ee0 );
+    }
 
     return( val );
 
@@ -663,18 +666,23 @@ double Cost( double *x, void *data ){
     int         i;
     double      g_model, d, sum;
 
+    FitData = (_FitData *)data;
+
+    // These constraints wont work for nMaxwellians>2
     if ( (x[1] > 2.0) || ( x[1] < -30.0) ) return( 9e99 );
     if ( (fabs( x[2] ) > 1000.0) || (fabs( x[2] ) < 1.0) ) return( 9e99 );
-    if ( (x[3] > 2.0) || ( x[3] < -30.0) ) return( 9e99 );
-    if ( (fabs( x[4] ) > 1000.0) || (fabs( x[4] ) < 1.0) ) return( 9e99 );
+    if ( FitData->nMaxwellians > 1 ) {
+        if ( (x[3] > 2.0) || ( x[3] < -30.0) ) return( 9e99 );
+        if ( (fabs( x[4] ) > 1000.0) || (fabs( x[4] ) < 1.0) ) return( 9e99 );
+    }
 
-    FitData = (_FitData *)data;
+
+    
 
 
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
 
-
-        g_model = log10( Model( x, FitData->E[i] ) );
+        g_model = log10( Model( x, FitData->nMaxwellians, FitData->E[i] ) );
         d = log10( FitData->g[i] ) - g_model;
 
         sum += d*d;
@@ -712,6 +720,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     if ( a < 0.0 ) return(-9e99);
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
+    FitData->nMaxwellians = f->nMaxwellians;
 
 
     /*
@@ -759,7 +768,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
     }
 
-    if ( FitData->n > 4 ) {
+    if ( FitData->n > 2 ) {
 
 
         // interpolate/fit E
@@ -778,7 +787,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
         x[2] = 25.0;
         x[3] = -2.0;
         x[4] = 200.0;
-        praxis( 4, x, (void *)FitData, Cost, in, out);
+        praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
     /*
     printf("out[0] = %g\n", out[0]);
     printf("out[1] = %g\n", out[1]);
@@ -803,7 +812,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
     //x[2] = 200.0;
         //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
-        psd = Model( x,  E );
+        psd = Model( x,  FitData->nMaxwellians, E );
         //psd = (double)a;
 
     //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
@@ -849,7 +858,8 @@ Lgm_PsdToFlux *Lgm_P2F_CreatePsdToFlux( int DumpDiagnostics ) {
      */
     p->DumpDiagnostics = DumpDiagnostics;
 
-    p->Extrapolate = TRUE;
+    p->Extrapolate  = TRUE;
+    p->nMaxwellians = 2;
 
     p->Alloced1 = FALSE;
     p->Alloced2 = FALSE;
@@ -1020,21 +1030,12 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
  *      \warning    Still working on this code. It is not finished.
  *
  */
-void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_PsdToFlux *p ) {
+void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double *Larr, double *Karr, double *Aarr, int narr, Lgm_MagModelInfo *mInfo, Lgm_PsdToFlux *p ) {
 
     int                 k, m, DoIt, i, iL, iMu, iK, done;
     double              SinAlphaEq, AlphaEq, p2c2, Lstar;
-    Lgm_MagModelInfo    *mInfo, *mInfo2;
+    Lgm_MagModelInfo    *mInfo2;
 
-    /*
-     * Init mInfo
-This is no good! How does user define mag model etc...?
-I think there needs to be a Lgm_MagModelInfo struct in f
-Then add a routine to set stuff up in there. Or just use the ones we have already....
-For now we will just go with the defaults.
-     */
-    mInfo = Lgm_InitMagInfo();
-//mInfo->Bfield = Lgm_B_edip;
 
     /*
      * If arrays are already alloc'd, free them first
@@ -1066,6 +1067,7 @@ For now we will just go with the defaults.
      * Copy A's (given in the arguments) into p structure.
      * Transform the A's into K's using Lgm_KofAlpha().
      * Save the results in the p structure.
+     * Also copy the Lstars into p structure.
      */
     Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
@@ -1083,6 +1085,8 @@ For now we will just go with the defaults.
             //p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
             Lgm_InterpArr( Aarr, Karr, narr,   AlphaEq, &p->KofA[k] );
             Lgm_InterpArr( Aarr, Larr, narr,   AlphaEq, &p->LstarOfA[k] );
+//GUARD AGAINST BAD VALS HERE!!!? i.e. negative vals
+//printf("KofA[%d] = %g    LstarOfA[%d] = %g\n", k, p->KofA[k], k, p->LstarOfA[k]);
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
@@ -1103,9 +1107,9 @@ For now we will just go with the defaults.
      * Note that since this conversion involves E and Alpha, the result is 2D.
 assumes electrons -- generalize this...
      */
-    for ( m=0; m<nE; m++ ){
+    for ( m=0; m<nE; m++ ){ // energy loop
         p->E[m] = E[m];
-        for ( k=0; k<nA; k++ ){
+        for ( k=0; k<nA; k++ ){ // pitch angle loop
             p->MuofE[m][k] = Lgm_Ek_to_Mu( p->E[m], p->A[k], p->B, LGM_Ee0 );
             //printf("p->E[%d], p->A[%d], p->KofA[%d], p->B, f->MuofE[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, p->E[m], p->A[k], p->KofA[k], p->B, p->MuofE[m][k]);
         }
@@ -1125,13 +1129,13 @@ assumes electrons -- generalize this...
      */
     LGM_ARRAY_2D( p->PSD_EA,  p->nE,  p->nA,  double );
     LGM_ARRAY_2D( p->FLUX_EA, p->nE,  p->nA,  double );
-    for ( k=0; k<nA; k++ ){
+    for ( k=0; k<nA; k++ ){ // loop over pitch angles
 
 
         /*
          * Get L index and MK array
          */
-        Lstar = p->LstarOfA[k]; // MAKE SURE THIS GETS INTO p STRUCTURE.
+        Lstar = p->LstarOfA[k]; 
         i=0; done = FALSE;
         while ( !done ){
             if (i >= p->nL ) {
@@ -1146,6 +1150,9 @@ assumes electrons -- generalize this...
 
 
 
+        /*
+         * Grab the MK subarray at iL (this is PSD as a func of mu and K at the Lstar implied for this PA.)
+         */
         for ( iMu=0; iMu<p->nMu; iMu++ ){
             for ( iK=0; iK<p->nK; iK++ ){
                 p->PSD_MK[iMu][iK] = p->PSD_LMK[iL][iMu][iK];  
@@ -1160,7 +1167,7 @@ assumes electrons -- generalize this...
 
 
 
-        for ( m=0; m<nE; m++ ){
+        for ( m=0; m<nE; m++ ){ // loop over energy
             p2c2 = Lgm_p2c2( p->E[m], LGM_Ee0 );
 
             DoIt = FALSE;
@@ -1191,23 +1198,22 @@ assumes electrons -- generalize this...
                 } else {
                     p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
                 }
+//CRAP
 //if (m==2)
-//printf("p->MuofE[m][k] = %g p->KofA[k], p->A[k] = %g %g       p->PSD_EA[m][k] = %g  p->FLUX_EA[m][k] = %g\n", p->MuofE[m][k], p->KofA[k], p->A[k], p->PSD_EA[m][k], p->FLUX_EA[m][k]);
+//printf("m=%d,k=%d, p->MuofE[m][k] = %g p->KofA[k], p->A[k] = %g %g       p->PSD_EA[m][k] = %g  p->FLUX_EA[m][k] = %g\n", m,k,p->MuofE[m][k], p->KofA[k], p->A[k], p->PSD_EA[m][k], p->FLUX_EA[m][k]);
             } else {
                 p->PSD_EA[m][k] = 0.0;
             }
 
-        }
-    }
+
+        } // end energy loop (m index)
+    } // end pitch angle loop (k index)
 
     if ( p->DumpDiagnostics ) {
         DumpGif( "Lgm_PsdToFlux_PSD_EA", p->nA, p->nE, p->PSD_EA );
         DumpGif( "Lgm_PsdToFlux_FLUX_EA", p->nA, p->nE, p->FLUX_EA );
     }
 
-
-// FIX this... The create and destroy of this should not be in here...
-    Lgm_FreeMagInfo( mInfo );
 
     p->Alloced2 = TRUE;
 
@@ -1243,6 +1249,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     if ( K < 0.0 ) return(-9e99);
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
+    FitData->nMaxwellians = p->nMaxwellians;
 
 
     /*
@@ -1281,14 +1288,14 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
             if ( g > 1e-40 ) {
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = Lgm_Mu_to_Ek( p->Mu[j], A, p->B, LGM_Ee0 );
-//                printf("i0, i1 = %d %d   K0, K1 = %g %g   y0, y1, slp = %g %g %g   K = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", i0, i1, K0, K1, y0, y1, slp, K,  FitData->n, FitData->E[ FitData->n ], FitData->n , FitData->g[ FitData->n ]);
-                //printf("%g %g\n", FitData->E[ FitData->n ], FitData->g[ FitData->n ]);
+//printf("i0, i1 = %d %d   K0, K1 = %g %g   y0, y1, slp = %g %g %g   K = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", i0, i1, K0, K1, y0, y1, slp, K,  FitData->n, FitData->E[ FitData->n ], FitData->n , FitData->g[ FitData->n ]);
+//printf("%g %g\n", FitData->E[ FitData->n ], FitData->g[ FitData->n ]);
                 ++(FitData->n);
             }
         }
     }
 
-    if ( FitData->n >=  4 ) {
+    if ( FitData->n >=  2 ) {
 
 
         // interpolate/fit E
@@ -1307,7 +1314,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         x[2] = 25.0;
         x[3] = -2.0;
         x[4] = 200.0;
-        praxis( 4, x, (void *)FitData, Cost, in, out);
+        praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
     /*
     printf("out[0] = %g\n", out[0]);
     printf("out[1] = %g\n", out[1]);
@@ -1333,10 +1340,10 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     //x[2] = 200.0;
         //printf("PSD_TO_FLUX: x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
         E = Lgm_Mu_to_Ek( Mu, A, p->B, LGM_Ee0 );
-        psd = Model( x,  E );
+        psd = Model( x,  FitData->nMaxwellians, E );
         //psd = (double)a;
 
-    //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+        //printf("E, A = %g %g  x = %g %g psd = %g\n", E, A, x[1], x[2], psd);
     } else {
 
         psd = -9e99;
@@ -1607,7 +1614,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
     sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
 
     free( uImage );
@@ -1624,7 +1631,85 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
     }
     sprintf( Filename, "%s_Bar.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow2_Red, Rainbow2_Grn, Rainbow2_Blu, 256, 0, "");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    fclose(fp_gif);
+    free( uImage );
+
+}
+
+/**
+ *   Routine to write out a GIF image
+ */
+void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double **Image ){
+
+    double           Val, dVal;
+    int              w, h;
+    unsigned char   *uImage, uVal, Filename[1024];
+    FILE            *fp_gif, *fp_info;
+
+    int             LogScale;
+
+    LogScale = FALSE;
+    LogScale = TRUE;
+
+
+    //printf("Min, Max = %g %g\n", Min, Max);
+
+    sprintf( Filename, "%s.info", FilenameBase);
+    fp_info = fopen( Filename, "w" );
+    fprintf( fp_info, "Min: %g\n", Min );
+    fprintf( fp_info, "Max: %g\n", Max );
+    fclose( fp_info );
+
+
+
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+
+            if ( LogScale ) {
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+            } else {
+                Val = Image[h][w];
+            }
+            if ( Val < -1e99 ) {
+                uVal = 0;
+            } else {
+                dVal = (Val - Min)/(Max-Min)*255.0;
+                if (dVal > 255.0) {
+                    uVal = 255;
+                } else if ( dVal < 0.0 ) {
+                    uVal = 0;
+                } else {
+                    uVal = (unsigned char)dVal;
+                }
+            }
+            *(uImage + W*(H-1-h) + w) = uVal;
+
+        }
+    }
+
+    sprintf( Filename, "%s.gif", FilenameBase);
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    fclose(fp_gif);
+
+    free( uImage );
+
+
+
+    // dump a colorbar image
+    W = 10; H = 256;
+    uImage = (unsigned char *)calloc( W*H, sizeof(unsigned char) );
+    for ( w=0; w<W; w++ ){
+        for ( h=0; h<H; h++ ) {
+            *(uImage + W*(H-1-h) + w) = h;
+        }
+    }
+    sprintf( Filename, "%s_Bar.gif", FilenameBase);
+    fp_gif = fopen(Filename, "w");
+    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
     free( uImage );
 

@@ -29,6 +29,78 @@ int LgmSgp_TleChecksum( char *Line ) {
 
 }
 
+/*
+ *  For a given time, search through an array of TLEs and locate the most
+ *  recent (i.e. the one that comes right before).
+ */
+int LgmSgp_FindTLEforGivenTime( int nTLEs, _SgpTLE *TLEs, int SortOrder, double JD, int Verbosity ) {
+
+    int     il, ih, im, done;
+    double  JDl, JDh, JDm;
+
+
+    if ( SortOrder > 0 ) {
+        il = 0; ih = nTLEs-1;
+    } else {
+        ih = 0; il = nTLEs-1;
+    }
+    JDl = TLEs[il].JD;
+    JDh = TLEs[ih].JD;
+
+    /*
+     * Do a check to make sure JD is contained in the list of TLEs we have.
+     */
+    if ( JD < JDl ) {
+        printf("\nLgmSgp_FindTLEforGivenTime: Warning, requested time (JD = %lf) is less than time in earliest TLE (JD = %lf). \n", JD, JDl);
+        printf("\tTLE[%d]->ElementSetEpoch = %lf\n", il, TLEs[il].ElementSetEpoch );
+        return( -1 );
+    }
+    if ( ( JD > JDh ) ) {
+        printf("\nLgmSgp_FindTLEforGivenTime: Warning, requested time (JD = %lf) is greater than time in latest TLE (JD = %lf).\n", JD, JDh);
+        printf("\tTLE[%d]->ElementSetEpoch = %lf\n", ih, TLEs[ih].ElementSetEpoch );
+        return( -1 );
+    }
+
+    done = FALSE;
+    while ( !done ){
+        
+        if ( abs(ih-il) == 1 ) {
+
+            done = TRUE;
+
+        } else {
+
+            // Get val at midpoint index
+            im  = (il+ih)/2;  
+if ((im <0)||(im>nTLEs-1)){
+printf("HUH?\n");
+}
+            JDm = TLEs[im].JD;
+
+            if ( JDm > JD ) {        // val is in lower half
+                ih = im; JDh = JDm;
+            } else {                 // val is in upper half
+                il = im; JDl = JDm;
+            }
+
+        }
+
+    }
+
+
+    /*  
+     *  Take the TLE at index il. We could do linear interp, but there could be
+     *  trouble there.  What if the later TLE is there because a manuever was
+     *  done....?
+     */
+    return( il );
+
+}
+
+
+
+
+
 int LgmSgp_ReadTlesFromFile( char *Filename, int *nTLEs, _SgpTLE *TLEs, int Verbosity ) {
 
     char    *Line0, *Line1, *Line2, *ptr;
@@ -289,6 +361,9 @@ void Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int 
     if (Verbosity > 3) printf("\t\tIntDesig        = %s  (%s)\n", TLE->IntDesig, TLE->IntDesig2);
 
     // Element Set Epoch (UTC) (also decode into other date formats)
+    if ( Line1[20] == ' ' ) Line1[20] = '0'; // sometimes the TLEs have blanks where we expect zeros...
+    if ( Line1[21] == ' ' ) Line1[21] = '0'; // sometimes the TLEs have blanks where we expect zeros...
+    if ( Line1[22] == ' ' ) Line1[22] = '0'; // sometimes the TLEs have blanks where we expect zeros...
     strncpy( str, Line1+18, 14 ); str[14] = '\0';
     sscanf( str, "%lf", &(TLE->ElementSetEpoch));
     if (Verbosity > 3) printf("\t\tElementSetEpoch = %14.8lf\n", TLE->ElementSetEpoch);

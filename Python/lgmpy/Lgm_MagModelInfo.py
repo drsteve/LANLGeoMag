@@ -9,7 +9,7 @@ Lgm_MagModelInfo module, this contains the necessary code Mag Model Info
 """
 from ctypes import pointer
 
-from Lgm_Wrap import Lgm_MagModelInfo, Lgm_InitMagInfoDefaults
+from Lgm_Wrap import Lgm_MagModelInfo, Lgm_InitMagInfoDefaults, Lgm_FreeMagInfo_children
 
 
 class Lgm_MagModelInfo(Lgm_MagModelInfo):
@@ -26,3 +26,9 @@ class Lgm_MagModelInfo(Lgm_MagModelInfo):
         Set the default values from Lgm
         """
         Lgm_InitMagInfoDefaults(pointer(self))
+
+    def __del__(self):
+        """
+        clean up memory that is allocated in C
+        """
+        Lgm_FreeMagInfo_children(pointer(self))

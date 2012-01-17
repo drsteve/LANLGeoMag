@@ -17,4 +17,7 @@ double   **Get_DoubleDataset_2D( hid_t file, char *Str, hsize_t *Dims );
 double  ***Get_DoubleDataset_3D( hid_t file, char *Str, hsize_t *Dims );
 double ****Get_DoubleDataset_4D( hid_t file, char *Str, hsize_t *Dims );
 
+void Lgm_WriteStringAttr( hid_t DataSet, char *AttrNAme, char *Str );
+void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val );
+
 #endif

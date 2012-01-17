@@ -6,7 +6,7 @@ CC        = gcc
 
 FILES1    =  
 
-all   : TwoLineElements TwoLineElementsFromFile
+all   : TwoLineElements TwoLineElementsFromFile NearestTLE
 
 TwoLineElements : Makefile $(FILES1) TwoLineElements.c
 	$(CC) $(FILES1) TwoLineElements.c $(LIBS) -o TwoLineElements
@@ -14,6 +14,9 @@ TwoLineElements : Makefile $(FILES1) TwoLineElements.c
 TwoLineElementsFromFile : Makefile $(FILES1) TwoLineElementsFromFile.c
 	$(CC) $(FILES1) TwoLineElementsFromFile.c $(LIBS) -o TwoLineElementsFromFile
 
+NearestTLE : Makefile $(FILES1) NearestTLE.c
+	$(CC) $(FILES1) NearestTLE.c $(LIBS) -o NearestTLE
+
 
 clean :
-	rm TwoLineElements TwoLineElementsFromFile *.o
+	rm TwoLineElements TwoLineElementsFromFile NearestTLE *.o

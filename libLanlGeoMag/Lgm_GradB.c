@@ -422,9 +422,9 @@ void Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagM
  *  \details
  *      The gradient and curvature drift velocity of the guiding center is given by;
  *          \f[
- *              V_s = {mv^2\overqB^2}\left{\left(1-{B\over
+ *              V_s = {mv^2\over qB^2}\left(\left(1-{B\over
  *              2B_m}\right){\vec{B}\times\nabla B\over B} + \left(1-{B\over
- *              B_m}\right){(\nabla\times \vec{B})_perp} \right}
+ *              B_m}\right){(\nabla\times \vec{B})_perp} \right)
  *          \f]
  *      (e.g. see Sukhtina, M.A., "One the calculation of the magnetic srift
  *      velocity of particles with arbitrary pitch angles, Planet Space Sci.
@@ -432,9 +432,9 @@ void Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagM
  *      particle's kinetic energy, and \f$E_0\f$ its rest energy, this can be
  *      rewritten as,
  *          \f[
- *              V_s = {\eta (2+\eta)\over (1+\eta)}E_0\overqB^2}\left{\left(1-{B\over
+ *              V_s = {\eta (2+\eta)\over (1+\eta)}{E_0\over qB^2}\left(\left(1-{B\over
  *              2B_m}\right){\vec{B}\times\nabla B\over B} + \left(1-{B\over
- *              B_m}\right){(\nabla\times \vec{B})_perp} \right}
+ *              B_m}\right){(\nabla\times \vec{B})_perp} \right)
  *          \f]
  *
  *
@@ -453,15 +453,26 @@ void Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagM
  *      \date           2011
  *
  */
-void Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double T, double E0, double Bm, int DerivScheme, double h, Lgm_MagModelInfo *m ) {
+int Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, Lgm_MagModelInfo *m ) {
 
-    double      B, BoverBm, g, eta;
-    Lgm_Vector  CurlB, CurlB_para, CurlB_perp, GradB, Bvec, Q, R, S;
+    double      B, BoverBm, g, eta, h, Beta, Beta2, Gamma;
+    double      q, T, E0, Bm;
+    int         DerivScheme;
+    Lgm_Vector  CurlB, CurlB_para, CurlB_perp, GradB, Bvec, Q, R, S, W, Z;
     Lgm_Vector  B_Cross_GradB;
 
+    q           = m->Lgm_VelStep_q;
+    T           = m->Lgm_VelStep_T;
+    E0          = m->Lgm_VelStep_E0;
+    Bm          = m->Lgm_VelStep_Bm;
+    h           = m->Lgm_VelStep_h;
+    DerivScheme = m->Lgm_VelStep_DerivScheme;
+
+//printf("Lgm_GradAndCurvDriftVel: u0 = %g %g %g\n", u0->x, u0->y, u0->z);
     m->Bfield( u0, &Bvec, m );
     B = Lgm_Magnitude( &Bvec );
     BoverBm = B/Bm;
+//printf("BoverBm = %g\n", BoverBm);
 
 
     /*
@@ -482,20 +493,47 @@ void Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, double q, double 
      */
     Q = B_Cross_GradB;
     g = (1.0-0.5*BoverBm)/B;
+//printf("g1 = %g\n", g);
     Lgm_ScaleVector( &Q, g ); // [nT/Re]
 
     R = CurlB_perp;
     g = 1.0-BoverBm;
+//printf("g2 = %g\n", g);
     Lgm_ScaleVector( &R, g ); // [nT/Re]
 
     Lgm_VecAdd( &S, &Q, &R ); // [nT/Re]
     eta = T/E0; // kinetic energy over rest energy
-    g = eta*(2.0+eta)/(1.0+eta)*E0*1e6*Joules_Per_eV/(q*B*B); // [ N m / (A s nT^2) ]  
+    Gamma = eta + 1.0;
+    Beta2 = 1.0 - 1.0/(Gamma*Gamma);
+    Beta  = sqrt( Beta2 );
+    g = Gamma*Beta2*E0*1e6*Joules_Per_eV/(q*B*B); // [ N m / (A s nT^2) ]  
     // gS would have units of [ N m / (A s nT Re) ], so convert nT and Re to SI
     // to get a final answer in m/s. Then convert to km/s.
     g *= 1e9/(Re*1e6);        
+    g /= Re;        
+//Re/s
+//printf("g3 = %g\n", g);
     Lgm_ScaleVector( &S, g ); // [ N m / (A s T m) ] = [ N m / (A s (N/(A m) m) ] = [ m/s ]
-    *Vel = S;
+// now its Re/s
 
+
+    // Add in parallel velocity (Note that v = c*Beta)
+    if (BoverBm >= 1.0) {
+        g = 0.0;
+    } else {
+        g = -LGM_c/(1000.0*Re)*Beta*sqrt(1.0-BoverBm)/B;
+    }
+//printf("T = %g, Beta = %g g = %g\n", T, Beta, g);
+    W = Bvec;
+    Lgm_ScaleVector( &W, g );
+//printf("W = %g %g %g\n", W.x, W.y, W.z);
+
+    Lgm_VecAdd( &Z, &S, &W );
+    
+
+    *Vel = Z;
+
+
+    return(1);
 
 }

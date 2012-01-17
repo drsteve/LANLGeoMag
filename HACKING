@@ -45,6 +45,12 @@ Installing
 ==========
 sudo make install
 
+Note: This will run the script GetEopFiles. If you are behind a proxy, you may
+need to modify youe /etc/sudoers file to include the line;
+
+Defaults env_keep = "http_proxy ftp_proxy" 
+
+
 
 Release engineering
 ===================
