@@ -80,12 +80,12 @@ void Lgm_SetCurrentTimeStr( Lgm_ElapsedTimeInfo *t ) {
     sprintf( Str, "%s", asctime_r( &tp, Buf ) );
     p = index( Str, '\n' ); *p = '\0';
     sprintf( t->CurrentTimeStr, "%s", Str );
-    sprintf( t->CurrentTimeStr2, "%4d%02d%02d_%02d%02d%02d", tp.tm_year+1900, tp.tm_mon+1, tp.tm_mday, tp.tm_hour, tp.tm_min, tp.tm_sec );
+    sprintf( t->CurrentTimeStr2, "%4d-%02d-%02dT%02d:%02d:%02d", tp.tm_year+1900, tp.tm_mon+1, tp.tm_mday, tp.tm_hour, tp.tm_min, tp.tm_sec );
 
 }
 void Lgm_PrintCurrentTime( Lgm_ElapsedTimeInfo *t ) {
 
     Lgm_SetCurrentTimeStr( t );
-    printf( "%s*****  Current Time: %s  *****%s\n", t->ColorStart, t->CurrentTimeStr, t->ColorEnd  );
+    printf( "%s*****  Current Time: %s  *****%s\n", t->ColorStart, t->CurrentTimeStr2, t->ColorEnd  );
 
 }

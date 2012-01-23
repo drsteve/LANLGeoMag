@@ -13,9 +13,11 @@ typedef struct Lgm_ElapsedTimeInfo {
     time_t  RunStartTime;    // Clock time that the run was started.
     time_t  RunEndTime;      // Clock time that the run ended.
 
-    char    ElapsedTimeStr[15];  // String containing elapsed time. 
-    char    CurrentTimeStr[15];  // String containg current time.
-    char    CurrentTimeStr2[15];  // String containg current time in different form YYYYMMDD_HHMMSS.
+    char    ElapsedTimeStr[30];  // String containing elapsed time. 
+    char    CurrentTimeStr[30];  // String containg current time.
+    char    CurrentTimeStr2[30];  // String containg current time in different form YYYYMMDD_HHMMSS.
+
+    int     Alloced;
 
 
 } Lgm_ElapsedTimeInfo;
