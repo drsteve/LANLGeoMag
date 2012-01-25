@@ -328,13 +328,10 @@ typedef struct Lgm_MagModelInfo {
     /*
      * Variables for defining Octree stuff
      */
-    Lgm_OctreeCell  *OctreeRoot;
+    Lgm_Octree      *Octree;
+    int             Octree_kNN_InterpMethod;
     int             Octree_kNN_k;
-    int             Octree_kNN_InterpMethod;  // 0 = linear Div Feee; 1 = Quadratic Div Free; 2 = Newton 4-point
-    double          Octree_kNN_MaxDist;       // in physical units
-    double          OctreeScaleMin;
-    double          OctreeScaleMax;
-    double          OctreeScaleDiff;
+    double          Octree_kNN_MaxDist;
 
 
     /*
