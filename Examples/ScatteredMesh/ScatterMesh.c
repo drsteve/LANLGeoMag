@@ -10,13 +10,11 @@ int main( ) {
     Lgm_CTrans          *c = Lgm_init_ctrans( 1 ); // more compact declaration
     Lgm_QinDentonOne    p;
     Lgm_MagModelInfo    *mInfo;
-    Lgm_Vector          *u, *B, q, v;
-    double              Time, JD, x, y, z, r, d, dist;
+    Lgm_Vector          *u, *B, q, Binterp, Bcd, Bmodel, Diff;
+    double              Time, JD, x, y, z, r, d;
     long int            Date, n;
 
     Lgm_Octree          *Octree;
-    Lgm_OctreeData      *kNN;
-    int                 K, Kgot, i, j;
     
 
     t.ColorizeText = TRUE;
@@ -40,21 +38,31 @@ int main( ) {
 
     Lgm_Set_Coord_Transforms( Date, Time, mInfo->c );
     Lgm_set_QinDenton( &p, mInfo );
-    mInfo->Bfield = Lgm_B_T89;
 
 
-    d = 0.1;
+    d = 0.25;
     n = 0;
     Lgm_PrintCurrentTime( &t );
     for ( x = -15.0; x <= 15.0; x += d ){
         for ( y = -15.0; y <= 15.0; y += d ){
             for ( z = -15.0; z <= 15.0; z += d ){
-                u[n].x = x; u[n].y = y; u[n].z = z;
-                r = Lgm_Magnitude( &u[n] );
-                //if (r > 1.1){
-                //    mInfo->Bfield( &u[n], &B[n], mInfo );
+                q.x = x; q.y = y; q.z = z;
+                r = Lgm_Magnitude( &q );
+                if (r > 1.1){
+                    u[n].x = q.x; u[n].y = q.y; u[n].z = q.z;
+
+                    mInfo->Bfield = Lgm_B_T89;
+                    mInfo->Bfield( &u[n], &Bmodel, mInfo );
+
+                    mInfo->Bfield = Lgm_B_edip;
+                    mInfo->Bfield( &u[n], &Bcd, mInfo );
+
+                    B[n].x = Bmodel.x - Bcd.x;
+                    B[n].y = Bmodel.y - Bcd.y;
+                    B[n].z = Bmodel.z - Bcd.z;
+
                     ++n;
-                //}
+                }
             }
         }
     }
@@ -65,7 +73,7 @@ int main( ) {
 
 
     /*
-     * Test kNN algorithm.
+     * Create Octree
      */
     printf("Creating Octree\n");
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
@@ -73,39 +81,43 @@ int main( ) {
     printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
     Lgm_PrintElapsedTime( &t );
 
-    q.x = 3.2233;
-    q.y = 2.4698;
-    q.z = 1.35193;
-
-    K = 4; 
-    LGM_ARRAY_1D( kNN, K, Lgm_OctreeData );
 
 
 
-    printf("\n\nTesting kNN (1000000 times)\n");
-    Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-    for (j=0; j<1000000; j++){
-        q.x = 30.0*rand()/(double)RAND_MAX - 15.0;
-        q.y = 30.0*rand()/(double)RAND_MAX - 15.0;
-        q.z = 30.0*rand()/(double)RAND_MAX - 15.0;
-        Lgm_Octree_kNN( &q, Octree, K, &Kgot, 1.0*1.0, kNN );
+    /*
+     * Test interpolation...
+     */
+    mInfo->Octree = Octree;
+    Lgm_Set_Octree_kNN_k( mInfo, 12 );
+    d = 0.01; y = 0.0; z = 0.0;
+    y = 0.0; z = 0.0;
+    for ( x = -9.0; x <= -2.0; x += d ){
+        q.x = x; q.y = y; q.z = z;
+
+        mInfo->Bfield = Lgm_B_FromScatteredData;
+        mInfo->Bfield( &q, &Binterp, mInfo );
+
+        mInfo->Bfield = Lgm_B_edip;
+        mInfo->Bfield( &q, &Bcd, mInfo );
+
+        Binterp.x += Bcd.x;
+        Binterp.y += Bcd.y;
+        Binterp.z += Bcd.z;
+
+        mInfo->Bfield = Lgm_B_T89;
+        mInfo->Bfield( &q, &Bmodel, mInfo );
+
+        Lgm_VecSub( &Diff, &Bmodel, &Binterp );
+
+        printf("q = %g %g %g   Binterp = %g %g %g  Bmodel = %g %g %g   Diff = %g %g %g   |Diff| = %g  Pcnt Error = %g\n", q.x, q.y, q.z, Binterp.x, Binterp.y, Binterp.z, Bmodel.x, Bmodel.y, Bmodel.z, Diff.x, Diff.y, Diff.z, Lgm_Magnitude(&Diff), Lgm_Magnitude(&Diff)/Lgm_Magnitude(&Bmodel)*100.0);
     }
-    Lgm_PrintElapsedTime( &t );
-
-
-
-    printf("\n\nKgot = %d   q = %g %g %g\n", Kgot, q.x, q.y, q.z);
-    for (i=0; i<Kgot; i++){
-        Lgm_OctreeUnScalePosition( &(kNN[i].Position), &v, Octree );
-        Lgm_OctreeUnScaleDistance( sqrt(kNN[i].Dist2), &dist, Octree );
-        printf("%02d: dist = %g   v = %g %g %g\n", i, dist, v.x, v.y, v.z );
-    }
 
 
 
 
 
-    LGM_ARRAY_1D_FREE( kNN );
+
+
 
     printf("Feeing Octree\n");
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );

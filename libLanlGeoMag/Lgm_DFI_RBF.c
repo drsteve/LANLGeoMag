@@ -56,7 +56,7 @@
  *      \f}
  *
  *
- *  We take the \f$\psi\f$ to be a scalar guassian RBF,
+ *  If we take the \f$\psi\f$ to be a scalar guassian RBF,
  *
  *
  *      \f[
@@ -78,6 +78,32 @@
  *          \Phi_{22} & = & -\partial_x^2 - \partial_y^2 & = & \left(4\epsilon - 4\epsilon^2 \left(x^2+y^2\right)\right) \psi
  *          \end{array}
  *      \f]
+ *
+ *  If we take the \f$\psi\f$ to be the multi-quadric RBF,
+ *
+ *
+ *      \f[
+ *          \psi(r) = \sqrt{1 + e r^2}
+ *      \f]
+ *
+ *  we get;
+ *
+ *
+ *      \f[
+ *          \begin{array}{rclcl}
+ *          \Phi_{00} & = & -\partial_y^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+x^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{01} & = & \partial_x\partial_y         & = & -e^2 x y ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{02} & = & \partial_x\partial_z         & = & -e^2 x z ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{10} & = & \partial_y\partial_x         & = &  \Phi_{01}\\
+ *          \Phi_{11} & = & -\partial_x^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+y^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{12} & = & \partial_y\partial_z         & = & -e^2 x z ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{20} & = & \partial_z\partial_x         & = &  \Phi_{02}\\
+ *          \Phi_{21} & = & \partial_z\partial_y         & = &  \Phi_{12}\\
+ *          \Phi_{22} & = & -\partial_x^2 - \partial_y^2 & = & -( \epsilon^2 (r^2+z^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} 
+ *          \end{array}
+ *      \f]
+ *
+ *
  *
  *  To find the weighting vectors \f$\vec{c}_j\f$, we make sure that the
  *  interpolation agrees with all the data that we have. This leads to a linear
@@ -203,15 +229,22 @@
 
 #include "Lgm/Lgm_DFI_RBF.h"
 
+#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
 
 
 /** Given \f$\vec{v} = (x, y, z)\f$ and \f$\vec{v}_0 = (x_0, y_0, z_0)\f$ this
- *  routine computes the matrix elements \f$\Phi_{ij}(x-x_0, y-y_0, z-z_0)\f$. 
+ *  routine computes the matrix elements \f$\Phi_{ij}(x-x_0, y-y_0, z-z_0)\f$,
+ *  where the scalar RBF is taken to be the guassian;
  *
- *  \param[in]        v   -   input target vector
- *  \param[in]       v0   -   input reference vector
- *  \param[in]      eps   -   smoothing factor in scalar RBF
- *  \param[in,out]  Phi   -   pointer to 3x3 matrix-value RBF (must must allocate and free)
+ *  \f[
+ *      \psi = \exp{ -\epsilon r^2 } = (\exp{ -\epsilon (x^2+y^2+z^2) }
+ *  \f]. 
+ *
+ *  \param[in]          v  -   input target vector
+ *  \param[in]         v0  -   input reference vector
+ *  \param[in]        eps  -   smoothing factor in scalar RBF
+ *  \param[in,out]    Phi  -   3x3 matrix-value RBF.
+ *  \param[in]        rbf  -   pointer to structure containing info for RBF interpolation. 
  *
  *  \return  void
  *
@@ -220,33 +253,71 @@
  *
  *
  */
-void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double eps, double **Phi ) {
+void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DFI_RBF_Info *rbf  ) {
 
-    double  psi, x, y, z, x2, y2, z2, r2, xy, yz, xz, f, g;
+    double  psi, psi2, psi3, x, y, z, x2, y2, z2, r2, f, g;
+    double  eps, Eps2, TwoEps;
 
+    eps = rbf->eps;
     x = v->x - v0->x;
     y = v->y - v0->y;
     z = v->z - v0->z;
-
     x2 = x*x; y2 = y*y; z2 = z*z;
     r2 = x2 + y2 + z2;
-    xy = x*y; yz = y*z; xz = x*z;
-    f = 4.0*eps; g = f*eps;
 
-    psi = exp( -eps*r2 );
+    if ( rbf->RadialBasisFunction == LGM_RBF_GAUSSIAN ) {
 
-    Phi[0][0] = ( f - g*(y2 + z2) ) * psi;
-    Phi[0][1] = g*xy*psi;
-    Phi[0][2] = g*xz*psi;
+        f = 4.0*eps; g = f*eps;
+        psi = exp( -eps*r2 );
 
-    Phi[1][0] = Phi[0][1];
-    Phi[1][1] = ( f - g*(x2 + z2) ) * psi;
-    Phi[1][2] = g*yz*psi;
+        Phi[0][0] = ( f - g*(y2 + z2) ) * psi;
+        Phi[0][1] = g*x*y*psi;
+        Phi[0][2] = g*x*z*psi;
 
-    Phi[2][0] = Phi[0][2];
-    Phi[2][1] = Phi[1][2];
-    Phi[2][2] = ( f - g*(x2 + y2) ) * psi;
+        Phi[1][0] = Phi[0][1];
+        Phi[1][1] = ( f - g*(x2 + z2) ) * psi;
+        Phi[1][2] = g*y*z*psi;
 
+        Phi[2][0] = Phi[0][2];
+        Phi[2][1] = Phi[1][2];
+        Phi[2][2] = ( f - g*(x2 + y2) ) * psi;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_MULTIQUADRIC ) {
+
+        Eps2   = eps*eps;
+        TwoEps = 2.0*eps;
+        f      = 1.0 + eps*r2;
+        psi    = sqrt( f );
+        psi2   = f; psi3 = psi*psi2;
+        g      = 1.0/psi3;
+
+        Phi[0][0] = ( Eps2*(r2+x2) + TwoEps) *g;
+        Phi[0][1] = Eps2*x*y *g;
+        Phi[0][2] = Eps2*y*z *g;
+
+        Phi[1][0] = Phi[0][1];
+        Phi[1][1] = ( Eps2*(r2+y2) + TwoEps) *g;
+        Phi[1][2] = Eps2*x*z *g;
+
+        Phi[2][0] = Phi[0][2];
+        Phi[2][1] = Phi[1][2];
+        Phi[2][2] = ( Eps2*(r2+z2) + TwoEps) *g;
+        
+
+    } else {
+        printf("Unknown value for rbf->RadialBasisFunction. (Got %d)\n", rbf->RadialBasisFunction );
+    }
+
+    /*
+    int i, j;
+    for (i=0; i<3; i++){
+        for (j=0; j<3; j++){
+            printf("%15g ", Phi[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+    */
 
     return;
 
@@ -259,10 +330,11 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double eps, double **Phi
  *  \f$\vec{c}_j\f$. Info is returned in the rbf structure.
  *
  *
- *  \param[in]        v   -   pointer to an array of position vectors.
- *  \param[in]        B   -   pointer to array of corresponding field vectors.
- *  \param[in]        n   -   number of (v, B) pairs defined.
- *  \param[in]      eps   -   smoothing factor in scalar RBF.
+ *  \param[in]                       v   -   pointer to an array of position vectors.
+ *  \param[in]                       B   -   pointer to array of corresponding field vectors.
+ *  \param[in]                       n   -   number of (v, B) pairs defined.
+ *  \param[in]                     eps   -   smoothing factor in scalar RBF.
+ *  \param[in]      RadialBasisFunction  -   RBF to use. Can be LGM_RBF_GAUSSIAN, LGM_RBF_MULTIQUADRIC
  *
  *  \return  pointer to structure containing info for RBF interpolation. User
  *           is responsible for freeing with Lgm_DFI_RBF_Free().
@@ -272,28 +344,30 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double eps, double **Phi
  *
  *
  */
-Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double eps ) {
+Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double eps, int RadialBasisFunction ) {
 
-    int              i, j, ii, jj, p, q, n3;
-    double           *d, **a, **Phi;
+    int              i, j, ii, jj, p, q, n3, s;
+    double           *d, **a, Phi[3][3], val;
+    gsl_matrix       *A;
+    gsl_vector       *D, *c;
     Lgm_DFI_RBF_Info *rbf;
 
     n3 = 3*n;
-
-    LGM_ARRAY_1D( d, n3, double ); 
-    LGM_ARRAY_2D( a, n3, n3, double ); 
-    LGM_ARRAY_2D( Phi, 3, 3, double ); 
+    A = gsl_matrix_calloc( n3, n3 );
+    c = gsl_vector_alloc( n3 );
+    D = gsl_vector_calloc( n3 );
 
 
     /*
      * Save info needed to do an evaluation.
      */
     rbf = ( Lgm_DFI_RBF_Info *)calloc( 1, sizeof(*rbf) );
+    rbf->RadialBasisFunction = RadialBasisFunction;
     rbf->eps = eps;
     rbf->n   = n;
     rbf->n3  = n3;
-    rbf->c   = gsl_vector_alloc( n3 );
     LGM_ARRAY_1D( rbf->v, n, Lgm_Vector);
+    LGM_ARRAY_1D( rbf->c, n, Lgm_Vector);
     for ( i=0; i<n; i++ ) rbf->v[i] = v[i];
     
 
@@ -302,9 +376,10 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
      * Fill d array.
      */
     for ( ii=0, i=0; i<n; i++ ) {
-        d[ii++] = B[i].x;
-        d[ii++] = B[i].y;
-        d[ii++] = B[i].z;
+        gsl_vector_set( D, ii, B[i].x); ii++;
+        gsl_vector_set( D, ii, B[i].y); ii++;
+        gsl_vector_set( D, ii, B[i].z); ii++;
+        //printf("B = %g %g %g\n", B[i].x, B[i].y, B[i].z);
     }
 
 
@@ -320,11 +395,11 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
             jj = 3*j;
 
             // Get Phi( v_i - v_j )
-            Lgm_DFI_RBF_Phi( &v[i], &v[j], eps, Phi );
+            Lgm_DFI_RBF_Phi( &v[i], &v[j], Phi, rbf );
 
             for ( p=0; p<3; p++ ){ // subarray row
                 for ( q=0; q<3; q++ ){  // subarray column
-                    a[ii+p][jj+q] = Phi[p][q];
+                    gsl_matrix_set( A, ii+p, jj+q, Phi[p][q] );
                 }
             }
 
@@ -332,6 +407,15 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
         }
 
     }
+
+    //for (i=0; i<n3; i++){
+    //    for (j=0; j<n3; j++){
+    //        printf("%15g ", gsl_matrix_get(A, i, j ) );
+    //    }
+    //    printf("\n");
+    //}
+
+
 
 
     /*
@@ -346,19 +430,27 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
      *  system to get c.
      *
      */
-    gsl_vector_view D = gsl_vector_view_array( d, n3 );
-    gsl_matrix_view A = gsl_matrix_view_array( a, n3, n3 );
-    gsl_linalg_cholesky_decomp( &A.matrix );
-    gsl_linalg_cholesky_solve( &A.matrix, &D.vector, rbf->c );
+    if ( LGM_DFI_RBF_SOLVER == LGM_CHOLESKY_DECOMP ){
+        gsl_linalg_cholesky_decomp( A );
+        gsl_linalg_cholesky_solve( A, D, c );
+    } else if ( LGM_DFI_RBF_SOLVER == LGM_PLU_DECOMP ){
+        gsl_permutation *P = gsl_permutation_alloc( n3 );
+        gsl_linalg_LU_decomp( A, P, &s );
+        gsl_linalg_LU_solve( A, P, D, c );
+        gsl_permutation_free( P );
+    }
+
+    for (i=0; i<n; i++){
+        rbf->c[i].x = gsl_vector_get( c, 3*i+0 );
+        rbf->c[i].y = gsl_vector_get( c, 3*i+1 );
+        rbf->c[i].z = gsl_vector_get( c, 3*i+2 );
+    }
 
 
     
-
-
-
-    LGM_ARRAY_1D_FREE( d ); 
-    LGM_ARRAY_2D_FREE( a ); 
-    LGM_ARRAY_2D_FREE( Phi ); 
+    gsl_vector_free( D );
+    gsl_vector_free( c );
+    gsl_matrix_free( A );
 
     return( rbf );
 
@@ -378,7 +470,7 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
  */
 void    Lgm_DFI_RBF_Free( Lgm_DFI_RBF_Info *rbf ) {
     LGM_ARRAY_1D_FREE( rbf->v );
-    gsl_vector_free( rbf->c );
+    LGM_ARRAY_1D_FREE( rbf->c );
     return;
 }
 
@@ -407,14 +499,17 @@ void    Lgm_DFI_RBF_Eval( Lgm_Vector *v, Lgm_Vector *B, Lgm_DFI_RBF_Info *rbf ) 
     Lgm_Vector  W;
     double      Phi[3][3];
 
+
     B->x = B->y = B->z = 0.0;
     for ( j=0; j<rbf->n; j++ ){
 
-        Lgm_DFI_RBF_Phi( v, &rbf->v[j], rbf->eps, Phi );
-        Lgm_MatTimesVec( Phi, &rbf->v[j], &W );
+        Lgm_DFI_RBF_Phi( v, &rbf->v[j], Phi, rbf );
+        Lgm_MatTimesVec( Phi, &rbf->c[j], &W );
+        //printf("c = %g %g %g   W = %g %g %g\n", rbf->c[j].x, rbf->c[j].y, rbf->c[j].z, W.x, W.y, W.z);
         B->x += W.x; B->y += W.y; B->z += W.z;
 
     }
+
 
     return;
     
