@@ -13,7 +13,7 @@ import ctypes
 import numpy as np
 
 import MagData
-from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_T89, Lgm_B_TS04_opt
+from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_T89, Lgm_B_TS04
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
@@ -106,7 +106,7 @@ class Lgm_TS04(MagData.MagData):
         self._mmi.W = arr_type(*self['W'])
         
         #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
-        retval = Lgm_B_TS04_opt(pointer(self._Vpos), pointer(B), pointer(self._mmi))
+        retval = Lgm_B_TS04(pointer(self._Vpos), pointer(B), pointer(self._mmi))
         if retval != 1:
             raise(RuntimeWarning('Odd return from Lgm_T89') )
         ans.append(B)
@@ -125,10 +125,10 @@ class Lgm_TS04(MagData.MagData):
         if isinstance(pos, np.ndarray):
             raise(NotImplementedError('Only lists can be input for position now') )
 
-def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
+def TS04(pos, time, P, Dst, By, Bz, W, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """
     Easy wrapper to just return values without having to create an instance of
-    Lgm_T89.
+    Lgm_TS04.
 
     All input parameters can be either their type or a list of the that type, all
     inputs must be the same length
@@ -164,7 +164,7 @@ def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     Lgm_T89.Lgm_T89
 
     """
-    a = Lgm_T89(pos, time, Kp, coord_system = coord_system,
+    a = Lgm_TS04(pos, time, P, Dst, By, Bz, W, coord_system = coord_system,
                         INTERNAL_MODEL=INTERNAL_MODEL)
     try:
         ans = [val.tolist() for val in a['B']]
