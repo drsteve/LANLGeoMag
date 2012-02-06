@@ -280,3 +280,18 @@ void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo) {
     MagInfo->InternalModel = LGM_EDIP;
     MagInfo->Bfield = Lgm_B_edip;
 }
+
+void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_CDIP;
+}
+
+void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_CDIP;
+}
+
+void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_IGRF;
+}
+
+
+
