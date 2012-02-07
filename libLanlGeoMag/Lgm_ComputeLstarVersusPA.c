@@ -183,7 +183,9 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
                     MagEphemInfo->I[i] = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
 
                     //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
-                    printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+                    if (LstarInfo3->VerbosityLevel > 0 ) {
+		      printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+		    }
 
                     /*
                      * Save results to the MagEphemInfo structure.
