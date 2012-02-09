@@ -24,8 +24,8 @@ int main( ) {
 
 
 
-    LGM_ARRAY_1D( u, 500000, Lgm_Vector );
-    LGM_ARRAY_1D( B, 500000, Lgm_Vector );
+    LGM_ARRAY_1D( u, 5000000, Lgm_Vector );
+    LGM_ARRAY_1D( B, 5000000, Lgm_Vector );
 
 
     mInfo = Lgm_InitMagInfo( );
@@ -43,7 +43,7 @@ int main( ) {
     mInfo->Bfield = Lgm_B_T89;
 
 
-    d = 0.5;
+    d = 0.3;
     n = 0;
     Lgm_PrintCurrentTime( &t );
     for ( x = -15.0; x <= 15.0; x += d ){
@@ -82,9 +82,9 @@ int main( ) {
 
 
 
-    printf("\n\nTesting kNN (1000 times)\n");
+    printf("\n\nTesting kNN (1000000 times)\n");
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-    for (j=0; j<=1000; j++){
+    for (j=0; j<=1000000; j++){
         q.x = 30.0*rand()/(double)RAND_MAX - 15.0;
         q.y = 30.0*rand()/(double)RAND_MAX - 15.0;
         q.z = 30.0*rand()/(double)RAND_MAX - 15.0;
@@ -107,7 +107,7 @@ int main( ) {
 
     LGM_ARRAY_1D_FREE( kNN );
 
-    printf("Feeing Octree\n");
+    printf("Freeing Octree\n");
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
     Lgm_FreeOctree( Octree );
     printf("Octree Freed\n");

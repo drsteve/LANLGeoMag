@@ -13,8 +13,8 @@
  */
 #include "Lgm/Lgm_MagModelInfo.h"
 
-#define FMAX(a,b)  ((a)>(b))?(a):(b)
-#define FMIN(a,b)  ((a)<(b))?(a):(b)
+#define FMAX(a,b)  (((a)>(b))?(a):(b))
+#define FMIN(a,b)  (((a)<(b))?(a):(b))
 
 int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
           double Htry, double *Hdid, double *Hnext,
