@@ -43,6 +43,7 @@ Lgm_Octree *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectData, un
     Max = -9e99;
     Min = 9e99;
     for (j=0; j<t->nData; j++){
+        t->Data[j].Id = j;
         t->Data[j].Position.x = ObjectPoints[j].x;
         t->Data[j].Position.y = ObjectPoints[j].y;
         t->Data[j].Position.z = ObjectPoints[j].z;
@@ -78,6 +79,8 @@ Lgm_Octree *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectData, un
     ot->Max  = Max;
     ot->Diff = Diff;
     ot->Root = t;
+
+    ot->kNN_Lookups = 0;
 
 
     return( ot );
@@ -779,6 +782,8 @@ int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, doub
      */
     while ( (p = PopObj(&PQ)) ) free( p );
 
+    ++(Octree->kNN_Lookups);
+    
 
     /*
      *  return success

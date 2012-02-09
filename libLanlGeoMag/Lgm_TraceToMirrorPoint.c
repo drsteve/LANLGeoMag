@@ -13,6 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *
+ *
+ * Feb 6, 2012 -- took out the eps parameter in MagStep (now fed by vals in
+ * structure). But in this routine we had eps = 1e-10 hardcoded). Check to see it still works.
+ *
+ *
  */
 
 #include <stdio.h>
@@ -131,7 +136,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         // First, try a moderately small step in the user-supplied direction.
         Htry = 0.1; // Some mirror point pairs may be closer thogether than this. If we fail, we need to try with a smaller value here.
         P = *u;
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
         Info->Bfield( &P, &Bvec, Info );
         B = Lgm_Magnitude( &Bvec );
         F = B-Bm;
@@ -159,7 +164,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
              */
             Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
             P    = *u;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return( LGM_BAD_TRACE );
             Info->Bfield( &P, &Bvec, Info );
             B = Lgm_Magnitude( &Bvec );
             F = B-Bm;
@@ -223,7 +228,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
          */
         if (Htry > Hmax) Htry = Hmax;
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 
 
         /*
@@ -363,7 +368,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
 
                 //P = Pa; Htry = 0.5*d;
                 P = Pa; Htry = LGM_1_OVER_GOLD*d;
-                if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-10, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+                if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
                 Info->Bfield( &P, &Bvec, Info );
                 F = Lgm_Magnitude( &Bvec ) - Bm;
                 if ( F >= 0.0 ) {

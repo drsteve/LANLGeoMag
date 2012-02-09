@@ -68,7 +68,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         Bs = Lgm_Magnitude( &Bvec );
 //printf("Bs-Bm = %g\n", Bs-Bm);
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Be  = Lgm_Magnitude( &Bvec );
@@ -85,7 +85,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Bs = Lgm_Magnitude( &Bvec );
 
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, LstarInfo->mInfo->Lgm_MagStep_Tol, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
 
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Be  = Lgm_Magnitude( &Bvec );

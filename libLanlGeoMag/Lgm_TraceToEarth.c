@@ -143,13 +143,13 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         Htry = 0.01;
 
         // sgn = +1
-        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &HeightPlus );
         //HeightPlus = WGS84_A*(Lgm_Magnitude( &w )-1.0);
 
         // sgn = -1
-        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &HeightMinus );
         //HeightMinus = WGS84_A*(Lgm_Magnitude( &w )-1.0);
@@ -166,7 +166,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         while ( !done ) {
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, direction, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, direction, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Sa += Hdid;
             Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
             Lgm_WGS84_to_GeodHeight( &w, &Height );
@@ -232,7 +232,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 //    reset = TRUE;
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
 	    F =  Height - TargetHeight;
@@ -308,7 +308,7 @@ if (0==1){
         } else {
 
             P = Pa; Htry = 0.5*d;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
             Lgm_WGS84_to_GeodHeight( &w, &Height );
             //Height = WGS84_A*(Lgm_Magnitude( &w )-1.0);
