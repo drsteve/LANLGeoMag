@@ -101,13 +101,13 @@ int main( ) {
     mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
     mInfo->Lgm_TraceLine_Tol   = 1e-6;
     
-    //Lgm_B_FromScatteredData_SetUp( mInfo );
+    Lgm_B_FromScatteredData_SetUp( mInfo );
 
 
     //mInfo->Bfield = Lgm_B_T89;
     fp = fopen("line_xz.txt", "w");
     fp2 = fopen("line_xz2.txt", "w");
-    for (Lat = 30.0; Lat<=35.0; Lat += 1.0){
+    for (Lat = 30.0; Lat<=90.0; Lat += 1.0){
         v.x = -2.0*cos( Lat*RadPerDeg ); v.y = 0.0; v.z = 2.0*sin( Lat*RadPerDeg );
         printf("v = %g %g %g\n", v.x, v.y, v.z);
         Lgm_TraceLine( &v, &w, 120.0, -1.0, 1e-7, FALSE, mInfo );
@@ -120,7 +120,7 @@ int main( ) {
         }
     }
 
-    //Lgm_B_FromScatteredData_TearDown( mInfo );
+    Lgm_B_FromScatteredData_TearDown( mInfo );
 
 /*
     for (Lat = 30.0; Lat<=90.0;  Lat += 1.0){

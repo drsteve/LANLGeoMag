@@ -8,7 +8,9 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_Octree.h"
 #include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/qsort.h"
 
+#define int_lt(a,b) ((*a)<(*b))
 
 
 
@@ -222,7 +224,8 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     LGM_ARRAY_1D( LookUpKey, Kgot, unsigned long int );
     for ( i=0; i<Kgot; i++ ) LookUpKey[i] = Info->Octree_kNN[i].Id;
     KeyLength = Kgot*sizeof( unsigned long int );
-    quicksort_uli( (long int)Kgot, LookUpKey-1 );
+    QSORT( unsigned long int, LookUpKey, Kgot, int_lt );
+    //quicksort_uli( (long int)Kgot, LookUpKey-1 );
 
 
 
@@ -261,7 +264,8 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
             I_data[i] = Info->Octree_kNN[i].Id;
             //printf("Position[%d] = %g %g %g    B_data[%d] = %g %g %g\n", i, v_data[i].x, v_data[i].y, v_data[i].z, i, B_data[i].x, B_data[i].y, B_data[i].z );
         }
-        quicksort_uli( (long int)n_data, I_data-1 );
+        QSORT( unsigned long int, I_data, n_data, int_lt );
+        //quicksort_uli( (long int)n_data, I_data-1 );
 
 
         /*
