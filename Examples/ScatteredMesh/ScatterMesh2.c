@@ -92,10 +92,10 @@ int main( ) {
     mInfo->Octree = Octree;
     Lgm_Set_Octree_kNN_k( mInfo, 4 );
 
-    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
+    //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
     //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_TS04, mInfo );
     //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, mInfo );
-    //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, mInfo );
     //mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
     mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
     mInfo->Lgm_MagStep_BS_Eps  = 1e-4;

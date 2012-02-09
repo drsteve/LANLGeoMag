@@ -128,6 +128,10 @@ void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info ) {
         Lgm_DFI_RBF_Free( rbf );
     }
 
+    if ( Info->Octree_kNN_Alloced > 0 ) {
+        LGM_ARRAY_1D_FREE( Info->Octree_kNN );                                                                                                                                                               
+    }
+
 }
 
 
@@ -261,7 +265,10 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 
 
         /*
-         *  Construct the rbf structure.
+         *  Construct the rbf structure. We dont free these until the hash
+         *  table is done with. Note that the hash table will be nthe only
+         *  reference to the pointer.  To free, use
+         *  Lgm_B_FromScatteredData_TearDown().
          */
         eps = 0.01;
         rbf = Lgm_DFI_RBF_Init( I_data, v_data, B_data, n_data, eps, LGM_RBF_GAUSSIAN );
@@ -289,11 +296,6 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     Lgm_DFI_RBF_Eval( v, &B1, rbf );
 
 
-
-//printf("v = %g %g %g   |v| = %g   B = %g %g %g\n", v->x, v->y, v->z, Lgm_Magnitude(v), B1.x, B1.y, B1.z );
-//printf("\n");
-
-
     /*
      *  Cleanup. Free rbf, kNN, etc..
      */
@@ -318,9 +320,6 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
                         break;
 
     }
-
-
-
 
 
     B->x = B1.x + B2.x;

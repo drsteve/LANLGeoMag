@@ -9,6 +9,8 @@
 
 struct timeb  StartTime;
 double ElapsedTime2( struct timeb StartTime );
+//int total_callocs=0;
+//int total_frees=0;
 
 /**
  *   Store given 3D data into an octree data structure.
@@ -388,6 +390,8 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
 
     // Allocate an element for the PQ
     new = (pQueue *) calloc( 1, sizeof(pQueue) );
+//++total_callocs;
+//printf("InsertCell_callocs = %d    MinDist2 = %g\n", total_callocs, dist);
 
     // Add Info
     new->Obj      = Cell;
@@ -442,6 +446,21 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     return( dist );
@@ -482,6 +501,9 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
 
     // Allocate an element for the PQ
     new = (pQueue *) calloc( 1, sizeof(pQueue) );
+//++total_callocs;
+//printf("InsertPoint_callocs = %d\n", total_callocs);
+//printf("MinDist2 = %g\n", MinDist2);
 
     // Add Info
     new->Obj      = Cell;
@@ -495,34 +517,38 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
         *PQ = new;
         new->Next = NULL;
         new->Prev = NULL;
+//printf("1.\n"); //PrintPQ( PQ ); //only for debugging
         return;
     } else {
+
         // find where to add the new element
         p = *PQ;
         while ( p ) {
-            if ( new->MinDist2 < p->MinDist2 ) {
-                if ( p->Prev == NULL ) {
-                    // Insert at top (i.e. as first element)
-                    new->Next = p;
-                    new->Prev = NULL;
-                    p->Prev   = new;
-                    *PQ        = new;
-                    return;
-                } else if ( p->Next == NULL ) {
-                    // Insert at bottom (i.e. as last element)
-                    p->Next   = new;
-                    new->Next = NULL;
-                    new->Prev = p;
-                    return;
-                } else {
-                    // Insert before p
-                    new->Next     = p;
-                    new->Prev     = p->Prev;
-                    p->Prev->Next = new;
-                    p->Prev       = new;
-                    return;
-                }
-            }
+
+            if ( (new->MinDist2 <= p->MinDist2) && (p->Prev != NULL) ) {
+                // Insert before p
+                new->Next     = p;
+                new->Prev     = p->Prev;
+                p->Prev->Next = new;
+                p->Prev       = new;
+//printf("2.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } else if ( (new->MinDist2 <= p->MinDist2) && (p->Prev == NULL) ) {
+                // Insert at top (i.e. as first element)
+                new->Next = p;
+                new->Prev = NULL;
+                p->Prev   = new;
+                *PQ        = new;
+//printf("3.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } else if ( (new->MinDist2 > p->MinDist2) && (p->Next == NULL) ) {
+                // Insert at bottom (i.e. as last element)
+                p->Next   = new;
+                new->Next = NULL;
+                new->Prev = p;
+//printf("4.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } 
             p = p->Next;
         }
     }
@@ -689,6 +715,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, doub
     pQueue          *PQ, *p;
     Lgm_OctreeCell  *Root;
     Lgm_Vector      q;
+static count=0;
 
 
     Root = Octree->Root;
@@ -737,7 +764,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, doub
                  * query point
                  */
                 if ( p->MinDist2 > MaxDist2 ) {
-                    while ( (p = PopObj(&PQ)) ) free( p );
+                    while ( (p = PopObj(&PQ)) ) {free( p );}
                     return( OCTREE_KNN_TOO_FEW_NNS );
                 }
 
@@ -771,16 +798,22 @@ int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, doub
         /*
          * object is no longer needed so free up the space we allocated for it.
          */
-        free( p );
+        free( p ); 
 
         if ( k >= K ) done = TRUE;
+
+
+	    //PrintPQ( &PQ ); //only for debugging
 
     }
 
     /*
      * Free all remaining objects on the PQ
      */
-    while ( (p = PopObj(&PQ)) ) free( p );
+    while ( (p = PopObj(&PQ)) ) {free( p );}
+
+
+//PrintPQ( &PQ ); //only for debugging  
 
     ++(Octree->kNN_Lookups);
     
