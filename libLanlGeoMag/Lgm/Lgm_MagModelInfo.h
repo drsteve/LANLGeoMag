@@ -375,6 +375,7 @@ typedef struct Lgm_MagModelInfo {
      *  hash table used in Lgm_B_FromScatteredData*()
      */
     Lgm_DFI_RBF_Info   *rbf_ht;         // hash table (uthash)
+    int                 rbf_ht_alloced; // Flag to indicate whether or not rbf_ht is allocated with data.
     long int            RBF_nHashFinds; // Number of HASH_FIND()'s performed.
     long int            RBF_nHashAdds;  // Number of HASH_ADD_KEYPTR()'s performed.
 
@@ -601,6 +602,13 @@ int Lgm_B_FromScatteredData( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Inf
 int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
+                                                                                                                                                                                                                 
+                                                                                                                                                                                                                 
+/*                                                                                                                                                                                                               
+ *  Iterates over all the entries in the hash table and 1) deletes them from                                                                                                                                     
+ *  the hash table, then 2) free the structure itself.                                                                                                                                                           
+ */                                                                                                                                                                                                              
+void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info ) 
 
 
 /*

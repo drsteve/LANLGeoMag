@@ -126,6 +126,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
      *  Initialize hash table used in Lgm_B_FromScatteredData*()
      */
     MagInfo->rbf_ht         = NULL;
+    MagInfo->rbf_ht_alloced = FALSE;
     MagInfo->RBF_nHashFinds = 0;
     MagInfo->RBF_nHashAdds  = 0;
 

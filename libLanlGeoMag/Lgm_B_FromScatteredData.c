@@ -102,27 +102,31 @@ int Lgm_B_FromScatteredData( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Inf
 
 }
 
+/*
+ *  Setup the hash table used in Lgm_B_FromScatteredData().
+ */
 void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info ) {
 
-    if ( Info->rbf_ht != NULL )  {
-        HASH_CLEAR( hh, Info->rbf_ht );
-    }
-    Info->rbf_ht = NULL;
+    if ( Info->rbf_ht_alloced ) Lgm_B_FromScatteredData_TearDown( Info );
+    Info->rbf_ht         = NULL;
+    Info->rbf_ht_alloced = FALSE;
     Info->RBF_nHashFinds = 0;
     Info->RBF_nHashAdds  = 0;
-
-
 }
 
 
 /*
- *  NOTE: THIS DOES NOT FREE THE ORIGINAL STRUCTURES. FIND AN EASY WAY TO DO BOTH.
- *  May need to redefine the ut_free() macro somehow....
+ *  Iterates over all the entries in the hash table and 1) deletes them from
+ *  the hash table, then 2) free the structure itself.
  */
 void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info ) {
 
-    HASH_CLEAR( hh, Info->rbf_ht );
+    Lgm_DFI_RBF_Info *rbf, *rbf_tmp;
 
+    HASH_ITER( hh, Info->rbf_ht, rbf, rbf_tmp ) {
+        HASH_DELETE( hh, Info->rbf_ht, rbf );
+        Lgm_DFI_RBF_Free( rbf );
+    }
 
 }
 
