@@ -50,21 +50,22 @@ int main( ) {
 
 
 
+    /* 
+     * Read in a BATS-R-US mesh
+     */
     n = 0;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
     fp = fopen( "bats_r_us.txt", "r" );
     while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &x, &y, &z, &Bx, &By, &Bz, &B1x, &B1y, &B1z ) != EOF ) {
         if ( ( B1x != 0.0 ) && ( B1y != 0.0 ) && ( B1y != 0.0 ) ) {
-//            if ( x*x+y*y+z*z < 20.0*20.0 ) {
                 u[n].x  = x; u[n].y  = y; u[n].z  = z;
                 B[n].x  = Bx; B[n].y  = By; B[n].z  = Bz;
                 B1[n].x = B1x; B1[n].y = B1y; B1[n].z = B1z;
                 ++n;
-//            }
         }
     }
     fclose(fp);
-    printf("n = %ld\n", n);
+    printf("Number of points in Mesh: %ld\n", n);
     Lgm_PrintElapsedTime( &t );
 
 
@@ -78,13 +79,10 @@ int main( ) {
     printf("Creating Octree\n");
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
     Octree = Lgm_InitOctree( u, B1, n );
-    //Octree = Lgm_InitOctree( u, B, n );
     printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
     Lgm_PrintElapsedTime( &t );
 
-mInfo->Hmax = 0.1;
-printf("mInfo->Hmax = %g\n", mInfo->Hmax);
-
+    mInfo->Hmax = 0.1;
 
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
 
@@ -94,19 +92,16 @@ printf("mInfo->Hmax = %g\n", mInfo->Hmax);
     mInfo->Octree = Octree;
     Lgm_Set_Octree_kNN_k( mInfo, 4 );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
     //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_TS04, mInfo );
     //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, mInfo );
-    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, mInfo );
-
-
-
-
-//mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
-mInfo->Lgm_MagStep_RK5_Eps    = 1e-1;
-mInfo->Lgm_MagStep_BS_Eps     = 1e-4;
-    mInfo->Lgm_TraceLine_Tol  = 1e-6;
+    //Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, mInfo );
+    //mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+    mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
+    mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
+    mInfo->Lgm_TraceLine_Tol   = 1e-6;
     
-    Lgm_B_FromScatteredData_SetUp( mInfo );
+    //Lgm_B_FromScatteredData_SetUp( mInfo );
 
 
     //mInfo->Bfield = Lgm_B_T89;
@@ -125,7 +120,7 @@ mInfo->Lgm_MagStep_BS_Eps     = 1e-4;
         }
     }
 
-    Lgm_B_FromScatteredData_TearDown( mInfo );
+    //Lgm_B_FromScatteredData_TearDown( mInfo );
 
 /*
     for (Lat = 30.0; Lat<=90.0;  Lat += 1.0){
@@ -167,9 +162,9 @@ mInfo->Lgm_MagStep_BS_Eps     = 1e-4;
 
     Lgm_PrintElapsedTime( &t );
 
-    printf("Number of kNN lookups: %ld\n",  Octree->kNN_Lookups );
-    printf("Number of HASH_FIND()s: %ld\n", mInfo->RBF_nHashFinds );
-    printf("Number of HASH_ADD_KEYPTR()s: %ld\n", mInfo->RBF_nHashAdds );
+//    printf("Number of kNN lookups: %ld\n",  Octree->kNN_Lookups );
+//    printf("Number of HASH_FIND()s: %ld\n", mInfo->RBF_nHashFinds );
+//    printf("Number of HASH_ADD_KEYPTR()s: %ld\n", mInfo->RBF_nHashAdds );
 
 //sleep(3000);
 

@@ -477,6 +477,7 @@ void    Lgm_DFI_RBF_Free( Lgm_DFI_RBF_Info *rbf ) {
     LGM_ARRAY_1D_FREE( rbf->LookUpKey );
     LGM_ARRAY_1D_FREE( rbf->v );
     LGM_ARRAY_1D_FREE( rbf->c );
+    free( rbf );
     return;
 }
 
