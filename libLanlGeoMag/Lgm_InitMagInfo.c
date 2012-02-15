@@ -286,7 +286,7 @@ void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo) {
 }
 
 void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo) {
-    MagInfo->InternalModel = LGM_CDIP;
+    MagInfo->InternalModel = LGM_EDIP;
 }
 
 void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo) {
