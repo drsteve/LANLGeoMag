@@ -230,6 +230,7 @@
 #include "Lgm/Lgm_DFI_RBF.h"
 
 #define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
+//#define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
 
 
 /** Given \f$\vec{v} = (x, y, z)\f$ and \f$\vec{v}_0 = (x_0, y_0, z_0)\f$ this
@@ -344,7 +345,7 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DF
  *
  *
  */
-Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double eps, int RadialBasisFunction ) {
+Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lgm_Vector *B, int n, double eps, int RadialBasisFunction ) {
 
     int              i, j, ii, jj, p, q, n3, s;
     double           *d, **a, Phi[3][3], val;
@@ -366,9 +367,13 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
     rbf->eps = eps;
     rbf->n   = n;
     rbf->n3  = n3;
+    LGM_ARRAY_1D( rbf->LookUpKey, n, unsigned long int);
     LGM_ARRAY_1D( rbf->v, n, Lgm_Vector);
     LGM_ARRAY_1D( rbf->c, n, Lgm_Vector);
-    for ( i=0; i<n; i++ ) rbf->v[i] = v[i];
+    for ( i=0; i<n; i++ ) {
+        rbf->LookUpKey[i] = I_data[i];
+        rbf->v[i] = v[i];
+    }
     
 
 
@@ -469,10 +474,15 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( Lgm_Vector *v, Lgm_Vector *B, int n, double 
  *
  */
 void    Lgm_DFI_RBF_Free( Lgm_DFI_RBF_Info *rbf ) {
+    LGM_ARRAY_1D_FREE( rbf->LookUpKey );
     LGM_ARRAY_1D_FREE( rbf->v );
     LGM_ARRAY_1D_FREE( rbf->c );
+    free( rbf );
     return;
 }
+
+
+
 
 
 

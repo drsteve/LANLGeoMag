@@ -1,4 +1,4 @@
-#ifndef LGM_OCTREE 
+#ifndef LGM_OCTREE
 #define LGM_OCTREE
 
 #include "Lgm_Vec.h"
@@ -6,7 +6,7 @@
 #define     OCTREE_MAX_LEVELS           16
 #define     OCTREE_ROOT_LEVEL           15
 #define     OCTREE_MAX_VAL              (32768.0)
-#define     OCTREE_MAX_DATA_PER_OCTANT  10
+#define     OCTREE_MAX_DATA_PER_OCTANT  4           // Too high slows things down. Fastest seems to be 4-5 range...
 
 #define     TRUE    1
 #define     FALSE   0
@@ -21,6 +21,7 @@
 
 typedef struct _Lgm_OctreeData {
 
+    unsigned long int   Id;
     Lgm_Vector          Position;
     Lgm_Vector          B;
     double              Dist2;
@@ -68,20 +69,21 @@ typedef struct _Lgm_OctreeCell {
  * it. For example, when contrsucting the Octree, the positions are all scaled
  * to fit between -1 and 1. The Min and Max values are found and the x, y, z
  * components of the positions are scaled as follows;
- *      
+ *
  *      \f[ x_new = (x-Min)/(Max-Min) \f]
- * 
+ *
  * The scaling values are needed to convert back to un-scaled positions.
- * 
+ *
  */
 typedef struct _Lgm_Octree {
 
-    unsigned long int n;      //<! Total number of points in the octree
-    double            Min;    //<! Min value for scaling positions
-    double            Max;    //<! Max value for scaling positions
-    double            Diff;   //<! Max-Min
-    
-    Lgm_OctreeCell   *Root;   //<! Pointer to the Root node of the Octree
+    unsigned long int n;            //<! Total number of points in the octree
+    double            Min;          //<! Min value for scaling positions
+    double            Max;          //<! Max value for scaling positions
+    double            Diff;         //<! Max-Min
+    long int          kNN_Lookups;  //<! Numbenr of kNN lookups performed
+
+    Lgm_OctreeCell   *Root;         //<! Pointer to the Root node of the Octree
 
 } Lgm_Octree;
 
@@ -129,6 +131,6 @@ void            Lgm_OctreeUnScaleDistance( double v, double *u, Lgm_Octree *Octr
 
 
 
-    
+
 
 #endif

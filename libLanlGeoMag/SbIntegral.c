@@ -245,7 +245,8 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
     if (Htry < 1e-12) done = TRUE;
     while ( !done ) {
 
-        Lgm_MagStep( &fInfo->Lgm_Sb_integrand_P, &fInfo->Lgm_Sb_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, fInfo->Bfield, fInfo );
+        //Lgm_MagStep( &fInfo->Lgm_Sb_integrand_P, &fInfo->Lgm_Sb_integrand_u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &sdid, &reset, fInfo->Bfield, fInfo );
+        Lgm_MagStep( &fInfo->Lgm_Sb_integrand_P, &fInfo->Lgm_Sb_integrand_u_scale, Htry, &Hdid, &Hnext, sgn, &sdid, &reset, fInfo->Bfield, fInfo );
         fInfo->Lgm_Sb_integrand_S += sgn*Hdid;
     	Hdone += Hdid;
     	if ( (Htry < 1e-12) || fabs(Hdone-H) < 1e-12 ){

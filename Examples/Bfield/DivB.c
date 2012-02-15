@@ -18,11 +18,11 @@ int main(){
     mInfo = Lgm_InitMagInfo( );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
 
-    mInfo->Bfield = Lgm_B_TS04;
-    mInfo->Bfield = Lgm_B_TS04_opt;
-    mInfo->Bfield = Lgm_B_igrf;
-    mInfo->Bfield = Lgm_B_T87;
     mInfo->Bfield = Lgm_B_OP77;
+    mInfo->Bfield = Lgm_B_T87;
+    mInfo->Bfield = Lgm_B_igrf;
+    mInfo->Bfield = Lgm_B_TS04_opt;
+    mInfo->Bfield = Lgm_B_TS04;
     mInfo->Bfield = Lgm_B_T89;
     mInfo->P      = 4.1011111111111118;
     mInfo->Dst    = 7.7777777777777777;

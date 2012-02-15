@@ -42,11 +42,29 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_I_integrand_JumpMethod = LGM_ABSOLUTE_JUMP_METHOD;
 
     /*
-     *  Some inits for MagStep
+     * Default to Bulirsch-Stoer ODE method for FL tracing (i.e. LGM_MAGSTEP_ODE_BS)
+     * Could also use LGM_MAGSTEP_ODE_RK5
      */
-    MagInfo->Lgm_MagStep_FirstTimeThrough = TRUE;
-    MagInfo->Lgm_MagStep_eps_old          = -1.0;
-    MagInfo->Lgm_MagStep_Tol              = 1e-10;
+    MagInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+
+    /*
+     *  Some inits for MagStep_BS
+     */
+    MagInfo->Lgm_MagStep_BS_FirstTimeThrough = TRUE;
+    MagInfo->Lgm_MagStep_BS_eps_old          = -1.0;
+    MagInfo->Lgm_MagStep_BS_Eps              = 1e-7;
+
+    /*
+     *  Some inits for MagStep_RK5
+     */
+    MagInfo->Lgm_MagStep_RK5_FirstTimeThrough = TRUE;
+    MagInfo->Lgm_MagStep_RK5_snew             =  0.0;
+    MagInfo->Lgm_MagStep_RK5_MaxCount         =  50;
+    MagInfo->Lgm_MagStep_RK5_Safety           =  0.9;
+    MagInfo->Lgm_MagStep_RK5_pGrow            = -0.2;
+    MagInfo->Lgm_MagStep_RK5_pShrnk           = -0.25;
+    MagInfo->Lgm_MagStep_RK5_ErrCon           = pow( 5.0/MagInfo->Lgm_MagStep_RK5_Safety, 1.0/MagInfo->Lgm_MagStep_RK5_pGrow);
+    MagInfo->Lgm_MagStep_RK5_Eps              = 1e-5;
 
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
 
@@ -72,6 +90,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_TraceToMirrorPoint_Tol = 1e-7;
     MagInfo->Lgm_TraceToEarth_Tol = 1e-7;
     MagInfo->Lgm_TraceToBmin_Tol  = 1e-7;
+    MagInfo->Lgm_TraceLine_Tol    = 1e-7;
 
 
 
@@ -91,6 +110,27 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
      * Inits for OP77
      */
     MagInfo->OP77_TILTL = 99.0;
+
+
+
+    /*
+     *  Inits for Octree stuff
+     */
+    //MagInfo->Octree_kNN_InterpMethod = XXX; // need to redo this
+    MagInfo->Octree_kNN_k = 4;
+    MagInfo->Octree_kNN_MaxDist2 = 1.0*1.0;
+    MagInfo->Octree_kNN_Alloced = 0;
+
+
+    /*
+     *  Initialize hash table used in Lgm_B_FromScatteredData*()
+     */
+    MagInfo->rbf_ht         = NULL;
+    MagInfo->rbf_ht_alloced = FALSE;
+    MagInfo->RBF_nHashFinds = 0;
+    MagInfo->RBF_nHashAdds  = 0;
+
+
 }
 
 
@@ -138,7 +178,7 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
     /*
      *  Lets also assume that GSL interp stuff should be NULL
-     *  This routine wont yet properly copy over the spline stuff. 
+     *  This routine wont yet properly copy over the spline stuff.
      *  Need to be careful if you want an independent copy of that stuff...
      *  BE careful free these things in copies -- it'll free them for all other copies too.
      */
@@ -165,7 +205,7 @@ void Lgm_MagModelInfo_Set_Psw( double Psw, Lgm_MagModelInfo *m ) {
 void Lgm_MagModelInfo_Set_Kp( double Kp, Lgm_MagModelInfo *m ) {
     m->Kp = Kp;
 }
-void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int ExternalModel ){
+void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m ){
 
     m->InternalModel = InternalModel;
     m->ExternalModel = ExternalModel;
@@ -186,14 +226,17 @@ void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int 
                                 } else {
                                     m->Bfield = Lgm_B_igrf;
                                 }
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
         case LGM_EXTMODEL_T87:
                                 m->Bfield = Lgm_B_T87;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
         case LGM_EXTMODEL_T89:
                                 m->Bfield = Lgm_B_T89;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
 /*
@@ -204,15 +247,34 @@ void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int 
 
         case LGM_EXTMODEL_T01S:
                                 m->Bfield = Lgm_B_T01S;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+
+        case LGM_EXTMODEL_TS04_OPT:
+                                m->Bfield = Lgm_B_TS04_opt;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
         case LGM_EXTMODEL_TS04:
                                 m->Bfield = Lgm_B_TS04;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
         case LGM_EXTMODEL_OP77:
                                 m->Bfield = Lgm_B_OP77;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
+
+        case LGM_EXTMODEL_SCATTERED_DATA:
+                                m->Bfield = Lgm_B_FromScatteredData;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+                                break;
+
+        case LGM_EXTMODEL_SCATTERED_DATA2:
+                                m->Bfield = Lgm_B_FromScatteredData2;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+                                break;
+
 
     }
 
@@ -229,8 +291,8 @@ void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k ) {
     m->Octree_kNN_k = k;
     return;
 }
-void Lgm_Set_Octree_kNN_MaxDist( Lgm_MagModelInfo *m, double MaxDist ) {
-    m->Octree_kNN_MaxDist = MaxDist; // This maxdist is in physical units
+void Lgm_Set_Octree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 ) {
+    m->Octree_kNN_MaxDist2 = MaxDist2; // This maxdist is in physical units
     return;
 }
 
@@ -292,6 +354,4 @@ void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo) {
 void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo) {
     MagInfo->InternalModel = LGM_IGRF;
 }
-
-
 
