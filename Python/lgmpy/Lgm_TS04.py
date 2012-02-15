@@ -83,11 +83,18 @@ class Lgm_TS04(MagData.MagData):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
-
         if coord_system != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+
+        # and actually set the internal model in Lgm
+        if self.attrs['internal_model'] == LGM_CDIP:
+            Lgm_Set_Lgm_B_cdip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_EDIP:
+            Lgm_Set_Lgm_B_edip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_IGRF:
+            Lgm_Set_Lgm_B_IGRF_InternalModel(pointer(self._mmi))
 
         #self.data = T89_Data(pos, time, Kp, coord_system, INTERNAL_MODEL)
         self['B'] = self.calc_B()
