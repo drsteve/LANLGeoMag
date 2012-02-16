@@ -268,7 +268,7 @@ double  Lgm_gamma( double Ek, double E0 );
 double  Lgm_PsdToDiffFlux( double f, double p2c2 );
 double  Lgm_DiffFluxToPsd( double j, double p2c2 );
 int     Lgm_GeometricSeq( double a, double b, int n, double *G );
-void    Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y );
+int     Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y );
 
 
 

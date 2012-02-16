@@ -28,14 +28,27 @@ int main(){
     // Set params in mInfo structure.
     Lgm_set_QinDenton( &p, mInfo );
 
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
     
-
     u.x = 3.0; u.y = 4.0; u.z = 3.0;
+mInfo->Kp = 3;
+
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
     mInfo->Bfield( &u, &B, mInfo );
-    printf( "%13.lf%13.lf%13.lf", u.x, u.y, u.z );
-    printf( "%13.lf%13.lf%13.lf", B.x, B.y, B.z );
-    printf( "%13.lf\n", Lgm_Magnitude( &B ) );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
+
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
+
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
 
 
 
