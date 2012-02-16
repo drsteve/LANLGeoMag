@@ -5,10 +5,10 @@ AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 AM_CFLAGS   = -fopenmp -lgomp
 
 # Directory where Eop-related stuff will be installed
-LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
+LGM_EOP_DATA_DIR   = ${prefix}/share/LanlGeoMag/EopData
 
 # Directory where Index-related stuff will be installed
-LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
+LGM_INDEX_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
 
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
