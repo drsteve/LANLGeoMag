@@ -56,8 +56,8 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
         #
         #  Some inits for MagStep
         #
-        self.assertEqual(mmi.Lgm_MagStep_FirstTimeThrough, TRUE)
-        self.assertEqual(mmi.Lgm_MagStep_eps_old, -1.0)
+        # self.assertEqual(mmi.Lgm_MagStep_FirstTimeThrough, TRUE) # this went away in 3e24b5ae65a11ef9376fd4246f5eee3a68485d39
+        # self.assertEqual(mmi.Lgm_MagStep_eps_old, -1.0) # this went away in 3e24b5ae65a11ef9376fd4246f5eee3a68485d39
         #
         # Set some default tolerances
         #
