@@ -1757,13 +1757,16 @@ int Lgm_GeometricSeq( double a, double b, int n, double *G ) {
 
 
 
-void Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
+int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
 
     gsl_interp_accel    *acc;
     gsl_spline          *spline;
     double              *xa2, *ya2;
-    int                 i, Flag;
+    int                 i, Flag, RetVal;
 
+    /*
+     *  Put array into ascending order if it isnt already. (gsl needs this).
+     */
     Flag = 0;
     if ( xa[1] < xa[0] ) {
 
@@ -1785,19 +1788,37 @@ void Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
     }
 
 
-    acc    = gsl_interp_accel_alloc( );
-    spline = gsl_spline_alloc( gsl_interp_akima, n );
-    gsl_spline_init( spline, xa2, ya2, n );
-    *y = gsl_spline_eval( spline, x, acc );
-    gsl_spline_free( spline );
-    gsl_interp_accel_free( acc );
 
+    /*
+     * Check to see if x would cause an extrapolation instead of an interp.
+     */
+    if ( (x<xa2[0]) || (x>xa2[n-1]) ){
+
+        *y = LGM_FILL_VALUE;
+        RetVal = -1;
+
+    } else {
+
+        acc    = gsl_interp_accel_alloc( );
+        spline = gsl_spline_alloc( gsl_interp_akima, n );
+        gsl_spline_init( spline, xa2, ya2, n );
+        *y = gsl_spline_eval( spline, x, acc );
+        gsl_spline_free( spline );
+        gsl_interp_accel_free( acc );
+        RetVal = 1;
+
+    }
+
+
+    /*
+     * If we had to allocate new mem, free it now.
+     */
     if ( Flag ){
         free( xa2 );
         free( ya2 );
     }
 
-    return;
+    return( RetVal );
 
 }
 
