@@ -664,6 +664,7 @@ void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo);

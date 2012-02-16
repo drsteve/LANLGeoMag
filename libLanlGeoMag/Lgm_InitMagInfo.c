@@ -325,6 +325,11 @@ void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_TS04;
 }
 
+void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_TS04_opt;
+}
+
+
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_T89;
 }
