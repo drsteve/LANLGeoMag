@@ -19,16 +19,17 @@
 #define LGM_INDEX_DATA_DIR    /usr/local/share/LanlGeoMag/Data
 #endif
 
-
-
 Lgm_QinDenton *Lgm_init_QinDenton( int Verbose ) {
-
+  // call this from C, never from Python
     Lgm_QinDenton      *q;
-
     q = (Lgm_QinDenton *) calloc( 1, sizeof(*q) );
+    Lgm_init_QinDentonDefaults(q, Verbose);
+    return q;
+}
 
+void Lgm_init_QinDentonDefaults( Lgm_QinDenton *q, int Verbose ) {
+  // call this from C or Python
     q->Verbosity = Verbose;
-
     LGM_ARRAY_1D( q->Date,          NMAX, long int );
     LGM_ARRAY_1D( q->MJD,           NMAX, double );
 
@@ -85,14 +86,10 @@ Lgm_QinDenton *Lgm_init_QinDenton( int Verbose ) {
     LGM_ARRAY_1D( q->W4_status,     NMAX, int );
     LGM_ARRAY_1D( q->W5_status,     NMAX, int );
     LGM_ARRAY_1D( q->W6_status,     NMAX, int );
-
-
-    return q;
-
 }
 
-void  Lgm_destroy_QinDenton( Lgm_QinDenton *q ) {
-
+void  Lgm_destroy_QinDenton_children( Lgm_QinDenton *q ) {
+  // call this from Python, probably not C
     // first free arrays inside structure
     LGM_ARRAY_1D_FREE( q->Date );
     LGM_ARRAY_1D_FREE( q->MJD );
@@ -151,12 +148,16 @@ void  Lgm_destroy_QinDenton( Lgm_QinDenton *q ) {
     LGM_ARRAY_1D_FREE( q->W5_status );
     LGM_ARRAY_1D_FREE( q->W6_status );
 
-
-    // then free structure itself
-    free( q );
-
     return;
 
+}
+
+void  Lgm_destroy_QinDenton( Lgm_QinDenton *q ) {
+  // call this from C, probably not from Python
+  Lgm_destroy_QinDenton_children(q);  
+    // then free structure itself
+    free( q );
+    return;
 }
 
 

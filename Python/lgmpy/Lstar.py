@@ -929,13 +929,13 @@ def get_Lstar_General(pos, date, alpha = 90.,
 def get_Lstar2(pos, date, alpha = 90.,
                   params = None, coord_system='GSM',
                   Bfield = 'Lgm_B_OP77',
-                  Bint = 'Lgm_B_IGRF',
+                  internal_model = 'Lgm_B_IGRF',
                   LstarThresh = 10.0,  # beyond this Lsimple don't compute Lstar
                   extended_out = False,
                   LstarQuality = 3, 
                   FootpointHeight=100., 
                   Colorize=False, 
-                  cverbosity=0):    
+                  cverbosity=0, QinDenton=False):    
 ## void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
     # setup a datamodel object to hold the answer
@@ -964,20 +964,18 @@ def get_Lstar2(pos, date, alpha = 90.,
     Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
 
     # setup a shortcut to LstarInfo
-    lsi = MagEphemInfo.LstarInfo.contents
-    lsi.VerbosityLevel = cverbosity
-    MagEphemInfo.LstarQuality = LstarQuality;
-    MagEphemInfo.SaveShellLines = extended_out;
-    lsi.LSimpleMax = 10.0;
-    lsi.VerbosityLevel = 0;
+    MagEphemInfo.LstarInfo.contents.VerbosityLevel = cverbosity
+    MagEphemInfo.LstarQuality = LstarQuality
+    MagEphemInfo.LstarInfo.contents.SaveShellLines = False
+    MagEphemInfo.LstarInfo.contents.FindShellPmin = extended_out
+    MagEphemInfo.LstarInfo.contents.LSimpleMax = 10.0;
     mmi.VerbosityLevel = 0;
     mmi.Lgm_LossConeHeight = FootpointHeight;
 
     #MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
 #    mmi.Bfield = Lgm_Wrap.__getattribute__(Bfield)
     Lgm_Wrap.__getattribute__('Lgm_Set_'+Bfield)(MagEphemInfo.LstarInfo.contents.mInfo)
-    Lgm_Wrap.__getattribute__('Lgm_Set_'+Bint+'_InternalModel')(MagEphemInfo.LstarInfo.contents.mInfo)    
-
+    Lgm_Wrap.__getattribute__('Lgm_Set_'+internal_model+'_InternalModel')(MagEphemInfo.LstarInfo.contents.mInfo)    
     
     MagEphemInfo.nAlpha = len(Alpha)
     if len(Alpha) > 1 and Bfield == 'Lgm_B_TS04':
@@ -1009,19 +1007,34 @@ def get_Lstar2(pos, date, alpha = 90.,
 ##                                 double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
 
-    # save params
-    ans['params'] = params
-    if params == None:
-        params = {}
-    # step through the params dict and populate MagEphemInfo
-    for key in params:
-        if key == 'W':
-            double6 = c_double*6
-            W = double6(*params[key])
-            MagEphemInfo.LstarInfo.contents.mInfo.contents.__setattr__(key, W)
-        else:
-            MagEphemInfo.LstarInfo.contents.mInfo.contents.__setattr__(key, params[key])
 
+    if QinDenton and Bfield == 'Lgm_B_TS04': # these are the params we will use.
+        # Grab the QinDenton data
+        # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
+        # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
+        JD = Lgm_Wrap.Lgm_Date_to_JD(datelong, utc, pointer(mmi.c))
+        qd_one = Lgm_Wrap.Lgm_QinDentonOne()
+        Lgm_Wrap.Lgm_get_QinDenton_at_JD( JD, pointer(qd_one), cverbosity)
+        Lgm_Wrap.Lgm_set_QinDenton(pointer(qd_one), pointer(mmi.c))
+        
+        ans['params'] = dm.SpaceData()
+        for att in dir(qd_one):
+            if att[0] != '_':
+                ans['params'][att] = getattr(qd_one, att)
+    else:
+        # save params
+        ans['params'] = params
+        if params == None:
+            params = {}
+        # step through the params dict and populate MagEphemInfo
+        for key in params:
+            if key == 'W':
+                double6 = c_double*6
+                W = double6(*params[key])
+                MagEphemInfo.LstarInfo.contents.mInfo.contents.__setattr__(key, W)
+            else:
+                MagEphemInfo.LstarInfo.contents.mInfo.contents.__setattr__(key, params[key])
+    
     Lgm_ComputeLstarVersusPA( ctypes.c_long(datelong), ctypes.c_double(utc), ctypes.pointer(Pgsm), 
                              ctypes.c_int(len(Alpha)), 
                              Alpha.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 

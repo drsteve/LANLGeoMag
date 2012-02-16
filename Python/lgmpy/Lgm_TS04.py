@@ -13,10 +13,110 @@ import ctypes
 import numpy as np
 
 import MagData
-from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_T89, Lgm_B_TS04
+from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_TS04, \
+                    Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel, \
+                    Lgm_get_QinDenton_at_JD, Lgm_Date_to_JD, Lgm_B_TS04_opt
+
+import lgmpy
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+
+
+class Lgm_TS04_QD(MagData.MagData):
+    #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
+    def __init__(self, pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF', verbose=False):
+        super(Lgm_TS04_QD, self).__init__(Position=pos, Epoch=time)
+
+        self.verbose = verbose
+
+        if not isinstance(pos, (Lgm_Vector.Lgm_Vector, list, np.ndarray)):
+            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+        self._Vpos = self._pos2Lgm_Vector(pos)
+
+        # time must be a datetime
+        if not isinstance(time, (datetime.datetime, list)):
+            raise(TypeError('time must be a datetime or list of datetime') )
+
+        if INTERNAL_MODEL not in (LGM_CDIP,
+                                  LGM_EDIP,
+                                  LGM_IGRF) and \
+            INTERNAL_MODEL not in ('LGM_CDIP',
+                                  'LGM_EDIP',
+                                  'LGM_IGRF'):
+            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
+        if isinstance(INTERNAL_MODEL, str):
+            INTERNAL_MODEL = eval(INTERNAL_MODEL)
+        self.attrs['internal_model'] = INTERNAL_MODEL
+
+        if coord_system != 'GSM':
+            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+
+        self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+
+        # and actually set the internal model in Lgm
+        if self.attrs['internal_model'] == LGM_CDIP:
+            Lgm_Set_Lgm_B_cdip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_EDIP:
+            Lgm_Set_Lgm_B_edip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_IGRF:
+            Lgm_Set_Lgm_B_IGRF_InternalModel(pointer(self._mmi))
+
+        #self.data = T89_Data(pos, time, Kp, coord_system, INTERNAL_MODEL)
+        self['B'] = self.calc_B()
+
+    def calc_B(self):
+        ans = []
+#            for v1, v2, v3 in zip(self._Vpos, self['Epoch'], self['Kp']):
+        date = Lgm_CTrans.dateToDateLong(self['Epoch'])
+        utc = Lgm_CTrans.dateToFPHours(self['Epoch'])
+        Lgm_Set_Coord_Transforms( date, utc, self._mmi.c) # dont need pointer as it is one
+        B = Lgm_Vector.Lgm_Vector()
+
+        # Grab the QinDenton data
+        # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
+        # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
+        JD = Lgm_Date_to_JD(date, utc, pointer(self._mmi.c))
+        qd_one = lgmpy.Lgm_Wrap.Lgm_QinDentonOne()
+        Lgm_get_QinDenton_at_JD( JD, pointer(qd_one), self.verbose)
+        lgmpy.Lgm_Wrap.Lgm_set_QinDenton(pointer(qd_one), pointer(self._mmi.c))
+
+        #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
+        retval = Lgm_B_TS04(pointer(self._Vpos), pointer(B), pointer(self._mmi))
+#        retval = Lgm_B_TS04_opt(pointer(self._Vpos), pointer(B), pointer(self._mmi))
+        if retval != 1:
+            raise(RuntimeWarning('Odd return from Lgm_TS04') )
+        ans.append(B)
+        return ans
+
+    def _pos2Lgm_Vector(self, pos):
+        if isinstance(pos, Lgm_Vector.Lgm_Vector):
+            return pos
+        if isinstance(pos, list):
+            Vpos = []
+            for val in pos:
+                if not isinstance(val, list):
+                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
+                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
+            return Vpos
+        if isinstance(pos, np.ndarray):
+            return(self._pos2Lgm_Vector(pos.tolist())) 
+
+
+    def _pos2Lgm_Vector(self, pos):
+        if isinstance(pos, Lgm_Vector.Lgm_Vector):
+            return pos
+        if isinstance(pos, list):
+            Vpos = []
+            for val in pos:
+                if not isinstance(val, list):
+                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
+                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
+            return Vpos
+        if isinstance(pos, np.ndarray):
+            return(self._pos2Lgm_Vector(pos.tolist())) 
+                        
+            
 
 class Lgm_TS04(MagData.MagData):
     """
@@ -83,11 +183,18 @@ class Lgm_TS04(MagData.MagData):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
-
         if coord_system != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+
+        # and actually set the internal model in Lgm
+        if self.attrs['internal_model'] == LGM_CDIP:
+            Lgm_Set_Lgm_B_cdip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_EDIP:
+            Lgm_Set_Lgm_B_edip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_IGRF:
+            Lgm_Set_Lgm_B_IGRF_InternalModel(pointer(self._mmi))
 
         #self.data = T89_Data(pos, time, Kp, coord_system, INTERNAL_MODEL)
         self['B'] = self.calc_B()

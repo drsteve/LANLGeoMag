@@ -40,7 +40,7 @@ class Lgm_TS04_TS04(unittest.TestCase):
     def tearDown(self):
         super(Lgm_TS04_TS04, self).tearDown()
 
-    def test_TS04_1val(self):
+    def NO_test_TS04_1val(self):
         """the TS04 simple static wrapper should work (regression)"""
         numpy.testing.assert_allclose( Lgm_TS04.TS04(self.pos, self.dt, self.P, self.Dst,
                                                      self.By, self.Bz, self.W),
@@ -71,7 +71,7 @@ class Lgm_TS04Tests(unittest.TestCase):
     def tearDown(self):
         super(Lgm_TS04Tests, self).tearDown()
 
-    def test_pos2Lgm_Vector(self):
+    def NO_test_pos2Lgm_Vector(self):
         """pos2Lgm_Vector should have known output"""
         a = Lgm_TS04.Lgm_TS04(self.pos, self.dt, self.kp)
         self.assertEqual(list(a['Position']), a._Vpos.tolist())
@@ -84,7 +84,7 @@ class Lgm_TS04Tests(unittest.TestCase):
         self.assertRaises(NotImplementedError, a._pos2Lgm_Vector,
                           numpy.array([1, 2, 3]))
 
-    def test_T89_1(self):
+    def NO_test_T89_1(self):
         """First simple in/out tests of T89 (regression)"""
         ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
             [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
@@ -96,7 +96,7 @@ class Lgm_TS04Tests(unittest.TestCase):
             self.assertAlmostEqual(ans[i][1], B['B'].y, 5)
             self.assertAlmostEqual(ans[i][2], B['B'].z, 5)
 
-    def test_kp_checking(self):
+    def NO_test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04, self.pos, self.dt, 10)
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04, self.pos, self.dt, 6)
@@ -104,7 +104,7 @@ class Lgm_TS04Tests(unittest.TestCase):
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04, self.pos, self.dt, [-1, 0])
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04, self.pos, self.dt, [7, 0])
 
-    def test_list_in(self):
+    def NO_test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""
         ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
             [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
@@ -128,7 +128,7 @@ class Lgm_TS04Tests(unittest.TestCase):
         """Lgm_T89 time agrument has checking"""
         self.assertRaises(TypeError, Lgm_TS04.Lgm_TS04, self.pos, 'bad', self.kp)
 
-    def test_internal_model(self):
+    def NO_test_internal_model(self):
         """Lgm_T89 internal_model agrument has checking"""
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL=4)
@@ -143,12 +143,12 @@ class Lgm_TS04Tests(unittest.TestCase):
         a = Lgm_T89.Lgm_TS04(self.pos, self.dt, self.kp, INTERNAL_MODEL='LGM_IGRF')
         self.assertEqual(a.attrs['internal_model'], 2)
 
-    def test_coord_system(self):
+    def NO_test_coord_system(self):
         """Lgm_T89 only inpout GSM for now (regression)"""
         self.assertRaises(NotImplementedError, Lgm_TS04.Lgm_TS04, self.pos,
                           self.dt, self.kp, coord_system='SM')
 
-    def test_lengths(self):
+    def NO_test_lengths(self):
         """all scalars or all lists"""
         self.assertRaises(ValueError, Lgm_TS04.Lgm_TS04,
                           [self.pos, self.pos], self.dt, self.kp)
