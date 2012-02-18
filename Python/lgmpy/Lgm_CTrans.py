@@ -104,6 +104,8 @@ def dateToDateLong(inval):
             else:
                 return [long(val.strftime('%Y%m%d')) for val in inval]
     except:
+        if isinstance(inval, numpy.ndarray):
+            inval = inval.item()
         return long(inval.strftime('%Y%m%d'))
 
 def dateLongToDate(inval):
@@ -167,6 +169,8 @@ def dateToFPHours(inval):
             else:
                 return lst
     except TypeError:
+        if isinstance(inval, numpy.ndarray):
+            inval = inval.item()
         return inval.hour + inval.minute/60 + \
                                     inval.second/60/60 + \
                                     inval.microsecond/60/60/1000000
@@ -208,9 +212,9 @@ def GSMtoMLT(gsm, dt):
     if gsm_.ndim == 2:
         if gsm_.shape[1] != 3:
             raise(ValueError("Invalid vector shape"))
-        if gsm_.size != dt_.size:
+        if gsm_.shape[0] != dt_.size:
             if dt_.size == 1:
-                dt_ = dm.dmarray([dt_]*gsm_.size)
+                dt_ = dm.dmarray([dt_]*gsm_.shape[0])
             else:
                 raise(ValueError("Array size mismatch"))
         ans = dm.dmarray(numpy.empty(len(dt_)), dtype=numpy.double, attrs={'coord_system': 'EDMAG'})
