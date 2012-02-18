@@ -204,13 +204,19 @@ def GSMtoMLT(gsm, dt):
         return MLT.value
         
     gsm_ = numpy.asanyarray(gsm)
+    dt_ = numpy.asanyarray(dt)
     if gsm_.ndim == 2:
         if gsm_.shape[1] != 3:
             raise(ValueError("Invalid vector shape"))
-        ans = dm.dmarray(numpy.empty(len(dt)), dtype=numpy.double, attrs={'coord_system': 'EDMAG'})
-        for ii, (gsm_val, dt_val) in enumerate(itertools.izip(gsm_, dt)):
+        if gsm_.size != dt_.size:
+            if dt_.size == 1:
+                dt_ = dm.dmarray([dt_]*gsm_.size)
+            else:
+                raise(ValueError("Array size mismatch"))
+        ans = dm.dmarray(numpy.empty(len(dt_)), dtype=numpy.double, attrs={'coord_system': 'EDMAG'})
+        for ii, (gsm_val, dt_val) in enumerate(itertools.izip(gsm_, dt_)):
             ans[ii] = doConv(gsm_val, dt_val)
     else:
-        ans = dm.dmarray(doConv(gsm_, dt), attrs={'coord_system': 'EDMAG'})
+        ans = dm.dmarray(doConv(gsm_, dt_), attrs={'coord_system': 'EDMAG'})
     return ans
 
