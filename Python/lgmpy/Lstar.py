@@ -961,7 +961,7 @@ def get_Lstar2(pos, date, alpha = 90.,
 
     # setup a shortcut to MagModelInfo
     mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
-    Lgm_Set_Coord_Transforms( datelong, utc, pointer(mmi.c))
+    Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont think mmi.c needs a pointer()
 
     # setup a shortcut to LstarInfo
     MagEphemInfo.LstarInfo.contents.VerbosityLevel = cverbosity
