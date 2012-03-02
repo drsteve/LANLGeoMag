@@ -18,7 +18,7 @@ int Colors[9] = { 224, 209, 21, 46, 55, 104, 22, 185, 23 };
 
 
 
-/*
+/**
  *      Input Variables:
  *
  *                      Date:
@@ -42,10 +42,11 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     int             i, LS_Flag, nn, tk, TraceFlag;
     char            *PreStr, *PostStr;
 
-    MagEphemInfo->LstarInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->FindShellPmin  = TRUE;
-    MagEphemInfo->LstarInfo->ComputeVgc     = TRUE;
-MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
+    /* These should be set by the user in the setup up MagEphemInfo no in here */
+    //MagEphemInfo->LstarInfo->SaveShellLines = FALSE;
+    //MagEphemInfo->LstarInfo->FindShellPmin  = FALSE;
+    //MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
+    //MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
     LstarInfo = MagEphemInfo->LstarInfo;
 
     // Save Date, UTC to MagEphemInfo structure
@@ -57,13 +58,11 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
     for (i=0; i<MagEphemInfo->nAlpha; i++) MagEphemInfo->Alpha[i] = Alpha[i];
 
     // Set Tolerances
-    SetLstarTolerances( MagEphemInfo->LstarQuality, LstarInfo );
-
+    SetLstarTolerances( Quality, LstarInfo );
 
 
     // set coord transformation
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c );
-
 
     /*
      *  Blocal at sat location.
@@ -108,9 +107,6 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
         }
     }
     if ( TraceFlag == 1 ) {
-
-
-
             /*
              *  Get a simple measure of how big L is
              */
@@ -119,8 +115,6 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
             CosLam = cos( Lam );
             //LSimple = (1.0+LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A)/( CosLam*CosLam );
             LSimple = Lgm_Magnitude( &LstarInfo->mInfo->Pmin );
-
-
 
             { // ***** BEGIN PARALLEL EXECUTION *****
 
@@ -183,7 +177,9 @@ MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
                     MagEphemInfo->I[i] = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
 
                     //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
-                    printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+                    //if (LstarInfo3->VerbosityLevel > 0 ) {
+		      printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
+		      // }
 
                     /*
                      * Save results to the MagEphemInfo structure.

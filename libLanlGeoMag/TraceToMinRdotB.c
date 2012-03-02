@@ -84,7 +84,8 @@ int Lgm_TraceToMinRdotB( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelI
     Sb   = -9e99;
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        //if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P, &Btmp, Info );
         B = Lgm_Magnitude( &Btmp );
 	    R = Lgm_Magnitude( &P );

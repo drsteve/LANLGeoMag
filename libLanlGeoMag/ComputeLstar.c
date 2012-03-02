@@ -283,8 +283,9 @@ Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s ) {
     t->mInfo = Lgm_CopyMagInfo( s->mInfo );
 
 
-    t->mInfo->Lgm_MagStep_FirstTimeThrough = TRUE;
-    t->mInfo->Lgm_MagStep_eps_old = -1.0;
+    t->mInfo->Lgm_MagStep_RK5_FirstTimeThrough = TRUE;
+    t->mInfo->Lgm_MagStep_BS_FirstTimeThrough = TRUE;
+    t->mInfo->Lgm_MagStep_BS_eps_old = -1.0;
 
 
     return( t );

@@ -84,7 +84,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      */
     P = Pa;
     //reset = TRUE;
-    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+    if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
     Info->Bfield( &P, &Btmp, Info );
     B = Lgm_Magnitude( &Btmp );
 
@@ -98,7 +98,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     } else {
 
         P2 = Pa; //reset = TRUE;
-        if ( Lgm_MagStep( &P2, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, 1.0, &s2, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P2, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s2, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P2, &Btmp, Info );
         B2 = Lgm_Magnitude( &Btmp );
 
@@ -133,7 +133,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     while (!done) {
 
 	    P = Pb;
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P, &Btmp, Info );
         B = Lgm_Magnitude( &Btmp );
 
@@ -198,7 +198,7 @@ if (0==1){
 	        //P = Pa; Htry = 0.381966011*d1;
 	        P = Pa; Htry = 0.5*d1;
 //printf("A. Sa, Sb, Sc = %g %g %g   d1, d2 = %g %g Htry = %g tol = %g Sc-Sa = %g\n", Sa, Sb, Sc, d1, d2, Htry, tol, Sc-Sa);
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
 
@@ -214,7 +214,7 @@ if (0==1){
 	        //P = Pb; Htry = 0.381966011*d2;
 	        P = Pb; Htry = 0.5*d2;
 //printf("B. Sa, Sb, Sc = %g %g %g   d1, d2 = %g %g Htry = %g tol = %g Sc-Sa = %g\n", Sa, Sb, Sc, d1, d2, Htry, tol, Sc-Sa);
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, Info->Lgm_MagStep_Tol, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
 

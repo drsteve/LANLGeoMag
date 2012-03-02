@@ -11,12 +11,17 @@ transformations in Lgm
 
 from __future__ import division
 
-from ctypes import pointer
+from ctypes import pointer, c_double
 import datetime
+import itertools
 
+import spacepy.datamodel as dm
 import numpy
 
-from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children
+import Lgm_MagModelInfo
+import Lgm_Vector
+from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children, Lgm_Convert_Coords, \
+                GSM_TO_WGS84, WGS84_TO_EDMAG, Lgm_Set_Coord_Transforms, Lgm_EDMAG_to_R_MLAT_MLON_MLT
 
 
 class Lgm_Coords(list):
@@ -99,6 +104,8 @@ def dateToDateLong(inval):
             else:
                 return [long(val.strftime('%Y%m%d')) for val in inval]
     except:
+        if isinstance(inval, numpy.ndarray):
+            inval = inval.item()
         return long(inval.strftime('%Y%m%d'))
 
 def dateLongToDate(inval):
@@ -162,6 +169,58 @@ def dateToFPHours(inval):
             else:
                 return lst
     except TypeError:
+        if isinstance(inval, numpy.ndarray):
+            inval = inval.item()
         return inval.hour + inval.minute/60 + \
                                     inval.second/60/60 + \
                                     inval.microsecond/60/60/1000000
+
+
+def GSMtoMLT(gsm, dt):
+    """
+    convert GSM values to MLT in the lgm way
+    
+    Parameters
+    ----------
+    gsm : array_like
+        Nx3 array_like of the GSM position
+    dt : array_like
+        N elementarray_like of datetime objects
+    
+    Returns
+    -------
+    out : numpy.array
+        N element array of the MLT values
+    """
+    def doConv(gsm, dt):
+        Pgsm = Lgm_Vector.Lgm_Vector(*gsm)
+        Pwgs = Lgm_Vector.Lgm_Vector()
+        Pmlt = Lgm_Vector.Lgm_Vector()
+        # can use a smaller structure here        
+        mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+        Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), mmi.c) # dont need pointer as it is one
+
+        Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, mmi.c )
+        Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, mmi.c )
+        R, MLat, MLon, MLT = c_double(), c_double(), c_double(), c_double(),
+        Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon),
+            pointer(MLT), mmi.c)
+        return MLT.value
+        
+    gsm_ = numpy.asanyarray(gsm)
+    dt_ = numpy.asanyarray(dt)
+    if gsm_.ndim == 2:
+        if gsm_.shape[1] != 3:
+            raise(ValueError("Invalid vector shape"))
+        if gsm_.shape[0] != dt_.size:
+            if dt_.size == 1:
+                dt_ = dm.dmarray([dt_]*gsm_.shape[0])
+            else:
+                raise(ValueError("Array size mismatch"))
+        ans = dm.dmarray(numpy.empty(len(dt_)), dtype=numpy.double, attrs={'coord_system': 'EDMAG'})
+        for ii, (gsm_val, dt_val) in enumerate(itertools.izip(gsm_, dt_)):
+            ans[ii] = doConv(gsm_val, dt_val)
+    else:
+        ans = dm.dmarray(doConv(gsm_, dt_), attrs={'coord_system': 'EDMAG'})
+    return ans
+

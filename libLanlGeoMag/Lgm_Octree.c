@@ -9,7 +9,101 @@
 
 struct timeb  StartTime;
 double ElapsedTime2( struct timeb StartTime );
+//int total_callocs=0;
+//int total_frees=0;
 
+/**
+ *   Store given 3D data into an octree data structure.
+ *
+ *   Given 1D arrays of vector positions and vector data (e.g. B-field), this
+ *   routine recursively partitions the data into an octree data structure. The
+ *   octree can be used to very efficiently find nearest neighbors (using
+ *   Lgm_Octree_kNN() ).
+ *
+ *      \param[in]      ObjectPoints   An array of position vectors
+ *      \param[in]      ObjectData     An array of data vectors (e.g. B-field)
+ *      \param[in]      N              Number of ObjectPoints
+ *
+ *      \returns        returns a pointer to the an Octree structure. User is
+ *                      responsible to freeing this with Lgm_FreeOctree( )
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
+ */
+Lgm_Octree *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectData, unsigned long int N ) {
+
+    double              Min, Max, Diff;
+    unsigned long int   j;
+    Lgm_OctreeCell      *t;
+    Lgm_Octree          *ot;
+
+    t = Lgm_CreateOctreeRoot();
+    t->nData      = N;
+    t->nDataBelow = t->nData;
+    t->Data       = (Lgm_OctreeData *) calloc( t->nData, sizeof( Lgm_OctreeData ) );
+    Max = -9e99;
+    Min = 9e99;
+    for (j=0; j<t->nData; j++){
+        t->Data[j].Id = j;
+        t->Data[j].Position.x = ObjectPoints[j].x;
+        t->Data[j].Position.y = ObjectPoints[j].y;
+        t->Data[j].Position.z = ObjectPoints[j].z;
+        t->Data[j].B.x = ObjectData[j].x;
+        t->Data[j].B.y = ObjectData[j].y;
+        t->Data[j].B.z = ObjectData[j].z;
+        /*
+         * Find scaling for data
+         */
+        if ( ObjectPoints[j].x > Max ) Max = ObjectPoints[j].x;
+        if ( ObjectPoints[j].y > Max ) Max = ObjectPoints[j].y;
+        if ( ObjectPoints[j].z > Max ) Max = ObjectPoints[j].z;
+        if ( ObjectPoints[j].x < Min ) Min = ObjectPoints[j].x;
+        if ( ObjectPoints[j].y < Min ) Min = ObjectPoints[j].y;
+        if ( ObjectPoints[j].z < Min ) Min = ObjectPoints[j].z;
+    }
+
+    /*
+     * Scale Data (positions need to be in range of [0-1]
+     */
+    Diff = Max - Min;
+    for (j=0; j<t->nData; j++){
+        t->Data[j].Position.x = (t->Data[j].Position.x - Min)/Diff;
+        t->Data[j].Position.y = (t->Data[j].Position.y - Min)/Diff;
+        t->Data[j].Position.z = (t->Data[j].Position.z - Min)/Diff;
+    }
+
+
+    SubDivideVolume( t );
+
+    ot = (Lgm_Octree *) calloc( 1, sizeof( Lgm_Octree) );
+    ot->Min  = Min;
+    ot->Max  = Max;
+    ot->Diff = Diff;
+    ot->Root = t;
+
+    ot->kNN_Lookups = 0;
+
+
+    return( ot );
+
+}
+
+
+
+
+/**
+ *   Creates a binary string representation of an unsigned int.
+ *
+ *      \param[in]      n       An unsigned int
+ *      \param[out]     Str     Pointer to a string (i.e. an array of chars)
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
+ */
 void Binary( unsigned int n, char *Str ) {
     int             i, j;
     unsigned int    mask;
@@ -24,8 +118,16 @@ void Binary( unsigned int n, char *Str ) {
 
 
 
-/*
- *  Recursively free the entire octree
+/**
+ *  Recursively free all nodes below the given node.
+ *
+ *      \param[in]      n       Pointer to a cell in an octree.
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 void Lgm_OctreeFreeBranch( Lgm_OctreeCell *Cell ){
 
@@ -37,7 +139,7 @@ void Lgm_OctreeFreeBranch( Lgm_OctreeCell *Cell ){
          *  Then this is a leaf. Free its contents then return.
          */
         if ( Cell->Data ) {
-            free( Cell->Data ); 
+            free( Cell->Data );
             Cell->Data = NULL;
         }
 
@@ -46,7 +148,7 @@ void Lgm_OctreeFreeBranch( Lgm_OctreeCell *Cell ){
         for (i=0; i<8; ++i) Lgm_OctreeFreeBranch( &(Cell->Octant[i]) );
         free( Cell->Octant );
         Cell->Octant = NULL;
-    
+
     }
 
 
@@ -55,19 +157,46 @@ void Lgm_OctreeFreeBranch( Lgm_OctreeCell *Cell ){
 
 }
 
-void Lgm_FreeOctree( Lgm_OctreeCell *ot ) {
-    Lgm_OctreeFreeBranch( ot );
+
+
+/**
+ *   Destroys an octree.
+ *
+ *   Given a pointer to an octree, this routine destroys the structure by
+ *   freeing up all allocated memory.
+ *
+ *      \param[in]      ot   Pointer to an initialized octree
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
+ */
+void Lgm_FreeOctree( Lgm_Octree *ot ) {
+    Lgm_OctreeFreeBranch( ot->Root );
+    free( ot->Root );
     free( ot );
 }
 
 
+/**
+ *  Create a root-level node for an octree.
+ *
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
+ */
 Lgm_OctreeCell *Lgm_CreateOctreeRoot( ) {
 
     char            Str[20];
     Lgm_OctreeCell  *Cell;
 
     /*
-     * allocate 
+     * allocate
      */
     Cell = (Lgm_OctreeCell *) calloc( 1, sizeof( Lgm_OctreeCell ) );
     Cell->nData = 0;
@@ -96,6 +225,21 @@ Lgm_OctreeCell *Lgm_CreateOctreeRoot( ) {
 
 
 
+/**
+ *   Find the cell in the octree that is identified by the given x, y, and z Location Codes.
+ *
+ *      \param[in]      Cell            Pointer to a node in the octree
+ *      \param[in]      ChildLevel      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ *      \param[in]      xLocationCode   unsigned int representation of the binary x location code to find.
+ *      \param[in]      yLocationCode   unsigned int representation of the binary y location code to find.
+ *      \param[in]      zLocationCode   unsigned int representation of the binary z location code to find.
+ *
+ *      \returns        Pointer to the cell that was found.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
+ */
 Lgm_OctreeCell *Lgm_OctreeTraverseToLocCode( Lgm_OctreeCell *Cell, unsigned int ChildLevel, unsigned int xLocationCode, unsigned int yLocationCode, unsigned int zLocationCode ) {
 
     unsigned int    BranchBit, Index;
@@ -103,11 +247,11 @@ Lgm_OctreeCell *Lgm_OctreeTraverseToLocCode( Lgm_OctreeCell *Cell, unsigned int 
     while( Cell->Octant ) { // loop until we reach a leaf (i.e. until Octant is NULL)
 
         // set branch bit for the children of Cell
-        BranchBit  = 1<<ChildLevel; 
+        BranchBit  = 1<<ChildLevel;
 
         // determine which octant to enter
-        Index = (((xLocationCode & BranchBit) >> ChildLevel) 
-                        + 2*( ((yLocationCode & BranchBit) >> ChildLevel) 
+        Index = (((xLocationCode & BranchBit) >> ChildLevel)
+                        + 2*( ((yLocationCode & BranchBit) >> ChildLevel)
                             + 2*((zLocationCode & BranchBit) >> ChildLevel) ) );
 
         Cell = &(Cell->Octant[Index]);
@@ -121,8 +265,17 @@ Lgm_OctreeCell *Lgm_OctreeTraverseToLocCode( Lgm_OctreeCell *Cell, unsigned int 
 
 
 
-/*
- * This returns a pointer to the cell that contains the query point
+/**
+ *   Returns a pointer to the cell that contains the query point
+ *
+ *      \param[in]      Root    Pointer to the root node of the octree
+ *      \param[in]      q       The 3D query point.
+ *
+ *      \returns        Pointer to the cell that was found.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 Lgm_OctreeCell *Lgm_LocateNearestCell( Lgm_OctreeCell *Root, Lgm_Vector *q ){
 
@@ -154,10 +307,20 @@ Lgm_OctreeCell *Lgm_LocateNearestCell( Lgm_OctreeCell *Root, Lgm_Vector *q ){
 
 
 
-/*
- * This routine computes the minimum distance between a point and a cube.
- * The dimensions and center of the cube are stored in the Lgm_OctreeCell
- * structure.
+/**
+ *  This routine computes the minimum distance between a point and an octree
+ *  cell (i.e. cube).  The dimensions and center of the cube are stored in the
+ *  Lgm_OctreeCell structure.
+ *
+ *      \param[in]      Cell    Pointer to a cell (i.e. node) in the octree
+ *      \param[in]      q       The 3D query point.
+ *
+ *      \returns        The minimum distance between the point and the cell in
+ *                      normalized coordinates.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 double  MinDist( Lgm_OctreeCell *Cell, Lgm_Vector *q ) {
 
@@ -172,7 +335,7 @@ double  MinDist( Lgm_OctreeCell *Cell, Lgm_Vector *q ) {
     py = q->y - Cell->Center.y;
     pz = q->z - Cell->Center.z;
 //printf("MinDist(): q = %g %g %g\n", q->x, q->y, q->z );
-    
+
     if      ( px < mh ) { d = px+ph; distance2 += d*d; }
     else if ( px > ph ) { d = px-ph; distance2 += d*d; }
 
@@ -190,10 +353,23 @@ double  MinDist( Lgm_OctreeCell *Cell, Lgm_Vector *q ) {
 
 
 
-/*
+/**
  *  Insert a Cell object into the Priority Queue (PQ). This computes distance
  *  and puts it into the PQ at the right place to maintain a `mindist' order
- *  (the top object of the queue.
+ *  (the top object of the queue. This routine is used by Lgm_Octree_kNN().
+ *
+ *      \param[in]      Cell        Pointer to a cell (i.e. node) in the octree
+ *      \param[in]      q           The 3D query point.
+ *      \param[in,out]  PQ          The "priority queue"3D query point.
+ *      \param[in]      MaxDist2    The maximum distance (squared) to care
+ *                                  about. Square distances beyond this value are ignored.
+ *
+ *      \returns        The distance between the point and the cell in
+ *                      normalized coordinates.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxDist2 ) {
 
@@ -214,6 +390,8 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
 
     // Allocate an element for the PQ
     new = (pQueue *) calloc( 1, sizeof(pQueue) );
+//++total_callocs;
+//printf("InsertCell_callocs = %d    MinDist2 = %g\n", total_callocs, dist);
 
     // Add Info
     new->Obj      = Cell;
@@ -224,8 +402,8 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
     if ( *PQ == NULL ) {
         // nothing in the Priority Queue.
         *PQ = new;
-	new->Prev = NULL;
-	new->Next = NULL;
+	    new->Prev = NULL;
+	    new->Next = NULL;
         return( dist );
     } else {
 
@@ -233,7 +411,7 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
         p = *PQ;
         done = FALSE;
         InsertAtEnd = FALSE; // always insert new object before the object pointed at by p unless this is true
-			     // then it goes at the end.
+			                 // then it goes at the end.
         while ( !done ) {
             if ( new->MinDist2 <= p->MinDist2 ) {
                 done = TRUE;
@@ -268,6 +446,21 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     return( dist );
@@ -275,25 +468,42 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
 
 }
 
-/*
- *  Insert a point object into the PQ
- *  This computes distance and puts it into the PQ at the right place.
+/**
+ *  Insert a point object into the priority queue. This computes distance and
+ *  puts it into the priority queue at the right place.  This routine is used
+ *  by Lgm_Octree_kNN().
+ *
+ *      \param[in]      Cell        Pointer to the cell (i.e. node) in the octree that contains the data point to add.
+ *      \param[in]      j           array index of the data point (contained within the given cell) to add.
+ *      \param[in]      q           The 3D query point.
+ *      \param[in,out]  PQ          The "priority queue"3D query point.
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
 
     pQueue  *new, *p;
-    double  x, y, z, dx, dy, dz, MinDist2 = 0.0;
+    double  x, y, z, dx, dy, dz, MinDist2;
+
+    MinDist2 = 0.0;
 
     // compute distance^2 between point and query point
     x = Cell->Data[j].Position.x; dx = q->x-x; MinDist2 += dx*dx;
     y = Cell->Data[j].Position.y; dy = q->y-y; MinDist2 += dy*dy;
     z = Cell->Data[j].Position.z; dz = q->z-z; MinDist2 += dz*dz;
 
-    
+
 
 
     // Allocate an element for the PQ
     new = (pQueue *) calloc( 1, sizeof(pQueue) );
+//++total_callocs;
+//printf("InsertPoint_callocs = %d\n", total_callocs);
+//printf("MinDist2 = %g\n", MinDist2);
 
     // Add Info
     new->Obj      = Cell;
@@ -307,34 +517,38 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
         *PQ = new;
         new->Next = NULL;
         new->Prev = NULL;
+//printf("1.\n"); //PrintPQ( PQ ); //only for debugging
         return;
     } else {
+
         // find where to add the new element
         p = *PQ;
         while ( p ) {
-            if ( new->MinDist2 < p->MinDist2 ) {
-                if ( p->Prev == NULL ) {
-                    // Insert at top (i.e. as first element)
-                    new->Next = p;
-                    new->Prev = NULL;
-                    p->Prev   = new;
-                    *PQ        = new;
-                    return;
-                } else if ( p->Next == NULL ) {
-                    // Insert at bottom (i.e. as last element)
-                    p->Next   = new;
-                    new->Next = NULL;
-                    new->Prev = p;
-                    return;
-                } else {
-                    // Insert before p
-                    new->Next     = p;
-                    new->Prev     = p->Prev;
-                    p->Prev->Next = new;
-                    p->Prev       = new;
-                    return;
-                }
-            }
+
+            if ( (new->MinDist2 <= p->MinDist2) && (p->Prev != NULL) ) {
+                // Insert before p
+                new->Next     = p;
+                new->Prev     = p->Prev;
+                p->Prev->Next = new;
+                p->Prev       = new;
+//printf("2.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } else if ( (new->MinDist2 <= p->MinDist2) && (p->Prev == NULL) ) {
+                // Insert at top (i.e. as first element)
+                new->Next = p;
+                new->Prev = NULL;
+                p->Prev   = new;
+                *PQ        = new;
+//printf("3.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } else if ( (new->MinDist2 > p->MinDist2) && (p->Next == NULL) ) {
+                // Insert at bottom (i.e. as last element)
+                p->Next   = new;
+                new->Next = NULL;
+                new->Prev = p;
+//printf("4.\n"); //PrintPQ( PQ ); //only for debugging
+                return;
+            } 
             p = p->Next;
         }
     }
@@ -344,8 +558,21 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
 
 
 
-/*
- *   Descend to the leaf that is closest to the query point
+/**
+ *   Descend to the leaf node that is closest to the query point. This routine
+ *   is used by Lgm_Octree_kNN().
+ *
+ *      \param[in]      Node        Pointer to a node (cell) in thge octree
+ *      \param[in]      PQ          The "priority queue"3D query point.
+ *      \param[in]      q           The 3D query point.
+ *      \param[in]      MaxDist2    The maximum distance (squared) to care
+ *                                  about. Square distances beyond this value are ignored.
+ *
+ *      \returns        pointer to closest leaf node.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 Lgm_OctreeCell *DescendTowardClosestLeaf( Lgm_OctreeCell *Node, pQueue **PQ, Lgm_Vector *q, double MaxDist2 ) {
 
@@ -358,7 +585,7 @@ Lgm_OctreeCell *DescendTowardClosestLeaf( Lgm_OctreeCell *Node, pQueue **PQ, Lgm
     Cell = Node;
     ChildLevel = Cell->Level - 1;
 
-    
+
 //    while( Cell->Octant ) { // loop until we reach a leaf (i.e. until Octant is NULL)
     if ( Cell->Octant ) { // do this if its a leaf cell
 
@@ -368,16 +595,16 @@ Lgm_OctreeCell *DescendTowardClosestLeaf( Lgm_OctreeCell *Node, pQueue **PQ, Lgm
 
             // Add Cell to Priority Queue
             dist = InsertCell( &(Cell->Octant[i]), q, PQ, MaxDist2 );
-            
+
             // keep track of closest octant
             if (dist <= min_dist) {
                 min_dist = dist;
 //printf("HHHHHHH: min_dist = %g\n", min_dist);
                 min_i    = i;
             }
-            
+
         }
-        
+
         Cell = &(Cell->Octant[min_i]);
 
     } else {
@@ -393,11 +620,20 @@ Lgm_OctreeCell *DescendTowardClosestLeaf( Lgm_OctreeCell *Node, pQueue **PQ, Lgm
 
 }
 
-/*
- *  Print contents of priority Queue (for debugging)
+/**
+ *   Prints the contents of the priority queue. For dubugging only. This routine
+ *   is used by Lgm_Octree_kNN().
+ *
+ *      \param[in]  PQ          The "priority queue"3D query point.
+ *
+ *      \returns        void
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 void PrintPQ( pQueue **PQ ) {
- 
+
     long int    i=0;
     pQueue      *p;
 
@@ -417,8 +653,17 @@ void PrintPQ( pQueue **PQ ) {
     printf("\n\n");
 }
 
-/*
- *  Pop an Object off the top of the PQ
+/**
+ *  Pop an Object off the top of the PQ. This routine
+ *  is used by Lgm_Octree_kNN().
+ *
+ *      \param[in,out]  PQ          The "priority queue"3D query point.
+ *
+ *      \returns        pointer to item popped off the priority queue.
+ *
+ *      \author         Mike Henderson
+ *      \date           2009-2012
+ *
  */
 pQueue *PopObj( pQueue **PQ ) {
 
@@ -441,42 +686,41 @@ pQueue *PopObj( pQueue **PQ ) {
 
 
 
-/*
- *  kNN: Finds the k Nearest Neighbors (kNN) of a query point q given that the
- *       set of data is stored as an Octree. All distances are in the normalized 
- *       units (i.e. scaled from [0.0-1.0] ).
+/**
+ *  Finds the k Nearest Neighbors (kNN) of a query point q given that the set
+ *  of data is stored as an Octree. All distances are in the normalized units
+ *  (i.e. scaled from [0.0-1.0] ).
  *
+ *    \param[in]     q           Query position. I.e. the point we want to find NNs for.
+ *    \param[in]     Root       Root node of Octree.
+ *    \param[in]     K          Number of NNs to find.
+ *    \param[in]     MaxDist2   Threshold distance^2 beyond which we give up on finding
+ *                              NNs.  (i.e. could find them, but we arent interested
+ *                              because they'd be too far from our query point to be
+ *                              useful).
+ *    \param[out]    Kgot       Number of NNs (within MaxDist2) that we actually found.
+ *    \param[out]    kNN        List of kNN Data items. Sorted (closest first).
  *
+ *    \returns       OCTREE_KNN_SUCCESS         Search succeeded.
+ *                   OCTREE_KNN_TOO_FEW_NNS     Search terminated because we couldnt find K NNs that were close enough.
+ *                   OCTREE_KNN_NOT_ENOUGH_DATA Octree doesnt contain enough data points.
  *
- *  Input:
- *  ------
- *          q        - query position. I.e. the point we want to find NNs for.
- *          Root     - Root node of Octree.
- *          K        - Number of NNs to find.
- *          MaxDist2 - Threshold distance^2 beyond which we give up on finding
- *                      NNs.  (i.e. could find them, but we arent interested
- *                      because they'd be too far from our query point to be
- *                      useful).
- *  Output:
- *  -------
- *          Kgot     - Number of NNs (within MaxDist2) that we actually found.
- *          kNN      - List of kNN Data items. Sorted (closest first).
- *
- *  Return Value:
- *  --------------
- *          OCTREE_KNN_SUCCESS         - Search succeeded.
- *          OCTREE_KNN_TOO_FEW_NNS     - Search terminated because we couldnt find 
-                                         K NNs that were close enough.
- *          OCTREE_KNN_NOT_ENOUGH_DATA - Octree doesnt contain enough data points.
- *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
  *
  */
-int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, double MaxDist2, Lgm_OctreeData *kNN ) {
+int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, double MaxDist2, Lgm_OctreeData *kNN ) {
 
-    int         k, done;
-    pQueue      *PQ, *p;
+    int             k, done;
+    pQueue          *PQ, *p;
+    Lgm_OctreeCell  *Root;
+    Lgm_Vector      q;
+static count=0;
 
+
+    Root = Octree->Root;
     *Kgot = 0;
+
 
 //MaxDist2 = .05;
 
@@ -491,7 +735,8 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
      *  Add Root Node to the Priority Queue.
      */
     PQ = NULL;
-    InsertCell( Root, q, &PQ, MaxDist2 );
+    Lgm_OctreeScalePosition( q_in, &q, Octree );
+    InsertCell( Root, &q, &PQ, MaxDist2 );
 
     /*
      *  Process items on the Priority Queue until we are done.
@@ -500,7 +745,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
     done = FALSE;
     while( !done ) {
 
-	//PrintPQ( &PQ ); //only for debugging
+	    //PrintPQ( &PQ ); //only for debugging
 
         /*
          * Pop the highest priority item off of the Priority Queue.
@@ -519,7 +764,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
                  * query point
                  */
                 if ( p->MinDist2 > MaxDist2 ) {
-                    while ( (p = PopObj(&PQ)) ) free( p );
+                    while ( (p = PopObj(&PQ)) ) {free( p );}
                     return( OCTREE_KNN_TOO_FEW_NNS );
                 }
 
@@ -538,7 +783,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
                  * adds all cells we encounter along the way to the PQ. Ignore
                  * Any cell that is farther than MaxDist2 away from query point.
                  */
-                DescendTowardClosestLeaf( p->Obj, &PQ, q, MaxDist2 );
+                DescendTowardClosestLeaf( p->Obj, &PQ, &q, MaxDist2 );
 
             }
 
@@ -557,12 +802,20 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
 
         if ( k >= K ) done = TRUE;
 
+
+	    //PrintPQ( &PQ ); //only for debugging
+
     }
 
     /*
      * Free all remaining objects on the PQ
      */
-    while ( (p = PopObj(&PQ)) ) free( p );
+    while ( (p = PopObj(&PQ)) ) {free( p );}
+
+
+//PrintPQ( &PQ ); //only for debugging  
+
+    ++(Octree->kNN_Lookups);
     
 
     /*
@@ -578,10 +831,17 @@ int Lgm_Octree_kNN( Lgm_Vector *q, Lgm_OctreeCell *Root, int K, int *Kgot, doubl
 
 
 
-
-
-
-
+/**
+ *  Allocate 8 new octants in a parent cell.
+ *
+ *    \param[in]     Parent     Cell in which new octants are to be created.
+ *
+ *    \returns       pointer to array of 8 newly allocated octants.
+ *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
+ *
+ */
 Lgm_OctreeCell *CreateNewOctants( Lgm_OctreeCell *Parent ) {
 
     int             i;
@@ -651,6 +911,18 @@ Lgm_OctreeCell *CreateNewOctants( Lgm_OctreeCell *Parent ) {
 }
 
 
+/**
+ *  Recursively subdivide volume. Stop when the number of data points ber cell
+ *  is lower than the threshold given by OCTREE_MAX_DATA_PER_OCTANT.
+ *
+ *    \param[in]     Node in the octree to subdivide.
+ *
+ *    \returns       void
+ *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
+ *
+ */
 void SubDivideVolume( Lgm_OctreeCell *Vol ) {
 
     int                 Level;
@@ -664,11 +936,11 @@ void SubDivideVolume( Lgm_OctreeCell *Vol ) {
      *  Create 8 new Octant cells
      *  CreateNewOctant() should make nData = 0 as initial value.
      */
-    Vol->Octant  = CreateNewOctants( Vol );   
+    Vol->Octant  = CreateNewOctants( Vol );
 
     /*
-     * Loop through the Data and figure out which 
-     * octant they belong to. Do this first so we know 
+     * Loop through the Data and figure out which
+     * octant they belong to. Do this first so we know
      * how much memory we need to allocate to each child's
      * data field.
      */
@@ -707,8 +979,8 @@ void SubDivideVolume( Lgm_OctreeCell *Vol ) {
      */
     for ( ii=0; ii<Vol->nData; ii++ ){
         j = Octant[ii];
-        Vol->Octant[j].Data[ (Vol->Octant[j].nData)++ ] = Vol->Data[ii]; 
-        
+        Vol->Octant[j].Data[ (Vol->Octant[j].nData)++ ] = Vol->Data[ii];
+
     }
 
 
@@ -721,7 +993,7 @@ void SubDivideVolume( Lgm_OctreeCell *Vol ) {
     Vol->nData = 0;
     free( Octant ); Octant = NULL;
     free( Vol->Data ); Vol->Data = NULL;
-    
+
 
 
     /*
@@ -730,83 +1002,85 @@ void SubDivideVolume( Lgm_OctreeCell *Vol ) {
     for ( i=0; i<8; i++ ) {
         if ( (Vol->Octant[i].Level > 0 ) && (Vol->Octant[i].nData > OCTREE_MAX_DATA_PER_OCTANT ) ) SubDivideVolume( &(Vol->Octant[i]) );
     }
-    
-    
+
+
     return;
 
 
 }
 
-void Lgm_OctreeScalePoint( Lgm_Vector *u, Lgm_Vector *v, double Min, double Diff ) {
-    v->x = (u->x - Min)/Diff;
-    v->y = (u->y - Min)/Diff;
-    v->z = (u->z - Min)/Diff;
-}
-
-
-/*
- * This actually does the work of creating the whole octree
+/**
+ *  Scale an input vector position. E.g., \f$ v = (u-Min)/ (Max-Min)\f$.
  *
- *  Input:
- *  ------
- *          ObjectPoints - An array of position vectors
- *          ObjectData   - An array of data vectors (e.g. B-field)
- *          N            - Number of ObjectPoints
+ *    \param[in]     u       input vector position.
+ *    \param[out]    v       output position in normalized coordinates.
+ *    \param[in]     Octree  The octree structure (which contains the scaling values).
  *
- *  Output:
- *  -------
- *          Min         - The Min value of all position components
- *          Max         - The Max value of all position components
- *          Min         - Max-Min
+ *    \returns       void
  *
- *  Return:
- *  -------
- *          returns a pointer to the root node of the octree
+ *    \author        Mike Henderson
+ *    \date          2009-2012
  *
  */
-Lgm_OctreeCell *Lgm_InitOctree( Lgm_Vector *ObjectPoints, Lgm_Vector *ObjectData, unsigned long int N, double *Min, double *Max, double *Diff ) {
-
-    unsigned long int   j;
-    Lgm_OctreeCell      *ot;
-
-    ot = Lgm_CreateOctreeRoot();
-    ot->nData      = N;
-    ot->nDataBelow = ot->nData;
-    ot->Data       = (Lgm_OctreeData *) calloc( ot->nData, sizeof( Lgm_OctreeData ) );
-    *Max = -9e99;
-    *Min = 9e99;
-    for (j=0; j<ot->nData; j++){
-        ot->Data[j].Position.x = ObjectPoints[j].x;
-        ot->Data[j].Position.y = ObjectPoints[j].y;
-        ot->Data[j].Position.z = ObjectPoints[j].z;
-        ot->Data[j].B.x = ObjectData[j].x;
-        ot->Data[j].B.y = ObjectData[j].y;
-        ot->Data[j].B.z = ObjectData[j].z;
-        /*
-         * Find scaling for data
-         */
-        if ( ObjectPoints[j].x > *Max ) *Max = ObjectPoints[j].x;
-        if ( ObjectPoints[j].y > *Max ) *Max = ObjectPoints[j].y;
-        if ( ObjectPoints[j].z > *Max ) *Max = ObjectPoints[j].z;
-        if ( ObjectPoints[j].x < *Min ) *Min = ObjectPoints[j].x;
-        if ( ObjectPoints[j].y < *Min ) *Min = ObjectPoints[j].y;
-        if ( ObjectPoints[j].z < *Min ) *Min = ObjectPoints[j].z;
-    }
-
-    /*
-     * Scale Data (positions need to be in range of [0-1]
-     */
-    *Diff = *Max - *Min;
-    for (j=0; j<ot->nData; j++){
-        ot->Data[j].Position.x = (ot->Data[j].Position.x - *Min)/(*Diff);
-        ot->Data[j].Position.y = (ot->Data[j].Position.y - *Min)/(*Diff);
-        ot->Data[j].Position.z = (ot->Data[j].Position.z - *Min)/(*Diff);
-    }
-
-
-    SubDivideVolume( ot );
-
-    return( ot );
-
+void Lgm_OctreeScalePosition( Lgm_Vector *u, Lgm_Vector *v, Lgm_Octree *Octree ) {
+    v->x = (u->x - Octree->Min)/Octree->Diff;
+    v->y = (u->y - Octree->Min)/Octree->Diff;
+    v->z = (u->z - Octree->Min)/Octree->Diff;
 }
+
+/**
+ *  Un-scale an input vector position. E.g., \f$ u = v*Diff + Min\f$.
+ *
+ *    \param[in]     v       input position in normalized coordinates.
+ *    \param[out]    u       output position in original coordinates.
+ *    \param[in]     Octree  The octree structure (which contains the scaling values).
+ *
+ *    \returns       void
+ *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
+ *
+ */
+void Lgm_OctreeUnScalePosition( Lgm_Vector *v, Lgm_Vector *u, Lgm_Octree *Octree ) {
+    u->x = v->x*Octree->Diff + Octree->Min;
+    u->y = v->y*Octree->Diff + Octree->Min;
+    u->z = v->z*Octree->Diff + Octree->Min;
+}
+
+
+/**
+ *  Scale a distance. E.g., \f$ u = v/Diff \f$.
+ *
+ *    \param[in]     u       input distance (in original coords).
+ *    \param[out]    v       output position in scaled coordinates.
+ *    \param[in]     Octree  The octree structure (which contains the scaling values).
+ *
+ *    \returns       void
+ *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
+ *
+ */
+void Lgm_OctreeScaleDistance( double u, double *v, Lgm_Octree *Octree ) {
+    *v = u/Octree->Diff;
+}
+
+/**
+ *  Un-scale a distance. E.g., \f$ u = v*Diff \f$.
+ *
+ *    \param[in]     u       input distance (in scaled coords).
+ *    \param[out]    v       output position in original coordinates.
+ *    \param[in]     Octree  The octree structure (which contains the scaling values).
+ *
+ *    \returns       void
+ *
+ *    \author        Mike Henderson
+ *    \date          2009-2012
+ *
+ */
+void Lgm_OctreeUnScaleDistance( double v, double *u, Lgm_Octree *Octree ) {
+    *u = v*Octree->Diff;
+}
+
+
 

@@ -65,12 +65,12 @@ double tlFunc( Lgm_Vector *P, double R0, Lgm_MagModelInfo *Info ){
 int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;
-    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Htry, Hdid, htry, hdid, Hnext, Hmin, Hmax, s, ss;
     double	    Sa=0.0, Sc=0.0, d;
     double	    R0, R, Fa, Fb, Fc, F;
     double	    Ra, Rb, Rc;
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
-    int		    done, reset, n, SavePnt;
+    int		    done, reset, n, SavePnt, Count;
 
 
     reset = TRUE;
@@ -111,6 +111,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     Lgm_B_cdip( u, &Bcdip, Info );
     Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
     ++n;
+    Info->nPnts = n;
     if (n > LGM_MAX_INTERP_PNTS){
 	    printf("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
     }
@@ -130,7 +131,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         // Trace until we are not.
         Htry  = 0.1;
         while ( !done ) {
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
@@ -153,6 +154,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
             Lgm_B_cdip( &P, &Bcdip, Info );
             Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
             ++n;
+            Info->nPnts = n;
         }
 
     }
@@ -178,9 +180,25 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     done    = FALSE;
     //reset   = TRUE;
     SavePnt = TRUE;
+    Htry = Info->Hmax;  // we want to step with constant increments.
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
+        /* 
+         * We want to make sure that we actually do a step of Htry, so keep
+         * trying until we get there.
+         */
+        htry = Htry; Hdid = 0.0; Count = 0;
+        while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100) ) {
+//printf("htry = %g\n", htry);
+            if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
+            Hdid += hdid;
+            htry = Htry - Hdid;
+            ++Count;
+        }
+
+
+
+if ( fabs(Htry-Hdid)>1e-4) printf("Htry, Hdid = %g %g    htry = %g   Count = %d\n", Htry, Hdid, htry, Count);
 
 
         R = Lgm_Magnitude( &P );
@@ -209,7 +227,10 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
              * Compute field strength and save the results in the array.
              */
             if ( SavePnt && (ss > Info->s[n-1]) ) {
+//printf("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n");
+//printf("P = %g %g %g\n", P.x, P.y, P.z);
                 Info->Bfield( &P, &Bvec, Info );
+//printf("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
                 Info->s[n]    = ss;                         // save arc length
                 Info->Px[n]   = P.x;                        // save 3D position vector.
                 Info->Py[n]   = P.y;                        //
@@ -219,6 +240,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
                 Lgm_B_cdip( &P, &Bcdip, Info );
                 Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
                 ++n;
+                Info->nPnts = n;
             }
 
             if ( n > LGM_MAX_INTERP_PNTS-10 ) {
@@ -276,7 +298,7 @@ if (0==1){
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 3\n");return(-1);}
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 3\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -341,8 +363,8 @@ if (1==1){
         Lgm_B_cdip( v, &Bcdip, Info );
         Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
         ++n;
+        Info->nPnts = n;
     }
-    Info->nPnts     = n;                       // set total number of points in the array.
     Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
                                                // when trying to interpolate.
 
@@ -380,12 +402,12 @@ if (1==1){
 int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;
-    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Htry, Hdid, htry, hdid, Hnext, Hmin, Hmax, s, ss;
     double	    Sa=0.0, Sc=0.0, d;
     double	    R0, R, Fa, Fb, Fc, F;
     double	    Ra, Rb, Rc;
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
-    int		    done, reset, n, m, SavePnt;
+    int		    done, reset, n, m, SavePnt, Count;
 
     reset = TRUE;
 
@@ -461,7 +483,16 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     m       = 0; // counts the number of iteration through the loop (for use as a failsafe bailout)
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
+        /* 
+         * We want to make sure that we actually do a step of Htry, so keep trying until we get there.
+         */
+        htry = Htry, Hdid = 0.0; Count = 0;
+        while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100) ) {
+            if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
+            htry = Htry - hdid;
+            Hdid += hdid;
+            ++Count;
+        }
 
 
         R = Lgm_Magnitude( &P );
@@ -563,7 +594,7 @@ if (1==1){
 	    } else {
 
             P = Pa; Htry = 0.5*d;
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 5\n");return(-1);}
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 5\n");return(-1);}
             R = Lgm_Magnitude( &P );
             F =  R - R0;
             if ( F >= 0.0 ) {
@@ -656,7 +687,7 @@ if (0==1){
      */
     if ( AddBminPoint ) {
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
-printf("2) ADDING NEW POINT\n");
+//printf("2) ADDING NEW POINT\n");
 //printf("n, nPnts = %d %d\n", n, Info->nPnts);
     }
 
@@ -1144,7 +1175,8 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     P = *u;
     while ( !done ) {
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        //if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
         ss += Hdid;  
 
         /*

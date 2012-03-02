@@ -164,15 +164,15 @@
                             //!<      Uwgs84 = Ry(-xp)Rz(-yp) Upef
 
 
-#define GSE_COORDS      7   // Geocentric Solar Ecliptic (mean of date quantities?)
+#define GSE_COORDS      7   //!< Geocentric Solar Ecliptic (mean of date quantities?)
 
-#define GSM_COORDS      8   // Geocentric Solar Magnetospheric (X to sun, mag dipole in X-Z plane)
+#define GSM_COORDS      8   //!< Geocentric Solar Magnetospheric (X to sun, mag dipole in X-Z plane)
 
-#define SM_COORDS       9   // Solar Magnetic (Mag dipole in Z, sun in X-Z plane)
+#define SM_COORDS       9   //!< Solar Magnetic (Mag dipole in Z, sun in X-Z plane)
 
-#define EDMAG_COORDS   10   // Eccentric Dipole Coords (true dipole is offset from center)
+#define EDMAG_COORDS   10   //!< Eccentric Dipole Coords (true dipole is offset from center)
 
-#define CDMAG_COORDS   11   // Centered Dipole Coords
+#define CDMAG_COORDS   11   //!< Centered Dipole Coords
 
 
 
@@ -491,7 +491,8 @@ typedef struct Lgm_CTrans {
     Lgm_LeapSeconds   l;            //!< Structure containing Leap Second Info
 
     Lgm_DateTime     UT1;           //!< A corrected version of UT0.
-                                    /**< UT is the mean solar time at Greenwich.
+                                    /**< A corrected version of UT0.
+                                     *   UT is the mean solar time at Greenwich.
                                      *   UT0 is a version of UT that uses data
                                      *   from many different ground stations.
                                      *   UT1 is a version of UT0 in which
@@ -502,95 +503,104 @@ typedef struct Lgm_CTrans {
                                      *   Units: Decimal hours
                                      */
 
-    Lgm_DateTime     UTC;           /**<
-                                     * Universal Time Coordinated.
-                                     * Most commonly used time system. Derived
-                                     * from atomic time. It is maintained to be
-                                     * within +/- 0.9s of UT1 (via addition or
-                                     * subtraction(?) of leap seconds).
-                                     * Units: Decimal hours
+    Lgm_DateTime     UTC;           //!< Universal Time Coordinated.
+                                    /**< Universal Time Coordinated.
+                                     *   Most commonly used time system. Derived
+                                     *   from atomic time. It is maintained to be
+                                     *   within +/- 0.9s of UT1 (via addition or
+                                     *   subtraction(?) of leap seconds).
+                                     *   Units: Decimal hours
                                      */
 
-    double           DUT1;          /**<
-                                     * Difference between UT1 and UTC.
-                                     *      DUT1 = UT1 - UTC.
-                                     * This is monitored and reported as part
-                                     * of the Earth Orientation Parameters
-                                     * (EOP). Can be predicted a short time
-                                     * into the future, but definitive values
-                                     * only available retrospectively.  We set
-                                     * this value to 0.0 by default. Thus in
-                                     * the absence of EOP data, we assume its
-                                     * initial value.
-                                     * Units: Decimal seconds
+    double           DUT1;          //!< Difference between UT1 and UTC ( DUT1 = UT1 - UTC.)
+                                    /**<
+                                     *   Difference between UT1 and UTC.
+                                     *          DUT1 = UT1 - UTC.
+                                     *   This is monitored and reported as part
+                                     *   of the Earth Orientation Parameters
+                                     *   (EOP). Can be predicted a short time
+                                     *   into the future, but definitive values
+                                     *   only available retrospectively.  We set
+                                     *   this value to 0.0 by default. Thus in
+                                     *   the absence of EOP data, we assume its
+                                     *   initial value.
+                                     *   Units: Decimal seconds
                                      */
 
-    double          LOD;            /**<
-                                     * Length Of Day (LOD). Its the amount of extra
-                                     * time in seconds that the current day has. Not
-                                     * predictable. Part of EOP values.
+    double          LOD;            //!< Length Of Day (LOD). Seconds in a day - 86400.
+                                    /**<
+                                     *   Length Of Day (LOD). Its the amount of extra
+                                     *   time in seconds that the current day has. Not
+                                     *   predictable. Part of EOP values.
                                      */
 
-    Lgm_DateTime    TAI;             /**<
+    Lgm_DateTime    TAI;            //!< International Atomic Time. (TAI = UTC + DAT).
+                                    /**<
                                       *  International Atomic Time.
                                       *     TAI = UTC + DAT
                                       */
 
-    Lgm_DateTime    GPS;             /**<
+    Lgm_DateTime    GPS;            //!< GPS time (GPS = TAI - 19s).
+                                    /**<
                                       *  GPS time
                                       *     GPS = TAI - 19s
                                       */
 
-    double          DAT;             /**<
-                                      reateFluxToPsd
-                                      *     DAT = TAI - UTC
-                                      * DAT is essentially the number of leap seconds
-                                      * and are an integral number of whole seconds.
-                                      * Units: Decimal seconds.
+    double          DAT;            //!< Difference between TAI and UTC. (DAT = TAI - UTC.)
+                                    /**<
+                                      *  Difference between TAI and UTC.
+                                      *      DAT = TAI - UTC
+                                      *  DAT is essentially the number of leap seconds
+                                      *  and are an integral number of whole seconds.
+                                      *  Units: Decimal seconds.
                                       */
 
-    Lgm_DateTime    TT;             /**<
+    Lgm_DateTime    TT;             //!< Terestrial Time (TT).
+                                    /**<
                                       *  Terestrial Time (TT).
-                                      * Essentially the same thing as
-                                      * "Terrestrial Dynamical Time (TDT) or
-                                      * Ephmeris Time (ET). Its defined to be,
-                                      *      TT = TAI + 32.184s
-                                      * Units: Decimal hours.
+                                      *  Essentially the same thing as
+                                      *  "Terrestrial Dynamical Time (TDT) or
+                                      *  Ephmeris Time (ET). Its defined to be,
+                                      *       TT = TAI + 32.184s
                                       */
 
-    Lgm_DateTime    TDB;            /**<
+    Lgm_DateTime    TDB;            //!< Barycentric Dynamical Time.
+                                    /**<
                                       *  Barycentric Dynamical Time.
-                                      * Not used here.
-                                      * Units: Decimal hours
+                                      *  Not used here.
                                       */
 
-    Lgm_DateTime    TCG;            /**<
+    Lgm_DateTime    TCG;            //!< Geocentric Coordinate Time.
+                                    /**<
                                       *  Geocentric Coordinate Time.
-                                      * Not used here.
-                                      * Units: Decimal hours
+                                      *  Not used here.
                                       */
 
 
-    double      gmst;               /**<
+    double      gmst;               //!< Greenwich Mean Sidereal Time.
+                                    /**<
                                       *  Greenwich Mean Sidereal Time
-                                      * units: in radians
+                                      *  Units: in radians
                                       */
 
-    double      gast;               /**<
+    double      gast;               //!< Greenwich Apparent Sidereal Time.
+                                    /**<
                                       *  Greenwich Apparent Sidereal Time
-                                      * Units: in radians
+                                      *  Units: in radians
                                       */
 
 
-    double      xp, yp;             /**<
-                                      * Pole wander parameters.
-                                      * part of EOP data.
-                                      * Units: radians
+    double      xp, yp;             //!< EOP Pole wander parameters.
+                                    /**<
+                                      *  Pole wander parameters.
+                                      *  part of EOP data.
+                                      *  Units: radians
                                       */
 
-    double      epsilon;            /**<
-                                     *  Mean Obliquity of the Ecliptic
-                                     * (in radians)
+    double      epsilon;            //!< Mean Obliquity of the Ecliptic.
+                                    /**<
+                                     *   Mean Obliquity of the Ecliptic
+                                     *   (in radians)
                                      */
 
     double      epsilon_true;       /**<

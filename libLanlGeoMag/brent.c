@@ -72,7 +72,7 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         // x to u. (From point Px to Pu.)
         P    = Px;
         Htry = du;
-        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
         f->Info->Bfield( &P, &Btmp, f->Info );
         B = Lgm_Magnitude( &Btmp );
         Pu = P;
@@ -119,10 +119,10 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
 
 int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_Vector P2, BrentFuncInfoP *f, double tol, double *Sz, double *Fz, Lgm_Vector *Pz ) {
 
-	int         iter;
+	int         iter, Count;
 	double      a, b, c, d, e, min1, min2;
 	double      fa, fb, fc, p, q, r, s, tol1, xm;
-    double      Htry, Hdid, Hnext, dd, sgn;
+    double      Htry, Hdid, Hnext, dd, sgn, htry, hdid;
     Lgm_Vector  Pa, Pb, Pc, P;
 
     a = S1; Pa = P1; fa = F1;
@@ -218,8 +218,25 @@ int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_V
 //        if ( dd < 0.0 ) sgn *= -1.0;
 //        Htry = fabs(dd);
         Htry = dd;
-        Lgm_MagStep( &Pb, &f->u_scale, Htry, &Hdid, &Hnext, f->Info->Lgm_MagStep_Tol, sgn, &s, &f->reset, f->Info->Bfield, f->Info );
-if (Htry != Hdid) printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
+
+
+        /*
+         * We want to make sure that we actually do a step of Htry, so keep trying until we get there.
+         */
+//printf("\n\n\n########################\nIn brent: Htry = %g\n", Htry);
+        htry = Htry, Hdid = 0.0; Count = 0;
+        while ( (fabs(htry) >= 0.5*tol1 ) && (fabs(xm) >= tol1) && (Count<100) ) {
+            if ( Lgm_MagStep( &Pb, &f->u_scale, htry, &hdid, &Hnext, sgn, &s, &f->reset, f->Info->Bfield, f->Info ) < 0 ) { printf("BAILING 4\n");return(-1); }
+//printf("In brent: Count=%d htry, hdid = %g %g  Htry, Hdid = %g %g    fabs(Hdid-Htry) = %g\n", Count, htry, hdid, Htry, Hdid, fabs(Hdid-Htry) );
+            Hdid += hdid;
+            htry = Htry - Hdid;
+//printf("In brent: Count=%d htry, hdid = %g %g  Htry, Hdid = %g %g    fabs(Hdid-Htry) = %g\n\n", Count, htry, hdid, Htry, Hdid, fabs(Hdid-Htry) );
+            ++Count;
+        }
+
+
+if (Htry != Hdid) printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  Htry = %g  Hdid = %g  AAAAAAAa\n", Htry, Hdid );
+//printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  Htry = %g  Hdid = %g  AAAAAAAa\n", Htry, Hdid );
         fb = f->func( &Pb, f->Val, f->Info );
         //printf("fa, fb, fc = %g %g %g\n", fa, fb, fc);
 

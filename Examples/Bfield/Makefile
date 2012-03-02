@@ -1,8 +1,11 @@
-all: B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+all: B B2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
 
 
 B: B.c
 	gcc B.c `pkg-config --cflags --libs lgm` -o B -Wall
+
+B2: B2.c
+	gcc B2.c `pkg-config --cflags --libs lgm` -o B2 -Wall
 
 GradB: GradB.c
 	gcc GradB.c `pkg-config --cflags --libs lgm` -o GradB -Wall

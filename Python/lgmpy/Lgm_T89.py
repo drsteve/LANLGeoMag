@@ -13,7 +13,7 @@ import numpy as np
 
 import MagData
 from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
-    Lgm_B_T89
+    Lgm_B_T89, Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
@@ -79,11 +79,18 @@ class Lgm_T89(MagData.MagData):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
-
         if coord_system != 'GSM':
             raise(NotImplementedError('Different coord systems are not yet ready to use') )
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
+        
+        # and actually set the internal model in Lgm
+        if self.attrs['internal_model'] == LGM_CDIP:
+            Lgm_Set_Lgm_B_cdip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_EDIP:
+            Lgm_Set_Lgm_B_edip_InternalModel(pointer(self._mmi))
+        elif self.attrs['internal_model'] == LGM_IGRF:
+            Lgm_Set_Lgm_B_IGRF_InternalModel(pointer(self._mmi))
 
         # either they are all one element or they are compatible lists no 1/2 way
         try:

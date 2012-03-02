@@ -6,6 +6,7 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Octree.h"
 #include "Lgm/Lgm_Constants.h"
+#include "Lgm/Lgm_DFI_RBF.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
@@ -75,13 +76,18 @@
 #define LGM_ABSOLUTE_JUMP_METHOD 1
 
 // External Mag models
-#define LGM_EXTMODEL_NULL   -1
-#define LGM_EXTMODEL_T87     0
-#define LGM_EXTMODEL_T89     1
-#define LGM_EXTMODEL_T96     2
-#define LGM_EXTMODEL_T01S    3
-#define LGM_EXTMODEL_TS04    4
-#define LGM_EXTMODEL_OP77    5
+#define LGM_EXTMODEL_NULL              -1
+#define LGM_EXTMODEL_T87                0
+#define LGM_EXTMODEL_T89                1
+#define LGM_EXTMODEL_T96                2
+#define LGM_EXTMODEL_T01S               3
+#define LGM_EXTMODEL_TS04               4
+#define LGM_EXTMODEL_OP77               5
+#define LGM_EXTMODEL_SCATTERED_DATA     6
+#define LGM_EXTMODEL_SCATTERED_DATA2    7
+
+#define LGM_EXTMODEL_TS04_OPT           8
+
 
 
 // Derivative schemes
@@ -95,6 +101,16 @@
 #define LGM_DERIV_SIX_POINT     2
 #endif
 
+
+/*
+ *  ODE solvers for FL tracing
+ */
+#ifndef LGM_MAGSTEP_ODE_BS
+#define LGM_MAGSTEP_ODE_BS      0
+#endif
+#ifndef LGM_MAGSTEP_ODE_RK5
+#define LGM_MAGSTEP_ODE_RK5     1
+#endif
 
 
 typedef struct Lgm_MagModelInfo {
@@ -223,21 +239,39 @@ typedef struct Lgm_MagModelInfo {
     int                 UseInterpRoutines; // whether to use fast I and Sb routines.
 
 
+    long int    Lgm_nMagEvals;          // records number of Bfield evals between resets
+    int         Lgm_MagStep_Integrator; // ODE solver to use ( LGM_MAGSTEP_ODE_BS or LGM_MAGSTEP_ODE_RK5)
+
     /*
-     *  These variables are needed to make Lgm_MagStep() reentrant/thread-safe.
+     *  Vars for Bulirsch-Stoer ODE solver. Some of these variables are needed
+     *  to make Lgm_MagStep() reentrant/thread-safe.  They basically used to be
+     *  static declarations within Lgm_MagStep()
+     */
+    double      Lgm_MagStep_BS_eps_old;
+    int	        Lgm_MagStep_BS_FirstTimeThrough;
+    int         Lgm_MagStep_BS_kmax;
+    int         Lgm_MagStep_BS_kopt;
+    double      Lgm_MagStep_BS_snew;
+    double      Lgm_MagStep_BS_A[LGM_MAGSTEP_JMAX+1];
+    double      Lgm_MagStep_BS_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
+    double      Lgm_MagStep_BS_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
+    double      Lgm_MagStep_BS_x[LGM_MAGSTEP_JMAX];
+    Lgm_Vector  Lgm_MagStep_BS_u[LGM_MAGSTEP_JMAX];
+    double      Lgm_MagStep_BS_Eps;        // Eps parameter used in BS method. Influences speed greatly.
+
+
+    /*
+     *  These variables are needed to make Lgm_MagStep2() reentrant/thread-safe.
      *  They basically used to be static declarations within Lgm_MagStep()
      */
-    long int    Lgm_nMagEvals; // records number of Bfield evals between resets
-    double      Lgm_MagStep_eps_old;
-    int	        Lgm_MagStep_FirstTimeThrough;
-    int         Lgm_MagStep_kmax;
-    int         Lgm_MagStep_kopt;
-    double      Lgm_MagStep_snew;
-    double      Lgm_MagStep_A[LGM_MAGSTEP_JMAX+1];
-    double      Lgm_MagStep_alpha[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
-    double      Lgm_MagStep_d[LGM_MAGSTEP_JMAX][LGM_MAGSTEP_JMAX];
-    double      Lgm_MagStep_x[LGM_MAGSTEP_JMAX];
-    double      Lgm_MagStep_Tol;        // tolerance for Magstep (ODE solver).
+    int	        Lgm_MagStep_RK5_FirstTimeThrough;
+    double      Lgm_MagStep_RK5_snew;
+    double      Lgm_MagStep_RK5_MaxCount;
+    double      Lgm_MagStep_RK5_Safety;
+    double      Lgm_MagStep_RK5_pGrow;
+    double      Lgm_MagStep_RK5_pShrnk;
+    double      Lgm_MagStep_RK5_ErrCon;
+    double      Lgm_MagStep_RK5_Eps;        // Eps parameter used in RK5 method. Influences speed greatly.
 
     /*
      *  These variables are needed to make Lgm_MagStep2() reentrant/thread-safe.
@@ -322,19 +356,28 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_TraceToMirrorPoint_Tol;
     double		Lgm_TraceToEarth_Tol;    // tolerance for deciding when you have converged to a footpoint. (Even for low Tol, the points obtained should still be on the FL to high precision.)
     double		Lgm_TraceToBmin_Tol;     // tolerance for deciding when you have converged to the Bmin point along a FL. (Even for low Tol, the points obtained should still be on the FL to high precision.)
+    double		Lgm_TraceLine_Tol;       // tolerance for magstep in Lgm_TraceLine() routines.
 
 
 
     /*
      * Variables for defining Octree stuff
      */
-    Lgm_OctreeCell  *OctreeRoot;
+    Lgm_Octree     *Octree;
+    int             Octree_kNN_InterpMethod;
     int             Octree_kNN_k;
-    int             Octree_kNN_InterpMethod;  // 0 = linear Div Feee; 1 = Quadratic Div Free; 2 = Newton 4-point
-    double          Octree_kNN_MaxDist;       // in physical units
-    double          OctreeScaleMin;
-    double          OctreeScaleMax;
-    double          OctreeScaleDiff;
+    double          Octree_kNN_MaxDist2;
+    Lgm_OctreeData *Octree_kNN;
+    int             Octree_kNN_Alloced; // number of elements allocated. (0 if unallocated).
+
+
+    /*
+     *  hash table used in Lgm_B_FromScatteredData*()
+     */
+    Lgm_DFI_RBF_Info   *rbf_ht;         // hash table (uthash)
+    int                 rbf_ht_alloced; // Flag to indicate whether or not rbf_ht is allocated with data.
+    long int            RBF_nHashFinds; // Number of HASH_FIND()'s performed.
+    long int            RBF_nHashAdds;  // Number of HASH_ADD_KEYPTR()'s performed.
 
 
     /*
@@ -410,19 +453,36 @@ int  Lgm_TraceIDL( int, void *argv[] );
 int  Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm, double sgn, double tol, Lgm_MagModelInfo *Info );
 
 
+int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double *, int *,
+              int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+int  Lgm_MagStep_BS( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
+              int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+int  Lgm_MagStep_RK5( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
+              int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 
-
+/*
+ * For Bulirsch-Stoer FL tracer
+ */
 int Lgm_ModMid( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 void Lgm_RatFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
-int  Lgm_MagStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
-              int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+void Lgm_PolFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+
+
 
 
 int Lgm_ModMid2( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
 	     int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 int  Lgm_VelStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
               int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+
+
+/*
+ * for RK5 FL tracer.
+ */
+int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sgn, double *yerr,
+        int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info );
+
 
 
 /*
@@ -539,6 +599,9 @@ void    T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NT
  */
 
 int Lgm_B_FromScatteredData( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info );
+void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
 
 
 /*
@@ -587,10 +650,10 @@ void Lgm_MagModelInfo_Set_Psw( double Psw, Lgm_MagModelInfo *m );
 void Lgm_MagModelInfo_Set_Kp( double Kp, Lgm_MagModelInfo *m );
 void Lgm_Set_Octree_kNN_InterpMethod( Lgm_MagModelInfo *m, int Method );
 void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
-void Lgm_Set_Octree_kNN_MaxDist( Lgm_MagModelInfo *m, double MaxDist );
+void Lgm_Set_Octree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
-void Lgm_MagModelInfo_Set_MagModel( Lgm_MagModelInfo *m, int InternalModel, int ExternalModel );
+void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m );
 
 /*
  * Added for Python wrapping, the function pointer is hard to impossible to
@@ -600,10 +663,13 @@ void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
-void Lgm_Set_gm_B_TS04(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
-
+void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo);
 
 
 /*
@@ -624,6 +690,7 @@ void    Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme
 void    Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagModelInfo *m );
 int     Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, Lgm_MagModelInfo *m );
 
+void quicksort_uli( unsigned long n, unsigned long *arr );
 
 
 #endif

@@ -15,7 +15,7 @@ ENABLE_EOP_CRON = @ENABLE_EOP_CRON@
 DAILY_CRON_DIR  = @DAILY_CRON_DIR@
 install-data-hook:
 	chmod +x $(EOPDATAdir)/GetEopFiles;
-	$(EOPDATAdir)/GetEopFiles 
+#	$(EOPDATAdir)/GetEopFiles 
 	if [ $(ENABLE_EOP_CRON) -eq 1 ]; then \
 	ln -sf $(EOPDATAdir)/GetEopFiles $(DAILY_CRON_DIR)/GetEopFiles;\
 	fi;

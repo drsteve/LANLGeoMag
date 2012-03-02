@@ -46,7 +46,7 @@ typedef struct Lgm_QinDentonOne {
     double      ByIMF, BzIMF, V_SW, Den_P, Pdyn;
     double      G1, G2, G3;
     int         ByIMF_status, BzIMF_status, V_SW_status, Den_P_status, Pdyn_status;
-    int         G1_status, G2_status, *G3_status;
+    int         G1_status, G2_status, G3_status;
     double      fKp, akp3, Dst;
     double      Bz1, Bz2, Bz3, Bz4, Bz5, Bz6;
     double      W1, W2, W3, W4, W5, W6;
@@ -55,7 +55,9 @@ typedef struct Lgm_QinDentonOne {
 } Lgm_QinDentonOne;
 
 Lgm_QinDenton   *Lgm_init_QinDenton( int Verbose );
+void            Lgm_init_QinDentonDefaults( Lgm_QinDenton *q, int Verbose );
 void            Lgm_destroy_QinDenton( Lgm_QinDenton *q );
+void            Lgm_destroy_QinDenton_children( Lgm_QinDenton *q );
 void            Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q );
 void            Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose );
 void            Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m );

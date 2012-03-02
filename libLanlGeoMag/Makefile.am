@@ -1,13 +1,14 @@
 SUBDIRS = Lgm EopData
 
-AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" 
+#AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_EMIT_KEYS=3 -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
+AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 AM_CFLAGS   = -fopenmp -lgomp
 
 # Directory where Eop-related stuff will be installed
-LGM_EOP_DATA_DIR   = @prefix@/share/LanlGeoMag/EopData
+LGM_EOP_DATA_DIR   = ${prefix}/share/LanlGeoMag/EopData
 
 # Directory where Index-related stuff will be installed
-LGM_INDEX_DATA_DIR = @prefix@/share/LanlGeoMag/Data
+LGM_INDEX_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
 
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
@@ -23,7 +24,7 @@ endif
 
 #libdir                   = @prefix@/lib
 lib_LTLIBRARIES          = libLanlGeoMag.la
-libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \
+libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \
 	                        Lgm_B_internal.c Lgm_CTrans.c Lgm_DateAndTime.c Lgm_Eop.c Lgm_IGRF.c Lgm_InitMagInfo.c \
                             Lgm_MaxwellJuttner.c Lgm_Nutation.c Lgm_Octree.c Lgm_Quat.c Lgm_Sgp.c Lgm_SimplifiedMead.c  Lgm_SunPosition.c \
                             Lgm_Trace.c Lgm_TraceToEarth.c Lgm_TraceToSphericalEarth.c Lgm_Vec.c MagStep.c Lgm_QuadPack3.c \
