@@ -961,7 +961,7 @@ def get_Lstar2(pos, date, alpha = 90.,
 
     # setup a shortcut to MagModelInfo
     mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
-    Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
+    Lgm_Set_Coord_Transforms( datelong, utc, pointer(mmi.c))
 
     # setup a shortcut to LstarInfo
     MagEphemInfo.LstarInfo.contents.VerbosityLevel = cverbosity
@@ -1008,7 +1008,7 @@ def get_Lstar2(pos, date, alpha = 90.,
 
 
 
-    if QinDenton and Bfield == 'Lgm_B_TS04': # these are the params we will use.
+    if QinDenton and (Bfield == 'Lgm_B_TS04' or Bfield == 'Lgm_B_TS04_opt'): # these are the params we will use.
         # Grab the QinDenton data
         # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
         # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
