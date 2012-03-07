@@ -105,7 +105,7 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         }
 
     }
-    printf("Lgm_Brent(): Too many iterations in brent.\n");
+    printf("Lgm_BrentP(): Too many iterations in brent.\n");
     *Smin = x;
     *Bmin = fx;
     *Pmin = Px;
@@ -352,3 +352,87 @@ int Lgm_zBrent(double S1, double S2, double F1, double F2, BrentFuncInfo *f, dou
 }
 
 
+
+int Lgm_Brent(double xa, double xb, double xc, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin ) {
+
+    int         iter;
+    double      a, b, d, etemp, fu, fv, fw, fx, p, q, r, tol1, tol2, u, v, w, x, xm;
+    double      e = 0.0;
+    double      Htry, Hdid, Hnext, du, s, B;
+
+    a = (xa < xc ? xa : xc);
+    b = (xa > xc ? xa : xc);
+    x = w = v = xb;
+    fw = fv = fx = fInfo->func( xb, 0.0, fInfo->Info );
+
+    for ( iter=1; iter<=ITMAX; iter++ ) {
+
+        xm = 0.5*(a+b);
+
+        tol1 = tol*fabs(x);
+        tol2 = 2.0*(tol1+ZEPS);
+
+        // Quit if we are done
+        if ( fabs(x-xm) <= (tol2-0.5*(b-a)) ) {
+            *xmin = x;
+            *fmin = fx;
+            return(1);
+        }
+
+        if ( fabs(e) > tol1 ) {
+            r = (x-w)*(fx-fv);
+            q = (x-v)*(fx-fw);
+            p = (x-v)*q-(x-w)*r;
+            q = 2.0*(q-r);
+            if (q > 0.0) p = -p;
+            q = fabs(q);
+            etemp = e;
+            e = d;
+            if ( fabs(p) >= fabs(0.5*q*etemp ) || (p <= q*(a-x)) || (p >= q*(b-x)) ) {
+                e = (x >= xm) ? a-x : b-x;
+                d = CGOLD*e;
+            } else {
+                d = p/q;
+                u = x+d;
+                if ( (u-a < tol2) || (b-u < tol2) ) d = SIGN( tol1, xm-x );
+            }
+        } else {
+            e = x >= xm ? a-x : b-x;
+            d = CGOLD*e;
+        }
+
+
+        /*
+         * Evaluate Func at u
+         */
+        u = ( fabs(d) >= tol1 ) ? x+d : x+SIGN( tol1, d );
+        fu = fInfo->func( u, 0.0, fInfo->Info );
+
+        if ( fu <= fx ) {
+
+            if ( u >= x ) { a = x; } else { b = x; }
+            SHFT(v,w,x,u);
+            SHFT(fv,fw,fx,fu);
+
+        } else {
+
+            if ( u < x ) { a = u; } else { b = u; }
+            if ( (fu <= fw) || (w == x) ) {
+                v  = w;
+                w  = u;
+                fv = fw;
+                fw = fu;
+            } else if ( (fu <= fv) ||  (v == x) ||  (v == w) ) {
+                v  = u;
+                fv = fu;
+            }
+
+        }
+
+    }
+    printf("Lgm_Brent(): Too many iterations in brent.\n");
+    *xmin = x;
+    *fmin = fx;
+    return(0);
+
+}

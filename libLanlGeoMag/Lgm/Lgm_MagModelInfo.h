@@ -184,6 +184,8 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector      Bvecmin;        //< value of Bvecmin
     double          Bmin;           //< Value of |Bmin|
     double          Smin;           //< Distance from southern footpoint to Pmin along FL.
+    double          Snorth;         //< Distance from initial point to northern footpoint along FL.
+    double          Ssouth;         //< Distance from initial point to southern footpoint along FL.
 
     Lgm_Vector      Spherical_Footprint_Pn;      //< position of northern footpoint (at 120km)
     double          Spherical_Footprint_Sn;      //< Distance along FL from southern foorpoint in Re
@@ -424,7 +426,7 @@ typedef struct BrentFuncInfo {
     double 		        (*func)( double x, double Val, void *Info );
 
 } BrentFuncInfo;
-int Lgm_Brent(double xa, double xb, double xc, double fb, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin );
+int Lgm_Brent(double xa, double xb, double xc, BrentFuncInfo *fInfo, double tol, double *xmin, double *fmin );
 int Lgm_zBrent(double x1, double x2, double f1, double f2, BrentFuncInfo *fInfo, double tol, double *x, double *f );
 
 

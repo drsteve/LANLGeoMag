@@ -40,6 +40,8 @@ typedef struct Lgm_MagEphemInfo {
     Lgm_Vector      Pmin;           //!< position of minimum |B| in GSM
     double          Bmin;           //!< Value of |Bmin|
     double          Smin;           //!< Distance from southern footpoint to Pmin along FL.
+    double          Snorth;         //!< Distance from initial point to northern footpoint along FL.
+    double          Ssouth;         //!< Distance from initial point to southern footpoint along FL.
 
     Lgm_Vector      Spherical_Footprint_Pn;   //!< position of northern footpoint (at 120km above spherical Earth)
     double          Spherical_Footprint_Sn;   //!< Distance along FL from southern foorpoint in Re
@@ -154,7 +156,7 @@ void    Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int 
 
 void    ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
 void    WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
-void    Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *IntModel, char *ExtModel, Lgm_MagEphemInfo *m );
+void    Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m );
 void    Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp, double Dst, Lgm_MagEphemInfo *m );
 
 

@@ -23,9 +23,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->InternalModel = LGM_IGRF;
 
     MagInfo->c     = Lgm_init_ctrans( 0 );
-    MagInfo->Kp    = 5;
+    MagInfo->fKp   = 2.0;
+    MagInfo->Kp    = 2;
     MagInfo->P     = 2.1; // SW pressure in nPa
     MagInfo->nFunc = 0;
+    MagInfo->Dst   = -5.0;
 
     MagInfo->B0    = 1.00;   // Should nominally be 1.0 See page 30 of Schultz and Lanzerotti, [1974]
     MagInfo->B1    = 0.8100; // See page 30 of Schultz and Lanzerotti, [1974]

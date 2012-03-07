@@ -182,6 +182,10 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     
 
 
+    Info->Smin   = -9e99;
+    Info->Snorth = -9e99;
+    Info->Ssouth = -9e99;
+    Info->Bmin   = -9e99;
 
 
 
@@ -195,12 +199,12 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
+    Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
+    Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
 
     
 
-    Info->Smin = -9e99;
-    Info->Bmin = -9e99;
 
 
     if ( flag1 && flag2 ) {

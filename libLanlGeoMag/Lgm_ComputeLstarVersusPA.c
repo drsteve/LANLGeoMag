@@ -91,6 +91,8 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         MagEphemInfo->Ellipsoid_Footprint_Ps  = v1;
         MagEphemInfo->Ellipsoid_Footprint_Pn  = v2;
         MagEphemInfo->Pmin          = v3;
+        MagEphemInfo->Snorth        = LstarInfo->mInfo->Snorth;
+        MagEphemInfo->Ssouth        = LstarInfo->mInfo->Ssouth;
         MagEphemInfo->Smin          = LstarInfo->mInfo->Smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
