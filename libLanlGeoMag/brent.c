@@ -37,6 +37,7 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         // Quit if we are done
         if ( fabs(x-xm) <= (tol2-0.5*(b-a)) ) {
             *Smin = x;
+            *Bmin = fx;
             *Pmin = Px;
             return(1);
         }
@@ -72,7 +73,9 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
         // x to u. (From point Px to Pu.)
         P    = Px;
         Htry = du;
-        Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        if ( Htry > 1e-16 ) {
+            Lgm_MagStep( &P, &f->u_scale, Htry, &Hdid, &Hnext, f->sgn, &s, &f->reset, f->Info->Bfield, f->Info );
+        }
         f->Info->Bfield( &P, &Btmp, f->Info );
         B = Lgm_Magnitude( &Btmp );
         Pu = P;

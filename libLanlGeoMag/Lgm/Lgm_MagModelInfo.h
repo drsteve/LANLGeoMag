@@ -183,9 +183,10 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector      Pmin;           //< position of minimum |B| in GSM
     Lgm_Vector      Bvecmin;        //< value of Bvecmin
     double          Bmin;           //< Value of |Bmin|
-    double          Smin;           //< Distance from southern footpoint to Pmin along FL.
     double          Snorth;         //< Distance from initial point to northern footpoint along FL.
     double          Ssouth;         //< Distance from initial point to southern footpoint along FL.
+    double          Stotal;         //< Distance from southern footpoint to northern footpoint along FL.
+    double          Smin;           //< Distance from southern footpoint to Bmin point along FL.
 
     Lgm_Vector      Spherical_Footprint_Pn;      //< position of northern footpoint (at 120km)
     double          Spherical_Footprint_Sn;      //< Distance along FL from southern foorpoint in Re

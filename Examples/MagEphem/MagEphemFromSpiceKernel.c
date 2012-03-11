@@ -204,7 +204,7 @@ double ApogeeFunc( double T, double val, void *Info ){
 
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
     et = Lgm_TDBSecSinceJ2000( &UTC, c );
-    spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+    spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
     U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
     R = Lgm_Magnitude( &U );
 
@@ -275,6 +275,11 @@ int main( int argc, char *argv[] ){
     Lgm_Vector      *H5_Pfs_edmag;
     double          *H5_Kp;
     double          *H5_Dst;
+    double          *H5_S_sc_to_pfn;
+    double          *H5_S_sc_to_pfs;
+    double          *H5_S_pfs_to_Bmin;
+    double          *H5_S_Bmin_to_sc;
+    double          *H5_S_total;
     int             H5_nT;
     int             H5_nAlpha;
     double          *H5_Alpha;
@@ -322,6 +327,12 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_1D( H5_Pfs_edmag, 2000,        Lgm_Vector );
     LGM_ARRAY_1D( H5_Kp,        2000,        double );
     LGM_ARRAY_1D( H5_Dst,       2000,        double );
+
+    LGM_ARRAY_1D( H5_S_sc_to_pfn,   2000,     double );
+    LGM_ARRAY_1D( H5_S_sc_to_pfs,   2000,     double );
+    LGM_ARRAY_1D( H5_S_pfs_to_Bmin, 2000,     double );
+    LGM_ARRAY_1D( H5_S_Bmin_to_sc,  2000,     double );
+    LGM_ARRAY_1D( H5_S_total,       2000,     double );
 
     LGM_ARRAY_1D( Perigee_UTC, 30, Lgm_DateTime );
     LGM_ARRAY_1D( Apogee_UTC,  30, Lgm_DateTime );
@@ -680,7 +691,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                             et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
                             ++nApogee;
 
@@ -710,7 +721,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
                             et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
                             ++nPerigee;
                             //Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 3 );
@@ -751,12 +762,12 @@ printf("nPerigee = %d\n", nPerigee);
 
                     //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
                     H5_nT = 0;
-                    for ( Seconds=0; Seconds<=86400; Seconds += 60 ) {
+                    for ( Seconds=0; Seconds<=86400; Seconds += 300 ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
 et = Lgm_TDBSecSinceJ2000( &UTC, c );
-spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
 printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
 U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
 
@@ -804,15 +815,20 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
                             // Fill arrays for dumping out as HDF5 files
                             strcpy( H5_IsoTimes[H5_nT], IsoTimeString );
-                            H5_Date[H5_nT]      = UTC.Date;
-                            H5_Doy[H5_nT]       = UTC.Doy;
-                            H5_UTC[H5_nT]       = UTC.Time;
-                            H5_JD[H5_nT]        = UTC.JD;
-                            H5_GpsTime[H5_nT]   = Lgm_UTC_to_GpsSeconds( &UTC, c );
-                            H5_TiltAngle[H5_nT] = c->psi*DegPerRad;
-                            H5_Rgsm[H5_nT]      = Rgsm;
-                            H5_Kp[H5_nT]        = MagEphemInfo->LstarInfo->mInfo->fKp;
-                            H5_Dst[H5_nT]       = MagEphemInfo->LstarInfo->mInfo->Dst;
+                            H5_Date[H5_nT]          = UTC.Date;
+                            H5_Doy[H5_nT]           = UTC.Doy;
+                            H5_UTC[H5_nT]           = UTC.Time;
+                            H5_JD[H5_nT]            = UTC.JD;
+                            H5_GpsTime[H5_nT]       = Lgm_UTC_to_GpsSeconds( &UTC, c );
+                            H5_TiltAngle[H5_nT]     = c->psi*DegPerRad;
+                            H5_Rgsm[H5_nT]          = Rgsm;
+                            H5_Kp[H5_nT]            = MagEphemInfo->LstarInfo->mInfo->fKp;
+                            H5_Dst[H5_nT]           = MagEphemInfo->LstarInfo->mInfo->Dst;
+                            H5_S_sc_to_pfn[H5_nT]   = (MagEphemInfo->Snorth > 0.0) ? MagEphemInfo->Snorth : LGM_FILL_VALUE;
+                            H5_S_sc_to_pfs[H5_nT]   = (MagEphemInfo->Ssouth > 0.0) ? MagEphemInfo->Ssouth : LGM_FILL_VALUE;
+                            H5_S_pfs_to_Bmin[H5_nT] = (MagEphemInfo->Smin > 0.0) ? MagEphemInfo->Smin : LGM_FILL_VALUE;
+                            H5_S_Bmin_to_sc[H5_nT]  = ((MagEphemInfo->Ssouth>0.0)&&(MagEphemInfo->Smin > 0.0)) ? MagEphemInfo->Ssouth-MagEphemInfo->Smin : LGM_FILL_VALUE;
+                            H5_S_total[H5_nT]       = ((MagEphemInfo->Snorth > 0.0)&&(MagEphemInfo->Ssouth > 0.0)) ? MagEphemInfo->Snorth + MagEphemInfo->Ssouth : LGM_FILL_VALUE;
                             MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &H5_Bsc_gsm[H5_nT], MagEphemInfo->LstarInfo->mInfo );
 
 
@@ -931,373 +947,6 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     // Create HDF5 file
                     file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
-                    // Create IsoTime Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    atype   = H5Tcopy( H5T_C_S1 );
-                    status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
-                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
-                    DataSet = H5Dcreate( file, "IsoTime", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-                    status  = H5Tclose( atype );
-
-                    // Create Date Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "Date", H5T_NATIVE_LONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "YYYYMMDD" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Doy Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "Doy", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "DDD" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create UTC (hours) Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "UTC", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create JD Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "JulianDate", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Days" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create GpsTime Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "GpsTime", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Seconds" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create TiltAngle Dataset
-                    Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "TiltAngle", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Degrees" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "-40.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "40.0" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rgeo Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rgeo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rgeod Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rgeod", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., km" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rgsm Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rgsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rsm Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rgei Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rgei", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Rgse Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Rgse", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create CDMAG Dataset
-                    Dims[0] = H5_nT; Dims[1] = 4;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "CDMAG", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours, Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create EDMAG Dataset
-                    Dims[0] = H5_nT; Dims[1] = 4;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "EDMAG", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours, Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Bsc_gsm Dataset
-                    Dims[0] = H5_nT; Dims[1] = 4;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Bsc_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfn_geo Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfn_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfn_gsm Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfn_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfn_geod Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfn_geod", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., km" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfn_cdmag Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfn_cdmag", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfn_edmag Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfn_edmag", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfs_geo Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfs_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfs_gsm Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfs_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfs_geod Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfs_geod", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., km" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfs_cdmag Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfs_cdmag", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create Pfs_edmag Dataset
-                    Dims[0] = H5_nT; Dims[1] = 3;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "Pfs_edmag", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg., Deg., Hours" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-
-
-
                     // Create Alpha Dataset
                     Dims[0] = H5_nAlpha;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
@@ -1309,10 +958,423 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
 
+                    // Create PerigeeTimes Dataset
+                    Dims[0] = nPerigee;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "PerigeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+                    // Create PerigeePosGeod_LatLon Dataset
+                    Dims[0] = nPerigee; Dims[1] = 2;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "PerigeePosGeod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "PerigeeTimes" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create PerigeePosGeod_Height Dataset
+                    Dims[0] = nPerigee;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "PerigeePosGeod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "PerigeeTimes" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create ApogeeTimes Dataset
+                    Dims[0] = nApogee;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "ApogeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+                    // Create ApogeePosGeod_LatLon Dataset
+                    Dims[0] = nApogee; Dims[1] = 2;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "ApogeePosGeod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "ApogeeTimes" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create ApogeePosGeod_Height Dataset
+                    Dims[0] = nApogee;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "ApogeePosGeod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "ApogeeTimes" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create IsoTime Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "IsoTime", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The date and time in ISO 8601 compliant format." );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",       "UTC" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",    "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",     "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",    "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+                    // Create Date Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Date", H5T_NATIVE_LONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The date. In YYYMMDD format." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "YYYYMMDD" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Doy Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Doy", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Ordinal Day of Year." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "DDD" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create UTC (hours) Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "UTC", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Universal Time (Coordinated). In decimal hours." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create JD Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "JulianDate", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Julian Date. In decimal days." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Days" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create GpsTime Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "GpsTime", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Number of SI seconds since 0h Jan 6, 1980 UTC." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Seconds" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create DipoleTiltAngle Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "DipoleTiltAngle", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Angle between Zgsm and Zsm (i.e. between Zgsm and dipole axis direction)." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Degrees" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rgeo Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rgeo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Geographic position vector of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rgeod_LatLon Dataset
+                    Dims[0] = H5_nT; Dims[1] = 2;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rgeod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Geographic Latitude and Longitude of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rgeod_Height Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Rgeod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Geographic Height (Above WGS84 Ellipsoid) of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Rgsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rgsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Solar Magnetospheric position vector of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Solar Magnetic position vector of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rgei Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rgei", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Equatorial Inertial position vector of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Rgse Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Rgse", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Solar Ecliptic position vector of S/C." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+                    // Create CDMAG_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "CDMAG_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of S/C in Centerted Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create CDMAG_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "CDMAG_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of S/C in Centerted Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create CDMAG_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "CDMAG_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of S/C in Centerted Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create CDMAG_R Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "CDMAG_R", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Radial distance of S/C from center of CDMAG coordinate system." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create EDMAG_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "EDMAG_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of S/C in Eccentric Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create EDMAG_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "EDMAG_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of S/C in Eccentric Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create EDMAG_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "EDMAG_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of S/C in Eccentric Dipole Coordinates." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create EDMAG_R Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "EDMAG_R", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Radial distance of S/C from center of EDMAG coordinate system." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+
+                    // Create IntModel Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "IntModel", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Internal magnetic field model." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+
+                    // Create ExtModel Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "ExtModel", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "External magnetic field model." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+
                     // Create Kp Dataset
                     Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     DataSet = H5Dcreate( file, "Kp", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Kp index value." );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimensionless" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
@@ -1325,6 +1387,21 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     DataSet = H5Dcreate( file, "Dst", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Dst index value." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Bsc_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bsc_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field vector at S/C (in GSM coords)." );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
@@ -1335,33 +1412,600 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
 
 
+                    // Create FieldLineType Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    atype   = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    DataSet = H5Dcreate( file, "FieldLineType", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Description of the type of field line the S/C is on., Can be one of 4 types: LGM_CLOSED      - FL hits Earth at both ends. LGM_OPEN_N_LOBE - FL is an OPEN field line rooted in the Northern polar cap. LGM_OPEN_S_LOBE - FL is an OPEN field line rooted in the Southern polar cap. LGM_OPEN_IMF    - FL does not hit Earth at eitrher end." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+                    status  = H5Tclose( atype );
+
+
+                    // Create S_sc_to_pfn Dataset
+                    Dims[0] = H5_nT; 
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "S_sc_to_pfn", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between S/C and Northern Footpoint along field line." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create S_sc_to_pfs Dataset
+                    Dims[0] = H5_nT; 
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "S_sc_to_pfs", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between S/C and Southern Footpoint along field line." );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create S_pfs_to_Bmin Dataset
+                    Dims[0] = H5_nT; 
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "S_pfs_to_Bmin", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between Southern Footpoint and Bmin point along field line.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create S_Bmin_to_sc Dataset
+                    Dims[0] = H5_nT; 
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "S_Bmin_to_sc", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between Bmin point and S/C along field line (positive if north of Bmin).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create S_total Dataset
+                    Dims[0] = H5_nT; 
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "S_total", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Total Field Line length (along field line).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Pfn_geo Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfn_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Location of Northern Footpoint (in GEO coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfn_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Location of Northern Footpoint (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+                    // Create Pfn_geod_LatLon Dataset
+                    Dims[0] = H5_nT; Dims[1] = 2;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfn_geod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Latitude and Longitude of Northern Footpoint.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_geod_Height Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfn_geod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Height of Northern Footpoint.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Pfn_CD_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_CD_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of Northern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_CD_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_CD_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of Northern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_CD_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_CD_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of Northern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_ED_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_ED_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of Northern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_ED_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_ED_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of Northern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfn_ED_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfn_ED_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of Northern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Bfn_geo Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bfn_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field vector at Northern Footpoint (in GEO coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Bfn_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bfn_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field vector at Northern Footpoint (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Loss_Cone_Alpha_n Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Loss_Cone_Alpha_n", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+
+
+
+
+                    // Create Pfs_geo Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfs_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Location of Southern Footpoint (in GEO coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfs_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Location of Southern Footpoint (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+                    // Create Pfs_geod_LatLon Dataset
+                    Dims[0] = H5_nT; Dims[1] = 2;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfs_geod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Latitude and Longitude of Southern Footpoint.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_geod_Height Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pfs_geod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic Height of Southern Footpoint.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Pfs_CD_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_CD_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of Southern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_CD_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_CD_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of Southern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_CD_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_CD_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of Southern Footpoint in Centerted Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_ED_MLAT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_ED_MLAT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Latitude of Southern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_ED_MLON Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_ED_MLON", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Longitude of Southern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Pfs_ED_MLT Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Pfs_ED_MLT", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic Local Time of Southern Footpoint in Eccentric Dipole Coordinates.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Hours" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Bfs_geo Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bfs_geo", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field vector at Southern Footpoint (in GEO coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Bfs_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bfs_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field vector at Southern Footpoint (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Loss_Cone_Alpha_s Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Loss_Cone_Alpha_s", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Pmin_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 3;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Pmin_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Location of minimum-|B| point (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Bmin_gsm Dataset
+                    Dims[0] = H5_nT; Dims[1] = 4;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Bmin_gsm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "B-field at minimum-|B| point (in GSM coords).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+                    // Create Lsimple Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Lsimple", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric distance to Bmin point for FL threading vehicle (i.e. |Pmin|).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimless" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create InvLat Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "InvLat", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Invariant latitude of vehicle computed from Lambda=acos(sqrt(1/Lsimple)).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Lm_eq Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "Lm_eq", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "McIlwain L of an eq. mirroring particle on same FL as vehicle (computed from L=Lm_eq, I=0, and Bm=|Bmin_gsm|, M=M_igrf).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimless" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create InvLat_eq Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "InvLat_eq", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Invariant latitude of vehicle computed from Lambda=acos(sqrt(1.0/Lm_eq)).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create BoverBeq Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "BoverBeq", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magntiude of Bsc over magnitude of Bmin.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimless" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create MlatFromBoverBeq Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "MlatFromBoverBeq", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Dipole latitude where (B/Beq)_dipole == BoverBeq.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create M_used Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "M_used", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The magnetic dipole moment that was used to convert magnetic flux to L*. In units of nT.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create M_ref Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "M_ref", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The fixed reference magnetic dipole moment for converting magnetic flux to L*. In units of nT.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create M_igrf Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "M_igrf", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Time-dependant magnetic dipole moment (probably shouldn't be used for converting magnetic flux to L*, but it sometimes is). In units of nT.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
                     // Create Lstar Dataset
                     Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
                     space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "Lstar", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Generalized Roederer L-shell value (also known as L*).");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimensionless" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "1.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "20.0" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create K Dataset
-                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "K", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re G^.5" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "log" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
 
@@ -1369,29 +2013,13 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
                     space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "L", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "McIlwain L-shell value.");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "Dimensionless" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "1.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "20.0" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create I Dataset
-                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
-                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "I", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "200.0" );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
 
@@ -1399,16 +2027,65 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
                     space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "Bm", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Magnetic field strength at mirror points for each pitch angle.");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "nT" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "log" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
-                    //Lgm_WriteStringAttr( DataSet, "VALIDMAX",   "1E30" );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
+
+                    // Create I Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "I", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Integral invariant for each pitch angle.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create K Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "K", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Second Invariant ( I*sqrt(Bm) ) for each pitch angle.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re G^.5" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "log" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    Lgm_WriteStringAttr( DataSet, "VALIDMIN",   "0.0" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+
+
+                    /*
+                     * Write Datasets
+                     */
+
+                    // Write Alpha
+                    SlabSize[0] = H5_nAlpha;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Alpha", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Alpha[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
 
 
 
@@ -1495,7 +2172,7 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     // Write TiltAngle
                     SlabSize[0] = H5_nT;
                     Offset[0]   = 0;
-                    DataSet  = H5Dopen( file, "TiltAngle", H5P_DEFAULT );
+                    DataSet  = H5Dopen( file, "DipoleTiltAngle", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -1503,6 +2180,8 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status   = H5Sclose( MemSpace );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
+
+
 
 
 
@@ -1523,9 +2202,11 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Rgeod
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Rgeod", H5P_DEFAULT );
+
+
+                    // Write Rgeod_LatLon
+                    SlabSize[0] = 1; SlabSize[1] = 2;
+                    DataSet  = H5Dopen( file, "Rgeod_LatLon", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
@@ -1540,6 +2221,30 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Sclose( MemSpace );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
+
+                    // Write Rgeod_Height
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "Rgeod_Height", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_GEO, c ); // Convert to cartesian GEO coords.
+                            Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
+                            U_ARR[0] = GeodLat; U_ARR[1] = GeodLong; U_ARR[2] = GeodHeight;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+
+
+
+
 
                     // Write Rgsm
                     SlabSize[0] = 1; SlabSize[1] = 3;
@@ -1607,17 +2312,23 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write CDMAG
-                    SlabSize[0] = 1; SlabSize[1] = 4;
-                    DataSet  = H5Dopen( file, "CDMAG", H5P_DEFAULT );
+
+
+
+
+
+
+                    // Write CDMAG_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "CDMAG_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
-                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
                             Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; Offset[1] = 0;
+                            Offset[0]   = iT; 
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -1625,23 +2336,170 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write EDMAG
-                    SlabSize[0] = 1; SlabSize[1] = 4;
-                    DataSet  = H5Dopen( file, "EDMAG", H5P_DEFAULT );
+                    // Write CDMAG_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "CDMAG_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
-                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
-                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian CDMAG coords.
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[1] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write CDMAG_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "CDMAG_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write CDMAG_R
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "CDMAG_R", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[3] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+
+                    // Write EDMAG_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "EDMAG_MLAT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
                             Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; Offset[1] = 0;
+                            Offset[0]   = iT; 
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
                     status = H5Sclose( MemSpace );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
+
+                    // Write EDMAG_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "EDMAG_MLON", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[1] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write EDMAG_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "EDMAG_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write EDMAG_R
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "EDMAG_R", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Lgm_Set_Coord_Transforms( H5_Date[iT], H5_UTC[iT], c );
+                            Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[3] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+                    // Write IntModel
+
+
+
+
+
+                    // Write ExtModel
+
+
+                    // Write Kp
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Kp", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Kp[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write Dst
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Dst", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Dst[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+
 
                     // Write Bsc_gsm
                     SlabSize[0] = 1; SlabSize[1] = 4;
@@ -1657,6 +2515,74 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Sclose( MemSpace );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
+
+
+
+                    // Write FieldLineType
+
+
+
+
+                    // Write S_sc_to_pfn
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "S_sc_to_pfn", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_S_sc_to_pfn[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write S_sc_to_pfs
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "S_sc_to_pfs", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_S_sc_to_pfs[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write S_pfs_to_Bmin
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "S_pfs_to_Bmin", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_S_pfs_to_Bmin[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write S_Bmin_to_sc
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "S_Bmin_to_sc", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_S_Bmin_to_sc[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write S_total
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "S_total", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_S_total[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
 
                     // Write Pfn_geo
                     SlabSize[0] = 1; SlabSize[1] = 3;
@@ -1688,9 +2614,9 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfn_geod
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfn_geod", H5P_DEFAULT );
+                    // Write Pfn_geod_LatLon
+                    SlabSize[0] = 1; SlabSize[1] = 2;
+                    DataSet  = H5Dopen( file, "Pfn_geod_LatLon", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
@@ -1703,13 +2629,120 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfn_cdmag
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfn_cdmag", H5P_DEFAULT );
+                    // Write Pfn_geod_Height
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "Pfn_geod_Height", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_geod[iT].x; U_ARR[1] = H5_Pfn_geod[iT].y; U_ARR[2] = H5_Pfn_geod[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfn_CD_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_CD_MLAT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfn_CD_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_CD_MLON", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfn_CD_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_CD_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+                    // Write Pfn_ED_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_ED_MLAT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfn_ED_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_ED_MLON", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfn_ED_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfn_ED_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+                    // Write Bfn_geo
+                    SlabSize[0] = 1; SlabSize[1] = 4;
+                    DataSet  = H5Dopen( file, "Bfn_geo", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
-                            U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
+                            U_ARR[0] = H5_Bfn_geo[iT].x; U_ARR[1] = H5_Bfn_geo[iT].y; U_ARR[2] = H5_Bfn_geo[iT].z; U_ARR[3] = Lgm_Magnitude( &H5_Bfn_geo[iT] );
                             Offset[0]   = iT; Offset[1] = 0;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
@@ -1718,13 +2751,13 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfn_edmag
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfn_edmag", H5P_DEFAULT );
+                    // Write Bfn_gsm
+                    SlabSize[0] = 1; SlabSize[1] = 4;
+                    DataSet  = H5Dopen( file, "Bfn_gsm", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
-                            U_ARR[0] = H5_Pfn_edmag[iT].x; U_ARR[1] = H5_Pfn_edmag[iT].y; U_ARR[2] = H5_Pfn_edmag[iT].z;
+                            U_ARR[0] = H5_Bfn_gsm[iT].x; U_ARR[1] = H5_Bfn_gsm[iT].y; U_ARR[2] = H5_Bfn_gsm[iT].z; U_ARR[3] = Lgm_Magnitude( &H5_Bfn_gsm[iT] );
                             Offset[0]   = iT; Offset[1] = 0;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
@@ -1732,6 +2765,21 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Sclose( MemSpace );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
+
+
+
+                    // Write Loss_Cone_Alpha_n
+
+
+
+
+
+
+
+
+
+
+
 
                     // Write Pfs_geo
                     SlabSize[0] = 1; SlabSize[1] = 3;
@@ -1763,9 +2811,9 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfs_geod
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfs_geod", H5P_DEFAULT );
+                    // Write Pfs_geod_LatLon
+                    SlabSize[0] = 1; SlabSize[1] = 2;
+                    DataSet  = H5Dopen( file, "Pfs_geod_LatLon", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
@@ -1778,14 +2826,29 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfs_cdmag
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfs_cdmag", H5P_DEFAULT );
+                    // Write Pfs_geod_Height
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "Pfs_geod_Height", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
-                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_geod[iT].x; U_ARR[1] = H5_Pfs_geod[iT].y; U_ARR[2] = H5_Pfs_geod[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfs_CD_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_CD_MLAT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; Offset[1] = 0;
+                            Offset[0]   = iT; 
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -1793,13 +2856,105 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status = H5Dclose( DataSet );
                     status = H5Sclose( space );
 
-                    // Write Pfs_edmag
-                    SlabSize[0] = 1; SlabSize[1] = 3;
-                    DataSet  = H5Dopen( file, "Pfs_edmag", H5P_DEFAULT );
+                    // Write Pfs_CD_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_CD_MLON", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfs_CD_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_CD_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+                    // Write Pfs_ED_MLAT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_ED_MLAT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfs_ED_MLON
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_ED_MLON", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Pfs_ED_MLT
+                    SlabSize[0] = 1; 
+                    DataSet  = H5Dopen( file, "Pfs_ED_MLT", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
+                            Offset[0]   = iT; 
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+                    // Write Bfs_geo
+                    SlabSize[0] = 1; SlabSize[1] = 4;
+                    DataSet  = H5Dopen( file, "Bfs_geo", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
-                            U_ARR[0] = H5_Pfs_edmag[iT].x; U_ARR[1] = H5_Pfs_edmag[iT].y; U_ARR[2] = H5_Pfs_edmag[iT].z;
+                            U_ARR[0] = H5_Bfs_geo[iT].x; U_ARR[1] = H5_Bfs_geo[iT].y; U_ARR[2] = H5_Bfs_geo[iT].z; U_ARR[3] = Lgm_Magnitude( &H5_Bfs_geo[iT] );
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Bfs_gsm
+                    SlabSize[0] = 1; SlabSize[1] = 4;
+                    DataSet  = H5Dopen( file, "Bfs_gsm", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Bfs_gsm[iT].x; U_ARR[1] = H5_Bfs_gsm[iT].y; U_ARR[2] = H5_Bfs_gsm[iT].z; U_ARR[3] = Lgm_Magnitude( &H5_Bfs_gsm[iT] );
                             Offset[0]   = iT; Offset[1] = 0;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
@@ -1810,46 +2965,16 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
 
 
+                    // Write Loss_Cone_Alpha_s
 
 
 
-                    // Write Kp
-                    SlabSize[0] = H5_nT;
-                    Offset[0]   = 0;
-                    DataSet  = H5Dopen( file, "Kp", H5P_DEFAULT );
-                    space    = H5Dget_space( DataSet );
-                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
-                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Kp[0] );
-                    status   = H5Sclose( MemSpace );
-                    status   = H5Sclose( space );
-                    status   = H5Dclose( DataSet );
-
-                    // Write Dst
-                    SlabSize[0] = H5_nT;
-                    Offset[0]   = 0;
-                    DataSet  = H5Dopen( file, "Dst", H5P_DEFAULT );
-                    space    = H5Dget_space( DataSet );
-                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
-                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Dst[0] );
-                    status   = H5Sclose( MemSpace );
-                    status   = H5Sclose( space );
-                    status   = H5Dclose( DataSet );
 
 
 
-                    // Write Alpha
-                    SlabSize[0] = H5_nAlpha;
-                    Offset[0]   = 0;
-                    DataSet  = H5Dopen( file, "Alpha", H5P_DEFAULT );
-                    space    = H5Dget_space( DataSet );
-                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
-                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Alpha[0] );
-                    status   = H5Sclose( MemSpace );
-                    status   = H5Sclose( space );
-                    status   = H5Dclose( DataSet );
+
+
+
 
 
 
@@ -1865,26 +2990,14 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
 
-                    // Write K
+                    // Write L
                     SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
                     Offset[0]   = 0; Offset[1] = 0;
-                    DataSet  = H5Dopen( file, "K", H5P_DEFAULT );
+                    DataSet  = H5Dopen( file, "L", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_K[0][0] );
-                    status   = H5Sclose( MemSpace );
-                    status   = H5Sclose( space );
-                    status   = H5Dclose( DataSet );
-
-                    // Write I
-                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
-                    Offset[0]   = 0; Offset[1] = 0;
-                    DataSet  = H5Dopen( file, "I", H5P_DEFAULT );
-                    space    = H5Dget_space( DataSet );
-                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
-                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_I[0][0] );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_L[0][0] );
                     status   = H5Sclose( MemSpace );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
@@ -1901,14 +3014,26 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
 
-                    // Write L
+                    // Write I
                     SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
                     Offset[0]   = 0; Offset[1] = 0;
-                    DataSet  = H5Dopen( file, "L", H5P_DEFAULT );
+                    DataSet  = H5Dopen( file, "I", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
-                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_L[0][0] );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_I[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write K
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "K", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_K[0][0] );
                     status   = H5Sclose( MemSpace );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
@@ -1947,6 +3072,11 @@ Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
     LGM_ARRAY_1D_FREE( H5_TiltAngle );
     LGM_ARRAY_1D_FREE( H5_Kp );
     LGM_ARRAY_1D_FREE( H5_Dst );
+    LGM_ARRAY_1D_FREE( H5_S_sc_to_pfn );
+    LGM_ARRAY_1D_FREE( H5_S_sc_to_pfs );
+    LGM_ARRAY_1D_FREE( H5_S_pfs_to_Bmin );
+    LGM_ARRAY_1D_FREE( H5_S_Bmin_to_sc );
+    LGM_ARRAY_1D_FREE( H5_S_total );
     LGM_ARRAY_1D_FREE( H5_Rgsm );
     LGM_ARRAY_1D_FREE( H5_Bsc_gsm );
     LGM_ARRAY_1D_FREE( H5_Bfn_geo );

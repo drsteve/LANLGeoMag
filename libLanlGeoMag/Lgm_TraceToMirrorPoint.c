@@ -439,7 +439,7 @@ tol = 1e-10;
         if ( Info->VerbosityLevel > 1 ) {
             printf("    v_gsm = %g %g %g\n", v->x, v->y, v->z);
             printf("    v_wgs84 = %g %g %g   Height = %g\n", w.x, w.y, w.z, Height);
-            printf("    MIKE Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
+            printf("    Lgm_TraceToMirrorPoint: Current Height is below specified loss cone height of %g km. In Loss Cone. (Height = %g) \n", Info->Lgm_LossConeHeight, Height );
         }
         if ( Info->VerbosityLevel > 4 ) {
             printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );

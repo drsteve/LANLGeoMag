@@ -555,7 +555,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
-    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
+    fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_gsm_x\", \"Pfn_gsm_y\", \"Pfn_gsm_z\" ],\n");
     fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_gsm!Ix!N , R!IE\", \"Pfn_gsm!Iy!N , R!IE\", \"Pfn_gsm!Iz!N , R!IE\"],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
@@ -1916,7 +1916,6 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     } else {
         MagLatFromBoverBeq = LGM_FILL_VALUE;
     }
-printf("s, cl, S_Bmin_to_sc, MagLatFromBoverBeq = %lf %lf %lf %lf\n", s, cl, S_Bmin_to_sc, MagLatFromBoverBeq);
     fprintf( fp, " %12g", MagLatFromBoverBeq );   // MagLatFromBoverBeq
 
 
