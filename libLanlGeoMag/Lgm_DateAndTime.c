@@ -1434,7 +1434,8 @@ double Lgm_UTC_to_TDBSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 
 /*
- * TDBSecSinceJ2000 is like SPICE's 'ephemeris time'
+ * TDBSecSinceJ2000 is like SPICE's 'ephemeris time'. Probably differs in 7th
+ * decimal place or so.
  */
 double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 

@@ -71,6 +71,8 @@ double Lgm_CdipMirrorLat( double SinAlpha0 ){
     double          s2, s4, x, g;
 
     s2 = SinAlpha0*SinAlpha0; s4 = s2*s2;
+    if (s4>1.0) s4 = 1.0;
+    else if ( s4<-1.0) s4 = -1.0;
 
     f.func = MirrorLatFunc;
     f.Val  = s4;

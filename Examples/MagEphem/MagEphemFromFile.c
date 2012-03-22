@@ -17,12 +17,13 @@
 #include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
 
-void StringSplit( char *Str, char *StrArray[], int len, int *n ); 
+void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 
 #define KP_DEFAULT 0
 
-const  char *argp_program_version     = "MagEphemFromFile 1.0 (August 25, 2011)";
+const  char *ProgramName = "MagEphemFromFile";
+const  char *argp_program_version     = "MagEphemFromFile_1.1";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] = "\nComputes magnetic ephemerii of S/C from input file that contains S/C position"
                     " in GEO Lat/Lon/Rad.\n\n InFile and OutFile are paths to files that may contain"
@@ -31,7 +32,7 @@ static char doc[] = "\nComputes magnetic ephemerii of S/C from input file that c
                     " repectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of"
                     " month. %B will also get substituted by the list of birds given in the -b option.\n"
                     " Here is an example using time-variables,\n\n \t./MagEphemFromFile -S 20020901 -E 20020930\n"
-                    " \t\t/home/jsmith/EphemData/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt\n"
+                    " \t\t/home/jsmith/EphemData/%YYYY/%YYYY%MM%DD_1989-046_Ephem.txt\n"
                     " \t\t/home/jsmith/MagEphemData/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt.\n\n Directories"
                     " in the output file will be created if they don't already exist.\n\n";
 
@@ -105,9 +106,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
       know is a pointer to our arguments structure. */
     struct Arguments *arguments = state->input;
     switch( key ) {
-        case 'b': // Birds                                                                                                                                                                                       
-            strncpy( arguments->Birds, arg, 4095 );                                                                                                                                                              
-            break;          
+        case 'b': // Birds
+            strncpy( arguments->Birds, arg, 4095 );
+            break;
         case 'S': // start date
             sscanf( arg, "%ld", &arguments->StartDate );
             break;
@@ -188,7 +189,7 @@ int main( int argc, char *argv[] ){
     char             IntModel[20], ExtModel[20], CoordSystem[80], Line[5000];
     int              AppendMode, UseEop, Colorize, Force;
     FILE             *fp_in, *fp_MagEphem;
-    int              nBirds, iBird;                                                                                                                                                                              
+    int              nBirds, iBird;
     char             **Birds, Bird[80];
     double           Inc, Alpha[1000], FootpointHeight, GeoLat, GeoLon, GeoRad;
     int              nAlpha, Quality;
@@ -216,9 +217,9 @@ int main( int argc, char *argv[] ){
     double          **H5_K;
 
     // kludge.
-    LGM_ARRAY_2D( H5_IsoTimes, 500, 80, char );
-    LGM_ARRAY_1D( H5_JD, 500, double );
-    LGM_ARRAY_1D( H5_Ugsm, 500, Lgm_Vector );
+    LGM_ARRAY_2D( H5_IsoTimes, 2000, 80, char );
+    LGM_ARRAY_1D( H5_JD, 2000, double );
+    LGM_ARRAY_1D( H5_Ugsm, 2000, Lgm_Vector );
 
 
     /*
@@ -277,7 +278,7 @@ int main( int argc, char *argv[] ){
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
 
-    LGM_ARRAY_2D( Birds, 20, 80, char );                                                                                                                                                                         
+    LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
 
     /*
@@ -309,19 +310,20 @@ int main( int argc, char *argv[] ){
             printf( "\t                EndDate: %ld\n", EndDate );
         }
 
-        if ( nBirds > 1  ){                                                                                                                                                                                      
-            printf( "\t                  Birds:" );                                                                                                                                                              
-            for (iBird=0; iBird<nBirds-1; iBird++) printf(" %s,", Birds[iBird]);                                                                                                                                 
-            printf(" %s\n", Birds[iBird]);                                                                                                                                                                       
-        } else if ( nBirds == 1  ){                                                                                                                                                                              
-            printf( "\t                   Bird:" );                                                                                                                                                              
-            printf(" %s\n", Birds[0]);                                                                                                                                                                           
+        if ( nBirds > 1  ){
+            printf( "\t                  Birds:" );
+            for (iBird=0; iBird<nBirds-1; iBird++) printf(" %s,", Birds[iBird]);
+            printf(" %s\n", Birds[iBird]);
+        } else if ( nBirds == 1  ){
+            printf( "\t                   Bird:" );
+            printf(" %s\n", Birds[0]);
         } else {
             printf("At least one bird name must be supplied with -b option.\n");
             exit(0);
         }
     }
 
+exit(0);
 
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -373,8 +375,8 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->Alpha[i] = Alpha[i];
         H5_Alpha[i] = Alpha[i];
     }
-    LGM_ARRAY_2D( H5_Lstar, 500, nAlpha, double );
-    LGM_ARRAY_2D( H5_K,     500, nAlpha, double );
+    LGM_ARRAY_2D( H5_Lstar, 2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_K,     2000, nAlpha, double );
 
 
 
@@ -404,14 +406,14 @@ int main( int argc, char *argv[] ){
 
 
 
-        /*                                                                                                                                                                                                   
-         * loop over all birds                                                                                                                                                                               
-         */                                                                                                                                                                                                  
-         for ( iBird = 0; iBird < nBirds; iBird++ ) {                                                                                                                                                         
-                                                                                                                                                                                                                 
+        /*
+         * loop over all birds
+         */
+         for ( iBird = 0; iBird < nBirds; iBird++ ) {
+
             strcpy( InFile, InputFilename );
             strcpy( OutFile, OutputFilename );
-            strcpy( Bird, Birds[ iBird ] );                                                                                                                                                                  
+            strcpy( Bird, Birds[ iBird ] );
             strcpy( InFile, InputFilename );
 
             if ( SubstituteVars ) {
@@ -453,20 +455,20 @@ int main( int argc, char *argv[] ){
 
 
             /*
-             *   Check to see if OutFile exists or not.
+             *   Check to see if HdfOutFile exists or not.
              */
             int     StatError, FileExists;
             struct stat StatBuf;
-            StatError = stat( OutFile, &StatBuf );
+            StatError = stat( HdfOutFile, &StatBuf );
 
             FileExists = FALSE;
             if ( StatError != -1 ) {
 
                 FileExists = TRUE;
                 if ( !Force ) {
-                    printf("\n\n\tOutfile already exists (use -F option to force processing): %s\n", OutFile );
+                    printf("\n\n\tHdfOutfile already exists (use -F option to force processing): %s\n", HdfOutFile );
                 } else {
-                    printf("\n\n\tWarning. Existing Outfile will be overwritten: %s \n", OutFile );
+                    printf("\n\n\tWarning. Existing HdfOutfile will be overwritten: %s \n", HdfOutFile );
                 }
 
                 if ( StatBuf.st_size < 1000LL ){
@@ -482,6 +484,14 @@ int main( int argc, char *argv[] ){
                 printf("\t\t      Last file access:  %s", ctime(&StatBuf.st_atime));
                 printf("\t\tLast file modification:  %s", ctime(&StatBuf.st_mtime));
                 printf("\n");
+
+                /*
+                 *   If HdfOutFile exists, check to see if it is readable.
+                 */
+                if ( !H5Fis_hdf5( HdfOutFile ) ) {
+                    printf("\t  Outfile Not Readable: %s. Forcing regeneration of file.\n\n\n", HdfOutFile );
+                    FileExists = FALSE;
+                }
 
             }
 
@@ -503,8 +513,8 @@ int main( int argc, char *argv[] ){
                     /*
                      * Open Mag Ephem file for writing
                      */
-                    fp_MagEphem = fopen( OutFile, "wb" );
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", IntModel, ExtModel, MagEphemInfo );
+                    fp_MagEphem = fopen( OutFile, "w" );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", 0, NULL, NULL, 0, NULL, NULL, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {
@@ -583,8 +593,8 @@ int main( int argc, char *argv[] ){
                              * Compute L*s, Is, Bms, Footprints, etc...
                              * These quantities are stored in the MagEphemInfo Structure
                              */
-                            printf("\n\n\t\tDate, UTC: %ld %g   Ugsm: %g %g %g \n", UTC.Date, UTC.Time, Ugsm.x, Ugsm.y, Ugsm.z );
-                            printf("\t\t------------------------------------------------------------------\n");
+                            printf("\n\n\t[ %s ]: %s  Bird: %s Ugsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Ugsm.x, Ugsm.y, Ugsm.z );
+                            printf("\t--------------------------------------------------------------------------------------------------\n");
                             Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Ugsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
@@ -606,7 +616,7 @@ int main( int argc, char *argv[] ){
                                 if (MagEphemInfo->Bm[i]>0.0) {
                                     H5_K[H5_nT][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
                                 } else {
-                                    H5_K[H5_nT][i] = -1e99;
+                                    H5_K[H5_nT][i] = LGM_FILL_VALUE;
                                 }
                             }
 
@@ -757,7 +767,7 @@ int main( int argc, char *argv[] ){
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
 
-                    
+
                     H5Fclose( file );
                 }
 
@@ -780,26 +790,26 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_1D_FREE( H5_Alpha );
     LGM_ARRAY_2D_FREE( H5_Lstar );
     LGM_ARRAY_2D_FREE( H5_K );
-    
+
 
 
     return(0);
 }
 
-void StringSplit( char *Str, char **StrArray, int len, int *n ) {                                                                                                                                                
-                                                                                                                                                                                                                 
-    int         nStr;                                                                                                                                                                                            
-    const char  delimiters[] = " .,;:!";                                                                                                                                                                         
-    char        *token, *ss;                                                                                                                                                                                     
-                                                                                                                                                                                                                 
-    *n   = 0;                                                                                                                                                                                                    
-    ss   = Str;                                                                                                                                                                                                  
-    nStr = strlen( Str );                                                                                                                                                                                        
-    while ( ( token = strtok( ss, delimiters ) ) != NULL ) {                                                                                                                                                     
-        strncpy( StrArray[*n], token, len-1 );                                                                                                                                                                   
-        if ( nStr >= len ) StrArray[*n][len-1] = '\0';                                                                                                                                                           
-        ++(*n);                                                                                                                                                                                                  
-        ss = NULL;                                                                                                                                                                                               
-    }                                                                                                                                                                                                            
-                                                                                                                                                                                                                 
-} 
+void StringSplit( char *Str, char **StrArray, int len, int *n ) {
+
+    int         nStr;
+    const char  delimiters[] = " ,;";
+    char        *token, *ss;
+
+    *n   = 0;
+    ss   = Str;
+    nStr = strlen( Str );
+    while ( ( token = strtok( ss, delimiters ) ) != NULL ) {
+        strncpy( StrArray[*n], token, len-1 );
+        if ( nStr >= len ) StrArray[*n][len-1] = '\0';
+        ++(*n);
+        ss = NULL;
+    }
+
+}

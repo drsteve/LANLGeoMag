@@ -19,6 +19,9 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
 
     MagEphemInfo->LstarInfo = InitLstarInfo( Verbosity );
 
+    MagEphemInfo->LstarInfo->SaveShellLines = TRUE;
+    MagEphemInfo->SaveShellLines = TRUE;
+
 
     /*
      * Allocate Arrays that depend on # of pitch angles.

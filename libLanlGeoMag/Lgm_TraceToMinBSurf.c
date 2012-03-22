@@ -49,7 +49,9 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      *
      */
 
-    done = FALSE; Sa = Sb = Sc = 0.0;
+    done = FALSE; 
+    Sa = Sb = Sc = 0.0;
+    Ba = Bb = Bc = 0.0;
 
     /*
      *  Set the start point, Pa and |B(Pa)|;
@@ -61,6 +63,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     Ba   = Lgm_Magnitude( &Btmp );
     Sa   = 0.0;
 
+//printf("P, B (initial) = %g %g %g %g\n", Pa.x, Pa.y, Pa.z, Ba); 
 
     /*
      *  Get an initial Htry that is safe -- i.e. start off slowly
@@ -87,6 +90,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
     if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
     Info->Bfield( &P, &Btmp, Info );
     B = Lgm_Magnitude( &Btmp );
+//printf("NEG: P, B  = %g %g %g %g\n", P.x, P.y, P.z, B); 
 
     if ( B < Ba ) {
 
@@ -101,6 +105,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
         if ( Lgm_MagStep( &P2, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s2, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Info->Bfield( &P2, &Btmp, Info );
         B2 = Lgm_Magnitude( &Btmp );
+//printf("POS: P2, B2  = %g %g %g %g\n", P2.x, P2.y, P2.z, B2); 
 
 	    if ( B2 < Ba ) {
 	        Pb  = P2;
@@ -111,14 +116,16 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 	        /*
 	         *  We must have already bracketed the min.
 	         */
-	        Pb   = P;  Bb   = B;  Sb   = s;
-	        Pc   = P2; Bc   = B2; Sc   = s2;
+	        Pb   = Pa;  Bb = Ba; Sb = Sa;
+	        Pa   = P;   Ba = B;  Sa = -s;
+	        Pc   = P2;  Bc = B2; Sc = s2;
 	        sgn  = 1.0;
 	        done = TRUE;
 	    }
 
     }
 
+//printf("B = %g %g %g   done = %d\n", Ba, Bb, Bc, done);
 
 
 
@@ -172,6 +179,8 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
         // no bracket
         return(0);
     }
+//printf("Sa, Sb, Sc = %lf %lf %lf\n", Sa, Sb, Sc);
+//printf("Ba, Bb, Bc = %lf %lf %lf\n", Ba, Bb, Bc);
 
 
 
@@ -182,7 +191,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
      *  (Sa, Sb, Sc) are the distances of the triple points along
      *  the FL.
      */
-if (0==1){
+if (1==1){
     done = FALSE;
 //reset=TRUE;
     while (!done) {
@@ -201,6 +210,7 @@ if (0==1){
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
+//printf("A. B = %g\n", B);
 
 	        if ( B < Bb ) {
                 Pc = Pb; Bc = Bb;  Sc = Sb;
@@ -217,6 +227,7 @@ if (0==1){
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
             Info->Bfield( &P, &Btmp, Info );
             B = Lgm_Magnitude( &Btmp );
+//printf("B. P = %g %g %g B = %g\n", P.x, P.y, P.z, B);
 
 	        if ( B < Bb ) {
                 Pa = Pb; Ba = Bb;  Sa = Sb;
@@ -234,8 +245,9 @@ if (0==1){
 
     /*
      * Try Brent's method
+THIS DOESNT SEEM TO GIVE RESULTS THAT ARE AS GOOD. FIND OUT WHY....
      */
-if (1==1){
+if (0==1){
 //printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
     double      Smin, Bmin;
     Lgm_Vector  Pmin;
@@ -250,7 +262,7 @@ if (1==1){
     Bb = Bmin;
     Sb = Smin;
     Pb = Pmin;
-//printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %g %g %g   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
+//printf("Sa, Sb, Sc = %g %g %g  Ba, Bb, Bc = %.15lf %.15lf %.15lf   tol = %g\n", Sa, Sb, Sc, Ba, Bb, Bc, tol);
 }
 
 
@@ -262,7 +274,8 @@ if (1==1){
      */
     *v = Pb;
 
-    Info->Trace_s = Sb*sgn;
+    //Info->Trace_s = Sb*sgn;
+    Info->Trace_s = -Sb*sgn;
 
     if ( Info->VerbosityLevel > 2 ) printf("TraceToMinBSurf(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
 
