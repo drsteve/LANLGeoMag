@@ -101,6 +101,8 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
      */
     Rinitial = WGS84_A*Lgm_Magnitude( u ); // km
 
+//Info->Bfield( u, &Bvec, Info );
+//printf("u = %g %g %g B = %.15lf\n", u->x, u->y, u->z, Lgm_Magnitude(&Bvec));
 
     /*
      * The Earth is a spheroid. It is more flattened at the poles than at the
@@ -182,6 +184,10 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     
 
 
+    Info->Smin   = -9e99;
+    Info->Snorth = -9e99;
+    Info->Ssouth = -9e99;
+    Info->Bmin   = -9e99;
 
 
 
@@ -195,12 +201,14 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
+    Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
+    Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
 
+    Info->Stotal = LGM_FILL_VALUE;
+    Info->Smin   = LGM_FILL_VALUE;
     
 
-    Info->Smin = -9e99;
-    Info->Bmin = -9e99;
 
 
     if ( flag1 && flag2 ) {
@@ -209,12 +217,27 @@ Info->Hmax = 0.10;
 	     *  Closed FL -- attempt to trace to Eq Plane.
 	     */
         //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
-        Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
+        //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
+        Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
         Info->Pmin = *v3;
-        Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
+        //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );
         Info->Bvecmin = Bvec;
         Info->Bmin = Lgm_Magnitude( &Bvec );
+        //printf("Bmin = %.15lf\n",  Info->Bmin );
+
+        /*
+         * Various FL arc lengths...
+         *  Snorth - distance from S/C to northern footpoint (set above)
+         *  Ssouth - distance from S/C to southern footpoint (set above)
+         *  Stotal - Total FL length ( Snorth + Ssouth ) (only compute for closed FL)
+         *  Smin   - distance from southern footpoint to S/C (Ssouth - what we
+         *           got from Lgm_TraceToMinBSurf() because we started at S/C)
+         */
+        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length
+        Info->Smin   = Info->Ssouth - Info->Trace_s;  // length from south foot to S/C
+//printf("Info->Ssouth, Info->Trace_s = %g %g\n", Info->Ssouth, Info->Trace_s);
+        
 
         Info->Ellipsoid_Footprint_Pn = *v2;
         Info->Bfield( v2, &Bvec, Info );

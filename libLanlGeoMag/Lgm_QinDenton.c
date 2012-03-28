@@ -302,6 +302,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
     if (q->nPnts < 3) {
 
         printf("Not enough QinDenton values to interpolate\n");
+        p->Dst = -5.0;
+        p->fKp = 2.0;
 
     } else {
 

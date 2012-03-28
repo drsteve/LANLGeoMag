@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #define TRACE_TOL   1e-7
+#define TRACE_TOL2   1e-10
 #define KP_DEFAULT  1
 
 // For colorizing text ...
@@ -78,6 +79,8 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     }
 
 
+
+
     /*
      *  Compute Field-related quantities for each Pitch Angle.
      *
@@ -85,14 +88,17 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
      *  First do a trace to identify the FL type and some of its critical points.
      *
      */
-    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
+    TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL2, LstarInfo->mInfo );
     MagEphemInfo->FieldLineType = TraceFlag;
     if ( TraceFlag > 0 ) {
         MagEphemInfo->Ellipsoid_Footprint_Ps  = v1;
         MagEphemInfo->Ellipsoid_Footprint_Pn  = v2;
         MagEphemInfo->Pmin          = v3;
+        MagEphemInfo->Snorth        = LstarInfo->mInfo->Snorth;
+        MagEphemInfo->Ssouth        = LstarInfo->mInfo->Ssouth;
         MagEphemInfo->Smin          = LstarInfo->mInfo->Smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
+//printf("P = %g %g %g   Blocal = %lf Bmin = %lf \n",  u->x, u->y, u->z, Blocal, MagEphemInfo->Bmin );
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
         MagEphemInfo->Mused         = MagEphemInfo->Mcurr;
@@ -236,7 +242,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                 } else {
                     printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo3->LSimpleMax );
                     MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
-printf("Bm = %g\n", MagEphemInfo->Bm[i]);
+//printf("Bm = %g\n", MagEphemInfo->Bm[i]);
                     MagEphemInfo->I[i]     = LGM_FILL_VALUE;
                     MagEphemInfo->nShellPoints[i] = 0;
 
