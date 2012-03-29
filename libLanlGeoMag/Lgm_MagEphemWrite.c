@@ -1422,39 +1422,39 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %15s", "Seconds" );
     fprintf( fp, " %13s", "Degrees" );
 
-    fprintf( fp, " %13s", "Re" ); // Geocentric GEO
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" ); // Geocentric GEO
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
 
     fprintf( fp, " %13s", "Deg." ); // Geodetic GEO
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "km" );
 
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
 
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
 
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
 
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
-    fprintf( fp, " %13s", "Re" );
-
-    fprintf( fp, " %13s", "Deg." );
-    fprintf( fp, " %13s", "Deg." );
-    fprintf( fp, " %13s", "Hours" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "R!IE" );
 
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "Hours" );
-    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "R!IE" );
+
+    fprintf( fp, " %13s", "Deg." );
+    fprintf( fp, " %13s", "Deg." );
+    fprintf( fp, " %13s", "Hours" );
+    fprintf( fp, " %13s", "R!IE" );
 
     fprintf( fp, " %14s",  " " );  // Int Model
     fprintf( fp, " %14s",  " " );  // Ext Model
@@ -1468,19 +1468,19 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %29s",  "" );    // Field Line Type
 
-    fprintf( fp, " %16s",  "Re" ); // S
-    fprintf( fp, " %16s",  "Re" ); // S
-    fprintf( fp, " %16s",  "Re" ); // S
-    fprintf( fp, " %16s",  "Re" ); // S
-    fprintf( fp, " %16s",  "Re" ); // S_total
+    fprintf( fp, " %16s",  "R!IE" ); // S
+    fprintf( fp, " %16s",  "R!IE" ); // S
+    fprintf( fp, " %16s",  "R!IE" ); // S
+    fprintf( fp, " %16s",  "R!IE" ); // S
+    fprintf( fp, " %16s",  "R!IE" ); // S_total
 
-    fprintf( fp, " %12s", "Re" );   // GSM
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "R!IE" );   // GSM
+    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "R!IE" );
 
-    fprintf( fp, " %12s", "Re" );   // GEO
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "R!IE" );   // GEO
+    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "R!IE" );
 
     fprintf( fp, " %12s", "Deg." ); // Geodetic
     fprintf( fp, " %12s", "Deg." );
@@ -1506,13 +1506,13 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %12s", "Deg." ); // Loss Cone North
 
-    fprintf( fp, " %12s", "Re" );   // GSM
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "R!IE" );   // GSM
+    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "R!IE" );
 
-    fprintf( fp, " %12s", "Re" );   // GEO
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "R!IE" );   // GEO
+    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "R!IE" );
 
     fprintf( fp, " %12s", "Deg." ); // Geodetic
     fprintf( fp, " %12s", "Deg." );
@@ -1538,9 +1538,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %12s", "Deg." ); // Loss Cone South
 
-    fprintf( fp, " %12s", "Re" );   // Pmin
-    fprintf( fp, " %12s", "Re" );
-    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "R!IE" );   // Pmin
+    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "R!IE" );
 
     fprintf( fp, " %12s", "nT" );   // Bmin
     fprintf( fp, " %12s", "nT" );
@@ -1567,9 +1567,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "nT" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "R!IE" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re G^0.5" ); fprintf(fp, " %12s", Str ); }
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "R!IE!N G!E0.5" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
 
     Lgm_free_ctrans(c);
