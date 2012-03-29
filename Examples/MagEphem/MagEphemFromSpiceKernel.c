@@ -204,7 +204,7 @@ double ApogeeFunc( double T, double val, void *Info ){
 
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
     et = Lgm_TDBSecSinceJ2000( &UTC, c );
-    spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+    spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
     U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
     R = Lgm_Magnitude( &U );
 
@@ -691,7 +691,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                             et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-                            spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
                             ++nApogee;
 
@@ -721,7 +721,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
                             et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-                            spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
                             ++nPerigee;
                             //Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 3 );
@@ -762,12 +762,13 @@ printf("nPerigee = %d\n", nPerigee);
 
                     //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
                     H5_nT = 0;
-                    for ( Seconds=0; Seconds<=86400; Seconds += 300 ) {
+                    //for ( Seconds=0; Seconds<=86400; Seconds += 300 ) {
+                    for ( Seconds=0; Seconds<=86400; Seconds += 60 ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
 et = Lgm_TDBSecSinceJ2000( &UTC, c );
-spkezp_c( RBSPB_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
 printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
 U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
 

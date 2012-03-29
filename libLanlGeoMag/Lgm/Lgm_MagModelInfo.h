@@ -133,6 +133,8 @@ typedef struct Lgm_MagModelInfo {
 
     double      B0, B1, B2;             // params for simplified mead field
 
+    double      M_Dungey, dB_Dungey;    // params for simple Dungey model
+
 
     /*
      * Variable to control which internal model to use
@@ -611,6 +613,12 @@ void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
  * Simplified Mead field.
  */
 int Lgm_SimplifiedMead(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info);
+
+/*
+ * Simple Dungey-Type open model. I.e. centered dipole plus constant dB.
+ * This model uses Inf0->M_Dungey and Info->dB_Dungey
+ */
+int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info);
 
 
 /*

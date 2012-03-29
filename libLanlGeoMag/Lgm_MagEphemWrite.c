@@ -40,7 +40,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf(fp, "\"PA%d\" ],\n", i ); 
 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%g Deg.\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%g (Deg.)\", ", m->Alpha[i] );
         fprintf(fp, "\"%g Deg.\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
         fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -205,7 +205,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"GpsTime\":          { \"DESCRIPTION\": \"Number of SI seconds since 0h Jan 6, 1980 UTC.\",\n");
     fprintf( fp, "#                               \"NAME\": \"GpsTime\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Gps Time\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Gps Time\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Gps Time (Seconds)\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                              \"UNITS\": \"Seconds\" },\n");
     fprintf( fp, "#\n");
@@ -215,7 +215,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"DipoleTiltAngle\":  { \"DESCRIPTION\": \"Angle between Zgsm and Zsm (i.e. between Zgsm and dipole axis direction).\",\n");
     fprintf( fp, "#                               \"NAME\": \"DipoleTiltAngle\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Dipole Tilt Angle\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Dipole Tilt Angle, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Dipole Tilt Angle (Degrees)\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                              \"UNITS\": \"Degrees\" },\n");
     fprintf( fp, "#\n");
@@ -224,7 +224,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgeo\":             { \"DESCRIPTION\": \"Geocentric Geographic position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgeo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Geographic Position\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance, R!BE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -239,7 +239,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgeod_LatLon\":     { \"DESCRIPTION\": \"Geodetic Geographic Latitude and Longitude of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgeod_LatLon\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Latitude and Longitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"R!Bgeod!N Latitude and Longitude, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"R!Bgeod!N Latitude and Longitude (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
@@ -253,7 +253,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgeod_Height\":     { \"DESCRIPTION\": \"Geodetic Geographic Height (Above WGS84 Ellipsoid) of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgeod_Height\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Height\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"R!Bgeod!N Height, km\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"R!Bgeod!N Height (km)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"km\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -100.0,\n");
@@ -264,7 +264,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgsm\":             { \"DESCRIPTION\": \"Geocentric Solar Magnetospheric position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Magnetospheric Position\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance, R!BE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -278,7 +278,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rsm\":              { \"DESCRIPTION\": \"Geocentric Solar Magnetic position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Magnetic Position\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance, R!BE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -292,7 +292,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgei\":             { \"DESCRIPTION\": \"Geocentric Equatorial Inertial position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgei\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Equatorial Inertial Position\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance, R!BE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -306,7 +306,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Rgse\":             { \"DESCRIPTION\": \"Geocentric Solar Ecliptic position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgse\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Ecliptic Position\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance, R!BE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -320,7 +320,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"CD_MLAT\":          { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"CD_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -331,7 +331,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"CD_MLON\":          { \"DESCRIPTION\": \"Magnetic Longitude of S/C Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"CD_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Longitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -342,7 +342,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"CD_MLT\":           { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"CD_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Local Time (MLT)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -353,7 +353,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"CD_R\":             { \"DESCRIPTION\": \"Radial distance of S/C from center of CDMAG coordinate system.\",\n");
     fprintf( fp, "#                               \"NAME\": \"CD_R\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Radial Distance\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD R, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD R (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -367,7 +367,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"ED_MLAT\":          { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"ED_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -378,7 +378,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"ED_MLON\":          { \"DESCRIPTION\": \"Magnetic Longitude of S/C Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"ED_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Longitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -389,7 +389,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"ED_MLT\":           { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"ED_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Local Time (MLT)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -400,7 +400,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"ED_R\":             { \"DESCRIPTION\": \"Radial distance of S/C from center of EDMAG coordinate system.\",\n");
     fprintf( fp, "#                               \"NAME\": \"ED_R\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Radial Distance\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED R, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED R (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -440,7 +440,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Dst\":              { \"DESCRIPTION\": \"Dst index value.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Dst\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Dst Index\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Dst, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Dst (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -10000.0,\n");
@@ -452,7 +452,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bsc_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at S/C (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bsc_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at S/C\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bsc_gsm, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bsc_gsm (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -476,7 +476,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"S_sc_to_pfn\":       { \"DESCRIPTION\": \"Distance between S/C and Northern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfn\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Distance to N. Foot. along FL\"\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance to N. Foot. along FL, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance to N. Foot. along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -487,7 +487,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"S_sc_to_pfs\":       { \"DESCRIPTION\": \"Distance between S/C and Southern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfs\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Distance to S. Foot. along FL\"\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance to S. Foot. along FL, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance to S. Foot. along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -498,7 +498,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"S_pfs_to_Bmin\":     { \"DESCRIPTION\": \"Distance between Southern Footpoint and Bmin point along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_pfs_to_Bmin\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Distance from S. Foot. to Pmin along FL\"\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance from S. Foot. to Pmin along FL, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance from S. Foot. to Pmin along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -509,7 +509,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"S_Bmin_to_sc\":     { \"DESCRIPTION\": \"Distance between Bmin point and S/C along field line (positive if north of Bmin).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_Bmin_to_sc\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Distance from Pmin to S/C along FL\"\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance from Pmin to S/C along FL, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Distance from Pmin to S/C along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -520,7 +520,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"S_total\":           { \"DESCRIPTION\": \"Total Field Line length (along field line).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_total\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Field Line length\"\n");
-    fprintf( fp, "#                              \"LABEL\": \"Field Line length, Re\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Field Line length (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -537,7 +537,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_geo\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geo, R!IE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geo (R!IE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -551,7 +551,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_gsm\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Position of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm, R!IE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm (R!IE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -565,7 +565,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_geod_LatLon\":  { \"DESCRIPTION\": \"Geodetic Latitude and Longitude of Northern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geod_LatLon\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Latitude and Longitude of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_LatLon, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_LatLon (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
@@ -579,7 +579,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_geod_Height\":  { \"DESCRIPTION\": \"Geodetic Height of Northern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geod_Height\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Height of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_Height, km\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_Height (km)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"km\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -100.0,\n");
@@ -590,7 +590,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_CD_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Northern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLAT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -601,7 +601,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_CD_MLON\":      { \"DESCRIPTION\":\"Magnetic Longitude of Northern Footpoint Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLON of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -612,7 +612,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_CD_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Northern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -623,7 +623,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_ED_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Northern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLAT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -634,7 +634,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_ED_MLON\":      { \"DESCRIPTION\":  \"Magnetic Longitude of Northern Footpoint Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLON of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -645,7 +645,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_ED_MLT\":       { \"DESCRIPTION\":\"Magnetic Local Time of Northern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -657,7 +657,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bfn_geo\":          { \"DESCRIPTION\": \"Magnetic field vector at Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfn_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Northern Footpoint (in GEO coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfn_geo, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bfn_geo (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -671,7 +671,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bfn_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfn_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Northern Footpoint (in GSM coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfn_gsm, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bfn_gsm (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -685,7 +685,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"Loss_Cone_Alpha_n\": { \"DESCRIPTION\": \"Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_n\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Northern Loss Cone Angle\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Northern Loss Cone Angle, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Northern Loss Cone Angle (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -706,7 +706,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_geo\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geo, R!IE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geo (R!IE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -720,7 +720,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_gsm\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm, R!IE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm (R!IE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -734,7 +734,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_geod_LatLon\":  { \"DESCRIPTION\": \"Geodetic Latitude and Longitude of Southern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geod_LatLon\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Latitude and Longitude of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_LatLon, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_LatLon (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
@@ -748,7 +748,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_geod_Height\":  { \"DESCRIPTION\": \"Geodetic Height of Southern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geod_Height\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Height of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_Height, km\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_Height (km)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"km\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -100.0,\n");
@@ -759,7 +759,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_CD_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Southern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLAT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -770,7 +770,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_CD_MLON\":      { \"DESCRIPTION\": \"Magnetic Longitude of Southern Footpoint Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLON of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -781,7 +781,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_CD_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Southern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -792,7 +792,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_ED_MLAT\":      { \"DESCRIPTION\":  \"Magnetic Latitude of Southern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLAT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLAT, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -803,7 +803,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_ED_MLON\":      { \"DESCRIPTION\":  \"Magnetic Longitude of Southern Footpoint Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLON of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLON, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -814,7 +814,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_ED_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Southern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLT, Hours\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -825,7 +825,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bfs_geo\":          { \"DESCRIPTION\": \"Magnetic field vector at Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfs_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Southern Footpoint (in GEO coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfs_geo, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bfs_geo (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -839,7 +839,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bfs_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfs_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Southern Footpoint (in GSM coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfs_gsm, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bfs_gsm (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -853,7 +853,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "# \"Loss_Cone_Alpha_s\": { \"DESCRIPTION\": \"Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_s\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Southern Loss Cone Angle\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Southern Loss Cone Angle, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Southern Loss Cone Angle (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -875,7 +875,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pmin_gsm\":         { \"DESCRIPTION\": \"Location of minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pmin_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Minimum-|B| point (in GSM Coordinates)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm, R!IE\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm (R!IE)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
@@ -890,7 +890,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Bmin_gsm\":         { \"DESCRIPTION\": \"B-field at minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bmin_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Minimum-|B| (in GSM Coordinates)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bmin_gsm, nT\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Bmin_gsm (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
@@ -915,7 +915,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"InvLat\":           { \"DESCRIPTION\": \"Invariant latitude of vehicle computed from Lambda=acos(sqrt(1/Lsimple)).\",\n");
     fprintf( fp, "#                               \"NAME\": \"InvLat\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Invariant Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Invariant Latitude, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Invariant Latitude (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -937,7 +937,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"InvLat_eq\":        { \"DESCRIPTION\": \"Invariant latitude of vehicle computed from Lambda=acos(sqrt(1.0/Lm_eq)).\",\n");
     fprintf( fp, "#                               \"NAME\": \"InvLat_eq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Lm_eq Invariant Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Lm_eq Invariant Latitude, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Lm_eq Invariant Latitude (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -960,7 +960,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"MlatFromBoverBeq\": { \"DESCRIPTION\": \"Dipole latitude where (B/Beq)_dipole == BoverBeq.\",\n");
     fprintf( fp, "#                               \"NAME\": \"MlatFromBoverBeq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"MlatFromBoverBeq\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"MlatFromBoverBeq, Degrees\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"MlatFromBoverBeq (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -973,7 +973,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"M_used\":           { \"DESCRIPTION\": \"The magnetic dipole moment that was used to convert magnetic flux to L*. In units of nT.\",\n");
     fprintf( fp, "#                               \"NAME\": \"M_used\",\n");
     fprintf( fp, "#                              \"TITLE\": \"M_used\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"M_used\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"M_used (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
@@ -984,7 +984,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"M_ref\":            { \"DESCRIPTION\": \"The fixed reference magnetic dipole moment for converting magnetic flux to L*. In units of nT.\",\n");
     fprintf( fp, "#                               \"NAME\": \"M_ref\",\n");
     fprintf( fp, "#                              \"TITLE\": \"M_ref\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"M_ref\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"M_ref (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
@@ -995,7 +995,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"M_igrf\":           { \"DESCRIPTION\": \"Time-dependant magnetic dipole moment (probably shouldn't be used for converting magnetic flux to L*, but it sometimes is). In units of nT.\",\n");
     fprintf( fp, "#                               \"NAME\": \"M_igrf\",\n");
     fprintf( fp, "#                              \"TITLE\": \"M_igrf\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"M_igrf\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"M_igrf (nT)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":     0.0,\n");
@@ -1016,7 +1016,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"Lstar\":            { \"DESCRIPTION\": \"Generalized Roederer L-shell value (also known as L*).\",\n");
         fprintf( fp, "#                               \"NAME\": \"Lstar\",\n");
         fprintf( fp, "#                              \"TITLE\": \"L!E*!N\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"L!E*!N, Dimensionless\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"L!E*!N\",\n");
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1036,7 +1036,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"L\":                { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
         fprintf( fp, "#                               \"NAME\": \"L\",\n");
         fprintf( fp, "#                              \"TITLE\": \"L\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"L, Dimensionless\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"L\",\n");
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1056,7 +1056,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"Bm\":               { \"DESCRIPTION\": \"Magnetic field strength at mirror points for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"Bm\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Mirror Magnetic Field Strength\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"Bm, nT\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Bm (nT)\",\n");
         fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1076,7 +1076,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"I\":                { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"I\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Integral Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"I, R!IE\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"I (R!IE)\",\n");
         fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1095,7 +1095,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"K\":                { \"DESCRIPTION\": \"Second Invariant ( I*sqrt(Bm) ) for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"K\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Second Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"K, R!IE!N G!E0.5!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"K (R!IE!N G!E0.5!N)\",\n");
         fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!E0.5!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
