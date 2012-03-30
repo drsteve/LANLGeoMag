@@ -763,7 +763,7 @@ printf("nPerigee = %d\n", nPerigee);
                     //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
                     H5_nT = 0;
                     //for ( Seconds=0; Seconds<=86400; Seconds += 300 ) {
-                    for ( Seconds=0; Seconds<=86400; Seconds += 60 ) {
+                    for ( Seconds=3600*4; Seconds<=3600*5; Seconds += 60 ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );

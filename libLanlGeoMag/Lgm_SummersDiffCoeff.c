@@ -269,7 +269,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
 
         /*
-         *  Perform integrations. The points[] array contains a list of point
+         *  Perform integrations. The points[] array contains a list of points
          *  in the integrand where integrable singularities occur. dqagp() uses
          *  these to break up the integral at these points (dqagp() is an
          *  extrapolation algorithm so it handles singularities very well.)

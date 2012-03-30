@@ -17,18 +17,18 @@
  *   do it is to pre-trace the FL and then interpolate the points in some
  *   manner. I'm hoping that combining dqags and Bulirsch-Stoer (which are both
  *   extrapolation methods) that we'll get a speedup.
- *   
+ *
  *   The integral is as follows:
  *
  *
- *                          / sm_north       
+ *                          / sm_north
  *                         |                 [                ] (-1/2)
  *                         |	             [	      B(s)    ]
  *                 Sb  =   |                 [ 1 -  --------  ]  	   ds
  *                         |                 [         Bm     ]
  *                         |                 [                ]
  *                        / sm_south
- *                       
+ *
  *
  *  I think these are all now reentrant.
  *
@@ -45,7 +45,7 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
 
     /*
      *  Type-cast our data structure to a generic type.
-     *  The structure holds auzilliary info we need down 
+     *  The structure holds auzilliary info we need down
      *  in the function calls.
      */
     qpInfo = (_qpInfo *)fInfo;
@@ -61,7 +61,7 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
 
 
     /*
-     *   set tolerances. 
+     *   set tolerances.
      */
     //epsabs = fInfo->epsabs;
     //epsrel = fInfo->epsrel;
@@ -74,11 +74,11 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
      */
     fInfo->Lgm_Sb_integrand_S        = 0.0;
     fInfo->Lgm_Sb_integrand_FirstCall = TRUE;
-                                                                                                                                                                             
 
 
-    leniw = 500; 
-    lenw  = 4*leniw; 
+
+    leniw = 500;
+    lenw  = 4*leniw;
     key   = 6;
     //iwork  = (int *) calloc( limit+1, sizeof(int) );
     //work   = (double *) calloc( lenw+1, sizeof(double) );
@@ -110,7 +110,7 @@ double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
 
     /*
      *  Type-cast our data structure to a generic type.
-     *  The structure holds auzilliary info we need down 
+     *  The structure holds auzilliary info we need down
      *  in the function calls.
      */
     qpInfo = (_qpInfo *)fInfo;
@@ -127,7 +127,7 @@ double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
 
 
     /*
-     *   set tolerances. 
+     *   set tolerances.
      */
     //epsabs = fInfo->epsabs;
     //epsrel = fInfo->epsrel;
@@ -135,15 +135,34 @@ double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
     epsrel = fInfo->Lgm_Sb_Integrator_epsrel;
 
 
-    leniw = 500; 
-    lenw  = 4*leniw; 
+    leniw = 500;
+    lenw  = 4*leniw;
     key   = 6;
 
-
-    points[1] = a;
-    points[2] = b;
-    npts = 4;
+    /*
+     *  Perform integrations. The points[] array contains a list of points
+     *  in the integrand where integrable singularities occur. dqagp() uses
+     *  these to break up the integral at these points (dqagp() is an
+     *  extrapolation algorithm so it handles singularities very well.)
+     *  Note: the value of npts2 must be 2+ the number of points added.
+     *  This is because it adds the endpoints internally (so dont add those
+     *  here).
+     */
+/*
+*/
+//    points[1] = a;
+//    points[2] = b;
+    npts = 2;
     dqagp(Sb_integrand_interped, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
+/*
+printf("here i am\n");
+double s;
+for(s=a; s<=b; s+=(b-a)/1000.0){
+printf("%g %g\n", s, Sb_integrand_interped(s, qpInfo));
+}
+exit(0);
+*/
+//    dqags(Sb_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
 
     return( result );
 
@@ -226,7 +245,7 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
 	    fInfo->Lgm_Sb_integrand_u_scale.x =  10.0;  fInfo->Lgm_Sb_integrand_u_scale.y = 1.0; fInfo->Lgm_Sb_integrand_u_scale.z = 10.0;
     	fInfo->Lgm_Sb_integrand_P = fInfo->Pm_South;
     	H = s; sgn = 1.0;
- 
+
     }
 
 
@@ -237,8 +256,8 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
 
 
     /*
-     *  Get B-field at the given value of s. 
-     *  Need to advance along field line by an amount Htry. May need to 
+     *  Get B-field at the given value of s.
+     *  Need to advance along field line by an amount Htry. May need to
      *  do more than one call to get there...
      */
     done = FALSE; Count = 0; Htry = H; Hdone = 0.0; reset = 1;

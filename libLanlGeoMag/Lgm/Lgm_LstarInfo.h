@@ -71,7 +71,16 @@ typedef struct Lgm_LstarInfo {
     double              Mirror_Ss[100];
 
     double              PhiVal[100], AngularVelocity[100];
+
+    double              Sb0;        // Equatorial value of Sb Integral.
+    double              d2B_ds2;    // second derivative of B wrt s at equator.
+
+    double              I0;
     double              I[100];
+
+    int                 ComputeSbIntegral;
+    double              SbIntegral0; // Sb Integral on initial FL (i.e. one with Sat through it.)
+    //double              SbIntegral[100]; // havent added code to compute these yet (do we need to?)
 
     Lgm_Vector          Bmin[100];
     Lgm_Vector          Pmin[100];

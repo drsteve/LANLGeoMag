@@ -217,6 +217,8 @@ Lgm_LstarInfo *InitLstarInfo( int VerbosityLevel ) {
     LstarInfo = (Lgm_LstarInfo *) calloc( 1, sizeof( *LstarInfo));
 
 
+
+
     /*
      *  Allocate memory for mInfo structure inside the LstarInfo structure.
      */
@@ -237,6 +239,10 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
     LstarInfo->ComputeVgc = FALSE;
+
+    LstarInfo->ComputeSbIntegral = TRUE;
+    LstarInfo->mInfo->ComputeSb0 = TRUE;
+    
 }
 
 
@@ -379,6 +385,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     }
     if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
+        LstarInfo->Sb0     = LstarInfo->mInfo->Sb0; // Equatorial value of Sb Integral.
+        LstarInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second derivative of B wrt s at equator.
+
 	    if (LstarInfo->VerbosityLevel > 0) {
             printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
 	        LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
@@ -467,6 +476,24 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
 
+                        /*
+                         *  Do interped Sb integral if desired. Note this is
+                         *  just for the initial FL (which is why we call it
+                         *  SbIntegral0). Can also add for each MLT if we want
+                         *  to (then we should probably add an array called
+                         *  SbIntegral[]).
+                         */
+                        LstarInfo->SbIntegral0 = LGM_FILL_VALUE;
+                        if ( LstarInfo->ComputeSbIntegral ) {
+                            LstarInfo->SbIntegral0 = SbIntegral_interped( LstarInfo->mInfo  );
+                            if (LstarInfo->VerbosityLevel > 0) {
+                                printf("\t\t  %sSb Integral Equatorially Mirroring:      %g%s\n",  PreStr, LstarInfo->Sb0, PostStr );
+                                printf("\t\t  %sSb Integral, (interped):      %g%s\n",  PreStr, LstarInfo->SbIntegral0, PostStr );
+                            }
+                        }
+
+
+
                         FreeSpline( LstarInfo->mInfo );
 
                     } else {
@@ -486,6 +513,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
 
                 }
+                LstarInfo->I0 = I; // save initial I in LstarInfo structure.
                 Ifound = I;
 
 

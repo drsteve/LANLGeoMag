@@ -225,11 +225,11 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                               \"NAME\": \"Rgeo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Geographic Position\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rgeo_x\", \"Rgeo_y\", \"Rgeo_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgeo!Ix!N ,  R!IE\", \"Rgeo!Iy!N ,  R!IE\", \"Rgeo!Iz!N ,  R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgeo!Bx!N ,  R!BE\", \"Rgeo!By!N ,  R!BE\", \"Rgeo!Bz!N ,  R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -265,11 +265,11 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                               \"NAME\": \"Rgsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Magnetospheric Position\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rgsm_x\", \"Rgsm_y\", \"Rgsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgsm!Ix!N ,  R!IE\", \"Rgsm!Iy!N ,  R!IE\", \"Rgsm!Iz!N ,  R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgsm!Bx!N ,  R!BE\", \"Rgsm!By!N ,  R!BE\", \"Rgsm!Bz!N ,  R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -279,11 +279,11 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                               \"NAME\": \"Rsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Magnetic Position\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rsm_x\", \"Rsm_y\", \"Rsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rsm!Ix!N ,  R!IE\", \"Rsm!Iy!N ,  R!IE\", \"Rsm!Iz!N ,  R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rsm!Bx!N ,  R!BE\", \"Rsm!By!N ,  R!BE\", \"Rsm!Bz!N ,  R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -293,11 +293,11 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                               \"NAME\": \"Rgei\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Equatorial Inertial Position\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rgei_x\", \"Rgei_y\", \"Rgei_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgei!Ix!N ,  R!IE\", \"Rgei!Iy!N ,  R!IE\", \"Rgei!Iz!N ,  R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgei!Bx!N ,  R!BE\", \"Rgei!By!N ,  R!BE\", \"Rgei!Bz!N ,  R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -307,11 +307,11 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                               \"NAME\": \"Rgse\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geocentric Solar Ecliptic Position\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance (R!BE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Rgse_x\", \"Rgse_y\", \"Rgse_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgse!Ix!N ,  R!IE\", \"Rgse!Iy!N ,  R!IE\", \"Rgse!Iz!N ,  R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Rgse!Bx!N ,  R!BE\", \"Rgse!By!N ,  R!BE\", \"Rgse!Bz!N ,  R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -457,7 +457,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bsc_gsm_x\", \"Bsc_gsm_y\", \"Bsc_gsm_z\", \"Bsc_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bsc!Igsm_x!N , nT\", \"Bsc!Igsm_y!N , nT\", \"Bsc!Igsm_z!N , nT\", \"Bsc_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bsc!Bgsm_x!N , nT\", \"Bsc!Bgsm_y!N , nT\", \"Bsc!Bgsm_z!N , nT\", \"Bsc_gsm_mag , nT\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -528,6 +528,27 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
+    fprintf( fp, "# \"d2B_ds2\":           { \"DESCRIPTION\": \"Second derivative of |B| with respect to s (dist along FL) at minimum |B| point.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"d2B_ds2\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"d!A2!NB/ds!A2!N\"\n");
+    fprintf( fp, "#                              \"LABEL\": \"d!A2!NB/ds!A2!N (nT!A2!N/Re!A2!N)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"nT!A2!N/Re!A2!N\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+    //fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
+
+    fprintf( fp, "# \"Sb0\":               { \"DESCRIPTION\": \"Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).\"\n");
+    fprintf( fp, "#                               \"NAME\": \"Sb0\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"Sb0\"\n");
+    fprintf( fp, "#                              \"LABEL\": \"Sb0 (Re)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+    //fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
 
 
 
@@ -537,12 +558,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_geo\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geo (R!IE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geo (R!BE)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Pfn_geo_x\", \"Pfn_geo_y\", \"Pfn_geo_z\"],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_geo!Ix!N , R!IE\", \"Pfn_geo!Iy!N , R!IE\", \"Pfn_geo!Iz!N , R!IE\"],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_geo!Bx!N , R!BE\", \"Pfn_geo!By!N , R!BE\", \"Pfn_geo!Bz!N , R!BE\"],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -551,12 +572,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfn_gsm\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Position of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm (R!IE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_gsm_x\", \"Pfn_gsm_y\", \"Pfn_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_gsm!Ix!N , R!IE\", \"Pfn_gsm!Iy!N , R!IE\", \"Pfn_gsm!Iz!N , R!IE\"],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_gsm!Bx!N , R!BE\", \"Pfn_gsm!By!N , R!BE\", \"Pfn_gsm!Bz!N , R!BE\"],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -662,7 +683,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_geo_x\", \"Bfn_geo_y\", \"Bfn_geo_z\", \"Bfn_geo_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_geo!Ix!N , nT\", \"Bfn_geo!Iy!N , nT\", \"Bfn_geo!Iz!N , nT\", \"Bfn_geo_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_geo!Bx!N , nT\", \"Bfn_geo!By!N , nT\", \"Bfn_geo!Bz!N , nT\", \"Bfn_geo_mag , nT\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -676,7 +697,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_gsm_x\", \"Bfn_gsm_y\", \"Bfn_gsm_z\", \"Bfn_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_gsm!Ix!N , nT\", \"Bfn_gsm!Iy!N , nT\", \"Bfn_gsm!Iz!N , nT\", \"Bfn_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_gsm!Bx!N , nT\", \"Bfn_gsm!By!N , nT\", \"Bfn_gsm!Bz!N , nT\", \"Bfn_gsm_mag , nT\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -706,12 +727,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_geo\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geo (R!IE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_geo (R!BE)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geo_x\", \"Pfs_geo_y\", \"Pfs_geo_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_geo!Ix!N , R!IE\", \"Pfs_geo!Iy!N , R!IE\", \"Pfs_geo!Iz!N , R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_geo!Bx!N , R!BE\", \"Pfs_geo!By!N , R!BE\", \"Pfs_geo!Bz!N , R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -720,12 +741,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pfs_gsm\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm (R!IE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_gsm!Ix!N , R!IE\", \"Pfs_gsm!Iy!N , R!IE\", \"Pfs_gsm!Iz!N , R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_gsm!Bx!N , R!BE\", \"Pfs_gsm!By!N , R!BE\", \"Pfs_gsm!Bz!N , R!BE\" ],\n");
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -830,7 +851,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_geo_x\", \"Bfs_geo_y\", \"Bfs_geo_z\", \"Bfs_geo_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_geo!Ix!N , nT\", \"Bfs_geo!Iy!N , nT\", \"Bfs_geo!Iz!N , nT\", \"Bfs_geo_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_geo!Bx!N , nT\", \"Bfs_geo!By!N , nT\", \"Bfs_geo!Bz!N , nT\", \"Bfs_geo_mag , nT\" ],\n");
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -844,7 +865,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_gsm_x\", \"Bfs_gsm_y\", \"Bfs_gsm_z\", \"Bfs_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_gsm!Ix!N , nT\", \"Bfs_gsm!Iy!N , nT\", \"Bfs_gsm!Iz!N , nT\", \"Bfs_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_gsm!Bx!N , nT\", \"Bfs_gsm!By!N , nT\", \"Bfs_gsm!Bz!N , nT\", \"Bfs_gsm_mag , nT\" ],\n");
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -875,12 +896,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#  \"Pmin_gsm\":         { \"DESCRIPTION\": \"Location of minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pmin_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Minimum-|B| point (in GSM Coordinates)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm (R!IE)\",\n");
-    fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pmin_gsm_x\", \"Pmin_gsm_y\", \"Pmin_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pmin_gsm!Ix!N , R!IE\", \"Pmin_gsm!Iy!N , R!IE\", \"Pmin_gsm!Iz!N , R!IE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pmin_gsm!Bx!N , R!BE\", \"Pmin_gsm!By!N , R!BE\", \"Pmin_gsm!Bz!N , R!BE\" ],\n");
     //fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -895,7 +916,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bmin_gsm_x\", \"Bmin_gsm_y\", \"Bmin_gsm_z\", \"Bmin_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bmin_gsm!Ix!N , nT\", \"Bmin_gsm!Iy!N , nT\", \"Bmin_gsm!Iz!N , nT\", \"Bmin_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bmin_gsm!Bx!N , nT\", \"Bmin_gsm!By!N , nT\", \"Bmin_gsm!Bz!N , nT\", \"Bmin_gsm_mag , nT\" ],\n");
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -1015,8 +1036,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     if ( m->nAlpha > 0 ) {
         fprintf( fp, "#  \"Lstar\":            { \"DESCRIPTION\": \"Generalized Roederer L-shell value (also known as L*).\",\n");
         fprintf( fp, "#                               \"NAME\": \"Lstar\",\n");
-        fprintf( fp, "#                              \"TITLE\": \"L!E*!N\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"L!E*!N\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"L!A*!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"L!A*!N\",\n");
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1024,8 +1045,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Lstar_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Lstar_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L!E*!N %g!Eo!N\", ", m->Alpha[i] );
-        fprintf(fp, "\"L!E*!N %g!Eo!N\" ],\n", m->Alpha[i] ); 
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L!A*!N %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"L!A*!N %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
@@ -1044,8 +1065,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"L_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L %g!Eo!N\", ", m->Alpha[i] );
-        fprintf(fp, "\"L %g!Eo!N\" ],\n", m->Alpha[i] ); 
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"L %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
@@ -1064,8 +1085,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Bm_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Bm_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"B!Dm!N %g!Eo!N\", ", m->Alpha[i] );
-        fprintf(fp, "\"B!Dm!N %g!Eo!N\" ],\n", m->Alpha[i] ); 
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"B!Dm!N %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"B!Dm!N %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 70000.0,\n");
@@ -1076,16 +1097,16 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"I\":                { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"I\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Integral Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"I (R!IE)\",\n");
-        fprintf( fp, "#                              \"UNITS\": \"R!IE!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"I (R!BE)\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"I_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I %g!Eo!N\", ", m->Alpha[i] );
-        fprintf(fp, "\"I %g!Eo!N\" ],\n", m->Alpha[i] ); 
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"I %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
@@ -1095,22 +1116,59 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#  \"K\":                { \"DESCRIPTION\": \"Second Invariant ( I*sqrt(Bm) ) for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"K\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Second Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"K (R!IE!N G!E0.5!N)\",\n");
-        fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!E0.5!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"K (R!BE!N G!A0.5!N)\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"R!BE!N G!A0.5!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
         fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"K_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"K_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"K %g!Eo!N\", ", m->Alpha[i] );
-        fprintf(fp, "\"K %g!Eo!N\" ],\n", m->Alpha[i] ); 
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"K %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"K %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 100000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+        fprintf( fp, "#  \"Sb\":               { \"DESCRIPTION\": \"Sb Integral for each pitch angle.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Sb\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"Sb Integral\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Sb (R!BE!N)\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Sb_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Sb_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Sb %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"Sb %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 100000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+        fprintf( fp, "#  \"Tb\":               { \"DESCRIPTION\": \"Bounce period for 1 MeV electrons.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Tb\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"Bounce period for 1 MeV electrons\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Tb (s)\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"s\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Tb_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Tb_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Tb %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"Tb %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 100000.0,\n");
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
 //        fprintf( fp, "#\n");
-
 
     }
 
@@ -1160,6 +1218,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %16s",  " +S_pfs_to_Bmin+" );
     fprintf( fp, " %16s",  " +-S_sc_to_Bmin+" );
     fprintf( fp, " %16s",  " +-- S_total --+" );
+    fprintf( fp, " %16s",  " +-- d2B_ds2 --+" );
+    fprintf( fp, " %16s",  " +---- Sb0 ----+" );
     fprintf( fp, " %38s",  " +---- North Mag. Footpoint GSM -----+" );
     fprintf( fp, " %38s",  " +- North Mag. Footpoint Geographic -+" );
     fprintf( fp, " %38s",  " +-- North Mag. Footpoint Geodetic --+" );
@@ -1251,6 +1311,29 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
         fprintf( fp, " %*s", n+3,  Str2 );
 
+        // Sb header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, " Sb (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, " Sb " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+        // Tb header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, " Tb (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, " Tb " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
 
         LGM_ARRAY_1D_FREE( Str2 );
     }
@@ -1318,6 +1401,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %16s",  "S_pfs_to_Bmin" );
     fprintf( fp, " %16s",  "S_sc_to_Bmin" );
     fprintf( fp, " %16s",  "S_total" );
+
+    fprintf( fp, " %16s",  "d2B_ds2" );
+    fprintf( fp, " %16s",  "Sb0" );
 
     fprintf( fp, " %12s", "Xgsm" ); // n. foot
     fprintf( fp, " %12s", "Ygsm" );
@@ -1412,6 +1498,10 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "I%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "K%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Sb%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Tb%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
     // units/format
     fprintf( fp, "# %25s", "YYYY-MM-DDTHH:MM:SS.SSSSZ" );
@@ -1422,39 +1512,39 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %15s", "Seconds" );
     fprintf( fp, " %13s", "Degrees" );
 
-    fprintf( fp, " %13s", "R!IE" ); // Geocentric GEO
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" ); // Geocentric GEO
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
     fprintf( fp, " %13s", "Deg." ); // Geodetic GEO
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "km" );
 
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
-    fprintf( fp, " %13s", "R!IE" );
-
-    fprintf( fp, " %13s", "Deg." );
-    fprintf( fp, " %13s", "Deg." );
-    fprintf( fp, " %13s", "Hours" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
+    fprintf( fp, " %13s", "Re" );
 
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "Deg." );
     fprintf( fp, " %13s", "Hours" );
-    fprintf( fp, " %13s", "R!IE" );
+    fprintf( fp, " %13s", "Re" );
+
+    fprintf( fp, " %13s", "Deg." );
+    fprintf( fp, " %13s", "Deg." );
+    fprintf( fp, " %13s", "Hours" );
+    fprintf( fp, " %13s", "Re" );
 
     fprintf( fp, " %14s",  " " );  // Int Model
     fprintf( fp, " %14s",  " " );  // Ext Model
@@ -1468,19 +1558,22 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %29s",  "" );    // Field Line Type
 
-    fprintf( fp, " %16s",  "R!IE" ); // S
-    fprintf( fp, " %16s",  "R!IE" ); // S
-    fprintf( fp, " %16s",  "R!IE" ); // S
-    fprintf( fp, " %16s",  "R!IE" ); // S
-    fprintf( fp, " %16s",  "R!IE" ); // S_total
+    fprintf( fp, " %16s",  "Re" ); // S
+    fprintf( fp, " %16s",  "Re" ); // S
+    fprintf( fp, " %16s",  "Re" ); // S
+    fprintf( fp, " %16s",  "Re" ); // S
+    fprintf( fp, " %16s",  "Re" ); // S_total
 
-    fprintf( fp, " %12s", "R!IE" );   // GSM
-    fprintf( fp, " %12s", "R!IE" );
-    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %16s",  "nT^2/Re^2" ); // d2B_ds2
+    fprintf( fp, " %16s",  "Re" ); // Sb0
 
-    fprintf( fp, " %12s", "R!IE" );   // GEO
-    fprintf( fp, " %12s", "R!IE" );
-    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "Re" );   // GSM
+    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "Re" );
+
+    fprintf( fp, " %12s", "Re" );   // GEO
+    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "Re" );
 
     fprintf( fp, " %12s", "Deg." ); // Geodetic
     fprintf( fp, " %12s", "Deg." );
@@ -1506,13 +1599,13 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %12s", "Deg." ); // Loss Cone North
 
-    fprintf( fp, " %12s", "R!IE" );   // GSM
-    fprintf( fp, " %12s", "R!IE" );
-    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "Re" );   // GSM
+    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "Re" );
 
-    fprintf( fp, " %12s", "R!IE" );   // GEO
-    fprintf( fp, " %12s", "R!IE" );
-    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "Re" );   // GEO
+    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "Re" );
 
     fprintf( fp, " %12s", "Deg." ); // Geodetic
     fprintf( fp, " %12s", "Deg." );
@@ -1538,9 +1631,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %12s", "Deg." ); // Loss Cone South
 
-    fprintf( fp, " %12s", "R!IE" );   // Pmin
-    fprintf( fp, " %12s", "R!IE" );
-    fprintf( fp, " %12s", "R!IE" );
+    fprintf( fp, " %12s", "Re" );   // Pmin
+    fprintf( fp, " %12s", "Re" );
+    fprintf( fp, " %12s", "Re" );
 
     fprintf( fp, " %12s", "nT" );   // Bmin
     fprintf( fp, " %12s", "nT" );
@@ -1567,9 +1660,13 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "nT" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "R!IE" ); fprintf(fp, " %12s", Str ); }
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "R!IE!N G!E0.5" ); fprintf(fp, " %12s", Str ); }
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re G^0.5" ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "s" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
 
     Lgm_free_ctrans(c);
@@ -1585,6 +1682,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     double          Bsc_mag, Bfn_mag, Bfs_mag, Bmin_mag, Alpha_Loss_Cone_n, Alpha_Loss_Cone_s;
     double          R, MLAT, MLON, MLT;
     double          Lm_eq, InvLat_eq, s, cl, BoverBeq, MagLatFromBoverBeq, Lsimple, InvLat, S_Bmin_to_sc;
+    double          Ek, E, p2c2, Beta2, Beta, T, vel;
     Lgm_DateTime    DT_UTC;
     Lgm_CTrans      *c = Lgm_init_ctrans(0);
     Lgm_Vector      v, vv, Bsc, Bfn, Bfn_geo, Bfs, Bfs_geo, Bmin;
@@ -1698,6 +1796,8 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     fprintf( fp, " %16g", ((m->Snorth > 0.0)&&(m->Ssouth > 0.0)) ? m->Snorth + m->Ssouth : LGM_FILL_VALUE ); // S_total
 
 
+    fprintf( fp, " %16g", m->d2B_ds2 ); // d2B_ds2
+    fprintf( fp, " %16g", m->Sb0 );     // Sb0
 
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_N_LOBE) ) {
@@ -1950,6 +2050,27 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         } else {
             fprintf(fp, " %12g", LGM_FILL_VALUE ); 
         }
+    }
+
+    // Sb's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Sb[i] ); }
+
+    // Tb's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { 
+
+
+        Ek    = 1.0; // MeV
+        E     = Ek + LGM_Ee0; // total energy, MeV
+        p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
+        Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
+        Beta  = sqrt( Beta2 );
+        vel   = Beta*LGM_c;  // velocity in m/s
+        vel  /= (Re*1000.0); // Re/s
+        T     = ( m->Sb[i] > 0.0 ) ? 2.0*m->Sb[i]/vel : LGM_FILL_VALUE;
+
+        fprintf(fp, " %12g", T ); 
     }
 
 

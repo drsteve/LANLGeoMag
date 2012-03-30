@@ -84,7 +84,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_I_Integrator = DQAGS;
 
     MagInfo->Lgm_Sb_Integrator_epsrel = 0.0;
-    MagInfo->Lgm_Sb_Integrator_epsabs = 1e-3;
+    MagInfo->Lgm_Sb_Integrator_epsabs = 1e-4;
     MagInfo->Lgm_Sb_Integrator = DQAGP; // not changeable (yet...)
 
     MagInfo->Lgm_FindBmRadius_Tol = 1e-10;

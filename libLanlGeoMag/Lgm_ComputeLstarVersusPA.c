@@ -110,9 +110,16 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
             MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
             MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+            MagEphemInfo->Sb[i]    = LGM_FILL_VALUE;
         }
+        MagEphemInfo->Sb0     = LGM_FILL_VALUE;
+        MagEphemInfo->d2B_ds2 = LGM_FILL_VALUE;
     }
     if ( TraceFlag == 1 ) {
+
+           MagEphemInfo->Sb0     = LstarInfo->mInfo->Sb0;     // Sb Integral for equatorially mirroring particles.
+           MagEphemInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second deriv of B wrt s at equator.
+
             /*
              *  Get a simple measure of how big L is
              */
@@ -180,7 +187,8 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                         printf("\t\t%sUTC, LSimple     = %g %g%s\n\n\n", PreStr, UTC, LSimple, PostStr );
                     }
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
-                    MagEphemInfo->I[i] = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
+                    MagEphemInfo->I[i]  = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
+                    MagEphemInfo->Sb[i] = LstarInfo2->SbIntegral0; // SbIntegral0 is Sb for the FL that the sat is on.
 
                     //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
                     //if (LstarInfo3->VerbosityLevel > 0 ) {

@@ -36,6 +36,8 @@ typedef struct Lgm_MagEphemInfo {
     Lgm_Vector      P;              //!< S/C position in GSM
     double          S;              //!< Distance along FL from southern footpoint to S/C location in Re.
     double          B;              //!< Local (model) B-field magnitude (i.e. at S/C position)
+    double          d2B_ds2;        //!< Value of second deriviative of B wrt s at eq (used to compute Sb0, curvature etc..).
+    double          Sb0;            //!< Value of Sb integral for eq mirroring particles (its not generally zero).
 
     Lgm_Vector      Pmin;           //!< position of minimum |B| in GSM
     double          Bmin;           //!< Value of |Bmin|
