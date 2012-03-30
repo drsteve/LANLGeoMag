@@ -550,6 +550,17 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
+    fprintf( fp, "# \"RadiusOfCurv\":      { \"DESCRIPTION\": \"Field line radius of curvature at minimum |B| point.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"RadiusOfCurv\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"FL Radius of Curvature at Bmin\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Radius of Curvature (R!BE!N)\",\n");
+    fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
+    //fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
+    fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+    fprintf( fp, "#\n");
+
 
 
 
@@ -1220,6 +1231,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %16s",  " +-- S_total --+" );
     fprintf( fp, " %16s",  " +-- d2B_ds2 --+" );
     fprintf( fp, " %16s",  " +---- Sb0 ----+" );
+    fprintf( fp, " %16s",  " +- RadOfCurv -+" );
     fprintf( fp, " %38s",  " +---- North Mag. Footpoint GSM -----+" );
     fprintf( fp, " %38s",  " +- North Mag. Footpoint Geographic -+" );
     fprintf( fp, " %38s",  " +-- North Mag. Footpoint Geodetic --+" );
@@ -1404,6 +1416,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %16s",  "d2B_ds2" );
     fprintf( fp, " %16s",  "Sb0" );
+    fprintf( fp, " %16s",  "RadOfCurv");
 
     fprintf( fp, " %12s", "Xgsm" ); // n. foot
     fprintf( fp, " %12s", "Ygsm" );
@@ -1566,6 +1579,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, " %16s",  "nT^2/Re^2" ); // d2B_ds2
     fprintf( fp, " %16s",  "Re" ); // Sb0
+    fprintf( fp, " %16s",  "Re" ); // Radius of Curvature
 
     fprintf( fp, " %12s", "Re" );   // GSM
     fprintf( fp, " %12s", "Re" );
@@ -1798,6 +1812,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     fprintf( fp, " %16g", m->d2B_ds2 ); // d2B_ds2
     fprintf( fp, " %16g", m->Sb0 );     // Sb0
+    fprintf( fp, " %16g", m->RofC );    // Radius of curvature at Bmin point
 
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_N_LOBE) ) {

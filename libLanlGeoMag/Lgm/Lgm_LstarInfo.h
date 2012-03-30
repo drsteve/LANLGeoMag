@@ -74,6 +74,7 @@ typedef struct Lgm_LstarInfo {
 
     double              Sb0;        // Equatorial value of Sb Integral.
     double              d2B_ds2;    // second derivative of B wrt s at equator.
+    double              RofC;       // radius of curvature at Bmin point.
 
     double              I0;
     double              I[100];

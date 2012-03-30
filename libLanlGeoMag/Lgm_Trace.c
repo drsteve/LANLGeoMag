@@ -89,9 +89,10 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     int		    i, reset, flag1, flag2, InitiallyBelowTargetHeight, done;
     double	    sgn=1.0, R, Rtarget, Rinitial, Rplus;
     Lgm_Vector	w, Bvec;
-    double      h, h2_inv, F[7], s, Hdid, Hnext, Htry;
+    double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, Hdid, Hnext, Htry;
+    double      d2Px_ds2, d2Py_ds2, d2Pz_ds2;
     double      GeodLat, GeodLong, GeodHeight;
-    Lgm_Vector  u_scale, P;
+    Lgm_Vector  u_scale, P, gpp;
 
 
 
@@ -288,7 +289,7 @@ Info->Hmax = 0.10;
 
 
     /*
-     *  Finally, if we need to, lets determine the curvature of |B| at Bmin.
+     *  Finally, if we need to, lets determine the d^2|B|/ds^2 at Bmin.
      * 
      *  Why would you need this? Well, the short answer is that we dont always
      *  need it. But if we ever want to compute the Sb integral for nearly
@@ -310,8 +311,12 @@ Info->Hmax = 0.10;
     if ( Info->ComputeSb0 ) {
 
         h      = 0.01;     // Re
+        h_inv  = 1000.0;   // Re^(-1)
         h2_inv = 10000.0;  // Re^(-2)
-        F[3] = Info->Bmin;
+        F[3]  = Info->Bmin;
+        Px[3] = Info->Pmin.x;
+        Py[3] = Info->Pmin.y;
+        Pz[3] = Info->Pmin.z;
         u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0; reset = TRUE;
         for (i=-3; i<=3; i++){
             if (i != 0) {
@@ -321,6 +326,12 @@ Info->Hmax = 0.10;
                 Info->Bfield( &P, &Bvec, Info );
                 F[i+3] = Lgm_Magnitude( &Bvec );
                 //printf("F[%d] = %g Hdid = %g\n", i, F[i+3], Hdid);
+
+                Px[i+3] = P.x;
+                Py[i+3] = P.y;
+                Pz[i+3] = P.z;
+
+
             }
         }
         Info->d2B_ds2 = h2_inv/180.0 * ( 2.0*F[0] - 27.0*F[1] + 270.0*F[2] - 490.0*F[3] + 270.0*F[4] - 27.0*F[5] + 2.0*F[6] );
@@ -328,8 +339,24 @@ Info->Hmax = 0.10;
 
         Info->Sb0 = M_PI*M_SQRT2*sqrt( Info->Bmin/Info->d2B_ds2 );
         //printf("Sb0 = %g\n", Info->Sb0);
+
+
+        // 2nd deriv. page 450 CRC standard math tables.
+        d2Px_ds2 = h2_inv/180.0 * ( 2.0*Px[0] - 27.0*Px[1] + 270.0*Px[2] - 490.0*Px[3] + 270.0*Px[4] - 27.0*Px[5] + 2.0*Px[6] );
+        d2Py_ds2 = h2_inv/180.0 * ( 2.0*Py[0] - 27.0*Py[1] + 270.0*Py[2] - 490.0*Py[3] + 270.0*Py[4] - 27.0*Py[5] + 2.0*Py[6] );
+        d2Pz_ds2 = h2_inv/180.0 * ( 2.0*Pz[0] - 27.0*Pz[1] + 270.0*Pz[2] - 490.0*Pz[3] + 270.0*Pz[4] - 27.0*Pz[5] + 2.0*Pz[6] );
+
+        /*
+         * Construct g" = (d2Px_ds2, d2Py_ds2, d2Pz_ds2).
+         *
+         *  Then K = |g"|  and R = 1/K
+         */
+        gpp.x = d2Px_ds2; gpp.y = d2Py_ds2; gpp.z = d2Pz_ds2;
+        Info->Kappa = Lgm_Magnitude( &gpp );
+        Info->RofC  = 1.0/Info->Kappa;
     
     }
+
 
 
 

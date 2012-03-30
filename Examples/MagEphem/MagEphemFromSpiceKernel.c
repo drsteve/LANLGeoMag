@@ -792,6 +792,7 @@ Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
 Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
+MagEphemInfo->LstarInfo->mInfo->Kp = 5.0;
 
 
 

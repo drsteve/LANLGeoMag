@@ -114,11 +114,13 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         }
         MagEphemInfo->Sb0     = LGM_FILL_VALUE;
         MagEphemInfo->d2B_ds2 = LGM_FILL_VALUE;
+        MagEphemInfo->RofC    = LGM_FILL_VALUE;
     }
     if ( TraceFlag == 1 ) {
 
            MagEphemInfo->Sb0     = LstarInfo->mInfo->Sb0;     // Sb Integral for equatorially mirroring particles.
            MagEphemInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second deriv of B wrt s at equator.
+           MagEphemInfo->RofC    = LstarInfo->mInfo->RofC;    // radius of curvature at Bmin point.
 
             /*
              *  Get a simple measure of how big L is

@@ -215,11 +215,12 @@ typedef struct Lgm_MagModelInfo {
 
 
 
-    int                 ComputeSb0; // Flag to determine whether or not to compute d2B_ds2 and Sb0 (default is FALSE).
-    double              d2B_ds2;    // second derivative of B wrt to s at smin.
-    double              Sb0;        // value of Sb integral for eq. mirroring particles.
-    int                 imin1;      // imin1 and imin2 are the indices in the
-    int                 imin2;      //   array between which smin is located.
+    int                 ComputeSb0;     // Flag to determine whether or not to compute d2B_ds2 and Sb0 (default is FALSE).
+    double              d2B_ds2;        // second derivative of B wrt to s at smin.
+    double              Sb0;            // value of Sb integral for eq. mirroring particles.
+    double              Kappa, RofC;    // Curvature and Radius of Curvature at Pmin.
+    int                 imin1;          // imin1 and imin2 are the indices in the
+    int                 imin2;          //   array between which smin is located.
 
 
 
