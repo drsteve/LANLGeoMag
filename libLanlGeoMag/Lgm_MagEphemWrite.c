@@ -475,7 +475,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"S_sc_to_pfn\":       { \"DESCRIPTION\": \"Distance between S/C and Northern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfn\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance to N. Foot. along FL\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance to N. Foot. along FL\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance to N. Foot. along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -486,7 +486,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"S_sc_to_pfs\":       { \"DESCRIPTION\": \"Distance between S/C and Southern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfs\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance to S. Foot. along FL\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance to S. Foot. along FL\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance to S. Foot. along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -497,7 +497,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"S_pfs_to_Bmin\":     { \"DESCRIPTION\": \"Distance between Southern Footpoint and Bmin point along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_pfs_to_Bmin\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance from S. Foot. to Pmin along FL\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance from S. Foot. to Pmin along FL\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance from S. Foot. to Pmin along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -508,7 +508,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"S_Bmin_to_sc\":     { \"DESCRIPTION\": \"Distance between Bmin point and S/C along field line (positive if north of Bmin).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_Bmin_to_sc\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance from Pmin to S/C along FL\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance from Pmin to S/C along FL\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Distance from Pmin to S/C along FL (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -519,7 +519,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"S_total\":           { \"DESCRIPTION\": \"Total Field Line length (along field line).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_total\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Field Line length\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Field Line length\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Field Line length (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -530,7 +530,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
     fprintf( fp, "# \"d2B_ds2\":           { \"DESCRIPTION\": \"Second derivative of |B| with respect to s (dist along FL) at minimum |B| point.\",\n");
     fprintf( fp, "#                               \"NAME\": \"d2B_ds2\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"d!A2!NB/ds!A2!N\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"d!A2!NB/ds!A2!N\",\n");
     fprintf( fp, "#                              \"LABEL\": \"d!A2!NB/ds!A2!N (nT!A2!N/Re!A2!N)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"nT!A2!N/Re!A2!N\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
@@ -539,9 +539,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "# \"Sb0\":               { \"DESCRIPTION\": \"Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).\"\n");
+    fprintf( fp, "# \"Sb0\":               { \"DESCRIPTION\": \"Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Sb0\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Sb0\"\n");
+    fprintf( fp, "#                              \"TITLE\": \"Sb0\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Sb0 (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
