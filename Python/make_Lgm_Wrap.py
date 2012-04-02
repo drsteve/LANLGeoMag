@@ -70,9 +70,15 @@ except OSError:
 
 if not ctypesgen_worked:
     print('ctypesgen not found')
-print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
-try:
+if os.path.exists('Lgm_Wrap.py.bak'):
+    print('copying Lgm_Wrap.py.bak to lgmpy/Lgm_Wrap.py')
     shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
-except OSError:
-            print("ctypesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
+else:
+    if sys.platform == 'linux2':
+        shutil.copy('LIN_Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+    elif sys.platform == 'darwin':
+        shutil.copy('OSX_Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
+    else:
+        print("ctypesgen not installed and no pre-made wrappers available.\n"
+              "Please contact the development team.")
 
