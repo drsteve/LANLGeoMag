@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import glob
+import os
 import os.path
 import shutil
 import subprocess
@@ -47,32 +48,54 @@ while len(libname) > 0:
         library_name = name
 
 ctypesgen_worked=False
+DEVNULL = os.open(os.devnull, os.O_RDWR)
 try:
-    subprocess.call(['ctypesgen.py',
-                     '-l' + library_name,
-                     '--no-macro-warnings',
-                     '-o', 'Lgm_Wrap.py.bak'] +
-                    includes + libpaths +
-                    headers)
+    subprocess.check_call(['ctypesgen.py',
+                           '-l' + library_name,
+                           '--no-macro-warnings',
+                           '-o', 'Lgm_Wrap.py.bak'] +
+                          includes + libpaths +
+                          headers,
+                          stdout=DEVNULL, stderr=DEVNULL)
     ctypesgen_worked = True
-except OSError:
+except:
+    #This is kinda ridiculous, because it tries to find something
+    #not on the binary PATH
+    interp = os.path.basename(sys.executable)
     for path in sys.path:
+        ctypesgen = os.path.normpath(
+            os.path.join(path, '..', '..', '..', 'bin', 'ctypesgen.py'))
+        if not os.path.isfile(ctypesgen):
+            continue
         try:
-            subprocess.call(['python', path + '/../../../bin/' + 'ctypesgen.py',
-                             '-l' + library_name,
-                             '--no-macro-warnings',
-                             '-o', 'Lgm_Wrap.py.bak'] +
-                            includes + libpaths +
-                            headers)
-            ctypesgen_worked = True
-        except OSError:
-            pass
+            subprocess.check_call([interp, ctypesgen,
+                                   '-l' + library_name,
+                                   '--no-macro-warnings',
+                                   '-o', 'Lgm_Wrap.py.bak'] +
+                                  includes + libpaths +
+                                  headers,
+                                  stdout=DEVNULL, stderr=DEVNULL)
+        except:
+            continue
+        ctypesgen_worked = True
+        break
+os.close(DEVNULL)
 
-if not ctypesgen_worked:
-    print('ctypesgen not found')
-print('copying ' + 'Lgm_Wrap.py.bak' + ' to ' + 'lgmpy/Lgm_Wrap.py')
-try:
-    shutil.copy('Lgm_Wrap.py.bak', 'lgmpy/Lgm_Wrap.py')
-except OSError:
-            print("ctypesgen not installed, rename one of the *_Lgm_Wrap.py.bak files as Lgm_Wrap")
+outfile = os.path.join('lgmpy','Lgm_Wrap.py')
+if os.path.exists('Lgm_Wrap.py.bak'):
+    if not ctypesgen_worked:
+        print('ctypesgen not found; using wrapper Lgm_Wrap.py.bak')
+    else:
+        print('Using ctypesgen-created wrapper Lgm_Wrap.py.bak')
+    shutil.copy('Lgm_Wrap.py.bak', outfile)
+else:
+    if sys.platform == 'linux2':
+        print('ctypesgen not found; using wrapper LIN_Lgm_Wrap.py.bak')
+        shutil.copy('LIN_Lgm_Wrap.py.bak', outfile)
+    elif sys.platform == 'darwin':
+        print('ctypesgen not found; using wrapper OSX__Lgm_Wrap.py.bak')
+        shutil.copy('OSX_Lgm_Wrap.py.bak', outfile)
+    else:
+        print("ctypesgen not found and no pre-made wrappers available.\n"
+              "Please contact the development team.")
 
