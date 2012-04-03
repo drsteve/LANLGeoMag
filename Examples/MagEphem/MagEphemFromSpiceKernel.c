@@ -747,7 +747,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                     /*
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
-printf("nPerigee = %d\n", nPerigee);
+//printf("nPerigee = %d\n", nPerigee);
                     Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 //exit(0);
@@ -762,37 +762,35 @@ printf("nPerigee = %d\n", nPerigee);
 
                     //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
                     H5_nT = 0;
-                    //for ( Seconds=0; Seconds<=86400; Seconds += 300 ) {
-                    for ( Seconds=3600*4; Seconds<=3600*5; Seconds += 60 ) {
+//MagEphemInfo->LstarInfo->VerbosityLevel = 2;
+                    for ( Seconds=0; Seconds<=86400; Seconds += 60 ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
-et = Lgm_TDBSecSinceJ2000( &UTC, c );
-spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
-U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
+
+                        et = Lgm_TDBSecSinceJ2000( &UTC, c );
+                        spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                        printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
+                        U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
 
 
-//// convert ISO time to DateTime
-//IsoTimeStringToDateTime( IsoTimeString, &UTC, c );
+                        if ( UseEop ) {
+                            // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+                            Lgm_get_eop_at_JD( UTC.JD, &eop, e );
 
-if ( UseEop ) {
-    // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
-    Lgm_get_eop_at_JD( UTC.JD, &eop, e );
+                            // Set the EOP vals in the CTrans structure.
+                            Lgm_set_eop( &eop, c );
+                        }
 
-    // Set the EOP vals in the CTrans structure.
-    Lgm_set_eop( &eop, c );
-}
+                        // Set mag model parameters
+                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 );
+                        Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
-// Set mag model parameters
-Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 );
-Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        // Set up the trans matrices
+                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
-// Set up the trans matrices
-Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-
-Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
-MagEphemInfo->LstarInfo->mInfo->Kp = 5.0;
+                        Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
+                        MagEphemInfo->LstarInfo->mInfo->Kp = 5.0;
 
 
 

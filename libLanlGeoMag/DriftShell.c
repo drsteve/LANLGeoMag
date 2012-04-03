@@ -89,17 +89,26 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         *Ifound = I;
         *mlat   = mlat_min;
         FoundValidI = TRUE;
+
         return( FoundValidI );
     }
 
+//printf("Dmin = %g\n", Dmin);
 
      
 
+
+    /*
+     * Attempt to bracket the zero in I-I0. Note that this may not be easy if
+     * the curve doesnt drop very substantially below the zero point. This is
+     * often the case for large eq. pitch angles.
+     */
     FoundZeroBracket = FALSE;
     if ( D1 > 0.0 ) {
         /*
          *  Then we would like to have the other side of the bracket be < 0.0.
-         *  I.e. we need a smaller I which (usually) is a smaller mlat.
+         *  I.e. we need a smaller I which (usually) is a smaller mlat. So try
+         *  mlat0 next.
          */
         I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
@@ -121,7 +130,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         if ( D0 < 0.0 ) {
 
             /*
-             * Found Bracket!!!
+             *  Yay, Found Zero Bracket!!!
              */
             FoundZeroBracket = TRUE;
             a = mlat0; Da = D0;
@@ -151,13 +160,17 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
             if ( D2 < 0.0 ) {
                 /*
-                 * Found Bracket!!!
+                 *  Yay, Found Zero Bracket!!!
                  */
                 FoundZeroBracket = TRUE;
                 a = mlat1; Da = D1;
                 b = mlat2; Db = D2;
             } else {
-                // set up a potential bracket for minimization
+                /*
+                 *  The three point dont provide a zero bracket. We need to
+                 *  treat the problem as a minimization instead.  Set up a
+                 *  potential bracket for minimization.
+                 */
                 a = mlat0; Da = D0;
                 b = mlat1; Db = D1;
                 c = mlat2; Dc = D2;
@@ -191,7 +204,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         if ( D2 > 0.0 ) {
 
             /*
-             * Found Bracket!!!
+             *  Yay, Found Zero Bracket!!!
              */
             FoundZeroBracket = TRUE;
             a = mlat1; Da = D1;
@@ -221,13 +234,17 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
             if ( D0 > 0.0 ) {
                 /*
-                 * Found Bracket!!!
+                 *  Yay, Found Zero Bracket!!!
                  */
                 FoundZeroBracket = TRUE;
                 a = mlat0; Da = D0;
                 b = mlat1; Db = D1;
             } else {
-                // set up a potential bracket for minimization
+                /*
+                 *  The three points dont provide a zero bracket. We need to
+                 *  treat the problem as a minimization instead.  Set up a
+                 *  potential bracket for minimization.
+                 */
                 a = mlat0; Da = D0;
                 b = mlat1; Db = D1;
                 c = mlat2; Dc = D2;
@@ -237,10 +254,12 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
     }
 
+//printf("Dmin = %g\n", Dmin);
     
 
     if ( !FoundZeroBracket ){
 
+//printf("1. HERE\n");
         /*
          * We did not find a Zero bracket. We will have to try the minimization
          * strategy to obtain a value of D that is negative.
@@ -248,14 +267,16 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
         /*
-         *  Test to see if we have a valid bracket. If we dont, then either the
-         *  minimum is outside the range we chose or there is no solution.
+         *  Test to see if we have a valid minimization bracket. If we dont,
+         *  then either the minimum is outside the range we chose or there is
+         *  no solution.
          */
         if ( (Db > Da) || (Db > Dc) ) {
             *Ifound = 9e99;
             return(-5);
         }
 
+//printf("2. HERE\n");
 
         F0 = 0.5; F1 = 0.5;
         done = FALSE; FoundValidI = FALSE; nIts = 0;
@@ -278,7 +299,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
             }
             I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
             De = I-I0;
-            if (De < Dmin){ Dmin = De; mlat_min = e; }
+            if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
             //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
 
 
@@ -383,6 +404,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         }
 
     }
+//printf("3. HERE\n");
 
 
 /*
@@ -508,6 +530,7 @@ exit(0);
         FoundValidI = -7;
         I = 9e99;
     }
+
 
 
 

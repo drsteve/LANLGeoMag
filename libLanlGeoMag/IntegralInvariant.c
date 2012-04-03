@@ -478,6 +478,7 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                         } else {
                             // Eqn 2.66b in Roederer
                             I = SS*sqrt(1.0 - rat);
+printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
                         }
                     } else {
                         I = Iinv_interped( mInfo  );

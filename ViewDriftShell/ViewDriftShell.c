@@ -8328,6 +8328,9 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
     MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(*MagEphemInfo));
     ReadMagEphemInfoStruct( "test.dat", &nPitchAngles, MagEphemInfo );
     printf("nPitchAngles = %d\n", nPitchAngles);
+for(i=0;i<24;i++){
+    printf("MagEphemInfo->ShellMirror_Pn[0][%d] = %g %g %g\n", i, MagEphemInfo->ShellMirror_Pn[0][i].x, MagEphemInfo->ShellMirror_Pn[0][i].y, MagEphemInfo->ShellMirror_Pn[0][i].z);
+}
 
     for (i=0; i<nPitchAngles+1; i++){
         ShowPitchAngle[i] = 0;

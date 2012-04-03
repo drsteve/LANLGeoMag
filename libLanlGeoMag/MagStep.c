@@ -401,8 +401,8 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
 //printf("2. k = %d u0 = %g %g %g\n", k, u0.x, u0.y, u0.z);
 //printf("2. k = %d v = %g %g %g\n", k, v.x, v.y, v.z);
             sss = h2/n2;
-            //Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
-            Lgm_PolFunExt( k-1, sss, &v, u, &uerr, Info );
+            Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
+            //Lgm_PolFunExt( k-1, sss, &v, u, &uerr, Info );
 //printf("3. k = %d u = %g %g %g\n", k, u->x, u->y, u->z);
 
             if (k !=  1){

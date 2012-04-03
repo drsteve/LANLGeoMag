@@ -350,7 +350,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
          *  have a minimum bracketed.)
          *
          */
-    if (0==1){
+    if (1==1){
         done  = FALSE;
         //reset = TRUE;
         if ( Info->VerbosityLevel > 4 ) nIts = 0;
@@ -395,7 +395,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
 
 
 
-    if (1==1){
+    if (0==1){
 
         /*
          *  Use Brent's method
@@ -415,7 +415,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
 tol = 1e-10;
         Lgm_zBrentP( Sa, Sb, Fa, Fb, Pa, Pb, &f, tol, &Sz, &Fz, &Pz );
         Fb = Fz; Sb = Sz; Pb = Pz;
-        //printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
+        printf("TRACETOMIRROR: Sa, Sb = %g %g  Fa, Fb = %g %g   tol = %g\n", Sa, Sb, Fa, Fb, tol);
     }
 
     }

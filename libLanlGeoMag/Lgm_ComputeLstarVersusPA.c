@@ -182,7 +182,9 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
 //////////////////////////////NOTE
 //////////////////////////////NOTE
 //////////////////////////////NOTE
+
                     LS_Flag = Lstar( &v3, LstarInfo2);
+
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
                         printf("\t\t%sUTC, L*          = %g %g%s\n", PreStr, UTC, LstarInfo2->LS, PostStr );
                         printf("\t\t%sUTC, L*_McIlwain = %g %g%s\n", PreStr, UTC, LstarInfo2->LS_McIlwain_M, PostStr );
@@ -197,10 +199,12 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
 		      printf("\t    %sL* [ %g\u00b0 ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
 		      // }
 
-                    /*
-                     * Save results to the MagEphemInfo structure.
-                     */
 
+
+
+                    /*
+                     * Save detailed results to the MagEphemInfo structure.
+                     */
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
                         MagEphemInfo->Shell_Pmin[i][nn]  = LstarInfo2->Pmin[nn];

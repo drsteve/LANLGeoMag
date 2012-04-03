@@ -45,8 +45,8 @@
  *  optimal as they could be. Probably losing some efficiency there. A
  *  taylor-made interpolator may do better?)
  */
-//#define GSL_INTERP  gsl_interp_linear
-#define GSL_INTERP  gsl_interp_akima
+#define GSL_INTERP  gsl_interp_linear
+//#define GSL_INTERP  gsl_interp_akima
 //#define GSL_INTERP  gsl_interp_cspline
 
 
@@ -716,11 +716,23 @@ void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info
 
     int         n;
     Lgm_Vector  Bcdip;
+//FILE *fp10;
+//int i;
+//
+//fp10 = fopen("puke10.txt", "w");
+//for(i=0; i<Info->nPnts; i++){
+//    fprintf(fp10, "%.15lf %.15lf\n", Info->s[i], Info->Bmag[i]);
+//}
+//fclose(fp10);
+//exit(0);
 
+//printf("BEFORE: s = %.15lf B0= %.15lf\n", Info->s[0], Info->Bmag[0]);
     if (Info->nPnts > 0){
         n = Info->nPnts-1;
+//printf("BEFORE: s = %.15lf B= %.15lf\n", Info->s[n], Info->Bmag[n]);
         Info->s[n]    = s;
         Info->Bmag[n] = B;
+//printf("AFTER: s = %.15lf B= %.15lf\n\n\n", Info->s[n], Info->Bmag[n]);
         Info->Px[n]   = P->x;
         Info->Py[n]   = P->y;
         Info->Pz[n]   = P->z;
@@ -728,6 +740,13 @@ void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info
         Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );
     }
 
+//fp10 = fopen("puke11.txt", "w");
+//for(i=0; i<Info->nPnts; i++){
+//    fprintf(fp10, "%.15lf %.15lf\n", Info->s[i], Info->Bmag[i]);
+//}
+//fclose(fp10);
+//
+//exit(0);
 }
 
 
@@ -1127,7 +1146,6 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
     int		    done, reset, n, SavePnt;
 
-
     reset = TRUE;
 
 
@@ -1199,9 +1217,293 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
 
     }
     
+//printf("S = %g   Info->Bmag[%d] = %.8lf   Info->Bm = %g   P = %.8lf %.8lf %.8lf\n", S, n-1, Info->Bmag[n-1], Info->Bm, Info->Px[n-1], Info->Py[n-1], Info->Pz[n-1]);
     Info->nPnts     = n;                       // set total number of points in the array.
     Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
                                                // when trying to interpolate.
+
+
+    /*
+     *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE
+     *  This will only make sense if these values are legitimate for this FL.
+     *  Perhaps it would be better to force user to do this elesewhere.
+     */
+    if ( AddBminPoint ) {
+        printf("1) ADDING NEW POINT\n");
+        // MUST ADD Bcdip for this too!
+        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
+    }
+    //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
+
+
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+
+    return( 1 );
+
+
+}
+
+
+
+
+/*
+ * In this version, we will start at the mirror points and trace out till we cross Bmin.
+ *
+ *
+ *
+ */
+int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, int N, int AddBminPoint, Lgm_MagModelInfo *Info ) {
+
+    Lgm_Vector	u_scale;
+    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Sa=0.0, Sc=0.0, d;
+    double	    R0, R, Fa, Fb, Fc, F;
+    double	    Ra, Rb, Rc;
+    Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
+    int		    done, reset, n, SavePnt;
+
+    double      sgn, Bmag, Bmag_old, S;
+    int         n1, n2, nn;
+    double      *s1, *Px1, *Py1, *Pz1, *Bmag1, *BminusBcdip1;
+    Lgm_Vector  *Bvec1;
+    double      *s2, *Px2, *Py2, *Pz2, *Bmag2, *BminusBcdip2;
+    Lgm_Vector  *Bvec2;
+
+    LGM_ARRAY_1D( s1, N, double );
+    LGM_ARRAY_1D( Px1, N, double );
+    LGM_ARRAY_1D( Py1, N, double );
+    LGM_ARRAY_1D( Pz1, N, double );
+    LGM_ARRAY_1D( Bmag1, N, double );
+    LGM_ARRAY_1D( BminusBcdip1, N, double );
+    LGM_ARRAY_1D( Bvec1, N, Lgm_Vector );
+
+    LGM_ARRAY_1D( s2, N, double );
+    LGM_ARRAY_1D( Px2, N, double );
+    LGM_ARRAY_1D( Py2, N, double );
+    LGM_ARRAY_1D( Pz2, N, double );
+    LGM_ARRAY_1D( Bmag2, N, double );
+    LGM_ARRAY_1D( BminusBcdip2, N, double );
+    LGM_ARRAY_1D( Bvec2, N, Lgm_Vector );
+
+
+    reset = TRUE;
+    S = dSa + dSb;
+
+
+    Htry = Info->Hmax;  // we want to step with constant increments.
+    Hmin = 1e-7;        // This may be necessary to find the endpoint.
+    Hmax = Info->Hmax;  // Dont use step bigger than this.
+    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+
+
+    /*
+     * Start at southern mirror point. And trace till we cross Bmin.
+     */
+    sgn = 1.0;
+    P   = *Pm_s;
+
+    /*
+     *  Save first point
+     */
+    n1 = 0;
+    ss = 0.0;
+    Info->Bfield( &P, &Bvec, Info );
+    s1[n1]    = ss;                        // save arc length
+    Px1[n1]   = P.x;                       // save 3D position vector.
+    Py1[n1]   = P.y;                       //
+    Pz1[n1]   = P.z;                       //
+    Bvec1[n1] = Bvec;                      // save 3D B-field vector.
+    Bmag1[n1] = Lgm_Magnitude( &Bvec );    // save field strength (and increment counter)
+    Lgm_B_cdip( &P, &Bcdip, Info );
+    BminusBcdip1[n1] = Bmag1[n1] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+    ++n1;
+    if (n1 > LGM_MAX_INTERP_PNTS){
+	    printf("Warning: n1 > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+    }
+
+
+    Htry = S/(double)N;
+    done  = FALSE;
+    Bmag_old = Bmag1[0];
+    while ( !done ) {
+
+        // take a step to get a new point
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        Info->Bfield( &P, &Bvec, Info );
+        Bmag = Lgm_Magnitude( &Bvec );
+        ss += Hdid;  
+
+        if ( (Bmag > Bmag_old) || (n > LGM_MAX_INTERP_PNTS) ) {
+
+            /*
+             *  We have crossed Bmin -- dont use this point
+             */
+            done = TRUE;
+
+        } else {
+
+            /*
+             *  Save this (new) point only if its different from the previous one)
+             */
+            if ( fabs(Hdid) > 0.0 ) {
+                Info->Bfield( &P, &Bvec, Info );
+                s1[n1]    = ss;                         // save arc length
+                Px1[n1]   = P.x;                        // save 3D position vector.
+                Py1[n1]   = P.y;                        //
+                Pz1[n1]   = P.z;                        //
+                Bvec1[n1] = Bvec;                       // save 3D B-field vector.
+                Bmag1[n1] = Bmag;                       // save field strength (and increment counter)
+                Lgm_B_cdip( &P, &Bcdip, Info );
+                BminusBcdip1[n1] = Bmag1[n1] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+                ++n1;
+            }
+
+        }
+
+        Bmag_old = Bmag;
+
+    }
+    
+
+
+
+
+
+
+    /*
+     *  Now start at northern mirror point. And trace till we cross Bmin.
+     */
+    sgn = -1.0;
+    P   = *Pm_n;
+
+    /*
+     *  Save first point into tmp arrays.
+     */
+    n2 = 0; 
+    ss = 0.0;
+    Info->Bfield( &P, &Bvec, Info );
+    s2[n2]    = S-ss;                         // save arc length
+    Px2[n2]   = P.x;                       // save 3D position vector.
+    Py2[n2]   = P.y;                       //
+    Pz2[n2]   = P.z;                       //
+    Bvec2[n2] = Bvec;                       // save 3D B-field vector.
+    Bmag2[n2] = Lgm_Magnitude( &Bvec );     // save field strength (and increment counter)
+    Lgm_B_cdip( &P, &Bcdip, Info );
+    BminusBcdip2[n2] = Bmag2[n2] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+    ++n2;
+    if (n2 > LGM_MAX_INTERP_PNTS){
+	    printf("Warning: n2 > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+    }
+
+
+    Htry = S/(double)N;
+    done  = FALSE;
+    Bmag_old = Bmag2[0];
+    while ( !done ) {
+
+        // take a step to get a new point
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        Info->Bfield( &P, &Bvec, Info );
+        Bmag = Lgm_Magnitude( &Bvec );
+        ss += Hdid;  
+
+        if ( (Bmag > Bmag_old) || (n > LGM_MAX_INTERP_PNTS) ) {
+
+            /*
+             *  We have crossed Bmin -- dont use this point
+             */
+            done = TRUE;
+
+        } else {
+
+            /*
+             *  Save this (new) point only if its different from the previous one)
+             */
+            if ( fabs(Hdid) > 0.0 ) {
+                Info->Bfield( &P, &Bvec, Info );
+                s2[n2]    = S-ss;                         // save arc length
+                Px2[n2]   = P.x;                        // save 3D position vector.
+                Py2[n2]   = P.y;                        //
+                Pz2[n2]   = P.z;                        //
+                Bvec2[n2] = Bvec;                       // save 3D B-field vector.
+                Bmag2[n2] = Bmag;                       // save field strength (and increment counter)
+                Lgm_B_cdip( &P, &Bcdip, Info );
+                BminusBcdip2[n2] = Bmag2[n2] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+                ++n2;
+            }
+
+        }
+
+        Bmag_old = Bmag;
+
+    }
+    
+    done = FALSE;
+    while ( !done ){
+        if ( ((n2<2)&&(n1<2)) || ( s2[n2-1] > s1[n1-1] ) ) {
+            done = TRUE;
+        } else {
+            --n1; --n2;
+        }
+    }
+
+    if ( fabs(s2[n2-1] - s1[n1-1]) < .01 ) --n2;
+
+
+
+    /*
+     * Now combine the two parts together.
+     */
+    nn = 0;
+    for ( n=0; n<n1; n++ ) {
+        Info->s[nn]           = s1[n];
+        Info->Px[nn]          = Px1[n];
+        Info->Py[nn]          = Px1[n];
+        Info->Pz[nn]          = Pz1[n];
+        Info->Bvec[nn]        = Bvec1[n];
+        Info->Bmag[nn]        = Bmag1[n];
+//printf("Info->s[%d] = %g   Bmag = %g\n", nn, Info->s[nn], Info->Bmag[nn]);
+        Info->BminusBcdip[nn] = BminusBcdip1[n];
+        ++nn;
+    }
+//printf("\n");
+    for ( n=n2-1; n>=0; n-- ) {
+        Info->s[nn]           = s2[n];
+        Info->Px[nn]          = Px2[n];
+        Info->Py[nn]          = Px2[n];
+        Info->Pz[nn]          = Pz2[n];
+        Info->Bvec[nn]        = Bvec2[n];
+        Info->Bmag[nn]        = Bmag2[n];
+//printf("**********Info->s[%d] = %g   Bmag = %g\n", nn, Info->s[nn], Info->Bmag[nn]);
+        Info->BminusBcdip[nn] = BminusBcdip2[n];
+        ++nn;
+    }
+
+    LGM_ARRAY_1D_FREE( s1 );
+    LGM_ARRAY_1D_FREE( Px1 );
+    LGM_ARRAY_1D_FREE( Py1 );
+    LGM_ARRAY_1D_FREE( Pz1 );
+    LGM_ARRAY_1D_FREE( Bmag1 );
+    LGM_ARRAY_1D_FREE( BminusBcdip1 );
+    LGM_ARRAY_1D_FREE( Bvec1 );
+
+    LGM_ARRAY_1D_FREE( s2 );
+    LGM_ARRAY_1D_FREE( Px2 );
+    LGM_ARRAY_1D_FREE( Py2 );
+    LGM_ARRAY_1D_FREE( Pz2 );
+    LGM_ARRAY_1D_FREE( Bmag2 );
+    LGM_ARRAY_1D_FREE( BminusBcdip2 );
+    LGM_ARRAY_1D_FREE( Bvec2 );
+
+
+
+
+
+
+    Info->nPnts     = nn;                      // set total number of points in the array.
+    Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
+
+
 
 
     /*

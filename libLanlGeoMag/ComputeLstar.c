@@ -242,7 +242,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
 
     LstarInfo->ComputeSbIntegral = TRUE;
     LstarInfo->mInfo->ComputeSb0 = TRUE;
-    
+
 }
 
 
@@ -428,7 +428,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
                     B = Lgm_Magnitude( &Bvec );
-                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g%s\n", PreStr, B, PostStr);
+                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
                 }
 
 
@@ -454,15 +454,17 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         // Eqn 2.66b in Roederer
                         I = SS*sqrt(1.0 - rat);
                     }
-                                                       
+
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
                     //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
                     if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
+                    // Lgm_TraceLine4() doesnt seem to work -- dont use it....
+                    //if ( Lgm_TraceLine4( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), dSa, dSb, LstarInfo->mInfo->nDivs, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
 
-                    ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
+                    //ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                     //AddNewPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
-                    ReplaceLastPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
+                    //ReplaceLastPoint( SS,  LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
                     if ( InitSpline( LstarInfo->mInfo ) ) {
 
                         /*
@@ -671,6 +673,7 @@ mlat0 = -30.0;
 //if ( (Count < 1) && (mlat0 < -1.0) ) mlat0 = -1.0;
             if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s-------------------  Line %02d of %02d   MLT: %g  (mlat0, mlat1 = %g %g) ---------------------%s\n", PreStr, k, nLines, MLT, mlat0, mlat1, PostStr );
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, LstarInfo );
+//printf("Ifound = %g FoundShellLine = %d\n", Ifound, FoundShellLine);
 
 
 
@@ -693,9 +696,27 @@ mlat0 = -30.0;
 	    }
 
 
-
-
         if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout);
+
+
+
+        /*
+         *  Note that FindShellLine() takes in MLT and returns mlat, rad. The three
+         *  values  (MLT, mlat, rad) are notionally supposed to represent the
+         *  position of the northern mirror point.  However, if we are close to the
+         *  equator, we may have initially confused the north and south mirror
+         *  points. We end up sorting the confusion out, but we really need to make
+         *  sure that as we proceed, we refer to the correct values.
+         *
+         *  
+         *
+         */
+//        u = LstarInfo->mInfo->Pm_North;
+//        Lgm_Convert_Coords( &u, &v, GSM_TO_SM, LstarInfo->mInfo->c );
+//        r    = Lgm_Magnitude( &v );
+//        mlat = asin( v.z/r )*DegPerRad;
+        
+
 
 
         /*
@@ -711,14 +732,17 @@ mlat0 = -30.0;
         /*
          *  convert mirror point to GSM.
          */
-        Phi = 15.0*(MLT-12.0)*RadPerDeg;
-        cl = cos( mlat * RadPerDeg ); sl = sin( mlat * RadPerDeg );
-        u.x = r*cl*cos(Phi); u.y = r*cl*sin(Phi); u.z = r*sl;
-        Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+//why are we doing this?
+// why does this seem to change?
+//        Phi = 15.0*(MLT-12.0)*RadPerDeg;
+//        cl = cos( mlat * RadPerDeg ); sl = sin( mlat * RadPerDeg );
+//        u.x = r*cl*cos(Phi); u.y = r*cl*sin(Phi); u.z = r*sl;
+//        Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
 
         /*
          * Save GSM cartesian as well...
          */
+        v = LstarInfo->mInfo->Pm_North;
         LstarInfo->Mirror_Pn[k] = v;
         LstarInfo->Mirror_Sn[k] = LstarInfo->mInfo->Sm_North;
 
@@ -752,7 +776,7 @@ mlat0 = -30.0;
         Phi = atan2( v.y, v.x );
         LstarInfo->MLT[k]  = Phi*DegPerRad/15.0 + 12.0;
         LstarInfo->mlat[k] = asin( v.z/Lgm_Magnitude(&v) )*DegPerRad;
-        if (LstarInfo->VerbosityLevel > 2) printf(" \t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout);
+        if (LstarInfo->VerbosityLevel > 2)  printf(" \t\t\t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout);
 
 
 
@@ -888,13 +912,6 @@ M = ELECTRON_MASS; // kg
 
 
         }
-
-
-
-
-
-
-
 
 
 

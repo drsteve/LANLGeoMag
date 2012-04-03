@@ -60,7 +60,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  To find the other mirror point, we need to know which way Bmin is.
          *  Lgm_TraceToMirrorPoint() should do the rest is for us.
          */
-        Htry = 1e-6; // we probably dont ever need to split the mirror points to any finer precision than this(?).
+        Htry = 1e-5; // (used to be 1e-6) we probably dont ever need to split the mirror points to any finer precision than this(?).
         //u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
         u_scale.x =  1.0;  u_scale.y = 1.0; u_scale.z = 1.0;
         P = Pmirror1;
@@ -101,6 +101,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         }
 
         SS1 = Hdid;
+//printf("Hdid = %g\n", Hdid);
         //SS1 = 0.0;
 
 
@@ -128,6 +129,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 //printf("Pm_North = %.15g %.15g %.15g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z );
                 return(0.0);
             }
+//printf("Pm_South = %.15g %.15g %.15g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z );
+//printf("Pm_North = %.15g %.15g %.15g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z );
 
 //Lgm_Vector vvv;
 //Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_South, &vvv, GSM_TO_SM, LstarInfo->mInfo->c );

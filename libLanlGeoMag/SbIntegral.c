@@ -161,8 +161,8 @@ for(s=a; s<=b; s+=(b-a)/1000.0){
 printf("%g %g\n", s, Sb_integrand_interped(s, qpInfo));
 }
 exit(0);
+    dqags(Sb_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
 */
-//    dqags(Sb_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
 
     return( result );
 
