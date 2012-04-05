@@ -1037,7 +1037,7 @@ def get_Lstar2(pos, date, alpha = 90.,
     
     Lgm_ComputeLstarVersusPA( ctypes.c_long(datelong), ctypes.c_double(utc), ctypes.pointer(Pgsm), 
                              ctypes.c_int(len(Alpha)), 
-                             Alpha.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                             np.require(Alpha, requirements=['C']).ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
                              ctypes.c_int(LstarQuality), ctypes.c_int(Colorize), 
                              ctypes.pointer(MagEphemInfo) )
 
