@@ -157,13 +157,17 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'E': // end date
             strncpy( TimeString, arg, 39 );
             IsoTimeStringToDateTime( TimeString, &d, c );
+            arguments->EndDate    = d.Date;
+
             // if no explicit time field was given assume user wants whole day.
             if ( strstr(TimeString, "T") == NULL ) {
+                // be informative about what the exact time range really will be.
+                arguments->EndSeconds = d.DaySeconds;
                 TaiSecs = d.DaySeconds + Lgm_UTC_to_TaiSeconds( &d, c );
                 Lgm_TaiSeconds_to_UTC( TaiSecs, &d, c );
+            } else {
+                arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             }
-            arguments->EndDate    = d.Date;
-            arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
             break;
         case 'e': // external model
@@ -442,6 +446,12 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
 
+    
+
+
+
+
+
     /*
      *  Print summary of our options
      */
@@ -470,6 +480,7 @@ int main( int argc, char *argv[] ){
             printf( "\t                   EndDateTime: %s\n", arguments.EndDateTime );
             printf( "\t      Time Increment [Seconds]: %ld\n", Delta);
         }
+printf("Delta = %ld\n", Delta);
 
         if ( nBirds > 1  ){
             printf( "\t                         Birds:" );
@@ -485,38 +496,9 @@ int main( int argc, char *argv[] ){
     }
 
 
-SpiceDouble et;
-SpiceDouble pos[3], lt;
+    SpiceDouble et;
+    SpiceDouble pos[3], lt;
 
-/*
-furnsh_c( InputFilename );
-
-Lgm_DateTime *myUTC;
-
-sprintf(time, "2013-01-01T00:00:00", StartDate );
-printf("time = %s\n", time);
-myUTC = Lgm_DateTime_Create( 2013, 1, 1, 0.0, LGM_TIME_SYS_UTC, c );
-et = Lgm_TDBSecSinceJ2000( myUTC, c );
-printf("et = %.15lf\n", et);
-
-
-
-str2et_c ( time, &et );
-printf("et = %.15lf\n", et);
-
-
-
-spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84_A);
-*/
-
-
-
-
-
-
-
-//exit(0);
 
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -818,10 +800,12 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
 
 
 
-                    //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
-                    H5_nT = 0;
+                    /*
+                     *  Loop[ over seconds of the day
+                     */
                     ss = (Date == StartDate) ? StartSeconds : 0;
-                    es = (Date == EndDate) ? EndSeconds : 0;
+                    es = (Date == EndDate) ? EndSeconds : 86400;
+                    H5_nT = 0;
                     for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
