@@ -1178,6 +1178,25 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
         //fprintf( fp, "#                          \"VALID_MAX\": 100000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+        fprintf( fp, "#  \"Kappa\":            { \"DESCRIPTION\": \"Kappa parameter for 1MeV electrons -- sqrt( (Minimum Radius of Curvature)/Maximum gyroradius)) (see Büchner, J., and L. M. Zelenyi (1989), Regular and Chaotic Charged Particle Motion in Magnetotaillike Field Reversals, 1. Basic Theory of Trapped Motion, J. Geophys. Res., 94(A9), 11,821–11,842, doi:10.1029/JA094iA09p11821.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Kappa\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"Kappa parameter for 1MeV electrons\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Kappa\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"dimensionless\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Kappa_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Kappa_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Kappa %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"Kappa %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 100000.0,\n");
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
 //        fprintf( fp, "#\n");
 
@@ -1330,6 +1349,18 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
             sprintf( TextStr, " Sb (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
         } else {
             sprintf( TextStr, " Sb " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+        // Kappa header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, " Kappa (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, " Kappa " ); tsl = strlen( TextStr );
         }
         n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
@@ -1515,6 +1546,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Sb%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Tb%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Kappa%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
     // units/format
     fprintf( fp, "# %25s", "YYYY-MM-DDTHH:MM:SS.SSSSZ" );
@@ -1681,6 +1714,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "s" ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "dimless" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "\n");
 
     Lgm_free_ctrans(c);
@@ -1696,7 +1731,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     double          Bsc_mag, Bfn_mag, Bfs_mag, Bmin_mag, Alpha_Loss_Cone_n, Alpha_Loss_Cone_s;
     double          R, MLAT, MLON, MLT;
     double          Lm_eq, InvLat_eq, s, cl, BoverBeq, MagLatFromBoverBeq, Lsimple, InvLat, S_Bmin_to_sc;
-    double          Ek, E, p2c2, Beta2, Beta, T, vel;
+    double          Ek, E, p2c2, Beta2, Beta, T, vel, p, rg, Kappa;
     Lgm_DateTime    DT_UTC;
     Lgm_CTrans      *c = Lgm_init_ctrans(0);
     Lgm_Vector      v, vv, Bsc, Bfn, Bfn_geo, Bfs, Bfs_geo, Bmin;
@@ -2086,6 +2121,22 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
         T     = ( m->Sb[i] > 0.0 ) ? 2.0*m->Sb[i]/vel : LGM_FILL_VALUE;
 
         fprintf(fp, " %12g", T ); 
+    }
+
+    // Kappa's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { 
+
+
+        Ek    = 1.0; // MeV
+        E     = Ek + LGM_Ee0; // total energy, MeV
+        p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
+        p     = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
+        rg    = sin(m->Alpha[i]*RadPerDeg)*p/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
+
+        Kappa = sqrt( m->RofC*Re*1e3/rg );
+
+        fprintf(fp, " %12g", Kappa ); 
     }
 
 

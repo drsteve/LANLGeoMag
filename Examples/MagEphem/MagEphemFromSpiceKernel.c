@@ -77,13 +77,14 @@ static struct argp_option Options[] = {
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
-    {"StartDate",       'S',    "yyyymmdd",                   0,                                      "StartDate "                              },
-    {"EndDate",         'E',    "yyyymmdd",                   0,                                      "EndDate "                                },
+    {"Verbosity",       'v',    "verbosity",                  0,                                      "Verbosity level to use. (0-4)"      },
+    {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",        0,                                      "Start date/time in ISO 8601 format. Seconds will be truncated to integers." },
+    {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",        0,                                      "End date/time in ISO 8601 format. Seconds will be truncated to integers." },
+    {"Delta",           'D',    "delta",                      0,                                      "Time cadence in (integer) seconds." },
     {"UseEop",          'e',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
     {"Colorize",        'c',    0,                            0,                                      "Colorize output"                         },
     {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
     {"Coords",          'C',    "coord_system",               0,                                      "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
-    {"verbose",         'v',    0,                            OPTION_ARG_OPTIONAL,                    "Produce verbose output"                  },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
     { 0 }
 };
@@ -91,7 +92,7 @@ static struct argp_option Options[] = {
 struct Arguments {
     char        *args[ nArgs ];       /* START_PA  END_PA  PA_INC */
     int         silent;
-    int         verbose;
+    int         Verbosity;
 
     double      StartPA;
     double      EndPA;
@@ -109,13 +110,30 @@ struct Arguments {
     int         UseEop;
 
     char        Birds[4096];
-    long int    StartDate;
-    long int    EndDate;
+
+    long int    Delta;              // Time step cadence
+
+    char        StartDateTime[80];
+    char        EndDateTime[80];
+
+    long int    StartDate;          // Start date (e.g. 20130201)
+    long int    EndDate;            // End date (e.g. 20130228)
+
+    long int    StartSeconds;       // Start time in seconds for the first date.
+    long int    EndSeconds;         // End time in seconds for the last date.
 };
 
 
 /* Parse a single option. */
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
+
+    double       TaiSecs;
+    int          ReturnFlag = 0, i;
+    char         TimeString[40];
+    Lgm_DateTime d;
+    Lgm_CTrans   *c = Lgm_init_ctrans( 0 );
+
+    Lgm_LoadLeapSeconds( c );
 
     /* Get the input argument from argp_parse, which we
       know is a pointer to our arguments structure. */
@@ -123,12 +141,30 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
     switch( key ) {
         case 'b': // Birds
             strncpy( arguments->Birds, arg, 4095 );
+            arguments->Birds[4094] = '\0'; // just in case
+            for ( i=0; i<strlen(arguments->Birds); i++ ) arguments->Birds[i] = tolower(arguments->Birds[i]);
+            break;
+        case 'D':
+            arguments->Delta = atol( arg );
             break;
         case 'S': // start date
-            sscanf( arg, "%ld", &arguments->StartDate );
+            strncpy( TimeString, arg, 39 );
+            IsoTimeStringToDateTime( TimeString, &d, c );
+            arguments->StartDate    = d.Date;
+            arguments->StartSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
+            Lgm_DateTimeToString( arguments->StartDateTime, &d, 0, 0 );
             break;
         case 'E': // end date
-            sscanf( arg, "%ld", &arguments->EndDate );
+            strncpy( TimeString, arg, 39 );
+            IsoTimeStringToDateTime( TimeString, &d, c );
+            // if no explicit time field was given assume user wants whole day.
+            if ( strstr(TimeString, "T") == NULL ) {
+                TaiSecs = d.DaySeconds + Lgm_UTC_to_TaiSeconds( &d, c );
+                Lgm_TaiSeconds_to_UTC( TaiSecs, &d, c );
+            }
+            arguments->EndDate    = d.Date;
+            arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
+            Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
             break;
         case 'e': // external model
             strcpy( arguments->ExtModel, arg );
@@ -158,7 +194,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             arguments->silent = 1;
             break;
         case 'v':
-            arguments->verbose = 1;
+            arguments->Verbosity = atoi( arg );
             break;
         case ARGP_KEY_ARG:
             if (state->arg_num >= nArgs) {
@@ -173,9 +209,13 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             argp_usage (state);
             break;
         default:
-            return ARGP_ERR_UNKNOWN;
+            ReturnFlag = ARGP_ERR_UNKNOWN;
+            break;
     }
-    return 0;
+
+    Lgm_free_ctrans( c );
+
+    return( ReturnFlag );
 }
 
 /* Our argp parser. */
@@ -189,6 +229,7 @@ static struct argp argp = { Options, parse_opt, ArgsDoc, doc };
 typedef struct afInfo {
     long int        Date;
     int             Sgn;
+    int             BODY;
     Lgm_CTrans      *c;
 } afInfo;
 double ApogeeFunc( double T, double val, void *Info ){
@@ -204,7 +245,7 @@ double ApogeeFunc( double T, double val, void *Info ){
 
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
     et = Lgm_TDBSecSinceJ2000( &UTC, c );
-    spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
     U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
     R = Lgm_Magnitude( &U );
 
@@ -234,10 +275,10 @@ int main( int argc, char *argv[] ){
     int              nBirds, iBird;
     char             **Birds, Bird[80];
     double           Inc, Alpha[1000], FootpointHeight;
-    int              nAlpha, Quality;
-    long int         StartDate, EndDate, Date;
+    int              nAlpha, Quality, Verbosity;
+    long int         StartDate, EndDate, Date, Delta;
     int              sYear, sMonth, sDay, sDoy, eYear, eMonth, eDay, eDoy, Year, Month, Day;
-    double           sJD, eJD, JD, Time;
+    double           sJD, eJD, JD, Time, StartSeconds, EndSeconds;
     Lgm_MagEphemInfo *MagEphemInfo;
     Lgm_QinDentonOne p;
 
@@ -289,8 +330,8 @@ int main( int argc, char *argv[] ){
     double          **H5_L;
     double          **H5_Bm;
 
-    int             done;
-    long int        Seconds, Ta, Tb, Tc;
+    int             done, BODY;
+    long int        ss, es, Seconds, Ta, Tb, Tc;
     double          R, Ra, Rb, Rc, Rmin, Tmin;
     BrentFuncInfo   bInfo;
     afInfo          *afi;
@@ -346,8 +387,9 @@ int main( int argc, char *argv[] ){
     arguments.EndPA           = 5.0;    // stop at 2.5 Deg.
     arguments.nPA             = 18;     // 18 pitch angles
     arguments.silent          = 0;
-    arguments.verbose         = 0;
+    arguments.Verbosity       = 0;
     arguments.Quality         = 3;
+    arguments.Delta           = 60;     // 60s default cadence
     arguments.Colorize        = 0;
     arguments.Force           = 0;
     arguments.UseEop          = 0;
@@ -384,11 +426,15 @@ int main( int argc, char *argv[] ){
      */
     FootpointHeight = arguments.FootPointHeight;
     Quality         = arguments.Quality;
+    Verbosity       = arguments.Verbosity;
     Colorize        = arguments.Colorize;
     Force           = arguments.Force;
     UseEop          = arguments.UseEop;
+    Delta           = arguments.Delta;
     StartDate       = arguments.StartDate;
     EndDate         = arguments.EndDate;
+    StartSeconds    = arguments.StartSeconds;
+    EndSeconds      = arguments.EndSeconds;
     strcpy( IntModel,  arguments.IntModel );
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
@@ -417,11 +463,12 @@ int main( int argc, char *argv[] ){
         printf( "\t                  Force output: %s\n", Force ? "yes" : "no" );
         printf( "\t                       Use Eop: %s\n", UseEop ? "yes" : "no" );
         printf( "\t        Colorize Thread Output: %d\n", Colorize );
-        printf( "\t                       Verbose: %s\n", arguments.verbose ? "yes" : "no" );
+        printf( "\t               Verbosity Level: %d\n", Verbosity );
         printf( "\t                        Silent: %s\n", arguments.silent  ? "yes" : "no" );
         if ( (StartDate > 0)&&(EndDate > 0) ){
-            printf( "\t                     StartDate: %ld\n", StartDate );
-            printf( "\t                       EndDate: %ld\n", EndDate );
+            printf( "\t                 StartDateTime: %s\n", arguments.StartDateTime );
+            printf( "\t                   EndDateTime: %s\n", arguments.EndDateTime );
+            printf( "\t      Time Increment [Seconds]: %ld\n", Delta);
         }
 
         if ( nBirds > 1  ){
@@ -483,8 +530,8 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
     MagEphemInfo->LstarQuality = Quality;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 10.0;
-    MagEphemInfo->LstarInfo->VerbosityLevel = 0;
-    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
+    MagEphemInfo->LstarInfo->VerbosityLevel = Verbosity;
+    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
     if ( !strcmp( ExtModel, "T87" ) ){
@@ -565,6 +612,15 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
             strcpy( Bird, Birds[ iBird ] );
             strcpy( InFile, InputFilename );
 
+            if        ( !strcmp( Bird, "rbspa" ) ){
+                BODY = RBSPA_ID;
+            } else if ( !strcmp( Bird, "rbspb" ) ){
+                BODY = RBSPB_ID;
+            } else {
+                // maybe user just has a SPICE BODY number?
+                BODY = atoi( Bird );
+            }
+
             if ( SubstituteVars ) {
 
                 // Substitute times in the files.
@@ -592,7 +648,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
             }
             printf( "      -------------------------------------------------------------------------------------------\n");
             printf( "           Input File: %s\n", InFile);
-            printf( "          Output File: %s\n", OutFile);
+            printf( "      TXT Output File: %s\n", OutFile);
             printf( "     HDF5 Output File: %s\n\n", HdfOutFile);
 
 
@@ -617,7 +673,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                 if ( !Force ) {
                     printf("\n\n\tHdfOutfile already exists (use -F option to force processing): %s\n", HdfOutFile );
                 } else {
-                    printf("\n\n\tWarning. Existing HdfOutfile will be overwritten: %s \n", HdfOutFile );
+                    printf("\n\n\tWarning. Existing HdfOutfile will be overwritten: %s \n\n", HdfOutFile );
                 }
 
                 if ( StatBuf.st_size < 1000LL ){
@@ -675,6 +731,8 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                      */
                     afi = (afInfo *)calloc( 1, sizeof(afInfo) );
                     afi->Date = Date;
+
+                    afi->BODY = BODY;
                     afi->Sgn  = -1; // +1 => find min (perigee)   -1 => find max (apogee)
                     afi->c    = c;
                     bInfo.Val  = 0.0;
@@ -691,7 +749,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                             et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
                             ++nApogee;
 
@@ -721,7 +779,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
                             et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-                            spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                            spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
                             ++nPerigee;
                             //Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 3 );
@@ -762,15 +820,16 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
 
                     //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
                     H5_nT = 0;
-//MagEphemInfo->LstarInfo->VerbosityLevel = 2;
-                    for ( Seconds=0; Seconds<=86400; Seconds += 60 ) {
+                    ss = (Date == StartDate) ? StartSeconds : 0;
+                    es = (Date == EndDate) ? EndSeconds : 0;
+                    for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
-                        spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                        printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
+                        spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                        //printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
                         U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
 
 
@@ -790,8 +849,6 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
-                        MagEphemInfo->LstarInfo->mInfo->Kp = 5.0;
-
 
 
 
