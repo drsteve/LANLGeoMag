@@ -3,7 +3,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
     char        Str[80], *Str2;
@@ -1213,12 +1213,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                        \"COMMON_NAME\": \"%s\",\n", Spacecraft);
     fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
     fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
+    fprintf( fp, "#                      \"SPICE_BODY_ID\": \"%d\"\n", 0);
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents.\",\n");
     fprintf( fp, "#                       \"CreationTime\": \"%02d:%02d:%02d UTC  %s %02d %4d\",\n", HH, MM, SS, sMonth[Month], Day, Year);
     fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
     fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
+    fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#\n");

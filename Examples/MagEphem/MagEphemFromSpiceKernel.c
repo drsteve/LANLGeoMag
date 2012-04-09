@@ -29,15 +29,15 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 #define KP_DEFAULT 0
 
-const  char *ProgramName = "MagEphemFromFile";
-const  char *argp_program_version     = "MagEphemFromFile_1.1";
+const  char *ProgramName = "MagEphemFromSpiceKernel";
+const  char *argp_program_version     = "MagEphemFromSpiceKernel_1.1";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
 "The input file is a SPICE kernel description file, which is a file describing all of the SPICE kernels that need to be loaded.  A sample kernel description file is written as;\n\n"
 
 "\t\\begindata\n"
-"\tKERNELS_TO_LOAD = ( 'RBSPA_2012_139_2014_213_01_deph.bsp', 'naif0009.tls' )\n"
+"\tKERNELS_TO_LOAD = ( 'RBSPA_2012_139_2014_213_01_deph.bsp', 'RBSPB_2012_139_2014_213_01_deph.bsp', 'naif0009.tls' )\n"
 "\t\\begintext\n\n\n"
 
 "Where 'RBSPA_2012_139_2014_213_01_deph.bsp' is a \"binary SPK\" SPICE kernel, and 'naif0009.tls' is a \"text leap second kernel (LSK)\" file.  In SPICE, SPK kernel files contain information that is used to compute the ephemeris (trajectory) of an object.\n\n"
@@ -345,6 +345,8 @@ int main( int argc, char *argv[] ){
     Lgm_Vector      *Perigee_U;
     Lgm_Vector      *Apogee_U;
     Lgm_Vector      Bvec, Bvec2;
+    int             n;
+    char            *CmdLine;
 
     // kludge.
     LGM_ARRAY_2D( H5_IsoTimes,  2000, 80,    char );
@@ -406,9 +408,24 @@ int main( int argc, char *argv[] ){
 
 
     /*
+     * Create a string that shows how we we called.
+     */
+//    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+//    LGM_ARRAY_1D( CmdLine, n+1, char );
+//    for (i=0; i<argc; i++) {
+//        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+//        strcat( CmdLine, " ");      // pad with spaces
+//    }
+//    printf("CmdLine = %s\n", CmdLine );
+
+//exit(0);
+
+
+    /*
      *  Parse CmdLine arguments and options
      */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
+
 
 
     /*
@@ -788,7 +805,7 @@ printf("Delta = %ld\n", Delta);
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 99999, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 //exit(0);
 
@@ -842,7 +859,15 @@ printf("Delta = %ld\n", Delta);
                              */
                             printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
                             printf("\t--------------------------------------------------------------------------------------------------\n");
-                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+Lgm_Vector TMPTMP;
+Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );
+Lgm_TraceToMinBSurf( &Rgsm, &TMPTMP, 0.1, 1e-7, MagEphemInfo->LstarInfo->mInfo );
+Lgm_Setup_AlphaOfK( &UTC, &TMPTMP, MagEphemInfo->LstarInfo->mInfo );
+printf("Lgm_AlphaOfK( 0.1 ) = %g\n", Lgm_AlphaOfK( 0.1, MagEphemInfo->LstarInfo->mInfo ) );
+Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
+exit(0);
+                            //Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
@@ -3097,6 +3122,7 @@ printf("Delta = %ld\n", Delta);
     Lgm_destroy_eop( e );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
 
+//    LGM_ARRAY_1D_FREE( CmdLine );
     LGM_ARRAY_2D_FREE( H5_K );
     LGM_ARRAY_2D_FREE( H5_Bm );
     LGM_ARRAY_2D_FREE( H5_I );

@@ -237,6 +237,7 @@ Info->Hmax = 0.10;
          */
         Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length
         Info->Smin   = Info->Ssouth - Info->Trace_s;  // length from south foot to S/C
+        Info->Trace_s = Info->Stotal;
 //printf("Info->Ssouth, Info->Trace_s = %g %g\n", Info->Ssouth, Info->Trace_s);
         
 
