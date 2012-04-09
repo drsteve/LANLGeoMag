@@ -17,6 +17,7 @@
 #include <Lgm_QinDenton.h>
 #include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
+#include <Lgm_ElapsedTime.h>
 #include "SpiceUsr.h"
 
 #define EARTH_ID     399
@@ -263,6 +264,9 @@ double ApogeeFunc( double T, double val, void *Info ){
  */
 int main( int argc, char *argv[] ){
 
+    Lgm_ElapsedTimeInfo t;
+    char                ElapsedTimeStr[256];
+
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
     Lgm_Vector       Rgsm, W, U;
@@ -347,6 +351,11 @@ int main( int argc, char *argv[] ){
     Lgm_Vector      Bvec, Bvec2;
     int             n;
     char            *CmdLine;
+
+
+    t.ColorizeText = TRUE;
+    Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+
 
     // kludge.
     LGM_ARRAY_2D( H5_IsoTimes,  2000, 80,    char );
@@ -511,6 +520,7 @@ printf("Delta = %ld\n", Delta);
             exit(0);
         }
     }
+    Lgm_PrintElapsedTime( &t );
 
 
     SpiceDouble et;
@@ -605,6 +615,8 @@ printf("Delta = %ld\n", Delta);
          * loop over all birds
          */
          for ( iBird = 0; iBird < nBirds; iBird++ ) {
+
+            Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
 
             strcpy( InFile, InputFilename );
             strcpy( OutFile, OutputFilename );
@@ -823,6 +835,7 @@ printf("Delta = %ld\n", Delta);
                     ss = (Date == StartDate) ? StartSeconds : 0;
                     es = (Date == EndDate) ? EndSeconds : 86400;
                     H5_nT = 0;
+                    Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
                     for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
@@ -859,15 +872,15 @@ printf("Delta = %ld\n", Delta);
                              */
                             printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
                             printf("\t--------------------------------------------------------------------------------------------------\n");
-Lgm_Vector TMPTMP;
-Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );
-Lgm_TraceToMinBSurf( &Rgsm, &TMPTMP, 0.1, 1e-7, MagEphemInfo->LstarInfo->mInfo );
-Lgm_Setup_AlphaOfK( &UTC, &TMPTMP, MagEphemInfo->LstarInfo->mInfo );
-printf("Lgm_AlphaOfK( 0.1 ) = %g\n", Lgm_AlphaOfK( 0.1, MagEphemInfo->LstarInfo->mInfo ) );
-Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
-exit(0);
-                            //Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
-                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+//Lgm_Vector TMPTMP;
+//Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );
+//Lgm_TraceToMinBSurf( &Rgsm, &TMPTMP, 0.1, 1e-7, MagEphemInfo->LstarInfo->mInfo );
+//Lgm_Setup_AlphaOfK( &UTC, &TMPTMP, MagEphemInfo->LstarInfo->mInfo );
+//printf("Lgm_AlphaOfK( 0.1 ) = %g\n", Lgm_AlphaOfK( 0.1, MagEphemInfo->LstarInfo->mInfo ) );
+//Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
+//exit(0);
+                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+//                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
@@ -1008,6 +1021,10 @@ exit(0);
 
                     }
                     fclose(fp_MagEphem);
+                
+                    Lgm_PrintElapsedTime( &t );
+                    Lgm_SetElapsedTimeStr( &t );
+                    strcpy( ElapsedTimeStr, t.ElapsedTimeStr );
 
 
                     // Create HDF5 file
@@ -3109,6 +3126,8 @@ exit(0);
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure
+
+
         } // end birds loop
     } // end JD loop
 
