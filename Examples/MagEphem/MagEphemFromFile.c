@@ -514,7 +514,7 @@ exit(0);
                      * Open Mag Ephem file for writing
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", 0, NULL, NULL, 0, NULL, NULL, MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", NULL, 0, NULL, NULL, 0, NULL, NULL, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {

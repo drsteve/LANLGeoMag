@@ -55,7 +55,6 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
     s = m->Trace_s;
 
 
-
     /*
      * If we are going to use interped routines, we need to pre-trace the line.
      * And we need to init the interp stuff.

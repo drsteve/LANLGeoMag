@@ -17,6 +17,7 @@
 #include <Lgm_QinDenton.h>
 #include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
+#include <Lgm_ElapsedTime.h>
 #include "SpiceUsr.h"
 
 #define EARTH_ID     399
@@ -29,15 +30,15 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 #define KP_DEFAULT 0
 
-const  char *ProgramName = "MagEphemFromFile";
-const  char *argp_program_version     = "MagEphemFromFile_1.1";
+const  char *ProgramName = "MagEphemFromSpiceKernel";
+const  char *argp_program_version     = "MagEphemFromSpiceKernel_1.1";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
 "The input file is a SPICE kernel description file, which is a file describing all of the SPICE kernels that need to be loaded.  A sample kernel description file is written as;\n\n"
 
 "\t\\begindata\n"
-"\tKERNELS_TO_LOAD = ( 'RBSPA_2012_139_2014_213_01_deph.bsp', 'naif0009.tls' )\n"
+"\tKERNELS_TO_LOAD = ( 'RBSPA_2012_139_2014_213_01_deph.bsp', 'RBSPB_2012_139_2014_213_01_deph.bsp', 'naif0009.tls' )\n"
 "\t\\begintext\n\n\n"
 
 "Where 'RBSPA_2012_139_2014_213_01_deph.bsp' is a \"binary SPK\" SPICE kernel, and 'naif0009.tls' is a \"text leap second kernel (LSK)\" file.  In SPICE, SPK kernel files contain information that is used to compute the ephemeris (trajectory) of an object.\n\n"
@@ -157,13 +158,17 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'E': // end date
             strncpy( TimeString, arg, 39 );
             IsoTimeStringToDateTime( TimeString, &d, c );
+            arguments->EndDate    = d.Date;
+
             // if no explicit time field was given assume user wants whole day.
             if ( strstr(TimeString, "T") == NULL ) {
+                // be informative about what the exact time range really will be.
+                arguments->EndSeconds = d.DaySeconds;
                 TaiSecs = d.DaySeconds + Lgm_UTC_to_TaiSeconds( &d, c );
                 Lgm_TaiSeconds_to_UTC( TaiSecs, &d, c );
+            } else {
+                arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             }
-            arguments->EndDate    = d.Date;
-            arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
             break;
         case 'e': // external model
@@ -259,6 +264,9 @@ double ApogeeFunc( double T, double val, void *Info ){
  */
 int main( int argc, char *argv[] ){
 
+    Lgm_ElapsedTimeInfo t;
+    char                ElapsedTimeStr[256];
+
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
     Lgm_Vector       Rgsm, W, U;
@@ -341,6 +349,13 @@ int main( int argc, char *argv[] ){
     Lgm_Vector      *Perigee_U;
     Lgm_Vector      *Apogee_U;
     Lgm_Vector      Bvec, Bvec2;
+    int             n;
+    char            *CmdLine;
+
+
+    t.ColorizeText = TRUE;
+    Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+
 
     // kludge.
     LGM_ARRAY_2D( H5_IsoTimes,  2000, 80,    char );
@@ -402,9 +417,24 @@ int main( int argc, char *argv[] ){
 
 
     /*
+     * Create a string that shows how we we called.
+     */
+//    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+//    LGM_ARRAY_1D( CmdLine, n+1, char );
+//    for (i=0; i<argc; i++) {
+//        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+//        strcat( CmdLine, " ");      // pad with spaces
+//    }
+//    printf("CmdLine = %s\n", CmdLine );
+
+//exit(0);
+
+
+    /*
      *  Parse CmdLine arguments and options
      */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
+
 
 
     /*
@@ -442,6 +472,12 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
 
+    
+
+
+
+
+
     /*
      *  Print summary of our options
      */
@@ -470,6 +506,7 @@ int main( int argc, char *argv[] ){
             printf( "\t                   EndDateTime: %s\n", arguments.EndDateTime );
             printf( "\t      Time Increment [Seconds]: %ld\n", Delta);
         }
+printf("Delta = %ld\n", Delta);
 
         if ( nBirds > 1  ){
             printf( "\t                         Birds:" );
@@ -483,40 +520,12 @@ int main( int argc, char *argv[] ){
             exit(0);
         }
     }
+    Lgm_PrintElapsedTime( &t );
 
 
-SpiceDouble et;
-SpiceDouble pos[3], lt;
+    SpiceDouble et;
+    SpiceDouble pos[3], lt;
 
-/*
-furnsh_c( InputFilename );
-
-Lgm_DateTime *myUTC;
-
-sprintf(time, "2013-01-01T00:00:00", StartDate );
-printf("time = %s\n", time);
-myUTC = Lgm_DateTime_Create( 2013, 1, 1, 0.0, LGM_TIME_SYS_UTC, c );
-et = Lgm_TDBSecSinceJ2000( myUTC, c );
-printf("et = %.15lf\n", et);
-
-
-
-str2et_c ( time, &et );
-printf("et = %.15lf\n", et);
-
-
-
-spkezp_c( RBSPA_ID,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84_A);
-*/
-
-
-
-
-
-
-
-//exit(0);
 
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -606,6 +615,8 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
          * loop over all birds
          */
          for ( iBird = 0; iBird < nBirds; iBird++ ) {
+
+            Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
 
             strcpy( InFile, InputFilename );
             strcpy( OutFile, OutputFilename );
@@ -806,7 +817,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, "FIX ME", 99999, "FIX ME", nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 99999, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 //exit(0);
 
@@ -818,10 +829,13 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
 
 
 
-                    //for ( Seconds=0; Seconds<=86400; Seconds += 900 ) {
-                    H5_nT = 0;
+                    /*
+                     *  Loop[ over seconds of the day
+                     */
                     ss = (Date == StartDate) ? StartSeconds : 0;
-                    es = (Date == EndDate) ? EndSeconds : 0;
+                    es = (Date == EndDate) ? EndSeconds : 86400;
+                    H5_nT = 0;
+                    Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
                     for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
@@ -858,7 +872,15 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
                              */
                             printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
                             printf("\t--------------------------------------------------------------------------------------------------\n");
+//Lgm_Vector TMPTMP;
+//Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );
+//Lgm_TraceToMinBSurf( &Rgsm, &TMPTMP, 0.1, 1e-7, MagEphemInfo->LstarInfo->mInfo );
+//Lgm_Setup_AlphaOfK( &UTC, &TMPTMP, MagEphemInfo->LstarInfo->mInfo );
+//printf("Lgm_AlphaOfK( 0.1 ) = %g\n", Lgm_AlphaOfK( 0.1, MagEphemInfo->LstarInfo->mInfo ) );
+//Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
+//exit(0);
                             Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+//                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
@@ -999,6 +1021,10 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
 
                     }
                     fclose(fp_MagEphem);
+                
+                    Lgm_PrintElapsedTime( &t );
+                    Lgm_SetElapsedTimeStr( &t );
+                    strcpy( ElapsedTimeStr, t.ElapsedTimeStr );
 
 
                     // Create HDF5 file
@@ -3100,6 +3126,8 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure
+
+
         } // end birds loop
     } // end JD loop
 
@@ -3113,6 +3141,7 @@ printf("pos = %.8lf %.8lf %.8lf\n", pos[0]/WGS84_A, pos[1]/WGS84_A, pos[2]/WGS84
     Lgm_destroy_eop( e );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
 
+//    LGM_ARRAY_1D_FREE( CmdLine );
     LGM_ARRAY_2D_FREE( H5_K );
     LGM_ARRAY_2D_FREE( H5_Bm );
     LGM_ARRAY_2D_FREE( H5_I );
