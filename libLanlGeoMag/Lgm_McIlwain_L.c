@@ -138,8 +138,10 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                     } else if ( mInfo->UseInterpRoutines ) {
                         if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(-9e99);
+//printf("BEFORE mInfo->nPnts = %d   mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
-                        ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_South, mInfo );
+                        //ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_South, mInfo );
+//printf("AFTER mInfo->nPnts = %d   mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         //AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );
                         if ( InitSpline( mInfo ) ) {
 

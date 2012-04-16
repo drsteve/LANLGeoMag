@@ -47,7 +47,7 @@ static char doc[] =
 
 "The %B variable will also get substituted by the list of birds given in the -b option.  Here is an example using time-variables.\n\n"
 
-"\t/MagEphemFromSpiceKernelFile -S 20020901 -E 20020930 setup.ker \n"
+"\t./MagEphemFromSpiceKernelFile -S 20020901 -E 20020930 setup.ker \n"
 "\t\t/home/jsmith/MagEphemData/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt.  \n"
 "\n"
 
@@ -82,7 +82,8 @@ static struct argp_option Options[] = {
     {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",        0,                                      "Start date/time in ISO 8601 format. Seconds will be truncated to integers." },
     {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",        0,                                      "End date/time in ISO 8601 format. Seconds will be truncated to integers." },
     {"Delta",           'D',    "delta",                      0,                                      "Time cadence in (integer) seconds." },
-    {"UseEop",          'e',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
+    {"DumpShellFiles",  'd',    0,                            0,                                      "Dump full binary shell files (for use in viaualizing drift shells)." },
+    {"UseEop",          'z',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
     {"Colorize",        'c',    0,                            0,                                      "Colorize output"                         },
     {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
     {"Coords",          'C',    "coord_system",               0,                                      "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
@@ -109,6 +110,7 @@ struct Arguments {
     char        CoordSystem[80];
 
     int         UseEop;
+    int         DumpShellFiles;
 
     char        Birds[4096];
 
@@ -182,6 +184,12 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'F':
             arguments->Force = 1;
+            break;
+        case 'z':
+            arguments->UseEop = 1;
+            break;
+        case 'd':
+            arguments->DumpShellFiles = 1;
             break;
         case 'f':
             sscanf( arg, "%lf", &arguments->FootPointHeight );
@@ -265,7 +273,6 @@ double ApogeeFunc( double T, double val, void *Info ){
 int main( int argc, char *argv[] ){
 
     Lgm_ElapsedTimeInfo t;
-    char                ElapsedTimeStr[256];
 
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
@@ -278,7 +285,7 @@ int main( int argc, char *argv[] ){
     char             InputFilename[1024];
     char             OutputFilename[1024];
     char             IntModel[20], ExtModel[20], CoordSystem[80];
-    int              UseEop, Colorize, Force;
+    int              DumpShellFiles, UseEop, Colorize, Force;
     FILE             *fp_in, *fp_MagEphem;
     int              nBirds, iBird;
     char             **Birds, Bird[80];
@@ -408,6 +415,7 @@ int main( int argc, char *argv[] ){
     arguments.Colorize        = 0;
     arguments.Force           = 0;
     arguments.UseEop          = 0;
+    arguments.DumpShellFiles  = 0;
     arguments.StartDate       = -1;
     arguments.EndDate         = -1;
     arguments.FootPointHeight = 100.0; // km
@@ -419,15 +427,14 @@ int main( int argc, char *argv[] ){
     /*
      * Create a string that shows how we we called.
      */
-//    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
-//    LGM_ARRAY_1D( CmdLine, n+1, char );
-//    for (i=0; i<argc; i++) {
-//        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
-//        strcat( CmdLine, " ");      // pad with spaces
-//    }
-//    printf("CmdLine = %s\n", CmdLine );
+    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+    n += argc;
+    LGM_ARRAY_1D( CmdLine, n+1, char );
+    for (i=0; i<argc; i++) {
+        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+        strcat( CmdLine, " ");      // pad with spaces
+    }
 
-//exit(0);
 
 
     /*
@@ -460,6 +467,7 @@ int main( int argc, char *argv[] ){
     Colorize        = arguments.Colorize;
     Force           = arguments.Force;
     UseEop          = arguments.UseEop;
+    DumpShellFiles  = arguments.DumpShellFiles;
     Delta           = arguments.Delta;
     StartDate       = arguments.StartDate;
     EndDate         = arguments.EndDate;
@@ -498,6 +506,7 @@ int main( int argc, char *argv[] ){
         printf( "\t                    L* Quality: %d\n", Quality );
         printf( "\t                  Force output: %s\n", Force ? "yes" : "no" );
         printf( "\t                       Use Eop: %s\n", UseEop ? "yes" : "no" );
+        printf( "\t         Dump Full Shell Files: %s\n", DumpShellFiles ? "yes" : "no" );
         printf( "\t        Colorize Thread Output: %d\n", Colorize );
         printf( "\t               Verbosity Level: %d\n", Verbosity );
         printf( "\t                        Silent: %s\n", arguments.silent  ? "yes" : "no" );
@@ -604,6 +613,7 @@ printf("Delta = %ld\n", Delta);
     char *OutFile    = (char *)calloc( 2056, sizeof( char ) );
     char *HdfOutFile = (char *)calloc( 2056, sizeof( char ) );
     char *InFile     = (char *)calloc( 2056, sizeof( char ) );
+    char *ShellFile  = (char *)calloc( 2056, sizeof( char ) );
 
     for ( JD = sJD; JD <= eJD; JD += 1.0 ) {
 
@@ -616,7 +626,6 @@ printf("Delta = %ld\n", Delta);
          */
          for ( iBird = 0; iBird < nBirds; iBird++ ) {
 
-            Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
 
             strcpy( InFile, InputFilename );
             strcpy( OutFile, OutputFilename );
@@ -817,7 +826,7 @@ printf("Delta = %ld\n", Delta);
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 99999, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 9, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 //exit(0);
 
@@ -856,7 +865,7 @@ printf("Delta = %ld\n", Delta);
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 );
+                        Lgm_get_QinDenton_at_JD( UTC.JD-365*5.0, &p, 0 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
                         // Set up the trans matrices
@@ -885,8 +894,11 @@ printf("Delta = %ld\n", Delta);
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 
-                            if ( nAlpha > 0 ){
-                                WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
+                            if ( DumpShellFiles && (nAlpha > 0) ){
+                                
+                                sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
+                                printf( "Writing Full Shell File: %s\n", ShellFile );
+                                WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
                             }
 
 
@@ -1024,7 +1036,10 @@ printf("Delta = %ld\n", Delta);
                 
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
-                    strcpy( ElapsedTimeStr, t.ElapsedTimeStr );
+                    sprintf( Command, "sed 's/ELAPSED_TIME/%s/' <%s >%s.new", t.ElapsedTimeStr, OutFile, OutFile); system( Command );
+                    sprintf( Command, "mv %s.new %s", OutFile, OutFile); system( Command );
+                
+                    
 
 
                     // Create HDF5 file
@@ -3133,6 +3148,7 @@ printf("Delta = %ld\n", Delta);
 
 
     //Lgm_DateTime_Destroy( myUTC );
+    free( ShellFile );
     free( OutFile );
     free( HdfOutFile );
     free( InFile );

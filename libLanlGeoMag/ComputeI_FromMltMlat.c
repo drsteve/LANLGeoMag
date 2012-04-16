@@ -202,7 +202,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                      *  Do I integral with interped integrand.
                      */
                     I = Iinv_interped( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+//                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I, I0, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     FreeSpline( LstarInfo->mInfo );
 
                 } else {
