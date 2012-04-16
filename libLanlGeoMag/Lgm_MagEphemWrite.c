@@ -1216,8 +1216,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                      \"SPICE_BODY_ID\": \"%d\"\n", 0);
     fprintf( fp, "#  },\n");
 
-    fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents.\",\n");
+    fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents. The format for ElapsedTime is DDD:HH:MM:SS.\",\n");
     fprintf( fp, "#                       \"CreationTime\": \"%02d:%02d:%02d UTC  %s %02d %4d\",\n", HH, MM, SS, sMonth[Month], Day, Year);
+    fprintf( fp, "#                        \"ElapsedTime\": \"%s\",\n", "ELAPSED_TIME" );
     fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
     fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
     fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
@@ -1806,7 +1807,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     }
     fprintf( fp, " %14s", ExtModel );        // Ext Model
     fprintf( fp, " %7.1f",  Kp );            // Kp
-    fprintf( fp, " %8d",  (int)Dst );             // Dst
+    fprintf( fp, " %8.3lf",  Dst );             // Dst
     
     m->LstarInfo->mInfo->Bfield( &m->P, &Bsc, m->LstarInfo->mInfo );
     fprintf( fp, " %12g", Bsc.x );  // Bsc_x_gsm

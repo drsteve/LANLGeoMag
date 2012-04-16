@@ -335,11 +335,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
-    int		done2, Count, FoundShellLine;
+    int		done2, Count, FoundShellLine, nIts;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
-    double	MirrorMLT_Old[500], MirrorMlat_Old[500];
+    double	MirrorMLT_Old[500], MirrorMlat_Old[500], PredMinusActualMlat;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
@@ -576,6 +576,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     nLines = (int)(24.0/DeltaMLT + 0.5);
+    delta = 3.0; // default
     for ( k=0, MLT=MLT0; MLT<(MLT0+24.0-1e-10); MLT += DeltaMLT){
 
 
@@ -601,27 +602,24 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sPredicted mlat3 = %g ( %g : %g )%s ", PreStr, pred_mlat, pred_delta_mlat, delta, PostStr ); fflush(stdout);
 
 	    }
-if ( k < 3 )       delta = 3.0;
-else if ( k < 6 )  delta = 2.0;
-else if ( k < 9 )  delta = 2.0;
-else if ( k < 12 ) delta = 2.0;
-else if ( k < 15 ) delta = 2.0;
-else if ( k < 18 ) delta = 1.0;
-else if ( k < 21 ) delta = 0.5;
-else               delta = 0.5;
-delta = 5.0;
-//fprintf(fp_predict, "%g %g\n", MLT, pred_mlat );
 
 
+        /*
+         * Set the range to search over. If this turns out to be too small,
+         * it'll get expanded in subsequent attempts.
+         */
+        if ( k == 0 ){
+            delta           = 0.001;
+        } else if ( k < 3 ){
+            delta = 3.0;
+        } else {
+            if (nIts > 1) delta = 1.5*fabs( PredMinusActualMlat );
+        }
 
-	    /*
-	     *  Now set a range to search. It should be pretty narrow to start.
-	     *  If its too small the search may fail. In which case we need to
-	     *  enlarge the search.
-    	 */
-	    done2 = FALSE; FoundShellLine = FALSE; Count = 0;
+
+	    done2 = FALSE; FoundShellLine = FALSE; Count = 0; 
 	    while ( !done2 && (k > 0) ) {
-	    //while ( !done2  ) {
+
 
 	        if ( Count == 0 ) {
 
@@ -639,6 +637,7 @@ delta = 5.0;
                  * Try double what we had.
                  */
                 delta *= 2;
+                if (delta < 1.0) delta = 1.0;
                 mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
 
@@ -663,17 +662,18 @@ delta = 5.0;
                  * OK, there may not be a good line -- i.e. drift shell may not be closed.
                  * To make sure, lets try 0->90 deg.
                  */
-                mlat0 = 0.0;
-mlat0 = -30.0;
+                //mlat0 = 0.0;
+                mlat0 = -30.0;
                 mlat1 = 90.0;
 
             }
 
 
-//if ( (Count < 1) && (mlat0 < -1.0) ) mlat0 = -1.0;
-            if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s-------------------  Line %02d of %02d   MLT: %g  (mlat0, mlat1 = %g %g) ---------------------%s\n", PreStr, k, nLines, MLT, mlat0, mlat1, PostStr );
-            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, LstarInfo );
-//printf("Ifound = %g FoundShellLine = %d\n", Ifound, FoundShellLine);
+            if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s----- Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d  --------%s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
+            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, &nIts, LstarInfo );
+            PredMinusActualMlat = pred_mlat - mlat;
+            if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s    > Predicted mlat:  %g  Actual mlat: %g  Diff: %g     MLT/MLAT: %g %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, PostStr );
+
 
 
 
@@ -1278,6 +1278,11 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
 
 }
 
+
+/*
+ * Given a history of MirrorMLT[] and MirrorMlat[] vals, this routine tries to
+ * predict what the next one will be via rational function extrapolation.
+ */
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta ) {
 
     int		nk, koffset;
@@ -1317,8 +1322,8 @@ void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
         }
 
 
-	    Lgm_RatFunInt( MirrorMLT+koffset-1, MirrorMlat+koffset-1, nk, MLT, &pred_mlat1, &pred_delta_mlat1 );
         Lgm_PolFunInt( MirrorMLT+koffset-1, MirrorMlat+koffset-1, nk, MLT, &pred_mlat2, &pred_delta_mlat2 );
+	    Lgm_RatFunInt( MirrorMLT+koffset-1, MirrorMlat+koffset-1, nk, MLT, &pred_mlat1, &pred_delta_mlat1 );
 
        	/*
 	     *  Make certain we have sane predictions
@@ -1357,6 +1362,10 @@ void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
 }
 
 
+/*
+ * Given a history of MirrorMLT[] and MirrorMlat[] vals, this routine tries to
+ * predict what the next one will be via a periodic akima spine.
+ */
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo ) {
 
     double	mlat;
@@ -1421,6 +1430,8 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
         gsl_set_error_handler_off(); // Turn off gsl default error handler
 	    gsl_interp_accel *acc = gsl_interp_accel_alloc( );
 	    gsl_interp *pspline = gsl_interp_alloc( gsl_interp_akima_periodic, LstarInfo->m );
+	    //gsl_interp *pspline = gsl_interp_alloc( gsl_interp_akima, LstarInfo->m );
+	    //gsl_interp *pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->m );
 	    gsl_interp_init( pspline, LstarInfo->xma, LstarInfo->yma, LstarInfo->m );
 	    mlat = gsl_interp_eval( pspline, LstarInfo->xma, LstarInfo->yma, MLT, acc );
 	    gsl_interp_free( pspline );

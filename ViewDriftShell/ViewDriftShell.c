@@ -3,7 +3,7 @@
  *
  *   Written by Mike Henderson
  *   (parts based on demo code written by written by Naofumi Yasufuku)
- *   
+ *
  *   IMPORTANT NOTE: OpenGL uses column-major format for matrices.
  *                       Cg uses row-major format for matrices.
  *                        C also uses row-major format for matrices.
@@ -12,7 +12,7 @@
  *      In row-major the rows are stored contiguously.
  *      In col-major the cols are stored contiguously.
  *
- *   
+ *
  */
 #ifndef MAIN
 #define MAIN
@@ -292,7 +292,7 @@ printf("HERE\n");
 printf("                        [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][0], mInfo->c->Agsm_to_wgs84[1][0], mInfo->c->Agsm_to_wgs84[2][0]);
 printf("    Agsm_to_wgs84     = [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][1], mInfo->c->Agsm_to_wgs84[1][1], mInfo->c->Agsm_to_wgs84[2][1]);
 printf("                        [ %15.8e  %15.8e  %15.8e ]\n\n", mInfo->c->Agsm_to_wgs84[0][2], mInfo->c->Agsm_to_wgs84[1][2], mInfo->c->Agsm_to_wgs84[2][2]);
-   
+
 
         Lgm_MatrixToQuat( mInfo->c->Agsm_to_sm, Q2 );
 
@@ -407,17 +407,17 @@ void SetProjectionMatrix( double FieldOfView, double Aspect, double zNear, doubl
     /*
      * Set up in row-major form (i.e. successive rows are contiguous in memory)
      */
-    m[0*4+0] = f/Aspect;    m[0*4+1] = 0.0;   m[0*4+2] =  0.0;                 m[0*4+3] = 0.0;  
-    m[1*4+0] = 0.0;         m[1*4+1] = f;     m[1*4+2] =  0.0;                 m[1*4+3] = 0.0; 
-    m[2*4+0] = 0.0;         m[2*4+1] = 0.0;   m[2*4+2] = (zFar+zNear)*dZinv;   m[2*4+3] = 2.0*zNear*zFar*dZinv; 
+    m[0*4+0] = f/Aspect;    m[0*4+1] = 0.0;   m[0*4+2] =  0.0;                 m[0*4+3] = 0.0;
+    m[1*4+0] = 0.0;         m[1*4+1] = f;     m[1*4+2] =  0.0;                 m[1*4+3] = 0.0;
+    m[2*4+0] = 0.0;         m[2*4+1] = 0.0;   m[2*4+2] = (zFar+zNear)*dZinv;   m[2*4+3] = 2.0*zNear*zFar*dZinv;
     m[3*4+0] = 0.0;         m[3*4+1] = 0.0;   m[3*4+2] = -1.0;                 m[3*4+3] = 0.0;
 
 }
 
 void SetTranslationScaleMatrix( double x, double y, double z, double s, float m[16] ){
 
-    m[0*4+0] = s;      m[0*4+1] = 0.0;   m[0*4+2] = 0.0;  m[0*4+3] = x;  
-    m[1*4+0] = 0.0;    m[1*4+1] = s;     m[1*4+2] = 0.0;  m[1*4+3] = y; 
+    m[0*4+0] = s;      m[0*4+1] = 0.0;   m[0*4+2] = 0.0;  m[0*4+3] = x;
+    m[1*4+0] = 0.0;    m[1*4+1] = s;     m[1*4+2] = 0.0;  m[1*4+3] = y;
     m[2*4+0] = 0.0;    m[2*4+1] = 0.0;   m[2*4+2] = s;    m[2*4+3] = z;
     m[3*4+0] = 0.0;    m[3*4+1] = 0.0;   m[3*4+2] = 0.0;  m[3*4+3] = 1.0;
 
@@ -430,8 +430,8 @@ void SetTranslationScaleMatrix( double x, double y, double z, double s, float m[
  *
  *
  */
-void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z, 
-                    double Lookat_x, double Lookat_y, double Lookat_z, 
+void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
+                    double Lookat_x, double Lookat_y, double Lookat_z,
                     double Up_x, double Up_y, double Up_z, float m[16] ){
 
     double  X[3], Y[3], Z[3], mag, mag_inv, Tx, Ty, Tz;
@@ -439,7 +439,7 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
     /*
      * Camera -  location of the Camera in World Space.
      * Lookat -  the location in World Space that the Camera should look at.
-     * Up     -  a vector specifying which direction in (world coords) will 
+     * Up     -  a vector specifying which direction in (world coords) will
      *           be up in the final view.
      *
      * Construct X, Y, and Z unit vectors. These are the world space coord unit
@@ -448,14 +448,14 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
      *  Also compute the translation needed to position the camera properly
      */
 
-    /* 
-     * Z unit vector points from Camera to Lookat 
+    /*
+     * Z unit vector points from Camera to Lookat
      */
     Z[0] = Camera_x - Lookat_x;
     Z[1] = Camera_x - Lookat_x;
     Z[2] = Camera_x - Lookat_x;
 
-    /* 
+    /*
      * make Z a unit vector
      */
     mag = sqrt(Z[0]*Z[0] + Z[1]*Z[1] + Z[2]*Z[2]);
@@ -474,7 +474,7 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
 
 
     /*
-     * X = Y cross Z 
+     * X = Y cross Z
      */
     X[0] =  Y[1]*Z[2] - Y[2]*Z[1]; X[1] = -Y[0]*Z[2] + Y[2]*Z[0]; X[2] =  Y[0]*Z[1] - Y[1]*Z[0];
 
@@ -482,7 +482,7 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
      * recompute Y to make an orthog. system. I.e. Y = Z cross X
      */
     Y[0] =  Z[1]*X[2] - Z[2]*X[1]; Y[1] = -Z[0]*X[2] + Z[2]*X[0]; Y[2] =  Z[0]*X[1] - Z[1]*X[0];
-    
+
     /*
      * Normlaize X
      */
@@ -517,11 +517,11 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
     Tx = -( X[0]*Camera_x + X[1]*Camera_y + X[2]*Camera_z );
     Ty = -( Y[0]*Camera_x + Y[1]*Camera_y + Y[2]*Camera_z );
     Tz = -( Z[0]*Camera_x + Z[1]*Camera_y + Z[2]*Camera_z );
-    
 
 
 
-    m[0*4+0] = X[0];    m[0*4+1] = X[1];  m[0*4+2] = X[2];  m[0*4+3] = Tx;  
+
+    m[0*4+0] = X[0];    m[0*4+1] = X[1];  m[0*4+2] = X[2];  m[0*4+3] = Tx;
     m[1*4+0] = Y[0];    m[1*4+1] = Y[1];  m[1*4+2] = Y[2];  m[1*4+3] = Ty;
     m[2*4+0] = Z[0];    m[2*4+1] = Z[1];  m[2*4+2] = Z[2];  m[2*4+3] = Tz;
     m[3*4+0] = 0.0;     m[3*4+1] = 0.0;   m[3*4+2] = 0.0;   m[3*4+3] = 1.0;
@@ -588,7 +588,7 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     }
 
     // determine how many Lines there are
-    nLines = 0; 
+    nLines = 0;
     Str = (char *)malloc( 4097*sizeof(char) );
     while ( fgets( Str, 400, fp )  ) {
         /*
@@ -605,12 +605,12 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     }
     rewind( fp ); // rewind fp back to start
 
-    
+
     /*
      * Alloc memory for the Lines array
      */
     Lines = (char **)calloc( nLines, sizeof(char *) );
-    i = 0; 
+    i = 0;
     //printf( "Shader File: %s\n", Filename );
     while ( fgets( Str, 400, fp )  ) {
         p = strstr( Str, "//" ); if (p != NULL) *p = '\0'; // get rid of //-style comments
@@ -627,10 +627,10 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     //printf("\n");
 
     fclose(fp);
-    
+
     shader = glCreateShader( ShaderType );
     glShaderSource( shader, nLines, (const  char **)Lines, (int *)NULL );
-    
+
     glCompileShader( shader );
     glGetShaderiv( shader, GL_COMPILE_STATUS, &r );
     if (r) {
@@ -696,7 +696,7 @@ void BuildShaders() {
     glAttachShader( g_shaderFrontInit, FrontFragShaderInit );
     glLinkProgram( g_shaderFrontInit );
     g_shaderFrontInit_AlphaLoc = glGetUniformLocation( g_shaderFrontInit, "Alpha" );
-    
+
 
     // Create g_shaderFrontPeel program
     g_shaderFrontPeel = glCreateProgram();
@@ -724,7 +724,7 @@ void BuildShaders() {
     glLinkProgram( g_shaderFrontFinal );
     g_shaderFrontFinal_BackgroundColorLoc = glGetUniformLocation( g_shaderFrontFinal, "BackgroundColor" );
     g_shaderFrontFinal_ColorTexLoc = glGetUniformLocation( g_shaderFrontFinal, "ColorTex" );
-    
+
 
     printf("\n");
 
@@ -1028,21 +1028,21 @@ float colors[][3] =    {
                         {0.784314, 0.435294, 0.921569} };
 
 float   colors2[][3] = {{0.000000, 0.000000, 0.000000},
-                        {0.490196, 0.184314, 0.835294}, 
-                        {0.231373, 0.184314, 0.835294}, 
-                        {0.184314, 0.411765, 0.835294}, 
-                        {0.184314, 0.737255, 0.835294}, 
-                        {0.184314, 0.835294, 0.643137}, 
-                        {0.184314, 0.835294, 0.305882}, 
-                        {0.568627, 0.835294, 0.184314}, 
-                        {0.796078, 0.835294, 0.184314}, 
-                        {0.835294, 0.721569, 0.184314}, 
-                        {0.490196, 0.184314, 0.184314}, 
-                        {0.835294, 0.552941, 0.184314}, 
-                        {0.835294, 0.427451, 0.184314}, 
-                        {0.835294, 0.184314, 0.184314}, 
-                        {0.835294, 0.184314, 0.721569}, 
-                        {0.705882, 0.184314, 0.835294}, 
+                        {0.490196, 0.184314, 0.835294},
+                        {0.231373, 0.184314, 0.835294},
+                        {0.184314, 0.411765, 0.835294},
+                        {0.184314, 0.737255, 0.835294},
+                        {0.184314, 0.835294, 0.643137},
+                        {0.184314, 0.835294, 0.305882},
+                        {0.568627, 0.835294, 0.184314},
+                        {0.796078, 0.835294, 0.184314},
+                        {0.835294, 0.721569, 0.184314},
+                        {0.490196, 0.184314, 0.184314},
+                        {0.835294, 0.552941, 0.184314},
+                        {0.835294, 0.427451, 0.184314},
+                        {0.835294, 0.184314, 0.184314},
+                        {0.835294, 0.184314, 0.721569},
+                        {0.705882, 0.184314, 0.835294},
                         {1.000000, 1.000000, 1.000000},
                         {0.000000, 0.000000, 0.000000} };
 
@@ -1390,7 +1390,7 @@ void LoadTextures(){
     glBindTexture( GL_TEXTURE_2D, Texture_Earth );
 
     /*
-     * Read Filename 
+     * Read Filename
      */
     if ( (ReadPng( MapImageFilename, &Width, &Height, &pImage ) < 0) || (MapImageFilename == NULL) ) {
         if ( MapImageFilename != NULL ) free( MapImageFilename );
@@ -1629,7 +1629,7 @@ printf("height, base, RotAng = %g %g %g\n", height, base, RotAng);
         glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_trans.specular);
         glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_trans.shininess * 128.0);
 
-    
+
 
     glPushMatrix();
 
@@ -1815,7 +1815,7 @@ void CreateEarth( ){
         //glTranslatef( DipoleOffset_sm.x, DipoleOffset_sm.y, DipoleOffset_sm.z );
 
         // Then draw a cylinder+cone to represent the vector
-        glTranslatef( 0.0, 0.0, -1.7 ); 
+        glTranslatef( 0.0, 0.0, -1.7 );
         gluCylinder(qobj, 0.041, 0.041, 3.2, 15, 5);
         glTranslatef( 0.0, 0.0, 3.2 );
         gdk_gl_draw_cone( TRUE, 0.07, 0.4, 15, 5 );
@@ -1898,7 +1898,7 @@ if (1==1){
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
         glEnable( GL_TEXTURE_2D );
-//        glEnable( GL_BLEND ); 
+//        glEnable( GL_BLEND );
         glDepthMask( GL_FALSE );
 //        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glPushMatrix();
@@ -1913,7 +1913,7 @@ if (1==1){
         glEnd();
         glPopMatrix();
         glDepthMask( GL_TRUE );
-//        glDisable( GL_BLEND ); 
+//        glDisable( GL_BLEND );
         glDisable( GL_TEXTURE_2D );
     glEndList( );
 }
@@ -2130,7 +2130,7 @@ void CreateMoon( ){
             Lgm_ScaleVector( &P_gei, mInfo->c->EarthMoonDistance );
             Lgm_Convert_Coords( &P_gei, &P, StarsConvertFlag, mInfo->c );
             glTranslatef( P.x, P.y, P.z );
-        
+
 //        glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
 //        glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
         CreateSphere( 3.0*0.2724, 80 );
@@ -2168,7 +2168,7 @@ void CreateSCPos( ) {
         glPopMatrix();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDisable( GL_BLEND ); 
+        glDisable( GL_BLEND );
         glDisable(GL_LINE_SMOOTH);
         glEnable(GL_LIGHTING);
         glDepthMask( GL_TRUE );
@@ -2258,18 +2258,18 @@ void ReLoadStars( ) {
 
 /*
  * get axis/angle rot required for billboarding
- * 
+ *
  *      P is the position of the billboard
  *      camera is position of camera
  *
  * Use like this;
- *      
+ *
  *          glRotatef( Angle, Axis.x, Axis.y, Axis.z );
  *          glTranslatef( p.x, p.y, p.z );
  */
 void GetBillboardAxisAngle( Lgm_Vector *p, Lgm_Vector *camera, Lgm_Vector *Axis, double *Angle ){
 
-    
+
     double      Q[4], A[3][3];
     Lgm_Vector  X, Y, Z;
 
@@ -2298,8 +2298,8 @@ void GetBillboardAxisAngle( Lgm_Vector *p, Lgm_Vector *camera, Lgm_Vector *Axis,
     // convert quat to axis/angle
     Lgm_QuatToAxisAngle(  Q, Angle, Axis );
 
-    
-    
+
+
 }
 
 
@@ -2313,9 +2313,9 @@ int LoadTLEs( ){
     double      r, g, b, mag;
     _SgpTLE     *TLEs;
     int         nTLEs=0;
-    
+
     /*
-     * Read in TLEs 
+     * Read in TLEs
      */
     TLEs = (_SgpTLE *)calloc( 20000, sizeof(_SgpTLE) );
     for (i=0; i<nSatTypes; i++){
@@ -2407,7 +2407,7 @@ void DrawSatLabels(){
 
     int             ii;
     cairo_surface_t *cst;
-    cairo_t         *cr;    
+    cairo_t         *cr;
     GLuint          temp_tex;
     GLdouble        ModelViewMatrix[16];
     GLdouble        ProjMatrix[16];
@@ -2418,7 +2418,7 @@ void DrawSatLabels(){
     _SpaceObjects   *Group;
 
     g = SatSelectorInfo->SatGroupList;
-    
+
     if ( g == NULL ) return;
 
     glGetDoublev( GL_MODELVIEW_MATRIX, ModelViewMatrix );
@@ -2538,7 +2538,7 @@ void CreateSats() {
      * compute the tsince needed.
      */
     JD = CurrentJD;
-    
+
     SatsDL = glGenLists( 1 );
     glNewList( SatsDL, GL_COMPILE );
 //        glPointParameterf( GL_POINT_FADE_THRESHOLD_SIZE, 256.0 );
@@ -2849,7 +2849,7 @@ void CreateSatOrbits() {
      * compute the tsince needed.
      */
     JD = CurrentJD;
-    
+
     SatOrbitsDL = glGenLists( 1 );
     glNewList( SatOrbitsDL, GL_COMPILE );
         glDepthMask( GL_FALSE );
@@ -2905,7 +2905,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                 Lgm_Set_Coord_Transforms( tDate, tUT, c );
                                 Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
 
-                                
+
                                 bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
     //Lgm_VecSub( &cc, &bb, &aa );
                                 Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
@@ -2942,7 +2942,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                             }
                             // LINES BETWEEN ORBIT AND GROUND PATH
                             if ( Group->Sat[i].DrawOrbitToGroundLines ) {
-                                nMax = 25; 
+                                nMax = 25;
                                 //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
                                 glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
                                 glBegin( GL_LINES );
@@ -2973,7 +2973,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                             period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
 
                             // init n to zero and start at current time
-                            n=0; dt = 0.0; 
+                            n=0; dt = 0.0;
 
                             // do first one to start
                             tinc = period/1000.0; // start out with very small increment
@@ -2997,7 +2997,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                 Lgm_Set_Coord_Transforms( tDate, tUT, c );
                                 Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
 
-                                
+
                                 bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
                                 Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
                                 if (Theta > 1.0) tinc *= 0.61803398875;
@@ -3087,7 +3087,7 @@ static void init_view (void) {
 
 
     /*
-     *  Nominally, 
+     *  Nominally,
      *      z-axis points out of screen
      *      x-axis is to the right
      *      y-axis is up.
@@ -3385,7 +3385,7 @@ static void realize( GtkWidget *widget, gpointer data) {
     GLfloat local_view[]      = {0.0};
 
     /*
-     * OpenGL BEGIN 
+     * OpenGL BEGIN
      */
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
@@ -3416,7 +3416,7 @@ static void realize( GtkWidget *widget, gpointer data) {
 
 
 // these are time dep.
-    // Create 3D GSM axes 
+    // Create 3D GSM axes
     CreateGSMAxes( );
 //    CreateZPSAxes( );
 
@@ -3429,14 +3429,14 @@ static void realize( GtkWidget *widget, gpointer data) {
 
     // Create a DL for stars.
     LoadStars( );
-    
+
     // Load sats
 //    LoadTLEs( );
     CreateSats();
     CreateSatOrbits();
     CreateLogo();
 
-    
+
 
 
 // these are SC specific
@@ -3461,8 +3461,8 @@ static void realize( GtkWidget *widget, gpointer data) {
 
     init_view( );
     gdk_gl_drawable_gl_end( gldrawable );
-    /* 
-     *  OpenGL END 
+    /*
+     *  OpenGL END
      */
 
   return;
@@ -3480,10 +3480,10 @@ static gboolean configure_event( GtkWidget *widget, GdkEventConfigure *event, gp
     double h = widget->allocation.height;
     double Aspect;
     double FieldOfView = 45.0;
-    
 
-   /* 
-    * OpenGL BEGIN 
+
+   /*
+    * OpenGL BEGIN
     */
     if ( !gdk_gl_drawable_gl_begin( gldrawable, glcontext ) ) return FALSE;
 
@@ -3521,8 +3521,8 @@ static gboolean configure_event( GtkWidget *widget, GdkEventConfigure *event, gp
     glGenTextures( 1, &Texture_HiResEarthQuad );
 
     gdk_gl_drawable_gl_end( gldrawable );
-   /*    
-    * OpenGL END 
+   /*
+    * OpenGL END
     */
 
     return TRUE;
@@ -3530,7 +3530,7 @@ static gboolean configure_event( GtkWidget *widget, GdkEventConfigure *event, gp
 }
 
 void DrawScene( ) {
-    
+
     char        Str[256];
     int         i, ty, tm, td, tD;
     int         iii, ii, jj, nn, nph, nth;
@@ -3560,11 +3560,11 @@ void DrawScene( ) {
 
 
 
-//20100305    
+//20100305
 //glUseProgram( g_shaderMyTest );
 glCallList( DipoleAxisDL );
 //glUseProgram( 0 );
-//20100305    
+//20100305
 glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
 //glCallList( EqPlaneDL );
@@ -3604,7 +3604,7 @@ CHECK COORDS!
 
     glCallList( MoonDL );
 
-    
+
     glPushMatrix();
     glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); // This implements coord trans from Observer coords -> GSM
 
@@ -3851,11 +3851,11 @@ if (LightingStyle == 2){
 
         /*
          * Compute the location of the Camera. It was originally at +Z, but its
-         * been rotated by quat_view. 
+         * been rotated by quat_view.
          */
         glEnable( GL_DEPTH_TEST );
         glEnable( GL_CULL_FACE );
-        glEnable( GL_BLEND ); 
+        glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
         glPushMatrix();
 
@@ -3867,7 +3867,7 @@ if (LightingStyle == 2){
 
         glPopMatrix();
 
-        glDisable( GL_BLEND ); 
+        glDisable( GL_BLEND );
         glDisable( GL_CULL_FACE );
 //        glDisable( GL_DEPTH_TEST );
 
@@ -3885,7 +3885,7 @@ if (LightingStyle == 2){
 
     glPushMatrix();
     glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); // This implements coord trans from Observer coords -> GSM
-    
+
     //glUseProgram( g_shaderMyTest );
 
 glFrontFace(GL_CW);
@@ -3901,12 +3901,12 @@ glMaterialfv( GL_BACK, GL_AMBIENT,   gInfo->DriftShellMaterial[i].ambient );
 glMaterialfv( GL_BACK, GL_SPECULAR,  gInfo->DriftShellMaterial[i].specular );
 glMaterialf(  GL_BACK, GL_SHININESS, gInfo->DriftShellMaterial[i].shininess*128.0 );
             if ( (int)(gInfo->DriftShellMaterial[i].diffuse[3]*128.0) < 128 ) {
-                glEnable( GL_BLEND ); 
+                glEnable( GL_BLEND );
                 glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
             }
             glCallList( DriftShellList4 + i );
             if ( (int)(gInfo->DriftShellMaterial[i+1].diffuse[3]*128.0) < 128 ) {
-                glDisable( GL_BLEND ); 
+                glDisable( GL_BLEND );
             }
         }
     }
@@ -3923,9 +3923,9 @@ glFrontFace(GL_CCW);
 
 
 
-    
+
     int w = g_imageWidth;
-    int h = g_imageHeight*0.1; 
+    int h = g_imageHeight*0.1;
     if (h<100) h = 100;
     double rat = (double)h/(double)g_imageHeight;
     cairo_surface_t *cst = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, w, h );
@@ -4024,7 +4024,7 @@ glFrontFace(GL_CCW);
 
 
 gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) {
-    
+
     int             i;
     double          qq[4];
     double          TBQ[4]; // TB stands for trackball
@@ -4052,6 +4052,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     add_quats( view_quat_diff, view_quat, view_quat );
     add_quats( view_quat_diff3, view_quat3, view_quat3 );
 
+printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], view_quat[3] );
+//printf("view_quat3 = %g %g %g %g\n", view_quat3[0], view_quat3[1], view_quat3[2], view_quat3[3] );
 
     /*
      * Compute the location of the Camera. It was originally at +Z, but its
@@ -4125,7 +4127,7 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glPopMatrix();
 
     } else {
-    
+
         /*
          * Fixed illumination (light moves with viewer)
          */
@@ -4163,7 +4165,7 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
 
     gdk_gl_drawable_gl_end (gldrawable);
 
-    
+
 
 
 
@@ -4239,8 +4241,8 @@ void trackball2( float q[4], Lgm_Vector *u, Lgm_Vector *r, float px, float py, f
 
 
 
-    /* 
-     * Check for zero rotation 
+    /*
+     * Check for zero rotation
      */
     if ( (px == qx) && (py == qy) ) {
         q[0] = q[1] = q[2] = 0.0; q[3] = 1.0;
@@ -4261,13 +4263,13 @@ void trackball2( float q[4], Lgm_Vector *u, Lgm_Vector *r, float px, float py, f
     dy /= mag;
 
     phi = mag * -90.0*M_PI/180.0; // -45-deg
-    
+
 
     /*
      *  Now, we actually want to rotate about an axis thats perp to this.
      *  Above, we have bvec = dx xhat + dy yhat. To get the perp vector
      *  rot by 90deg. This gives, avec = -dy xhat + dx yhat
-     * 
+     *
      *  Here, xhat is the Right vector (r), and yhat if the Up vector (u)
      */
 //    Up = *u; Right = *r;
@@ -4342,7 +4344,7 @@ static gboolean idle( GtkWidget *widget ) {
         else if ( (AnimateTime == TIME_PLAY_BACKWARD) && (CurrentJD <= StartJD-1e-8)) AnimateTime  = TIME_STOP;
         else if ( (AnimateTime == TIME_STEP_FOREWARD) && (CurrentJD >= EndJD+1e-8))   AnimateTime  = TIME_STOP;
         else if ( (AnimateTime == TIME_STEP_BACKWARD) && (CurrentJD <= StartJD-1e-8)) AnimateTime  = TIME_STOP;
-        
+
         if ( AnimateTime == TIME_STOP ) {
             AdjustIdle( drawing_area );
         }
@@ -4389,7 +4391,7 @@ static gboolean idle( GtkWidget *widget ) {
         }
 
         if (oJD != CurrentJD){
-            sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay, 
+            sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,
                                 CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec, CurrentUT, CurrentJD );
             gtk_misc_set_alignment(GTK_MISC(CurrentTimeLabel), 0, 0.5);
             gtk_label_set_text( GTK_LABEL(CurrentTimeLabel), Str );
@@ -4405,7 +4407,7 @@ static gboolean idle( GtkWidget *widget ) {
 
     } else if ( AnimateView ) {
         expose_event( drawing_area, NULL, NULL );
-    } 
+    }
 
     /* Update synchronously. */
 // check this one out...
@@ -4498,8 +4500,8 @@ static void AdjustIdle( GtkWidget *widget ){
     int RunIdle = FALSE;
 
     // idle should ben running for any of these cases
-    if ( AnimateView || (AnimateTime == TIME_PLAY_FOREWARD) || (AnimateTime == TIME_PLAY_BACKWARD) 
-            || (AnimateTime == TIME_STEP_FOREWARD) || (AnimateTime == TIME_STEP_BACKWARD) 
+    if ( AnimateView || (AnimateTime == TIME_PLAY_FOREWARD) || (AnimateTime == TIME_PLAY_BACKWARD)
+            || (AnimateTime == TIME_STEP_FOREWARD) || (AnimateTime == TIME_STEP_BACKWARD)
             || (AnimateTime == TIME_REALTIMEPLAY) ) {
 
         RunIdle = TRUE;
@@ -4513,7 +4515,7 @@ static void AdjustIdle( GtkWidget *widget ){
         idle_remove( widget );
 //        gdk_window_invalidate_rect( widget->window, &widget->allocation, FALSE );
     }
-    
+
 }
 
 
@@ -4549,7 +4551,7 @@ void  ChangeMapImage( GtkFileChooser *chooser,  gpointer user_data){
     printf( "******************************************** You selected file: %s\n", MapImageFilename );
     if ( MapImageFilename == NULL ) return;
     LoadTextures();
-  
+
     return;
 
 }
@@ -4628,12 +4630,12 @@ static void ChangeStartOrEndDate( GtkWidget  *widget, gpointer data ) {
                 break;
 
     }
-    
+
     if ( k < 10 ) {
         StartDate = StartYear*10000 + StartMonth*100 + StartDay;
         StartJD = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
         printf("StartDate = %ld\n", StartDate);
-        sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay, 
+        sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay,
                                     StartHour, StartMin, StartSec, StartMilliSec, StartUT, StartJD );
         gtk_misc_set_alignment(GTK_MISC(StartTimeLabel), 0, 0.5);
         gtk_label_set_text( GTK_LABEL(StartTimeLabel), Str );
@@ -4641,7 +4643,7 @@ static void ChangeStartOrEndDate( GtkWidget  *widget, gpointer data ) {
         EndDate = EndYear*10000 + EndMonth*100 + EndDay;
         EndJD = Lgm_JD( EndYear, EndMonth, EndDay, EndUT, LGM_TIME_SYS_UTC, c );
         printf("EndDate = %ld\n", EndDate);
-        sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay, 
+        sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay,
                                     EndHour, EndMin, EndSec, EndMilliSec, EndUT, EndJD );
         gtk_misc_set_alignment(GTK_MISC(EndTimeLabel), 0, 0.5);
         gtk_label_set_text( GTK_LABEL(EndTimeLabel), Str );
@@ -4689,12 +4691,12 @@ static void ChangeStartOrEndTime( GtkWidget  *widget, gpointer data ) {
                 break;
 
     }
-    
+
     if ( k < 10 ) {
         StartUT = (double)StartHour + (double)StartMin/60.0 + (double)StartSec/3600.0;
         StartJD = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
         printf("StartTime = %lf\n", StartUT);
-        sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay, 
+        sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay,
                                     StartHour, StartMin, StartSec, StartMilliSec, StartUT, StartJD );
 printf("%s\n", Str);
         gtk_label_set_text( GTK_LABEL(StartTimeLabel), Str );
@@ -4702,7 +4704,7 @@ printf("%s\n", Str);
         EndUT = (double)EndHour + (double)EndMin/60.0 + (double)EndSec/3600.0;
         EndJD = Lgm_JD( EndYear, EndMonth, EndDay, EndUT, LGM_TIME_SYS_UTC, c );
         printf("EndTime = %lf\n", EndUT);
-        sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay, 
+        sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay,
                                     EndHour, EndMin, EndSec, EndMilliSec, EndUT, EndJD );
         gtk_label_set_text( GTK_LABEL(EndTimeLabel), Str );
     }
@@ -4729,8 +4731,8 @@ static void TimeAction( GtkWidget *widget, gpointer data ) {
 
     k = GPOINTER_TO_INT( data );
     switch ( k ) {
-        case TIME_RESET_BACKWARD_TO_START: 
-        case TIME_RESET_FOREWARD_TO_END: 
+        case TIME_RESET_BACKWARD_TO_START:
+        case TIME_RESET_FOREWARD_TO_END:
 
                 if ( k == TIME_RESET_BACKWARD_TO_START ) {
                     printf("Reset Current Time to Start Time...\n");
@@ -4766,7 +4768,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 ReCreateSatOrbits();
                 printf("A\n"); expose_event( drawing_area, NULL, NULL );
 
-                sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay, 
+                sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,
                                                     CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec, CurrentUT, CurrentJD );
                 gtk_misc_set_alignment(GTK_MISC(CurrentTimeLabel), 0, 0.5);
                 gtk_label_set_text( GTK_LABEL(CurrentTimeLabel), Str );
@@ -4774,7 +4776,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 //sprintf(Str, "Current Frame: %ld / %ld", cFrame, nFrames);
                 sprintf(Str, "Frames Done: %ld    Frames Remaining: %ld    (Total: %ld)", cFrame, nFramesLeft, nFrames);
                 gtk_label_set_text( GTK_LABEL(cFramesLabel), Str );
-                
+
                 break;
 
         case TIME_STEP_FOREWARD:
@@ -4823,7 +4825,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 AdjustIdle( drawing_area );
                 break;
 
-        case 5: 
+        case 5:
                 UpdateTimeDepQuants( CurrentDate, CurrentUT );
 
                 ReCreateEarth( );
@@ -4833,7 +4835,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 ReCreateSatOrbits();
                 printf("3.\n"); expose_event( drawing_area, NULL, NULL );
 
-                
+
                 break;
     }
 
@@ -4841,11 +4843,22 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
 }
 
 
+static void ChangeViewQuat( GtkWidget *widget, gpointer data) {
+    int     i;
+    double  val;
+
+    i   = GPOINTER_TO_INT( data );
+    val = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
+
+    view_quat[i] = val;
+    expose_event( drawing_area, NULL, NULL );
+}
+
 
 static void ChangenFieldPnts( GtkWidget *widget, gpointer data) {
     int n;
     // delete the old list
-    glDeleteLists( DriftShellList4, MagEphemInfo->nAlpha ); 
+    glDeleteLists( DriftShellList4, MagEphemInfo->nAlpha );
 
     // get new n value
     n = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
@@ -4858,11 +4871,11 @@ static void ChangenFieldPnts( GtkWidget *widget, gpointer data) {
     // re-create drift shell meshes
     MakeDriftShellMesh( &nShellPoints2 );
 
-    
+
 
     // create the new list
     GenerateDriftShellLists();
-    
+
     printf("4.\n"); expose_event( drawing_area, NULL, NULL );
 }
 static void ChangeStarsMaxMag( GtkWidget *widget, gpointer data) {
@@ -4887,7 +4900,7 @@ static void ChangeRayleighScattConst( GtkWidget *widget, gpointer data) {
 }
 
 static void ChangeRayleighScaleHeight( GtkWidget *widget, gpointer data) {
-    
+
     free( aInfo->DepthBuf );
     aInfo->rScaleHeight = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
     MakeOpticalDepthBuffer();
@@ -5089,7 +5102,7 @@ static gboolean button_press_event_popup_menu (GtkWidget *widget, GdkEventButton
 
 
 
-/* 
+/*
  * Creates the popup menu.
  */
 static GtkWidget * create_popup_menu (GtkWidget *drawing_area) {
@@ -5259,12 +5272,12 @@ static GtkWidget * create_popup_menu (GtkWidget *drawing_area) {
 
   menu_item = gtk_menu_item_new_with_label( "Fixed Illumination" );
   gtk_menu_shell_append( GTK_MENU_SHELL( lighting_menu ), menu_item );
-  g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 1 ) ); 
+  g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 1 ) );
   gtk_widget_show( menu_item );
 
   menu_item = gtk_menu_item_new_with_label( "Vertex Shader Test" );
   gtk_menu_shell_append( GTK_MENU_SHELL( lighting_menu ), menu_item );
-  g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 2 ) ); 
+  g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 2 ) );
   gtk_widget_show( menu_item );
 
 
@@ -5273,7 +5286,7 @@ static GtkWidget * create_popup_menu (GtkWidget *drawing_area) {
 
 
 
-  /* 
+  /*
    * Root popup menu.
    */
   menu = gtk_menu_new ();
@@ -5422,7 +5435,7 @@ void InterpFieldLine( double *x, double *y, double *z, double *s, double Ss, dou
 
 
 void MakeFieldLines( int nAddPnts, int *nNewFieldPoints ){
-    
+
     int i, ns, nInterpPoints, ii, kk;
     double  xout[200], yout[200], zout[200];
 
@@ -5447,11 +5460,11 @@ printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
 ////            ++kk;
             if (nPnts[i][ns] > 4 ){
 //                InterpFieldLine( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], s2_gsm[i][ns], nPnts2[i][ns], xout, yout, zout, nInterpPoints );
-                InterpFieldLine( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], s_gsm[i][ns], 
-                        //MagEphemInfo->ShellEllipsoidFootprint_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns], 
-                        MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns], 
-                        //MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns], 
-                        //0.0, MagEphemInfo->ShellMirror_Sn[i][ns], 
+                InterpFieldLine( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], s_gsm[i][ns],
+                        //MagEphemInfo->ShellEllipsoidFootprint_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns],
+                        MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns],
+                        //MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns],
+                        //0.0, MagEphemInfo->ShellMirror_Sn[i][ns],
                         nPnts[i][ns], xout, yout, zout, nInterpPoints );
                 for (ii=0; ii<nInterpPoints; ii++){
                     x3_gsm[i][ns][kk] = xout[ii];
@@ -5469,7 +5482,7 @@ printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
 //printf("z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2] = %g %g\n", z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2]);
             nNewFieldPoints[i] = kk; // will be 2 more than before.
 printf("nNewFieldPoints[i] = %d\n", nNewFieldPoints[i]);
-            
+
         }
     }
 //exit(0);
@@ -5494,7 +5507,7 @@ void MakeDriftShellMesh( int *nNewShellPoints ){
      *  We typically have more than enough points all the driftshell field
      *  lines.  However, we usually dont have very many field lines. So the
      *  drift shell surface can look more faceted than we would like. To solve
-     *  this, we want to add more points in-between the drift shell points. 
+     *  this, we want to add more points in-between the drift shell points.
      *
      *  Here, we assume that we have already interped the FL points to give a
      *  constant number of points along each FL.  If we take one index number
@@ -5534,7 +5547,7 @@ void MakeDriftShellMesh( int *nNewShellPoints ){
                     PhiArray[ns] = ns*360.0/(double)nShellPoints;
                 }
             }
-        
+
 
 
 
@@ -5622,12 +5635,12 @@ void MakeDriftShellMesh( int *nNewShellPoints ){
                     im1 = i-1; ip1 = i+1;
                 } else if ( i == 0 ) {
                     /*
-                     * Start FL point 
+                     * Start FL point
                      */
                     im1 = i; ip1 = i+1;
                 } else {
                     /*
-                     * End FL point 
+                     * End FL point
                      */
                     im1 = i-1; ip1 = i;
                 }
@@ -5655,7 +5668,7 @@ void MakeDriftShellMesh( int *nNewShellPoints ){
 
 
 
-    
+
 
 }
 
@@ -5674,7 +5687,7 @@ void TraceFieldLines( ){
     for ( i=0; i<MagEphemInfo->nAlpha; i++ ) {
         for ( ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++ ) {
 
-            
+
             /*
              *  Includes the entire field line.
              */
@@ -5685,13 +5698,13 @@ void TraceFieldLines( ){
                 y_gsm[i][ns][tn] = MagEphemInfo->y_gsm[i][ns][tn];
                 z_gsm[i][ns][tn] = MagEphemInfo->z_gsm[i][ns][tn];
             }
-            
+
 
 
 
             /*
              *  Include only portion of field between mirror points
-             *  Add the mirror points explicitly later. 
+             *  Add the mirror points explicitly later.
              */
             for (kk=0, tn=0; tn<MagEphemInfo->nFieldPnts[i][ns]; tn++ ){
 		        if ( ( MagEphemInfo->Bmag[i][ns][tn] < MagEphemInfo->Bm[i]-1e-6 ) && ( MagEphemInfo->Bmag[i][ns][tn] > 0.0 ) ) {
@@ -5734,8 +5747,8 @@ void create_ViewDriftShell( void *data ) {
 //    double              Q[4];
 
 
-    /* 
-     * Initialize GtkGLExt. 
+    /*
+     * Initialize GtkGLExt.
      */
 //    gtk_gl_init (&xInfo->argc, &xInfo->argv);
 
@@ -5784,8 +5797,8 @@ void create_ViewDriftShell( void *data ) {
 
 
 
-    /* 
-     * Get automatically redrawn if any of their children changed allocation. 
+    /*
+     * Get automatically redrawn if any of their children changed allocation.
      */
     gtk_container_set_reallocate_redraws( GTK_CONTAINER(ViewDriftShellWindow), TRUE );
 
@@ -5826,14 +5839,14 @@ void create_ViewDriftShell( void *data ) {
 
 
 
-    /* 
-     * Set OpenGL-capability to the widget. 
+    /*
+     * Set OpenGL-capability to the widget.
      */
     gtk_widget_set_gl_capability( drawing_area, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE );
 
-    // should not have to include GDK_POINTER_MOTION_MASK here but openSUSE 11.2 (or KDE 4.3) doesnt seem to pass me the 
+    // should not have to include GDK_POINTER_MOTION_MASK here but openSUSE 11.2 (or KDE 4.3) doesnt seem to pass me the
     // GDK_BUTTON1_MOTION_MASK type masks...
-    gtk_widget_add_events( drawing_area, GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK 
+    gtk_widget_add_events( drawing_area, GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK
                                          | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
 
     g_signal_connect_after(     G_OBJECT( drawing_area ), "realize",                  G_CALLBACK( realize ),                   NULL );
@@ -5870,8 +5883,8 @@ void create_ViewDriftShell( void *data ) {
      */
     menu = create_popup_menu( drawing_area );
 
-    /* 
-     * Signal handler 
+    /*
+     * Signal handler
      */
 //    g_signal_connect_swapped( G_OBJECT(drawing_area), "button_press_event", G_CALLBACK(button_press_event_popup_menu), menu );
 
@@ -5980,7 +5993,7 @@ static void ChangeMaterialShininess( GtkMenuItem  *menuitem, gpointer data ) {
              * So we need to set it back to "Custom" and re-read the color buttons too...
              */
             material = &gInfo->FieldLineMaterial[k];
-//            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k], 
+//            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k],
 //                                             gInfo->FieldLineSpecularColorButton[k], gInfo->FieldLineShininessButton[k]);
 
             g_signal_handler_block( G_OBJECT( gInfo->FieldLineMaterialButton[k] ), gInfo->FieldLineMaterialButtonHandler[k] );
@@ -5998,7 +6011,7 @@ static void ChangeMaterialShininess( GtkMenuItem  *menuitem, gpointer data ) {
              * So we need to set it back to "Custom" and re-read the color buttons too...
              */
             material = &gInfo->DriftShellMaterial[kk];
-//            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[kk], gInfo->DriftShellAmbientColorButton[kk], 
+//            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[kk], gInfo->DriftShellAmbientColorButton[kk],
 //                                             gInfo->DriftShellSpecularColorButton[kk], gInfo->DriftShellShininessButton[kk]);
 
             g_signal_handler_block( G_OBJECT( gInfo->DriftShellMaterialButton[kk] ), gInfo->DriftShellMaterialButtonHandler[kk] );
@@ -6007,7 +6020,7 @@ static void ChangeMaterialShininess( GtkMenuItem  *menuitem, gpointer data ) {
         }
     }
 
-    
+
 
 
     printf("25.\n"); expose_event( drawing_area, NULL, NULL );
@@ -6105,10 +6118,10 @@ printf("indx = %d\n", indx);
          * Get colors and shininess
          */
         if ( Flag) {
-            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[k], gInfo->DriftShellAmbientColorButton[k], 
+            GetAllMaterialColors( material, gInfo->DriftShellDiffuseColorButton[k], gInfo->DriftShellAmbientColorButton[k],
                                              gInfo->DriftShellSpecularColorButton[k], gInfo->DriftShellShininessButton[k]);
         } else {
-            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k], 
+            GetAllMaterialColors( material, gInfo->FieldLineDiffuseColorButton[k], gInfo->FieldLineAmbientColorButton[k],
                                              gInfo->FieldLineSpecularColorButton[k], gInfo->FieldLineShininessButton[k]);
         }
 
@@ -6143,8 +6156,8 @@ static void ChangeMaterialColor( GtkMenuItem  *menuitem, gpointer data ) {
     i = k/3;
     j = k-i*3;
 
-    
-    
+
+
 
     if (Flag){
 
@@ -6161,7 +6174,7 @@ printf("Flag = %d   indx = %d\n", Flag, indx );
             g_signal_handler_block( G_OBJECT( gInfo->DriftShellMaterialButton[i] ), gInfo->DriftShellMaterialButtonHandler[i] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->DriftShellMaterialButton[i]), 0);
             g_signal_handler_unblock( G_OBJECT( gInfo->DriftShellMaterialButton[i] ), gInfo->DriftShellMaterialButtonHandler[i] );
-        } 
+        }
 
         if (j==0) {
             button = gInfo->DriftShellDiffuseColorButton[i];
@@ -6187,7 +6200,7 @@ printf("Flag = %d   indx = %d\n", Flag, indx );
             g_signal_handler_block( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
             gtk_combo_box_set_active( GTK_COMBO_BOX(gInfo->FieldLineMaterialButton[i]), 0);
             g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), gInfo->FieldLineMaterialButtonHandler[i] );
-        } 
+        }
 
         if (j==0) {
             button = gInfo->FieldLineDiffuseColorButton[i];
@@ -6303,7 +6316,7 @@ static void SelectPitchAngles2( GtkWidget  *widget, gpointer data ) {
 static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
 
     int i;
-    
+
     for (i=0; i< 5; i++){
         if ( gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( RadioCoordSystem[i] ) ) ) break;
     }
@@ -6395,11 +6408,11 @@ printf("SpaceObjects->nSat = %d\n", SpaceObjects->nSat);
                 EarthToSun = tc->Sun; Lgm_ScaleVector( &EarthToSun, tc->earth_sun_dist );
                 IridiumFlare( JD, &SpaceObjects->Sat[i].TLE, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P);
 diff = Re*Lgm_VecDiffMag( &uu, &g1 );
-printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name ); 
+printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name );
                 if (Flag1){
                     diff = Re*Lgm_VecDiffMag( &uu, &g1 );
                     if ( diff < 40.0 ) {
-                        printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name ); 
+                        printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name );
                         Lgm_Print_HMSd( tUT ); printf(" )\n");
                     }
                 }
@@ -6449,7 +6462,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 //    GtkWidget           *grid1;
 
 
-    
+
 
     window1 = gtk_window_new( GTK_WINDOW_TOPLEVEL); gtk_widget_show( window1 );
     gtk_window_set_title( GTK_WINDOW(window1), _("Drift Shell Settings"));
@@ -6460,7 +6473,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_container_add (GTK_CONTAINER (window1), notebook);
 
 
-    /* 
+    /*
      * ******* Date/Time  Page *****************************************************
      */
     vbox2 = gtk_vbox_new (FALSE, 0); gtk_widget_show (vbox2);
@@ -6563,8 +6576,8 @@ GtkWidget *PitchAngleDisplayProperties(){
     label = gtk_label_new (_("sec")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table3), label, 2, 3, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
 
- 
- 
+
+
 
     // end date
     ++row;
@@ -6650,7 +6663,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     label = gtk_label_new (_("sec")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table3), label, 2, 3, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
- 
+
 
 
     // time increment + number of frames
@@ -6667,7 +6680,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_table_attach (GTK_TABLE (table1), spinbutton, 1, 2, row, row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
     g_signal_connect( G_OBJECT( spinbutton ), "value_changed", G_CALLBACK( ChangeTimeInc ), NULL );
- 
+
 
     // dump frames
     DumpFramesCheckbutton = gtk_check_button_new_with_mnemonic (_("Dump Frames")); gtk_widget_show (DumpFramesCheckbutton);
@@ -6686,32 +6699,32 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     // Start Time Label
     ++row;
-    sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay, 
+    sprintf(Str, "Start Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", StartYear, StartMonth, StartDay,
                                     StartHour, StartMin, StartSec, StartMilliSec, StartUT, StartJD );
     StartTimeLabel = gtk_label_new( Str ); gtk_widget_show(StartTimeLabel);
     gtk_table_attach (GTK_TABLE (table1), StartTimeLabel, 0, 4, row, row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_misc_set_alignment (GTK_MISC (StartTimeLabel), 0, 0.5);
- 
+
     // End Time Label
     ++row;
-    sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay, 
+    sprintf(Str, "End Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", EndYear, EndMonth, EndDay,
                                     EndHour, EndMin, EndSec, EndMilliSec, EndUT, EndJD );
     EndTimeLabel = gtk_label_new( Str ); gtk_widget_show(EndTimeLabel);
     gtk_table_attach (GTK_TABLE (table1), EndTimeLabel, 0, 4, row, row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_misc_set_alignment (GTK_MISC (EndTimeLabel), 0, 0.5);
- 
+
     // Current Time Label
     ++row;
-    sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay, 
+    sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,
                                     CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec, CurrentUT, CurrentJD );
     CurrentTimeLabel = gtk_label_new( Str ); gtk_widget_show(CurrentTimeLabel);
     gtk_table_attach (GTK_TABLE (table1), CurrentTimeLabel, 0, 4, row, row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_misc_set_alignment (GTK_MISC(CurrentTimeLabel), 0, 0.5);
- 
+
 
     // ********* action buttons ************
     ++row;
-    hbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (hbox); 
+    hbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (hbox);
     gtk_table_attach (GTK_TABLE (table1), hbox, 0, 4, row, row+1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
 
 //    button = gtk_button_new_with_mnemonic (_("Reset Current Time\n To Start Time")); gtk_widget_show (button);
@@ -6823,8 +6836,8 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
 
- 
-    /* 
+
+    /*
      * ******* Coordinate Systems Page *****************************************************
      */
     vbox2 = gtk_vbox_new (FALSE, 0); gtk_widget_show (vbox2);
@@ -6957,15 +6970,15 @@ GtkWidget *PitchAngleDisplayProperties(){
     colorbutton = gtk_color_button_new (); gtk_widget_show (colorbutton);
     gtk_table_attach (GTK_TABLE (table1), colorbutton, 3, 4, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
 
- 
- 
 
 
 
 
 
 
-    /* 
+
+
+    /*
      * ******** Field Lines Page ****************************************************
      */
     vbox2 = gtk_vbox_new (FALSE, 0); gtk_widget_show (vbox2);
@@ -6983,7 +6996,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_table_set_row_spacings( GTK_TABLE (table1), 0 );
     gtk_table_set_col_spacings( GTK_TABLE (table1), 10 );
 
-    
+
     col = 0;
     // Pitch angle column
     label = gtk_label_new (_("<b>Pitch\nAngle</b>")); gtk_widget_show (label);
@@ -6994,7 +7007,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     // vertical separator
     vseparator = gtk_vseparator_new (); gtk_widget_show (vseparator);
-    gtk_table_attach (GTK_TABLE (table1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0); 
+    gtk_table_attach (GTK_TABLE (table1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0);
     ++col;
 
     // Column Headers for Field Lines
@@ -7041,7 +7054,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     // Separator
     hseparator = gtk_hseparator_new (); gtk_widget_show (hseparator);
-    gtk_table_attach (GTK_TABLE (table1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0); 
+    gtk_table_attach (GTK_TABLE (table1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
 
@@ -7082,7 +7095,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
         GtkCellRenderer *cr = gtk_cell_renderer_text_new();
         g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
-        gtk_tree_store_clear( ts ); 
+        gtk_tree_store_clear( ts );
 
         for (ii=nNamedMaterials-1; ii>=0; ii--){
             gtk_tree_store_insert( ts, &iter, NULL, 0 );
@@ -7091,7 +7104,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         gtk_tree_store_insert( ts, &iter, NULL, 0 );
         gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
 
-        gInfo->FieldLineMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) ); 
+        gInfo->FieldLineMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) );
         gtk_widget_set_size_request( gInfo->FieldLineMaterialButton[i], 30, 20);
         gtk_cell_layout_pack_start( GTK_CELL_LAYOUT(gInfo->FieldLineMaterialButton[i]), cr, FALSE);
         gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT(gInfo->FieldLineMaterialButton[i]), cr, "text", 0, NULL);
@@ -7101,7 +7114,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineMaterialButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
         gInfo->FieldLineMaterialButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->FieldLineMaterialButton[i] ), "changed", G_CALLBACK( ChangeMaterial ), GINT_TO_POINTER(i) );
         ++col;
-      
+
 
         color.red = gInfo->FieldLineMaterial[i].diffuse[0]*65535;
         color.green = gInfo->FieldLineMaterial[i].diffuse[1]*65535;
@@ -7161,14 +7174,14 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_container_set_border_width (GTK_CONTAINER (vbox2), 20);
 
     // Page title
-    label = gtk_label_new (_("<b><span size=\"small\">Drift Shells</span></b>")); 
+    label = gtk_label_new (_("<b><span size=\"small\">Drift Shells</span></b>"));
     gtk_widget_show (label);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), vbox2, label );
 
     // Table for widgets
-    table1 = gtk_table_new (40, 10, FALSE); 
+    table1 = gtk_table_new (40, 10, FALSE);
     gtk_widget_show (table1);
     gtk_box_pack_start( GTK_BOX (vbox2), table1, TRUE, TRUE, 15 );
     gtk_table_set_row_spacings (GTK_TABLE (table1), 0);
@@ -7185,7 +7198,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     // vertical separator
     vseparator = gtk_vseparator_new (); gtk_widget_show (vseparator);
-    gtk_table_attach (GTK_TABLE (table1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0); 
+    gtk_table_attach (GTK_TABLE (table1), vseparator, col, col+1, 0, 13, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_FILL), 0, 0);
     ++col;
 
 
@@ -7235,7 +7248,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     // Separator
     hseparator = gtk_hseparator_new (); gtk_widget_show (hseparator);
-    gtk_table_attach (GTK_TABLE (table1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0); 
+    gtk_table_attach (GTK_TABLE (table1), hseparator, 0, 8, 2, 3, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
     /*
@@ -7262,7 +7275,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         /*
          *  Drift Shells
          */
-        gInfo->DriftShellShowPitchAngleButton[i] = gtk_check_button_new(); 
+        gInfo->DriftShellShowPitchAngleButton[i] = gtk_check_button_new();
         gtk_widget_show( gInfo->DriftShellShowPitchAngleButton[i] );
         gtk_widget_set_size_request( gInfo->DriftShellShowPitchAngleButton[i], 30, 20);
         if (i==0) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[i] ), ShowAllPitchAngles2 );
@@ -7276,7 +7289,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
         GtkCellRenderer *cr = gtk_cell_renderer_text_new();
         g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
-        gtk_tree_store_clear( ts ); 
+        gtk_tree_store_clear( ts );
 
         for (ii=nNamedMaterials-1; ii>=0; ii--){
             gtk_tree_store_insert( ts, &iter, NULL, 0 );
@@ -7285,7 +7298,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         gtk_tree_store_insert( ts, &iter, NULL, 0 );
         gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
 
-        gInfo->DriftShellMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) ); 
+        gInfo->DriftShellMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) );
         gtk_widget_set_size_request( gInfo->DriftShellMaterialButton[i], 30, 20);
         gtk_cell_layout_pack_start( GTK_CELL_LAYOUT(gInfo->DriftShellMaterialButton[i]), cr, FALSE);
         gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT(gInfo->DriftShellMaterialButton[i]), cr, "text", 0, NULL);
@@ -7305,9 +7318,9 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
 
-            
-        color.red = gInfo->DriftShellMaterial[i].diffuse[0]*65535; 
-        color.green = gInfo->DriftShellMaterial[i].diffuse[1]*65535; 
+
+        color.red = gInfo->DriftShellMaterial[i].diffuse[0]*65535;
+        color.green = gInfo->DriftShellMaterial[i].diffuse[1]*65535;
         color.blue = gInfo->DriftShellMaterial[i].diffuse[2]*65535;
         gInfo->DriftShellDiffuseColorButton[i] = gtk_color_button_new_with_color( &color ); gtk_widget_show( gInfo->DriftShellDiffuseColorButton[i] );
         gtk_widget_set_size_request( gInfo->DriftShellDiffuseColorButton[i], 30, 20);
@@ -7441,7 +7454,7 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
 
-    // Latitude 
+    // Latitude
     hbox = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox);
     gtk_table_attach (GTK_TABLE (table1), hbox, 0, 1, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
 
@@ -7453,7 +7466,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_box_pack_start (GTK_BOX (hbox), spinbutton, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
 
-    // Longitude 
+    // Longitude
     hbox = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox);
     gtk_table_attach (GTK_TABLE (table1), hbox, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
@@ -7465,7 +7478,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_box_pack_start (GTK_BOX (hbox), spinbutton, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
 
-    // Altitude 
+    // Altitude
     hbox = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox);
     gtk_table_attach (GTK_TABLE (table1), hbox, 2, 3, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
@@ -7513,7 +7526,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
 
 
-    // Search 
+    // Search
     hbox = gtk_hbox_new (TRUE, 0); gtk_widget_show (hbox);
     gtk_table_attach (GTK_TABLE (table1), hbox, 0, 4, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
 
@@ -7579,7 +7592,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_DATE );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Time */
     renderer = gtk_cell_renderer_text_new ();
@@ -7587,7 +7600,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_TIME );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Magnitude */
     renderer = gtk_cell_renderer_text_new ();
@@ -7595,7 +7608,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_MAGNITUDE );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Alt */
     renderer = gtk_cell_renderer_text_new ();
@@ -7603,7 +7616,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_ALT );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Az */
     renderer = gtk_cell_renderer_text_new ();
@@ -7611,7 +7624,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_AZ );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Dist to Center */
     renderer = gtk_cell_renderer_text_new ();
@@ -7619,7 +7632,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_DIST_TO_CENTER );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Magnitude at Center */
     renderer = gtk_cell_renderer_text_new ();
@@ -7627,7 +7640,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_MAGNITUDE_AT_CENTER );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     /* column for Dist to Center */
     renderer = gtk_cell_renderer_text_new ();
@@ -7635,7 +7648,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_tree_view_column_set_alignment( column, 0.5 );
     gtk_tree_view_column_set_resizable( column, TRUE );
     gtk_tree_view_column_set_sort_column_id( column, IRIDIUM_FLARE_COLUMN_SATELLITE );
-    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column ); 
+    gtk_tree_view_append_column( GTK_TREE_VIEW(treeview), column );
 
     gtk_widget_show_all( scrolledwindow );
     gtk_widget_show( treeview );
@@ -7673,13 +7686,13 @@ GtkWidget *PitchAngleDisplayProperties(){
      * Row for Toggle button
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Show\nAtmosphere:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Show\nAtmosphere:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
     checkbutton = gtk_check_button_new(); gtk_widget_show( checkbutton );
@@ -7692,13 +7705,13 @@ GtkWidget *PitchAngleDisplayProperties(){
      * Row for Rayleigh Scattering
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Rayleigh\nScattering:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Rayleigh\nScattering:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -7741,13 +7754,13 @@ GtkWidget *PitchAngleDisplayProperties(){
      * Row for Mie Scattering
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Mie\nScattering:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Mie\nScattering:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -7783,7 +7796,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     gtk_box_pack_start (GTK_BOX (hbox), MieScaleHeightButton, FALSE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (MieScaleHeightButton), TRUE);
     g_signal_connect( G_OBJECT( MieScaleHeightButton ), "value_changed", G_CALLBACK( ChangeMieScaleHeight ), NULL );
-    
+
 
     // assym factor label + button
     hbox = gtk_hbox_new (FALSE, 5); gtk_widget_show (hbox);
@@ -7803,18 +7816,18 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
 
-    
+
     /*
      * Row for Sun
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Solar Intensity:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Solar Intensity:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
     // Intensity label+button
@@ -7838,13 +7851,13 @@ GtkWidget *PitchAngleDisplayProperties(){
      * Row for Sun
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Solar Color:</b>\n(\u019B's in nm)")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Solar Color:</b>\n(\u019B's in nm)")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -7902,13 +7915,13 @@ GtkWidget *PitchAngleDisplayProperties(){
      * Row for Outer Sphere
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Outer Sphere:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Outer Sphere:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -7949,13 +7962,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (OuterSpherenButton), TRUE);
      * Row for Inner Sphere
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b>Inner Sphere:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Inner Sphere:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 6, 7, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 6, 7, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -7998,13 +8011,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
      * Row for Samples
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    label = gtk_label_new (_("<b># Samples:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b># Samples:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 7, 8, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 7, 8, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
 
@@ -8066,7 +8079,7 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
      * Row for Toggle button
      * The rows on this page are two cols: col 1 is label col two holds hbox (which holds othwer hboxes)
      */
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 0, 1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
     checkbutton = gtk_check_button_new(); gtk_widget_show( checkbutton );
@@ -8074,7 +8087,7 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_box_pack_start (GTK_BOX (RowHbox), checkbutton, FALSE, FALSE, 0);
     g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleStars ), NULL );
 
-    label = gtk_label_new (_("<b>Show Stars</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Show Stars</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 1, 2, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
@@ -8084,13 +8097,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     /*
      * Row for Max Magnitude
      */
-    label = gtk_label_new (_("<b>Star Magnitude:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Star Magnitude:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 2, 3, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 3, 4, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
 
     // Max Magnitude button
@@ -8142,8 +8155,8 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_file_chooser_add_filter( GTK_FILE_CHOOSER(filechooserbutton), PngFilter );
     gtk_file_chooser_set_filter( GTK_FILE_CHOOSER(filechooserbutton), PngFilter );
 
-    gtk_widget_show (filechooserbutton);
-    gtk_table_attach (GTK_TABLE (table1), filechooserbutton, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
+    gtk_widget_show( filechooserbutton );
+    gtk_table_attach( GTK_TABLE (table1), filechooserbutton, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 5);
 
     g_signal_connect( G_OBJECT( filechooserbutton ), "file-set" , G_CALLBACK( ChangeMapImage ), NULL );
 
@@ -8151,8 +8164,65 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
 
     label = gtk_label_new (_("Map Image: "));
     gtk_widget_show (label);
-    gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 10);
     gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+
+
+
+    /*
+     * Row for quat_view Quaternion
+     */
+    label = gtk_label_new (_("<b>View Quat:</b>")); gtk_widget_show (label);
+    gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
+    gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new (FALSE, 5); gtk_widget_show (hbox);
+    gtk_box_pack_start (GTK_BOX (RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new ( 0.0, -1.0, 1.0, 0.01, 0.10, 0);
+    GtkWidget *ViewQuatButton0 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 0.001, 5);
+    gtk_widget_show( ViewQuatButton0 );
+    gtk_box_pack_start( GTK_BOX (hbox), ViewQuatButton0, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(ViewQuatButton0), TRUE);
+    g_signal_connect( G_OBJECT( ViewQuatButton0 ), "value_changed", G_CALLBACK( ChangeViewQuat ), GINT_TO_POINTER( 0 ) );
+
+    spinbutton1_adj = gtk_adjustment_new ( -sqrt(0.5), -1.0, 1.0, 0.01, 0.10, 0);
+    GtkWidget *ViewQuatButton1 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 0.001, 5);
+    gtk_widget_show( ViewQuatButton1 );
+    gtk_box_pack_start( GTK_BOX (hbox), ViewQuatButton1, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(ViewQuatButton1), TRUE);
+    g_signal_connect( G_OBJECT( ViewQuatButton1 ), "value_changed", G_CALLBACK( ChangeViewQuat ), GINT_TO_POINTER( 1 ) );
+
+    spinbutton1_adj = gtk_adjustment_new ( -sqrt(0.5), -1.0, 1.0, 0.01, 0.10, 0);
+    GtkWidget *ViewQuatButton2 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 0.001, 5);
+    gtk_widget_show( ViewQuatButton2 );
+    gtk_box_pack_start( GTK_BOX (hbox), ViewQuatButton2, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(ViewQuatButton2), TRUE);
+    g_signal_connect( G_OBJECT( ViewQuatButton2 ), "value_changed", G_CALLBACK( ChangeViewQuat ), GINT_TO_POINTER( 2 ) );
+
+    spinbutton1_adj = gtk_adjustment_new ( 0.0, -1.0, 1.0, 0.01, 0.10, 0);
+    GtkWidget *ViewQuatButton3 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 0.001, 5);
+    gtk_widget_show( ViewQuatButton3 );
+    gtk_box_pack_start( GTK_BOX (hbox), ViewQuatButton3, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(ViewQuatButton3), TRUE);
+    g_signal_connect( G_OBJECT( ViewQuatButton3 ), "value_changed", G_CALLBACK( ChangeViewQuat ), GINT_TO_POINTER( 3 ) );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8182,13 +8252,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     /*
      * Row for nFieldLine Points
      */
-    label = gtk_label_new (_("<b>Fieldline Pnts:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Fieldline Pnts:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
     // nFieldline Points button
@@ -8212,13 +8282,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     /*
      * Row for Lighting
      */
-    label = gtk_label_new (_("<b>Lighting:</b>")); gtk_widget_show (label); 
+    label = gtk_label_new (_("<b>Lighting:</b>")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, 0, 1, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment (GTK_MISC (label), 1, 0.5);
 
-    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox); 
+    RowHbox = gtk_hbox_new (FALSE, 10); gtk_widget_show (RowHbox);
     gtk_table_attach (GTK_TABLE (table1), RowHbox, 1, 2, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
 
     // nFieldline Points button
@@ -8261,7 +8331,7 @@ int main( int argc, char *argv[] ) {
 
     InitSatSelectorInfo();
 
-    
+
 
     StartYear  = 2008; StartMonth = 7; StartDay   = 22;
 //StartYear  = 2009; StartMonth = 4; StartDay   = 20;

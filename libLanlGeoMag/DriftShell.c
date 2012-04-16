@@ -23,12 +23,13 @@
  *            \return 0 - no field line could be found
  *
  */
-int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, Lgm_LstarInfo *LstarInfo) {
+int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector    u, w, Pm_North, Pmirror, v1, v2, v3;
     double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
     double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2;
     int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
 
+    *Iterations = 0;
 
     /*
      *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
@@ -534,6 +535,7 @@ exit(0);
 
 
 
+    *Iterations = nIts;
 
 
 

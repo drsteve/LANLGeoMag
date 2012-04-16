@@ -31,11 +31,13 @@ mInfo->Bfield = Lgm_B_T89;
     //vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
     Date = 19960106;
     UTC  = 1.2444444444444445;
+Date = 20130101;
+UTC = 0.0;
 
 
 
 
-    mInfo->Kp = 2;
+    mInfo->Kp = 1;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
     u.x = -4.0; u.y = 0.0; u.z = 1.0;
     r = 4.83415065;
@@ -44,6 +46,9 @@ mInfo->Bfield = Lgm_B_T89;
     u.x = r*cos(lat)*cos(lon);
     u.y = r*cos(lat)*sin(lon);
     u.z = r*sin(lat);
+u.x = -1.0782061357444688;
+u.y = -0.02002017766251564;
+u.z = 0.0013214621445654662;
     printf("u_gsm = %.15lf %.15lf %.15lf\n", u.x, u.y, u.z);
 //    Lgm_Convert_Coords( &u, &v, GSM_TO_WGS84, c );
 //    printf("v_wgs84 = %.15lf %.15lf %.15lf\n", v.x, v.y, v.z);
