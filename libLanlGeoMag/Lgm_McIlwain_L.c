@@ -195,10 +195,12 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                     }
 
+                } else {
+                    if (mInfo->VerbosityLevel > 0) printf("Could not find northern mirror point.\n");
                 }
 
             } else {
-                printf("Could not find southern mirror point.\n");
+                if (mInfo->VerbosityLevel > 0) printf("Could not find southern mirror point.\n");
             }
 
         } 
