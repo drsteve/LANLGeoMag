@@ -760,7 +760,7 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
 
 
 
-    int         i, i1=0, i2=0;
+    int         i, i1=0, i2=0, Shift=FALSE;
     Lgm_Vector  Bcdip;
 
     /*
@@ -781,9 +781,11 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
     if ( s < Info->s[0]) {
         i1 = -1;
         i2 =  0;
+        Shift = TRUE;
     } else if ( s > Info->s[Info->nPnts-1]) {
         i1 = Info->nPnts-1;
         i2 = Info->nPnts;
+        Shift = FALSE;
     } else {
 
         /*
@@ -796,6 +798,11 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
                 break;
             }
         }
+        Shift = TRUE;
+
+    }
+
+    if ( Shift ) {
         /*
          *  Make room for new point
          */
@@ -806,7 +813,6 @@ void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
             Info->Py[i+1]   = Info->Py[i];
             Info->Pz[i+1]   = Info->Pz[i];
         }
-
     }
 
 

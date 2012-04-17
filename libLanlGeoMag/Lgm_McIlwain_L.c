@@ -30,8 +30,11 @@
  */
 double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo ) {
 
-    Lgm_Vector      v1, v2, v3, Bvec;
-    double          rat, B, sa, sa2, Blocal, dSa, dSb, r, SS, L;
+    int             reset;
+    Lgm_Vector      v1, v2, v3, Bvec, Bvectmp, Ptmp, u_scale;
+    double          rat, B, sa, sa2, Blocal, dSa, dSb, r, SS, L, stmp, Hdid, Hnext, Btmp;
+
+    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
 
     *I  = -9e99;
     *Bm = -9e99;
@@ -138,10 +141,34 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                     } else if ( mInfo->UseInterpRoutines ) {
                         if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(-9e99);
-//printf("BEFORE mInfo->nPnts = %d   mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
+//printf("BEFORE mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
-                        //ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_South, mInfo );
-//printf("AFTER mInfo->nPnts = %d   mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
+                        ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_North, mInfo );
+//printf("AFTER1 mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
+
+                        /*
+                         * Make sure we have a small margin before and after so
+                         * we dont end up trying to extrapolate if s ever getd
+                         * slightly out of bounds.
+                         */
+                        Ptmp = mInfo->Pm_South; stmp = 0.0; reset = FALSE;
+                        if ( Lgm_MagStep( &Ptmp, &u_scale, 0.01, &Hdid, &Hnext, -1.0, &stmp, &reset, mInfo->Bfield, mInfo ) < 0 ) { return(-1); }
+                        mInfo->Bfield( &Ptmp, &Bvectmp, mInfo ); Btmp = Lgm_Magnitude( &Bvectmp );
+                        //printf("-stmp, Btmp = %g %g\n", -stmp, Btmp );
+                        AddNewPoint( -stmp, Btmp, &Ptmp, mInfo );
+//printf("AFTER2 mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
+
+                        Ptmp = mInfo->Pm_North; stmp = 0.0; reset = FALSE;
+                        if ( Lgm_MagStep( &Ptmp, &u_scale, 0.01, &Hdid, &Hnext, 1.0, &stmp, &reset, mInfo->Bfield, mInfo ) < 0 ) { return(-1); }
+                        mInfo->Bfield( &Ptmp, &Bvectmp, mInfo ); Btmp = Lgm_Magnitude( &Bvectmp );
+                        //printf("stmp, Btmp = %g %g\n", SS+stmp, Btmp );
+                        AddNewPoint( SS+stmp, Btmp, &Ptmp, mInfo );
+
+                        
+                        
+                        
+
+//printf("AFTER2 mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         //AddNewPoint( SS,  mInfo->Bm, &mInfo->Pm_North, mInfo );
                         if ( InitSpline( mInfo ) ) {
 
