@@ -451,8 +451,8 @@ int  Lgm_TraceLine2(  Lgm_Vector *, Lgm_Vector *, double, double, double, double
 int  Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info );
 int  Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, int N, int AddBminPoint, Lgm_MagModelInfo *Info );
 
-void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
-void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
+int  ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
+int  ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 void AddNewPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info );
 int  InitSpline( Lgm_MagModelInfo *Info );
 int  FreeSpline( Lgm_MagModelInfo *Info );

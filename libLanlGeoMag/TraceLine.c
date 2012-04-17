@@ -704,55 +704,52 @@ if (0==1){
 
 }
 
-void ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
+int ReplaceFirstPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector  Bcdip;
 
-    Info->s[0]    = s;
-    Info->Bmag[0] = B;
-    Info->Px[0]   = P->x;
-    Info->Py[0]   = P->y;
-    Info->Pz[0]   = P->z;
-    Lgm_B_cdip( P, &Bcdip, Info );
-    Info->BminusBcdip[0] = Info->Bmag[0] - Lgm_Magnitude( &Bcdip );
+    /* 
+     *  Make sure that doing the replacement does not leave us with a
+     *  non-monotonic array.
+     */
+    if ( s < Info->s[0] ){
+        Info->s[0]    = s;
+        Info->Bmag[0] = B;
+        Info->Px[0]   = P->x;
+        Info->Py[0]   = P->y;
+        Info->Pz[0]   = P->z;
+        Lgm_B_cdip( P, &Bcdip, Info );
+        Info->BminusBcdip[0] = Info->Bmag[0] - Lgm_Magnitude( &Bcdip );
+        return( 1 );
+    } else {
+        return( 0 );
+    }
 
 }
 
-void ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
+int ReplaceLastPoint( double s, double B, Lgm_Vector *P, Lgm_MagModelInfo *Info ) {
 
     int         n;
     Lgm_Vector  Bcdip;
-//FILE *fp10;
-//int i;
-//
-//fp10 = fopen("puke10.txt", "w");
-//for(i=0; i<Info->nPnts; i++){
-//    fprintf(fp10, "%.15lf %.15lf\n", Info->s[i], Info->Bmag[i]);
-//}
-//fclose(fp10);
-//exit(0);
 
-//printf("BEFORE: s = %.15lf B0= %.15lf\n", Info->s[0], Info->Bmag[0]);
-    if (Info->nPnts > 0){
-        n = Info->nPnts-1;
-//printf("BEFORE: s = %.15lf B= %.15lf\n", Info->s[n], Info->Bmag[n]);
+    /* 
+     *  Make sure that doing the replacement does not leave us with a
+     *  non-monotonic array.
+     */
+    n = Info->nPnts-1;
+    if ((Info->nPnts > 0)&&(s > Info->s[n])){
         Info->s[n]    = s;
         Info->Bmag[n] = B;
-//printf("AFTER: s = %.15lf B= %.15lf\n\n\n", Info->s[n], Info->Bmag[n]);
         Info->Px[n]   = P->x;
         Info->Py[n]   = P->y;
         Info->Pz[n]   = P->z;
         Lgm_B_cdip( P, &Bcdip, Info );
         Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );
+        return( 1 );
+    } else {
+        return( 0 );
     }
 
-//fp10 = fopen("puke11.txt", "w");
-//for(i=0; i<Info->nPnts; i++){
-//    fprintf(fp10, "%.15lf %.15lf\n", Info->s[i], Info->Bmag[i]);
-//}
-//fclose(fp10);
-//
-//exit(0);
 }
 
 
