@@ -38,6 +38,7 @@ START_TEST(test_MCILWAIN_01) {
         fscanf( fp_expected, "%lf", &I_expected );
         fscanf( fp_expected, "%lf", &Bm_expected );
         fscanf( fp_expected, "%lf", &M_expected );
+        fclose( fp_expected );
     } else {
         printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_01.expected\n" );
     }
@@ -64,7 +65,6 @@ START_TEST(test_MCILWAIN_01) {
         printf("Could not open file: check_McIlwain_L_01.got\\n");
     }
 
-    fclose( fp_expected );
     fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_01.expected check_McIlwain_L_01.got\n" );
 
 
@@ -88,6 +88,7 @@ START_TEST(test_MCILWAIN_02) {
         fscanf( fp_expected, "%lf", &I_expected );
         fscanf( fp_expected, "%lf", &Bm_expected );
         fscanf( fp_expected, "%lf", &M_expected );
+        fclose( fp_expected );
     } else {
         printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_02.expected\n" );
     }
@@ -113,7 +114,6 @@ START_TEST(test_MCILWAIN_02) {
         printf("Could not open file: check_McIlwain_L_02.got\\n");
     }
 
-    fclose( fp_expected );
     fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_02.expected check_McIlwain_L_02.got\n" );
 
 
@@ -138,6 +138,7 @@ START_TEST(test_MCILWAIN_03) {
         fscanf( fp_expected, "%lf", &I_expected );
         fscanf( fp_expected, "%lf", &Bm_expected );
         fscanf( fp_expected, "%lf", &M_expected );
+        fclose( fp_expected );
     } else {
         printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_03.expected\n" );
     }
@@ -163,7 +164,6 @@ START_TEST(test_MCILWAIN_03) {
         printf("Could not open file: check_McIlwain_L_03.got\\n");
     }
 
-    fclose( fp_expected );
     fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_03.expected check_McIlwain_L_03.got\n" );
 
 
@@ -187,6 +187,7 @@ START_TEST(test_MCILWAIN_04) {
         fscanf( fp_expected, "%lf", &I_expected );
         fscanf( fp_expected, "%lf", &Bm_expected );
         fscanf( fp_expected, "%lf", &M_expected );
+        fclose( fp_expected );
     } else {
         printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_04.expected\n" );
     }
@@ -198,7 +199,7 @@ START_TEST(test_MCILWAIN_04) {
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
     if ( !Passed ){
-        printf("\nTest 01, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
+        printf("\nTest 04, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
         printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
         printf("                        Got: %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M);
     }
@@ -213,7 +214,6 @@ START_TEST(test_MCILWAIN_04) {
         printf("Could not open file: check_McIlwain_L_04.got\\n");
     }
 
-    fclose( fp_expected );
     fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_04.expected check_McIlwain_L_04.got\n" );
 
 
