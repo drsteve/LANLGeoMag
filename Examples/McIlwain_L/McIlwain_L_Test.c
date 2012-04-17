@@ -65,7 +65,6 @@ u.z = -1.0028377093930358;
     a = 90.0;
 
     L = Lgm_McIlwain_L( Date, UTC, &u, a, 1, &I, &Bm, &M, mInfo );
-printf("mInfo->nPnts = %d\n", mInfo->nPnts);
     printf("Pitch Angle: %g    McIlwain L  = %.15g   ( I, Bm, M = %.15g %g %g )\n", a, L, I, Bm, M);
 
 

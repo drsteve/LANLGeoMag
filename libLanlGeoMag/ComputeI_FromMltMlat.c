@@ -3,10 +3,11 @@
 
 double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
 
-    int         reset=1;
-    
+    int         reset=1, reset2;
+
     double      I, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
-    Lgm_Vector  w, u, Pmirror1, Pmirror2, v1, v2, v3, Bvec, P, Ps, u_scale;
+    Lgm_Vector  w, u, Pmirror1, Pmirror2, v1, v2, v3, Bvec, P, Ps, u_scale, Bvectmp, Ptmp;
+    double      stmp, Btmp;
 
 
     /*
@@ -78,7 +79,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 //printf("1. Be-Bs = %g        Be, Bs = %.15g %.15g  Bm = %.15g\n", Be - Bs, Be, Bs, LstarInfo->mInfo->Bm);
             sgn = -1.0;
         } else {
-            
+
 //printf("2a. Be-Bs = %g        Be, Bs = %.15g %.15g Bm = %.15g\n", Be - Bs, Be, Bs, LstarInfo->mInfo->Bm);
             // try the other direction
             P = Pmirror1;
@@ -95,7 +96,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 sgn = 1.0;
             } else {
                 // we are probably very close to Pmin. So I=0.
-                return( 0.0 ); 
+                return( 0.0 );
             }
 
         }
@@ -194,6 +195,25 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
 //MGH MGH                            ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
 //MGH MGH                            AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
+                ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
+                ReplaceLastPoint( SS, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
+
+                /*
+                 * Make sure we have a small margin before and after so
+                 * we dont end up trying to extrapolate if s ever getd
+                 * slightly out of bounds.
+                 */
+                 Ptmp = LstarInfo->mInfo->Pm_South; stmp = 0.0; reset2 = FALSE;
+                 if ( Lgm_MagStep( &Ptmp, &u_scale, 0.01, &Hdid, &Hnext, -1.0, &stmp, &reset2, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) { return(-1); }
+                 LstarInfo->mInfo->Bfield( &Ptmp, &Bvectmp, LstarInfo->mInfo ); Btmp = Lgm_Magnitude( &Bvectmp );
+                 //printf("-stmp, Btmp = %g %g\n", -stmp, Btmp );
+                 AddNewPoint( -stmp, Btmp, &Ptmp, LstarInfo->mInfo );
+
+                 Ptmp = LstarInfo->mInfo->Pm_North; stmp = 0.0; reset2 = FALSE;
+                 if ( Lgm_MagStep( &Ptmp, &u_scale, 0.01, &Hdid, &Hnext, 1.0, &stmp, &reset2, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) { return(-1); }
+                 LstarInfo->mInfo->Bfield( &Ptmp, &Bvectmp, LstarInfo->mInfo ); Btmp = Lgm_Magnitude( &Bvectmp );
+                 //printf("stmp, Btmp = %g %g\n", SS+stmp, Btmp );
+                 AddNewPoint( SS+stmp, Btmp, &Ptmp, LstarInfo->mInfo );
 
 
                 if ( InitSpline( LstarInfo->mInfo ) ) {
@@ -231,7 +251,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             I = 9e99;
         }
 
-    } 
+    }
 
 
 
