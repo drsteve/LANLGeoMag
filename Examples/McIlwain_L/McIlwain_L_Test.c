@@ -4,19 +4,20 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <Lgm_QinDenton.h>
 #include <fcntl.h>
 
 
 int main(){
     long int            Date;
-    double              L, I, Bm, M, a, UTC;
+    double              L, I, Bm, M, a, UTC, JD;
     double              r, lat, lon;
     Lgm_Vector          u, v;
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
+    Lgm_QinDentonOne    p;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
 
     mInfo->Bfield = Lgm_B_TS04;
-mInfo->Bfield = Lgm_B_T89;
     mInfo->P      = 4.1011111111111118;
     mInfo->Dst    = 7.7777777777777777;
     mInfo->By     = 3.7244444444444444;
@@ -33,11 +34,20 @@ mInfo->Bfield = Lgm_B_T89;
     UTC  = 1.2444444444444445;
 Date = 20130101;
 UTC = 0.0;
+Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
+JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
+// Get (interpolate) the QinDenton vals from the values in the file at the given Julian Date
+Lgm_get_QinDenton_at_JD( JD, &p, 0 );
+// Set params in mInfo structure.
+Lgm_set_QinDenton( &p, mInfo );
+
+
+mInfo->Bfield = Lgm_B_T89;
+mInfo->Kp = 3;
 
 
 
 
-    mInfo->Kp = 1;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
     u.x = -4.0; u.y = 0.0; u.z = 1.0;
     r = 4.83415065;
@@ -46,20 +56,21 @@ UTC = 0.0;
     u.x = r*cos(lat)*cos(lon);
     u.y = r*cos(lat)*sin(lon);
     u.z = r*sin(lat);
-u.x = -1.0782061357444688;
-u.y = -0.02002017766251564;
-u.z = 0.0013214621445654662;
+u.x = 0.3503119221132272;
+u.y = 0.185820103265288;
+u.z = -1.0028377093930358;
     printf("u_gsm = %.15lf %.15lf %.15lf\n", u.x, u.y, u.z);
 //    Lgm_Convert_Coords( &u, &v, GSM_TO_WGS84, c );
 //    printf("v_wgs84 = %.15lf %.15lf %.15lf\n", v.x, v.y, v.z);
     a = 90.0;
 
     L = Lgm_McIlwain_L( Date, UTC, &u, a, 1, &I, &Bm, &M, mInfo );
-    printf("Pitch Angle: %g    McIlwain L  = %.15lf   ( I, Bm, M = %.15g %g %g )\n", a, L, I, Bm, M);
+printf("mInfo->nPnts = %d\n", mInfo->nPnts);
+    printf("Pitch Angle: %g    McIlwain L  = %.15g   ( I, Bm, M = %.15g %g %g )\n", a, L, I, Bm, M);
 
-    
-    Lgm_FreeMagInfo( mInfo );                                                                                                                                                                                                              
-    Lgm_free_ctrans( c );         
+
+    Lgm_FreeMagInfo( mInfo );
+    Lgm_free_ctrans( c );
 
 
 

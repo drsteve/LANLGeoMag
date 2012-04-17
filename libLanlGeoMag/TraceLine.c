@@ -547,6 +547,12 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
             Fc = F;
             Sc = Sa + Hdid;
         }
+
+        if ( n > LGM_MAX_INTERP_PNTS-10 ) {
+            printf("Lgm_TraceLine2(): Trying to add too many points to interpolation arrays - bailing.\n");
+            return( -1 );
+        }
+
 	    /*
          *  We have been stepping along at a constant Htry. But when we get
          *  close to the end we do not want to drop below the surface of the
@@ -905,6 +911,18 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
     int         i1, i2;
     Lgm_Vector  P, Bvec;
 
+
+    /*
+     * Make sure s is within bounds.
+     */
+    if ( (s < Info->s[0]) || (s > Info->s[Info->nPnts-1]) ) {
+        printf("BofS: ( Line %d in file %s ). Trying to evaluate BofS( s, Info ) for an s that is outside of the bounds of the interpolating arrays.\n\tInfo->nPnts = %d, Info->s[0] = %.8g, Info->s[%d] = %.8g, s = %.8g\n", __LINE__, __FILE__, Info->nPnts, Info->s[0], Info->nPnts-1, Info->s[Info->nPnts-1], s);
+        exit(-1);
+    }
+
+
+
+
     /*
      * Use GSL to compute BminusBcdip(s)
      */
@@ -1213,7 +1231,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
             ++n;
         }
 
-        if ( (ss >= S) || (n > LGM_MAX_INTERP_PNTS) ) done = TRUE;
+        if ( (ss >= S) || (n > (LGM_MAX_INTERP_PNTS-10) ) ) done = TRUE;
 
     }
     
@@ -1356,6 +1374,9 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
                 Lgm_B_cdip( &P, &Bcdip, Info );
                 BminusBcdip1[n1] = Bmag1[n1] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
                 ++n1;
+                if (n1 > LGM_MAX_INTERP_PNTS){
+                    printf("Warning: n1 > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+                }
             }
 
         }
@@ -1429,6 +1450,9 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
                 Bmag2[n2] = Bmag;                       // save field strength (and increment counter)
                 Lgm_B_cdip( &P, &Bcdip, Info );
                 BminusBcdip2[n2] = Bmag2[n2] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
+                if (n2 > LGM_MAX_INTERP_PNTS){
+                    printf("Warning: n2 > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+                }
                 ++n2;
             }
 
