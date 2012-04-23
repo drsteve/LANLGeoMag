@@ -373,7 +373,7 @@ if (0==1){
 
     if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToSphericalEarth(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToSphericalEarth(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 

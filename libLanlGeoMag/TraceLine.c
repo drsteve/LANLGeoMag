@@ -387,7 +387,7 @@ if (1==1){
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -697,7 +697,7 @@ if (0==1){
 //printf("n, nPnts = %d %d\n", n, Info->nPnts);
     }
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine2(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine2(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -1257,7 +1257,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -1546,7 +1546,7 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
