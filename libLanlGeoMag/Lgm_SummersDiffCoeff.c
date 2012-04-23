@@ -152,12 +152,12 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     double           epsabs, epsrel, abserr, work[2002], points[10];
     double           ySing, a_new, b_new, B;
     int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
-    Lgm_SummersInfo *si=(Lgm_SummersInfo *)calloc( 1, sizeof(Lgm_SummersInfo));
+    Lgm_SummersInfo  si;
 
-    si->Version = Version;
-    si->n1 = n1;
-    si->n2 = n2;
-    si->n3 = n3;
+    si.Version = Version;
+    si.n1 = n1;
+    si.n2 = n2;
+    si.n3 = n3;
     if ( Version == LGM_SUMMERS_2007 ){
         if ( fabs(1.0-(n1+n2+n3)) > 1e-10 ) {
             printf("Lgm_SummersDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
@@ -204,9 +204,9 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
      *  Pack integrand parameters into structure
      */
     if ( WaveMode == LGM_R_MODE_WAVE ) {
-        si->s = 1;
+        si.s = 1;
     } else if ( WaveMode == LGM_L_MODE_WAVE ) {
-        si->s = -1;
+        si.s = -1;
     } else {
         printf("Lgm_SummersDxxBounceAvg(): Unknown wavemode = %d\n", WaveMode );
         return(0);
@@ -215,11 +215,11 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
     Beq = M_CDIP/(L*L*L);
     if ( Species == LGM_ELECTRONS ) {
-        si->Lambda  = -1.0;
+        si.Lambda  = -1.0;
         E0          = LGM_Ee0;      // set rest energy to electron rest energy (MeV)
         Omega_SigEq = Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS );
     } else if ( Species == LGM_PROTONS ) {
-        si->Lambda = LGM_EPS;
+        si.Lambda = LGM_EPS;
         E0         = LGM_Ep0;       // set rest energy to proton rest energy (MeV)
         Omega_SigEq = Lgm_GyroFreq( LGM_e, Beq, LGM_PROTON_MASS );
     } else {
@@ -227,37 +227,37 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         return(0);
     }
     Omega_eEq = Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS );
-    si->Omega_eEq   = Omega_eEq;    // Equatorial electron gyro-frequency.
-    si->Omega_SigEq = Omega_SigEq;  // Equatorial gyro-frequency for given species.
+    si.Omega_eEq   = Omega_eEq;    // Equatorial electron gyro-frequency.
+    si.Omega_SigEq = Omega_SigEq;  // Equatorial gyro-frequency for given species.
 
-    si->E           = Ek/E0;        // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
-    si->Alpha0      = Alpha0*M_PI/180.0;
-    si->SinAlpha0   = sin(si->Alpha0);
-    si->SinAlpha02  = si->SinAlpha0*si->SinAlpha0;
-    si->CosAlpha0   = cos(si->Alpha0);
-    si->CosAlpha02  = si->CosAlpha0*si->CosAlpha0;
-    si->TanAlpha0   = si->SinAlpha0/si->CosAlpha0;
-    si->TanAlpha02  = si->TanAlpha0*si->TanAlpha0;
-    si->L           = L;
-    si->aStarEq     = aStarEq;
-//    si->dB          = dB;
-    si->BwFuncData  = BwFuncData;
-    si->BwFunc      = BwFunc;
-    si->w1          = w1;           // Lower freq cuttof.
-    si->w2          = w2;           // Upper freq cuttof.
-    si->wm          = wm;           // Frequency of max wave power.
-    si->dw          = dw;           // Frequency bandwidth (at equator).
-    si->MaxWaveLat  = MaxWaveLat*RadPerDeg;   // Assume there are no waves at +/-MaxWaveLat.
-    si->Rho         = Rho;
-    si->Directions  = Directions;
+    si.E           = Ek/E0;        // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
+    si.Alpha0      = Alpha0*M_PI/180.0;
+    si.SinAlpha0   = sin(si.Alpha0);
+    si.SinAlpha02  = si.SinAlpha0*si.SinAlpha0;
+    si.CosAlpha0   = cos(si.Alpha0);
+    si.CosAlpha02  = si.CosAlpha0*si.CosAlpha0;
+    si.TanAlpha0   = si.SinAlpha0/si.CosAlpha0;
+    si.TanAlpha02  = si.TanAlpha0*si.TanAlpha0;
+    si.L           = L;
+    si.aStarEq     = aStarEq;
+//    si.dB          = dB;
+    si.BwFuncData  = BwFuncData;
+    si.BwFunc      = BwFunc;
+    si.w1          = w1;           // Lower freq cuttof.
+    si.w2          = w2;           // Upper freq cuttof.
+    si.wm          = wm;           // Frequency of max wave power.
+    si.dw          = dw;           // Frequency bandwidth (at equator).
+    si.MaxWaveLat  = MaxWaveLat*RadPerDeg;   // Assume there are no waves at +/-MaxWaveLat.
+    si.Rho         = Rho;
+    si.Directions  = Directions;
 
 
     /*
      *  Set integration limits
      */
     a = 0.0;                                            // radians
-    B = acos( Lgm_CdipMirrorLat( si->SinAlpha0 ) );     // radians
-    b = ( B < si->MaxWaveLat ) ? B : si->MaxWaveLat;
+    B = acos( Lgm_CdipMirrorLat( si.SinAlpha0 ) );     // radians
+    b = ( B < si.MaxWaveLat ) ? B : si.MaxWaveLat;
     if ( fabs(a-b) < 1e-9 ) {
 
         *Daa_ba = 0.0;
@@ -281,45 +281,45 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          *  Schultz and Lanzeroti (Eqns 1.28a-d). Here we do it exactly.
          *      T0 = 1.38017299815047317375;
          *      T1 = 0.74048048969306104115;
-         *      T  = T0 - 0.5*(T0-T1)*(si->SinAlpha0 + sqrt(si->SinAlpha0));
+         *      T  = T0 - 0.5*(T0-T1)*(si.SinAlpha0 + sqrt(si.SinAlpha0));
          */
         npts2 = 2;
-        //dqagp( CdipIntegrand_Sb, (_qpInfo *)si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqags( CdipIntegrand_Sb, (_qpInfo *)si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        //dqagp( CdipIntegrand_Sb, (_qpInfo *)&si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( CdipIntegrand_Sb, (_qpInfo *)&si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             } else {
-                dqags( SummersIntegrand_Gaa, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             }
         } else {
             *Daa_ba = 0.0;
         }
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             } else {
-                dqags( SummersIntegrand_Gap, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             }
         } else {
             *Dap_ba = 0.0;
         }
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             } else {
-                dqags( SummersIntegrand_Gpp, (_qpInfo *)si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
             }
         } else {
             *Dpp_ba = 0.0;
@@ -2110,7 +2110,9 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     while ( !done ) {
         a += inc;
         if ( a > Lat1 ){
-            done = TRUE;
+            if (Verbose) printf("Warning: Line %d in %s Lat1-Lat0 too small?\n", __LINE__, __FILE__);
+            return(FALSE);
+            //done = TRUE;
         } else {
             fa = fabs( f( a, qpInfo ) );
             if ( fa > 0.0 ) {
@@ -2128,7 +2130,9 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     while ( !done ) {
         b += inc;
         if ( b > Lat1 ){
-            done = TRUE;
+            if (Verbose) printf("Warning: Line %d in %s Function monotonically non-increasing\n", __LINE__, __FILE__);
+            return(FALSE);
+            //done = TRUE;
         } else {
             fb = fabs( f( b, qpInfo ) );
             if ( fb > fa ) {
@@ -2145,7 +2149,9 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     while ( !done ) {
         c += inc;
         if ( c > Lat1 ){
-            done = TRUE;
+            if (Verbose) printf("Warning: Line %d in %s Function non-decreasing.\n", __LINE__, __FILE__);
+            return(FALSE);
+            //done = TRUE;
         } else {
             fc = fabs( f( c, qpInfo ) );
             if ( fc < fb ) {

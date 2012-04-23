@@ -3567,7 +3567,7 @@ glCallList( DipoleAxisDL );
 //20100305
 glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
-//glCallList( EqPlaneDL );
+glCallList( EqPlaneDL );
 
 
 /*
