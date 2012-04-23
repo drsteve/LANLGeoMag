@@ -277,7 +277,7 @@ if (0==1){
     //Info->Trace_s = Sb*sgn;
     Info->Trace_s = -Sb*sgn;
 
-    if ( Info->VerbosityLevel > 2 ) printf("TraceToMinBSurf(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("TraceToMinBSurf(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 

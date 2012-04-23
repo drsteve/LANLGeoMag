@@ -24,7 +24,8 @@ import numpy
 
 import Lgm_CTrans
 import Lgm_Vector
-from Lgm_Wrap import Lgm_LeapYear, Lgm_GetLeapSeconds, Lgm_IsLeapSecondDay,  Lgm_LoadLeapSeconds, Lgm_GPS_to_GpsSeconds, Lgm_DateTime, Lgm_GpsSeconds_to_GPS
+from Lgm_Wrap import Lgm_LeapYear, Lgm_GetLeapSeconds, Lgm_IsLeapSecondDay,  Lgm_LoadLeapSeconds, Lgm_GPS_to_GpsSeconds, Lgm_DateTime, Lgm_GpsSeconds_to_GPS, IsoTimeStringToDateTime
+
 
 class Lgm_DateAndTime_tests(unittest.TestCase):
     def setUp(self):
@@ -94,6 +95,18 @@ class Lgm_DateAndTime_tests(unittest.TestCase):
         Lgm_GpsSeconds_to_GPS(661613680.0, ctypes.pointer(date))
         self.assertEqual(20001223, date.Date)
         self.assertAlmostEqual(13.577777777777778, date.Time)
+
+#    def test_Lgm_TAI_to_GPS(self):
+#        """Lgm_TAI_to_GPS should hav known output"""
+#        # how to populate a Lgm_DateTime?
+#
+#    def test_Lgm_GPS_to_TAI(self):
+#        """Lgm_GPS_to_TAI should hav known output"""
+#        # how to populate a Lgm_DateTime?
+
+
+
+
 
 
 if __name__ == '__main__':

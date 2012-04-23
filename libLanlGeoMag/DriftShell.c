@@ -680,7 +680,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 //printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG     D = %g\n", D);
     if (LstarInfo->VerbosityLevel > 5) {
-        printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr );
+      printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr );
     }
 
     return( FoundValidBm );
