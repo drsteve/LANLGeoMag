@@ -42,7 +42,7 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
     def test_init_vals(self):
         """test that the defaults in init don't change (regression)"""
         mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-        self.assertEqual(mmi.Kp, 5)
+        self.assertEqual(mmi.Kp, 2)
         self.assertEqual(mmi.P, 2.1)
         self.assertEqual(mmi.nFunc, 0)
         self.assertEqual(mmi.B0, 1.00)
@@ -72,7 +72,7 @@ class Lgm_MagModelInfoTests(unittest.TestCase):
         self.assertEqual(mmi.Lgm_I_Integrator, DQAGS)
 
         self.assertEqual(mmi.Lgm_Sb_Integrator_epsrel, 0.0)
-        self.assertEqual(mmi.Lgm_Sb_Integrator_epsabs, 1e-3)
+        self.assertEqual(mmi.Lgm_Sb_Integrator_epsabs, 1e-4)
         self.assertEqual(mmi.Lgm_Sb_Integrator, DQAGP)
 
         self.assertEqual(mmi.Lgm_FindBmRadius_Tol, 1e-10)
