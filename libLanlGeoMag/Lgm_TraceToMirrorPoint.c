@@ -452,14 +452,14 @@ tol = 1e-10;
         printf("    =============================================================================================================\n" );
         printf("    |                                                                                                           |\n" );
         printf("    |    Total iterations to find root: %3d                                                                     |\n", nIts );
-        printf("    |    Total Bfield evaluations find root: %4d                                                                 |\n", Info->Lgm_nMagEvals );
+        printf("    |    Total Bfield evaluations find root: %4d                                                                 |\n", (int)Info->Lgm_nMagEvals );
         printf("    |    TraceToMirrorPoint, Final Result: %15g %15g %15g     Sm = %g    |\n", v->x, v->y, v->z, *Sm );
         printf("    |                                                                                                           |\n" );
         printf("    =============================================================================================================\n", v->x, v->y, v->z, *Sm );
         printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
     }
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToMirrorPoint(): Number of Bfield evaluations = %d\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToMirrorPoint(): Number of Bfield evaluations = %d\n", (int)Info->Lgm_nMagEvals );
 
     return( 1 );
 
