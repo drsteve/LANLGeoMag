@@ -110,6 +110,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
             MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
             MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+            MagEphemInfo->K[i]     = LGM_FILL_VALUE;
             MagEphemInfo->Sb[i]    = LGM_FILL_VALUE;
         }
         MagEphemInfo->Sb0     = LGM_FILL_VALUE;
@@ -192,6 +193,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     }
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
                     MagEphemInfo->I[i]  = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
+                    MagEphemInfo->K[i]  = LstarInfo2->I[0]*sqrt(MagEphemInfo->Bm[i]*1e-5); // Second invariant
                     MagEphemInfo->Sb[i] = LstarInfo2->SbIntegral0; // SbIntegral0 is Sb for the FL that the sat is on.
 
                     //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
@@ -258,6 +260,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
 //printf("Bm = %g\n", MagEphemInfo->Bm[i]);
                     MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+                    MagEphemInfo->K[i]     = LGM_FILL_VALUE;
                     MagEphemInfo->nShellPoints[i] = 0;
 
                 }
