@@ -79,7 +79,6 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
     ReadMagEphemInfoStruct( Filename, &ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo );
     printf( "\t     Date/Time: %ld/%g\n", ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC );
     printf( "\t# Pitch Angles: %d\n", ObjInfo->MagEphemInfo->nAlpha );
-exit(0);
 
 
     for ( i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) { // Loop over Pitch Angles
