@@ -20,6 +20,9 @@
 
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
+#include "Vds_DriftShell.h"
+
+Vds_ObjectInfo  *ObjInfo;
 
 void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks);
 
@@ -59,7 +62,6 @@ static GtkItemFactoryEntry MenuItems[] = {
 };
 
 
-Lgm_MagEphemInfo   *MagEphemInfo;
 
 
 GLfloat LightPosition[]        = {0.0, 3.0, 3.0, 0.0};
@@ -131,7 +133,6 @@ double IdentityMatrix[3][3] = { {1.0, 0.0, 0.0 }, {0.0, 1.0, 0.0 }, {0.0, 0.0, 1
 void DrawScene( );
 void CreateSphere( double r, int n);
 void CreateEllipsoid( double ra, double rb, int n);
-void TraceFieldLines( );
 void IridiumFlare( double JD, _SgpTLE *TLE, Lgm_Vector *EarthToSun, int *Flag1, int *Flag2, int *Flag3, Lgm_Vector *g1, Lgm_Vector *g2, Lgm_Vector *g3, Lgm_Vector *P ) ;
 
 
@@ -139,9 +140,12 @@ void IridiumFlare( double JD, _SgpTLE *TLE, Lgm_Vector *EarthToSun, int *Flag1, 
  * Texture names
  */
 GLuint  Texture_Earth;
+GLuint  Texture_TopSide;
 GLuint  Texture_Moon;
 GLuint  Texture_Logo;
 GLuint  Texture_EqPlane;
+GLuint  Texture_MeridPlane1;
+GLuint  Texture_MeridPlane2;
 GLuint  Texture_Debris;
 GLuint  Texture_RocketBody;
 GLuint  Texture_Spacecraft;
@@ -1072,14 +1076,11 @@ float   colors2[][3] = {{0.000000, 0.000000, 0.000000},
 
 int ReadPng( char *Filename, int *Width, int *Height, GLubyte **pImage );
 void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius );
-void MakeFieldLines( int nAddPnts, int *nNewFieldPoints );
-void MakeDriftShellMesh( int *n );
 
 
 
-void ReadMagEphemData( char *Filename, long int Date, double UT, double Lat, double Lon, double Rad, int Mode );
 
-int         nInterpPoints, nFieldPoints[90], nShellPoints, nShellPoints2;
+int         nInterpPoints, nFieldPoints[90], nShellPoints;
 
 
 int         nPnts[90][24], nPnts2[90][24], gap[1000];
@@ -1115,6 +1116,7 @@ static GLuint ZPSAxesDL           = 0;  // Display list for xyz axes
 static GLuint AxesDL           = 0;  // Display list for xyz axes
 //static GLuint SMAxesDL         = 0;  // Display list for GSM xyz axes
 static GLuint EarthDL          = 0;  // Display List for Earth
+static GLuint TopSideDL        = 0;  // Display List for TopSide Image
 static GLuint GeoMarkersDL     = 0;  // Display List for Earth
 static GLuint MoonDL           = 0;  // Display List for Moon
 static GLuint LogoDL           = 0;  // Display List for Logo Image
@@ -1125,15 +1127,13 @@ static GLuint ScPositionDL     = 0;  // Display List for S/C position
 static GLuint StarsDL          = 0;  // Display List for Stars
 static GLuint SatsDL           = 0;  // Display List for Sats
 static GLuint SatOrbitsDL      = 0;  // Display List for Sat Orbits
-static GLuint EqPlaneDL        = 0;  // Display List for Sats
-static GLuint EqPlaneGridDL    = 0;  // Display List for Sats
+static GLuint EqPlaneDL        = 0;  // Display List
+static GLuint EqPlaneGridDL    = 0;  // Display List
+static GLuint MeridPlane1DL     = 0;  // Display List
+static GLuint MeridPlane2DL     = 0;  // Display List
 static GLuint HiResEarthQuadDL = 0;  // Display List
 
 
-
-static GLuint DriftShellList2 = 0;
-static GLuint DriftShellList3 = 0;
-static GLuint DriftShellList4 = 0;
 
 
 
@@ -1285,6 +1285,12 @@ static MaterialProp mat_EqPlane = {
   {0.0, 0.0, 0.0, 1.0},
   0.25
 };
+static MaterialProp mat_MeridPlane1 = {
+  {1.0, 1.0, 1.0, 0.7},
+  {1.0, 1.0, 1.0, 0.7},
+  {0.0, 0.0, 0.0, 1.0},
+  0.25
+};
 
 
 static MaterialProp mat_red_plastic = {
@@ -1431,6 +1437,54 @@ void LoadTextures(){
 //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 //    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
+
+    /*
+     *  Texture for the TopSide Image
+     */
+    glGenTextures( 1, &Texture_TopSide );
+    glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
+    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Lat_Versus_Lon_Top_035.png");
+    ReadPng( Filename, &Width, &Height, &pImage );
+    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+    free( pImage );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+    /*
+     *  Texture for the Meridional plane 1
+     */
+    glGenTextures( 1, &Texture_MeridPlane1 );
+    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
+    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid1_035.png");
+    ReadPng( Filename, &Width, &Height, &pImage );
+    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+    free( pImage );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+    /*
+     *  Texture for the Meridional plane 2
+     */
+    glGenTextures( 1, &Texture_MeridPlane2 );
+    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
+    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid2_035.png");
+    ReadPng( Filename, &Width, &Height, &pImage );
+    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+    free( pImage );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the EQ plane
@@ -1919,6 +1973,116 @@ if (1==1){
 }
 
 
+
+
+    // TopSide
+    TopSideDL = glGenLists( 1 );
+    glNewList( TopSideDL, GL_COMPILE );
+    {
+        glPushMatrix();
+        glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_earth2.diffuse);
+        glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_earth2.specular);
+        glMaterialf(  GL_FRONT, GL_SHININESS, mat_earth2.shininess * 128.0);
+        glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glEnable( GL_TEXTURE_2D );
+        glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
+        glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
+        //CreateEllipsoid( 1.1, (double)(WGS84_B/WGS84_A), 80 );
+
+        CreateCutEllipsoid( (1.0+500.0/WGS84_A), (double)(1.0+500.0/WGS84_A), 76*2 );
+        glDisable( GL_TEXTURE_2D );
+        glPopMatrix();
+    }
+    glEndList( );
+
+    // MeridPlane1 image
+if (1==1){
+    MeridPlane1DL = glGenLists( 1 );
+    glNewList( MeridPlane1DL, GL_COMPILE );
+        glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_earth2.diffuse);
+        glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_earth2.specular);
+        glMaterialf(  GL_FRONT, GL_SHININESS, mat_earth2.shininess * 128.0);
+        glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glShadeModel(GL_SMOOTH);
+        glEnable( GL_TEXTURE_2D );
+        glEnable( GL_BLEND );
+//        glDisable( GL_BLEND );
+        //glDepthMask( GL_FALSE );
+        //glDepthMask( GL_TRUE );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glPushMatrix();
+        glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
+//        glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
+        glRotatef( 180.0, 0.0, 0.0, 1.0);
+        glRotatef( 90.0, 0.0, 0.0, 1.0);
+//        glRotatef( 90.0, 1.0, 0.0, 0.0);
+        glBegin(GL_QUADS);
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(0.0, 0.0);  glVertex3f(  0.0,  0.0, -1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(1.0, 0.0); glVertex3f( 1.1, 0.0, -1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(1.0, 1.0); glVertex3f(  1.1, 0.0, 1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(0.0, 1.0);  glVertex3f(   0.0,  0.0, 1.1 );
+        glEnd();
+        glPopMatrix();
+        glDepthMask( GL_TRUE );
+//        glDisable( GL_BLEND );
+        glDisable( GL_TEXTURE_2D );
+    glEndList( );
+}
+
+    // MeridPlane1 image 2
+if (1==1){
+    MeridPlane2DL = glGenLists( 1 );
+    glNewList( MeridPlane2DL, GL_COMPILE );
+        glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_earth2.diffuse);
+        glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_earth2.specular);
+        glMaterialf(  GL_FRONT, GL_SHININESS, mat_earth2.shininess * 128.0);
+        glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glShadeModel(GL_SMOOTH);
+        glEnable( GL_TEXTURE_2D );
+        glEnable( GL_BLEND );
+//        glDisable( GL_BLEND );
+        //glDepthMask( GL_FALSE );
+        //glDepthMask( GL_TRUE );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glPushMatrix();
+        glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
+//        glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
+        glRotatef( 180.0, 0.0, 0.0, 1.0);
+        glRotatef( 90.0, 0.0, 0.0, 1.0);
+        glRotatef( 270.0, 0.0, 0.0, 1.0);
+//        glRotatef( 90.0, 1.0, 0.0, 0.0);
+        glBegin(GL_QUADS);
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(0.0, 0.0);  glVertex3f(  0.0,  0.0, -1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(1.0, 0.0); glVertex3f( 1.1, 0.0, -1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(1.0, 1.0); glVertex3f(  1.1, 0.0, 1.1 );
+            glNormal3f( 1.0, 0.0, 0.0 ); glTexCoord2f(0.0, 1.0);  glVertex3f(   0.0,  0.0, 1.1 );
+        glEnd();
+        glPopMatrix();
+        glDepthMask( GL_TRUE );
+//        glDisable( GL_BLEND );
+        glDisable( GL_TEXTURE_2D );
+    glEndList( );
+}
+
+
 }
 
 void DestroyHiResEarthQuad( GLuint *Texture ){
@@ -2024,6 +2188,8 @@ void ReCreateEarth ( ){
     glDeleteLists( DipoleAxisDL, 1 );
     glDeleteLists( SunDirectionDL, 1 );
     glDeleteLists( EqPlaneGridDL, 1 );
+    glDeleteLists( MeridPlane1DL, 1 );
+    glDeleteLists( MeridPlane2DL, 1 );
     glDeleteLists( EqPlaneDL, 1 );
     CreateEarth( );
 }
@@ -2164,7 +2330,7 @@ void CreateSCPos( ) {
 
         glPushMatrix();
         glColor4f( 0.5, 0.5, 0.2, 0.5 );
-        glTranslatef(MagEphemInfo->P.x, MagEphemInfo->P.y, MagEphemInfo->P.z );  gdk_gl_draw_sphere( TRUE, 0.11, 20, 20 );
+        glTranslatef(ObjInfo->MagEphemInfo->P.x, ObjInfo->MagEphemInfo->P.y, ObjInfo->MagEphemInfo->P.z );  gdk_gl_draw_sphere( TRUE, 0.11, 20, 20 );
         glPopMatrix();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -2369,10 +2535,10 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].sglAlf = 0.75*0.75;
 
         // Orbit Colors
-        SpaceObjects->Sat[i].oRed = 0.8;
-        SpaceObjects->Sat[i].oGrn = 0.8;
-        SpaceObjects->Sat[i].oBlu = 0.8;
-        SpaceObjects->Sat[i].oAlf = 0.1;
+        SpaceObjects->Sat[i].oRed = 1.0;
+        SpaceObjects->Sat[i].oGrn = 1.0;
+        SpaceObjects->Sat[i].oBlu = 1.0;
+        SpaceObjects->Sat[i].oAlf = 0.8;
 
         SpaceObjects->Sat[i].ogpRed = 0.2;
         SpaceObjects->Sat[i].ogpGrn = 0.2;
@@ -3239,125 +3405,79 @@ void CreateEllipsoid( double ra, double rb, int n) {
     }
 }
 
-void GenerateFieldLineLists(){
+/*
+   Create an ellipsoid centered at c, with equatorial radius ra, polar radius rb, and precision n
+   Draw a point for zero radius spheres
+*/
+void CreateCutEllipsoid( double ra, double rb, int n) {
 
-    int i, ns;
+    int          i, j;
+    double       ct1, ct2, st1, st2, cp, sp, Phi0, Phi1, dPhi, fPhi;
+    double       r, theta1, theta2, Phi, g, h;
+    Lgm_Vector   e, p;
 
-    /*
-     *  Create List for the Full Field Lines
-     */
-    DriftShellList2 = glGenLists( MagEphemInfo->nAlpha );
+    Phi0 =  90.0*RadPerDeg;
+    Phi1 = 360.0*RadPerDeg;
+    dPhi = Phi1-Phi0;
 
-    // Field Lines and Foot Points
-    for (i=0; i<MagEphemInfo->nAlpha; i++){
 
-if ( MagEphemInfo->Lstar[i] > 1.0 ) {
-
-        glNewList( DriftShellList2 + i, GL_COMPILE );
-
-            //glMaterialfv( GL_FRONT, GL_DIFFUSE, colors[i] );
-            for (ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++){
-            ////for (ns=0; ns<1; ns++){
-
-                // Foot Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
-
-                // Field Lines
-                MakeTube( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], nPnts[i][ns], 12, 0.0375/2.0 );
-                //MakeTube( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], nPnts2[i][ns], 12, 0.0375/2.0 );
-                //MakeTube( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], nPnts[i][ns], 12, 0.0375/4.0 );
-                MakeTube( x3_gsm[i][ns], y3_gsm[i][ns], z3_gsm[i][ns], nFieldPoints[i], 12, 0.0375/2.0 );
-                //MakeTube( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], nPnts[i][ns], 8, 0.0375 );
-
-                // Mirror Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellMirror_Pn[i][ns].x, MagEphemInfo->ShellMirror_Pn[i][ns].y, MagEphemInfo->ShellMirror_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellMirror_Ps[i][ns].x, MagEphemInfo->ShellMirror_Ps[i][ns].y, MagEphemInfo->ShellMirror_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); glPopMatrix();
-
-            }
-
-        glEndList( );
-}
+    if (ra < 0.0) ra = -ra;
+    if (rb < 0.0) rb = -rb;
+    if (n < 0) n = -n;
+    if ( (n < 4) || (ra <= 0.0) || (rb <= 0.0) ) {
+        glBegin( GL_POINTS );
+        glVertex3f( 0.0, 0.0, 0.0 );
+        glEnd( );
+        return;
     }
 
+    g = ra*ra/(rb*rb);
+    h = 1.0-g;
 
-    /*
-     *  Create List for the Partial Field Lines
-     */
-    DriftShellList3 = glGenLists( MagEphemInfo->nAlpha );
+    for (j=0;j<n/2;j++) {
+        // range in latitude from -PI/2 -> PI/2
+        theta1 = j * 2.0*M_PI / n - 0.5*M_PI;
+        theta2 = (j + 1) * 2.0*M_PI / n - 0.5*M_PI;
+        ct1 = cos(theta1); st1 = sin(theta1);
+        ct2 = cos(theta2); st2 = sin(theta2);
 
-    // Field Lines and Foot Points
-    for (i=0; i<MagEphemInfo->nAlpha; i++){
-        glNewList( DriftShellList3 + i, GL_COMPILE );
+        glBegin(GL_QUAD_STRIP);
+        for (i=0;i<=n;i++) {
+            // range in longitude from Phi0 to Phi1
+            Phi = dPhi*i/(double)n + Phi0;
+            fPhi = Phi/(2.0*M_PI);
+            cp = cos(Phi); sp = sin(Phi);
 
-        for (ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++){
-//            for (ns=0; ns<1; ns++){
+            e.x = ct2*cp;
+            e.y = ct2*sp;
+            e.z = st2;
+            r = ra/sqrt( ct2*ct2*h + g );
+            p.x = r * e.x;
+            p.y = r * e.y;
+            p.z = r * e.z;
 
-                // Foot Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); glPopMatrix();
+            glNormal3f(e.x,e.y,g*e.z);
+            glTexCoord2f( fPhi, 2*(j+1)/(double)n );
+            glVertex3f(p.x,p.y,p.z);
 
-                // Field Lines
-                //MakeTube( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], nPnts2[i][ns], 12, 0.0375/2.0 );
-                MakeTube( x3_gsm[i][ns], y3_gsm[i][ns], z3_gsm[i][ns], nFieldPoints[i], 12, 0.0375/2.0 );
+            e.x = ct1*cp;
+            e.y = ct1*sp;
+            e.z = st1;
+            r = ra/sqrt( ct1*ct1*h + g );
+            p.x = r * e.x;
+            p.y = r * e.y;
+            p.z = r * e.z;
 
-                // Mirror Points
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellMirror_Pn[i][ns].x, MagEphemInfo->ShellMirror_Pn[i][ns].y, MagEphemInfo->ShellMirror_Pn[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); glPopMatrix();
-                glPushMatrix(); glTranslatef(MagEphemInfo->ShellMirror_Ps[i][ns].x, MagEphemInfo->ShellMirror_Ps[i][ns].y, MagEphemInfo->ShellMirror_Ps[i][ns].z ); gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); glPopMatrix();
-
-            }
-
-
-
-        glEndList( );
+            glNormal3f(e.x,e.y,g*e.z);
+            glTexCoord2f( fPhi, 2*j/(double)n );
+            glVertex3f(p.x,p.y,p.z);
+        }
+        glEnd();
     }
-
-}
-
-void ReGenerateFieldLineLists(){
-    glDeleteLists( DriftShellList2, MagEphemInfo->nAlpha );
-    glDeleteLists( DriftShellList3, MagEphemInfo->nAlpha );
-    GenerateFieldLineLists();
 }
 
 
 
-
-
-void GenerateDriftShellLists(){
-
-    int i, p, k;
-
-
-    /*
-     *  Create List for the Drift Shell Surfaces
-     */
-    DriftShellList4 = glGenLists( MagEphemInfo->nAlpha );
-
-    // Drift Shell Surfaces
-    for (p=0; p<MagEphemInfo->nAlpha; p++){
-
-        glNewList( DriftShellList4 + p, GL_COMPILE );
-            for (i=0;i<nFieldPoints[p]-1;i++) {
-                glBegin(GL_QUAD_STRIP);
-                //for (k=0;k<nShellPoints2-60;k++) {
-                for (k=0;k<nShellPoints2;k++) {
-                    glNormal3f( nx4_gsm[p][k][i], ny4_gsm[p][k][i], nz4_gsm[p][k][i] );
-                    glVertex3f( x4_gsm[p][k][i], y4_gsm[p][k][i], z4_gsm[p][k][i] );
-                    glNormal3f( nx4_gsm[p][k][i+1], ny4_gsm[p][k][i+1], nz4_gsm[p][k][i+1] );
-                    glVertex3f( x4_gsm[p][k][i+1], y4_gsm[p][k][i+1], z4_gsm[p][k][i+1] );
-                }
-            	glEnd();
-            }
-        glEndList( );
-
-    }
-
-}
-void ReGenerateDriftShellLists(){
-    glDeleteLists( DriftShellList4, MagEphemInfo->nAlpha );
-    GenerateDriftShellLists();
-}
 
 
 
@@ -3442,16 +3562,16 @@ static void realize( GtkWidget *widget, gpointer data) {
 // these are SC specific
 // Need to process new mag data files
 // for this to update properly...
-    TraceFieldLines( );
+//    TraceFieldLines( );
 
     // Create sphere to represent Spacecraft Position
     CreateSCPos( );
 
     // Create FL tubes
-    GenerateFieldLineLists();
+    GenerateFieldLineLists( ObjInfo );
 
     // Create Drift Shell surfaces
-    GenerateDriftShellLists();
+    GenerateDriftShellLists( ObjInfo );
 
 
 
@@ -3567,7 +3687,7 @@ glCallList( DipoleAxisDL );
 //20100305
 glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
-glCallList( EqPlaneDL );
+//glCallList( EqPlaneDL );
 
 
 /*
@@ -3643,7 +3763,7 @@ if (LightingStyle == 2){
          * We want to show all of the PAs
          */
         if ( ShowFullFieldLine ){
-            for (i=0; i<MagEphemInfo->nAlpha; i++ ) {
+            for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
                 glMaterialfv( GL_FRONT, GL_SPECULAR,  gInfo->FieldLineMaterial[i].specular );
@@ -3653,10 +3773,10 @@ if (LightingStyle == 2){
 //SurfaceColor[2] = gInfo->FieldLineMaterial[i].diffuse[2];
 //SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
 //glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
-                glCallList( DriftShellList2 + i );
+                glCallList( ObjInfo->DriftShellList2 + i );
             }
         } else {
-            for (i=0; i<MagEphemInfo->nAlpha; i++ ) {
+            for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
                 glMaterialfv( GL_FRONT, GL_SPECULAR,  gInfo->FieldLineMaterial[i].specular );
@@ -3666,7 +3786,7 @@ if (LightingStyle == 2){
 //SurfaceColor[2] = gInfo->FieldLineMaterial[i].diffuse[2];
 //SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
 //glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
-                glCallList( DriftShellList3 + i );
+                glCallList( ObjInfo->DriftShellList3 + i );
             }
         }
 
@@ -3676,7 +3796,7 @@ if (LightingStyle == 2){
          * We want to show a subset of Pitch Angles
          */
 
-        for (i=0; i<MagEphemInfo->nAlpha; i++ ) {
+        for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
             if ( ShowPitchAngle[i] ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
@@ -3688,9 +3808,9 @@ if (LightingStyle == 2){
 //SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
 //glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
                 if ( ShowFullFieldLine ){
-                    glCallList( DriftShellList2 + i );
+                    glCallList( ObjInfo->DriftShellList2 + i );
                 } else {
-                    glCallList( DriftShellList3 + i);
+                    glCallList( ObjInfo->DriftShellList3 + i);
                 }
             }
         }
@@ -3824,6 +3944,9 @@ if (LightingStyle == 2){
 
 
 
+glCallList( TopSideDL );
+glCallList( MeridPlane1DL );
+glCallList( MeridPlane2DL );
 
 
 
@@ -3890,7 +4013,7 @@ if (LightingStyle == 2){
 
 glFrontFace(GL_CW);
     glLightModelfv( GL_LIGHT_MODEL_TWO_SIDE, LightModelTwoSide);
-    for (i=0; i<MagEphemInfo->nAlpha; i++ ) {
+    for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
         if ( ShowPitchAngle2[i] ) {
             glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->DriftShellMaterial[i].diffuse );
             glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->DriftShellMaterial[i].ambient );
@@ -3904,7 +4027,7 @@ glMaterialf(  GL_BACK, GL_SHININESS, gInfo->DriftShellMaterial[i].shininess*128.
                 glEnable( GL_BLEND );
                 glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
             }
-            glCallList( DriftShellList4 + i );
+            glCallList( ObjInfo->DriftShellList4 + i );
             if ( (int)(gInfo->DriftShellMaterial[i+1].diffuse[3]*128.0) < 128 ) {
                 glDisable( GL_BLEND );
             }
@@ -4857,24 +4980,19 @@ static void ChangeViewQuat( GtkWidget *widget, gpointer data) {
 
 static void ChangenFieldPnts( GtkWidget *widget, gpointer data) {
     int n;
-    // delete the old list
-    glDeleteLists( DriftShellList4, MagEphemInfo->nAlpha );
 
     // get new n value
     n = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
     printf("n = %d\n", n);
 
-    // re-create field lines with new n
-    MakeFieldLines( n, nFieldPoints );
-//printf("nFieldPoints = %d\n", nFieldPoints);
-
-    // re-create drift shell meshes
-    MakeDriftShellMesh( &nShellPoints2 );
+    // re-create field lines and drift shell meshes with new n
+    MakeFieldLines( n, ObjInfo );
+    MakeDriftShellMesh( ObjInfo );
 
 
-
-    // create the new list
-    GenerateDriftShellLists();
+    // re-generate display lists
+    //ReGenerateFieldLineLists( ObjInfo );
+    ReGenerateDriftShellLists( ObjInfo );
 
     printf("4.\n"); expose_event( drawing_area, NULL, NULL );
 }
@@ -4990,7 +5108,7 @@ static void SelectPitchAngles( GtkMenuItem  *menuitem, gpointer data ) {
          */
         AllState = gtk_check_menu_item_get_active(  GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[0] ) ); // get state of "All" check item
         ShowAllPitchAngles = AllState;
-        for (j=0; j<MagEphemInfo->nAlpha; j++) {
+        for (j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) {
             ShowPitchAngle[j] = AllState;
             g_signal_handler_block( G_OBJECT( PitchAngleCheckMenuItem[j+1] ), PitchAngleHandler[j] );
             gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[j+1] ), AllState );
@@ -5007,8 +5125,8 @@ static void SelectPitchAngles( GtkMenuItem  *menuitem, gpointer data ) {
          *
          *  If they are all off, then set the All item to off.
          */
-        for (n=0, j=0; j<MagEphemInfo->nAlpha; j++) n += gtk_check_menu_item_get_active(  GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[j+1] ) );
-        if ( n == MagEphemInfo->nAlpha ){
+        for (n=0, j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) n += gtk_check_menu_item_get_active(  GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[j+1] ) );
+        if ( n == ObjInfo->MagEphemInfo->nAlpha ){
             ShowAllPitchAngles = TRUE;
             g_signal_handler_block( G_OBJECT( PitchAngleCheckMenuItem[0] ), PitchAngleAllHandler );
             gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[0] ), TRUE );
@@ -5139,8 +5257,8 @@ static GtkWidget * create_popup_menu (GtkWidget *drawing_area) {
     gtk_widget_show( PitchAngleCheckMenuItem[n] );
     ++n;
 
-    for (i=0; i<MagEphemInfo->nAlpha; i++) {
-        sprintf(Str, "Show %g Pitch Angle", MagEphemInfo->Alpha[i] );
+    for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++) {
+        sprintf(Str, "Show %g Pitch Angle", ObjInfo->MagEphemInfo->Alpha[i] );
         PitchAngleCheckMenuItem[n] = gtk_check_menu_item_new_with_label( Str );
         gtk_menu_shell_append( GTK_MENU_SHELL( PitchAngle_menu ), PitchAngleCheckMenuItem[n] );
         if (ShowPitchAngle[i]) gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM( PitchAngleCheckMenuItem[n] ), TRUE );
@@ -5385,346 +5503,9 @@ static void examine_gl_config_attrib (GdkGLConfig *glconfig) {
 
 
 
-void InterpFieldLine( double *x, double *y, double *z, double *s, double Ss, double Sn, int n1, double *xout, double *yout, double *zout, int n2  ){
 
-    gsl_interp_accel    *acc;
-    gsl_spline          *spline;
-    double  ss, s_inc;
-    int     t;
 
-    s_inc = ( Sn-Ss )/((double)(n2-1));
-//printf("Ss, Sn = %g %g   s[0], s[n1-1] = %g %g \n", Ss, Sn, s[0], s[n1-1]);
 
-    //Px
-    acc    = gsl_interp_accel_alloc( );
-    spline = gsl_spline_alloc( GSL_INTERP, n1 );
-    gsl_spline_init( spline, s, x, n1 );
-    //for (ss=s[0]+s_inc, t=0; t<n2; t++ ){
-    for (ss=Ss, t=0; t<n2; t++ ){
-        xout[t] = gsl_spline_eval( spline, ss, acc );
-        ss += s_inc;
-    }
-    gsl_spline_free( spline );
-    gsl_interp_accel_free( acc );
-
-    //Py
-    acc    = gsl_interp_accel_alloc( );
-    spline = gsl_spline_alloc( GSL_INTERP, n1 );
-    gsl_spline_init( spline, s, y, n1 );
-    //for (ss=s[0]+s_inc, t=0; t<n2; t++ ){
-    for (ss=Ss, t=0; t<n2; t++ ){
-        yout[t] = gsl_spline_eval( spline, ss, acc );
-        ss += s_inc;
-    }
-    gsl_spline_free( spline );
-    gsl_interp_accel_free( acc );
-
-    //Pz
-    acc    = gsl_interp_accel_alloc( );
-    spline = gsl_spline_alloc( GSL_INTERP, n1 );
-    gsl_spline_init( spline, s, z, n1 );
-    //for (ss=s[0]+s_inc, t=0; t<n2; t++ ){
-    for (ss=Ss, t=0; t<n2; t++ ){
-        zout[t] = gsl_spline_eval( spline, ss, acc );
-        ss += s_inc;
-    }
-    gsl_spline_free( spline );
-    gsl_interp_accel_free( acc );
-
-}
-
-
-void MakeFieldLines( int nAddPnts, int *nNewFieldPoints ){
-
-    int i, ns, nInterpPoints, ii, kk;
-    double  xout[200], yout[200], zout[200];
-
-printf("nNewFieldPoints = %d\n", *nNewFieldPoints);
-
-    for ( i=0; i<MagEphemInfo->nAlpha; i++ ) {
-//printf("MagEphemInfo->nShellPoints[%d] = %d\n", i, MagEphemInfo->nShellPoints[i]);
-        for ( ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++ ) {
-            /*
-             *  Lets interp the points to a fixed number so we can make a mesh
-             *  out of them.
-             */
-//            nInterpPoints = 4;
-//            nInterpPoints = 40;
-//            nInterpPoints = 180;
-            nInterpPoints = nAddPnts;
-            kk=0;
-            // add mirror points explicitly
-////            x3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Ps[i][ns].x;
-////            y3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Ps[i][ns].y;
-////            z3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Ps[i][ns].z;
-////            ++kk;
-            if (nPnts[i][ns] > 4 ){
-//                InterpFieldLine( x2_gsm[i][ns], y2_gsm[i][ns], z2_gsm[i][ns], s2_gsm[i][ns], nPnts2[i][ns], xout, yout, zout, nInterpPoints );
-                InterpFieldLine( x_gsm[i][ns], y_gsm[i][ns], z_gsm[i][ns], s_gsm[i][ns],
-                        //MagEphemInfo->ShellEllipsoidFootprint_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns],
-                        MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellMirror_Sn[i][ns],
-                        //MagEphemInfo->ShellMirror_Ss[i][ns], MagEphemInfo->ShellEllipsoidFootprint_Sn[i][ns],
-                        //0.0, MagEphemInfo->ShellMirror_Sn[i][ns],
-                        nPnts[i][ns], xout, yout, zout, nInterpPoints );
-                for (ii=0; ii<nInterpPoints; ii++){
-                    x3_gsm[i][ns][kk] = xout[ii];
-                    y3_gsm[i][ns][kk] = yout[ii];
-                    z3_gsm[i][ns][kk] = zout[ii];
-                    ++kk;
-                }
-            } else {
-                printf("Insufficient number of field line points: Alpha Index = %d   nShell Index = %d\n", i, ns);
-            }
-////            x3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Pn[i][ns].x;
-////            y3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Pn[i][ns].y;
-////            z3_gsm[i][ns][kk] = MagEphemInfo->ShellMirror_Pn[i][ns].z;
-////            ++kk;
-//printf("z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2] = %g %g\n", z3_gsm[i][ns][kk-1], z3_gsm[i][ns][kk-2]);
-            nNewFieldPoints[i] = kk; // will be 2 more than before.
-printf("nNewFieldPoints[i] = %d\n", nNewFieldPoints[i]);
-
-        }
-    }
-//exit(0);
-
-}
-
-
-void MakeDriftShellMesh( int *nNewShellPoints ){
-
-    int                 p, nShellPoints, nAddShellPoints;
-    int                 i, j, ns, q, nsp1;
-    double              DeltaPhi, PhiInc, Phi, d;
-    double              PhiArray[50], xArray[50], yArray[50], zArray[50];
-    double              PhiArray2[50], xArray2[50], yArray2[50], zArray2[50];
-    int                 im1, ip1, k, km1, kp1, MonoTonic;
-    Lgm_Vector          u, v, n;
-    gsl_interp_accel    *acc_x, *acc_y, *acc_z;
-    gsl_spline          *spline_x, *spline_y, *spline_z;
-
-
-    /*
-     *  We typically have more than enough points all the driftshell field
-     *  lines.  However, we usually dont have very many field lines. So the
-     *  drift shell surface can look more faceted than we would like. To solve
-     *  this, we want to add more points in-between the drift shell points.
-     *
-     *  Here, we assume that we have already interped the FL points to give a
-     *  constant number of points along each FL.  If we take one index number
-     *  from each FL, the points should describe a closed curve. Its these
-     *  curves that we can interpolate on to get a more smooth overall surface.
-     */
-    nShellPoints = 24;
-    nAddShellPoints = 10; // number of points to add in between each given Shell point
-    for (p=0; p<MagEphemInfo->nAlpha; p++) { // Loop over pitch angle
-        for (i=0; i<nFieldPoints[p]; i++ ){
-
-            // create interpolation arrays
-            for (ns=0; ns<nShellPoints; ns++ ){
-
-                /*
-                 * Compute Phi -- the azimuthal angle of the points.
-                 */
-                PhiArray[ns] = DegPerRad*atan2( y3_gsm[p][ns][i],  x3_gsm[p][ns][i] );
-                xArray[ns] = x3_gsm[p][ns][i];
-                yArray[ns] = y3_gsm[p][ns][i];
-                zArray[ns] = z3_gsm[p][ns][i];
-
-            }
-
-            /*
-             * Make sure the Phi Array does not have values that are the same.
-             */
-            for (MonoTonic = TRUE, ns=1; ns<nShellPoints; ns++ ){
-                if ( fabs( PhiArray[ns] - PhiArray[ns-1]) < 1e-3 ) {
-                    MonoTonic = FALSE;
-                }
-            }
-
-            // KLUDGE
-            if ( !MonoTonic ) {
-                for ( ns=0; ns<nShellPoints; ns++ ){
-                    PhiArray[ns] = ns*360.0/(double)nShellPoints;
-                }
-            }
-
-
-
-
-
-	        // keep first phi val as is.
-            PhiArray2[0] = PhiArray[0];
-            xArray2[0]   = xArray[0];
-            yArray2[0]   = yArray[0];
-            zArray2[0]   = zArray[0];
-	        d = 0.0;
-            for (ns=1; ns<nShellPoints; ns++ ){
-		        if ( PhiArray[ns] < PhiArray[ns-1] ) d += 360.0;
-		        PhiArray2[ns] = PhiArray[ns]+d;
-                xArray2[ns] = xArray[ns];
-                yArray2[ns] = yArray[ns];
-                zArray2[ns] = zArray[ns];
-            }
-            /*
-             * Finally Add in the first point again for periodic spline
-             */
-            PhiArray2[nShellPoints] = PhiArray[0]+d;
-            xArray2[nShellPoints] = xArray[0];
-            yArray2[nShellPoints] = yArray[0];
-            zArray2[nShellPoints] = zArray[0];
-            if ( PhiArray2[nShellPoints] < PhiArray[nShellPoints-1] ) PhiArray2[nShellPoints] += 360.0;
-
-
-
-
-
-            /*
-             *  Add 'nAddShellPoints' points between each of the nominal points.
-             */
-            acc_x    = gsl_interp_accel_alloc( ); spline_x = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_x, PhiArray2, xArray2, nShellPoints+1 );
-            acc_y    = gsl_interp_accel_alloc( ); spline_y = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_y, PhiArray2, yArray2, nShellPoints+1 );
-            acc_z    = gsl_interp_accel_alloc( ); spline_z = gsl_spline_alloc( gsl_interp_cspline_periodic, nShellPoints+1 ); gsl_spline_init( spline_z, PhiArray2, zArray2, nShellPoints+1 );
-            for (j=0, ns=0; ns<nShellPoints; ns++ ){
-
-                nsp1 = ns+1; // last value is at index nShellPoints (so ns+1 is allowed)
-                DeltaPhi = PhiArray2[nsp1] - PhiArray2[ns];
-                PhiInc = DeltaPhi/((double)(nAddShellPoints+1));
-
-                // add original point
-                x4_gsm[p][j][i] = xArray2[ns];
-                y4_gsm[p][j][i] = yArray2[ns];
-                z4_gsm[p][j][i] = zArray2[ns];
-                ++j; // count point added so far
-
-                // add new points
-                for (q=0; q<nAddShellPoints; q++){
-                    Phi = PhiArray2[ns] + PhiInc*(double)(q+1);
-                    x4_gsm[p][j][i] = gsl_spline_eval( spline_x, Phi, acc_x );
-                    y4_gsm[p][j][i] = gsl_spline_eval( spline_y, Phi, acc_y );
-                    z4_gsm[p][j][i] = gsl_spline_eval( spline_z, Phi, acc_z );
-                    ++j; // count point added so far
-                }
-
-		        if (ns==nShellPoints-1){
-		            // add first point again to close
-                    x4_gsm[p][j][i] = xArray2[0];
-                    y4_gsm[p][j][i] = yArray2[0];
-                    z4_gsm[p][j][i] = zArray2[0];
-                    ++j; // count point added so far
-		        }
-            }
-            gsl_spline_free( spline_x ); gsl_interp_accel_free( acc_x );
-            gsl_spline_free( spline_y ); gsl_interp_accel_free( acc_y );
-            gsl_spline_free( spline_z ); gsl_interp_accel_free( acc_z );
-            *nNewShellPoints = j;
-
-        }
-
-
-
-        /*
-         *  Compute Normals
-         */
-        for (i=0;i<nFieldPoints[p];i++) {
-            for (k=0;k<*nNewShellPoints;k++) {
-
-                if (( i>0 ) && ( i<(nFieldPoints[p]-1) )) {
-                    /*
-                     * Interior FL points
-                     */
-                    im1 = i-1; ip1 = i+1;
-                } else if ( i == 0 ) {
-                    /*
-                     * Start FL point
-                     */
-                    im1 = i; ip1 = i+1;
-                } else {
-                    /*
-                     * End FL point
-                     */
-                    im1 = i-1; ip1 = i;
-                }
-                u.x = x4_gsm[p][k][ip1] - x4_gsm[p][k][im1];
-                u.y = y4_gsm[p][k][ip1] - y4_gsm[p][k][im1];
-                u.z = z4_gsm[p][k][ip1] - z4_gsm[p][k][im1];
-
-                km1 = k-1; kp1 = k+1;
-                if (km1 < 0) km1 += *nNewShellPoints;
-                if (kp1 >= *nNewShellPoints) kp1 -= *nNewShellPoints;
-                v.x = x4_gsm[p][kp1][i] - x4_gsm[p][km1][i];
-                v.y = y4_gsm[p][kp1][i] - y4_gsm[p][km1][i];
-                v.z = z4_gsm[p][kp1][i] - z4_gsm[p][km1][i];
-
-                Lgm_CrossProduct( &u, &v, &n );
-                Lgm_NormalizeVector( &n );
-                nx4_gsm[p][k][i] = -n.x;
-                ny4_gsm[p][k][i] = -n.y;
-                nz4_gsm[p][k][i] = -n.z;
-
-            }
-        }
-
-    } // p loop
-
-
-
-
-
-}
-
-
-
-
-
-/*
- * We should change the name of this routine. It no longer actually does any tracing.
- * It just sets up the FLs based on what we read in.
- */
-void TraceFieldLines( ){
-
-    int     i, kk, tn, ns;
-
-    for ( i=0; i<MagEphemInfo->nAlpha; i++ ) {
-        for ( ns=0; ns<MagEphemInfo->nShellPoints[i]; ns++ ) {
-
-
-            /*
-             *  Includes the entire field line.
-             */
-            nPnts[i][ns] = MagEphemInfo->nFieldPnts[i][ns];
-            for (tn=0; tn<MagEphemInfo->nFieldPnts[i][ns]; tn++ ){
-                s_gsm[i][ns][tn] = MagEphemInfo->s_gsm[i][ns][tn];
-                x_gsm[i][ns][tn] = MagEphemInfo->x_gsm[i][ns][tn];
-                y_gsm[i][ns][tn] = MagEphemInfo->y_gsm[i][ns][tn];
-                z_gsm[i][ns][tn] = MagEphemInfo->z_gsm[i][ns][tn];
-            }
-
-
-
-
-            /*
-             *  Include only portion of field between mirror points
-             *  Add the mirror points explicitly later.
-             */
-            for (kk=0, tn=0; tn<MagEphemInfo->nFieldPnts[i][ns]; tn++ ){
-		        if ( ( MagEphemInfo->Bmag[i][ns][tn] < MagEphemInfo->Bm[i]-1e-6 ) && ( MagEphemInfo->Bmag[i][ns][tn] > 0.0 ) ) {
-                    s2_gsm[i][ns][kk] = MagEphemInfo->s_gsm[i][ns][tn];
-                    x2_gsm[i][ns][kk] = MagEphemInfo->x_gsm[i][ns][tn];
-                    y2_gsm[i][ns][kk] = MagEphemInfo->y_gsm[i][ns][tn];
-                    z2_gsm[i][ns][kk] = MagEphemInfo->z_gsm[i][ns][tn];
-                    ++kk;
-                }
-            }
-            nPnts2[i][ns] = kk;
-printf("nPnts2[%d][%d] = %d\n", i, ns, nPnts2[i][ns]);
-
-        }
-    }
-
-    MakeFieldLines( 80, nFieldPoints );
-    MakeDriftShellMesh( &nShellPoints2 );
-
-}
 
 
 void create_ViewDriftShell( void *data ) {
@@ -5869,7 +5650,7 @@ void create_ViewDriftShell( void *data ) {
      */
     //ShowAllPitchAngles = TRUE;
     ShowAllPitchAngles = FALSE;
-    for (i=0; i<=MagEphemInfo->nAlpha; i++){
+    for (i=0; i<=ObjInfo->MagEphemInfo->nAlpha; i++){
         //ShowPitchAngle[i] = TRUE;
         ShowPitchAngle[i] = FALSE;
         ShowPitchAngle2[i] = FALSE;
@@ -6225,14 +6006,14 @@ static void SelectPitchAngles2( GtkWidget  *widget, gpointer data ) {
 
     i = GPOINTER_TO_INT( data );
     if (i<100){
-        if (i==MagEphemInfo->nAlpha) {
+        if (i==ObjInfo->MagEphemInfo->nAlpha) {
             /*
              * Select/deselect all of them
              */
-            AllState = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ) ); // get state of "All" check item
+            AllState = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ) ); // get state of "All" check item
             printf("AllState  = %d\n", AllState);
             ShowAllPitchAngles = AllState;
-            for (j=0; j<MagEphemInfo->nAlpha; j++) {
+            for (j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) {
                 ShowPitchAngle[j] = AllState;
                 g_signal_handler_block( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[j] ), gInfo->FieldLineShowPitchAngleButtonHandler[j] );
                 gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[j] ), AllState );
@@ -6249,32 +6030,32 @@ static void SelectPitchAngles2( GtkWidget  *widget, gpointer data ) {
              *
              *  If they are all off, then set the All item to off.
              */
-            for (n=0, j=0; j<MagEphemInfo->nAlpha; j++) n += gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[j] ) );
-            if ( n == MagEphemInfo->nAlpha ){
+            for (n=0, j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) n += gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[j] ) );
+            if ( n == ObjInfo->MagEphemInfo->nAlpha ){
                 ShowAllPitchAngles = TRUE;
-                g_signal_handler_block( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
-                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), TRUE );
-                g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
+                g_signal_handler_block( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
+                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), TRUE );
+                g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
 
             } else {
                 ShowAllPitchAngles = FALSE;
-                g_signal_handler_block( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
-                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), FALSE );
-                g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
+                g_signal_handler_block( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
+                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), FALSE );
+                g_signal_handler_unblock( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->FieldLineShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
             }
 
 
         }
     } else {
         i -= 100;
-        if (i==MagEphemInfo->nAlpha) {
+        if (i==ObjInfo->MagEphemInfo->nAlpha) {
             /*
              * Select/deselect all of them
              */
-            AllState2 = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ) ); // get state of "All" check item
+            AllState2 = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ) ); // get state of "All" check item
             printf("AllState2 = %d\n", AllState2);
             ShowAllPitchAngles2 = AllState2;
-            for (j=0; j<MagEphemInfo->nAlpha; j++) {
+            for (j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) {
                 ShowPitchAngle2[j] = AllState2;
                 g_signal_handler_block( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[j] ), gInfo->DriftShellShowPitchAngleButtonHandler[j] );
                 gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[j] ), AllState2 );
@@ -6291,18 +6072,18 @@ static void SelectPitchAngles2( GtkWidget  *widget, gpointer data ) {
              *
              *  If they are all off, then set the All item to off.
              */
-            for (n=0, j=0; j<MagEphemInfo->nAlpha; j++) n += gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[j] ) );
-            if ( n == MagEphemInfo->nAlpha ){
+            for (n=0, j=0; j<ObjInfo->MagEphemInfo->nAlpha; j++) n += gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[j] ) );
+            if ( n == ObjInfo->MagEphemInfo->nAlpha ){
                 ShowAllPitchAngles = TRUE;
-                g_signal_handler_block( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
-                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), TRUE );
-                g_signal_handler_unblock( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
+                g_signal_handler_block( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
+                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), TRUE );
+                g_signal_handler_unblock( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
 
             } else {
                 ShowAllPitchAngles = FALSE;
-                g_signal_handler_block( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
-                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), FALSE );
-                g_signal_handler_unblock( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[MagEphemInfo->nAlpha] );
+                g_signal_handler_block( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
+                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), FALSE );
+                g_signal_handler_unblock( G_OBJECT( gInfo->DriftShellShowPitchAngleButton[ObjInfo->MagEphemInfo->nAlpha] ), gInfo->DriftShellShowPitchAngleButtonHandler[ObjInfo->MagEphemInfo->nAlpha] );
             }
 
 
@@ -7061,14 +6842,14 @@ GtkWidget *PitchAngleDisplayProperties(){
     /*
      *  Fill in rows
      */
-    for (i=0; i<=MagEphemInfo->nAlpha; i++){
+    for (i=0; i<=ObjInfo->MagEphemInfo->nAlpha; i++){
 
         col = 0;
 
-        if (i==MagEphemInfo->nAlpha){
+        if (i==ObjInfo->MagEphemInfo->nAlpha){
             sprintf( Str, "<small><b>All</b></small>" );
         } else {
-            sprintf( Str, "<small><b>%g\u00b0</b></small>", MagEphemInfo->Alpha[i] );
+            sprintf( Str, "<small><b>%g\u00b0</b></small>", ObjInfo->MagEphemInfo->Alpha[i] );
         }
         label = gtk_label_new( Str ); gtk_widget_show( label );
         gtk_table_attach( GTK_TABLE(table1), label, col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
@@ -7083,7 +6864,7 @@ GtkWidget *PitchAngleDisplayProperties(){
          */
         gInfo->FieldLineShowPitchAngleButton[i] = gtk_check_button_new(); gtk_widget_show( gInfo->FieldLineShowPitchAngleButton[i] );
         gtk_widget_set_size_request( gInfo->FieldLineShowPitchAngleButton[i], 30, 20);
-        if (i==MagEphemInfo->nAlpha) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[i] ), ShowAllPitchAngles );
+        if (i==ObjInfo->MagEphemInfo->nAlpha) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[i] ), ShowAllPitchAngles );
         else      gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( gInfo->FieldLineShowPitchAngleButton[i] ), ShowPitchAngle[i] );
         gtk_table_attach( GTK_TABLE(table1), gInfo->FieldLineShowPitchAngleButton[i], col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );
         gInfo->FieldLineShowPitchAngleButtonHandler[i] = g_signal_connect( G_OBJECT( gInfo->FieldLineShowPitchAngleButton[i] ), "toggled", G_CALLBACK( SelectPitchAngles2 ), GINT_TO_POINTER(i) );
@@ -7254,14 +7035,14 @@ GtkWidget *PitchAngleDisplayProperties(){
     /*
      *  Fill in rows
      */
-    for (i=0; i<=MagEphemInfo->nAlpha; i++){
+    for (i=0; i<=ObjInfo->MagEphemInfo->nAlpha; i++){
 
         col = 0;
 
-        if (i==MagEphemInfo->nAlpha){
+        if (i==ObjInfo->MagEphemInfo->nAlpha){
             sprintf( Str, "<small><b>All</b></small>" );
         } else {
-            sprintf( Str, "<small><b>%g\u00b0</b></small>", MagEphemInfo->Alpha[i] );
+            sprintf( Str, "<small><b>%g\u00b0</b></small>", ObjInfo->MagEphemInfo->Alpha[i] );
         }
         label = gtk_label_new( Str ); gtk_widget_show( label );
         gtk_table_attach( GTK_TABLE(table1), label, col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(0), 0, 0 );
@@ -8326,6 +8107,22 @@ int main( int argc, char *argv[] ) {
     int         fd, i;
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
 
+    
+    /*
+     * Initialize the ObjInfo structure
+     */
+    ObjInfo = Vds_InitObjectInfo();
+
+    /*
+     * Create the FLs and DSs from data in a file.
+     */
+    CreateFieldLinesAndDriftShells( "test.dat", ObjInfo );
+
+
+
+
+
+
     aInfo = New_aInfo();
     InitAtmosphere();
 
@@ -8394,15 +8191,8 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
     add_pixmap_directory( "/home/mgh/DREAM/Dream/Dream/Images" );
 
 
-    int nPitchAngles;
-    MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(*MagEphemInfo));
-    ReadMagEphemInfoStruct( "test.dat", &nPitchAngles, MagEphemInfo );
-    printf("nPitchAngles = %d\n", nPitchAngles);
-for(i=0;i<24;i++){
-    printf("MagEphemInfo->ShellMirror_Pn[0][%d] = %g %g %g\n", i, MagEphemInfo->ShellMirror_Pn[0][i].x, MagEphemInfo->ShellMirror_Pn[0][i].y, MagEphemInfo->ShellMirror_Pn[0][i].z);
-}
 
-    for (i=0; i<nPitchAngles+1; i++){
+    for (i=0; i<ObjInfo->nPitchAngles+1; i++){
         ShowPitchAngle[i] = 0;
         ShowPitchAngle2[i] = 0;
     }
@@ -8411,30 +8201,30 @@ for(i=0;i<24;i++){
     /*
      * Set up materials
      */
-    LGM_ARRAY_1D( gInfo->FieldLineMaterial,                     nPitchAngles+1,    MaterialProp );
-    LGM_ARRAY_1D( gInfo->FieldLineShininessButton,              nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->FieldLineShininessButtonHandler,       nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->FieldLineMaterialButton,               nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->FieldLineMaterialButtonHandler,        nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButton,         nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler,  nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->FieldLineDiffuseColorButton,           nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->FieldLineAmbientColorButton,           nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->FieldLineSpecularColorButton,          nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterial,                     ObjInfo->nPitchAngles+1,    MaterialProp );
+    LGM_ARRAY_1D( gInfo->FieldLineShininessButton,              ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineShininessButtonHandler,       ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterialButton,               ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineMaterialButtonHandler,        ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButton,         ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineShowPitchAngleButtonHandler,  ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->FieldLineDiffuseColorButton,           ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineAmbientColorButton,           ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->FieldLineSpecularColorButton,          ObjInfo->nPitchAngles+1,    GtkWidget * );
 
-    LGM_ARRAY_1D( gInfo->DriftShellMaterial,                    nPitchAngles+1,    MaterialProp );
-    LGM_ARRAY_1D( gInfo->DriftShellShininessButton,             nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->DriftShellShininessButtonHandler,      nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->DriftShellMaterialButton,              nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->DriftShellMaterialButtonHandler,       nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButton,        nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, nPitchAngles+1,    gulong );
-    LGM_ARRAY_1D( gInfo->DriftShellDiffuseColorButton,          nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->DriftShellAmbientColorButton,          nPitchAngles+1,    GtkWidget * );
-    LGM_ARRAY_1D( gInfo->DriftShellSpecularColorButton,         nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellMaterial,                    ObjInfo->nPitchAngles+1,    MaterialProp );
+    LGM_ARRAY_1D( gInfo->DriftShellShininessButton,             ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellShininessButtonHandler,      ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->DriftShellMaterialButton,              ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellMaterialButtonHandler,       ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButton,        ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellShowPitchAngleButtonHandler, ObjInfo->nPitchAngles+1,    gulong );
+    LGM_ARRAY_1D( gInfo->DriftShellDiffuseColorButton,          ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellAmbientColorButton,          ObjInfo->nPitchAngles+1,    GtkWidget * );
+    LGM_ARRAY_1D( gInfo->DriftShellSpecularColorButton,         ObjInfo->nPitchAngles+1,    GtkWidget * );
 
     int ii;
-    for (i=0; i<nPitchAngles; i++){
+    for (i=0; i<ObjInfo->nPitchAngles; i++){
 
         ii = i%19;
 

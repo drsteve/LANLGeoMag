@@ -1553,7 +1553,7 @@ if ((j==189)&&(k==118)) {
  */
 void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
-    double           Val, Min, Max, dVal;
+    double           Val, Val2, Min, Max, dVal;
     int              w, h;
     unsigned char   *uImage, uVal, Filename[1024];
     FILE            *fp_gif, *fp_info;
@@ -1570,13 +1570,14 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
     for ( w=0; w<W; w++ ){
         for ( h=0; h<H; h++ ) {
 
+            Val = Image[h][w];
             if ( LogScale ) {
-                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+                Val2 = (Val > 0.0) ? log10( Val ) : -9e99;
             } else {
-                Val = Image[h][w];
+                Val2 = Image[h][w];
             }
-            if (Val > Max) Max = Val;
-            if ((Val < Min)&&(Val > -1e99)) Min = Val;
+            if (Val2 > Max) Max = Val2;
+            if ((Val2 < Min)&&(Val > 0.0)) Min = Val2;
 
         }
     }
