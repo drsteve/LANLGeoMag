@@ -130,7 +130,7 @@ void Lgm_AxisAngleToQuat( Lgm_Vector *u, double Angle, double *Q ) {
  *  by a (normalized) quaternion.
  *
  *  Input:
- *      Q[4]  -- four element array containing Qx, Qy, Qz,Qw
+ *      Q[4]  -- four element array containing Qx, Qy, Qz, Qw
  *
  *  Output:
  *

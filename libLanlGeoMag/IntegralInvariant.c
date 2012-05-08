@@ -80,7 +80,7 @@ double Iinv( Lgm_MagModelInfo *mInfo ) {
     double	epsabs, epsrel, result, abserr;
     double  resabs, resasc;
     int		key, neval, ier, limit, lenw, last, iwork[501];
-    double	work[2001];
+    double	work[2002];
     _qpInfo	*qpInfo;
 
 
@@ -180,7 +180,7 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
     double	epsabs, epsrel, result, abserr, resabs, resasc;
     int		key, limit, lenw;
     int     iwork[501], last, ier, neval;
-    double	work[2001];
+    double	work[2002];
     _qpInfo	*qpInfo;
 
 

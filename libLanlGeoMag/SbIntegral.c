@@ -39,7 +39,7 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
     double	a, b;
     double	epsabs, epsrel, result, abserr;
     int		npts, key, neval, ier, leniw, lenw, last, iwork[501];
-    double	work[2001], points[20];
+    double	work[2002], points[20];
     _qpInfo	*qpInfo;
 
 
@@ -104,7 +104,7 @@ double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
     double	a, b;
     double	epsabs, epsrel, result, abserr;
     int		npts, key, neval, ier, leniw, lenw, last, iwork[501];
-    double	work[2001], points[20];
+    double	work[2002], points[20];
     _qpInfo	*qpInfo;
 
 

@@ -4225,9 +4225,9 @@ printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], vi
     TBQ[0] = view_quat3[0]; TBQ[1] = view_quat3[1]; TBQ[2] = view_quat3[2]; TBQ[3] = view_quat3[3];
     Lgm_QuatToAxisAngle(  TBQ, &RotAngle5,  &RotAxis5 );
 
-    glRotatef( RotAngle5, RotAxis5.x, RotAxis5.y, RotAxis5.z );
-    glRotatef( -RotAngle4, RotAxis4.x, RotAxis4.y, RotAxis4.z );
-    glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z );
+    glRotatef( RotAngle5, RotAxis5.x, RotAxis5.y, RotAxis5.z ); // This is the panning-type rotation
+    glRotatef( -RotAngle4, RotAxis4.x, RotAxis4.y, RotAxis4.z ); // This is the spinning type rotation
+    glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z ); // Position things properly rel. to "camera" or "eye"
 
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
@@ -4492,7 +4492,8 @@ static gboolean idle( GtkWidget *widget ) {
         if ( oJD != CurrentJD ){
             Lgm_jd_to_ymdh( CurrentJD, &CurrentDate, &CurrentYear, &CurrentMonth, &CurrentDay, &CurrentUT );
             Lgm_UT_to_hmsms( CurrentUT, &CurrentHour, &CurrentMin, &CurrentSec, &CurrentMilliSec );
-            UpdateTimeDepQuants( CurrentDate, CurrentUT );
+//            UpdateTimeDepQuants( CurrentDate, CurrentUT );
+UpdateTimeDepQuants( ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC  );
 
             if (ShowStars) ReLoadStars( );
             ReCreateSats();

@@ -1051,7 +1051,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     double      a, b, r;
     double      epsabs, epsrel, result, abserr;
     int         key, neval, ier, limit, lenw, last, iwork[501];
-    double      work[2001];
+    double      work[2002];
     _qpInfo     *qpInfo;
 
 
@@ -1155,7 +1155,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     double      a, b;
     double      epsabs, epsrel, result, abserr;
     int         key, neval, ier, limit, lenw, last, iwork[501];
-    double      work[2001], MLT, mlat;
+    double      work[2002], MLT, mlat;
     _qpInfo     *qpInfo;
 
 
@@ -1233,7 +1233,7 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     double      a, b, r;
     double      epsabs, epsrel, result, abserr;
     int         key, neval, ier, limit, lenw, last, iwork[501];
-    double      work[2001];
+    double      work[2002];
     _qpInfo     *qpInfo;
 
 
