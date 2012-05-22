@@ -114,6 +114,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->OP77_TILTL = 99.0;
 
 
+    /*
+     * Inits for TS04
+     */
+    MagInfo->TS04_Info = Lgm_Init_TS04( );
+
 
     /*
      *  Inits for Octree stuff
@@ -137,8 +142,12 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
 
 void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
+
     Lgm_free_ctrans( Info->c );
-//what about any splines that may have been alloc'd?
+    free( Info->TS04_Info );
+
+    //what about any splines that may have been alloc'd?
+
 }
 
 

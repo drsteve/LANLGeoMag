@@ -7,6 +7,7 @@
 #include "Lgm/Lgm_Octree.h"
 #include "Lgm/Lgm_Constants.h"
 #include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/Lgm_Tsyg2004.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
@@ -406,6 +407,11 @@ typedef struct Lgm_MagModelInfo {
     double OP77_A[65], OP77_B[65], OP77_C[45], OP77_D[45], OP77_E[65], OP77_F[65], OP77_TT[5];
 
 
+    /*
+     *  Info structure for TS0
+     */
+    LgmTsyg2004_Info *TS04_Info;
+
 
 
 } Lgm_MagModelInfo;
@@ -572,14 +578,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
  *  Function Prototypes for TS04 model
  */
 int  Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
-                double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
-                double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
-                double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
-                double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
-                double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
-                double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
+void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
 
 
 

@@ -773,7 +773,8 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
     Dgsm.y = c->Amod_to_gsm[0][1]*Dmod.x + c->Amod_to_gsm[1][1]*Dmod.y + c->Amod_to_gsm[2][1]*Dmod.z;
     Dgsm.z = c->Amod_to_gsm[0][2]*Dmod.x + c->Amod_to_gsm[1][2]*Dmod.y + c->Amod_to_gsm[2][2]*Dmod.z;
 
-    spsi       = sqrt( Dgsm.x*Dgsm.x + Dgsm.y*Dgsm.y );
+//    spsi       = sqrt( Dgsm.x*Dgsm.x + Dgsm.y*Dgsm.y );
+    spsi       = fabs( Dgsm.x );
     psi        = asin( spsi );
     psi       *= ( Dgsm.x < 0.0 ) ? -1.0 : 1.0;
     c->psi     = psi;

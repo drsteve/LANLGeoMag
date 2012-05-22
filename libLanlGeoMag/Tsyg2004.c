@@ -231,7 +231,6 @@ void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
         &BYR11, &BZR11, &BXR12, &BYR12, &BZR12, &BXR21, &BYR21, &BZR21, &BXR22, &BYR22, 
         &BZR22, &HXIMF, &HYIMF, &HZIMF, &BBX, &BBY, &BBZ );
 
-/*
 printf("BXCF, BYCF, BZCF   = %.10g %.10g %.10g\n", BXCF, BYCF, BZCF );
 printf("BXT1, BYT1, BZT1   = %.10g %.10g %.10g\n", BXT1, BYT1, BZT1 );
 printf("BXT2, BYT2, BZT2   = %.10g %.10g %.10g\n", BXT2, BYT2, BZT2 );
@@ -243,6 +242,7 @@ printf("BXR21, BYR21, BZR21   = %.10g %.10g %.10g\n", BXR21, BYR21, BZR21 );
 printf("BXR22, BYR22, BZR22   = %.10g %.10g %.10g\n", BXR22, BYR22, BZR22 );
 printf("HXIMF, HYIMF, HZIMF   = %.10g %.10g %.10g\n", HXIMF, HYIMF, HZIMF );
 printf("BBX, BBY, BBZ   = %.10g %.10g %.10g\n", BBX, BBY, BBZ);
+/*
 */
 
 

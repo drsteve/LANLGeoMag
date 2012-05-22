@@ -1,9 +1,9 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
-    Lgm_Vector  B2;
-    int		    iopt;
-    double	    parmod[11], ps, X, Y, Z, Bx, By, Bz;
+    Lgm_Vector       B2;
+    int		         iopt;
+    double	         parmod[11], ps, X, Y, Z, Bx, By, Bz;
 
 
     parmod[1]  = Info->P; 	// Pressure in nPa
@@ -22,7 +22,7 @@ int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     ps = Info->c->psi;  // dipole tilt angle
     X = v->x; Y = v->y; Z = v->z;
 
-    Tsyg_TS04_opt( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz );
+    Tsyg_TS04_opt( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, Info->TS04_Info );
 //    t04s_( &iopt, parmod+1, &ps, &X, &Y, &Z, &Bx, &By, &Bz );
     /*
     printf("Bts04 =  (%g, %g, %g)\n", Bx, By, Bz);
