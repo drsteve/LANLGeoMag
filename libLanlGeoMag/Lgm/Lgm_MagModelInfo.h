@@ -87,7 +87,6 @@
 #define LGM_EXTMODEL_SCATTERED_DATA     6
 #define LGM_EXTMODEL_SCATTERED_DATA2    7
 
-#define LGM_EXTMODEL_TS04_OPT           8
 
 
 
@@ -555,30 +554,14 @@ void lgm_field_t96mod_mgh__(double *PARMOD, double *AMDF, int *IYEAR,int *IDAY,i
 void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *, double *, double *, double *, double * );
 
 
+
 /*
- *  T04
+ *  TS04 Optimized
  *
  *  Function Prototypes for TS04 model
  */
 int  Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void Lgm_ComputeW( double W[], int i, double Nk[], double Vk[], double Bsk[], int nk );
-void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
-                double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
-                double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
-                double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
-                double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
-                double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
-                double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ );
-
-
-/*
- *  T04 Optimized
- *
- *  Function Prototypes for TS04 model
- */
-int  Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
 
 
 

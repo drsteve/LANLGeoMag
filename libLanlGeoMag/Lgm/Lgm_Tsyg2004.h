@@ -63,7 +63,7 @@ typedef struct LgmTsyg2004_Info {
     double      OLD_Z;
 
 
-    // cache vars used in BIRK_SHL_opt()
+    // cache vars used in BIRK_SHL()
     int         DoneJ[4];
     double      CPS, SPS, S3PS, PST1[4], PST2[4], ST1[4], CT1[4], ST2[4], CT2[4], X1[4], Z1[4], X2[4], Z2[4];
     double      P[4][4];
@@ -104,46 +104,46 @@ typedef struct LgmTsyg2004_Info {
  *  Function declarations
  */
 void Lgm_Init_TS04( LgmTsyg2004_Info *t );
-void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
+void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
                 double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
                 double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,
                 double *BZT1, double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
                 double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, double *BXR12,
                 double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
                 double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BBX, double *BBY, double *BBZ, LgmTsyg2004_Info *tInfo );
-void    SHLCAR3X3_opt( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
-void    DEFORMED_opt( int IOPT, double PS, double X, double Y, double Z,
+void    SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void    DEFORMED( int IOPT, double PS, double X, double Y, double Z,
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2004_Info *tInfo );
-void    WARPED_opt( int IOPT, double PS, double X, double Y, double Z,
+void    WARPED( int IOPT, double PS, double X, double Y, double Z,
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2004_Info *tInfo );
-void    UNWARPED_opt( int IOPT, double X, double Y, double Z,
+void    UNWARPED( int IOPT, double X, double Y, double Z,
                 double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2004_Info *tInfo );
-void    TAILDISK_opt( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void    SHLCAR5X5_opt( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ );
-void    BIRK_TOT_opt( int IOPB, double PS, double X, double Y, double Z,
+void    TAILDISK( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void    SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ );
+void    BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
                 double *BX11, double *BY11, double *BZ11, double *BX12, double *BY12, double *BZ12,
                 double *BX21, double *BY21, double *BZ21, double *BX22, double *BY22, double *BZ22, LgmTsyg2004_Info *tInfo );
-void    BIRK_1N2_opt( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo ) ;
-void    TWOCONES_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
-void    ONE_CONE_opt( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
-double  THETA_S_opt( double *A, double R, double Theta, double SinTheta, double Sin2Theta, double Sin3Theta);
-double  R_S_opt( double *A, double R, double CosTheta, double Cos2Theta );
-void    FIALCOS_opt( double R, double THETA, double SIN_THETA, double COS_THETA, double SIN_PHI, double COS_PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT);
-void    BIRK_SHL_opt( int, int, int, int, int, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
-void    FULL_RC_opt( int IOPR, double PS, double X, double Y, double Z,
+void    BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo ) ;
+void    TWOCONES( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void    ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+double  THETA_S( double *A, double R, double Theta, double SinTheta, double Sin2Theta, double Sin3Theta);
+double  R_S( double *A, double R, double CosTheta, double Cos2Theta );
+void    FIALCOS( double R, double THETA, double SIN_THETA, double COS_THETA, double SIN_PHI, double COS_PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT);
+void    BIRK_SHL( int, int, int, int, int, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void    FULL_RC( int IOPR, double PS, double X, double Y, double Z,
                 double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC,  double *BZPRC, LgmTsyg2004_Info *tInfo );
-void    SRC_PRC_opt( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z,
+void    SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z,
                 double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC, double *BZPRC, LgmTsyg2004_Info *tInfo );
-void    RC_SYMM_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ);
-double  AP_opt( double R, double SINT, double COST);
-void    PRC_SYMM_opt( double X,double Y,double Z, double *BX, double *BY, double *BZ );
-double  AP_optPRC( double R, double SINT, double COST);
-void    PRC_QUAD_opt( double X, double Y, double Z, double *BX, double *BY, double *BZ);
-double  BR_PRC_Q_opt( double R, double SINT, double COST );
-double  BT_PRC_Q_opt( double R, double SINT, double COST);
-void    FFS_opt( double A, double A0, double DA, double *F, double *FA, double *FS );
-void    RC_SHIELD_opt( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
-void    DIPOLE_opt( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void    RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  AP( double R, double SINT, double COST);
+void    PRC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ );
+double  APPRC( double R, double SINT, double COST);
+void    PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  BR_PRC_Q( double R, double SINT, double COST );
+double  BT_PRC_Q( double R, double SINT, double COST);
+void    FFS( double A, double A0, double DA, double *F, double *FA, double *FS );
+void    RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
+void    DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
 
 
 
