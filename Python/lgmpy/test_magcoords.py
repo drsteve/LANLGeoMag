@@ -30,17 +30,20 @@ class magcoords_Tests(unittest.TestCase):
         """quick functional tests (regression)"""
         ans = [-3.608026916281572, 4.163336342344337e-17, -1.7268878861662331]
         numpy.testing.assert_allclose(ans,
-                            magcoords.coordTrans([-4,0,0], datetime.datetime(2009,1,1),'SM','GSM'), rtol=1e-6)
+                            magcoords.coordTrans([-4,0,0], datetime.datetime(2009,1,1),
+                            'SM','GSM'), atol=1e-8)
         ans = [-3.9999999999999991, 1.87350135e-16, 0.00000000e+00]
         numpy.testing.assert_allclose(ans,
                             magcoords.coordTrans([-3.608026916281573, 2.5673907444456745e-16,
-            -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','SM'), rtol=1e-6)
+            -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','SM'), atol=1e-8)
         ans = [-0.8908435824705201, 0.09891125760552615, -0.4434120822553017]
         numpy.testing.assert_allclose(ans,
-            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 'WGS84', 'GSM'), rtol=1e-6)
+            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 
+            'WGS84', 'GSM'), rtol=1e-6)
         ans = [36.7677624344546, -2.329852593118382, 4.12310562561766]
         numpy.testing.assert_allclose(ans,
-            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 'GSM', 'WGS84'), rtol=1e-6)
+            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 
+            'GSM', 'WGS84'), rtol=1e-6)
 
     def test_Lvalue(self):
         """Lvalue should have known output"""
@@ -93,7 +96,7 @@ class magcoords_Tests(unittest.TestCase):
         in_pos = Lgm_Vector.Lgm_Vector(-4,0,0)
         ans = [-3.608026916281572, 4.163336342344337e-17, -1.7268878861662331]
         numpy.testing.assert_allclose(ans,
-                            magcoords.coordTrans(in_pos, datetime.datetime(2009,1,1),'SM','GSM'), rtol=1e-6)
+                            magcoords.coordTrans(in_pos, datetime.datetime(2009,1,1),'SM','GSM'), atol=1e-8)
 
     def test_raises(self):
         """coordTrans has various exceptions checked"""
