@@ -117,7 +117,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     /*
      * Inits for TS04
      */
-    MagInfo->TS04_Info = Lgm_Init_TS04( );
+    Lgm_Init_TS04( &MagInfo->TS04_Info );
 
 
     /*
@@ -144,7 +144,6 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
 
     Lgm_free_ctrans( Info->c );
-    free( Info->TS04_Info );
 
     //what about any splines that may have been alloc'd?
 
@@ -185,6 +184,8 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
      *  Now, copy the Lgm_CTrans struct properly.
      */
     t->c = Lgm_CopyCTrans( s->c );
+
+
 
 
     /*

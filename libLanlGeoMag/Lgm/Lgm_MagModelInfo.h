@@ -408,9 +408,9 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
-     *  Info structure for TS0
+     *  Info structure for TS04
      */
-    LgmTsyg2004_Info *TS04_Info;
+    LgmTsyg2004_Info    TS04_Info;
 
 
 

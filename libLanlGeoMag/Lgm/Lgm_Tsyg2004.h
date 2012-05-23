@@ -103,6 +103,7 @@ typedef struct LgmTsyg2004_Info {
 /*
  *  Function declarations
  */
+void Lgm_Init_TS04( LgmTsyg2004_Info *t );
 void TS04_EXTERN_opt( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BXIMF, double BYIMF,
                 double BZIMF, double W1, double W2, double W3, double W4, double W5, double W6, double PS,
                 double X, double Y, double Z, double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1,

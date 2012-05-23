@@ -11,7 +11,19 @@
  *
  *
  *
- *    ASSEMBLED:  MARCH 25, 2004; UPDATED:  AUGUST 2 & 31, DECEMBER 27, 2004.
+ *      ASSEMBLED:  MARCH 25, 2004; UPDATED:  AUGUST 2 & 31, DECEMBER 27, 2004.
+ *      LATEST MODIFICATIONS/BUGS REMOVED:
+ *
+ *      (1) MARCH 14, 2005:  79 -> 69  (LINE 94; might cause compilation problems with some Fortran compilers)
+ *
+ *      (2) JUNE 24, 2006:  REPLACED COEFFICIENTS IN
+ *          (i)   DATA statement in FUNCTION AP,
+ *          (ii)  DATA C_SY statement in SUBROUTINE FULL_RC, and
+ *          (iii) DATA A statement in SUBROUTINE T04_s.
+ *      This correction was needed due to a bug found in the symmetric ring current module.
+ *      Its impact can be significant (up to ~20 nT) only in the innermost magnetosphere (R<=2)
+ *      and only for strongly disturbed conditions; otherwise, the change in the model field
+ *      does not exceed a few percent.
  *
  *  ------------------------------------------------------------------------------------------
  *    A DATA-BASED MODEL OF THE EXTERNAL (I.E., WITHOUT EARTH'S CONTRIBUTION) PART OF THE
@@ -95,13 +107,9 @@ void mysincos(double val, double *sin_val, double *cos_val)
 
 }
 
-LgmTsyg2004_Info *Lgm_Init_TS04(  ){
+void Lgm_Init_TS04( LgmTsyg2004_Info *t ){
 
-    LgmTsyg2004_Info    *t;
     int                 i, j;
-
-    // init memory for TS04 Info structure
-    t = (LgmTsyg2004_Info *)calloc( 1, sizeof(LgmTsyg2004_Info) );
 
     // Init some params
     t->OLD_PS = -9e99;
@@ -114,8 +122,8 @@ LgmTsyg2004_Info *Lgm_Init_TS04(  ){
             t->P[i][j] = -9e99;
         }
     }
-    
-    return( t );
+
+    return;
 
 }
 
@@ -130,6 +138,8 @@ void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double CO
     double       BXR12, BYR12, BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, HXIMF;
     double       HYIMF, HZIMF, BBX, BBY, BBZ;
     int           IOPGEN=1, IOPTT=0, IOPB=0, IOPR=0;
+/*
+    OLD version of A coeffs.
     static double  A[] = { -9e99, 1.00000, 5.19884, 0.923524, 8.68111, 0.00000, -6.44922, 11.3109,
                         -3.84555, 0.00000, 0.558081, 0.937044, 0.00000, 0.772433, 0.687241,
                         0.00000, 0.320369, 1.22531, -0.432246E-01, -0.382436, 0.457468,
@@ -140,6 +150,19 @@ void Tsyg_TS04_opt( int IOPT, double *PARMOD, double PS, double SINPS, double CO
                         0.581002, 1.14671, 0.876060, 0.386060, 0.801831, 0.874315, 0.463634,
                         0.175077, 0.673053, 0.388341, 2.32074, 1.32373, 0.419800, 1.24968,
                         1.28903, .409286, 1.57622, .690036, 1.28836, 2.4054, .528557, .564247 };
+*/
+
+    // new version
+    static double  A[] = { -9e99, 1.00000, 5.44118, 0.891995, 9.09684, 0.00000, -7.18972, 12.2700,
+                        -4.89408, 0.00000, 0.870536, 1.36081, 0.00000, 0.688650, 0.602330,
+                        0.00000, 0.316346, 1.22728, -0.363620E-01, -0.405821, 0.452536,
+                        0.755831, 0.215662, 0.152759, 5.96235, 23.2036, 11.2994, 69.9596,
+                        0.989596, -0.132131E-01, 0.985681, 0.344212E-01, 1.02389, 0.207867,
+                        1.51220, 0.682715E-01, 1.84714, 1.76977, 1.37690, 0.696350, 0.343280,
+                        3.28846, 111.293, 5.82287, 4.39664, 0.383403, 0.648176, 0.318752E-01,
+                        0.581168, 1.15070, 0.843004, 0.394732, 0.846509, 0.916555, 0.550920,
+                        0.180725, 0.898772, 0.387365, 2.26596, 1.29123, 0.436819, 1.28211,
+                        1.33199, .405553, 1.6229, .699074, 1.26131, 2.42297, .537116, .619441 };
 
 
     IOPGEN = 0;
@@ -1823,7 +1846,7 @@ void     FIALCOS_opt( double R, double THETA, double SIN_THETA, double COS_THETA
 
 // This is one of the costliest routines -- mostly due to sin,cos,exp
 // Almost 13% of Lstar calc is done in here.
-void    BIRK_SHL_opt( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC, 
+void    BIRK_SHL_opt( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC,
                                 double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo ) {
 
     int        L, M, I, N, NN, K;
@@ -2053,6 +2076,8 @@ void     FULL_RC_opt( int IOPR, double PS, double X, double Y, double Z,
      *             IOPR=2 - PRC ONLY
      */
 
+    /*
+    ORIG vals
     static double C_SY[] = { -9e99, 1675.694858,1780.006388,-961.6082149,-1668.914259,
                     -27.40437029,-107.4169670,27.76189943,92.89740503,-43.92949274,
                     -403.6444072,6.167161865,298.2779761,-1680.779044,-1780.933039,
@@ -2071,6 +2096,27 @@ void     FULL_RC_opt( int IOPR, double PS, double X, double Y, double Z,
                     7.981216562,35.16822497,12.45651654,1.689755359,3.678712366,
                     23.66117284,6.987136092,6.886678677,20.91245928,1.650064156,
                     3.474068566,.3474715765,.6564043111 };
+    */
+
+    // CORRECTED VALUES (AS OF MAY 2006)
+    static double C_SY[] = { -9e99, -957.2534900, -817.5450246, 583.2991249, 758.8568270,
+                    13.17029064, 68.94173502, -15.29764089, -53.43151590, 27.34311724,
+                    149.5252826, -11.00696044, -179.7031814, 953.0914774, 817.2340042,
+                    -581.0791366, -757.5387665, -13.10602697, -68.58155678, 15.22447386,
+                    53.15535633, -27.07982637, -149.1413391, 10.91433279, 179.3251739,
+                    -6.028703251, 1.303196101, -1.345909343, -1.138296330, -0.06642634348,
+                    -0.3795246458, .07487833559, .2891156371, -.5506314391, -.4443105812,
+                    0.2273682152, 0.01086886655, -9.130025352, 1.118684840, 1.110838825,
+                    .1219761512, -.06263009645, -.1896093743, .03434321042, .01523060688,
+                    -.4913171541, -.2264814165, -.04791374574, .1981955976, -68.32678140,
+                    -48.72036263, 14.03247808, 16.56233733, 2.369921099, 6.200577111,
+                    -1.415841250, -0.8184867835, -3.401307527, -8.490692287, 3.217860767,
+                    -9.037752107, 66.09298105, 48.23198578, -13.67277141, -16.27028909,
+                    -2.309299411, -6.016572391, 1.381468849, 0.7935312553, 3.436934845,
+                    8.260038635, -3.136213782, 8.833214943, 8.041075485, 8.024818618,
+                    35.54861873, 12.55415215, 1.738167799, 3.721685353, 23.06768025,
+                    6.871230562, 6.806229878, 21.35990364, 1.687412298, 3.500885177,
+                    0.3498952546, 0.6595919814 };
 
     static double C_PR[] = { -9e99, -64820.58481,-63965.62048,66267.93413,135049.7504,
                     -36.56316878,124.6614669,56.75637955,-87.56841077,5848.631425,
