@@ -269,6 +269,7 @@ double  Lgm_PsdToDiffFlux( double f, double p2c2 );
 double  Lgm_DiffFluxToPsd( double j, double p2c2 );
 int     Lgm_GeometricSeq( double a, double b, int n, double *G );
 int     Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y );
+double  Model( double *x, int n, double E );
 
 
 

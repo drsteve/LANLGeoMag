@@ -1081,12 +1081,18 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
             p->A[k]    = A[k]; // A is local Pitch Angle
             SinAlphaEq = sqrt( mInfo2->Bmin/mInfo2->Blocal ) * sin( RadPerDeg*p->A[k] );
             AlphaEq    = DegPerRad*asin( SinAlphaEq );
+
 // REALLY SHOULD ASSUME WE HAVE THESE ALREADY. I.E. from MahEphemInfo pre-processing.
             //p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
             Lgm_InterpArr( Aarr, Karr, narr,   AlphaEq, &p->KofA[k] );
             Lgm_InterpArr( Aarr, Larr, narr,   AlphaEq, &p->LstarOfA[k] );
 //GUARD AGAINST BAD VALS HERE!!!? i.e. negative vals
-//printf("KofA[%d] = %g    LstarOfA[%d] = %g\n", k, p->KofA[k], k, p->LstarOfA[k]);
+            //printf("KofA[%d] = %g    LstarOfA[%d] = %g\n", k, p->KofA[k], k, p->LstarOfA[k]);
+
+
+            Lgm_InterpArr( Aarr, Karr, narr,   A[k], &p->KofA[k] );
+            Lgm_InterpArr( Aarr, Larr, narr,   A[k], &p->LstarOfA[k] );
+            
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
@@ -1161,12 +1167,6 @@ assumes electrons -- generalize this...
 
 
 
-
-
-
-
-
-
         for ( m=0; m<nE; m++ ){ // loop over energy
             p2c2 = Lgm_p2c2( p->E[m], LGM_Ee0 );
 
@@ -1194,12 +1194,13 @@ assumes electrons -- generalize this...
                 p->PSD_EA[m][k]  = Lgm_P2F_GetPsdAtMuAndK( p->MuofE[m][k], p->KofA[k], p->A[k], p );
                 // Now do conversion from units of PSD to Flux
                 if ( p->PSD_EA[m][k] < 0.0 ) {
+//printf("p->PSD_EA[%d][%d] = %g\n", m, k, p->PSD_EA[m][k]);
                     p->FLUX_EA[m][k] = -9e99;
                 } else {
                     p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
                 }
 //CRAP
-//if (m==2)
+//if (m==7)
 //printf("m=%d,k=%d, p->MuofE[m][k] = %g p->KofA[k], p->A[k] = %g %g       p->PSD_EA[m][k] = %g  p->FLUX_EA[m][k] = %g\n", m,k,p->MuofE[m][k], p->KofA[k], p->A[k], p->PSD_EA[m][k], p->FLUX_EA[m][k]);
             } else {
                 p->PSD_EA[m][k] = 0.0;
@@ -1209,9 +1210,9 @@ assumes electrons -- generalize this...
         } // end energy loop (m index)
     } // end pitch angle loop (k index)
 
-    if ( p->DumpDiagnostics ) {
         DumpGif( "Lgm_PsdToFlux_PSD_EA", p->nA, p->nE, p->PSD_EA );
         DumpGif( "Lgm_PsdToFlux_FLUX_EA", p->nA, p->nE, p->FLUX_EA );
+    if ( p->DumpDiagnostics ) {
     }
 
 
@@ -1256,9 +1257,11 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
      * Interpolate on K first to get a 1D array of f(mu).
      */
     if ( K > p->K[p->nK - 1] ) {
+        //printf("Lgm_P2F_GetPsdAtMuAndK: (A) K >  p->K[%d] = %g %g\n", K, p->nK - 1, p->K[p->nK - 1] );
         return(-9e99);
         i0 = p->nK - 2; i1 = p->nK - 1;
     } else if ( K < p->K[0] ) {
+        //printf("Lgm_P2F_GetPsdAtMuAndK: (B) K <  p->K[0] = %g %g\n", K, p->K[0] );
         return(-9e99);
         i0 = 0; i1 = 1;
     } else {
@@ -1269,7 +1272,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
             }
         }
     }
-    //printf("i0, i1 = %d %d\n", i0, i1);
+    //printf("Lgm_P2F_GetPsdAtMuAndK: i0, i1 = %d %d\n", i0, i1);
 
 
     // interpolate K
