@@ -15,7 +15,7 @@ import numpy as np
 import MagData
 from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_TS04, \
                     Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel, \
-                    Lgm_get_QinDenton_at_JD, Lgm_Date_to_JD, Lgm_B_TS04_opt
+                    Lgm_get_QinDenton_at_JD, Lgm_Date_to_JD
 
 import lgmpy
 import Lgm_Vector

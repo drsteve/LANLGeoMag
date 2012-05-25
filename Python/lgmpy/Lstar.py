@@ -978,8 +978,8 @@ def get_Lstar2(pos, date, alpha = 90.,
     Lgm_Wrap.__getattribute__('Lgm_Set_'+internal_model+'_InternalModel')(MagEphemInfo.LstarInfo.contents.mInfo)    
     
     MagEphemInfo.nAlpha = len(Alpha)
-    if len(Alpha) > 1 and Bfield == 'Lgm_B_TS04':
-        raise(NotImplementedError('TS04 is not thread safe!! Can only do 1 PA at a time'))
+    #if len(Alpha) > 1 and Bfield == 'Lgm_B_TS04':
+    #    raise(NotImplementedError('TS04 is not thread safe!! Can only do 1 PA at a time'))
 
     for i in range(len(Alpha)):
         MagEphemInfo.Alpha[i] = Alpha[i]
@@ -1008,7 +1008,7 @@ def get_Lstar2(pos, date, alpha = 90.,
 
 
 
-    if QinDenton and (Bfield == 'Lgm_B_TS04' or Bfield == 'Lgm_B_TS04_opt'): # these are the params we will use.
+    if QinDenton and Bfield == 'Lgm_B_TS04': # these are the params we will use.
         # Grab the QinDenton data
         # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
         # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
