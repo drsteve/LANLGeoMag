@@ -6,6 +6,7 @@ int main( ) {
     double      UTC;
     
     Date = 20040812;    // August 12, 2004
+
     UTC  = 12.34567;  // Universal Time Coordinated (in decimal hours)
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
@@ -21,6 +22,7 @@ int main( ) {
     printf("UTC  = %lf\n", UTC);
     printf("Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z);
     printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
+
 
 
     Lgm_free_ctrans( c ); // free the structure

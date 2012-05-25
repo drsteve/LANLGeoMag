@@ -339,7 +339,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
-    double	MirrorMLT_Old[500], MirrorMlat_Old[500], PredMinusActualMlat;
+    double	MirrorMLT_Old[500], MirrorMlat_Old[500], PredMinusActualMlat, res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
@@ -425,10 +425,13 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
                 if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z, PostStr);
+                    printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n",
+                            PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y,
+                            LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
                     B = Lgm_Magnitude( &Bvec );
-                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
+                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n",
+                            PreStr, B, LstarInfo->mInfo->Bm, PostStr);
                 }
 
 
@@ -511,6 +514,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
                     /*
                      *  Do full blown I integral. (Integrand is evaluated by tracing to required s-values.)
+                     *  (This strategy isnt used very much anymore - 20120524, MGH)
                      */
                     I = Iinv( LstarInfo->mInfo  );
                     if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
@@ -617,7 +621,19 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         }
 
 
-	    done2 = FALSE; FoundShellLine = FALSE; Count = 0; 
+        /*
+         * Loop until we are done. We will be done when we have either;
+         *
+         *    1) found I to the requested tolerance or
+         *    2) I cannot be found after several attempts.
+         *
+         *  Each attempt is kept track of by the 'Count' variable.  The
+         *  strategy is to make a reasonable estimate for the search range on
+         *  mlat. If this doesnt work, we expand the size of the range.
+         *
+         */
+	    done2 = FALSE; FoundShellLine = FALSE; Count = 0;
+        LstarInfo->nImI0 = 0;
 	    while ( !done2 && (k > 0) ) {
 
 
@@ -641,6 +657,25 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
 
+
+for (i=0; i<LstarInfo->nImI0; i++) {
+    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
+    LstarInfo->Earr[i] = 1.0;
+}
+if ( LstarInfo->nImI0>2 ){
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+    printf( "res = %g\n", res );
+}
+if ( fabs(res) < 90.0 ){
+mlat0 = res-1.0;
+mlat1 = res+1.0;
+}
+
+
+
+
+
+
             } else if ( Count == 2 ) {
 
 	            /*
@@ -656,6 +691,20 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
                 }
 
+for (i=0; i<LstarInfo->nImI0; i++) {
+    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
+    LstarInfo->Earr[i] = 1.0;
+}
+if ( LstarInfo->nImI0>2 ){
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+    printf( "res = %g\n", res );
+}
+if ( fabs(res) < 90.0 ){
+mlat0 = res-5.0;
+mlat1 = res+5.0;
+}
+
+
     	    } else {
 
                 /*
@@ -664,15 +713,40 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  */
                 //mlat0 = 0.0;
                 mlat0 = -30.0;
+//mlat0 = 0.0;
                 mlat1 = 90.0;
+//mlat1 = 45.0;
+//mlat1 = 23.855537644144878;
+
+for (i=0; i<LstarInfo->nImI0; i++) {
+    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
+    LstarInfo->Earr[i] = 1.0;
+}
+if ( LstarInfo->nImI0>2 ){
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+    printf( "res = %g\n", res );
+}
+if ( fabs(res) < 90.0 ){
+mlat0 = res-45.0;
+mlat1 = res+45.0;
+}
+
 
             }
 
 
-            if (LstarInfo->VerbosityLevel > 1) printf("\n\t\t%s----- Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d  --------%s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
+            if (LstarInfo->VerbosityLevel > 1) {
+                printf("\n\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                printf("\t\t%s             Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d          %s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
+                printf("\t\t%s________________________________________________________________________________________________________________________________%s\n", PreStr, PostStr );
+            }
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, &nIts, LstarInfo );
             PredMinusActualMlat = pred_mlat - mlat;
-            if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s    > Predicted mlat:  %g  Actual mlat: %g  Diff: %g     MLT/MLAT: %g %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, PostStr );
+            if (LstarInfo->VerbosityLevel > 1) {
+                printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, Ifound, Ifound-I, PostStr );
+                printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+            }
 
 
 
@@ -708,14 +782,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
          *  points. We end up sorting the confusion out, but we really need to make
          *  sure that as we proceed, we refer to the correct values.
          *
-         *  
+         *
          *
          */
 //        u = LstarInfo->mInfo->Pm_North;
 //        Lgm_Convert_Coords( &u, &v, GSM_TO_SM, LstarInfo->mInfo->c );
 //        r    = Lgm_Magnitude( &v );
 //        mlat = asin( v.z/r )*DegPerRad;
-        
+
 
 
 

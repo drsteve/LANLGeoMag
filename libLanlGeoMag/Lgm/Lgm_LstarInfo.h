@@ -112,6 +112,17 @@ typedef struct Lgm_LstarInfo {
     double              xma[500], yma[500], ym2[500];
 
 
+    /*
+     * Variables to keep track of the I-I0 versus mlat variations that result
+     * in search attempts in FindShellLine(). These vars are used in Lstar() to
+     * help figure out ranges of mlat to search over.
+     */
+    double  MLATarr[500]; // mlat's
+    double  ImI0arr[500]; // I-I0's
+    double  Earr[500];    // nominally the error on I-I0 (typically set to const).
+    int     nImI0;        // number of vals stored.
+
+
 
     /*
      *  variables for keeping track of particles

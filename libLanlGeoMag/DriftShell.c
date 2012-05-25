@@ -1,7 +1,9 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
+#include <gsl/gsl_multifit.h>
 #define MAX_ITS 100
 
+int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
 
 /*
  *   FindShellLine
@@ -28,8 +30,10 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
     double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2;
     int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
+    int           i;
 
     *Iterations = 0;
+
 
     /*
      *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
@@ -78,6 +82,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      */
     I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
     if ( fabs(I) > 1e99 ) return(-5);
+    LstarInfo->MLATarr[LstarInfo->nImI0] = mlat1;
+    LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
     D1 = I-I0;
     if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
 
@@ -113,6 +119,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
          */
         I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
+        LstarInfo->MLATarr[LstarInfo->nImI0] = mlat0;
+        LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
         D0 = I-I0;
         if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = mlat0; }
 
@@ -144,6 +152,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              */
             I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
             if ( fabs(I) > 1e99 ) return(-5);
+            LstarInfo->MLATarr[LstarInfo->nImI0] = mlat2;
+            LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             D2 = I-I0;
             if (fabs(D2) < Dmin){ Dmin = fabs(D2); mlat_min = mlat2; }
 
@@ -187,6 +197,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
          */
         I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
+        LstarInfo->MLATarr[LstarInfo->nImI0] = mlat2;
+        LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
         D2 = I-I0;
         if (fabs(D2) < Dmin){ Dmin = fabs(D2); mlat_min = mlat2; }
 
@@ -218,6 +230,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
              */
             I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
             if ( fabs(I) > 1e99 ) return(-5);
+            LstarInfo->MLATarr[LstarInfo->nImI0] = mlat0;
+            LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             D0 = I-I0;
             if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = mlat0; }
 
@@ -256,6 +270,79 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     }
 
 //printf("Dmin = %g\n", Dmin);
+
+
+for (i=0; i<LstarInfo->nImI0; i++) {
+//printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
+LstarInfo->Earr[i] = 1.0;
+}
+
+if (1==1){
+double res;
+if ( LstarInfo->nImI0>2 ){
+FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+if ( (res > -90.0) && (res < 90.0) ){
+printf( "res = %g\n", res );
+a = res-2.0;
+b = res;
+c = res+2.0;
+
+I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
+if ( fabs(I) < 1e98 ) {
+    LstarInfo->MLATarr[LstarInfo->nImI0] = b;
+    LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
+    D0 = I-I0;
+    if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = b; }
+}
+Db = D0;
+if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+    *rad    = r;
+    *Ifound = I;
+    *mlat   = mlat_min;
+    FoundValidI = TRUE;
+    return( FoundValidI );
+}
+
+I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
+if ( fabs(I) < 1e98 ) {
+    LstarInfo->MLATarr[LstarInfo->nImI0] = a;
+    LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
+    D0 = I-I0;
+    if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = a; }
+}
+Da = D0;
+if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+    *rad    = r;
+    *Ifound = I;
+    *mlat   = mlat_min;
+    FoundValidI = TRUE;
+    return( FoundValidI );
+}
+
+
+
+I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
+if ( fabs(I) < 1e98 ) {
+    LstarInfo->MLATarr[LstarInfo->nImI0] = c;
+    LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
+    D0 = I-I0;
+    if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = c; }
+}
+Dc = D0;
+if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+    *rad    = r;
+    *Ifound = I;
+    *mlat   = mlat_min;
+    FoundValidI = TRUE;
+    return( FoundValidI );
+}
+printf("new trial range: a,b,c = %g %g %g  Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc);
+
+}
+
+}
+
+}
     
 
     if ( !FoundZeroBracket ){
@@ -299,6 +386,8 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
                 e = b + F1*d1;
             }
             I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            LstarInfo->MLATarr[LstarInfo->nImI0] = e;
+            LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
             if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
             //printf("Initially:  a, b, c, [e]  = %g %g %g [%g]   Da, Db, Dc, [De] = %g %g %g [%g]   Dmin = %g\n", a, b, c, e, Da, Db, Dc, De, Dmin );
@@ -443,6 +532,8 @@ exit(0);
             d = b-a;
             e = a + F*d;
             I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            LstarInfo->MLATarr[LstarInfo->nImI0] = e;
+            LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
             if (fabs(De) < Dmin){ Dmin = fabs(De); mlat_min = e; }
             //printf("Initially:  a, b, [e]  = %g %g [%g]   Da, Db, [De] = %g %g [%g]   Dmin = %g\n", a, b, e, Da, Db, De, Dmin );
@@ -687,3 +778,69 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 }
 
+
+
+int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
+
+    int     i, Flag;
+    double  chisq, root, A, B, C, D;
+
+    gsl_multifit_linear_workspace   *work;
+    gsl_matrix                      *X, *cov;
+    gsl_vector                      *v, *w, *c, *xx;
+
+
+    X   = gsl_matrix_alloc( n, 3 );
+    v   = gsl_vector_alloc( n );                                                                                                                          
+    w   = gsl_vector_alloc( n );
+    c   = gsl_vector_alloc (3);                                                                                                                            
+    cov = gsl_matrix_alloc (3, 3);
+    xx  = gsl_vector_alloc (3);
+
+    for ( i=0; i<n; i++ ) {
+
+        gsl_matrix_set( X, i, 0, 1.0 );                                                                                                                   
+        gsl_matrix_set( X, i, 1, x[i] );                                                                                                                    
+        gsl_matrix_set( X, i, 2, x[i]*x[i] );                                                                                                                 
+
+        gsl_vector_set( v, i, y[i] );                                                                                                                       
+        gsl_vector_set( w, i, 1.0/(dy[i]*dy[i]) );
+
+    }
+
+    
+    work = gsl_multifit_linear_alloc( n, 3 );                                                                        
+    gsl_multifit_wlinear( X, w, v, c, cov, &chisq, work );                                                                                           
+    gsl_multifit_linear_free( work );
+
+    C = gsl_vector_get( c, 0 );
+    B = gsl_vector_get( c, 1 );
+    A = gsl_vector_get( c, 2 );
+
+    
+    Flag = 0;
+    D = B*B - 4.0*A*C;
+    if ( D >= 0.0 ) {
+        *res  = (-B + sqrt( D ))/(2.0*A);
+//        gsl_vector_set( xx, 0, 1.0 );                                                                                                                     
+//        gsl_vector_set( xx, 1, root );                                                                                                                    
+//        gsl_vector_set( xx, 2, root*root );
+//        gsl_multifit_linear_est( xx, c, cov, res, res_err );
+        Flag = 1;
+    } else {
+        *res = -1e31;
+    }
+
+
+    gsl_matrix_free( X );                                                                                                                              
+    gsl_vector_free( xx );                                                                                                                             
+    gsl_vector_free( v );                                                                                                                              
+    gsl_vector_free( w );                                                                                                                              
+    gsl_vector_free( c );                                                                                                                              
+    gsl_matrix_free( cov );
+    
+
+    return( Flag );
+
+
+}

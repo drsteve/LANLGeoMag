@@ -23,7 +23,6 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     X = v->x; Y = v->y; Z = v->z;
 
     Tsyg_TS04( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->TS04_Info );
-//    t04s_( &iopt, parmod+1, &ps, &X, &Y, &Z, &Bx, &By, &Bz );
     /*
     printf("Bts04 =  (%g, %g, %g)\n", Bx, By, Bz);
     B_cdip(  v, &B2, Info );

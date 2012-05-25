@@ -73,7 +73,7 @@ static char ArgsDoc[] = "InFile OutFile";
  */
 static struct argp_option Options[] = {
     {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
-    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Default is T89."    },
+    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be OP77, T87, T89, TS04. Default is T89."    },
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,                                      "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\"."   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
