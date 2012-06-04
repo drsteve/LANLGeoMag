@@ -126,7 +126,7 @@ double Iinv( Lgm_MagModelInfo *mInfo ) {
          *  Use DQAGS
          */
         limit = 500; lenw = 4*limit; key = 6;
-        dqags(I_integrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
+        dqags(I_integrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, mInfo->VerbosityLevel );
 
     } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 
@@ -221,7 +221,7 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
          *  Use DQAGS
          */
         limit = 500; lenw = 4*limit; key = 6;
-        dqags(I_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
+        dqags(I_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, mInfo->VerbosityLevel );
 
     } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 

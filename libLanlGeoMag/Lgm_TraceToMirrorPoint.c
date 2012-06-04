@@ -219,6 +219,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     FoundBracket = FALSE;
     while ( !done ) {
 
+//printf("P = %g %g %g   u_scale=%g %g %g\n", P.x, P.y, P.z, u_scale.x, u_scale.y, u_scale.z);
         if ( Info->VerbosityLevel > 4 ) {
             printf("    TraceToMirrorPoint, Finding Bracket: Starting P: %15g %15g %15g\n", P.x, P.y, P.z );
         }
@@ -229,6 +230,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         if (Htry > Hmax) Htry = Hmax;
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+//printf("P = %g %g %g\n", P.x, P.y, P.z);
 
 
         /*

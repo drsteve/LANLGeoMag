@@ -1161,7 +1161,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     iwork  = (int *) calloc( limit+1, sizeof(int) );
     work   = (double *) calloc( lenw+1, sizeof(double) );
 */
-    dqags(MagFluxIntegrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
+    dqags(MagFluxIntegrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, LstarInfo->mInfo->VerbosityLevel );
 /*
     free( iwork );
     free( work );
@@ -1272,7 +1272,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     iwork  = (int *) calloc( limit+1, sizeof(int) );
     work   = (double *) calloc( lenw+1, sizeof(double) );
 */
-    dqags(LambdaIntegrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
+    dqags(LambdaIntegrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, LstarInfo->mInfo->VerbosityLevel );
 /*
     free( iwork );
     free( work );
@@ -1339,7 +1339,7 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     iwork  = (int *) calloc( limit+1, sizeof(int) );
     work   = (double *) calloc( lenw+1, sizeof(double) );
 */
-    dqags(MagFluxIntegrand2, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work);
+    dqags(MagFluxIntegrand2, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, LstarInfo->mInfo->VerbosityLevel );
 /*
     free( iwork );
     free( work );

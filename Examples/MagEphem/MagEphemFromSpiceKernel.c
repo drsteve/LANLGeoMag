@@ -865,6 +865,8 @@ printf("Delta = %ld\n", Delta);
                         }
 
                         // Set mag model parameters
+// Kludged to use dynamic QinDenton.
+// We need a mechanism to restrict Kp to a given value 
                         Lgm_get_QinDenton_at_JD( UTC.JD-365*5.0, &p, 0 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 

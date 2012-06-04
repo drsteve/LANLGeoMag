@@ -24,7 +24,7 @@ double d1mach( int i );
 
 int dqags(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b, 
 	double epsabs, double epsrel, double *result, double *abserr, int *neval, 
-	int *ier, int limit, int lenw, int *last, int *iwork, double *work);
+	int *ier, int limit, int lenw, int *last, int *iwork, double *work, int verbosity );
 
 int dqagse(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b, 
 	double epsabs, double epsrel, int limit, double *result, double *abserr, 
@@ -35,7 +35,7 @@ int dqagse(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b,
 int dqagp(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b, 
     int npts2, double   *points, double epsabs, double epsrel, double *result, 
     double *abserr, int *neval, int *ier, int leniw, int lenw, int *last, 
-    int *iwork, double *work);
+    int *iwork, double *work, int verbosity );
 
 int dqagpe(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b, 
     int npts2, double  *points, double epsabs, double epsrel, int limit, 

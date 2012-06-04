@@ -21,13 +21,19 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
           double sgn, double *s, int *reset,
           int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
+    Lgm_Vector u0;
     double  eps;
 
-
+    u0 = *u;
     if (        Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_BS ) {
 
         eps = Info->Lgm_MagStep_BS_Eps;
         Lgm_MagStep_BS( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
+if ( (u->y < 6.722)&&(u->y > 6.721) ) {
+printf("u0 = %g %g %g\n", u0.x, u0.y, u0.z);
+printf("u = %g %g %g\n", u->x, u->y, u->z);
+printf("Htry, Hdid, Hnext, eps, sgn = %g %g %g %g %g\n", Htry, *Hdid, *Hnext, eps, sgn);
+}
 
     } else if ( Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_RK5 ) {
 
@@ -286,7 +292,8 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
 
     Lgm_Vector        u0, b0, v, uerr, e;
     int               q, k, kk, km=0, n;
-    int               reduction, done;
+    int               reduction, done, ModMidSuccessfull;
+int Flag;
     double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1], Bmag;
     double            eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
     /*
@@ -301,6 +308,9 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
      *  Ratio of required func calls (for the test I did) was about 1.6
      */
     static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
+
+
+
 
 //printf("u = %g %g %g\n", u->x, u->y, u->z);
 
@@ -389,21 +399,20 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
                     }
                 Info->Lgm_MagStep_BS_FirstTimeThrough=TRUE;
                 Info->Lgm_MagStep_BS_eps_old = -1.0;
-                //printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
+                printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
                 return(-1);
             }
 
             n  = Seq[k];
             n2 = (double)(n*n);
             h2 = H*H;
-            if ( !Lgm_ModMid( &u0, &b0, &v, H, n, sgn, Mag, Info ) ) return(-1); // bail if Lgm_ModMid() had issues.
-//printf("2. k = %d u = %g %g %g\n", k, u->x, u->y, u->z);
-//printf("2. k = %d u0 = %g %g %g\n", k, u0.x, u0.y, u0.z);
-//printf("2. k = %d v = %g %g %g\n", k, v.x, v.y, v.z);
+
+            ModMidSuccessfull = Lgm_ModMid( &u0, &b0, &v, H, n, sgn, Mag, Info );
+            if ( !ModMidSuccessfull ) return(-1); // bail if Lgm_ModMid() had issues.
+
             sss = h2/n2;
-            Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
-            //Lgm_PolFunExt( k-1, sss, &v, u, &uerr, Info );
-//printf("3. k = %d u = %g %g %g\n", k, u->x, u->y, u->z);
+            //Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
+            Lgm_PolFunExt( k-1, sss, &v, u, &uerr, Info );
 
             if (k !=  1){
 
@@ -450,7 +459,6 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
             }
 
 
-//printf("4. k = %d u = %g %g %g\n", k, u->x, u->y, u->z);
         }
 
         if (!done) {
@@ -489,7 +497,6 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
         }
     }
 
-//printf("u_final = %g %g %g\n", u->x, u->y, u->z);
 
 
     return(1);
@@ -519,13 +526,13 @@ int Lgm_MagStep_RK5( Lgm_Vector *u, Lgm_Vector *u_scale,
     if (  *reset  ) {
         Info->Lgm_nMagEvals = 0;
         Info->Lgm_MagStep_RK5_snew = 0.0;
-        *s   = 0.0;                                                                                                            
+        *s   = 0.0;
         Info->Lgm_MagStep_RK5_FirstTimeThrough = TRUE;
-        
+
     }
 
     Count = 0;
-    Done  = FALSE; 
+    Done  = FALSE;
 
 
     /*
