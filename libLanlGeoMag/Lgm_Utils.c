@@ -15,3 +15,21 @@ void Lgm_LogSpace( double start, double stop, int num, double *array ){
     accDelta += delta;
   }
 }
+
+
+/*
+ * given a sorted array, data, find the index where value should be inserted to maintain order
+ */
+int Lgm_Bisect(double *data, double value, int len) {
+  int mid, hi=len, lo = 0;
+  while (lo <hi) {
+    mid = (lo+hi) / 2;  // integer division
+    if (value < data[mid])
+      hi = mid;
+    else
+      lo = mid+1;
+  }
+  return (lo);
+}
+
+
