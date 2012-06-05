@@ -226,6 +226,14 @@ printf("IsoTimeString = %s\n", IsoTimeString);
     fprintf( fp, "#                              \"UNITS\": \"Degrees\" },\n");
     fprintf( fp, "#\n");
 
+    fprintf( fp, "#  \"InOut\":            { \"DESCRIPTION\": \"Flag indicating whether we are inbound (-1) or outbound (+1).\",\n");
+    fprintf( fp, "#                               \"NAME\": \"InOut\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"InOut\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"InOut\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"dimless\" },\n");
+    fprintf( fp, "#\n");
+
 
     fprintf( fp, "#  \"Rgeo\":             { \"DESCRIPTION\": \"Geocentric Geographic position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgeo\",\n");
@@ -1238,6 +1246,7 @@ printf("IsoTimeString = %s\n", IsoTimeString);
     // column header
     fprintf( fp, "%91s",  "#  +------------------------------------ Date and Time -----------------------------------+" );
     fprintf( fp, " %13s",  " +- TiltAng +" );
+    fprintf( fp, " %11s",  " +- InOut +" );
     fprintf( fp, " %41s",  " +--- Geocentric Geographic Coords --+" );
     fprintf( fp, " %41s",  " +---- Geodetic Geographic Coords ---+" );
     fprintf( fp, " %41s",  " +--------- GSM Coordinates ---------+" );
@@ -1401,6 +1410,7 @@ printf("IsoTimeString = %s\n", IsoTimeString);
     fprintf( fp, " %16s", "Julian Date" );
     fprintf( fp, " %15s", "GPS Time" );
     fprintf( fp, " %13s", "    " );
+    fprintf( fp, " %11s", "    " );
 
     fprintf( fp, " %13s", "Xgeo" );
     fprintf( fp, " %13s", "Ygeo" );
@@ -1566,6 +1576,7 @@ printf("IsoTimeString = %s\n", IsoTimeString);
     fprintf( fp, " %16s", "Days" );
     fprintf( fp, " %15s", "Seconds" );
     fprintf( fp, " %13s", "Degrees" );
+    fprintf( fp, " %11s", "       " );
 
     fprintf( fp, " %13s", "Re" ); // Geocentric GEO
     fprintf( fp, " %13s", "Re" );
@@ -1757,6 +1768,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     fprintf( fp, " %16.8lf", c->UTC.JD );    // Julian Date
     fprintf( fp, " %15.3lf", Lgm_UTC_to_GpsSeconds( &c->UTC, c ) ); // GpsTime
     fprintf( fp, " %13.8lf", c->psi*DegPerRad ); // DipoleTiltAngle
+    fprintf( fp, " %11d", m->InOut );        // InOut
 
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );

@@ -39,6 +39,40 @@ void elt_qsort( struct TimeList *arr, unsigned n ) {
     QSORT( struct TimeList, arr, n, elt_lt );
 }
 
+/*
+ * returns; 
+ *    0 if not enough points
+ *    1 if outbound
+ *   -1 if inbound
+ */
+int InOutBound( TimeList *a, int n, double JD ){
+
+    int     i, ihi, FoundUpper;
+
+    if ( n<1 )             return( 0 );
+    if ( JD < a[0].key )   return( (a[0].val == 1)   ?  1 : -1 );
+    if ( JD > a[n-1].key ) return( (a[n-1].val == 1) ? -1 :  1 );
+
+
+    FoundUpper = FALSE;
+    ihi = 0;
+    for (i=0; i<n; i++){
+        if ( a[i].key > JD ) {
+            FoundUpper = TRUE;
+            ihi = i;
+            break;
+        }
+    }
+printf("ihi=%d\n", ihi);
+
+    
+
+    return( (a[ihi].val == 1)   ?  1 : -1 );
+    
+
+
+}
+
 
 void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
@@ -861,12 +895,11 @@ int main( int argc, char *argv[] ){
                     free( afi );
 
 
+                    /*
+                     * sort the merged list of apogee/perigee times.
+                     */
                     elt_qsort( ApoPeriTimeList, nApoPeriTimeList );
-for( i=0; i<nApoPeriTimeList; i++ ){
-    printf("ApoPeriTimeList = %g %d\n", ApoPeriTimeList[i].key, ApoPeriTimeList[i].val );
-}
 
-exit(0);
 
 
                     /*
@@ -943,6 +976,7 @@ exit(0);
                             Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 //                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
+                            MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
                             Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 
@@ -962,6 +996,7 @@ exit(0);
                             H5_Doy[H5_nT]           = UTC.Doy;
                             H5_UTC[H5_nT]           = UTC.Time;
                             H5_JD[H5_nT]            = UTC.JD;
+                            H5_InOut[H5_nT]         = MagEphemInfo->InOut;
                             H5_GpsTime[H5_nT]       = Lgm_UTC_to_GpsSeconds( &UTC, c );
                             H5_TiltAngle[H5_nT]     = c->psi*DegPerRad;
                             H5_Rgsm[H5_nT]          = Rgsm;
@@ -1163,7 +1198,6 @@ exit(0);
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "ApogeeTimes" );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic position of apogee (lat/lon/rad)." );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg./Deg./km" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
