@@ -19,14 +19,28 @@
 #include <Lgm_HDF5.h>
 #include <Lgm_ElapsedTime.h>
 #include "SpiceUsr.h"
+#include <Lgm/qsort.h>
 
 #define EARTH_ID     399
 #define MOON_ID      301
 #define RBSPA_ID    -362
 #define RBSPB_ID    -363
 
-void StringSplit( char *Str, char *StrArray[], int len, int *n );
+/*
+ * Stuff for inbound/outbound determination
+ */
+typedef struct TimeList {
+    double  key;    // set to JD or somesuch thing.
+    int     val;    // set to 0 for perigee time 1 for apogee time
+} TimeList;
 
+void elt_qsort( struct TimeList *arr, unsigned n ) {
+    #define elt_lt(a,b) ((a)->key < (b)->key)
+    QSORT( struct TimeList, arr, n, elt_lt );
+}
+
+
+void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 #define KP_DEFAULT 0
 
@@ -308,6 +322,7 @@ int main( int argc, char *argv[] ){
     char            **H5_IsoTimes;
     long int        *H5_Date;
     int             *H5_Doy;
+    int             *H5_InOut;
     double          *H5_UTC;
     double          *H5_JD;
     double          *H5_GpsTime;
@@ -351,11 +366,17 @@ int main( int argc, char *argv[] ){
     BrentFuncInfo   bInfo;
     afInfo          *afi;
     int             nPerigee, nApogee;
+    char            **Perigee_IsoTimes;
+    char            **Apogee_IsoTimes;
     Lgm_DateTime    *Perigee_UTC;
     Lgm_DateTime    *Apogee_UTC;
     Lgm_Vector      *Perigee_U;
     Lgm_Vector      *Apogee_U;
-    Lgm_Vector      Bvec, Bvec2;
+    double          **Perigee_Geod;
+    double          **Apogee_Geod;
+    TimeList        *ApoPeriTimeList;
+    int             nApoPeriTimeList;
+    Lgm_Vector      Bvec, Bvec2, w;
     int             n;
     char            *CmdLine;
 
@@ -368,6 +389,7 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_2D( H5_IsoTimes,  2000, 80,    char );
     LGM_ARRAY_1D( H5_Date,      2000,        long int );
     LGM_ARRAY_1D( H5_Doy,       2000,        int );
+    LGM_ARRAY_1D( H5_InOut,     2000,        int );
     LGM_ARRAY_1D( H5_UTC,       2000,        double );
     LGM_ARRAY_1D( H5_JD,        2000,        double );
     LGM_ARRAY_1D( H5_GpsTime,   2000,        double );
@@ -397,10 +419,15 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_1D( H5_S_Bmin_to_sc,  2000,     double );
     LGM_ARRAY_1D( H5_S_total,       2000,     double );
 
-    LGM_ARRAY_1D( Perigee_UTC, 30, Lgm_DateTime );
-    LGM_ARRAY_1D( Apogee_UTC,  30, Lgm_DateTime );
-    LGM_ARRAY_1D( Perigee_U, 30, Lgm_Vector );
-    LGM_ARRAY_1D( Apogee_U,  30, Lgm_Vector );
+    LGM_ARRAY_1D( ApoPeriTimeList, 20, TimeList );
+    LGM_ARRAY_1D( Perigee_UTC, 10, Lgm_DateTime );
+    LGM_ARRAY_1D( Apogee_UTC,  10, Lgm_DateTime );
+    LGM_ARRAY_2D( Perigee_Geod, 10, 3, double );
+    LGM_ARRAY_2D( Apogee_Geod,  10, 3, double );
+    LGM_ARRAY_1D( Perigee_U, 10, Lgm_Vector );
+    LGM_ARRAY_1D( Apogee_U,  10, Lgm_Vector );
+    LGM_ARRAY_2D( Perigee_IsoTimes, 10, 80, char );
+    LGM_ARRAY_2D( Apogee_IsoTimes,  10, 80, char );
 
     /*
      * Default option values.
@@ -480,7 +507,7 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
 
-    
+
 
 
 
@@ -515,7 +542,6 @@ int main( int argc, char *argv[] ){
             printf( "\t                   EndDateTime: %s\n", arguments.EndDateTime );
             printf( "\t      Time Increment [Seconds]: %ld\n", Delta);
         }
-printf("Delta = %ld\n", Delta);
 
         if ( nBirds > 1  ){
             printf( "\t                         Birds:" );
@@ -763,6 +789,7 @@ printf("Delta = %ld\n", Delta);
                     Tc = 1800; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
                     done = FALSE;
                     nApogee = 0;
+                    nApoPeriTimeList = 0;
                     while ( !done ) {
                         if ( (Rb < Ra) && (Rb < Rc) ) {
                             // we have a bracket. Find Min.
@@ -771,10 +798,19 @@ printf("Delta = %ld\n", Delta);
                             et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
                             spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
-                            ++nApogee;
 
-                            //Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 3 );
-                            //printf("Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", Ta, Tb, Tc, Ra, Rb, Rc, IsoTimeString, fabs(Rmin) );
+                            Lgm_Set_Coord_Transforms( Apogee_UTC[nApogee].Date, Apogee_UTC[nApogee].Time, c );
+                            Lgm_Convert_Coords( &Apogee_U[nApogee], &w, GEI2000_TO_WGS84, c );
+                            Lgm_WGS84_to_GEOD( &w, &Apogee_Geod[nApogee][0], &Apogee_Geod[nApogee][1], &Apogee_Geod[nApogee][2] );
+
+                            Lgm_DateTimeToString( Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
+                            printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                            ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
+                            ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
+                            ++nApoPeriTimeList;
+
+                            ++nApogee;
+                            
                         }
                         // advance another 900 seconds.
                         Ta = Tb; Ra = Rb;
@@ -801,9 +837,19 @@ printf("Delta = %ld\n", Delta);
                             et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
                             spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                             Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
+
+                            Lgm_Set_Coord_Transforms( Perigee_UTC[nPerigee].Date, Perigee_UTC[nPerigee].Time, c );
+                            Lgm_Convert_Coords( &Perigee_U[nPerigee], &w, GEI2000_TO_WGS84, c );
+                            Lgm_WGS84_to_GEOD( &w, &Perigee_Geod[nPerigee][0], &Perigee_Geod[nPerigee][1], &Perigee_Geod[nPerigee][2] );
+
+                            Lgm_DateTimeToString( Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
+                            printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+
+                            ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
+                            ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
+                            ++nApoPeriTimeList;
+
                             ++nPerigee;
-                            //Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 3 );
-                            //printf("Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", Ta, Tb, Tc, Ra, Rb, Rc, IsoTimeString, fabs(Rmin) );
                         }
                         // advance another 900 seconds.
                         Ta = Tb; Ra = Rb;
@@ -815,7 +861,12 @@ printf("Delta = %ld\n", Delta);
                     free( afi );
 
 
+                    elt_qsort( ApoPeriTimeList, nApoPeriTimeList );
+for( i=0; i<nApoPeriTimeList; i++ ){
+    printf("ApoPeriTimeList = %g %d\n", ApoPeriTimeList[i].key, ApoPeriTimeList[i].val );
+}
 
+exit(0);
 
 
                     /*
@@ -826,9 +877,8 @@ printf("Delta = %ld\n", Delta);
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 9, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, Apogee_UTC, Apogee_U, MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 9, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
-//exit(0);
 
                     if ( UseEop ) {
                         // Read in the EOP vals
@@ -866,7 +916,7 @@ printf("Delta = %ld\n", Delta);
 
                         // Set mag model parameters
 // Kludged to use dynamic QinDenton.
-// We need a mechanism to restrict Kp to a given value 
+// We need a mechanism to restrict Kp to a given value
                         Lgm_get_QinDenton_at_JD( UTC.JD-365*5.0, &p, 0 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
@@ -897,7 +947,7 @@ printf("Delta = %ld\n", Delta);
 
 
                             if ( DumpShellFiles && (nAlpha > 0) ){
-                                
+
                                 sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
                                 printf( "Writing Full Shell File: %s\n", ShellFile );
                                 WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
@@ -1035,13 +1085,13 @@ printf("Delta = %ld\n", Delta);
 
                     }
                     fclose(fp_MagEphem);
-                
+
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
                     sprintf( Command, "sed 's/ELAPSED_TIME/%s/' <%s >%s.new", t.ElapsedTimeStr, OutFile, OutFile); system( Command );
                     sprintf( Command, "mv %s.new %s", OutFile, OutFile); system( Command );
-                
-                    
+
+
 
 
                     // Create HDF5 file
@@ -1062,11 +1112,12 @@ printf("Delta = %ld\n", Delta);
                     Dims[0] = nPerigee;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
-                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_size( atype, strlen(Perigee_IsoTimes[0]) );
                     status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "PerigeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The times of Perigee in ISO 8601 compliant format. Defined as smallest geocentric distance." );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
@@ -1074,38 +1125,29 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
                     status  = H5Tclose( atype );
 
-                    // Create PerigeePosGeod_LatLon Dataset
-                    Dims[0] = nPerigee; Dims[1] = 2;
+                    // Create PerigeePosGeod Dataset
+                    Dims[0] = nPerigee; Dims[1] = 3;
                     space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "PerigeePosGeod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    DataSet = H5Dcreate( file, "PerigeePosGeod", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "PerigeeTimes" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic position of perigee (lat/lon/rad)." );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg./Deg./km" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
 
-                    // Create PerigeePosGeod_Height Dataset
-                    Dims[0] = nPerigee;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "PerigeePosGeod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "PerigeeTimes" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
 
                     // Create ApogeeTimes Dataset
                     Dims[0] = nApogee;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
-                    status  = H5Tset_size( atype, 30 );
+                    status  = H5Tset_size( atype, strlen(Apogee_IsoTimes[0]) );
                     status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "ApogeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The times of Perigee in ISO 8601 compliant format. Defined as largest geocentric distance." );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
@@ -1114,24 +1156,14 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
                     status  = H5Tclose( atype );
 
-                    // Create ApogeePosGeod_LatLon Dataset
-                    Dims[0] = nApogee; Dims[1] = 2;
+                    // Create ApogeePosGeod Dataset
+                    Dims[0] = nApogee; Dims[1] = 3;
                     space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
-                    DataSet = H5Dcreate( file, "ApogeePosGeod_LatLon", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    DataSet = H5Dcreate( file, "ApogeePosGeod", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "ApogeeTimes" );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic position of apogee (lat/lon/rad)." );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg./Deg./km" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg." );
-                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
-                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
-                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
-                    status  = H5Sclose( space );
-                    status  = H5Dclose( DataSet );
-
-                    // Create ApogeePosGeod_Height Dataset
-                    Dims[0] = nApogee;
-                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
-                    DataSet = H5Dcreate( file, "ApogeePosGeod_Height", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "ApogeeTimes" );
-                    Lgm_WriteStringAttr( DataSet, "UNITS",      "km" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
                     Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
                     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
@@ -1530,7 +1562,7 @@ printf("Delta = %ld\n", Delta);
 
 
                     // Create S_sc_to_pfn Dataset
-                    Dims[0] = H5_nT; 
+                    Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "S_sc_to_pfn", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between S/C and Northern Footpoint along field line." );
@@ -1543,7 +1575,7 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
 
                     // Create S_sc_to_pfs Dataset
-                    Dims[0] = H5_nT; 
+                    Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "S_sc_to_pfs", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between S/C and Southern Footpoint along field line." );
@@ -1556,7 +1588,7 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
 
                     // Create S_pfs_to_Bmin Dataset
-                    Dims[0] = H5_nT; 
+                    Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "S_pfs_to_Bmin", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between Southern Footpoint and Bmin point along field line.");
@@ -1569,7 +1601,7 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
 
                     // Create S_Bmin_to_sc Dataset
-                    Dims[0] = H5_nT; 
+                    Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "S_Bmin_to_sc", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between Bmin point and S/C along field line (positive if north of Bmin).");
@@ -1582,7 +1614,7 @@ printf("Delta = %ld\n", Delta);
                     status  = H5Dclose( DataSet );
 
                     // Create S_total Dataset
-                    Dims[0] = H5_nT; 
+                    Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 2
                     DataSet = H5Dcreate( file, "S_total", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Total Field Line length (along field line).");
@@ -2209,6 +2241,81 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
                     status = H5Tclose( atype );
 
+
+                    // Write Apogee Time Strings
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "ApogeeTimes", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(Apogee_IsoTimes[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<nApogee; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &Apogee_IsoTimes[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
+
+                    // Write ApogeePosGeod
+                    SlabSize[0] = 1; SlabSize[1] = 3;
+                    DataSet  = H5Dopen( file, "ApogeePosGeod", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<nApogee; iT++ ){
+                            U_ARR[0] = Apogee_Geod[iT][0]; U_ARR[1] = Apogee_Geod[iT][1]; U_ARR[2] = Apogee_Geod[iT][2];
+printf("U_ARR = %g %g %g\n", U_ARR[0], U_ARR[1], U_ARR[2]);
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+
+
+                    // Write Perigee Time Strings
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "PerigeeTimes", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(Perigee_IsoTimes[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<nPerigee; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &Perigee_IsoTimes[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
+
+                    // Write PerigeePosGeod
+                    SlabSize[0] = 1; SlabSize[1] = 3;
+                    DataSet  = H5Dopen( file, "PerigeePosGeod", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<nPerigee; iT++ ){
+                            U_ARR[0] = Perigee_Geod[iT][0]; U_ARR[1] = Perigee_Geod[iT][1]; U_ARR[2] = Perigee_Geod[iT][2];
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+
+
                     // Write Date
                     SlabSize[0] = H5_nT;
                     Offset[0]   = 0;
@@ -2332,7 +2439,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_GEO, c ); // Convert to cartesian GEO coords.
                             Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
                             U_ARR[0] = GeodLat; U_ARR[1] = GeodLong; U_ARR[2] = GeodHeight;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
                     }
@@ -2419,7 +2526,7 @@ printf("Delta = %ld\n", Delta);
 
 
                     // Write CDMAG_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "CDMAG_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2428,7 +2535,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
                             Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2437,7 +2544,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write CDMAG_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "CDMAG_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2446,7 +2553,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
                             Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[1] );
                     }
@@ -2455,7 +2562,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write CDMAG_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "CDMAG_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2464,7 +2571,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
                             Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
                     }
@@ -2473,7 +2580,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write CDMAG_R
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "CDMAG_R", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2482,7 +2589,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_CDMAG, c ); // Convert to cartesian CDMAG coords.
                             Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[3] );
                     }
@@ -2493,7 +2600,7 @@ printf("Delta = %ld\n", Delta);
 
 
                     // Write EDMAG_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "EDMAG_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2502,7 +2609,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
                             Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2511,7 +2618,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write EDMAG_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "EDMAG_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2520,7 +2627,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
                             Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[1] );
                     }
@@ -2529,7 +2636,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write EDMAG_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "EDMAG_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2538,7 +2645,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
                             Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
                     }
@@ -2547,7 +2654,7 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write EDMAG_R
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "EDMAG_R", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
@@ -2556,7 +2663,7 @@ printf("Delta = %ld\n", Delta);
                             Lgm_Convert_Coords( &H5_Rgsm[iT], &W, GSM_TO_EDMAG, c ); // Convert to cartesian EDMAG coords.
                             Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
                             U_ARR[0] = MLAT; U_ARR[1] = MLON; U_ARR[2] = MLT; U_ARR[3] = R;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[3] );
                     }
@@ -2736,7 +2843,7 @@ printf("Delta = %ld\n", Delta);
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_geod[iT].x; U_ARR[1] = H5_Pfn_geod[iT].y; U_ARR[2] = H5_Pfn_geod[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
                     }
@@ -2745,13 +2852,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfn_CD_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_CD_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2760,13 +2867,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfn_CD_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_CD_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2775,13 +2882,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfn_CD_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_CD_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2791,13 +2898,13 @@ printf("Delta = %ld\n", Delta);
 
 
                     // Write Pfn_ED_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_ED_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2806,13 +2913,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfn_ED_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_ED_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2821,13 +2928,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfn_ED_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfn_ED_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfn_cdmag[iT].x; U_ARR[1] = H5_Pfn_cdmag[iT].y; U_ARR[2] = H5_Pfn_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2933,7 +3040,7 @@ printf("Delta = %ld\n", Delta);
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_geod[iT].x; U_ARR[1] = H5_Pfs_geod[iT].y; U_ARR[2] = H5_Pfs_geod[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[2] );
                     }
@@ -2942,13 +3049,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfs_CD_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_CD_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2957,13 +3064,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfs_CD_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_CD_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2972,13 +3079,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfs_CD_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_CD_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -2988,13 +3095,13 @@ printf("Delta = %ld\n", Delta);
 
 
                     // Write Pfs_ED_MLAT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_ED_MLAT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -3003,13 +3110,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfs_ED_MLON
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_ED_MLON", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -3018,13 +3125,13 @@ printf("Delta = %ld\n", Delta);
                     status = H5Sclose( space );
 
                     // Write Pfs_ED_MLT
-                    SlabSize[0] = 1; 
+                    SlabSize[0] = 1;
                     DataSet  = H5Dopen( file, "Pfs_ED_MLT", H5P_DEFAULT );
                     space    = H5Dget_space( DataSet );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             U_ARR[0] = H5_Pfs_cdmag[iT].x; U_ARR[1] = H5_Pfs_cdmag[iT].y; U_ARR[2] = H5_Pfs_cdmag[iT].z;
-                            Offset[0]   = iT; 
+                            Offset[0]   = iT;
                             status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                             status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
                     }
@@ -3201,6 +3308,11 @@ printf("Delta = %ld\n", Delta);
     LGM_ARRAY_1D_FREE( Apogee_UTC );
     LGM_ARRAY_1D_FREE( Perigee_U );
     LGM_ARRAY_1D_FREE( Apogee_U );
+    LGM_ARRAY_2D_FREE( Perigee_IsoTimes );
+    LGM_ARRAY_2D_FREE( Apogee_IsoTimes );
+    LGM_ARRAY_2D_FREE( Perigee_Geod );
+    LGM_ARRAY_2D_FREE( Apogee_Geod );
+    LGM_ARRAY_1D_FREE( ApoPeriTimeList );
 
 
 

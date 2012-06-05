@@ -58,11 +58,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nPerigee );
 
         fprintf( fp, "#                             \"VALUES\": [ ");
+printf("nPerigee = %d\n", nPerigee);
         for (i=0; i<nPerigee-1; i++) {
             Lgm_DateTimeToString( IsoTimeString, &Perigee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
             fprintf(fp, "\"%s\", ", IsoTimeString );
         }
         Lgm_DateTimeToString( IsoTimeString, &Perigee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
         fprintf(fp, "\"%s\" ],\n", IsoTimeString ); 
 
 
@@ -110,11 +113,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nApogee );
 
         fprintf( fp, "#                             \"VALUES\": [ ");
+printf("nApogee = %d\n", nApogee);
         for (i=0; i<nApogee-1; i++) {
             Lgm_DateTimeToString( IsoTimeString, &Apogee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
             fprintf(fp, "\"%s\", ", IsoTimeString );
         }
         Lgm_DateTimeToString( IsoTimeString, &Apogee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
         fprintf(fp, "\"%s\" ],\n", IsoTimeString ); 
 
 

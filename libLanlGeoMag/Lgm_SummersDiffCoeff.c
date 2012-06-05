@@ -289,8 +289,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         dqags( CdipIntegrand_Sb, (_qpInfo *)&si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
                 dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
@@ -302,8 +302,8 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         }
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
                 dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
@@ -314,7 +314,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
             *Dap_ba = 0.0;
         }
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
