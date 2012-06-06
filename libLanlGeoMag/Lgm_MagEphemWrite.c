@@ -58,11 +58,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nPerigee );
 
         fprintf( fp, "#                             \"VALUES\": [ ");
+printf("nPerigee = %d\n", nPerigee);
         for (i=0; i<nPerigee-1; i++) {
             Lgm_DateTimeToString( IsoTimeString, &Perigee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
             fprintf(fp, "\"%s\", ", IsoTimeString );
         }
         Lgm_DateTimeToString( IsoTimeString, &Perigee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
         fprintf(fp, "\"%s\" ],\n", IsoTimeString ); 
 
 
@@ -110,11 +113,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nApogee );
 
         fprintf( fp, "#                             \"VALUES\": [ ");
+printf("nApogee = %d\n", nApogee);
         for (i=0; i<nApogee-1; i++) {
             Lgm_DateTimeToString( IsoTimeString, &Apogee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
             fprintf(fp, "\"%s\", ", IsoTimeString );
         }
         Lgm_DateTimeToString( IsoTimeString, &Apogee_UTC[i], 0, 3 );
+printf("IsoTimeString = %s\n", IsoTimeString);
         fprintf(fp, "\"%s\" ],\n", IsoTimeString ); 
 
 
@@ -218,6 +224,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                              \"LABEL\": \"Dipole Tilt Angle (Degrees)\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                              \"UNITS\": \"Degrees\" },\n");
+    fprintf( fp, "#\n");
+
+    fprintf( fp, "#  \"InOut\":            { \"DESCRIPTION\": \"Flag indicating whether we are inbound (-1) or outbound (+1).\",\n");
+    fprintf( fp, "#                               \"NAME\": \"InOut\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"InOut\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"InOut\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"dimless\" },\n");
     fprintf( fp, "#\n");
 
 
@@ -1232,6 +1246,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     // column header
     fprintf( fp, "%91s",  "#  +------------------------------------ Date and Time -----------------------------------+" );
     fprintf( fp, " %13s",  " +- TiltAng +" );
+    fprintf( fp, " %11s",  " +- InOut +" );
     fprintf( fp, " %41s",  " +--- Geocentric Geographic Coords --+" );
     fprintf( fp, " %41s",  " +---- Geodetic Geographic Coords ---+" );
     fprintf( fp, " %41s",  " +--------- GSM Coordinates ---------+" );
@@ -1395,6 +1410,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %16s", "Julian Date" );
     fprintf( fp, " %15s", "GPS Time" );
     fprintf( fp, " %13s", "    " );
+    fprintf( fp, " %11s", "    " );
 
     fprintf( fp, " %13s", "Xgeo" );
     fprintf( fp, " %13s", "Ygeo" );
@@ -1560,6 +1576,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %16s", "Days" );
     fprintf( fp, " %15s", "Seconds" );
     fprintf( fp, " %13s", "Degrees" );
+    fprintf( fp, " %11s", "       " );
 
     fprintf( fp, " %13s", "Re" ); // Geocentric GEO
     fprintf( fp, " %13s", "Re" );
@@ -1751,6 +1768,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     fprintf( fp, " %16.8lf", c->UTC.JD );    // Julian Date
     fprintf( fp, " %15.3lf", Lgm_UTC_to_GpsSeconds( &c->UTC, c ) ); // GpsTime
     fprintf( fp, " %13.8lf", c->psi*DegPerRad ); // DipoleTiltAngle
+    fprintf( fp, " %11d", m->InOut );        // InOut
 
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );

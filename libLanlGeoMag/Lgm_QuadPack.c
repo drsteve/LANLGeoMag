@@ -3,7 +3,7 @@
 /*
  *      QUADPACK DQAGS Routine converted to C
  */
-int dqags(f, qpInfo, a, b, epsabs, epsrel, result, abserr, neval, ier, limit, lenw, last, iwork, work)
+int dqags(f, qpInfo, a, b, epsabs, epsrel, result, abserr, neval, ier, limit, lenw, last, iwork, work, verbosity )
 double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate    	 */
 _qpInfo *qpInfo;        	  /*  Auxilliary information to pass to function (to avoid making globals) */
 double   a;             	  /*  Lower Limit of integration.                                 	 */
@@ -19,6 +19,7 @@ int	 lenw;
 int	*last;
 int	*iwork;
 double	*work;
+int	verbosity;
 {
 
 
@@ -206,7 +207,7 @@ int TMPiwork[600];
     if( (limit < 1) || (lenw < limit*4) ) {
 
         if (*ier == 6) lvl = 1;
-        if (*ier != 0) {
+        if ((*ier != 0)&&(verbosity>2)) {
             fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
             PrintQuadpackError( *ier );
         }
@@ -235,8 +236,8 @@ int TMPiwork[600];
     lvl = 0;
 
 
-    if(*ier == 6) lvl = 1;
-    if(*ier != 0){
+    if (*ier == 6) lvl = 1;
+    if ((*ier != 0)&&(verbosity>2)){
 	    fprintf(stderr, "dqags: Abnormal return from dqags, ier = %d,  lvl = %d\n", *ier, lvl);
         PrintQuadpackError( *ier );
         return(-1);

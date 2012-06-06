@@ -151,6 +151,7 @@ void 	    spline( double *x, double *y, int n, double yp1, double ypn, double *y
 void 	    splint( double *xa, double *ya, double *y2a, int n, double x, double *y);
 void 	    quicksort( unsigned long n, double *arr );
 void 	    quicksort2(  unsigned long n, double *arr, double *brr );
+void 	    quicksort3(  unsigned long n, double *arr, double *brr, double *crr );
 Lgm_MagModelInfo     *init_info( ) ;
 void        NewTimeLstarInfo( long int Date, double UT, double PitchAngle, int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_LstarInfo *LstarInfo );
 int         Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo );

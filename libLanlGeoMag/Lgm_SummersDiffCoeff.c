@@ -152,6 +152,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     double           epsabs, epsrel, abserr, work[2002], points[10];
     double           ySing, a_new, b_new, B;
     int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
+    int              VerbosityLevel = 0;
     Lgm_SummersInfo  si;
 
     si.Version = Version;
@@ -285,41 +286,41 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
          */
         npts2 = 2;
         //dqagp( CdipIntegrand_Sb, (_qpInfo *)&si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
-        dqags( CdipIntegrand_Sb, (_qpInfo *)&si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( CdipIntegrand_Sb, (_qpInfo *)&si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             } else {
-                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             }
         } else {
             *Daa_ba = 0.0;
         }
 
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
-        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             } else {
-                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             }
         } else {
             *Dap_ba = 0.0;
         }
 
-        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a, b, &a_new, &b_new );
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)&si, TRUE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
-                dqagp( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqagp( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             } else {
-                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
             }
         } else {
             *Dpp_ba = 0.0;

@@ -29,6 +29,8 @@ typedef struct Lgm_MagEphemInfo {
     long int        Date;           //!< Date in YYYYMMDD format
     double          UTC;            //!< UTC in decimal hours
 
+    int             InOut;          //!< Flag indicating whether we are inbound (-1) or outbound (+1)
+
     double          Lat;            //!< Geographic Latitude
     double          Lon;            //!< Geographic Longitude
     double          Rad;            //!< Geographic Radius

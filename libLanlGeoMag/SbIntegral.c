@@ -86,7 +86,7 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
     points[1] = a;
     points[2] = b;
     npts = 4;
-    dqagp(Sb_integrand, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
+    dqagp(Sb_integrand, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work, fInfo->VerbosityLevel );
     //free( iwork );
     //free( work );
 
@@ -153,7 +153,7 @@ double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
 //    points[1] = a;
 //    points[2] = b;
     npts = 2;
-    dqagp(Sb_integrand_interped, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
+    dqagp(Sb_integrand_interped, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work, fInfo->VerbosityLevel );
 /*
 printf("here i am\n");
 double s;
