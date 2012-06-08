@@ -120,7 +120,7 @@ static char ArgsDoc[] = "InFile OutFile";
  */
 static struct argp_option Options[] = {
     {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
-    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be OP77, T87, T89, TS04. Default is T89."    },
+    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be OP77, T87, T89, T89c, TS04. Default is T89c."    },
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,                                      "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\"."   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
@@ -487,7 +487,7 @@ int main( int argc, char *argv[] ){
     arguments.EndDate         = -1;
     arguments.FootPointHeight = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
-    strcpy( arguments.ExtModel, "T89" );
+    strcpy( arguments.ExtModel, "T89c" );
     strcpy( arguments.CoordSystem, "LATLONRAD" );
 
 
@@ -630,9 +630,12 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_edip;
     } else if ( !strcmp( ExtModel, "IGRF" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
-    } else { //if ( !strcmp( ExtModel, "T89" ) ){
+    } else if ( !strcmp( ExtModel, "T89" ) ){
         // default
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+    } else { //if ( !strcmp( ExtModel, "T89c" ) ){
+        // default
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
     }
 
     if ( !strcmp( IntModel, "CDIP" ) ){
@@ -848,7 +851,7 @@ int main( int argc, char *argv[] ){
                             Lgm_WGS84_to_GEOD( &w, &Apogee_Geod[nApogee][0], &Apogee_Geod[nApogee][1], &Apogee_Geod[nApogee][2] );
 
                             Lgm_DateTimeToString( Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
-                            printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                            //printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, Apogee_IsoTimes[nApogee], fabs(Rmin) );
                             ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
                             ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
                             ++nApoPeriTimeList;
@@ -887,7 +890,7 @@ int main( int argc, char *argv[] ){
                             Lgm_WGS84_to_GEOD( &w, &Perigee_Geod[nPerigee][0], &Perigee_Geod[nPerigee][1], &Perigee_Geod[nPerigee][2] );
 
                             Lgm_DateTimeToString( Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
-                            printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+                            //printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, Perigee_IsoTimes[nPerigee], fabs(Rmin) );
 
                             ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
                             ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
@@ -958,7 +961,7 @@ int main( int argc, char *argv[] ){
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD-365*5.0, &p, 0 );
+                        Lgm_get_QinDenton_at_JD( UTC.JD-3153.0, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
                         if ( Kp >= 0.0 ) {

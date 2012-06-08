@@ -658,6 +658,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
 
 
+/*
 for (i=0; i<LstarInfo->nImI0; i++) {
     printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
     LstarInfo->Earr[i] = 1.0;
@@ -666,10 +667,24 @@ if ( LstarInfo->nImI0>2 ){
     FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
     printf( "res = %g\n", res );
 }
-if ( fabs(res) < 90.0 ){
-mlat0 = res-1.0;
-mlat1 = res+1.0;
-}
+*/
+
+
+if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
+    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
+    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
+    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
+        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
+    }                                                                                                                                                                                                
+    if ( fabs(res) < 90.0 ){
+        mlat0 = res-1.0;
+        mlat1 = res+1.0;
+    }
+}                  
+
+
+
 
 
 
@@ -691,18 +706,18 @@ mlat1 = res+1.0;
                     mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
                 }
 
-for (i=0; i<LstarInfo->nImI0; i++) {
-    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
-    LstarInfo->Earr[i] = 1.0;
-}
-if ( LstarInfo->nImI0>2 ){
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-    printf( "res = %g\n", res );
-}
-if ( fabs(res) < 90.0 ){
-mlat0 = res-5.0;
-mlat1 = res+5.0;
-}
+if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
+    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
+    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
+    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
+        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
+    }                                                                                                                                                                                                
+    if ( fabs(res) < 90.0 ){
+        mlat0 = res-5.0;
+        mlat1 = res+5.0;
+    }
+}                  
 
 
     	    } else {
@@ -718,18 +733,18 @@ mlat1 = res+5.0;
 //mlat1 = 45.0;
 //mlat1 = 23.855537644144878;
 
-for (i=0; i<LstarInfo->nImI0; i++) {
-    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
-    LstarInfo->Earr[i] = 1.0;
-}
-if ( LstarInfo->nImI0>2 ){
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-    printf( "res = %g\n", res );
-}
-if ( fabs(res) < 90.0 ){
-mlat0 = res-45.0;
-mlat1 = res+45.0;
-}
+if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
+    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
+    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
+    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
+    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
+        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
+    }                                                                                                                                                                                                
+    if ( fabs(res) < 90.0 ){
+        mlat0 = res-45.0;
+        mlat1 = res+45.0;
+    }
+}                  
 
 
             }

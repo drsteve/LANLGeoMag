@@ -23,7 +23,7 @@ void elt_qsort( struct FitVals *arr, unsigned n ) {
 
 
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
-int FitQuadAndFindZero2( double *x, double *y, double *dy, int n, double *res );
+int FitQuadAndFindZero2( double *x, double *y, double *dy, int n, int nmax, double *res );
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo );
 
 /*
@@ -488,17 +488,20 @@ mlatbest = mlat_min;
             d = b-a;
             e = a + F*d;
             //if (( LstarInfo->nImI0 > 2 )&&( nbFits%2 )){
-//            if ( LstarInfo->nImI0 > 3 ){
-//                if (LstarInfo->VerbosityLevel > 1){
-//                    printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
-//                }
-//                for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
-//                FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-//                if ( (res > (a+1e-6)) && ( res < (b-1e-6)) ) {
-//                    e = res;
-//                    ++nbFits;
-//                }
-//            }
+            //if (( LstarInfo->nImI0 > 2 )&&( nbFits>5 )){
+            //if ( LstarInfo->nImI0 == 6){
+            if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
+                for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                if (LstarInfo->VerbosityLevel > 1){
+                    printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                }
+                if ( (res > a) && ( res < b) ) {
+                    e = res;
+                    ++nbFits;
+                }
+            }
 
 
             I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
@@ -838,7 +841,7 @@ int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
 /*
  * same as above, but only use the best 4 vals
  */
-int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, double *res ) {
+int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax, double *res ) {
 
     int         i, Flag;
     double      chisq, root, A, B, C, D;
@@ -860,7 +863,7 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, double *
     }
     elt_qsort( f, n );
     
-    n = 4;
+    n = nmax;
     LGM_ARRAY_1D( x, n, double );
     LGM_ARRAY_1D( y, n, double );
     LGM_ARRAY_1D( dy, n, double );
