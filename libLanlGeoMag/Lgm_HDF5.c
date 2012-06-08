@@ -31,6 +31,16 @@ void Lgm_WriteStringAttr( hid_t DataSet, char *AttrNAme, char *Str ) {
     return;
 }
 
+/** here is a C++ version just so we have it **/
+/* #include "H5Cpp.h" */
+/* void h5_addStringAttribute(DataSet ds, std::string attrName, std::string attrValue) { */
+/*   StrType str_type(0, attrValue.length()); */
+/*   DataSpace att_space(H5S_SCALAR); */
+/*   Attribute att = ds.createAttribute( attrName, str_type, att_space ); */
+/*   att.write( str_type, attrValue ); */
+/* } */
+
+
 void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val ) {
 
     hid_t   space, Attr;
