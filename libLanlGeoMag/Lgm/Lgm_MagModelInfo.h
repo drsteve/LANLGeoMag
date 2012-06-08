@@ -80,12 +80,13 @@
 #define LGM_EXTMODEL_NULL              -1
 #define LGM_EXTMODEL_T87                0
 #define LGM_EXTMODEL_T89                1
-#define LGM_EXTMODEL_T96                2
-#define LGM_EXTMODEL_T01S               3
-#define LGM_EXTMODEL_TS04               4
-#define LGM_EXTMODEL_OP77               5
-#define LGM_EXTMODEL_SCATTERED_DATA     6
-#define LGM_EXTMODEL_SCATTERED_DATA2    7
+#define LGM_EXTMODEL_T89c               2
+#define LGM_EXTMODEL_T96                3
+#define LGM_EXTMODEL_T01S               4
+#define LGM_EXTMODEL_TS04               5
+#define LGM_EXTMODEL_OP77               6
+#define LGM_EXTMODEL_SCATTERED_DATA     7
+#define LGM_EXTMODEL_SCATTERED_DATA2    8
 
 
 
@@ -541,6 +542,16 @@ int Lgm_BT_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_BRC_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_BC_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+
+
+/*
+ *  T89c
+ *
+ *  Function Prototypes for T89c model
+ */
+void T89c( int IOPT, double *PARMOD, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, Lgm_MagModelInfo *Info );
+void T89c_Feild( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info );
+int Lgm_B_T89c( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
 /*

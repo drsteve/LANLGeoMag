@@ -17,6 +17,11 @@
  *      tail current sheet, Planetary and Space Science Volume 37, Issue 1,
  *      January 1989, Pages 5-20.
  *
+ *      N. A. Tsyganenko, Correction to A magnetospheric magnetic field model
+ *      with a warped tail current sheet. Planet. Space Sci. 37, S-20 (1989).
+ *
+ *  This code was constructed directly from the published versions of the
+ *  papers above.
  *
  */
 
@@ -106,9 +111,14 @@ int Lgm_BT_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double	   p26_2, p29_2, p31_2, cc, cc2, pp;
     double	   zz, ss, ss12, ss32, tt, tt12, tt32, uu, uu12, uu32, nn, oonn, ooS_T, ooP, ooS_T_2, qtzr;
     double    *p;
+    int        indx;
 
 
-    p = Lgm_T89_a[Info->Kp];
+    indx = Info->Kp;
+    if (indx < 0) indx = 0;
+    if (indx > 5) indx = 5;
+    
+    p = Lgm_T89_a[indx];
 
 
     sin_psi = Info->c->sin_psi;

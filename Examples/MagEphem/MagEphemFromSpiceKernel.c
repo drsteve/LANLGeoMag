@@ -40,7 +40,11 @@ void elt_qsort( struct TimeList *arr, unsigned n ) {
 }
 
 /*
- * returns; 
+ * This routine is for figuring out wheter we are inbound or outbound at any given time...
+ * Takers:
+ *    List of JD times of apogee/perigee crossings and current JD.
+ *    The TimeList structure contans a key (JD) and a value indicating apogee or perigee.
+ * Returns; 
  *    0 if not enough points
  *    1 if outbound
  *   -1 if inbound
@@ -63,13 +67,8 @@ int InOutBound( TimeList *a, int n, double JD ){
             break;
         }
     }
-printf("ihi=%d\n", ihi);
-
-    
 
     return( (a[ihi].val == 1)   ?  1 : -1 );
-    
-
 
 }
 
@@ -126,6 +125,7 @@ static struct argp_option Options[] = {
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
+    {"Kp",              'K',    "Kp",                         0,                                      "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
     {"Verbosity",       'v',    "verbosity",                  0,                                      "Verbosity level to use. (0-4)"      },
     {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",        0,                                      "Start date/time in ISO 8601 format. Seconds will be truncated to integers." },
     {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",        0,                                      "End date/time in ISO 8601 format. Seconds will be truncated to integers." },
@@ -149,6 +149,7 @@ struct Arguments {
     int         nPA;
 
     int         Quality;
+    double      Kp;
     int         Colorize;
     int         Force;
     double      FootPointHeight;
@@ -244,6 +245,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'q':
             arguments->Quality = atoi( arg );
+            break;
+        case 'K':
+            sscanf( arg, "%lf", &arguments->Kp );
             break;
         case 'C':
             strcpy( arguments->CoordSystem, arg );
@@ -352,6 +356,7 @@ int main( int argc, char *argv[] ){
     herr_t          status;
     hsize_t         Dims[4], Offset[4], SlabSize[4];
     int             iT;
+    double          Kp;
     double          GeodLat, GeodLong, GeodHeight, MLAT, MLON, MLT;
     char            **H5_IsoTimes;
     long int        *H5_Date;
@@ -472,6 +477,7 @@ int main( int argc, char *argv[] ){
     arguments.silent          = 0;
     arguments.Verbosity       = 0;
     arguments.Quality         = 3;
+    arguments.Kp              = -999.9; 
     arguments.Delta           = 60;     // 60s default cadence
     arguments.Colorize        = 0;
     arguments.Force           = 0;
@@ -524,6 +530,7 @@ int main( int argc, char *argv[] ){
      */
     FootpointHeight = arguments.FootPointHeight;
     Quality         = arguments.Quality;
+    Kp              = arguments.Kp;
     Verbosity       = arguments.Verbosity;
     Colorize        = arguments.Colorize;
     Force           = arguments.Force;
@@ -563,6 +570,9 @@ int main( int argc, char *argv[] ){
         printf("\n");
         printf( "\t                Internal Model: %s\n", IntModel );
         printf( "\t                External Model: %s\n", ExtModel );
+        if ( Kp >= 0.0 ) {
+            printf( "\t              Forcing Kp to be: %g\n", Kp );
+        }
         printf( "\t          FootpointHeight [km]: %g\n", FootpointHeight );
         printf( "\t                    L* Quality: %d\n", Quality );
         printf( "\t                  Force output: %s\n", Force ? "yes" : "no" );
@@ -948,10 +958,16 @@ int main( int argc, char *argv[] ){
                         }
 
                         // Set mag model parameters
-// Kludged to use dynamic QinDenton.
-// We need a mechanism to restrict Kp to a given value
                         Lgm_get_QinDenton_at_JD( UTC.JD-365*5.0, &p, 0 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+
+                        if ( Kp >= 0.0 ) {
+                            MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
+                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5); 
+                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 5) MagEphemInfo->LstarInfo->mInfo->Kp = 5; 
+                            if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
+                        }
+
 
                         // Set up the trans matrices
                         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );

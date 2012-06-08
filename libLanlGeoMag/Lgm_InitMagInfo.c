@@ -251,6 +251,11 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
+        case LGM_EXTMODEL_T89c:
+                                m->Bfield = Lgm_B_T89c;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+
 /*
         case LGM_EXTMODEL_T96:
                                 m->Bfield = Lgm_B_T96;
