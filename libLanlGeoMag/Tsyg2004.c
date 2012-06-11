@@ -76,24 +76,14 @@
  */
 double mypow( double x, double e ) {
 
-/*
-    static double xmin=9e99, xmax=-9e99;
-
-    if ( (x<xmin) && (x >= 0.0) ) {
-        xmin = x;
-        printf("new xmin = %g\n", xmin);
-    }
-
-    if ( x>xmax ) {
-        xmax = x;
-        printf("new xmax = %g\n", xmax);
-    }
-
-*/
-
 //return(powFastLookup( x, e ));
 //return(1.0);
-    return( pow( x, e ) );
+//static long count=0;
+//printf("%d %g\n", count, e);
+//++count;
+//return( pow( x, e ) );
+  return( exp( e*log(x) )  );
+//return( Lgm_FastPowPoly( x, e ) );
 
 }
 
@@ -272,8 +262,12 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
 
 
-//could create a LUT for this pow.
-    XAPPA = mypow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
+    if ( PDYN != tInfo->OLD_PDYN ) {
+        XAPPA = mypow( 0.5*PDYN, A[23] );   //  OVERALL SCALING PARAMETER
+        tInfo->XAPPA = XAPPA;
+    } else {
+        XAPPA = tInfo->XAPPA;   //  OVERALL SCALING PARAMETER
+    }
 
 
     XAPPA2 = XAPPA*XAPPA;
@@ -373,7 +367,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
         DSTT = -20.;
         if (DST < DSTT) DSTT = DST;
-//could create a LUT for this pow.
+// Cache this.
         ZNAM = mypow( fabs( DSTT ), 0.37 );
         tInfo->CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
         tInfo->CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
@@ -393,9 +387,9 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         ZNAM = fabs( DST );
         if ( DST >= -20.0 ) ZNAM = 20.0;
         ZNAM05 = 0.05*ZNAM;
-//could create a LUT for this pow.
+// Cache this.
         tInfo->CB_BIRKPAR.XKAPPA1 = A[32]*mypow( ZNAM05, A[33] );
-//could create a LUT for this pow.
+// Cache this.
         tInfo->CB_BIRKPAR.XKAPPA2 = A[34]*mypow( ZNAM05, A[35] );
         BIRK_TOT( IOPB, PS, XX, YY, ZZ, BXR11, BYR11, BZR11, BXR12, BYR12,
                 BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, tInfo );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
@@ -2560,7 +2554,7 @@ double    APPRC( double R, double SINT, double COST) {
     double GAMMAoDG2, GAMMAoDG22, GAMMAoDG3, GAMMAoDG32, ALPHA_S, GAMMAoDG5, GAMMAoDG52;
     double ALPHApALPHA5oDAL5, ALPHApALPHA5oDAL52, GAMMA_S, GAMMAS2, ALSQH, F, Q, C, G, RS;
     double COSTS, SINTS, RHOS, RHOS2, ZS, RRC1pRHOS, RRC1pRHOS2, P, XK2, XK, XKRHO12, XK2S, DL;
-    double ELK, ELE, APHI1, RRC2pRHOS, RRC2pRHOS2, APHI2, Result;
+    double ELK, ELE, APHI1, RRC2pRHOS, RRC2pRHOS2, APHI2, Result, CubeRoot_GAMMAS2;
 
 
 
@@ -2595,16 +2589,16 @@ double    APPRC( double R, double SINT, double COST) {
     GAMMAoDG2 = GAMMA/DG2; GAMMAoDG22 = GAMMAoDG2*GAMMAoDG2;
     GAMMAoDG3 = GAMMA/DG3; GAMMAoDG32 = GAMMAoDG3*GAMMAoDG3;
 
-//could create a LUT for this pow.
-    ALPHA_S = ALPHA*(1.+P1/mypow(1.+ALPHAmALPHA1oDAL12, BETA1)
-//could create a LUT for this pow.
-        *DEXP1+P2*(ALPHA-ALPHA2)/mypow(1.+ALPHAmALPHA2oDAL22, BETA2)
-//could create a LUT for this pow.
-        /mypow(1.+GAMMAoDG22, BETA3)
-//could create a LUT for this pow.
-        +P3*ALPHAmALPHA32/mypow(1.+ALPHAmALPHA3oDAL32, BETA4)
-//could create a LUT for this pow.
-        /mypow(1.+GAMMAoDG32, BETA5));        // ALPHA -> ALPHA_S  (DEFORMED)
+//    ALPHA_S = ALPHA*(1.
+//        + P1/mypow(1.+ALPHAmALPHA1oDAL12, BETA1)*DEXP1
+//        + P2*(ALPHA-ALPHA2)/( mypow(1.+ALPHAmALPHA2oDAL22, BETA2)*mypow(1.+GAMMAoDG22, BETA3))
+//        + P3*ALPHAmALPHA32/( mypow(1.+ALPHAmALPHA3oDAL32, BETA4)*mypow(1.+GAMMAoDG32, BETA5)) );        // ALPHA -> ALPHA_S  (DEFORMED)
+
+    ALPHA_S = ALPHA*(1.
+        + P1/mypow(1.+ALPHAmALPHA1oDAL12, BETA1)*DEXP1
+        + P2*(ALPHA-ALPHA2)/exp( (BETA2)*log(1.+ALPHAmALPHA2oDAL22) + (BETA3)*log(1.+GAMMAoDG22) )
+        + P3*ALPHAmALPHA32/exp( BETA4*log(1.+ALPHAmALPHA3oDAL32) + BETA5*log(1.+GAMMAoDG32)) );        // ALPHA -> ALPHA_S  (DEFORMED)
+
 
 
 
@@ -2618,13 +2612,16 @@ double    APPRC( double R, double SINT, double COST) {
 
     ALSQH = 0.5*ALPHA_S*ALPHA_S;        // ALPHA_S,GAMMA_S -> RS,SINTS,COSTS
     F = 64./27.*GAMMAS2+ALSQH*ALSQH;
-    Q = mypow( sqrt(F)+ALSQH, 1./3. );
-    C = Q-4.*mypow( GAMMAS2, 1./3. )/(3.*Q);
+    //Q = mypow( sqrt(F)+ALSQH, 1./3. );
+    Q = cbrt( sqrt(F)+ALSQH );
+    CubeRoot_GAMMAS2 = 4.0*cbrt( GAMMAS2 );
+    //C = Q-4.*mypow( GAMMAS2, 1./3. )/(3.*Q);
+    C = Q-CubeRoot_GAMMAS2/(3.*Q);
 
 
     if (C < 0.) C = 0.;
 
-    G  = sqrt(C*C+4.*mypow( GAMMAS2, 1./3. ));
+    G  = sqrt(C*C+CubeRoot_GAMMAS2);
     RS = 4./((sqrt(2.*G-C)+sqrt(C))*(G+C));
     COSTS = GAMMA_S*RS*RS;
     SINTS = sqrt(1.-COSTS*COSTS);
@@ -2833,7 +2830,8 @@ double    BR_PRC_Q( double R, double SINT, double COST ) {
     D4 = D3*COST2;
 
     FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = SC*mypow(ALPHA, XK3)*mypow(FS, XK4)/(mypow(R/B3, BE3)+1.0);
+    //D5 = SC*mypow(ALPHA, XK3)*mypow(FS, XK4)/(mypow(R/B3, BE3)+1.0);
+D5 = SC*exp( XK3*log(ALPHA) + XK4*log(FS))/(mypow(R/B3, BE3)+1.0);
     D6 = D5*COST2;
 
     ALPHAmAL4oDAL4 = (ALPHA-AL4)/DAL4; ALPHAmAL4oDAL42 = ALPHAmAL4oDAL4*ALPHAmAL4oDAL4;
@@ -2916,11 +2914,13 @@ double    BT_PRC_Q( double R, double SINT, double COST) {
     D2 = D1*COST2;
 
     FFS(ALPHA,AL2,DAL2,&F,&FA,&FS);
-    D3 = mypow(FA, XK2)/mypow(R, BE2);
+//    D3 = mypow(FA, XK2)/mypow(R, BE2);
+D3 = exp( XK2*log(FA) - BE2*log(R) );
     D4 = D3*COST2;
 
     FFS(ALPHA,AL3,DAL3,&F,&FA,&FS);
-    D5 = mypow(FS, XK3)*mypow(ALPHA, XK4)/(mypow(R/B3, BE3)+1.0);
+//    D5 = mypow(FS, XK3)*mypow(ALPHA, XK4)/(mypow(R/B3, BE3)+1.0);
+D5 = exp( XK3*log(FS) + XK4*log(ALPHA))/(mypow(R/B3, BE3)+1.0);
     D6 = D5*COST2;
 
     FFS(GAMMA,0.0,DG1,&F,&FA,&FS);
