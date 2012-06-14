@@ -1,7 +1,7 @@
 #ifndef LGM_DFI_RBF
 #define LGM_DFI_RBF
 
-#include "Lgm_Vec.h"
+#include "Lgm/Lgm_Vec.h"
 #include "Lgm/Lgm_DFI_RBF.h"
 #include "Lgm/Lgm_DynamicMemory.h"
 #include "Lgm/uthash.h"

@@ -433,9 +433,12 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
-     * Pointer to FastPow Structure.
+     *  hash table used in Lgm_FastPow()
      */
-//    Lgm_FastPow *f;
+    //Lgm_FastPow   *fastpow_ht;          // hash table (uthash)
+    //int            fastpow_ht_alloced;  // Flag to indicate whether or not fastpow_ht is allocated with data.
+    //long int       FP_nHashFinds;       // Number of HASH_FIND()'s performed.
+    //long int       FP_nHashAdds;        // Number of HASH_ADD_KEYPTR()'s performed.
 
 
 
