@@ -10,6 +10,7 @@
 #include "Lgm/Lgm_Tsyg2004.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
+//#include "Lgm/Lgm_FastPowPoly.h"
 
 
 #ifndef TRUE
@@ -32,7 +33,8 @@
 #define     LGM_BAD_TRACE                 -3
 
 
-#define 	LGM_MAGSTEP_KMAX	16
+//#define 	LGM_MAGSTEP_KMAX	16
+#define 	LGM_MAGSTEP_KMAX	8
 #define 	LGM_MAGSTEP_IMAX	(LGM_MAGSTEP_KMAX+1)
 #define 	LGM_MAGSTEP_JMAX	(LGM_MAGSTEP_KMAX+2)
 #define 	LGM_MAGSTEP_REDMAX 	1.0e-5
@@ -268,6 +270,23 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
+     * For new BS ODE solver...
+     */
+    //double      Lgm_MagStep_BS_coeff[LGM_MAGSTEP_IMAX+1][LGM_MAGSTEP_IMAX+1];
+    double      Lgm_MagStep_BS_coeff[LGM_MAGSTEP_IMAX][LGM_MAGSTEP_IMAX];
+    int         Lgm_MagStep_BS_first_step;
+    int         Lgm_MagStep_BS_last_step;
+    int         Lgm_MagStep_BS_reject;
+    int         Lgm_MagStep_BS_prev_reject;
+    int         Lgm_MagStep_BS_k_targ;
+    double      Lgm_MagStep_BS_atol;
+    double      Lgm_MagStep_BS_rtol;
+    //double      Lgm_MagStep_BS_cost[LGM_MAGSTEP_KMAX+1];
+    double      Lgm_MagStep_BS_cost[LGM_MAGSTEP_IMAX];
+
+
+
+    /*
      *  These variables are needed to make Lgm_MagStep2() reentrant/thread-safe.
      *  They basically used to be static declarations within Lgm_MagStep()
      */
@@ -411,6 +430,12 @@ typedef struct Lgm_MagModelInfo {
      *  Info structure for TS04
      */
     LgmTsyg2004_Info    TS04_Info;
+
+
+    /*
+     * Pointer to FastPow Structure.
+     */
+//    Lgm_FastPow *f;
 
 
 

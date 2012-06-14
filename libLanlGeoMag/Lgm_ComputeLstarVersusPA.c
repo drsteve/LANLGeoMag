@@ -176,7 +176,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
                         printf("\n\n\t\t%sComputing L* for: UTC = %g PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
-                        printf("    \t\t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
+                        //printf("    \t\t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
                     }
 //////////////////////////////NOTE
 //////////////////////////////NOTE   We are giving Lstar the Min B point ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

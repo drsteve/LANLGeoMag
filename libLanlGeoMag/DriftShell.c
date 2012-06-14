@@ -16,10 +16,10 @@ typedef struct FitVals {
     double  x, y, dy;
 } FitVals;
 
-void elt_qsort( struct FitVals *arr, unsigned n ) {                                                                                                                           
-    #define elt_lt(a,b) ((a)->key < (b)->key)                                                                                                                               
-    QSORT( struct FitVals, arr, n, elt_lt );                                                                                                                                     
-} 
+void elt_qsort( struct FitVals *arr, unsigned n ) {
+    #define elt_lt(a,b) ((a)->key < (b)->key)
+    QSORT( struct FitVals, arr, n, elt_lt );
+}
 
 
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
@@ -49,7 +49,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
 int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector    u, w, Pm_North, Pmirror, v1, v2, v3;
     double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
-    double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest;
+    double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
     int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
     int           i, Flag, nbFits;
     BracketType   Bracket;
@@ -116,12 +116,12 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         if ( FoundZeroBracket ) {
             printf("\t\t\t> Found zero bracket: (a,b) = %g %g  (Da, Db) = %g %g\n", Bracket.a, Bracket.b, Bracket.Da, Bracket.Db );
         } else {
-            printf("\t\t\t> No zero bracket found: (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n", 
-                Bracket.a, Bracket.b, Bracket.c, 
+            printf("\t\t\t> No zero bracket found: (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n",
+                Bracket.a, Bracket.b, Bracket.c,
                 Bracket.Da, Bracket.Db, Bracket.Dc );
         }
     }
-    
+
 
 
 
@@ -153,30 +153,69 @@ mlatbest = mlat_min;
 
 
 
-    double res;
-    if (LstarInfo->VerbosityLevel > 1){
-        if ( !FoundZeroBracket ) {
+    if ( !FoundZeroBracket ) {
 
-            if ( LstarInfo->nImI0>2 ){
+        if ( LstarInfo->nImI0>2 ){
 
-                for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
-                FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-                if ( (res > -90.0) && (res < 90.0) ){
+            for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+            FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+            if ( (res > -90.0) && (res < 90.0) ){
+                if (LstarInfo->VerbosityLevel > 1){
+                    printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                }
+                a = res-2.0;
+                b = res;
+                c = res+2.0;
+
+                I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
+                if ( fabs(I) < 1e98 ) {
+                    D0 = I-I0;
+                    LstarInfo->MLATarr[LstarInfo->nImI0] = b;
+                    LstarInfo->ImI0arr[LstarInfo->nImI0++] = D0;
+                    if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = b; }
+                }
+                Db = D0;
+                if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+                    *rad    = r;
+                    *Ifound = I;
+                    *mlat   = mlat_min;
+                    FoundValidI = TRUE;
                     if (LstarInfo->VerbosityLevel > 1){
-                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                        printf( "\t\t\t> Converged with requested tolerance: |I-I0|=%g < %g\n", Dmin, LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
                     }
-                    a = res-2.0;
-                    b = res;
-                    c = res+2.0;
+                    return( FoundValidI );
+                } else if ( D0*Sign < 0.0 ) {
 
-                    I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
-                    if ( fabs(I) < 1e98 ) {
-                        D0 = I-I0;
-                        LstarInfo->MLATarr[LstarInfo->nImI0] = b;
-                        LstarInfo->ImI0arr[LstarInfo->nImI0++] = D0;
-                        if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = b; }
+                    FoundZeroBracket = TRUE;
+                    if ( Dbest < 0.0 ) {
+                        a  = mlatbest;
+                        Da = Dbest;
+                        b  = b;
+                        Db = D0;
+                    } else {
+                        a  = b;
+                        Da = D0;
+                        b  = mlatbest;
+                        Db = Dbest;
                     }
-                    Db = D0;
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf("\t\t\t> 1. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
+                    }
+
+                }
+
+
+                if ( !FoundZeroBracket ) {
+
+
+                    I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
+                    if ( fabs(I) < 1e98 ) {
+                        LstarInfo->MLATarr[LstarInfo->nImI0] = a;
+                        LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
+                        D0 = I-I0;
+                        if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = a; }
+                    }
+                    Da = D0;
                     if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
                         *rad    = r;
                         *Ifound = I;
@@ -192,16 +231,16 @@ mlatbest = mlat_min;
                         if ( Dbest < 0.0 ) {
                             a  = mlatbest;
                             Da = Dbest;
-                            b  = b;
+                            b  = a;
                             Db = D0;
                         } else {
-                            a  = b;
+                            //a  = a;
                             Da = D0;
                             b  = mlatbest;
                             Db = Dbest;
                         }
                         if (LstarInfo->VerbosityLevel > 1){
-                            printf("\t\t\t> 1. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
+                            printf("\t\t\t> 2. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
                         }
 
                     }
@@ -209,15 +248,14 @@ mlatbest = mlat_min;
 
                     if ( !FoundZeroBracket ) {
 
-
-                        I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
+                        I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
                         if ( fabs(I) < 1e98 ) {
-                            LstarInfo->MLATarr[LstarInfo->nImI0] = a;
+                            LstarInfo->MLATarr[LstarInfo->nImI0] = c;
                             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
                             D0 = I-I0;
-                            if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = a; }
+                            if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = c; }
                         }
-                        Da = D0;
+                        Dc = D0;
                         if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
                             *rad    = r;
                             *Ifound = I;
@@ -233,70 +271,29 @@ mlatbest = mlat_min;
                             if ( Dbest < 0.0 ) {
                                 a  = mlatbest;
                                 Da = Dbest;
-                                b  = a;
+                                b  = c;
                                 Db = D0;
                             } else {
-                                //a  = a;
+                                a  = c;
                                 Da = D0;
                                 b  = mlatbest;
                                 Db = Dbest;
                             }
                             if (LstarInfo->VerbosityLevel > 1){
-                                printf("\t\t\t> 2. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
+                                printf("\t\t\t> 3. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
                             }
 
                         }
-
-
-                        if ( !FoundZeroBracket ) {
-
-                            I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
-                            if ( fabs(I) < 1e98 ) {
-                                LstarInfo->MLATarr[LstarInfo->nImI0] = c;
-                                LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
-                                D0 = I-I0;
-                                if (fabs(D0) < Dmin){ Dmin = fabs(D0); mlat_min = c; }
-                            }
-                            Dc = D0;
-                            if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
-                                *rad    = r;
-                                *Ifound = I;
-                                *mlat   = mlat_min;
-                                FoundValidI = TRUE;
-                                if (LstarInfo->VerbosityLevel > 1){
-                                    printf( "\t\t\t> Converged with requested tolerance: |I-I0|=%g < %g\n", Dmin, LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
-                                }
-                                return( FoundValidI );
-                            } else if ( D0*Sign < 0.0 ) {
-
-                                FoundZeroBracket = TRUE;
-                                if ( Dbest < 0.0 ) {
-                                    a  = mlatbest;
-                                    Da = Dbest;
-                                    b  = c;
-                                    Db = D0;
-                                } else {
-                                    a  = c;
-                                    Da = D0;
-                                    b  = mlatbest;
-                                    Db = Dbest;
-                                }
-                                if (LstarInfo->VerbosityLevel > 1){
-                                    printf("\t\t\t> 3. Zero bracket detected!: (a,b) = %g %g  (Da, Db) = %g %g\n", a, b, Da, Db );
-                                }
-
-                            }
-
-                        } //!FoundZeroBracket
-
-
-                        if (LstarInfo->VerbosityLevel > 1){
-                            printf("\t\t\t> New trial range: a,b,c = %g %g %g  Da,Db,Dc = %g %g %g\n", a, b, c, Da, Db, Dc);
-                        }
-
 
                     } //!FoundZeroBracket
-                } 
+
+
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf("\t\t\t> New trial range: a,b,c = %g %g %g  Da,Db,Dc = %g %g %g\n", a, b, c, Da, Db, Dc);
+                    }
+
+
+                } //!FoundZeroBracket
             }
         }
     }
@@ -475,7 +472,7 @@ mlatbest = mlat_min;
 
 
             /*
-             *  Find a new point to evaluate. 
+             *  Find a new point to evaluate.
              *
              *  If we have less than 3 points so far, take it as a a fraction,
              *  F through the interval.  Compute I and the difference between I
@@ -862,7 +859,7 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
         //printf("|y|, y, x, = %g %g %g\n", fabs(yin[i]), yin[i], xin[i] );
     }
     elt_qsort( f, n );
-    
+
     n = nmax;
     LGM_ARRAY_1D( x, n, double );
     LGM_ARRAY_1D( y, n, double );
@@ -872,7 +869,7 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
         y[i] = f[i].y;
         dy[i] = f[i].dy;
     }
-    
+
 
     X   = gsl_matrix_alloc( n, 3 );
     v   = gsl_vector_alloc( n );

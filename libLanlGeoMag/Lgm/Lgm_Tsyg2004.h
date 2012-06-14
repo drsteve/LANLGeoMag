@@ -61,6 +61,7 @@ typedef struct LgmTsyg2004_Info {
     double      OLD_X;
     double      OLD_Y;
     double      OLD_Z;
+    double      OLD_PDYN;
 
 
     // cache vars used in BIRK_SHL()
@@ -74,20 +75,7 @@ typedef struct LgmTsyg2004_Info {
     double      YooP[4][4], YooQ[4][4], CYPI[4][4], CYQI[4][4], SYPI[4][4], SYQI[4][4];
     double      Z1ooR[4][4], Z2ooS[4][4], SZRK[4][4], CZSK[4][4], CZRK[4][4], SZSK[4][4];
     double      SQPR[4][4][4], SQQS[4][4][4], EPR[4][4][4], EQS[4][4][4];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    double      XAPPA;
 
 
 

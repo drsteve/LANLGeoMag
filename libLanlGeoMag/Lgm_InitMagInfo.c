@@ -57,6 +57,16 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_MagStep_BS_Eps              = 1e-7;
 
     /*
+     *  Some inits for new MagStep_BS
+     */
+    MagInfo->Lgm_MagStep_BS_first_step  = TRUE;
+    MagInfo->Lgm_MagStep_BS_last_step   = FALSE;
+    MagInfo->Lgm_MagStep_BS_reject      = FALSE;
+    MagInfo->Lgm_MagStep_BS_prev_reject = FALSE;
+    MagInfo->Lgm_MagStep_BS_atol        = 1e-4;
+    MagInfo->Lgm_MagStep_BS_rtol        = 1e-4;
+
+    /*
      *  Some inits for MagStep_RK5
      */
     MagInfo->Lgm_MagStep_RK5_FirstTimeThrough = TRUE;
@@ -138,6 +148,14 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->RBF_nHashAdds  = 0;
 
 
+    /*
+     * Allocate space to FastPow structure
+     * And initialize it...
+     */
+//    MagInfo->f = Lgm_InitFastPow();
+//    powFastSetTable( MagInfo->f );
+
+
 }
 
 
@@ -145,7 +163,11 @@ void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
 
     Lgm_free_ctrans( Info->c );
 
+
+//    Lgm_FreeFastPow( Info->f );
+
     //what about any splines that may have been alloc'd?
+
 
 }
 

@@ -478,7 +478,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
                         I = Iinv_interped( LstarInfo->mInfo  );
-                        if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                        if (LstarInfo->VerbosityLevel > 0) {
+                            printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                        }
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
 

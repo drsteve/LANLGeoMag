@@ -1,6 +1,8 @@
-/* Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
+/* Michael G. Henderson <mghenderson@lanl.gov>
  *
  *     Routines to perform Bulirsch-Stoer step.
+ *
+ * BS is based on NR 3rd edition routines.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -11,6 +13,7 @@
  * implied warranty.
  *
  */
+#include <math.h>
 #include "Lgm/Lgm_MagModelInfo.h"
 
 #define FMAX(a,b)  (((a)>(b))?(a):(b))
@@ -27,13 +30,11 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     u0 = *u;
     if (        Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_BS ) {
 
+//printf("Info->Lgm_MagStep_BS_Eps = %g\b", Info->Lgm_MagStep_BS_Eps);
+//exit(0);
+//Info->Lgm_MagStep_BS_Eps = 1e-7;
         eps = Info->Lgm_MagStep_BS_Eps;
         Lgm_MagStep_BS( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
-if ( (u->y < 6.722)&&(u->y > 6.721) ) {
-printf("u0 = %g %g %g\n", u0.x, u0.y, u0.z);
-printf("u = %g %g %g\n", u->x, u->y, u->z);
-printf("Htry, Hdid, Hnext, eps, sgn = %g %g %g %g %g\n", Htry, *Hdid, *Hnext, eps, sgn);
-}
 
     } else if ( Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_RK5 ) {
 
@@ -70,6 +71,7 @@ int Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *b0, Lgm_Vector *v, double H, int n, d
      */
     h  = sgn * H/(double)n;
     h2 = 2.0 * h;
+//printf("h=%g\n", h);
 
 
     /*
@@ -125,6 +127,8 @@ int Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *b0, Lgm_Vector *v, double H, int n, d
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
         printf("Lgm_ModMid(): Bmag too small during final Euler step (z1 = %g %g %g Bmag = %g) is too small (returning with 0).\n", z1.x, z1.y, z1.z, Bmag );
+//printf("z0, z1 = %g %g %g    %g %g %g   z2 = %g %g %g\n", z0.x, z0.y, z0.z, z1.x, z1.y, z1.z, z2.x, z2.y, z2.z );
+
         return(0);
     }
     z2.x = z1.x + h*B.x;
@@ -264,6 +268,20 @@ void Lgm_PolFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
 }
 
 
+void polyextr( int k, double table[][3], double *last, Lgm_MagModelInfo *Info ) {
+
+    int i, j;
+
+    for ( j=k-1; j>0; j-- ) {       // Update the current row using the Neville recursive formula.
+        for ( i=0; i<3; i++ ) {
+            table[j-1][i] = table[j][i] + Info->Lgm_MagStep_BS_coeff[k][j]*(table[j][i]-table[j-1][i]);
+        }
+    }
+    for ( i=0; i<3; i++) {       // Update the last element.
+        last[i] = table[0][i] + Info->Lgm_MagStep_BS_coeff[k][0]*(table[0][i]-last[i]);
+    }
+
+}
 
 
 /*
@@ -284,18 +302,24 @@ void Lgm_PolFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vecto
  *
  *
  */
+
 int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
-          double Htry, double *Hdid, double *Hnext,
+          double htry, double *hdid, double *hnext,
           double eps, double sgn, double *s, int *reset,
           int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
 
-    Lgm_Vector        u0, b0, v, uerr, e;
-    int               q, k, kk, km=0, n;
-    int               reduction, done, ModMidSuccessfull;
-int Flag;
-    double            h2, sss, n2, f, H, err[LGM_MAGSTEP_KMAX+1], Bmag;
-    double            eps1, max_error=0.0, fact, red=1.0, scale=1.0, work, workmin;
+    Lgm_Vector  u0, b0, v;
+    int         k;
+    int         ModMidSuccessfull;
+    double      err, Bmag;
+    double      hopt[LGM_MAGSTEP_IMAX], work[LGM_MAGSTEP_IMAX];
+    double      logfact, ratio, expo, facmin, fac, g;
+    double      y[3], ysav[3], yseq[3], scale[3];
+    double      rtol, atol;
+    double      h, hnew, table[LGM_MAGSTEP_KMAX][3];
+    int         i, l, forward;
+    int         firstk, kopt;
     /*
      *  For years, we ran with this seq;
      *
@@ -307,60 +331,52 @@ int Flag;
      *
      *  Ratio of required func calls (for the test I did) was about 1.6
      */
-    static int     Seq[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
+    static double   STEPFAC1=0.65, STEPFAC2=0.94, STEPFAC3=0.02, STEPFAC4=4.0, KFAC1=0.8, KFAC2=0.9;
+    static int      Seq[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
 
 
 
 
 //printf("u = %g %g %g\n", u->x, u->y, u->z);
 
-    if ( fabs(Htry) < 1e-16 ) {
-        printf("Lgm_MagStep(): Requested stepsize is very small (returning with -1). Htry = %g\n", Htry );
+    scale[0] = u_scale->x; scale[1] = u_scale->y; scale[2] = u_scale->z;
+
+    if ( fabs(htry) < 1e-16 ) {
+        printf("Lgm_MagStep(): Requested stepsize is very small (returning with -1). htry = %g\n", htry );
         return(-1);
     }
 
+    atol = Info->Lgm_MagStep_BS_atol;
+    rtol = Info->Lgm_MagStep_BS_rtol;
 
-    if ( *reset ) Info->Lgm_nMagEvals = 0;
 
     if ( ( eps != Info->Lgm_MagStep_BS_eps_old ) || ( *reset ) ){
 
+        Info->Lgm_nMagEvals = 0;
         Info->Lgm_MagStep_BS_eps_old = eps;
+        *s = 0.0;
 
-        *Hnext  = -1.0;
-        eps1    = LGM_MAGSTEP_SAFE1*eps;
+        Info->Lgm_MagStep_BS_cost[0] = Seq[0] + 1;
+        for ( k=0; k<LGM_MAGSTEP_KMAX; k++ ) Info->Lgm_MagStep_BS_cost[k+1] = Info->Lgm_MagStep_BS_cost[k] + Seq[k+1];
+        logfact = -0.6*log10( FMAX(1.0e-12,rtol) ) + 0.5;
+        *hnext  = -1e99;
+        Info->Lgm_MagStep_BS_k_targ  = FMAX(1,FMIN(LGM_MAGSTEP_KMAX-1,(int)logfact));
 
-        /*
-         *  Compute work to get to column k of the tableau.
-         *  Here we assume work is just the number of function
-         *  evals needed to get to column k.
-         */
-        Info->Lgm_MagStep_BS_A[1] = Seq[1] + 1;
-        for (k=1; k <= LGM_MAGSTEP_KMAX; ++k) Info->Lgm_MagStep_BS_A[k+1] = Info->Lgm_MagStep_BS_A[k] + Seq[k+1];
-
-
-        /*
-         *  Compute Deuflhard's correction factors.
-         */
-        for (q=2; q <= LGM_MAGSTEP_KMAX; ++q) {
-            for (k=1; k < q; ++k) {
-                Info->Lgm_MagStep_BS_alpha[k][q] = pow( eps1, (Info->Lgm_MagStep_BS_A[k+1] - Info->Lgm_MagStep_BS_A[q+1])
-                / ( (2.0*k+1.0)*(Info->Lgm_MagStep_BS_A[q+1] - Info->Lgm_MagStep_BS_A[1] + 1.0)) );
+        for ( k = 0; k<LGM_MAGSTEP_IMAX; k++ ) {
+            for ( l=0; l<k; l++ ) {
+                ratio       = (double)Seq[k]/(double)Seq[l];
+                Info->Lgm_MagStep_BS_coeff[k][l] = 1.0/(ratio*ratio-1.0);
             }
         }
-
-        /*
-         *  Compute optimal row for convergence.
-         */
-        for (Info->Lgm_MagStep_BS_kopt=2; Info->Lgm_MagStep_BS_kopt < LGM_MAGSTEP_KMAX; Info->Lgm_MagStep_BS_kopt++)
-            if (Info->Lgm_MagStep_BS_A[Info->Lgm_MagStep_BS_kopt+1] > Info->Lgm_MagStep_BS_alpha[Info->Lgm_MagStep_BS_kopt-1][Info->Lgm_MagStep_BS_kopt] * Info->Lgm_MagStep_BS_A[Info->Lgm_MagStep_BS_kopt]) break;
-            Info->Lgm_MagStep_BS_kmax = Info->Lgm_MagStep_BS_kopt;
 
     }
 
 
 
 
-    H = Htry;
+    /*
+     *  Evaluate at u0
+     */
     u0 = *u;
     if ( (*Mag)(&u0, &b0, Info) == 0 ) {
         // bail if B-field eval had issues.
@@ -375,134 +391,187 @@ int Flag;
         return(-1);
     }
 
-    if ( (*s != Info->Lgm_MagStep_BS_snew) || (H != *Hnext) || ( *reset ) ) {
-        Info->Lgm_MagStep_BS_snew = 0.0;
-        *s   = 0.0;
-        Info->Lgm_MagStep_BS_kopt = Info->Lgm_MagStep_BS_kmax;
-        Info->Lgm_MagStep_BS_FirstTimeThrough = TRUE;
+
+    // convert vector into array
+    y[0] = u0.x;
+    y[1] = u0.y;
+    y[2] = u0.z;
+
+
+
+    work[0] = 0;
+    h = htry;
+    forward = ( h>0 ) ? TRUE : FALSE;
+    ysav[0] = u0.x; ysav[1] = u0.y; ysav[2] = u0.z;                 // Save the starting values.
+
+    if ( (h != *hnext) && !(Info->Lgm_MagStep_BS_first_step) ) {    // h gets reset in Odeint for the last step. ????
+        Info->Lgm_MagStep_BS_last_step = TRUE;
     }
-    reduction = FALSE;
-    done      = FALSE;
+    if ( Info->Lgm_MagStep_BS_reject ) {                            // Previous step was rejected.
+        Info->Lgm_MagStep_BS_prev_reject = TRUE;
+        Info->Lgm_MagStep_BS_last_step   = FALSE;
+    }
+    Info->Lgm_MagStep_BS_reject = FALSE;
+    firstk = TRUE;
+    hnew   = fabs(h);
 
+Info->Lgm_MagStep_BS_last_step = FALSE;
 
-    while ( !done ) {
+    while ( firstk || Info->Lgm_MagStep_BS_reject ) {                        // Loop until step accepted.
+        h = forward ? hnew : -hnew;
+        firstk = FALSE;
+        Info->Lgm_MagStep_BS_reject = FALSE;
+        //if ( fabs(h) <= fabs(*s)*eps ) printf("step size underflow in StepperBS");
 
-        for (k=1; k<=Info->Lgm_MagStep_BS_kmax; ++k) {
-//printf("\n\n\n1. k = %d u = %g %g %g\n", k, u->x, u->y, u->z);
+        for ( k=0; k<=Info->Lgm_MagStep_BS_k_targ+1; k++ ) {                 // Evaluate the sequence of modified midpoint integrations.
 
-            Info->Lgm_MagStep_BS_snew = *s + H;
-            if ( fabs(Info->Lgm_MagStep_BS_snew - *s) < 1e-16 ) {
-                if (Info->VerbosityLevel > 1) {
-                    //printf("H = %g\n", H);
-                    fprintf(stderr, "step size underflow\n");
-                    fprintf(stderr, "Htry, Hdid, Hnext = %g %g %g\n", Htry, *Hdid, *Hnext);
-                    }
-                Info->Lgm_MagStep_BS_FirstTimeThrough=TRUE;
-                Info->Lgm_MagStep_BS_eps_old = -1.0;
-                printf("HOW DID I GET HERE? u0 = %g %g %g    v = %g %g %g    H, Htry, s  = %g %g %g    \n", u0.x, u0.y, u0.z, v.x, v.y, v.z, H, Htry, *s );
-                return(-1);
-            }
-
-            n  = Seq[k];
-            n2 = (double)(n*n);
-            h2 = H*H;
-
-            ModMidSuccessfull = Lgm_ModMid( &u0, &b0, &v, H, n, sgn, Mag, Info );
+            /*
+             * Do a modified midpoint call
+             */
+            //dy( ysav, h, k, yseq, ipt, derivs );
+            ModMidSuccessfull = Lgm_ModMid( &u0, &b0, &v, h, Seq[k], sgn, Mag, Info );
             if ( !ModMidSuccessfull ) return(-1); // bail if Lgm_ModMid() had issues.
+            yseq[0] = v.x; yseq[1] = v.y; yseq[2] = v.z;
 
-            sss = h2/n2;
-            //Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
-            Lgm_PolFunExt( k-1, sss, &v, u, &uerr, Info );
-
-            if (k !=  1){
-
-                e.x = fabs( uerr.x/u_scale->x );
-                e.y = fabs( uerr.y/u_scale->y );
-                e.z = fabs( uerr.z/u_scale->z );
-                max_error = 1.0e-30;
-                if (e.x > max_error) max_error = e.x;
-                if (e.y > max_error) max_error = e.y;
-                if (e.z > max_error) max_error = e.z;
-                max_error /= eps;
-                km = k-1;
-                err[km] = pow( max_error/LGM_MAGSTEP_SAFE1, 1.0/(2.0*km + 1.0) );
+            if (k == 0) {
+                 y[0] = yseq[0];
+                 y[1] = yseq[1];
+                 y[2] = yseq[2];
+            } else {
+                // Store result in tableau.
+                for (i=0;i<3;i++) table[k-1][i] = yseq[i];
             }
 
+            if ( k != 0 ) {
 
-            if ( (k != 1) && ((k >= Info->Lgm_MagStep_BS_kopt-1) || Info->Lgm_MagStep_BS_FirstTimeThrough )) {
+                // Perform extrapolation.
+                polyextr( k, &table[0], y, Info );
 
-                if ( max_error < 1.0 ) {
-
-                    /*
-                     *  We've converged! Bailout and go home...
-                     */
-                    done = TRUE;
-
-                } else if ( (k == Info->Lgm_MagStep_BS_kmax)||(k == Info->Lgm_MagStep_BS_kopt+1) ) {
-
-                    red = LGM_MAGSTEP_SAFE2/err[km];
-
-                } else if ( (k == Info->Lgm_MagStep_BS_kopt) && (Info->Lgm_MagStep_BS_alpha[Info->Lgm_MagStep_BS_kopt-1][Info->Lgm_MagStep_BS_kopt] < err[km]) ) {
-
-                    red = 1.0/err[km];
-
-                } else if ( (k == Info->Lgm_MagStep_BS_kmax) && (Info->Lgm_MagStep_BS_alpha[km][Info->Lgm_MagStep_BS_kmax-1] < err[km]) ) {
-
-                    red = LGM_MAGSTEP_SAFE2 * Info->Lgm_MagStep_BS_alpha[km][Info->Lgm_MagStep_BS_kmax-1]/err[km];
-
-                } else if ( Info->Lgm_MagStep_BS_alpha[km][Info->Lgm_MagStep_BS_kopt] < err[km] ) {
-
-                    red = Info->Lgm_MagStep_BS_alpha[km][Info->Lgm_MagStep_BS_kopt-1]/err[km];
-
+                // Compute normalized error estimate err_k.
+                err = 0.0;
+                for ( i=0; i<3; i++ ) {
+                    scale[i]  = atol + rtol*FMAX(fabs(ysav[i]),fabs(y[i]));
+                    g         = (y[i]-table[0][i])/scale[i];
+                    err      += g*g;
                 }
+                err    = sqrt( err/3.0 );
 
+                // Compute optimal stepsize for this order.
+                expo   = 1.0/(double)(2*k+1);
+                facmin = pow( STEPFAC3, expo );
+                if (err == 0.0) {
+                    fac = 1.0/facmin;
+                } else {
+                    fac = STEPFAC2/pow(err/STEPFAC1,expo);
+                    fac = FMAX(facmin/STEPFAC4,FMIN(1.0/facmin,fac));
+                }
+                hopt[k] = fabs(h*fac);
+                work[k] = Info->Lgm_MagStep_BS_cost[k]/hopt[k];  // Work per unit step
+
+                if ( (Info->Lgm_MagStep_BS_first_step || Info->Lgm_MagStep_BS_last_step) && err <= 1.0 ) break;
+
+                if ( (k == Info->Lgm_MagStep_BS_k_targ-1) && !Info->Lgm_MagStep_BS_prev_reject && !Info->Lgm_MagStep_BS_first_step && !Info->Lgm_MagStep_BS_last_step) {
+                    g = Seq[Info->Lgm_MagStep_BS_k_targ]*Seq[Info->Lgm_MagStep_BS_k_targ+1]/(double)(Seq[0]*Seq[0]);
+                    
+                    if (err <= 1.0) {
+                        // Converged within order window.
+                        break;
+                    } else if ( err>g*g ) {
+                        // Criterion (17.3.17) predicts step will fail.
+                        Info->Lgm_MagStep_BS_reject = TRUE;
+                        Info->Lgm_MagStep_BS_k_targ = k;
+                        if ( (Info->Lgm_MagStep_BS_k_targ>1) && (work[k-1]<KFAC1*work[k]) ) Info->Lgm_MagStep_BS_k_targ--;
+                        hnew = hopt[Info->Lgm_MagStep_BS_k_targ];
+                        break;
+                    }
+                }
+                if ( k == Info->Lgm_MagStep_BS_k_targ ) {
+                    g = (double)Seq[k+1]/(double)Seq[0];
+                    if ( err <= 1.0 ) {
+                        // Converged within order window.
+                        break;
+                    } else if ( err>g*g ) {
+                        // Criterion (17.3.20) predicts step will fail.
+                        Info->Lgm_MagStep_BS_reject = TRUE;
+                        if ( (Info->Lgm_MagStep_BS_k_targ>1) && (work[k-1]<KFAC1*work[k]) ) Info->Lgm_MagStep_BS_k_targ--;
+                        hnew = hopt[Info->Lgm_MagStep_BS_k_targ];
+                        break;
+                    }
+                }
+                if ( k == Info->Lgm_MagStep_BS_k_targ+1 ) {
+                    if ( err > 1.0 ) {
+                        Info->Lgm_MagStep_BS_reject = TRUE;
+                        if ( (Info->Lgm_MagStep_BS_k_targ>1) && (work[Info->Lgm_MagStep_BS_k_targ-1]<KFAC1*work[Info->Lgm_MagStep_BS_k_targ]) ) Info->Lgm_MagStep_BS_k_targ--;
+                        hnew = hopt[Info->Lgm_MagStep_BS_k_targ];
+                    }
+                    break;
+                }
             }
+        } // Go back and try next k.
+
+        // Arrive here from any break in for loop.
+        if ( Info->Lgm_MagStep_BS_reject ) Info->Lgm_MagStep_BS_prev_reject = TRUE;
+
+    }   // Go back if step was rejected.
 
 
-        }
+    u->x = y[0]; u->y = y[1]; u->z = y[2];
 
-        if (!done) {
-            red = (red < LGM_MAGSTEP_REDMIN) ? red : LGM_MAGSTEP_REDMIN;
-            red = (red > LGM_MAGSTEP_REDMAX) ? red : LGM_MAGSTEP_REDMAX;
-            H *= red;
-            reduction = TRUE;
-        }
-
-    }
-
+    Info->Lgm_MagStep_BS_snew = *s + h;
     *s     = Info->Lgm_MagStep_BS_snew;
-    *Hdid  = H;
+    *hdid  = h;
+
+    Info->Lgm_MagStep_BS_first_step = FALSE;
+
+
+    
+
+
+
+
+
+    // Determine optimal order for next step.
+    if ( k == 1 ) {
+        kopt = 2;
+    } else if (k <= Info->Lgm_MagStep_BS_k_targ) {
+        kopt = k;
+        if ( work[k-1] < KFAC1*work[k] ) {
+            kopt = k-1;
+        } else if ( work[k] < KFAC2*work[k-1] ) {
+            kopt = FMIN(k+1,LGM_MAGSTEP_KMAX-1);
+        }
+    } else {
+        kopt = k-1;
+        if ( (k > 2) && (work[k-2] < KFAC1*work[k-1]) ) kopt = k-2;
+        if (work[k] < KFAC2*work[kopt]) kopt = FMIN(k,LGM_MAGSTEP_KMAX-1);
+    }
+
+    if ( Info->Lgm_MagStep_BS_prev_reject ) {
+        // After a rejected step neither order nor stepsize should increase.
+        Info->Lgm_MagStep_BS_k_targ = FMIN(kopt,k);
+        hnew   = FMIN(fabs(h),hopt[Info->Lgm_MagStep_BS_k_targ]);
+        Info->Lgm_MagStep_BS_prev_reject = FALSE;
+    } else {
+        // Stepsize control for next step.
+        if (kopt <= k) {
+            hnew=hopt[kopt];
+        } else {
+            if ( (k<Info->Lgm_MagStep_BS_k_targ) && (work[k]<KFAC2*work[k-1]) ){
+                hnew = hopt[k]*Info->Lgm_MagStep_BS_cost[kopt+1]/Info->Lgm_MagStep_BS_cost[k];
+            } else {
+                hnew = hopt[k]*Info->Lgm_MagStep_BS_cost[kopt]/Info->Lgm_MagStep_BS_cost[k];
+            }
+        }
+        Info->Lgm_MagStep_BS_k_targ = kopt;
+    }
+    *hnext = ( forward ) ? hnew : -hnew;
+
+
     *reset = FALSE;
-    Info->Lgm_MagStep_BS_FirstTimeThrough = FALSE;
-    workmin = 1e99;
-    for (kk=1; kk<=km; ++kk) {
-        fact = (err[kk] > LGM_MAGSTEP_SCLMAX) ? err[kk] : LGM_MAGSTEP_SCLMAX;
-
-        work = fact*Info->Lgm_MagStep_BS_A[kk+1];
-        if (work < workmin){
-            scale   = fact;
-            workmin = work;
-            Info->Lgm_MagStep_BS_kopt    = kk+1;
-        }
-
-    }
-
-    *Hnext = H/scale;
-    if ( (Info->Lgm_MagStep_BS_kopt >= k) && (Info->Lgm_MagStep_BS_kopt != Info->Lgm_MagStep_BS_kmax) && !reduction ) {
-        f = scale/Info->Lgm_MagStep_BS_alpha[Info->Lgm_MagStep_BS_kopt-1][Info->Lgm_MagStep_BS_kopt];
-        fact = (f > LGM_MAGSTEP_SCLMAX) ? f : LGM_MAGSTEP_SCLMAX;
-        if ( Info->Lgm_MagStep_BS_A[Info->Lgm_MagStep_BS_kopt+1]*fact <= workmin){
-            *Hnext = H/fact;
-            Info->Lgm_MagStep_BS_kopt++;
-        }
-    }
-
-
-
+    
     return(1);
 
 }
-
 
 
 /*
@@ -519,7 +588,7 @@ int Lgm_MagStep_RK5( Lgm_Vector *u, Lgm_Vector *u_scale,
           int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
     int         Done, Count, i;
-    double      h, htemp, ErrMax, yscal[3], yerr[3], ytemp[3], snew, Bmag;
+    double      h, ErrMax, htemp, yscal[3], yerr[3], snew, Bmag;
     Lgm_Vector  u0, v, b0;
 
 
@@ -657,7 +726,7 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
 
     //double  dc1 = c1-2825.0/27648.0, dc3 = c3-18575.0/48384.0, dc4 = c4-13525.0/55296.0, dc5 = -277.00/14336.0, dc6 = c6-0.25;
     double  dc1 = -0.00429377480158730159;
-    double  dc3 =  0.01866858609385783299;
+    double  dc3 =  0.01866858609385783299; // unused?????????
     double  dc4 = -0.03415502683080808080;
     double  dc5 = -0.01932198660714285714;
     double  dc6 =  0.03910220214568040654;
@@ -817,6 +886,8 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
     }
 
 
+
+    return(1);
 
 }
 

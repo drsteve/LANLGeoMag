@@ -185,7 +185,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
     Lgm_DateTime d;
     Lgm_CTrans   *c = Lgm_init_ctrans( 0 );
 
-    Lgm_LoadLeapSeconds( c );
+    //Lgm_LoadLeapSeconds( c );
 
     /* Get the input argument from argp_parse, which we
       know is a pointer to our arguments structure. */
@@ -631,8 +631,9 @@ int main( int argc, char *argv[] ){
     } else if ( !strcmp( ExtModel, "IGRF" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
     } else if ( !strcmp( ExtModel, "T89" ) ){
-        // default
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+    } else if ( !strcmp( ExtModel, "TS04" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else { //if ( !strcmp( ExtModel, "T89c" ) ){
         // default
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
@@ -983,6 +984,7 @@ int main( int argc, char *argv[] ){
                              * Compute L*s, Is, Bms, Footprints, etc...
                              * These quantities are stored in the MagEphemInfo Structure
                              */
+                            printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
                             printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
                             printf("\t--------------------------------------------------------------------------------------------------\n");
 //Lgm_Vector TMPTMP;
@@ -3319,7 +3321,7 @@ printf("U_ARR = %g %g %g\n", U_ARR[0], U_ARR[1], U_ARR[2]);
     Lgm_destroy_eop( e );
     Lgm_FreeMagEphemInfo( MagEphemInfo );
 
-//    LGM_ARRAY_1D_FREE( CmdLine );
+    LGM_ARRAY_1D_FREE( CmdLine );
     LGM_ARRAY_2D_FREE( H5_K );
     LGM_ARRAY_2D_FREE( H5_Bm );
     LGM_ARRAY_2D_FREE( H5_I );
@@ -3330,6 +3332,7 @@ printf("U_ARR = %g %g %g\n", U_ARR[0], U_ARR[1], U_ARR[2]);
     LGM_ARRAY_2D_FREE( H5_IsoTimes );
     LGM_ARRAY_1D_FREE( H5_Date );
     LGM_ARRAY_1D_FREE( H5_Doy );
+    LGM_ARRAY_1D_FREE( H5_InOut );
     LGM_ARRAY_1D_FREE( H5_UTC );
     LGM_ARRAY_1D_FREE( H5_JD );
     LGM_ARRAY_1D_FREE( H5_GpsTime );
