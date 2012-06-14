@@ -332,6 +332,7 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
      *  Ratio of required func calls (for the test I did) was about 1.6
      */
     static double   STEPFAC1=0.65, STEPFAC2=0.94, STEPFAC3=0.02, STEPFAC4=4.0, KFAC1=0.8, KFAC2=0.9;
+    //static int      Seq[] = { 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38 };
     static int      Seq[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 32, 48, 64, 128, 256 };
 
 

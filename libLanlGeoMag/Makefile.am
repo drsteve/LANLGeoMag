@@ -2,6 +2,7 @@ SUBDIRS = Lgm EopData
 
 #AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_EMIT_KEYS=3 -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
+#AM_CFLAGS   = -fopenmp -lgomp -ffast-math
 AM_CFLAGS   = -fopenmp -lgomp
 
 # Directory where Eop-related stuff will be installed
