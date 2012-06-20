@@ -1,0 +1,7 @@
+Build instructions for Linux are in INSTALL.
+
+This package also comes with Python wrappers. To install these it is highly
+recommended to install the ctypesgen package first.
+Then:
+$ cd Python
+$ python setup.py install [--user]

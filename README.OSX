@@ -5,4 +5,10 @@ Then at least on RBSP2 I have to specify a lib path in ./configure to make it wo
 
 
 
+This package also comes with Python wrappers. To install these it is highly
+recommended to install the ctypesgen package first.
+Then:
+$ cd Python
+$ python setup.py install [--user]
+
 
