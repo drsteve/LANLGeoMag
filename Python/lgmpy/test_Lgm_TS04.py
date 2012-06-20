@@ -3,11 +3,9 @@
 """
 Test suite for the Lgm_T89 file
 
-@author: Brian Larsen
+@author: Brian Larsen, Steve Morley
 @organization: LANL
 @contact: balarsen@lanl.gov
-
-@version: V1: 20-Dec-2010 (BAL)
 """
 
 import unittest
@@ -21,12 +19,7 @@ import Lgm_Vector
 
 class Lgm_TS04_TS04(unittest.TestCase):
     """
-    Tests related to Lgm_T89.T89 wrapper
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
-
-    @version: V1: 11-Jan-2011 (BAL)
+    Tests related to Lgm_TS04.TS04 wrapper
     """
     def setUp(self):
         super(Lgm_TS04_TS04, self).setUp()
@@ -56,12 +49,7 @@ class Lgm_TS04_TS04(unittest.TestCase):
 
 class Lgm_TS04Tests(unittest.TestCase):
     """
-    Tests related to Lgm_T89
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
-
-    @version: V1: 04-Jan-2011 (BAL)
+    Tests related to Lgm_TS04
     """
     def setUp(self):
         super(Lgm_TS04Tests, self).setUp()

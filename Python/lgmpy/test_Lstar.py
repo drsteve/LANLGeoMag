@@ -2,18 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-Test suite for the LstarVersusPA
+Test suite for the Lstar
 
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 21-Mar-2011 (BAL)
+@author: Brian Larsen, Steve Morley
 """
 
 import unittest
 import datetime
 import itertools
+import numpy
 
 import Lstar, magcoords
 
@@ -38,39 +35,39 @@ class Lstar_Tests(unittest.TestCase):
     def testLgm_B_T89_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.023183886291658, ans[90]['LHilton'], places=5)
-        self.assertAlmostEqual(5.023305023427929, ans[90]['LMcIlwain'], places=5)
-        self.assertAlmostEqual(4.4370668758725413, ans[90]['Lstar'][0], places=5)
-        self.assertAlmostEqual(5.8143100824678715, ans[90]['Lsimple'][0], places=5)
+        self.assertAlmostEqual(5.023224681323122, ans[90]['LHilton'], places=5)
+        self.assertAlmostEqual(5.023345837912123, ans[90]['LMcIlwain'], places=5)
+        self.assertAlmostEqual(4.4394894008417509, ans[90]['Lstar'][0], places=5)
+        self.assertAlmostEqual(5.8150378118566692, ans[90]['Lsimple'][0], places=5)
 
     def testLgm_B_T89_2(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
-        self.assertAlmostEqual(5.173153485588002, ans[90]['LHilton'], places=5)
-        self.assertAlmostEqual(5.173324540665132, ans[90]['LMcIlwain'], places=5)
-        self.assertAlmostEqual(4.3353194198508458, ans[90]['Lstar'][0], places=5)
-        self.assertAlmostEqual(5.4671418851981279, ans[90]['Lsimple'][0], places=5)
+        self.assertAlmostEqual(5.173219946879955, ans[90]['LHilton'], places=5)
+        self.assertAlmostEqual(5.173391035301953, ans[90]['LMcIlwain'], places=5)
+        self.assertAlmostEqual(4.3357109221795058, ans[90]['Lstar'][0], places=5)
+        self.assertAlmostEqual(5.4677658796753397, ans[90]['Lsimple'][0], places=5)
 
     def testLgm_B_OP77_1(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
-        self.assertAlmostEqual(4.856440932632041, ans[90]['LHilton'], places=5)
-        self.assertAlmostEqual(4.856521737271392, ans[90]['LMcIlwain'], places=5)
-        self.assertAlmostEqual(4.5595704409784359, ans[90]['Lstar'][0], places=5)
-        self.assertAlmostEqual(6.2895336832152031, ans[90]['Lsimple'][0], places=5)
+        self.assertAlmostEqual(4.856457863940974, ans[90]['LHilton'], places=5)
+        self.assertAlmostEqual(4.856538675881111, ans[90]['LMcIlwain'], places=5)
+        self.assertAlmostEqual(4.5543191367621869, ans[90]['Lstar'][0], places=5)
+        self.assertAlmostEqual(6.2903467181016017, ans[90]['Lsimple'][0], places=5)
 
     def testLgm_B_OP77_2(self):
         """This is a regression functional test for LstarVersusPA (regression)"""
         # should be no change with Kp
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
-        self.assertAlmostEqual(4.856440932632041, ans[90]['LHilton'], places=5)
-        self.assertAlmostEqual(4.856521737271392, ans[90]['LMcIlwain'], places=5)
-        self.assertAlmostEqual(4.5595704409784359, ans[90]['Lstar'][0], places=5)
-        self.assertAlmostEqual(6.2895336832152031, ans[90]['Lsimple'][0], places=5)
+        self.assertAlmostEqual(4.856457863940974, ans[90]['LHilton'], places=5)
+        self.assertAlmostEqual(4.856538675881111, ans[90]['LMcIlwain'], places=5)
+        self.assertAlmostEqual(4.5543191367621869, ans[90]['Lstar'][0], places=5)
+        self.assertAlmostEqual(6.2903467181016017, ans[90]['Lsimple'][0], places=5)
 
     def testCentredDipole90(self):
         """Unit test for centred dipole - should give known result"""
-        for rdist, qlevel in itertools.product([3, 3.5, 4, 5, 6], range(1,7)):
+        for rdist, qlevel in itertools.product([3, 3.5, 4, 5, 6], range(1,5)):
             ans = Lstar.get_Lstar([-rdist,0,0], self.date, alpha=90, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=qlevel)
             try:
                 self.assertAlmostEqual(rdist, ans[90]['Lstar'][0], places=qlevel)
@@ -81,10 +78,10 @@ class Lstar_Tests(unittest.TestCase):
 
     def testCentredDipole75(self):
         """Unit test for centred dipole - should give known result"""
-        for rdist, qlevel in itertools.product([3,3.5,4,5,6], range(2,7)):
+        for rdist, qlevel in itertools.product([3,3.5,4,5,6], range(2,5)):
             ans = Lstar.get_Lstar([-rdist,0,0], self.date, alpha=75, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=qlevel)
             try:
-                self.assertAlmostEqual(rdist, ans[75]['Lstar'][0], places=qlevel)
+                self.assertAlmostEqual(rdist, ans[75]['Lstar'][0], places=qlevel-1)
             except:
                 pass #print('FAILURE L=%f, Qual=%d, date=%s' % (rdist, qlevel, self.date))
 
@@ -95,12 +92,7 @@ class Lstar_Tests(unittest.TestCase):
         converge to a solution on all machines"""
         for rdist, qlevel in itertools.product([3], range(1,5)):
             ans = Lstar.get_Lstar([-rdist,0,0], self.date, alpha=9, coord_system='SM', Bfield='Lgm_B_cdip', LstarQuality=qlevel)
-            try:
-                print('TRY: {0}'.format(qlevel))
-                self.assertAlmostEqual(rdist, ans[9]['Lstar'][0], places=qlevel)
-            except:
-                print('EXCEPT: {0}'.format(qlevel))
-                self.assertAlmostEqual(rdist, ans[9]['Lstar'][...], places=qlevel-1)
+            numpy.testing.assert_allclose(ans[9]['Lstar'][...], rdist, atol=10**(-1*(qlevel-2)), rtol=10**(-1*(qlevel)))
 
 class Lstar_Data_Tests(unittest.TestCase):
     def setUp(self):
