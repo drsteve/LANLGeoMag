@@ -273,10 +273,10 @@ int LgmSgp_ReadTlesFromStrings( char *Line0, char *Line1, char *Line2, int *nTLE
         TLEValid = FALSE;
     }
     if ( CheckSumRead1 != CheckSumComp1 ) {
-        if (Verbosity > 0) printf("LgmSgp_ReadTwoLineElements: Checksum Error in Two Line Element.\n");
-        if (Verbosity > 0) printf("    TLE Line#1 doesn't\n");
-        if (Verbosity > 0) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead1, CheckSumComp1);
-        if (Verbosity > 0) printf("    Line1=\"%s\"\n\n", Line1);
+        if (Verbosity > 1) printf("LgmSgp_ReadTwoLineElements: Checksum Error in Two Line Element.\n");
+        if (Verbosity > 1) printf("    TLE Line#1 doesn't\n");
+        if (Verbosity > 1) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead1, CheckSumComp1);
+        if (Verbosity > 1) printf("    Line1=\"%s\"\n\n", Line1);
 //        TLEValid = FALSE;
     }
     if ( Line2[0] != '2' ) {
@@ -287,10 +287,10 @@ int LgmSgp_ReadTlesFromStrings( char *Line0, char *Line1, char *Line2, int *nTLE
         TLEValid = FALSE;
     }
     if ( CheckSumRead2 != CheckSumComp2 ) {
-        if (Verbosity > 0) printf("LgmSgp_ReadTwoLineElements: Checksum Error in Two Line Element.\n");
-        if (Verbosity > 0) printf("    TLE Line#2 doesn't\n");
-        if (Verbosity > 0) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead2, CheckSumComp2);
-        if (Verbosity > 0) printf("    Line2=\"%s\"\n\n", Line2);
+        if (Verbosity > 1) printf("LgmSgp_ReadTwoLineElements: Checksum Error in Two Line Element.\n");
+        if (Verbosity > 1) printf("    TLE Line#2 doesn't\n");
+        if (Verbosity > 1) printf("    have the correct Checksum. Read: %d, Computed: %d.\n", CheckSumRead2, CheckSumComp2);
+        if (Verbosity > 1) printf("    Line2=\"%s\"\n\n", Line2);
 //        TLEValid = FALSE;
     }
 
