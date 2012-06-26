@@ -14,7 +14,7 @@ EOPDATA_DATA = GetEopFiles LgmEop.dat eopc04.62-now finals.daily \
 ENABLE_EOP_CRON = @ENABLE_EOP_CRON@
 DAILY_CRON_DIR  = @DAILY_CRON_DIR@
 install-data-hook:
-	chmod +x $(EOPDATAdir)/GetEopFiles;
+	chmod +x $(DESTDIR)$(EOPDATAdir)/GetEopFiles;
 #	$(EOPDATAdir)/GetEopFiles 
 	if [ $(ENABLE_EOP_CRON) -eq 1 ]; then \
 	ln -sf $(EOPDATAdir)/GetEopFiles $(DAILY_CRON_DIR)/GetEopFiles;\
