@@ -470,7 +470,6 @@ mlatbest = mlat_min;
         while ( !done ) {
 
 
-
             /*
              *  Find a new point to evaluate.
              *
@@ -568,20 +567,26 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but |I-I0| = %g\n", fabs(a-b), De );
                 }
-            //} else if ( (De < 0.0) && (De > Da)  ) {
-            } else if ( De < 0.0 ) {
-                /*
-                 * We found a better value for the lower end of the bracket.
-                 */
-                a  = e;
-                Da = De;
             } else if ( De > 0.0 ) {
-            //} else if ( (De > 0.0) && (De < Db)  ) {
-                /*
-                 * We found a better value for the lower end of the bracket.
-                 */
-                b  = e;
-                Db = De;
+                if ( Da > 0.0 ) {
+                    // We found a better value for the lower end of the bracket.
+                    a  = e;
+                    Da = De;
+                } else {
+                    // We found a better value for the upper end of the bracket.
+                    b  = e;
+                    Db = De;
+                }
+            } else if ( De < 0.0 ) {
+                if ( Da < 0.0 ) {
+                    // We found a better value for the lower end of the bracket.
+                    a  = e;
+                    Da = De;
+                } else {
+                    // We found a better value for the upper end of the bracket.
+                    b  = e;
+                    Db = De;
+                }
             } else {
                 // WE SHOULD NEVER GET HERE
                 /*
