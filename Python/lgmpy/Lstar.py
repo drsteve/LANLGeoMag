@@ -396,8 +396,11 @@ def get_Lstar(pos, date, alpha = 90.,
         sa2 = sa*sa
 
         # print("{0}Computing L* for Pitch Angle: Alpha[{1}] = {2} Date: {3}   UTC: {4}   Lsimple = {5:4.3}{6}\n").format(PreStr, i, MagEphemInfo.Alpha[i], date, utc, Lsimple, PostStr )
-
-        MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm = MagEphemInfo.B/sa2
+        
+        if sa2!=0: #non-zero pitch angle
+            MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm = MagEphemInfo.B/sa2
+        else:
+            continue
         ans[pa]['Bmirror'] = datamodel.dmarray(MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm, attrs={'units':'nT'})
         ans[pa]['Bmirror'].attrs['coord_system'] = 'GSM'
         # ***********************************************
