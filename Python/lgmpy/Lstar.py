@@ -382,7 +382,6 @@ def get_Lstar(pos, date, alpha = 90.,
     ans[pa]['Pmin'] = datamodel.dmarray(minB, attrs={'units':'R_E'})
     ans[pa]['Pmin'].attrs['coord_system'] = 'GSM'
     ans[pa]['Bmin'] = datamodel.dmarray(MagEphemInfo.Bmin, attrs={'units':'nT'})
-
     # LOOP OVER PITCH ANGLES
     for i, pa in enumerate(Alpha):
 
@@ -402,7 +401,7 @@ def get_Lstar(pos, date, alpha = 90.,
         ans[pa]['Bmirror'] = datamodel.dmarray(MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm, attrs={'units':'nT'})
         ans[pa]['Bmirror'].attrs['coord_system'] = 'GSM'
         # ***********************************************
-
+        
         # I tink this is already done
         # Lgm_Set_Coord_Transforms( Date, UTC, MagEphemInfo.LstarInfo.contents.mInfo.contents.c )
 
@@ -440,56 +439,56 @@ def get_Lstar(pos, date, alpha = 90.,
             if extended_out:
                 ans[pa]['ShellI'] = \
                     datamodel.dmarray(numpy.ctypeslib.ndarray([len(lstarinf.I)],
-                                            dtype=c_double, buffer=lstarinf.I) )
+                                            dtype=c_double, buffer=lstarinf.I) ).copy()
                 ans[pa]['ShellEllipsoidFootprint_Pn'] = \
                     numpy.ctypeslib.ndarray(len(lstarinf.Ellipsoid_Footprint_Pn),
                                             dtype=c_double,
-                                            buffer=lstarinf.Ellipsoid_Footprint_Pn)
+                                            buffer=lstarinf.Ellipsoid_Footprint_Pn).copy()
                 ans[pa]['ShellEllipsoidFootprint_Ps'] = \
                     numpy.ctypeslib.ndarray(len(lstarinf.Ellipsoid_Footprint_Ps),
                                             dtype=c_double,
-                                            buffer=lstarinf.Ellipsoid_Footprint_Ps)
+                                            buffer=lstarinf.Ellipsoid_Footprint_Ps).copy()
 
                 ans[pa]['ShellMirror_Pn'] = \
                     numpy.ctypeslib.ndarray(len(lstarinf.Mirror_Pn),
                                             dtype=c_double,
-                                            buffer=lstarinf.Mirror_Pn)
+                                            buffer=lstarinf.Mirror_Pn).copy()
                 ans[pa]['ShellMirror_Ps'] = \
                     numpy.ctypeslib.ndarray(len(lstarinf.Mirror_Ps),
                                             dtype=c_double,
-                                            buffer=lstarinf.Mirror_Ps)
+                                            buffer=lstarinf.Mirror_Ps).copy()
                 ans[pa]['ShellMirror_Ss'] = lstarinf.mInfo.contents.Sm_South
                 ans[pa]['ShellMirror_Sn'] = lstarinf.mInfo.contents.Sm_North
                 ans[pa]['nFieldPnts'] = \
                     numpy.ctypeslib.ndarray(len(lstarinf.nFieldPnts),
                                             dtype=c_int,
-                                            buffer=lstarinf.nFieldPnts)
+                                            buffer=lstarinf.nFieldPnts).copy()
 
                 ans[pa]['s_gsm'] = \
                     numpy.ctypeslib.ndarray([len(lstarinf.s_gsm),
                                              len(lstarinf.s_gsm[0])],
                                             dtype=c_double,
-                                            buffer=lstarinf.s_gsm)
+                                            buffer=lstarinf.s_gsm).copy()
                 ans[pa]['Bmag'] = \
                     numpy.ctypeslib.ndarray([len(lstarinf.Bmag),
                                              len(lstarinf.Bmag[0])],
                                             dtype=c_double,
-                                            buffer=lstarinf.Bmag)
+                                            buffer=lstarinf.Bmag).copy()
                 ans[pa]['x_gsm'] = \
                     numpy.ctypeslib.ndarray([len(lstarinf.x_gsm),
                                              len(lstarinf.x_gsm[0])],
                                             dtype=c_double,
-                                            buffer=lstarinf.x_gsm)
+                                            buffer=lstarinf.x_gsm).copy()
                 ans[pa]['y_gsm'] = \
                     numpy.ctypeslib.ndarray([len(lstarinf.y_gsm),
                                              len(lstarinf.y_gsm[0])],
                                             dtype=c_double,
-                                            buffer=lstarinf.y_gsm)
+                                            buffer=lstarinf.y_gsm).copy()
                 ans[pa]['z_gsm'] = \
                     numpy.ctypeslib.ndarray([len(lstarinf.z_gsm),
                                              len(lstarinf.z_gsm[0])],
                                             dtype=c_double,
-                                            buffer=lstarinf.z_gsm)
+                                            buffer=lstarinf.z_gsm).copy()
                 delT = datetime.datetime.now() - tnow
                 ans[pa].attrs['Calc_Time'] = delT.seconds + delT.microseconds/1e6
 
