@@ -238,10 +238,17 @@ def getDipoleTilt(date):
     =======
     out : array or float
         array of dipole tile angles
+
+    Examples
+    ========
+    from lgmpy import Lgm_CTrans
+    import datetime
+    Lgm_CTrans.getDipoleTilt(datetime.datetime(2000, 1, 1))
+    # -0.45114989442541137
     """
     if hasattr(date, 'year'):
         date = [date]
-    ans = numpy.zeros(len(date), dtype=float)
+    ans = numpy.empty(len(date), dtype=float)
     for i, d in enumerate(date):
         trans = Lgm_CTrans()
         datelong = dateToDateLong(d)
