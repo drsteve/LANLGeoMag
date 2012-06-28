@@ -224,3 +224,31 @@ def GSMtoMLT(gsm, dt):
         ans = dm.dmarray(doConv(gsm_, dt_), attrs={'coord_system': 'EDMAG'})
     return ans
 
+
+def getDipoleTilt(date):
+    """
+    returns the dipole tile angle in radians
+
+    Parameters
+    ==========
+    date : datetime or iterable of datetime
+        the date for the computation
+
+    Returns
+    =======
+    out : array or float
+        array of dipole tile angles
+    """
+    if hasattr(date, 'year'):
+        date = [date]
+    ans = numpy.zeros(len(date), dtype=float)
+    for i, d in enumerate(date):
+        trans = Lgm_CTrans()
+        datelong = dateToDateLong(d)
+        utc = dateToFPHours(d)
+        Lgm_Set_Coord_Transforms( datelong, utc, pointer(trans))
+        ans[i] = trans.psi
+    if len(ans) == 1:
+        return ans[0]
+    else:
+        return ans

@@ -151,6 +151,17 @@ class Lgm_CTransTests(unittest.TestCase):
         mlt = Lgm_CTrans.GSMtoMLT([0], datetime.datetime(2000, 1, 1))
         self.assertAlmostEqual(mlt, 20.80272832231037)
 
+    def test_getDipoleTilt(self):
+        """getDipoleTilt should give known results"""
+        dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2000, 1, 1))
+        self.assertAlmostEqual(dt, -0.45114989442541137)
+        dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2010, 1, 1))
+        self.assertAlmostEqual(dt, -0.44636634840305872)
+        dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2010, 6, 1))
+        self.assertAlmostEqual(dt, 0.32433439111559559)
+        dt = Lgm_CTrans.getDipoleTilt([datetime.datetime(2010, 6, 1)]*2)
+        numpy.testing.assert_allclose(dt, [0.32433439111559559, 0.32433439111559559])
+
 
 if __name__ == '__main__':
     unittest.main()
