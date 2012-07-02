@@ -1141,7 +1141,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 
     double      a, b, r;
     double      epsabs, epsrel, result, abserr;
-    int         key, neval, ier, limit, lenw, last, iwork[501];
+    int         key, neval, ier, limit, lenw, last, iwork[502];
     double      work[2002];
     _qpInfo     *qpInfo;
 
