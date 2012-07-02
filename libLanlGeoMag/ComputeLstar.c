@@ -856,10 +856,6 @@ if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
         if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-11, LstarInfo->mInfo ) ){ return(-4); }
         LstarInfo->Spherical_Footprint_Pn[k] = w;
 
-
-
-
-
         /*
          *  convert footpoint back to SM
          */
@@ -868,8 +864,6 @@ if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
         LstarInfo->MLT[k]  = Phi*DegPerRad/15.0 + 12.0;
         LstarInfo->mlat[k] = asin( v.z/Lgm_Magnitude(&v) )*DegPerRad;
         if (LstarInfo->VerbosityLevel > 2)  printf(" \t\t\t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout);
-
-
 
 
         /*
@@ -1063,12 +1057,6 @@ FIX
     LstarInfo->pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->nSplnPnts );
     //printf ("spline uses '%s' interpolation.\n", gsl_interp_name( LstarInfo->pspline ));
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
-
-
-
-
-
-
 
 
 /*

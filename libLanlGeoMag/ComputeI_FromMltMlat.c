@@ -96,6 +96,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 sgn = 1.0;
             } else {
                 // we are probably very close to Pmin. So I=0.
+                LstarInfo->mInfo->Pm_North = Pmirror1;
+                LstarInfo->mInfo->Pm_South = Pmirror1;
                 return( 0.0 );
             }
 
