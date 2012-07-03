@@ -257,6 +257,8 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                     m->Bfield = Lgm_B_cdip;
                                 } else if ( InternalModel == LGM_EDIP ) {
                                     m->Bfield = Lgm_B_edip;
+                                } else if ( InternalModel == LGM_DUNGEY ) {
+                                    m->Bfield = Lgm_B_Dungey;
                                 } else {
                                     m->Bfield = Lgm_B_igrf;
                                 }
@@ -365,6 +367,11 @@ void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo) {
 
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_OP77;
+}
+
+void Lgm_Set_Lgm_B_Dungey(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->InternalModel = LGM_DUNGEY;
+    MagInfo->Bfield = Lgm_B_Dungey;
 }
 
 void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo) {

@@ -72,6 +72,7 @@
 #define LGM_CDIP        0
 #define LGM_EDIP        1
 #define LGM_IGRF        2
+#define LGM_DUNGEY      3
 
 #define LGM_MAX_INTERP_PNTS 10000
 
@@ -697,6 +698,7 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
 void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_Dungey(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);
