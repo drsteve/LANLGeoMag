@@ -101,6 +101,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             } else {
                 // we are probably very close to Pmin. So I=0.
 //printf("DFSsssssssssssssssssssssssS\n");
+                LstarInfo->mInfo->Pm_North = Pmirror1;
+                LstarInfo->mInfo->Pm_South = Pmirror1;
                 return( 0.0 );
             }
 

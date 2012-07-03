@@ -948,10 +948,6 @@ mlat0 =0.0;
         if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-11, LstarInfo->mInfo ) ){ return(-4); }
         LstarInfo->Spherical_Footprint_Pn[k] = w;
 
-
-
-
-
         /*
          *  convert footpoint back to SM
          */
@@ -960,8 +956,6 @@ mlat0 =0.0;
         LstarInfo->MLT[k]  = Phi*DegPerRad/15.0 + 12.0;
         LstarInfo->mlat[k] = asin( v.z/Lgm_Magnitude(&v) )*DegPerRad;
         if (LstarInfo->VerbosityLevel > 2)  printf(" \t\t\t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout);
-
-
 
 
         /*
@@ -1173,17 +1167,6 @@ FIX
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
 
 
-for (i=0; i<LstarInfo->pspline->size; ++i){ 
-printf("SPLNE OBJECT: %g %g\n", LstarInfo->pspline->x[i], LstarInfo->pspline->y[i]);
-}
-
-
-
-
-
-
-
-
 /*
 For debugging...
 */
@@ -1262,7 +1245,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 
     double      a, b, r;
     double      epsabs, epsrel, result, abserr;
-    int         key, neval, ier, limit, lenw, last, iwork[501];
+    int         key, neval, ier, limit, lenw, last, iwork[502];
     double      work[2002];
     _qpInfo     *qpInfo;
 
@@ -1366,7 +1349,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
 
     double      a, b;
     double      epsabs, epsrel, result, abserr;
-    int         key, neval, ier, limit, lenw, last, iwork[501];
+    int         key, neval, ier, limit, lenw, last, iwork[502];
     double      work[2002], MLT, mlat;
     _qpInfo     *qpInfo;
 
@@ -1394,8 +1377,6 @@ printf("mlat = %g\n", mlat);
      */
     a = mlat;
     b = M_PI/2.0;
-
-
 
 
     /*
@@ -1445,7 +1426,7 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
 
     double      a, b, r;
     double      epsabs, epsrel, result, abserr;
-    int         key, neval, ier, limit, lenw, last, iwork[501];
+    int         key, neval, ier, limit, lenw, last, iwork[502];
     double      work[2002];
     _qpInfo     *qpInfo;
 
