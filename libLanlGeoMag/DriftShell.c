@@ -22,6 +22,7 @@ void elt_qsort( struct FitVals *arr, unsigned n ) {
 }
 
 
+int FitLineAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero2( double *x, double *y, double *dy, int n, int nmax, double *res );
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo );
@@ -106,7 +107,9 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      */
     Bracket.Dmin = 9e99;
     Flag = BracketZero( I0, Ifound, Bm, MLT, mlat, rad, mlat0, mlat1, mlat2, &Bracket, LstarInfo );
-    if ( Flag < 0 )  return( -5 );   // An evaluation in BracketZero() hit on a value
+    if ( Flag < 0 )  {
+        return( -11 );   // An evaluation in BracketZero() hit on a value
+    }
                                      //  of I that was undefined -- bail.
     if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value
                                      // of I that is within tolerance -- we're done.
@@ -772,6 +775,65 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 }
 
+int FitLineAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
+
+    int     i, Flag;
+    double  chisq, root, A, B, C, D;
+
+    gsl_multifit_linear_workspace   *work;
+    gsl_matrix                      *X, *cov;
+    gsl_vector                      *v, *w, *c, *xx;
+
+
+    X   = gsl_matrix_alloc( n, 2 );
+    v   = gsl_vector_alloc( n );
+    w   = gsl_vector_alloc( n );
+    c   = gsl_vector_alloc(2);
+    cov = gsl_matrix_alloc(2, 2);
+    xx  = gsl_vector_alloc(2);
+
+    for ( i=0; i<n; i++ ) {
+
+        gsl_matrix_set( X, i, 0, 1.0 );
+        gsl_matrix_set( X, i, 1, x[i] );
+
+        gsl_vector_set( v, i, y[i] );
+        gsl_vector_set( w, i, 1.0/(dy[i]*dy[i]) );
+
+    }
+
+
+    work = gsl_multifit_linear_alloc( n, 2 );
+    gsl_multifit_wlinear( X, w, v, c, cov, &chisq, work );
+    gsl_multifit_linear_free( work );
+
+    // y = b*x + c
+    C = gsl_vector_get( c, 0 );
+    B = gsl_vector_get( c, 1 );
+
+
+
+    Flag = 0;
+    if ( fabs(B) > 0.0 ) {
+        *res = -C/B;
+        Flag = 1;
+    } else {
+        *res = -1e31;
+    }
+
+
+    gsl_matrix_free( X );
+    gsl_vector_free( xx );
+    gsl_vector_free( v );
+    gsl_vector_free( w );
+    gsl_vector_free( c );
+    gsl_matrix_free( cov );
+
+
+    return( Flag );
+
+
+}
 
 
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
@@ -816,6 +878,7 @@ int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
     D = B*B - 4.0*A*C;
     if ( D >= 0.0 ) {
         *res  = (-B + sqrt( D ))/(2.0*A);
+//printf("A, B, C = %g %g %g   res = %g\n", A, B, C, *res);
 //        gsl_vector_set( xx, 0, 1.0 );
 //        gsl_vector_set( xx, 1, root );
 //        gsl_vector_set( xx, 2, root*root );

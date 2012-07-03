@@ -280,7 +280,10 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
 
         // Set Htry adaptively. But make sure we wont descend below the Earth's surface.
+        // WARNING: This will be bad for Shabansky type situations where we have a double minimum....
+        // Perhaps whether to adaptively do this should be controlable. If we have trouble, we can restrict the stepsize...
         Htry = Hnext;
+if (Htry > 0.1) Htry = 0.1;
 double Rvalidmin = 1.0 + MinValidHeight/Re;
         //if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
         if (Htry > (R-Rvalidmin)) Htry = 0.95*(R-Rvalidmin);
@@ -294,7 +297,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
             printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
             printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
             printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
-            printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
+            printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g Htry = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height, Htry );
         }
 
         //if ( Height < 0.0 ) {
@@ -313,7 +316,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
     }
 
 
-//printf("Fa, Fb = %g %g\n", Fa, Fb);
+//printf("TRACE: Fa, Fb = %g %g\n", Fa, Fb);
 
     /*
      * We have found a potential bracket, but lets just be sure.

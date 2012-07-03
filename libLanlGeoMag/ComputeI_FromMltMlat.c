@@ -65,11 +65,14 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         //u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
         u_scale.x =  1.0;  u_scale.y = 1.0; u_scale.z = 1.0;
         P = Pmirror1;
+        //printf("P = %g %g %g\n", P.x, P.y, P.z);
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Bs = Lgm_Magnitude( &Bvec );
+        //printf("Ps = %g %g %g\n", P.x, P.y, P.z);
 //printf("Bs-Bm = %g\n", Bs-Bm);
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
+//printf("Hdid = %g\n", Hdid);
 
         LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
         Be  = Lgm_Magnitude( &Bvec );
@@ -87,6 +90,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             Bs = Lgm_Magnitude( &Bvec );
 
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, LstarInfo->mInfo->Bfield, LstarInfo->mInfo ) < 0 ) return( -1.0 );
+//printf("Hdid = %g\n", Hdid);
 
             LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
             Be  = Lgm_Magnitude( &Bvec );
@@ -96,6 +100,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 sgn = 1.0;
             } else {
                 // we are probably very close to Pmin. So I=0.
+//printf("DFSsssssssssssssssssssssssS\n");
                 return( 0.0 );
             }
 
