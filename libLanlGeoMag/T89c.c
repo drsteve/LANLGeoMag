@@ -144,7 +144,7 @@ void T89c( int IOPT, double *PARMOD, double PS, double X, double Y, double Z, do
     XI[3] = Z;
     XI[4] = Info->c->psi;
 
-    T89c_Feild( 1, A, XI, F, Info );
+    T89c_Field( 1, A, XI, F, Info );
 
     *BX = F[1];
     *BY = F[2];
@@ -157,7 +157,7 @@ void T89c( int IOPT, double *PARMOD, double PS, double X, double Y, double Z, do
 
 
 
-void T89c_Feild( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info ) {
+void T89c_Field( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info ) {
 
     /*
      *-------------------------------------------------------------------

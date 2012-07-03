@@ -13,6 +13,97 @@
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
 
+int ClassifyFL( Lgm_MagModelInfo *m, int Verbosity ) {
+
+    int     i, iMin, Type, iMax, done;
+    double  Min, Max, Curr, Prev;
+
+    double  Diff, OldDiff, Minima[10], Maxima[10];
+    int     nMinima, iMinima[10];
+    int     nMaxima, iMaxima[10];
+
+    Type = 0;
+
+    Max  = -1e31;
+    iMax = -1;
+    
+    /*
+     *   Find Global minimum
+     */
+    Min = 9e99;
+    for (i=0; i<m->nPnts; i++){
+        if ( m->Bmag[i] < Min ) {
+            Min = m->Bmag[i];
+            iMin = i;
+        }
+    }
+
+
+    /*
+     *   Find number of minimums and maximums
+     */
+    nMinima = 0;
+    nMaxima = 0;
+    Diff = -1e31;
+    for ( i=1; i<m->nPnts; i++ ){
+        
+        OldDiff = Diff;
+        Diff    = m->Bmag[i] - m->Bmag[i-1];
+
+        if ( (Diff > 0.0) && (OldDiff < 0.0) ) {
+            iMinima[nMinima] = i-1;
+            Minima[nMinima] = m->Bmag[i-1];
+            ++nMinima;
+        }
+
+        if ( (Diff < 0.0) && (OldDiff > 0.0) ) {
+            iMaxima[nMaxima] = i-1;
+            Maxima[nMaxima] = m->Bmag[i-1];
+            ++nMaxima;
+        }
+
+    }
+    if ( Verbosity > 1 ) {
+
+        if ( nMinima > 1 ) {
+            printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            if ( Verbosity > 2 ) {
+                for ( i=0; i<nMinima; i++ ){
+                    printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
+                }
+            }
+
+        }
+
+        if ( nMaxima > 1 ) {
+            printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            if ( Verbosity > 2 ) {
+                for ( i=0; i<nMaxima; i++ ){
+                    printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
+                }
+            }
+        }
+
+    }
+    
+    Type = nMaxima;
+    
+    return( Type );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * There are many tolerances involved in an Lstar calculation.  Here we try and
@@ -338,7 +429,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     int		done2, Count, FoundShellLine, nIts;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
-    double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, pred_delta_mlat=0.0, mlat0, mlat1, delta;
+    double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[500], MirrorMlat_Old[500], PredMinusActualMlat, res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
@@ -623,6 +714,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         }
 
 
+
         /*
          * Loop until we are done. We will be done when we have either;
          *
@@ -639,12 +731,20 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    while ( !done2 && (k > 0) ) {
 
 
+//FILE *fppp;
+//fppp = fopen("FL.txt", "a");
+//for(i=0; i<LstarInfo->mInfo->nPnts; i++){
+//    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+//}
+//fclose(fppp);
 	        if ( Count == 0 ) {
 
                 /*
                  *  First time through -- lets use the predicted range.
                  */
                 //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
+                if (delta > 20.0) delta = 20.0;
+                mlat_try = pred_mlat;
                 mlat0 = ((pred_mlat-delta) <  -10.0) ?  -10.0 : (pred_mlat-delta);
                 mlat1 = ((pred_mlat+delta) > 90.0) ? 90.0 : (pred_mlat+delta);
 
@@ -656,41 +756,31 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  */
                 delta *= 2;
                 if (delta < 1.0) delta = 1.0;
+                mlat_try = pred_mlat;
                 mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
                 mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
-
-
-/*
-for (i=0; i<LstarInfo->nImI0; i++) {
-    printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i] );
-    LstarInfo->Earr[i] = 1.0;
-}
-if ( LstarInfo->nImI0>2 ){
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-    printf( "res = %g\n", res );
-}
-*/
-
-
-if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
-    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
-    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
-    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
-        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
-    }                                                                                                                                                                                                
-    if ( fabs(res) < 90.0 ){
-        mlat0 = res-1.0;
-        mlat1 = res+1.0;
-    }
-}                  
+mlat0 =0.0;
 
 
 
-
-
-
-
+//printf("LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
+//for (i=0; i<LstarInfo->nImI0; i++){
+//printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i]);
+//}
+                if ( LstarInfo->nImI0 > 2 ) {
+                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                    //FitLineAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                    }
+                    if ( fabs(res) < 90.0 ){
+                        mlat_try = res;
+                        mlat0 = res-1.0;
+                        mlat1 = res+1.0;
+                    }
+                }
 
 
             } else if ( Count == 2 ) {
@@ -707,20 +797,25 @@ if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
                     mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
                     mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
                 }
+                mlat_try = pred_mlat;
 
-if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
-    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
-    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
-    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
-        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
-    }                                                                                                                                                                                                
-    if ( fabs(res) < 90.0 ){
-        mlat0 = res-5.0;
-        mlat1 = res+5.0;
-    }
-}                  
-
+//printf("?? LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
+//for (i=0; i<LstarInfo->nImI0; i++){
+//printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i]);
+//}
+                if ( LstarInfo->nImI0 > 3 ) {
+                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                    if (LstarInfo->VerbosityLevel > 1){ 
+                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res ); 
+                    }
+                    if ( fabs(res) < 90.0 ){
+                        mlat_try = res;
+                        mlat0 = res-5.0;
+                        mlat1 = res+5.0;
+                    }
+                }
 
     	    } else {
 
@@ -729,24 +824,29 @@ if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
                  * To make sure, lets try 0->90 deg.
                  */
                 //mlat0 = 0.0;
+                mlat_try = pred_mlat;
                 mlat0 = -30.0;
 //mlat0 = 0.0;
                 mlat1 = 90.0;
 //mlat1 = 45.0;
 //mlat1 = 23.855537644144878;
 
-if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){                                                                                                                                          
-    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;                                                                                                                                     
-    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );                                                                                     
-    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );                                                                                           
-    if (LstarInfo->VerbosityLevel > 1){                                                                                                                                                              
-        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );                                                                                                                   
-    }                                                                                                                                                                                                
-    if ( fabs(res) < 90.0 ){
-        mlat0 = res-45.0;
-        mlat1 = res+45.0;
-    }
-}                  
+
+
+//printf("?? LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
+                if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
+                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                    }
+                    if ( fabs(res) < 90.0 ){
+                        mlat_try = res;
+                        mlat0 = res-45.0;
+                        mlat1 = res+45.0;
+                    }
+                }
 
 
             }
@@ -757,13 +857,19 @@ if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
                 printf("\t\t%s             Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d          %s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n", PreStr, PostStr );
             }
-            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, &nIts, LstarInfo );
+            //FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, &nIts, LstarInfo );
+            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+//if (FoundShellLine == -11){ printf("OPEN?????????????????\n"); }
             PredMinusActualMlat = pred_mlat - mlat;
             if (LstarInfo->VerbosityLevel > 1) {
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
                 printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, Ifound, Ifound-I, PostStr );
                 printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
             }
+
+
+
+
 
 
 
@@ -937,6 +1043,14 @@ M = ELECTRON_MASS; // kg
 
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
+//FILE *fppp;
+//fppp = fopen("FL.txt","a");
+//for (i=0; i<LstarInfo->mInfo->nPnts; i++){
+//fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+//}
+//fclose(fppp);
+
+int Type = ClassifyFL( LstarInfo->mInfo,  LstarInfo->VerbosityLevel );
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
             for (tkk=0, nfp=nnn-1; nfp>=0; nfp--){
@@ -1054,21 +1168,12 @@ FIX
      */
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     LstarInfo->acc = gsl_interp_accel_alloc( );
+//    LstarInfo->pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->nSplnPnts );
     LstarInfo->pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->nSplnPnts );
+//    LstarInfo->pspline = gsl_interp_alloc( gsl_interp_linear, LstarInfo->nSplnPnts );
     //printf ("spline uses '%s' interpolation.\n", gsl_interp_name( LstarInfo->pspline ));
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
 
-
-/*
-For debugging...
-    fp = fopen("ShellFootTrace.dat", "w");
-    for (MLT=-24.0; MLT<=48.0; MLT += 0.01){
-	    //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
-	    mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
-	    fprintf(fp, "%g %g\n", MLT, mlat);
-    }
-    fclose(fp);
-*/
 
 
     Phi1 = MagFlux( LstarInfo );
@@ -1207,7 +1312,7 @@ double LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) {
     LstarInfo = (Lgm_LstarInfo *)qpInfo;
 
     MLT = LstarInfo->Phi*DegPerRad/15.0;
-phi = 15.0*(MLT-12.0)*RadPerDeg;
+    phi = 15.0*(MLT-12.0)*RadPerDeg;
     cl = cos( Lambda ); sl = sin( Lambda );
     u.x = cl*cos( phi );
     u.y = cl*sin( phi );

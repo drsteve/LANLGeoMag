@@ -579,7 +579,7 @@ int Lgm_B_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
  *  Function Prototypes for T89c model
  */
 void T89c( int IOPT, double *PARMOD, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, Lgm_MagModelInfo *Info );
-void T89c_Feild( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info );
+void T89c_Field( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info );
 int Lgm_B_T89c( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
