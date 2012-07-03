@@ -166,9 +166,11 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     FILE        *fp;
     double      Time, MJD, Prev_MJD, Next_MJD, Prev_UT, Next_UT;
     long int    n, Prev_Date, Next_Date;
-    int         Year, Month, Day, Doy;
+    int         Year, Month, Day, Doy, j, done;
     int         Prev_Year, Prev_Month, Prev_Day, Next_Year, Next_Month, Next_Day;
+    int         success1, success2, success3;
     char        *Line, *Filename;
+    static char *ftype[] = {"1min", "1hr" };
     Lgm_CTrans  *c = Lgm_init_ctrans(0);
 
     Lgm_Doy( Date, &Year, &Month, &Day, &Doy);
@@ -190,83 +192,126 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 
 
-    // Read in Previous Date
-    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Prev_Year, Prev_Date );
-    if ( (fp = fopen( Filename, "r" )) != NULL ) {
-        while( fgets( Line, 2048, fp ) != NULL ) {
-            if ( Line[0] != '#' ) {
-                sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                            q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                            &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                            &q->G1[n], &q->G2[n], &q->G3[n],
-                            &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                            &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                            &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                            &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                ++n;
+    // Read in Previous Date -- Try 1min first, 1hr next...
+    j = 0; done = FALSE; success1 = FALSE;
+    while ( !done ){
+
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Prev_Year, Prev_Date, ftype[j] );
+        if ( (fp = fopen( Filename, "r" )) != NULL ) {
+            while( fgets( Line, 2048, fp ) != NULL ) {
+                if ( Line[0] != '#' ) {
+                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
+                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
+                                &q->G1[n], &q->G2[n], &q->G3[n],
+                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
+                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
+                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
+                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
+                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
+                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
+                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
+                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
+                    ++n;
+                }
             }
+            fclose( fp );
+            done = TRUE;
+            success1 = TRUE;
+        } else {
+            // only complain if this is our last try.
+            if (j==1) printf( "Cannot open %s file.\n", Filename );
         }
-        fclose( fp );
-    } else {
-        printf( "Cannot open %s file.\n", Filename );
+
+        if (j == 1) {
+            done = TRUE;
+        } else {
+            ++j;
+        }
+
     }
 
 
     // Read in Current Date
-    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Year, Date );
-    if ( (fp = fopen( Filename, "r" )) != NULL ) {
-        while( fgets( Line, 2048, fp ) != NULL ) {
-            if ( Line[0] != '#' ) {
-                sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                            q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                            &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                            &q->G1[n], &q->G2[n], &q->G3[n],
-                            &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                            &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                            &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                            &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                ++n;
+    j = 0; done = FALSE; success2 = FALSE;
+    while ( !done ){
+
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Year, Date, ftype[j] );
+        if ( (fp = fopen( Filename, "r" )) != NULL ) {
+            while( fgets( Line, 2048, fp ) != NULL ) {
+                if ( Line[0] != '#' ) {
+                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
+                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
+                                &q->G1[n], &q->G2[n], &q->G3[n],
+                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
+                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
+                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
+                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
+                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
+                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
+                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
+                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
+                    ++n;
+                }
             }
+            fclose( fp );
+            done = TRUE;
+            success2 = TRUE;
+        } else {
+            // only complain if this is our last try.
+            if (j==1) printf( "Cannot open %s file.\n", Filename );
         }
-        fclose( fp );
-    } else {
-        printf( "Cannot open %s file.\n", Filename );
+
+        if (j == 1) {
+            done = TRUE;
+        } else {
+            ++j;
+        }
+
     }
 
 
 
     // Read in Next Date
-    sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_1min.txt", LGM_INDEX_DATA_DIR, Next_Year, Next_Date );
-    if ( (fp = fopen( Filename, "r" )) != NULL ) {
-        while( fgets( Line, 2048, fp ) != NULL ) {
-            if ( Line[0] != '#' ) {
-                sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                            q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                            &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                            &q->G1[n], &q->G2[n], &q->G3[n],
-                            &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                            &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                            &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                            &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                            &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                            &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                ++n;
+    j = 0; done = FALSE; success3 = FALSE;
+    while ( !done ){
+
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Next_Year, Next_Date, ftype[j] );
+        if ( (fp = fopen( Filename, "r" )) != NULL ) {
+            while( fgets( Line, 2048, fp ) != NULL ) {
+                if ( Line[0] != '#' ) {
+                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
+                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
+                                &q->G1[n], &q->G2[n], &q->G3[n],
+                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
+                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
+                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
+                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
+                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
+                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
+                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
+                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
+                    ++n;
+                }
             }
+            fclose( fp );
+            done = TRUE;
+            success3 = TRUE;
+        } else {
+            // only complain if this is our last try.
+            if (j==1) printf( "Cannot open %s file.\n", Filename );
         }
-        fclose( fp );
-    } else {
-        printf( "Cannot open %s file.\n", Filename );
+
+        if (j == 1) {
+            done = TRUE;
+        } else {
+            ++j;
+        }
+
     }
+
 
     q->nPnts = n;
 
