@@ -1043,12 +1043,12 @@ M = ELECTRON_MASS; // kg
 
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
-FILE *fppp;
-fppp = fopen("FL.txt","a");
-for (i=0; i<LstarInfo->mInfo->nPnts; i++){
-fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
-}
-fclose(fppp);
+//FILE *fppp;
+//fppp = fopen("FL.txt","a");
+//for (i=0; i<LstarInfo->mInfo->nPnts; i++){
+//fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+//}
+//fclose(fppp);
 
 int Type = ClassifyFL( LstarInfo->mInfo,  LstarInfo->VerbosityLevel );
 
