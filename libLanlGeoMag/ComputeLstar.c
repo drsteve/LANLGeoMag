@@ -13,7 +13,7 @@
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
 
-int ClassifyFL( Lgm_MagModelInfo *m ) {
+int ClassifyFL( Lgm_MagModelInfo *m, int Verbosity ) {
 
     int     i, iMin, Type, iMax, done;
     double  Min, Max, Curr, Prev;
@@ -63,13 +63,27 @@ int ClassifyFL( Lgm_MagModelInfo *m ) {
         }
 
     }
-    printf("nMinima = %d\n", nMinima );
-    for ( i=0; i<nMinima; i++ ){
-        printf( "Minimum %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
-    }
-    printf("nMaxima = %d\n", nMaxima );
-    for ( i=0; i<nMaxima; i++ ){
-        printf( "Maximam %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
+    if ( Verbosity > 1 ) {
+
+        if ( nMinima > 1 ) {
+            printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            if ( Verbosity > 2 ) {
+                for ( i=0; i<nMinima; i++ ){
+                    printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
+                }
+            }
+
+        }
+
+        if ( nMaxima > 1 ) {
+            printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            if ( Verbosity > 2 ) {
+                for ( i=0; i<nMaxima; i++ ){
+                    printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
+                }
+            }
+        }
+
     }
     
     Type = nMaxima;
@@ -1036,7 +1050,7 @@ fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
 }
 fclose(fppp);
 
-int Type = ClassifyFL( LstarInfo->mInfo );
+int Type = ClassifyFL( LstarInfo->mInfo,  LstarInfo->VerbosityLevel );
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
             for (tkk=0, nfp=nnn-1; nfp>=0; nfp--){
@@ -1124,13 +1138,7 @@ int Type = ClassifyFL( LstarInfo->mInfo );
      *  sort arrays so they are monotonically increasing in MLT
      *  (needed for spline interp).
      */
-for (i=0; i<LstarInfo->nPnts; i++){
-printf("BEFORE: %g %g\n", LstarInfo->MLT[i], LstarInfo->mlat[i]);
-}
     quicksort2(  LstarInfo->nPnts, LstarInfo->MLT-1, LstarInfo->mlat-1 );
-for (i=0; i<LstarInfo->nPnts; i++){
-printf("AFTER: %g %g\n", LstarInfo->MLT[i], LstarInfo->mlat[i]);
-}
 
 
 
@@ -1166,25 +1174,6 @@ FIX
     //printf ("spline uses '%s' interpolation.\n", gsl_interp_name( LstarInfo->pspline ));
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
 
-
-/*
-For debugging...
-*/
-FILE *fp;
-    fp = fopen("ShellFootTrace.dat", "w");
-if (0==1){
-    for (i=0; i<LstarInfo->nSplnPnts; ++i){ 
-        fprintf(fp, "%g %g\n", LstarInfo->xa[i], LstarInfo->ya[i] );
-    }
-}
-if (1==1){
-    for (MLT=-12.0; MLT<=24.0; MLT += 0.001){
-	    //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
-	    mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
-	    fprintf(fp, "%g %g\n", MLT, mlat);
-    }
-}
-    fclose(fp);
 
 
     Phi1 = MagFlux( LstarInfo );
@@ -1323,7 +1312,7 @@ double LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) {
     LstarInfo = (Lgm_LstarInfo *)qpInfo;
 
     MLT = LstarInfo->Phi*DegPerRad/15.0;
-phi = 15.0*(MLT-12.0)*RadPerDeg;
+    phi = 15.0*(MLT-12.0)*RadPerDeg;
     cl = cos( Lambda ); sl = sin( Lambda );
     u.x = cl*cos( phi );
     u.y = cl*sin( phi );
@@ -1367,7 +1356,6 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     MLT = LstarInfo->Phi*DegPerRad/15.0;
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
-printf("mlat = %g\n", mlat);
     //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
     mlat *= RadPerDeg;
 
@@ -1460,7 +1448,6 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     work   = (double *) calloc( lenw+1, sizeof(double) );
 */
     dqags(MagFluxIntegrand2, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, LstarInfo->mInfo->VerbosityLevel );
-printf( "last = %d\n", last);
 /*
     free( iwork );
     free( work );
