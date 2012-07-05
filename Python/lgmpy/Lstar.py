@@ -37,7 +37,7 @@ import Lgm_MagEphemInfo
 import Closed_Field
 from _Bfield_dict import Bfield_dict
 
-__author__ = 'Brian Larsen, Steve Morley (Python), Mike Henderson (C) - LANL'
+__author__ = 'Brian Larsen, Steve Morley, Mike Henderson - LANL'
 
 class Lstar_Data(datamodel.SpaceData):
     """
@@ -69,7 +69,7 @@ class Lstar_Data(datamodel.SpaceData):
         self['position'] = {}
 
     def __repr__(self):
-        tb.dictree(self, verbose=True, attrs=True)
+        self.tree(verbose=True, attrs=True)
         return ''
 
 def get_Lstar(pos, date, alpha = 90.,
@@ -365,12 +365,12 @@ def get_Lstar(pos, date, alpha = 90.,
         ans[pa] = datamodel.SpaceData()
         ans[pa]['Lsimple'] = datamodel.dmarray([Lsimple])
         #sets up nans in case of Lstar failure
-        ans[pa]['I'] = datamodel.dmarray(numpy.nan)
-        ans[pa]['Lstar'] = datamodel.dmarray(numpy.nan, attrs={'info':trace})
-        ans[pa]['LMcIlwain'] = datamodel.dmarray(numpy.nan)
-        ans[pa]['LHilton'] = datamodel.dmarray(numpy.nan)
-        ans[pa]['Bmin'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
-        ans[pa]['Bmirror'] = datamodel.dmarray(numpy.nan, attrs={'units':'nT'})
+        ans[pa]['I'] = datamodel.dmarray([numpy.nan])
+        ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':trace})
+        ans[pa]['LMcIlwain'] = datamodel.dmarray([numpy.nan])
+        ans[pa]['LHilton'] = datamodel.dmarray([numpy.nan])
+        ans[pa]['Bmin'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
+        ans[pa]['Bmirror'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
 
     if trace != 'LGM_CLOSED':
         return ans

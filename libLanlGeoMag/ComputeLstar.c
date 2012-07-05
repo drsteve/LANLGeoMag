@@ -1179,6 +1179,7 @@ FIX
     Phi1 = MagFlux( LstarInfo );
     LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi1;
     Phi2 = MagFlux2( LstarInfo );
+//printf("InternalModel: %d\n", LstarInfo->mInfo->InternalModel);
     LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi2;
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
 
