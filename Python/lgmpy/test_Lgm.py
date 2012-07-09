@@ -30,6 +30,7 @@ from test_magcoords import *
 from test_Bfield_dict import *
 from test_Lgm_DateAndTime import *
 from test_quicksort import *
+from test_Lgm_Utils import *
 # add others here as they exist
 
 if __name__ == '__main__':
