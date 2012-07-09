@@ -13,7 +13,7 @@ import numpy as np
 
 from Lgm_Wrap import Lgm_LogSpace, Lgm_Bisect
 
-class quicksort_Tests(unittest.TestCase):
+class Lgm_Utils_Tests(unittest.TestCase):
     def test_Lgm_LogSpace(self):
         """regression on Lgm_LogSpace"""
         a = np.empty([10], dtype=ctypes.c_double)
