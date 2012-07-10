@@ -58,17 +58,20 @@ def runPA(quality):
     for pp in range(1,91):
         dum = lgmpy.get_Lstar(loci.data[1], ticks.UTC[1], alpha=pp, coord_system='SM', 
                               Bfield='Lgm_B_cdip', extended_out=True, LstarQuality=quality)
-        vals.extend(dum[pp]['Lstar'])
+        try:
+            vals.extend(dum[pp]['Lstar'])
+        except (IndexError, TypeError): #get_Lstar returns a 0-D nan in some cases...
+            vals.extend([dum[pp]['Lstar'].tolist()])
     fig = plt.figure()
     plt.plot(vals, drawstyle='steps-mid')
     plt.xlabel('Pitch Angle')
     plt.ylabel('L* (LanlGeoMag)')
-    plt.title('Cent. dipole [-5,0,0]$_{SM}$; Quality (0,0)')
+    plt.title('Cent. dipole [-5,0,0]$_{SM}$'+'; Quality ({0})'.format(str(quality)))
     figname = 'LGM_L*_vs_PA_cdip_q{0}'.format(str(quality))
     plt.savefig(''.join([figname,'.png']), dpi=300)
     plt.savefig(''.join([figname,'.pdf']))
 
 if __name__ == '__main__':
-    for qq in range(6, 8):
+    for qq in range(0, 8):
         runPA(qq)
     #runQs()
