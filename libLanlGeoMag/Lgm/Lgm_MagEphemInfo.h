@@ -140,6 +140,10 @@ typedef struct Lgm_MagEphemInfo {
     double      *LMcIlwain;  //!< LMcIlwain[ PitchAngleIndex ]
     double      *Lstar;      //!< Lstar[ PitchAngleIndex ]
 
+    int         *DriftOrbitType;     // e.g. Open, Closed, Shabansky
+    int         **nMinima;           // # of minima on FL
+    int         **nMaxima;           // # of maxima on FL (not including endpoints
+
 
 } Lgm_MagEphemInfo;
 

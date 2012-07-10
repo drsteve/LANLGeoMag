@@ -13,14 +13,19 @@
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
 
-int ClassifyFL( Lgm_MagModelInfo *m, int Verbosity ) {
+int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
-    int     i, iMin, Type, iMax, done;
+    Lgm_MagModelInfo    *m;
+    
+    int     i, iMin, Type, iMax, done, Verbosity;
     double  Min, Max, Curr, Prev;
 
     double  Diff, OldDiff, Minima[10], Maxima[10];
     int     nMinima, iMinima[10];
     int     nMaxima, iMaxima[10];
+
+    Verbosity = LstarInfo->VerbosityLevel;
+    m = LstarInfo->mInfo;
 
     Type = 0;
 
@@ -87,6 +92,13 @@ int ClassifyFL( Lgm_MagModelInfo *m, int Verbosity ) {
     }
     
     Type = nMaxima;
+
+    /*
+     * Save some info.
+     * Probably want to save more...?
+     */
+    LstarInfo->nMinima[k] = nMinima;
+    LstarInfo->nMaxima[k] = nMaxima;
     
     return( Type );
 
@@ -112,8 +124,8 @@ int ClassifyFL( Lgm_MagModelInfo *m, int Verbosity ) {
 void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
     if ( ( Quality < 0 ) || ( Quality > 8 ) ) {
-        printf("%sSetLstarTolerances: Quality value (of %d) not in range [0, 8]. Setting to 5.%s\n", s->PreStr, Quality, s->PostStr );
-        Quality = 5;
+        printf("%sSetLstarTolerances: Quality value (of %d) not in range [0, 8]. Setting to 3.%s\n", s->PreStr, Quality, s->PostStr );
+        Quality = 3;
     }
 
     // These tend to be critical to keep things working smoothly.
@@ -141,6 +153,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 500;
 
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-8;
+
             break;
 
         case 7:
@@ -158,6 +173,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-7;
 
             s->mInfo->nDivs = 400;
+
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-8;
 
             break;
 
@@ -177,6 +195,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 300;
 
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-7;
+
             break;
 
         case 5:
@@ -194,6 +215,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-5;
 
             s->mInfo->nDivs = 200;
+
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-6;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-6;
 
             break;
 
@@ -213,6 +237,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 200;
 
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-5;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-5;
+
             break;
 
         case 3:
@@ -230,6 +257,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
 
             s->mInfo->nDivs = 200;
+
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-4;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-4;
 
             break;
 
@@ -249,6 +279,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 200;
 
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
+
             break;
 
         case 1:
@@ -267,6 +300,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 100;
 
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
+
             break;
 
         case 0:
@@ -284,6 +320,9 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_FindShellLine_I_Tol = 5e-1;
 
             s->mInfo->nDivs = 50;
+
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
 
             break;
 
@@ -653,6 +692,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
 
+    for ( i=0; i<k; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
 
 
 
@@ -1050,7 +1090,8 @@ M = ELECTRON_MASS; // kg
 //}
 //fclose(fppp);
 
-int Type = ClassifyFL( LstarInfo->mInfo,  LstarInfo->VerbosityLevel );
+int Type = ClassifyFL( k, LstarInfo );
+            LstarInfo->nMinMax = k;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
             for (tkk=0, nfp=nnn-1; nfp>=0; nfp--){
@@ -1182,6 +1223,21 @@ FIX
     LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi2;
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
 
+
+
+
+    /*
+     *  Determine the type of the orbit. We will not be here if we bailed early.. So LGM_DRIFT_ORBIT_OPEN_SHABANSKY
+     *  cant be determined here ... 
+     */
+    LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
+    for ( i=0; i<k; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
+    if ( LstarInfo->LS < 0.0 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+
+
+
+
+
     if (LstarInfo->VerbosityLevel > 0) {
         printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
@@ -1190,14 +1246,18 @@ FIX
         printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-        printf("\t\t%s  L* (Using McIllwain M):                %.15lf%s\n\n\n\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+        printf("\t\t%s  L* (Using McIllwain M):                %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n%s", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n%s", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n%s", PreStr, PostStr );
+        printf("\n\n\n" );
     }
 
     gsl_interp_free( LstarInfo->pspline );
     gsl_interp_accel_free( LstarInfo->acc );
 
 
-    return(0);
+    return( (LstarInfo->LS < 0.0) ?  -1 : 1 );
 
 }
 

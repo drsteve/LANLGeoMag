@@ -40,7 +40,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     Lgm_Vector      v1, v2, v3, vv1, Bvec;
     double          sa, sa2, Blocal;
     double          Lam, CosLam, LSimple;
-    int             i, LS_Flag, nn, tk, TraceFlag;
+    int             i, k, LS_Flag, nn, tk, TraceFlag;
     char            *PreStr, *PostStr;
 
     /* These should be set by the user in the setup up MagEphemInfo no in here */
@@ -195,6 +195,22 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     MagEphemInfo->I[i]  = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
                     MagEphemInfo->K[i]  = LstarInfo2->I[0]*sqrt(MagEphemInfo->Bm[i]*1e-5); // Second invariant
                     MagEphemInfo->Sb[i] = LstarInfo2->SbIntegral0; // SbIntegral0 is Sb for the FL that the sat is on.
+                    /*
+                     *  Determine the type of the orbit
+                     */
+                    if ( LS_Flag >= 0 )  {
+                        LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
+                        for ( k=0; k<LstarInfo2->nMinMax; ++k ) {
+                            if ( LstarInfo2->nMinima[k] > 1 ) LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
+                        }
+                    } else {
+                        LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+                        for ( k=0; k<LstarInfo2->nMinMax; ++k ) {
+                            if ( LstarInfo2->nMinima[k] > 1 ) LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
+                        }
+                    }
+                    MagEphemInfo->DriftOrbitType[i] = LstarInfo2->DriftOrbitType;
+
 
                     //printf("\t    %sL* [ %g Deg. ]: Date: %ld   UTC: %g   Lsimple:%g   L*:%.15g%s\n", PreStr, MagEphemInfo->Alpha[i], Date, UTC, LSimple, LstarInfo2->LS, PostStr );
                     //if (LstarInfo3->VerbosityLevel > 0 ) {
@@ -251,6 +267,11 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                             MagEphemInfo->z_gsm[i][nn][tk] = LstarInfo2->z_gsm[nn][tk];
                         }
 //printf("LstarInfo2->nFieldPnts[%d] = %d\n", nn, LstarInfo2->nFieldPnts[nn]);
+
+
+                        MagEphemInfo->nMinima[i][nn] = LstarInfo2->nMinima[nn];
+                        MagEphemInfo->nMaxima[i][nn] = LstarInfo2->nMaxima[nn];
+
                     }
 
                     FreeLstarInfo( LstarInfo2 );

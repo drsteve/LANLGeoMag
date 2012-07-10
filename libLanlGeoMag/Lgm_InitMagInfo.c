@@ -63,8 +63,8 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_MagStep_BS_last_step   = FALSE;
     MagInfo->Lgm_MagStep_BS_reject      = FALSE;
     MagInfo->Lgm_MagStep_BS_prev_reject = FALSE;
-    MagInfo->Lgm_MagStep_BS_atol        = 1e-4;
-    MagInfo->Lgm_MagStep_BS_rtol        = 1e-4;
+    MagInfo->Lgm_MagStep_BS_atol        = 1e-5;
+    MagInfo->Lgm_MagStep_BS_rtol        = 1e-5;
 
     /*
      *  Some inits for MagStep_RK5
@@ -304,11 +304,13 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
         case LGM_EXTMODEL_SCATTERED_DATA:
                                 m->Bfield = Lgm_B_FromScatteredData;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
         case LGM_EXTMODEL_SCATTERED_DATA2:
                                 m->Bfield = Lgm_B_FromScatteredData2;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
 
