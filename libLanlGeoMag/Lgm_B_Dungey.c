@@ -16,7 +16,7 @@ int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info) {
     double      cp, sp, ct, st;
 
     Info->M_Dungey = 30500.0;
-    Info->dB_Dungey = -14.74;
+    Info->dB_Dungey = -14.474;
 
     M  = Info->M_Dungey;  // Chen and Shultyz have 30500.0 nT
     dB = Info->dB_Dungey;  // Constant Delta-B in SM z--direction
