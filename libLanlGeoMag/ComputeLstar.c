@@ -149,12 +149,12 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-9;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-8;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-8;
 
             s->mInfo->nDivs = 500;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -170,12 +170,12 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-8;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-7;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-8;
 
             s->mInfo->nDivs = 400;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -195,8 +195,8 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 300;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-7;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -217,7 +217,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 200;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-6;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-6;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -238,7 +238,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 200;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-5;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-5;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -259,7 +259,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 200;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-4;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-4;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -280,7 +280,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 200;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -301,7 +301,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 100;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
@@ -322,7 +322,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->nDivs = 50;
 
             s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
-            s->mInfo->Lgm_MagStep_BS_rtol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
