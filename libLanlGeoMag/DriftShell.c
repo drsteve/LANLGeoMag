@@ -48,12 +48,13 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
  *
  */
 int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo) {
-    Lgm_Vector    u, w, Pm_North, Pmirror, v1, v2, v3;
-    double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
-    double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
-    int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
-    int           i, Flag, nbFits;
-    BracketType   Bracket;
+    Lgm_Vector      u, w, Pm_North, Pmirror, v1, v2, v3;
+    double          F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
+    double          SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
+    int             done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
+    int             i, Flag, nbFits;
+    BracketType     Bracket;
+    double          BRACKET_EPS;
 
     *Iterations = 0;
 
@@ -302,9 +303,11 @@ mlatbest = mlat_min;
     }
 
 
-
-
-
+    if ( LstarInfo->mInfo->Lgm_FindShellLine_I_Tol > 1e-4 ) {
+        BRACKET_EPS = 1e-6;
+    } else {
+        BRACKET_EPS = 1e-10;
+    }
 
 
     /*
@@ -394,21 +397,21 @@ mlatbest = mlat_min;
                 //printf("[a, b] = %g %g   [Da, Db] = %g %g\n", a, b, Da, Db);
 
                 //exit(0);
-            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+            } else if ( fabs(e-mlat0)  < BRACKET_EPS ) {
                 /*
                  * Converged  to lower endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
                  */
                 done = TRUE;
                 FoundValidI = -2;
-            } else if ( fabs(e-mlat2) < 1e-5 ) {
+            } else if ( fabs(e-mlat2) < BRACKET_EPS ) {
                 /*
                  * Converged  to upper endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
                  */
                 done = TRUE;
                 FoundValidI = -3;
-            } else if ( fabs(a-c) < 1e-8 ) {
+            } else if ( fabs(a-c) < BRACKET_EPS ) {
                 /*
                  * Converged  to something, but not I?  try to enlarge initial
                  * bracket.
@@ -535,7 +538,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged with requested tolerance: |I-I0|=%g < %g\n", Dmin, LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
                 }
-            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+            } else if ( fabs(e-mlat0)  < BRACKET_EPS ) {
                 /*
                  * Converged  to lower endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
@@ -545,7 +548,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to lower endpoint: mlat, mlat0 = %g %g\n", e, mlat0 );
                 }
-            } else if ( fabs(e-mlat1) < 1e-5 ) {
+            } else if ( fabs(e-mlat1) < BRACKET_EPS ) {
                 /*
                  * Converged  to upper endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
@@ -555,7 +558,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to upper endpoint: mlat, mlat1 = %g %g\n", e, mlat0 );
                 }
-            } else if ( fabs(a-b) < 1e-8 ) {
+            } else if ( fabs(a-b) < BRACKET_EPS ) {
                 /*
                  * Converged  to something, but not I?  try to enlarge initial
                  * bracket.

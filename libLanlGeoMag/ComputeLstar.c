@@ -149,7 +149,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-9;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-8;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-9;
 
             s->mInfo->nDivs = 500;
 
@@ -170,7 +170,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-8;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-8;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-9;
 
             s->mInfo->nDivs = 400;
 
@@ -182,20 +182,20 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
         case 6:
 
             s->mInfo->Lgm_MagFlux_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-8;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-9;
 
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-8;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-9;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsrel = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-7;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-8;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-6;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-8;
 
             s->mInfo->nDivs = 300;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
@@ -216,7 +216,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 200;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-6;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;

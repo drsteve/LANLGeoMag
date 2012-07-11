@@ -24,6 +24,9 @@
 
 typedef struct Lgm_LstarInfo {
 
+
+
+
     double              KineticEnergy;  // Particle kinetic energy
     double              Mass;           // Particle mass
     double              PitchAngle;     // Particle Pitch Angle

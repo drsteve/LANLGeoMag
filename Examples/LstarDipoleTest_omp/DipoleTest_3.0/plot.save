@@ -1,6 +1,6 @@
 Plot-2.1
 v550
-1
+2
 10
 17
 103
@@ -43,9 +43,19 @@ v550
 0.000000
 0
 0
+11
+1
+103
+14
+8.500000
+11.000000
+0.000000
+0.000000
+0
+0
 8
 10
-results_1e-01.dat
+results_1.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -148,7 +158,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 11
-results_1e-02.dat
+results_2.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -251,7 +261,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 12
-results_1e-03.dat
+results_3.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -354,7 +364,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 13
-results_1e-04.dat
+results_4.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -457,7 +467,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 14
-results_1e-05.dat
+results_5.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -560,7 +570,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 15
-results_1e-06.dat
+results_6.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -663,7 +673,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 16
-results_1e-07.dat
+results_7.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -678,8 +688,8 @@ Pitch Angle, Degrees
 110
 0.000000
 90.000000
--2.000000
-2.000000
+-10.000000
+10.000000
 3
 17
 4
@@ -766,7 +776,7 @@ Pitch Angle, Degrees
 0.000000
 0.000000
 17
-results_1e-08.dat
+results_8.dat
 Graph 1
 Pitch Angle, Degrees
 
@@ -781,8 +791,8 @@ Pitch Angle, Degrees
 110
 0.000000
 90.000000
--20.000000
-20.000000
+-100.000000
+100.000000
 3
 17
 4
