@@ -357,7 +357,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         y  = (double *)calloc( nq, sizeof(double) );
 
         acc    = gsl_interp_accel_alloc( );
-        spline = gsl_spline_alloc( gsl_interp_cspline, nq );
+        //spline = gsl_spline_alloc( gsl_interp_cspline, nq );
+        spline = gsl_spline_alloc( gsl_interp_akima, nq );
 
 
 

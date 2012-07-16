@@ -194,9 +194,6 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
     }
 
 
-    /*
-     *  Take location of the Min-B surface to be Pb.
-     */
     *v = Pb;
 
 
