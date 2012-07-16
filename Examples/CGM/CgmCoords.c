@@ -10,7 +10,7 @@ int main( ) {
     double           CgmLat, CgmLon, CgmRad, CgmAlt;
     FILE             *fp;
 
-    Lgm_MagModelInfo_Set_MagModel( m, LGM_IGRF, LGM_EXTMODEL_NULL );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_NULL, m );
     m->Kp = 5;
 
     Date = 19800101; UTC  = 0.0;

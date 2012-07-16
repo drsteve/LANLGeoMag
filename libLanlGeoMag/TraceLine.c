@@ -188,6 +188,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
          * trying until we get there.
          */
         htry = Htry; Hdid = 0.0; Count = 0;
+//printf("n= %d P = %g %g %g  htry = %g\n", n, P.x, P.y, P.z, htry);
         while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100) ) {
 //printf("htry = %g\n", htry);
             if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
@@ -244,7 +245,7 @@ if ( fabs(Htry-Hdid)>1e-4) printf("Htry, Hdid = %g %g    htry = %g   Count = %d\
             }
 
             if ( n > LGM_MAX_INTERP_PNTS-10 ) {
-                printf("Lgm_TraceLine(): Trying to add too many points to interpolation arrays - bailing.\n");
+                printf("Lgm_TraceLine(): Trying to add too many points to interpolation arrays - bailing (n = %d).\n", n);
                 return( -1 );
             }
 	    }

@@ -13,6 +13,17 @@
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
 
+/*
+ * Routine determines type of FL that is present in the LstarInfo->mInfo
+ * structure (FL has to have already been traced!)
+ *
+ * Returns a flag that is set as follows;
+ *
+ *      0: Field line has only a single minimum.
+ *      1: Field line has multiple minima, but these wont affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
+ *      2: Field line has multiple minima, and these will affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
+ *
+ */
 int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
     Lgm_MagModelInfo    *m;
@@ -91,7 +102,6 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
     }
     
-    Type = nMaxima;
 
     /*
      * Save some info.
@@ -99,6 +109,13 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
      */
     LstarInfo->nMinima[k] = nMinima;
     LstarInfo->nMaxima[k] = nMaxima;
+
+    Type = ( nMaxima > 0 ) ? 1 : 0;
+
+    for ( i=0; i<nMaxima; i++ ){
+        if ( Maxima[i] > m->Bm ) Type = 2;
+    }
+
     
     return( Type );
 
@@ -465,7 +482,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
-    int		done2, Count, FoundShellLine, nIts;
+    int		done2, Count, FoundShellLine, nIts, Type;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
@@ -503,6 +520,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     }
 
 
+
+
     /*
      *  Do Initial field Line to get Bm and I
      */
@@ -526,6 +545,19 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             printf("\t\t%sMag. Field Strength, B at Pmin (nT):    %g%s\n", PreStr, B, PostStr);
         }
 
+        /*
+         *  If we are here, we know the field line is closed.  
+
+         *  Now, lets classify what type of FL it is. This call determines
+         *  whether or not there are multiple minima on the FL. 
+         *
+         *  If there are multiple minima, then we need to figure out if, for
+         *  the current pitch angle, we can mirror in multiple regions (i.e.
+         *  Shabansky drift orbit type bifurcations.)
+         *
+         */
+        Type = ClassifyFL( 0, LstarInfo );
+
 
         /*
          * Trace from Bmin point up to northern mirror point and down to
@@ -545,15 +577,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
 
-
-
-
-
-
-
-
-
-
+                /*
+                 *  We found both mirror points. Dump some diagnostics.
+                 */
                 if (LstarInfo->VerbosityLevel > 0) {
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n",
                             PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y,
@@ -563,6 +589,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n",
                             PreStr, B, LstarInfo->mInfo->Bm, PostStr);
                 }
+
+
 
 
                 /*
@@ -692,6 +720,18 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
 
+
+
+
+    /*
+     *  If we get here, then the field line going through our starting point is
+     *  closed and we could find the required mirror points.
+     */
+
+
+
+
+    // initialize DriftOrbitType as open
     for ( i=0; i<k; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
 
 
@@ -897,9 +937,31 @@ mlat0 =0.0;
                 printf("\t\t%s             Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d          %s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n", PreStr, PostStr );
             }
-            //FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat, mlat1, &nIts, LstarInfo );
+
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-//if (FoundShellLine == -11){ printf("OPEN?????????????????\n"); }
+
+v = LstarInfo->mInfo->Pm_North;
+if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-11, LstarInfo->mInfo ) ){ return(-4); }
+LstarInfo->Spherical_Footprint_Pn[k] = w;
+LstarInfo->mInfo->Hmax = 0.05;
+Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+if (LstarInfo->VerbosityLevel > 1) {
+    printf("\t\t%sTracing Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+}
+LstarInfo->Spherical_Footprint_Ps[k] = v2;
+Type = ClassifyFL( k, LstarInfo );
+if (LstarInfo->VerbosityLevel > 1) {
+    printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
+}
+//printf("k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
+if ( Type > 1 ){
+    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+    //printf("\t\tRedoing!  k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
+    if (LstarInfo->VerbosityLevel > 1) {
+        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
+    }
+}
+
             PredMinusActualMlat = pred_mlat - mlat;
             if (LstarInfo->VerbosityLevel > 1) {
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
@@ -1090,7 +1152,8 @@ M = ELECTRON_MASS; // kg
 //}
 //fclose(fppp);
 
-int Type = ClassifyFL( k, LstarInfo );
+//Type = ClassifyFL( k, LstarInfo );
+//printf("k, Type = %d %d\n", k, Type);
             LstarInfo->nMinMax = k;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
