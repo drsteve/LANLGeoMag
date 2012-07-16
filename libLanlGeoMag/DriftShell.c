@@ -22,6 +22,7 @@ void elt_qsort( struct FitVals *arr, unsigned n ) {
 }
 
 
+int FitLineAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero2( double *x, double *y, double *dy, int n, int nmax, double *res );
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo );
@@ -47,12 +48,13 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
  *
  */
 int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo) {
-    Lgm_Vector    u, w, Pm_North, Pmirror, v1, v2, v3;
-    double        F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
-    double        SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
-    int           done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
-    int           i, Flag, nbFits;
-    BracketType   Bracket;
+    Lgm_Vector      u, w, Pm_North, Pmirror, v1, v2, v3;
+    double          F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
+    double          SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
+    int             done, FoundValidI, FirstHalf, nIts, FoundZeroBracket;
+    int             i, Flag, nbFits;
+    BracketType     Bracket;
+    double          BRACKET_EPS;
 
     *Iterations = 0;
 
@@ -106,7 +108,9 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      */
     Bracket.Dmin = 9e99;
     Flag = BracketZero( I0, Ifound, Bm, MLT, mlat, rad, mlat0, mlat1, mlat2, &Bracket, LstarInfo );
-    if ( Flag < 0 )  return( -5 );   // An evaluation in BracketZero() hit on a value
+    if ( Flag < 0 )  {
+        return( -11 );   // An evaluation in BracketZero() hit on a value
+    }
                                      //  of I that was undefined -- bail.
     if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value
                                      // of I that is within tolerance -- we're done.
@@ -299,9 +303,11 @@ mlatbest = mlat_min;
     }
 
 
-
-
-
+    if ( LstarInfo->mInfo->Lgm_FindShellLine_I_Tol > 1e-4 ) {
+        BRACKET_EPS = 1e-6;
+    } else {
+        BRACKET_EPS = 1e-10;
+    }
 
 
     /*
@@ -391,21 +397,21 @@ mlatbest = mlat_min;
                 //printf("[a, b] = %g %g   [Da, Db] = %g %g\n", a, b, Da, Db);
 
                 //exit(0);
-            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+            } else if ( fabs(e-mlat0)  < BRACKET_EPS ) {
                 /*
                  * Converged  to lower endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
                  */
                 done = TRUE;
                 FoundValidI = -2;
-            } else if ( fabs(e-mlat2) < 1e-5 ) {
+            } else if ( fabs(e-mlat2) < BRACKET_EPS ) {
                 /*
                  * Converged  to upper endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
                  */
                 done = TRUE;
                 FoundValidI = -3;
-            } else if ( fabs(a-c) < 1e-8 ) {
+            } else if ( fabs(a-c) < BRACKET_EPS ) {
                 /*
                  * Converged  to something, but not I?  try to enlarge initial
                  * bracket.
@@ -532,7 +538,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged with requested tolerance: |I-I0|=%g < %g\n", Dmin, LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
                 }
-            } else if ( fabs(e-mlat0)  < 1e-5 ) {
+            } else if ( fabs(e-mlat0)  < BRACKET_EPS ) {
                 /*
                  * Converged  to lower endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
@@ -542,7 +548,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to lower endpoint: mlat, mlat0 = %g %g\n", e, mlat0 );
                 }
-            } else if ( fabs(e-mlat1) < 1e-5 ) {
+            } else if ( fabs(e-mlat1) < BRACKET_EPS ) {
                 /*
                  * Converged  to upper endpoint -- no valid mlat found within
                  * interval - probably have to enlarge initial bracket.
@@ -552,7 +558,7 @@ mlatbest = mlat_min;
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to upper endpoint: mlat, mlat1 = %g %g\n", e, mlat0 );
                 }
-            } else if ( fabs(a-b) < 1e-8 ) {
+            } else if ( fabs(a-b) < BRACKET_EPS ) {
                 /*
                  * Converged  to something, but not I?  try to enlarge initial
                  * bracket.
@@ -772,6 +778,65 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 }
 
+int FitLineAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
+
+    int     i, Flag;
+    double  chisq, root, A, B, C, D;
+
+    gsl_multifit_linear_workspace   *work;
+    gsl_matrix                      *X, *cov;
+    gsl_vector                      *v, *w, *c, *xx;
+
+
+    X   = gsl_matrix_alloc( n, 2 );
+    v   = gsl_vector_alloc( n );
+    w   = gsl_vector_alloc( n );
+    c   = gsl_vector_alloc(2);
+    cov = gsl_matrix_alloc(2, 2);
+    xx  = gsl_vector_alloc(2);
+
+    for ( i=0; i<n; i++ ) {
+
+        gsl_matrix_set( X, i, 0, 1.0 );
+        gsl_matrix_set( X, i, 1, x[i] );
+
+        gsl_vector_set( v, i, y[i] );
+        gsl_vector_set( w, i, 1.0/(dy[i]*dy[i]) );
+
+    }
+
+
+    work = gsl_multifit_linear_alloc( n, 2 );
+    gsl_multifit_wlinear( X, w, v, c, cov, &chisq, work );
+    gsl_multifit_linear_free( work );
+
+    // y = b*x + c
+    C = gsl_vector_get( c, 0 );
+    B = gsl_vector_get( c, 1 );
+
+
+
+    Flag = 0;
+    if ( fabs(B) > 0.0 ) {
+        *res = -C/B;
+        Flag = 1;
+    } else {
+        *res = -1e31;
+    }
+
+
+    gsl_matrix_free( X );
+    gsl_vector_free( xx );
+    gsl_vector_free( v );
+    gsl_vector_free( w );
+    gsl_vector_free( c );
+    gsl_matrix_free( cov );
+
+
+    return( Flag );
+
+
+}
 
 
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
@@ -816,6 +881,7 @@ int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res ) {
     D = B*B - 4.0*A*C;
     if ( D >= 0.0 ) {
         *res  = (-B + sqrt( D ))/(2.0*A);
+//printf("A, B, C = %g %g %g   res = %g\n", A, B, C, *res);
 //        gsl_vector_set( xx, 0, 1.0 );
 //        gsl_vector_set( xx, 1, root );
 //        gsl_vector_set( xx, 2, root*root );

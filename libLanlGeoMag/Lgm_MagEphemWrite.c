@@ -1072,6 +1072,25 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
         fprintf( fp, "#\n");
 
+        fprintf( fp, "#  \"DriftShellType\":   { \"DESCRIPTION\": \"Type of Drift Shell (e.g. %d=CLOSED, %d=CLOSED_SHABANSKY, %d=OPEN, %d=OPEN_SHABANSKY)\",\n", LGM_DRIFT_ORBIT_CLOSED, LGM_DRIFT_ORBIT_CLOSED_SHABANSKY, LGM_DRIFT_ORBIT_OPEN, LGM_DRIFT_ORBIT_OPEN_SHABANSKY);
+        fprintf( fp, "#                               \"NAME\": \"DriftShellType\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"Drift Shell Type\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"DS Type\",\n");
+        fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"DSType_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"DSType_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"DSType %g!Ao!N\", ", m->Alpha[i] );
+        fprintf(fp, "\"DSType %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
 
         fprintf( fp, "#  \"L\":                { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
         fprintf( fp, "#                               \"NAME\": \"L\",\n");
@@ -1301,6 +1320,18 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
             sprintf( TextStr, " Lstar (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
         } else {
             sprintf( TextStr, " Lstar " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+        // DS Type header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, " Drift Shell Type (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, " DSType " ); tsl = strlen( TextStr );
         }
         n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
@@ -1548,6 +1579,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "L*%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "DSType%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "L%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Bm%d", i ); fprintf(fp, " %12s", Str ); }
@@ -1714,6 +1747,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %12s", "nT" );   // M_Ref
     fprintf( fp, " %12s", "nT" );   // M_IGRF
 
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
@@ -2091,6 +2126,10 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     // L*'s
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Lstar[i] ); }
+
+    // Drift Shell Types
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12d", m->DriftOrbitType[i] ); }
 
     // McIlwain L (computed from I, Bm, M)
     fprintf(fp, "    ");

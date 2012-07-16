@@ -72,6 +72,7 @@
 #define LGM_CDIP        0
 #define LGM_EDIP        1
 #define LGM_IGRF        2
+#define LGM_DUNGEY      3
 
 #define LGM_MAX_INTERP_PNTS 10000
 
@@ -578,7 +579,7 @@ int Lgm_B_T89( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
  *  Function Prototypes for T89c model
  */
 void T89c( int IOPT, double *PARMOD, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, Lgm_MagModelInfo *Info );
-void T89c_Feild( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info );
+void T89c_Field( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Info );
 int Lgm_B_T89c( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
@@ -697,6 +698,7 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
 void Lgm_Set_Lgm_B_cdip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_edip(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_igrf(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_Dungey(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);

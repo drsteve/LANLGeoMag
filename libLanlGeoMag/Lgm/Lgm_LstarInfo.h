@@ -14,11 +14,18 @@
 #define RE              (6378.135e3)        /* Earth Radius, m */
 #define CC              (2.99792458e8)      /* Speed of Light, m/s */
 
+#define LGM_DRIFT_ORBIT_CLOSED              1
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY    2
+#define LGM_DRIFT_ORBIT_OPEN                3
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
 
 
 
 
 typedef struct Lgm_LstarInfo {
+
+
+
 
     double              KineticEnergy;  // Particle kinetic energy
     double              Mass;           // Particle mass
@@ -87,6 +94,11 @@ typedef struct Lgm_LstarInfo {
     Lgm_Vector          Pmin[100];
     Lgm_Vector          GradI[100];
     Lgm_Vector          Vgc[100];
+
+    int                 DriftOrbitType;         // e.g. Open, Closed, Shabansky
+    int                 nMinMax;                // Number of valid FLs represented in nMinima[] and nMaxima[] (we may have bailed early)
+    int                 nMinima[100];           // # of minima on FL
+    int                 nMaxima[100];           // # of maxima on FL (not including endpoints
 
     int                 nSplnPnts;
     double              xa[500], ya[500], y2[500];

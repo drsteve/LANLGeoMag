@@ -29,9 +29,9 @@ int main( int argc, char *argv[] ){
     // Position in SM
 //    Psm.x = -1.5; Psm.y = 0.0; Psm.z = 0.0;
 //    Psm.x = -1.25; Psm.y = 0.0; Psm.z = 0.0;
+    Psm.x = -1.05; Psm.y = 0.0; Psm.z = 0.0;
 //    Psm.x = -6.6; Psm.y = 0.0; Psm.z = 0.0;
-//    Psm.x = -1.05; Psm.y = 0.0; Psm.z = 0.0;
-    Psm.x = -3.0; Psm.y = 0.0; Psm.z = 0.0;
+//    Psm.x = -3.0; Psm.y = 0.0; Psm.z = 0.0;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, c );
 
     // Create array of Pitch Angles to compute
@@ -77,11 +77,14 @@ int main( int argc, char *argv[] ){
     /*
      * Dump results
      */
-    sprintf( Filename, "DipoleTest_3.0/results_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+double puke = pow(10.0, -MagEphemInfo->LstarQuality);
+    //sprintf( Filename, "DipoleTest_3.0/results_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+    sprintf( Filename, "DipoleTest_1.05/results_%d.dat", MagEphemInfo->LstarQuality);
     fpout = fopen(Filename, "w");
     for (i=0; i<nAlpha; i++ ){
         if ( MagEphemInfo->Lstar[i] > 0.0 ) {
-            fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (3.00-MagEphemInfo->Lstar[i])/MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+            fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (1.05-MagEphemInfo->Lstar[i])/puke );
+            printf("%.15lf %.15lf %g\n", MagEphemInfo->Alpha[i], (1.05-MagEphemInfo->Lstar[i])/puke, 1.05-MagEphemInfo->Lstar[i] );
         }
     }
     fclose(fpout);

@@ -22,8 +22,8 @@ int main( ) {
 
 
 
-    LGM_ARRAY_1D( u, 50000000, Lgm_Vector );
-    LGM_ARRAY_1D( B, 50000000, Lgm_Vector );
+    LGM_ARRAY_1D( u, 5000000, Lgm_Vector );
+    LGM_ARRAY_1D( B, 5000000, Lgm_Vector );
 
 
     mInfo = Lgm_InitMagInfo( );
@@ -40,7 +40,7 @@ int main( ) {
     Lgm_set_QinDenton( &p, mInfo );
 
 
-    d = 0.25;
+    d = 0.5;
     n = 0;
     Lgm_PrintCurrentTime( &t );
     for ( x = -15.0; x <= 15.0; x += d ){

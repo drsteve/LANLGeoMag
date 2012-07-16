@@ -962,7 +962,8 @@ int main( int argc, char *argv[] ){
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD-3153.0, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
+                        Lgm_get_QinDenton_at_JD( UTC.JD-3153.0, &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
+                        //Lgm_get_QinDenton_at_JD( Lgm_JD( 2003, 10, 30, 12.0, LGM_TIME_SYS_UTC, c ), &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
                         if ( Kp >= 0.0 ) {

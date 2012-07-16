@@ -1976,6 +1976,7 @@ if (1==1){
 
 
     // TopSide
+if (0==1){
     TopSideDL = glGenLists( 1 );
     glNewList( TopSideDL, GL_COMPILE );
     {
@@ -2002,7 +2003,6 @@ if (1==1){
     glEndList( );
 
     // MeridPlane1 image
-if (1==1){
     MeridPlane1DL = glGenLists( 1 );
     glNewList( MeridPlane1DL, GL_COMPILE );
         glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
