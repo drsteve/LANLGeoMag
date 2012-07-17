@@ -26,18 +26,24 @@ int main( ) {
     while( fscanf( fp, "%lf %lf %lf", &glat, &glon, &galt ) != EOF ) {
 
         gr   = 1.0 + galt/WGS84_A;
-        Ugeo.x = gr*cos(RadPerDeg*glat)*cos(RadPerDeg*glon);
-        Ugeo.y = gr*cos(RadPerDeg*glat)*sin(RadPerDeg*glon);
-        Ugeo.z = gr*sin(RadPerDeg*glat);
+        //Ugeo.x = gr*cos(RadPerDeg*glat)*cos(RadPerDeg*glon);
+        //Ugeo.y = gr*cos(RadPerDeg*glat)*sin(RadPerDeg*glon);
+        //Ugeo.z = gr*sin(RadPerDeg*glat);
 
-        Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, m->c );
-        Lgm_CDMAG_TO_CGM( &Ugsm, &CgmLat, &CgmLon, &CgmRad, m );
+        //Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, m->c );
+        Lgm_GEO_TO_CGM(glat, glon, gr, &CgmLat, &CgmLon, &CgmRad, m );
 
         CgmAlt  = (CgmRad - 1.0)*WGS84_A;
         CosLat   = cos( CgmLat*RadPerDeg );
 
         L    = CgmRad/(CosLat*CosLat);
         printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", glat, glon, galt, gr, CgmLat, CgmLon, CgmAlt, CgmRad, L );
+
+Lgm_CGM_TO_GEO(CgmLat, CgmLon, CgmRad, &glat, &glon, &gr, m );
+galt = (gr - 1.0)*WGS84_A;
+L = -99e99;
+printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", glat, glon, galt, gr, CgmLat, CgmLon, CgmAlt, CgmRad, L );
+
 
     }
 

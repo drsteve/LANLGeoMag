@@ -710,9 +710,11 @@ void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo);
 
 
 /*
- * CD MAG coorfs to corrected Geomag.
+ * coordinate conversions to/from corrected Geomag.
  */
-int  Lgm_CDMAG_TO_CGM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
+int  Lgm_GSM_TO_CBM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
+int  Lgm_GEO_TO_CGM( double geoLat, double geoLon, double geoAlt, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
+int  Lgm_CGM_TO_GEO( double CgmLat, double CgmLon, double CgmRadi, double *geoLat, double *geoLon, double *geoAlt, Lgm_MagModelInfo *m );
 
 
 
