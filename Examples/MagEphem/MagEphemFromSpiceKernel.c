@@ -120,7 +120,26 @@ static char ArgsDoc[] = "InFile OutFile";
  */
 static struct argp_option Options[] = {
     {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
-    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be OP77, T87, T89, T89c, TS04. Default is T89c."    },
+    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be:\n"
+                                                                                                      "\tOP77Q\n"
+                                                                                                      "\t\tOlsen-Pfitser 1977 Quiet model. Does not depend\n"
+                                                                                                      "\t\ton any input parameters.\n"
+                                                                                                      "\tT87Q\n"
+                                                                                                      "\t\tTsyganenko 1987 model with a fixed Kp = 2.\n"
+                                                                                                      "\tT89Q\n"
+                                                                                                      "\t\tTsyganenko 1989 (T89c version) model with a\n"
+                                                                                                      "\t\tfixed Kp = 2.\n"
+                                                                                                      "\tT87D\n"
+                                                                                                      "\t\tTsyganenko 1987 model with Qin-Denton input\n"
+                                                                                                      "\t\tparameters.\n"
+                                                                                                      "\tT89D\n"
+                                                                                                      "\t\tTsyganenko 1989 model with Qin-Denton input\n"
+                                                                                                      "\t\tparameters.\n"
+                                                                                                      "\tTS04D\n"
+                                                                                                      "\t\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
+                                                                                                      "\t\tinput parameters.\n"
+                                                                                                      "\tTS07D\n"
+                                                                                                      "\t\tTsyganenko-Sitnov 2007 model.\n" },
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,                                      "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\"."   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
@@ -356,7 +375,7 @@ int main( int argc, char *argv[] ){
     herr_t          status;
     hsize_t         Dims[4], Offset[4], SlabSize[4];
     int             iT;
-    double          Kp;
+    double          Kp, T89Q_Kp;
     double          GeodLat, GeodLong, GeodHeight, MLAT, MLON, MLT;
     char            **H5_IsoTimes;
     long int        *H5_Date;
@@ -416,7 +435,7 @@ int main( int argc, char *argv[] ){
     TimeList        *ApoPeriTimeList;
     int             nApoPeriTimeList;
     Lgm_Vector      Bvec, Bvec2, w;
-    int             n;
+    int             n, OverRideKp;
     char            *CmdLine;
 
 
@@ -487,7 +506,7 @@ int main( int argc, char *argv[] ){
     arguments.EndDate         = -1;
     arguments.FootPointHeight = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
-    strcpy( arguments.ExtModel, "T89c" );
+    strcpy( arguments.ExtModel, "T89D" );
     strcpy( arguments.CoordSystem, "LATLONRAD" );
 
 
@@ -622,6 +641,7 @@ int main( int argc, char *argv[] ){
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
+    OverRideKp = FALSE;
     if ( !strcmp( ExtModel, "T87" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T87;
     } else if ( !strcmp( ExtModel, "CDIP" ) ){
@@ -630,13 +650,26 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_edip;
     } else if ( !strcmp( ExtModel, "IGRF" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
-    } else if ( !strcmp( ExtModel, "T89" ) ){
+    } else if ( !strcmp( ExtModel, "OP77Q" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
-    } else if ( !strcmp( ExtModel, "TS04" ) ){
+        Kp = 2;
+        OverRideKp = TRUE;
+    } else if ( !strcmp( ExtModel, "T89Q" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        T89Q_Kp = 2;
+        OverRideKp = TRUE;
+    } else if ( !strcmp( ExtModel, "T89D" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+    } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
+    } else if ( !strcmp( ExtModel, "TS07D" ) ){
+        //MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
+        printf("TS07D not yet implemented\n");
+        exit(0);
     } else { //if ( !strcmp( ExtModel, "T89c" ) ){
         // default
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
+        printf("Unknown model. ExtModel: %s\n", ExtModel );
+        exit(0);
     }
 
     if ( !strcmp( IntModel, "CDIP" ) ){
@@ -966,6 +999,7 @@ int main( int argc, char *argv[] ){
                         //Lgm_get_QinDenton_at_JD( Lgm_JD( 2003, 10, 30, 12.0, LGM_TIME_SYS_UTC, c ), &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
+//MIKE
                         if ( Kp >= 0.0 ) {
                             MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
                             MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5); 
