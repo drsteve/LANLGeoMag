@@ -261,6 +261,18 @@ double Lgm_kepler(double M, double e) {
     return(E);
 }
 
+/*
+ *  This routine outputs the dipole tilt angle as computed in Lgm_Set_Coord_Transforms
+ *
+ *   	Date    -- (long int) 	containing date ( e.g. YYYYMMDD or YYYYDDD )
+ *	UT	-- (double)	    decimal UT in hours ( e.g. 12.0 is noon ).
+ *      
+ */
+double Lgm_Dipole_Tilt(long int date, double UTC) {
+  Lgm_CTrans *c = Lgm_init_ctrans(0);
+  Lgm_Set_Coord_Transforms(date, UTC, c);
+  return c->psi;
+}
 
 
 /*
