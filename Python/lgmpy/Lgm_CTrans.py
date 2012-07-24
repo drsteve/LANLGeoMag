@@ -21,7 +21,8 @@ import numpy
 import Lgm_MagModelInfo
 import Lgm_Vector
 from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children, Lgm_Convert_Coords, \
-                GSM_TO_WGS84, WGS84_TO_EDMAG, Lgm_Set_Coord_Transforms, Lgm_EDMAG_to_R_MLAT_MLON_MLT
+                GSM_TO_WGS84, WGS84_TO_EDMAG, Lgm_Set_Coord_Transforms, Lgm_EDMAG_to_R_MLAT_MLON_MLT, \
+                Lgm_Dipole_Tilt
 
 
 class Lgm_Coords(list):
@@ -71,10 +72,10 @@ class Lgm_CTrans(Lgm_CTrans):
     def __init__(self, Verbose=False):
         # initialize to the values set in c so we don't have to maintain two places
         Lgm_ctransDefaults(pointer(self), Verbose)
-        
+
     def __del__(self):
         Lgm_free_ctrans_children(pointer(self))
-    
+
 def dateToDateLong(inval):
     """
     convert a python date or datetime object to a Date (long) object that
@@ -179,14 +180,14 @@ def dateToFPHours(inval):
 def GSMtoMLT(gsm, dt):
     """
     convert GSM values to MLT in the lgm way
-    
+
     Parameters
     ----------
     gsm : array_like
         Nx3 array_like of the GSM position
     dt : array_like
         N elementarray_like of datetime objects
-    
+
     Returns
     -------
     out : numpy.array
@@ -196,7 +197,7 @@ def GSMtoMLT(gsm, dt):
         Pgsm = Lgm_Vector.Lgm_Vector(*gsm)
         Pwgs = Lgm_Vector.Lgm_Vector()
         Pmlt = Lgm_Vector.Lgm_Vector()
-        # can use a smaller structure here        
+        # can use a smaller structure here
         mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
         Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), mmi.c) # dont need pointer as it is one
 
@@ -206,7 +207,7 @@ def GSMtoMLT(gsm, dt):
         Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon),
             pointer(MLT), mmi.c)
         return MLT.value
-        
+
     gsm_ = numpy.asanyarray(gsm)
     dt_ = numpy.asanyarray(dt)
     if gsm_.ndim == 2:
@@ -250,11 +251,9 @@ def getDipoleTilt(date):
         date = [date]
     ans = numpy.empty(len(date), dtype=float)
     for i, d in enumerate(date):
-        trans = Lgm_CTrans()
         datelong = dateToDateLong(d)
         utc = dateToFPHours(d)
-        Lgm_Set_Coord_Transforms( datelong, utc, pointer(trans))
-        ans[i] = trans.psi
+        ans[i] = Lgm_Dipole_Tilt(datelong, utc)
     if len(ans) == 1:
         return ans[0]
     else:

@@ -751,6 +751,7 @@ void        Lgm_mjd_to_ymdh ( double MJD, long int *Date, int *year, int *month,
 
 double      Lgm_hour24( double );
 double      Lgm_kepler( double, double );
+double      Lgm_Dipole_Tilt(long int date, double UTC);
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
