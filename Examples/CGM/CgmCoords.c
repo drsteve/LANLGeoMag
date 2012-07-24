@@ -4,9 +4,11 @@
 int main( ) {
     Lgm_MagModelInfo *m = Lgm_InitMagInfo();
     Lgm_Vector       Ugeo, Ugsm;
+    int              x;
     long int         Date;
     double           UTC, CosLat, L;
     double           glat, glon, gr, galt;
+    double           olat, olon, or, oalt;
     double           CgmLat, CgmLon, CgmRad, CgmAlt;
     FILE             *fp;
 
@@ -31,7 +33,7 @@ int main( ) {
         //Ugeo.z = gr*sin(RadPerDeg*glat);
 
         //Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, m->c );
-        Lgm_GEO_TO_CGM(glat, glon, gr, &CgmLat, &CgmLon, &CgmRad, m );
+        Lgm_GEOD_TO_CGM(glat, glon, gr, &CgmLat, &CgmLon, &CgmRad, m );
 
         CgmAlt  = (CgmRad - 1.0)*WGS84_A;
         CosLat   = cos( CgmLat*RadPerDeg );
@@ -39,10 +41,14 @@ int main( ) {
         L    = CgmRad/(CosLat*CosLat);
         printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", glat, glon, galt, gr, CgmLat, CgmLon, CgmAlt, CgmRad, L );
 
-Lgm_CGM_TO_GEO(CgmLat, CgmLon, CgmRad, &glat, &glon, &gr, m );
-galt = (gr - 1.0)*WGS84_A;
+
+//printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", olat, olon, oalt, or, CgmLat, CgmLon, CgmAlt, CgmRad, L );
+x = Lgm_CGM_TO_GEOD(CgmLat, CgmLon, gr, &olat, &olon, &or, m );
+//printf("gr = %g\n", or);
+//or = 1.0 + oalt/WGS84_A;
+oalt = 1.0+or*WGS84_A;
 L = -99e99;
-printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", glat, glon, galt, gr, CgmLat, CgmLon, CgmAlt, CgmRad, L );
+printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", olat, olon, oalt, or, CgmLat, CgmLon, CgmAlt, CgmRad, L );
 
 
     }
