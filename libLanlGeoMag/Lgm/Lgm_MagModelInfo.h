@@ -391,6 +391,7 @@ typedef struct Lgm_MagModelInfo {
      * Variables for defining Octree stuff
      */
     Lgm_Octree     *Octree;
+    int             Octree_Alloced;     // TRUE if memory is alloced for the octree, FALSE otherwise.
     int             Octree_kNN_InterpMethod;
     int             Octree_kNN_k;
     double          Octree_kNN_MaxDist2;
@@ -684,6 +685,7 @@ int         Lgm_Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_MagModelInfo *In
  */
 void Lgm_MagModelInfo_Set_Psw( double Psw, Lgm_MagModelInfo *m );
 void Lgm_MagModelInfo_Set_Kp( double Kp, Lgm_MagModelInfo *m );
+void Lgm_MagModelInfo_Set_Octree( Lgm_Octree *Octree, int k, Lgm_MagModelInfo *m );
 void Lgm_Set_Octree_kNN_InterpMethod( Lgm_MagModelInfo *m, int Method );
 void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
 void Lgm_Set_Octree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 );
