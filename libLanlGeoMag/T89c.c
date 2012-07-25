@@ -277,7 +277,7 @@ void T89c_Field( int ID, double *A, double *XI, double *F, Lgm_MagModelInfo *Inf
 //    if ( ID == 1 ) {
 
         for (i=1; i<=30; i++ ) {
-            for (l=1; l<=30; l++ ) {
+            for (l=1; l<=3; l++ ) {
                 DER[l][i] = 0.0;
             }
         }
