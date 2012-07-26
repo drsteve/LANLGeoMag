@@ -16,6 +16,7 @@ int main( ) {
     m->Kp = 5;
 
     Date = 19800101; UTC  = 0.0;
+    Date = 20000101; UTC  = 0.0;
     Lgm_Set_Coord_Transforms( Date, UTC, m->c );
 
     fp = fopen("input2.txt", "r");
@@ -43,12 +44,13 @@ int main( ) {
 
 
 //printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", olat, olon, oalt, or, CgmLat, CgmLon, CgmAlt, CgmRad, L );
-x = Lgm_CGM_TO_GEOD(CgmLat, CgmLon, gr, &olat, &olon, &or, m );
+//x = Lgm_CGM_TO_GEOD(CgmLat, CgmLon, gr, &olat, &olon, &or, m );
+x = Lgm_CGM_TO_GEOD(CgmLat, CgmLon, CgmRad, &olat, &olon, &or, m );
 //printf("gr = %g\n", or);
 //or = 1.0 + oalt/WGS84_A;
 oalt = 1.0+or*WGS84_A;
 L = -99e99;
-printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n", olat, olon, oalt, or, CgmLat, CgmLon, CgmAlt, CgmRad, L );
+printf("%10g %10g %10g %10g     %10g %10g %10g %10g     %10g\n\n", olat, olon, oalt, or, CgmLat, CgmLon, CgmAlt, CgmRad, L );
 
 
     }

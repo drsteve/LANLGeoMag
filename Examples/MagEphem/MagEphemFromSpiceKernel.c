@@ -20,6 +20,7 @@
 #include <Lgm_ElapsedTime.h>
 #include "SpiceUsr.h"
 #include <Lgm/qsort.h>
+#include <Lgm_Octree.h>
 
 #define EARTH_ID     399
 #define MOON_ID      301
@@ -44,7 +45,7 @@ void elt_qsort( struct TimeList *arr, unsigned n ) {
  * Takers:
  *    List of JD times of apogee/perigee crossings and current JD.
  *    The TimeList structure contans a key (JD) and a value indicating apogee or perigee.
- * Returns; 
+ * Returns;
  *    0 if not enough points
  *    1 if outbound
  *   -1 if inbound
@@ -119,42 +120,59 @@ static char ArgsDoc[] = "InFile OutFile";
  *             or OPTION_NO_USAGE
  */
 static struct argp_option Options[] = {
-    {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
-    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Can be:\n"
-                                                                                                      "\tOP77Q\n"
-                                                                                                      "\t\tOlsen-Pfitser 1977 Quiet model. Does not depend\n"
-                                                                                                      "\t\ton any input parameters.\n"
-                                                                                                      "\tT87Q\n"
-                                                                                                      "\t\tTsyganenko 1987 model with a fixed Kp = 2.\n"
-                                                                                                      "\tT89Q\n"
-                                                                                                      "\t\tTsyganenko 1989 (T89c version) model with a\n"
-                                                                                                      "\t\tfixed Kp = 2.\n"
-                                                                                                      "\tT87D\n"
-                                                                                                      "\t\tTsyganenko 1987 model with Qin-Denton input\n"
-                                                                                                      "\t\tparameters.\n"
-                                                                                                      "\tT89D\n"
-                                                                                                      "\t\tTsyganenko 1989 model with Qin-Denton input\n"
-                                                                                                      "\t\tparameters.\n"
-                                                                                                      "\tTS04D\n"
-                                                                                                      "\t\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
-                                                                                                      "\t\tinput parameters.\n"
-                                                                                                      "\tTS07D\n"
-                                                                                                      "\t\tTsyganenko-Sitnov 2007 model.\n" },
-    {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,                                      "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\"."   },
-    {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
-    {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
-    {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
-    {"Kp",              'K',    "Kp",                         0,                                      "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
-    {"Verbosity",       'v',    "verbosity",                  0,                                      "Verbosity level to use. (0-4)"      },
-    {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",        0,                                      "Start date/time in ISO 8601 format. Seconds will be truncated to integers." },
-    {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",        0,                                      "End date/time in ISO 8601 format. Seconds will be truncated to integers." },
-    {"Delta",           'D',    "delta",                      0,                                      "Time cadence in (integer) seconds." },
-    {"DumpShellFiles",  'd',    0,                            0,                                      "Dump full binary shell files (for use in viaualizing drift shells)." },
-    {"UseEop",          'z',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
-    {"Colorize",        'c',    0,                            0,                                      "Colorize output"                         },
-    {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
-    {"Coords",          'C',    "coord_system",               0,                                      "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
+    { 0, 0, 0, 0,   "Time Options:", 1},
+    {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",          0,        "Start date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
+    {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",          0,        "End date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
+    {"Delta",           'D',    "delta",                        0,        "Time cadence in (integer) seconds.", 0 },
+
+    { 0, 0, 0, 0,   "Internal Model Options:", 2},
+    {"IntModel",        'i',    "model",                        0,        "Internal Magnetic Field Model to use. Can be CDIP, EDIP, IGRF. Default is IGRF.\n\n", 0},
+
+    { 0, 0, 0, 0,   "External Model Options:", 3},
+    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, TS04D, TS07D.\n", 0},
+    {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
+
+/*
+    { 0, 0, 0, 0,
+"OP77Q\n"
+"\tOlsen-Pfitser 1977 Quiet model. Does not depend\n"
+"\ton any input parameters.\n"
+"T87Q\n"
+"\tTsyganenko 1987 model with a fixed Kp\n"
+"\t(default is 2.) The Kp level can be over-\n"
+"\t-ridden with the --Kp option.\n"
+"T89Q\n"
+"\tTsyganenko 1989 (T89c version) model\n"
+"\t(default is 2.) The Kp level can be over-\n"
+"\t-ridden with the --Kp option.\n"
+"T87D\n"
+"\tTsyganenko 1987 model with Qin-Denton input\n"
+"\tparameters.\n"
+"T89D\n"
+"\tTsyganenko 1989 model with Qin-Denton input\n"
+"\tparameters.\n"
+"TS04D\n"
+"\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
+"\tinput parameters.\n"
+"TS07D\n"
+"\tTsyganenko-Sitnov 2007 model.\n\n", 0 },
+*/
+
+    { 0, 0, 0, 0,   "Other Options:", 4},
+    {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,        "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\".", 0   },
+    {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
+    {"FootPointHeight", 'f',    "height",                     0,        "Footpoint height in km. Default is 100km."                  },
+    {"Quality",         'q',    "quality",                    0,        "Quality to use for L* calculations. Default is 3."      },
+    {"UseEop",          'z',    0,                            0,        "Use Earth Orientation Parameters whn comoputing ephemerii" },
+    {"Coords",          'C',    "coord_system",               0,        "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
+
+    { 0, 0, 0, 0,   "Output Options:", 5},
+    {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
+    {"Verbosity",       'v',    "verbosity",                  0,        "Verbosity level to use. (0-4)"      },
+    {"DumpShellFiles",  'd',    0,                            0,        "Dump full binary shell files (for use in viaualizing drift shells)." },
+    {"Colorize",        'c',    0,                            0,        "Colorize output"                         },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
+
     { 0 }
 };
 
@@ -496,7 +514,7 @@ int main( int argc, char *argv[] ){
     arguments.silent          = 0;
     arguments.Verbosity       = 0;
     arguments.Quality         = 3;
-    arguments.Kp              = -999.9; 
+    arguments.Kp              = -999.9;
     arguments.Delta           = 60;     // 60s default cadence
     arguments.Colorize        = 0;
     arguments.Force           = 0;
@@ -526,7 +544,7 @@ int main( int argc, char *argv[] ){
     /*
      *  Parse CmdLine arguments and options
      */
-    argp_parse (&argp, argc, argv, 0, 0, &arguments);
+    argp_parse( &argp, argc, argv, 0, 0, &arguments );
 
 
 
@@ -636,7 +654,7 @@ int main( int argc, char *argv[] ){
     // Settings for Lstar calcs
     MagEphemInfo->LstarQuality = Quality;
     MagEphemInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->LSimpleMax = 10.0;
+    MagEphemInfo->LstarInfo->LSimpleMax = 12.0;
     MagEphemInfo->LstarInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
@@ -721,6 +739,83 @@ int main( int argc, char *argv[] ){
     char *HdfOutFile = (char *)calloc( 2056, sizeof( char ) );
     char *InFile     = (char *)calloc( 2056, sizeof( char ) );
     char *ShellFile  = (char *)calloc( 2056, sizeof( char ) );
+
+///*
+// * Read in a BATS-R-US mesh
+// */
+FILE *fp;
+double              x, y, z, Bx, By, Bz, B1x, B1y, B1z;
+long int     rmin_n;
+double r,rmin;
+Lgm_Vector          *u, *B, *B1;
+Lgm_Octree          *Octree;
+LGM_ARRAY_1D( u, 2000000 , Lgm_Vector );
+    LGM_ARRAY_1D( B, 2000000 , Lgm_Vector );
+    LGM_ARRAY_1D( B1, 2000000 , Lgm_Vector );
+n = 0;
+Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+double theta, phi;
+rmin = 100.0;
+rmin_n = -1;
+if (0==1){
+for (r=1.0; r<1.5; r += 0.1){
+    for (i=0; i<10000; i++){
+        theta = -M_PI/2.0 + M_PI*rand()/(double)RAND_MAX;
+        phi =  2.0*M_PI*rand()/(double)RAND_MAX;
+        u[n].x = r*sin(theta)*cos(phi);
+        u[n].y = r*sin(theta)*sin(phi);
+        u[n].z = r*cos(theta);
+        B1[n].x = 0.0; B1[n].y = 0.0; B1[n].z = 0.0;
+
+        ++n;
+    }
+}
+}
+fp = fopen( "bats_r_us.txt", "r" );
+long int rmin_line_num, linenum = 0;
+while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &x, &y, &z, &Bx, &By, &Bz, &B1x, &B1y, &B1z ) != EOF ) {
+    if ( ( fabs(B1x) > 1e-9 ) && ( fabs(B1y) >  1e-9 ) && ( fabs(B1y) > 1e-9 ) ) {
+            u[n].x  = x; u[n].y  = y; u[n].z  = z;
+            B[n].x  = Bx; B[n].y  = By; B[n].z  = Bz;
+            B1[n].x = B1x; B1[n].y = B1y; B1[n].z = B1z;
+r = Lgm_Magnitude(&u[n]);
+if (r<rmin){
+rmin = r;
+rmin_n = n;
+rmin_line_num = linenum;
+}
+            ++n;
+    }
+    ++linenum;
+}
+fclose(fp);
+printf("Number of points in Mesh: %ld\n", n);
+Lgm_PrintElapsedTime( &t );
+printf("rmin = %g rmin_n = %ld rmin_line_num = %ld\n", rmin, rmin_line_num, rmin_n);
+//exit(0);
+/*
+* Create Octree
+*/
+printf("Creating Octree\n");
+Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+Octree = Lgm_InitOctree( u, B1, n );
+printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
+Lgm_PrintElapsedTime( &t );
+
+Lgm_MagModelInfo_Set_Octree( Octree, 8, MagEphemInfo->LstarInfo->mInfo );
+
+
+Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, MagEphemInfo->LstarInfo->mInfo );
+//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
+MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-4;
+MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
+MagEphemInfo->LstarInfo->mInfo->Lgm_TraceLine_Tol   = 1e-6;
+Lgm_B_FromScatteredData_SetUp( MagEphemInfo->LstarInfo->mInfo );
+
+
+
+
 
     for ( JD = sJD; JD <= eJD; JD += 1.0 ) {
 
@@ -891,7 +986,7 @@ int main( int argc, char *argv[] ){
                             ++nApoPeriTimeList;
 
                             ++nApogee;
-                            
+
                         }
                         // advance another 900 seconds.
                         Ta = Tb; Ra = Rb;
@@ -969,7 +1064,7 @@ int main( int argc, char *argv[] ){
 
 
                     /*
-                     *  Loop[ over seconds of the day
+                     *  Loop over seconds of the day
                      */
                     ss = (Date == StartDate) ? StartSeconds : 0;
                     es = (Date == EndDate) ? EndSeconds : 86400;
@@ -984,6 +1079,7 @@ int main( int argc, char *argv[] ){
                         spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                         //printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
                         U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
+U.x = 8.0; U.y = 0.0; U.z = -1.2;
 
 
                         if ( UseEop ) {
@@ -1002,8 +1098,8 @@ int main( int argc, char *argv[] ){
 //MIKE
                         if ( Kp >= 0.0 ) {
                             MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
-                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5); 
-                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 5) MagEphemInfo->LstarInfo->mInfo->Kp = 5; 
+                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5);
+                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 5) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
                             if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
                         }
 

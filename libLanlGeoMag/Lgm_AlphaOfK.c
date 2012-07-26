@@ -52,6 +52,10 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      * adaptive trace. I.e. -- no points are saved.
      */
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, m );
+    if ( TraceFlag != LGM_CLOSED ) {
+        // problem tracing FL?
+        return(-5);
+    }
     s = m->Trace_s;
 
 
@@ -65,7 +69,9 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
          * Start at Southern Footpoint and trace to Northern Footpoint.
          */
         m->Hmax = s/200.0;
-        Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
+        //Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
+
+        Lgm_TraceLine2( &v1, &v4, 0.0, s/200.0, 1.0, TRACE_TOL, FALSE, m );
 
 
         if ( !InitSpline( m ) ) return(-5);

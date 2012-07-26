@@ -540,8 +540,8 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
         { // start parallel
 
-            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
-            #pragma omp for schedule(dynamic, 1)
+//            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+//            #pragma omp for schedule(dynamic, 1)
             for ( k=0; k<nK; k++ ){
 
                 mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo

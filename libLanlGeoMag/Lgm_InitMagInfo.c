@@ -221,6 +221,15 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
     // octree stuff is also not copied correctly...
 
+    if ( s->Octree_Alloced ) {
+        //t->Octree         = Lgm_CopyOctree( s->Octree );
+        t->Octree         = s->Octree;
+        t->Octree_Alloced = TRUE;
+    } else {
+        t->Octree         = NULL;
+        t->Octree_Alloced = FALSE;
+    }
+
 
     return( t );
 
@@ -321,6 +330,12 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 /*
  * Some setters
  */
+void Lgm_MagModelInfo_Set_Octree( Lgm_Octree *Octree, int k, Lgm_MagModelInfo *m ) {
+    m->Octree         = Octree;
+    m->Octree_Alloced = TRUE;
+    Lgm_Set_Octree_kNN_k( m, k );
+    return;
+}
 void Lgm_Set_Octree_kNN_InterpMethod( Lgm_MagModelInfo *m, int Method ) {
     m->Octree_kNN_InterpMethod = Method;
     return;

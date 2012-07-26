@@ -170,6 +170,7 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 //    if ( Info->Octree->Root == NULL ) return( OCTREE_IS_NULL );
 
 
+if ( Lgm_Magnitude( v ) > 2.5 ) {
 
     /*
      *  Allocate space for the K Nearest Neighbors.
@@ -305,6 +306,9 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
      */
     LGM_ARRAY_1D_FREE( LookUpKey );
 
+} else {
+    B1.x = B1.y = B1.z = 0.0;
+}
 
 
 

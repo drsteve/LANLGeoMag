@@ -31,9 +31,9 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     int     i, iMin, Type, iMax, done, Verbosity;
     double  Min, Max, Curr, Prev;
 
-    double  Diff, OldDiff, Minima[10], Maxima[10];
-    int     nMinima, iMinima[10];
-    int     nMaxima, iMaxima[10];
+    double  Diff, OldDiff, Minima[100], Maxima[100];
+    int     nMinima, iMinima[100];
+    int     nMaxima, iMaxima[100];
 
     Verbosity = LstarInfo->VerbosityLevel;
     m = LstarInfo->mInfo;
@@ -811,12 +811,12 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    while ( !done2 && (k > 0) ) {
 
 
-//FILE *fppp;
-//fppp = fopen("FL.txt", "a");
-//for(i=0; i<LstarInfo->mInfo->nPnts; i++){
-//    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
-//}
-//fclose(fppp);
+FILE *fppp;
+fppp = fopen("FL.txt", "a");
+for(i=0; i<LstarInfo->mInfo->nPnts; i++){
+    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+}
+fclose(fppp);
 	        if ( Count == 0 ) {
 
                 /*
@@ -954,6 +954,7 @@ if (LstarInfo->VerbosityLevel > 1) {
     printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
 }
 //printf("k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
+//if (0==1){
 if ( Type > 1 ){
     FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
     //printf("\t\tRedoing!  k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
@@ -961,6 +962,7 @@ if ( Type > 1 ){
         printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
     }
 }
+//}
 
             PredMinusActualMlat = pred_mlat - mlat;
             if (LstarInfo->VerbosityLevel > 1) {
@@ -1283,7 +1285,6 @@ FIX
     Phi1 = MagFlux( LstarInfo );
     LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi1;
     Phi2 = MagFlux2( LstarInfo );
-//printf("InternalModel: %d\n", LstarInfo->mInfo->InternalModel);
     LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi2;
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
 

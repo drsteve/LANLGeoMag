@@ -410,6 +410,8 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
     int		    done, reset, n, m, SavePnt, Count;
 
+//printf("u = %g %g %g\n", u->x, u->y, u->z);
+
     reset = TRUE;
 
 //printf("\n\n\n*************************\n");
@@ -488,7 +490,9 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
          * We want to make sure that we actually do a step of Htry, so keep trying until we get there.
          */
         htry = Htry, Hdid = 0.0; Count = 0;
-        while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100) ) {
+        while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100)) {
+            //printf( "P = %g %g %g\n", P.x, P.y, P.z);
+            //printf( "Pa = %g %g %g\n", Pa.x, Pa.y, Pa.z);
             if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
             htry = Htry - hdid;
             Hdid += hdid;

@@ -69,7 +69,6 @@ for i, doy in enumerate(DOY):
         dirname = "{0:4d}".format( Year )
         old_Year = Year
         if not os.path.exists(dirname):
-            print "Making Directory:",  dirname
             os.makedirs(dirname)
 
 

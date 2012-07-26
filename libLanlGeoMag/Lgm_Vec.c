@@ -209,7 +209,7 @@ void Lgm_CartToSphCoords( Lgm_Vector *u, double *Lat, double *Lon, double *r) {
     z2 = u->z * u->z;
     
     *r = sqrt(x2 + y2 + z2);
-    sq = sqrt(x2 + y2);
+    //sq = sqrt(x2 + y2);
     
     //take care of the poles
     if ((x2+y2 <= 1e-8)) {
@@ -218,7 +218,8 @@ void Lgm_CartToSphCoords( Lgm_Vector *u, double *Lat, double *Lon, double *r) {
     }
     else {
         *Lon = atan2(u->y,u->x)*DegPerRad;
-        *Lat = 90.0 - atan2(sq, u->z)*DegPerRad;
+        //*Lat = 90.0 - atan2(sq, u->z)*DegPerRad;
+        *Lat = asin(u->z/(*r))*DegPerRad;
     }
 
     return;
