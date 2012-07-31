@@ -18,7 +18,7 @@ from spacepy import datamodel
 
 
 from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE, MOD_TO_GSE, MOD_TO_WGS84, GEO_TO_GSM, GSE_TO_GEI2000, GEI2000_TO_GSM, GSM_TO_GEI2000, GEI2000_TO_GSE
+from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE, MOD_TO_GSE, MOD_TO_WGS84, GEO_TO_GSM, GSE_TO_GEI2000, GEI2000_TO_GSM, GSM_TO_GEI2000, GEI2000_TO_GSE, GEO_TO_GSE, GSE_TO_GEO
 from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
 from lgmpy.Lstar import Lstar_Data
 
@@ -43,7 +43,9 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'GSE_GEI2000' : GSE_TO_GEI2000,
                  'GEI2000_GSE' : GEI2000_TO_GSE,
                  'GEI2000_GSM' : GEI2000_TO_GSM,
-                 'GSM_GEI2000' : GSM_TO_GEI2000,}
+                 'GSM_GEI2000' : GSM_TO_GEI2000,
+                 'GEO_GSE'     : GEO_TO_GSE,
+                 'GSE_GEO'     : GSE_TO_GEO}
 
 def coordTrans(*args):
     '''

@@ -38,11 +38,11 @@ class magcoords_Tests(unittest.TestCase):
             -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','SM'), atol=1e-8)
         ans = [-0.8908435824705201, 0.09891125760552615, -0.4434120822553017]
         numpy.testing.assert_allclose(ans,
-            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 
+            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1),
             'WGS84', 'GSM'), rtol=1e-6)
         ans = [36.7677624344546, -2.329852593118382, 4.12310562561766]
         numpy.testing.assert_allclose(ans,
-            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1), 
+            magcoords.coordTrans([-4, 0, 1], datetime.datetime(2009,1,1),
             'GSM', 'WGS84'), rtol=1e-6)
 
     def test_Lvalue(self):
@@ -102,6 +102,15 @@ class magcoords_Tests(unittest.TestCase):
         """coordTrans has various exceptions checked"""
         self.assertRaises(TypeError, magcoords.coordTrans, [-3.608026916281573, 2.5673907444456745e-16,
             -1.7268878861662329], 'bad date','SM','GSM')
+
+    def test_GEO_GSE(self):
+        """regression test on GEO_TO_GSM"""
+        expected = [-1.4268697964755936, -0.6973756761170802, 3.3878768794432226]
+        numpy.testing.assert_allclose(expected,
+                            magcoords.coordTrans([1,2,3], datetime.datetime(2012, 3, 4), 'GEO', 'GSE'))
+        numpy.testing.assert_allclose([1,2,3],
+                            magcoords.coordTrans(expected, datetime.datetime(2012, 3, 4), 'GSE', 'GEO'))
+
 
 
 if __name__ == '__main__':
