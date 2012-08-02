@@ -88,6 +88,14 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
     def tearDown(self):
         super(Lgm_VectorTestsWrap, self).tearDown()
 
+    def test_tolist(self):
+        """test .tolist()"""
+        self.assertEqual(self.vec1.tolist(), [1,2,3])
+
+    def test_toarray(self):
+        """test .toarray()"""
+        np.testing.assert_array_equal(self.vec1.toarray(), np.asarray([1,2,3]))
+
     def test_eq(self):
         """__eq__ has known output"""
         self.assertTrue(self.vec1 == self.vec1)

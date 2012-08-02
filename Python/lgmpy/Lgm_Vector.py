@@ -15,6 +15,8 @@ import itertools
 import copy
 from ctypes import pointer, c_double
 
+import numpy as np
+
 from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
     Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords
@@ -248,7 +250,7 @@ class Lgm_Vector(Lgm_Vector):
 
     def tolist(self):
         """
-        change an Lgm_Vector to a list
+        change a Lgm_Vector to a list
 
         Returns
         -------
@@ -263,6 +265,24 @@ class Lgm_Vector(Lgm_Vector):
         [1.0, 2.0, 3.0]
         """
         return [self.x, self.y, self.z]
+
+    def toarray(self):
+        """
+        change a Lgm_Vector to a numpy array
+
+        Returns
+        -------
+        out : list
+            the contents of the Lgm_Vector changed into a list
+
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> dat = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> dat.tolist()
+        [1.0, 2.0, 3.0]
+        """
+        return np.asarray([self.x, self.y, self.z])
 
     def crossProduct(self, other):
         """
