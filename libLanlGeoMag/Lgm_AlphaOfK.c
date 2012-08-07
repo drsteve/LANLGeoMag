@@ -69,9 +69,8 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
          * Start at Southern Footpoint and trace to Northern Footpoint.
          */
         m->Hmax = s/200.0;
-        //Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
-
-        Lgm_TraceLine2( &v1, &v4, 0.0, s/200.0, 1.0, TRACE_TOL, FALSE, m );
+        Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
+        //Lgm_TraceLine2( &v1, &v4, 0.0, s/200.0, 1.0, TRACE_TOL, FALSE, m );
 
 
         if ( !InitSpline( m ) ) return(-5);
@@ -247,42 +246,64 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
              *  Iinv_interped routines, we better figure out what [a,b] should
              *  be.
              */
+            m->Sm_South = m->Smin     - Sma;
+            m->Sm_North = m->Sm_South + Smb;
+            if ( ( m->Sm_South < m->s[0] ) || ( m->Sm_North > m->s[m->nPnts-1]) ) {
 
+                /*
+                 *  If we are here, then either the southern or northern
+                 *  mirror points are not within the bounds of the
+                 *  pre-traced field line points. Since we did the
+                 *  pre-traced FL from LossConeHeight to LossConeHeight, we
+                 *  will assume that this particle mirrors below the loss
+                 *  cone height -- and hence that K is undefined.
+                 */
+                //printf("Alpha = %g   m->Bm = %g\n", Alpha, m->Bm );
+                //printf("m->Smin = %g    Sma, Smb = %g %g\n", m->Smin, Sma, Smb );
+                //printf("m->Sm_South = %g    m->Sm_North = %g\n", m->Sm_South, m->Sm_North );
+                //printf("m->s[0] = %g\n", m->s[0] );
+                //exit(0);
+                if (m->VerbosityLevel >= 2) {
+                    if ( m->Sm_South < m->s[0] ) {
+                        printf("Lgm_AlphaOfK(), Line %d: Sm_South (= %g) is less than s[0] (= %g)\n",  __LINE__, m->Sm_South, m->s[0] );
+                        printf("\tAssuming particle mirrors below loss cone height, Setting K to -9e99\n" );
+                    } else if ( m->Sm_North > m->s[m->nPnts-1] ) {
+                        printf("Lgm_AlphaOfK(), Line %d: Sm_North (= %g) is less than s[%d] (= %g)\n",  __LINE__, m->Sm_North, m->nPnts-1, m->s[m->nPnts-1] );
+                        printf("\tAssuming particle mirrors below loss cone height, Setting K to -9e99\n" );
+                    }
+                }
+                K = -9e99;
 
-            if ( Smb <= 1e-5 ) {
-                // if FL length is small, use an approx expression for I
+            } else if ( Smb <= 1e-5 ) {
+
+                /*
+                 * if FL length is small, use an approx expression for I
+                 */
                 rat = m->Bmin/m->Bm;
                 if ((1.0-rat) < 0.0) {
                     I = 0.0;
                 } else {
-                    // Eqn 2.66b in Roederer
-                    I = Smb*sqrt(1.0 - m->Bmin/m->Bm);
+                    I = Smb*sqrt(1.0 - m->Bmin/m->Bm); // Eqn 2.66b in Roederer
                 }
 
             } else if (  m->UseInterpRoutines ) {
 
                 /*
-                 *  Do interped I integral.
+                 *  Do interped I integral. K in units of G^1/2 Re.
                  */
-                m->Sm_South = m->Smin - Sma;
-                m->Sm_North = m->Sm_South + Smb;
-//printf("m->Smin = %g    Sma, Smb = %g %g\n", m->Smin, Sma, Smb );
-//printf("m->Sm_South = %g    m->Sm_North = %g\n", m->Sm_South, m->Sm_North );
-//exit(0);
                 I = Iinv_interped( m );
-                // Compute K(Alpha) (units of G^1/2 Re)
                 K = 3.16227766e-3*I*sqrt(m->Bm);
                 if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Interped Integral) = %g   K = %g\n",  I, K );
 
             } else {
 
                 /*
-                 *  Do full blown I integral. 
+                 *  Do full blown I integral. K in units of G^1/2 Re.
+                 *  Check limits.
                  */
                 m->Sm_South = 0.0;
                 m->Sm_North = Smb;
                 I = Iinv( m );
-                // Compute K(Alpha) (units of G^1/2 Re)
                 K = 3.16227766e-3*I*sqrt(m->Bm);
                 if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Full Integral) = %g   K = %g\n",  I, K );
 

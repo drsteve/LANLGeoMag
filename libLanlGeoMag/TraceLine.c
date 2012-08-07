@@ -515,7 +515,8 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
 	         */
 	        v->x = v->y = v->z = 0.0;
 	        return(0);
-        } else if ( (ss > 0.0) && ((R-1.0) < 1e-8) && (F < 0.0) ) {
+//      } else if ( (ss > 0.0) && ((R-1.0) < 1e-8) && (F < 0.0) ) {
+        } else if ( (ss > 0.0) && ((R-1.0) < Info->Lgm_TraceLine_Tol) ) {
             // We have detected a change in sign for F, and we have gone some distance already, and we seem to be very close to surface of the Earth...
             // But we havent yet gone Min dist.
             // Something may have gone wrong?

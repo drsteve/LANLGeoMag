@@ -148,7 +148,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                         /*
                          * Make sure we have a small margin before and after so
-                         * we dont end up trying to extrapolate if s ever getd
+                         * we dont end up trying to extrapolate if s ever gets
                          * slightly out of bounds.
                          */
                         Ptmp = mInfo->Pm_South; stmp = 0.0; reset = FALSE;
