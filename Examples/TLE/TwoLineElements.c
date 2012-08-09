@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <Lgm_CTrans.h>
 #include <Lgm_Sgp.h>
+#include <Lgm_Eop.h>
 
 /*
  * This example shows how to compute positions of objects from TLEs
@@ -17,6 +18,8 @@ int main( int argc, char *argv[] ){
     double      UT, tsince, JD, StartUT, EndUT, StartJD, EndJD, JDinc;
     Lgm_CTrans  *c = Lgm_init_ctrans( 0 );
     Lgm_Vector  Ugse, Uteme;
+    Lgm_Eop     *e = Lgm_init_eop( 0 );
+    Lgm_EopOne  eop;
     int         nTLEs;
     char        Line0[100], Line1[100], Line2[100], *ptr;
     char        *InputFile  = "ssa_swx_tle_input.txt";
@@ -97,11 +100,20 @@ int main( int argc, char *argv[] ){
     fprintf(fp, "%%%s\n", TLEs[0].Line1 );
     fprintf(fp, "%%%s\n", TLEs[0].Line2 );
 
+    // Read in the EOP vals
+    Lgm_read_eop( e );
+
     // loop over specified time range
     for ( JD = StartJD; JD <= EndJD; JD += JDinc ) {
 
         // Convert the current JD back to Date/UT etc..
         Lgm_jd_to_ymdh ( JD, &Date, &Year, &Month, &Day, &UT );
+
+        // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+        Lgm_get_eop_at_JD( JD, &eop, e );
+
+        // Set the EOP vals in the CTrans structure.
+        Lgm_set_eop( &eop, c );
 
         // Set up the trans matrices
         Lgm_Set_Coord_Transforms( Date, UT, c );
@@ -114,10 +126,10 @@ int main( int argc, char *argv[] ){
         Uteme.x = s->X/WGS84_A; Uteme.y = s->Y/WGS84_A; Uteme.z = s->Z/WGS84_A;
 
         // Example of converting TEME->GSE coords.
-        Lgm_Convert_Coords( &Uteme, &Ugse, TEME_TO_GSE, c );
+        Lgm_Convert_Coords( &Uteme, &Ugse, TEME_TO_WGS84, c );
 
         // Dump result to file
-        printf("%8ld %.10lf %10.6lf %10.6lf %10.6lf\n", Date, UT, Ugse.x, Ugse.y, Ugse.z  );
+        printf("%8ld %.10lf %15.9lf %15.9lf %15.9lf\n", Date, UT, Ugse.x, Ugse.y, Ugse.z  );
         fprintf(fp, "%8ld %.10lf %10.6lf %10.6lf %10.6lf\n", Date, UT, Ugse.x, Ugse.y, Ugse.z  );
 
     }
@@ -126,6 +138,7 @@ int main( int argc, char *argv[] ){
     Lgm_free_ctrans( c );
     free( s );
     free( TLEs );
+    Lgm_destroy_eop( e );
 
     return(0);
 }

@@ -1079,7 +1079,6 @@ Lgm_B_FromScatteredData_SetUp( MagEphemInfo->LstarInfo->mInfo );
                         spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                         //printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
                         U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
-U.x = 8.0; U.y = 0.0; U.z = -1.2;
 
 
                         if ( UseEop ) {

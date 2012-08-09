@@ -572,6 +572,7 @@ mlatbest = mlat_min;
                 }
                 if (LstarInfo->VerbosityLevel > 1){
                     printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but |I-I0| = %g\n", fabs(a-b), De );
+                    printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
                 }
             } else if ( De > 0.0 ) {
                 if ( Da > 0.0 ) {

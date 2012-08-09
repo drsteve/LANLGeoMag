@@ -269,13 +269,13 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
             s->mInfo->Lgm_I_Integrator_epsabs = 0.0;
-            s->mInfo->Lgm_I_Integrator_epsrel = 1e-4;
+            s->mInfo->Lgm_I_Integrator_epsrel = 1e-5;
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
 
             s->mInfo->nDivs = 200;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-4;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-5;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
@@ -296,7 +296,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
 
             s->mInfo->nDivs = 200;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-3;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-4;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
