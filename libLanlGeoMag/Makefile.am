@@ -8,6 +8,9 @@ AM_CFLAGS   = -fopenmp -lgomp
 # Directory where Eop-related stuff will be installed
 LGM_EOP_DATA_DIR   = ${prefix}/share/LanlGeoMag/EopData
 
+# Directory where TS07-related files will be installed
+LGM_TS07_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
+
 # Directory where Index-related stuff will be installed
 LGM_INDEX_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
 
@@ -31,7 +34,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_B_FromScatteredData
                             Lgm_Trace.c Lgm_TraceToEarth.c Lgm_TraceToSphericalEarth.c Lgm_Vec.c MagStep.c Lgm_QuadPack3.c \
                             Lgm_QuadPack.c Lgm_Cgm.c quicksort.c SbIntegral.c T87.c T89.c T89c.c TraceLine.c Lgm_TraceToMinBSurf.c  \
                             TraceToMinRdotB.c Lgm_TraceToMirrorPoint.c TraceToSMEquat.c T01S.c Tsyg_T01s.c TS04.c Tsyg2004.c \
-                            Lgm_PolyRoots.c Lgm_SummersDiffCoeff.c Lgm_B_Dungey.c Lgm_FastPowPoly.c\
+                            Lgm_PolyRoots.c Lgm_SummersDiffCoeff.c Lgm_B_Dungey.c Lgm_FastPowPoly.c Tsyg2007.c TS07.c\
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c \
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
@@ -52,3 +55,4 @@ install-exec-hook:
 #	chmod +x $(EOPDATAdir)/GetEopFiles; $(EOPDATAdir)/GetEopFiles
 	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	rsync -ar QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
+	rsync -ar TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.

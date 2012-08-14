@@ -245,7 +245,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
          double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21, double *BXR22, double *BYR22,
         double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo ) {
 
-    int        done;
+    int       done;
     double    XAPPA, XAPPA2, XAPPA3, SPS, X0, AM, S0, FACTIMF, OIMFX, OIMFY, OIMFZ, R, XSS, ZSS;
     double    XSOLD, ZSOLD, ZSSoR, ZSSoR2, RH, RoRH, RoRH2, RoRH3, SINPSAS, SINPSAS2, COSPSAS, DD, RHO2, ASQ;
     double    XMXM, AXX0, ARO, AROpAXX0, AROpAXX02, SIGMA, CFX, CFY, CFZ, DSTT, ZNAM;

@@ -8,6 +8,7 @@
 #include "Lgm/Lgm_Constants.h"
 #include "Lgm/Lgm_DFI_RBF.h"
 #include "Lgm/Lgm_Tsyg2004.h"
+#include "Lgm/Lgm_Tsyg2007.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 //#include "Lgm/Lgm_FastPowPoly.h"
@@ -87,9 +88,10 @@
 #define LGM_EXTMODEL_T96                3
 #define LGM_EXTMODEL_T01S               4
 #define LGM_EXTMODEL_TS04               5
-#define LGM_EXTMODEL_OP77               6
-#define LGM_EXTMODEL_SCATTERED_DATA     7
-#define LGM_EXTMODEL_SCATTERED_DATA2    8
+#define LGM_EXTMODEL_TS07               6
+#define LGM_EXTMODEL_OP77               7
+#define LGM_EXTMODEL_SCATTERED_DATA     8
+#define LGM_EXTMODEL_SCATTERED_DATA2    9
 
 
 
@@ -435,6 +437,12 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
+     *  Info structure for TS07
+     */
+    LgmTsyg2007_Info    TS07_Info;
+
+
+    /*
      *  hash table used in Lgm_FastPow()
      */
     //Lgm_FastPow   *fastpow_ht;          // hash table (uthash)
@@ -604,6 +612,13 @@ void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *
 int  Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2004_Info *tInfo );
 
+/*
+ *  TS07 Optimized
+ *
+ *  Function Prototypes for TS07 model
+ */
+int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
 
 /*
