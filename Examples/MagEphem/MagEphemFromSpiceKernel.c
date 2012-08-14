@@ -743,75 +743,75 @@ int main( int argc, char *argv[] ){
 ///*
 // * Read in a BATS-R-US mesh
 // */
-FILE *fp;
-double              x, y, z, Bx, By, Bz, B1x, B1y, B1z;
-long int     rmin_n;
-double r,rmin;
-Lgm_Vector          *u, *B, *B1;
-Lgm_Octree          *Octree;
-LGM_ARRAY_1D( u, 2000000 , Lgm_Vector );
-    LGM_ARRAY_1D( B, 2000000 , Lgm_Vector );
-    LGM_ARRAY_1D( B1, 2000000 , Lgm_Vector );
-n = 0;
-Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-double theta, phi;
-rmin = 100.0;
-rmin_n = -1;
-if (0==1){
-for (r=1.0; r<1.5; r += 0.1){
-    for (i=0; i<10000; i++){
-        theta = -M_PI/2.0 + M_PI*rand()/(double)RAND_MAX;
-        phi =  2.0*M_PI*rand()/(double)RAND_MAX;
-        u[n].x = r*sin(theta)*cos(phi);
-        u[n].y = r*sin(theta)*sin(phi);
-        u[n].z = r*cos(theta);
-        B1[n].x = 0.0; B1[n].y = 0.0; B1[n].z = 0.0;
-
-        ++n;
-    }
-}
-}
-fp = fopen( "bats_r_us.txt", "r" );
-long int rmin_line_num, linenum = 0;
-while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &x, &y, &z, &Bx, &By, &Bz, &B1x, &B1y, &B1z ) != EOF ) {
-    if ( ( fabs(B1x) > 1e-9 ) && ( fabs(B1y) >  1e-9 ) && ( fabs(B1y) > 1e-9 ) ) {
-            u[n].x  = x; u[n].y  = y; u[n].z  = z;
-            B[n].x  = Bx; B[n].y  = By; B[n].z  = Bz;
-            B1[n].x = B1x; B1[n].y = B1y; B1[n].z = B1z;
-r = Lgm_Magnitude(&u[n]);
-if (r<rmin){
-rmin = r;
-rmin_n = n;
-rmin_line_num = linenum;
-}
-            ++n;
-    }
-    ++linenum;
-}
-fclose(fp);
-printf("Number of points in Mesh: %ld\n", n);
-Lgm_PrintElapsedTime( &t );
-printf("rmin = %g rmin_n = %ld rmin_line_num = %ld\n", rmin, rmin_line_num, rmin_n);
-//exit(0);
-/*
-* Create Octree
-*/
-printf("Creating Octree\n");
-Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-Octree = Lgm_InitOctree( u, B1, n );
-printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
-Lgm_PrintElapsedTime( &t );
-
-Lgm_MagModelInfo_Set_Octree( Octree, 8, MagEphemInfo->LstarInfo->mInfo );
-
-
-Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, MagEphemInfo->LstarInfo->mInfo );
-//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
-MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
-MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-4;
-MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
-MagEphemInfo->LstarInfo->mInfo->Lgm_TraceLine_Tol   = 1e-6;
-Lgm_B_FromScatteredData_SetUp( MagEphemInfo->LstarInfo->mInfo );
+//FILE *fp;
+//double              x, y, z, Bx, By, Bz, B1x, B1y, B1z;
+//long int     rmin_n;
+//double r,rmin;
+//Lgm_Vector          *u, *B, *B1;
+//Lgm_Octree          *Octree;
+//LGM_ARRAY_1D( u, 2000000 , Lgm_Vector );
+//    LGM_ARRAY_1D( B, 2000000 , Lgm_Vector );
+//    LGM_ARRAY_1D( B1, 2000000 , Lgm_Vector );
+//n = 0;
+//Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+//double theta, phi;
+//rmin = 100.0;
+//rmin_n = -1;
+//if (0==1){
+//for (r=1.0; r<1.5; r += 0.1){
+//    for (i=0; i<10000; i++){
+//        theta = -M_PI/2.0 + M_PI*rand()/(double)RAND_MAX;
+//        phi =  2.0*M_PI*rand()/(double)RAND_MAX;
+//        u[n].x = r*sin(theta)*cos(phi);
+//        u[n].y = r*sin(theta)*sin(phi);
+//        u[n].z = r*cos(theta);
+//        B1[n].x = 0.0; B1[n].y = 0.0; B1[n].z = 0.0;
+//
+//        ++n;
+//    }
+//}
+//}
+//fp = fopen( "bats_r_us.txt", "r" );
+//long int rmin_line_num, linenum = 0;
+//while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &x, &y, &z, &Bx, &By, &Bz, &B1x, &B1y, &B1z ) != EOF ) {
+//    if ( ( fabs(B1x) > 1e-9 ) && ( fabs(B1y) >  1e-9 ) && ( fabs(B1y) > 1e-9 ) ) {
+//            u[n].x  = x; u[n].y  = y; u[n].z  = z;
+//            B[n].x  = Bx; B[n].y  = By; B[n].z  = Bz;
+//            B1[n].x = B1x; B1[n].y = B1y; B1[n].z = B1z;
+//r = Lgm_Magnitude(&u[n]);
+//if (r<rmin){
+//rmin = r;
+//rmin_n = n;
+//rmin_line_num = linenum;
+//}
+//            ++n;
+//    }
+//    ++linenum;
+//}
+//fclose(fp);
+//printf("Number of points in Mesh: %ld\n", n);
+//Lgm_PrintElapsedTime( &t );
+//printf("rmin = %g rmin_n = %ld rmin_line_num = %ld\n", rmin, rmin_line_num, rmin_n);
+////exit(0);
+///*
+//* Create Octree
+//*/
+//printf("Creating Octree\n");
+//Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
+//Octree = Lgm_InitOctree( u, B1, n );
+//printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
+//Lgm_PrintElapsedTime( &t );
+//
+//Lgm_MagModelInfo_Set_Octree( Octree, 8, MagEphemInfo->LstarInfo->mInfo );
+//
+//
+//Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, MagEphemInfo->LstarInfo->mInfo );
+////MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
+//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-4;
+//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
+//MagEphemInfo->LstarInfo->mInfo->Lgm_TraceLine_Tol   = 1e-6;
+//Lgm_B_FromScatteredData_SetUp( MagEphemInfo->LstarInfo->mInfo );
 
 
 

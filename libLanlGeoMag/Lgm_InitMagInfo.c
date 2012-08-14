@@ -167,9 +167,9 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
 void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
 
+    Lgm_DeAllocate_TS07( &(Info->TS07_Info) );
     Lgm_free_ctrans( Info->c );
 
-    Lgm_DeAllocate_TS07( Info->TS07_Info );
 
 
 //    Lgm_FreeFastPow( Info->f );
@@ -237,6 +237,11 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
         t->Octree         = NULL;
         t->Octree_Alloced = FALSE;
     }
+
+
+
+    // TEMP KLUDGE
+    t->TS07_Info.ArraysAlloced = FALSE;
 
 
     return( t );

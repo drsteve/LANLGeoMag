@@ -811,12 +811,12 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    while ( !done2 && (k > 0) ) {
 
 
-FILE *fppp;
-fppp = fopen("FL.txt", "a");
-for(i=0; i<LstarInfo->mInfo->nPnts; i++){
-    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
-}
-fclose(fppp);
+//FILE *fppp;
+//fppp = fopen("FL.txt", "a");
+//for(i=0; i<LstarInfo->mInfo->nPnts; i++){
+//    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+//}
+//fclose(fppp);
 	        if ( Count == 0 ) {
 
                 /*

@@ -149,7 +149,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
 
 void Lgm_DeAllocate_TS07( LgmTsyg2007_Info *t ){
 
-    if ( t->ArraysAlloced ) {
+    if ( t->ArraysAlloced == TRUE ) {
         LGM_ARRAY_1D_FREE( t->A );
         LGM_ARRAY_2D_FREE( t->TSS );
         LGM_ARRAY_3D_FREE( t->TSO );
@@ -952,7 +952,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
      */
     for ( K=1; K<=5; K++ ){
 
-        TAILSHT_S( K, X, Y, Z, &BXSK, &BYSK, &BZSK );
+        TS07D_TAILSHT_S( K, X, Y, Z, &BXSK, &BYSK, &BZSK, tInfo );
         //SHTBNORM_S( K, X, Y, Z, &HXSK, &HYSK, &HZSK );
 
         BXS[K] = BXSK;  // +HXSK
@@ -965,7 +965,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
     for ( K=1; K<=5; K++ ){
         for ( L=1; L<=4; L++ ){
 
-            TAILSHT_OE( 1, K, L, X, Y, Z, &BXOKL, &BYOKL, &BZOKL );
+            TS07D_TAILSHT_OE( 1, K, L, X, Y, Z, &BXOKL, &BYOKL, &BZOKL, tInfo );
             //SHTBNORM_O( K, L, X, Y, Z, &HXOKL, &HYOKL, &HZOKL );
 
 
@@ -973,7 +973,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
           BYO[K][L] = BYOKL; // +HYOKL
           BZO[K][L] = BZOKL; // +HZOKL
 
-          TAILSHT_OE( 0, K, L, X, Y, Z, &BXEKL, &BYEKL, &BZEKL);
+          TS07D_TAILSHT_OE( 0, K, L, X, Y, Z, &BXEKL, &BYEKL, &BZEKL, tInfo );
           //SHTBNORM_E( K, L, X, Y, Z, &HXEKL, &HYEKL, &HZEKL );
 
           BXE[K][L] = BXEKL;  // +HXEKL
@@ -1272,7 +1272,7 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
         for ( n=1; n<=5; n++ ){
 
             RHO  = sqrt( X*X + Y*Y );
-            AKN  = dabs( AK[n] );
+            AKN  = fabs( AK[n] );
             AKNR = AKN*RHO;
 
             CHZ = cosh( Z*AKN );
@@ -1360,7 +1360,7 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
     AK[5] = TSE[80][K][L];
 
 
-    phi = atans2( Y, X );
+    phi = atan2( Y, X );
 
     L1 = 0;
     *FX = *FY = *FZ = 0.0;

@@ -83,6 +83,7 @@ START_TEST(test_MCILWAIN_02) {
     FILE                *fp_got;
 
     if ( (fp_expected = fopen( "check_McIlwain_L_02.expected", "r" )) != NULL ) {
+printf("HERe\n");
 
         fscanf( fp_expected, "%lf", &L_expected );
         fscanf( fp_expected, "%lf", &I_expected );
@@ -98,6 +99,7 @@ START_TEST(test_MCILWAIN_02) {
     L = Lgm_McIlwain_L( Date, UTC, &u, 90.0, 1, &I, &Bm, &M, mInfo );
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
+printf("HERE Passed = %d\n", Passed);
     if ( !Passed ){
         printf("\nTest 02, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
         printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
