@@ -131,6 +131,12 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
 
     /*
+     * Inits for TS07
+     */
+    Lgm_Init_TS07( &MagInfo->TS07_Info );
+
+
+    /*
      *  Inits for Octree stuff
      */
     //MagInfo->Octree_kNN_InterpMethod = XXX; // need to redo this
@@ -162,6 +168,8 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
 
     Lgm_free_ctrans( Info->c );
+
+    Lgm_DeAllocate_TS07( Info->TS07_Info );
 
 
 //    Lgm_FreeFastPow( Info->f );
@@ -376,6 +384,10 @@ void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo) {
 
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_TS04;
+}
+
+void Lgm_Set_Lgm_B_TS07(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_TS07;
 }
 
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo) {
