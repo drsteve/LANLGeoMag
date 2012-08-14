@@ -104,6 +104,7 @@ typedef struct LgmTsyg2007_Info {
  *  Function declarations
  */
 void Lgm_Init_TS07( LgmTsyg2007_Info *t );
+void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t );
 
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z,
                 double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );

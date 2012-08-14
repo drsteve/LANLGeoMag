@@ -1,5 +1,5 @@
-#ifdef HAVE_CONFIG_H                                                                                                                                                      
-#include <config.h>                                                                                                                                                       
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
 #include <stdio.h>
@@ -12,6 +12,39 @@
 /*
  *  Converted to C by Michael G. Henderson (mghenderson@lanl.gov) Aug 10, 2012.
  */
+
+void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
+
+    int     k;
+    char    Filename[1024];
+    FILE    *fp;
+
+    /*
+     * Just hard code for now....
+     */
+
+    /*
+     *  Read in coeffs
+     */
+    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2008_070_13.par", LGM_TS07_DATA_DIR );
+    if ( (fp = fopen( Filename, "r" )) != NULL ) {
+
+        for ( k=1; k<=101; k++ ) fscanf( fp, "%ld", &t->A[k] );
+
+    } else {
+
+        printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+        exit(-1);
+
+    }
+
+
+
+}
+
+
+
+
 
 void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
 
@@ -50,12 +83,14 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     t->ArraysAlloced = TRUE;
 
 
+
+
     /*
      *  Read in the TSS, TSO, and TSE .par files
      */
     for ( i=1; i<=5; i++ ) {
 
-        sprintf( Filename, "%s/tailamebhr%1d.par", LGM_TS07_DATA_DIR, i );
+        sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamebhr%1d.par", LGM_TS07_DATA_DIR, i );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
             for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSS[k][i] );
@@ -72,11 +107,11 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     for ( i=1; i<=5; i++ ) {
         for ( j=1; j<=4; j++ ) {
 
-            sprintf( Filename, "tailamhr_o_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
+            sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_o_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSO[k][i][j] );
-    
+
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
@@ -90,11 +125,11 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     for ( i=1; i<=5; i++ ) {
         for ( j=1; j<=4; j++ ) {
 
-            sprintf( Filename, "tailamhr_e_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
+            sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_e_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSE[k][i][j] );
-    
+
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
