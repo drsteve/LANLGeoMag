@@ -681,9 +681,8 @@ int main( int argc, char *argv[] ){
     } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else if ( !strcmp( ExtModel, "TS07D" ) ){
-        //MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
-        printf("TS07D not yet implemented\n");
-        exit(0);
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS07;
+Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
     } else { //if ( !strcmp( ExtModel, "T89c" ) ){
         // default
         printf("Unknown model. ExtModel: %s\n", ExtModel );

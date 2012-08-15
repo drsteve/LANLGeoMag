@@ -317,6 +317,10 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                 m->Bfield = Lgm_B_TS04;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
+        case LGM_EXTMODEL_TS07:
+                                m->Bfield = Lgm_B_TS07;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
 
         case LGM_EXTMODEL_OP77:
                                 m->Bfield = Lgm_B_OP77;
@@ -333,6 +337,11 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 m->Bfield = Lgm_B_FromScatteredData2;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+
+        default:
+                                printf("No such B field model\n");
+                                exit(-1);
                                 break;
 
 

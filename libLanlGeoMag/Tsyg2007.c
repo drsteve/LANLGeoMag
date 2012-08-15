@@ -26,10 +26,13 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
     /*
      *  Read in coeffs
      */
-    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2008_070_13.par", LGM_TS07_DATA_DIR );
+    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2008/2008_070_13.par", LGM_TS07_DATA_DIR );
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
-        for ( k=1; k<=101; k++ ) fscanf( fp, "%ld", &t->A[k] );
+        for ( k=1; k<=101; k++ ) {
+            fscanf( fp, "%lf", &t->A[k] );
+            //printf("t->A[%d] = %g\n", k, t->A[k]);
+        }
 
     } else {
 
@@ -93,7 +96,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
         sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamebhr%1d.par", LGM_TS07_DATA_DIR, i );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
-            for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSS[k][i] );
+            for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSS[k][i] );
 
         } else {
 
@@ -110,7 +113,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_o_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
-                for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSO[k][i][j] );
+                for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSO[k][i][j] );
 
             } else {
 
@@ -128,7 +131,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_e_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
-                for ( k=1; k<=80; k++ ) fscanf( fp, "%ld", &t->TSE[k][i][j] );
+                for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSE[k][i][j] );
 
             } else {
 
@@ -182,10 +185,12 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
     PDYN = PARMOD[1]; // following other versions...
     A = tInfo->A;
 
+    tInfo->sin_psi_op = SINPS;
+    tInfo->cos_psi_op = COSPS;
+
     TS07D_EXTERN( 0, A, NTOT, PS, PDYN, X, Y, Z, &BXCF, &BYCF, &BZCF, BXTS, BYTS, BZTS,
             BXTO, BYTO, BZTO, BXTE, BYTE, BZTE, &BXR11, &BYR11, &BZR11, &BXR12, &BYR12, &BZR12,
             &BXR21a, &BYR21a, &BZR21a, &BXR21s, &BYR21s, &BZR21s, BX, BY, BZ, tInfo );
-
 
 
 
@@ -227,7 +232,8 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
 
 
     if ( PDYN != tInfo->OLD_PDYN ) {
-        XAPPA = mypow( 0.5*PDYN, 0.155 );   //  0.155 is the value obtained in TS05
+        //XAPPA = mypow( 0.5*PDYN, 0.155 );   //  0.155 is the value obtained in TS05
+        XAPPA = pow( 0.5*PDYN, 0.155 );   //  0.155 is the value obtained in TS05
         tInfo->XAPPA = XAPPA;
     } else {
         XAPPA = tInfo->XAPPA;
@@ -819,7 +825,7 @@ void TS07D_WARPED( double PS, double X, double Y, double Z,
      */
     int       K, L;
     double    DGDX, XL, DXLDX, SPS, RHO2, RHO, PHI, CPHI, SPHI, XL2, XL4, XL3, RHO4, RR4L4;
-    double    F, G, TW, DFDPHI, RR4L42, DFDRHO, DFDX, CF, SF, YAS, ZAS, BX_AS1, BY_AS1, BZ_AS1;
+    double    F, G, TW, DFDPHI, RR4L4_2, DFDRHO, DFDX, CF, SF, YAS, ZAS, BX_AS1, BY_AS1, BZ_AS1;
     double    BX_AS2, BY_AS2, BZ_AS2, BRHO_AS, BPHI_AS, BRHO_S, BPHI_S;
     double    BX_ASS[6],BX_ASO[6][5],BX_ASE[6][5];
     double    BY_ASS[6],BY_ASO[6][5],BY_ASE[6][5];
@@ -848,12 +854,13 @@ void TS07D_WARPED( double PS, double X, double Y, double Z,
 
     XL2 = XL*XL; XL4 = XL2*XL2; XL3 = XL2*XL; RHO4 = RHO2*RHO2;
     RR4L4 = RHO/(RHO4+XL4);
+    RR4L4_2 = RR4L4*RR4L4;
 
-    F      = PHI+G*RHO2*RR4L4*CPHI*SPS;
-    DFDPHI = 1.0-G*RHO2*RR4L4*SPHI*SPS;
-    RR4L42 = RR4L4*RR4L4;
-    DFDRHO = G*RR4L42*(3.0*XL4-RHO4)*CPHI*SPS;
-    DFDX   = RR4L4*CPHI*SPS*(DGDX*RHO2-G*RHO*RR4L4*4.0*XL3*DXLDX);
+    F = PHI+G*RHO2*RR4L4*CPHI*SPS +TW*(X/10.0);
+    DFDPHI=1.0-G*RHO2*RR4L4*SPHI*SPS;
+    DFDRHO=G* RR4L4_2 *(3.0*XL4-RHO4)*CPHI*SPS;
+    DFDX=RR4L4*CPHI*SPS*(DGDX*RHO2-G*RHO*RR4L4*4.0*XL3*DXLDX)+TW/10.0;  //  THE LAST TERM DESCRIBES THE IMF-INDUCED TWISTING (ADDED 04/21/06)
+
 
     //CF  = cos(F); SF  = sin(F);
     mysincos( F, &SF, &CF );
@@ -884,7 +891,7 @@ void TS07D_WARPED( double PS, double X, double Y, double Z,
 
 
     for ( K=1; K<=5; K++ ){
-        for ( L=1; L<=5; L++ ){
+        for ( L=1; L<=4; L++ ){
 
             /*
              * -------------------------------------------- Deforming odd modules
@@ -1159,7 +1166,6 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
 
 void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m, ievo;
     double  D0, RNOT, DLTK, RHO, CSPHI, SNPHI, phi, CSMPHI, SNMPHI, DKM, RKM, RKMZ, RKMR;
     double  ZD, REX, AJM, AJMD, AJM1, BRO, BPHI ;
 
@@ -1174,8 +1180,8 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
     SNPHI = Y/RHO;
 
     phi    = atan2( Y, X );
-    CSMPHI = cos( m*phi );
-    SNMPHI = sin( m*phi );
+    CSMPHI = cos( M*phi );
+    SNMPHI = sin( M*phi );
 
     DKM = 1.0 + (MK-1)*DLTK;
     RKM = DKM/RNOT;
@@ -1191,15 +1197,15 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
     /*
      * ---- calculating Jm and its derivatives ------
      */
-    if ( m > 2 ) {
-        AJM  = bessj( m, RKMR );
-        AJM1 = bessj( m-1, RKMR );
-        AJMD = AJM1 - m*AJM/RKMR;
+    if ( M > 2 ) {
+        AJM  = bessj( M, RKMR );
+        AJM1 = bessj( M-1, RKMR );
+        AJMD = AJM1 - M*AJM/RKMR;
     } else {
-        if ( m == 2 ) {
+        if ( M == 2 ) {
             AJM  = bessj( 2, RKMR );
             AJM1 = bessj1( RKMR );
-            AJMD = AJM1 - m*AJM/RKMR;
+            AJMD = AJM1 - M*AJM/RKMR;
         } else {
             AJM  = bessj1( RKMR );
             AJM1 = bessj0( RKMR );
@@ -1208,7 +1214,7 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
     }
 
 
-    if ( ievo == 0 ) {
+    if ( IEVO == 0 ) {
 
         /*-------------------------------------------
             calculating symmetric modes
@@ -1712,8 +1718,8 @@ void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
     double      FX21, FY21, FZ21, HX21, HY21, HZ21, FX22, FY22, FZ22, HX22, HY22, HZ22, XKAPPA;
     int         PSChanged, XChanged, YChanged, ZChanged;
 
-    XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;         // FORWARDED IN BIRK_1N2
-    X_SC   = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;   // FORWARDED IN BIRK_SHL
+    tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;               // FORWARDED IN BIRK_1N2
+    X_SC                         = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIRK_1N2( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11, tInfo );        //  REGION 1, MODE 1
     //BIRK_SHL( SH11,PS,X_SC,X,Y,Z,&HX11,&HY11,&HZ11, tInfo);
@@ -1730,8 +1736,8 @@ void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
 
 
 
-    XKAPPA = tInfo->CB_BIRKPAR.XKAPPA2;         // FORWARDED IN BIRK_1N2
-    X_SC   = tInfo->CB_BIRKPAR.XKAPPA2 - 1.1;   // FORWARDED IN BIRK_SHL
+    tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA2;               // FORWARDED IN BIRK_1N2
+    X_SC                         = tInfo->CB_BIRKPAR.XKAPPA2 - 1.0;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIRK_1N2( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21, tInfo );        //  REGION 2, MODE 1
     //BIRK_SHL( SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
@@ -2474,8 +2480,8 @@ void     TS07D_BIRTOTSY( double PS, double X, double Y, double Z,
     double      FX21, FY21, FZ21, HX21, HY21, HZ21, FX22, FY22, FZ22, HX22, HY22, HZ22, XKAPPA;
     int         PSChanged, XChanged, YChanged, ZChanged;
 
-    XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;         // FORWARDED IN BIRK_1N2
-    X_SC   = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;   // FORWARDED IN BIRK_SHL
+    tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;               // FORWARDED IN BIRK_1N2
+    X_SC                         = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIR1N2SY( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11, tInfo );        //  REGION 1, MODE 1
     //BIRK_SHL( SH11,PS,X_SC,X,Y,Z,&HX11,&HY11,&HZ11, tInfo);
@@ -2492,8 +2498,8 @@ void     TS07D_BIRTOTSY( double PS, double X, double Y, double Z,
 
 
 
-    XKAPPA = tInfo->CB_BIRKPAR.XKAPPA2;         // FORWARDED IN BIRK_1N2
-    X_SC   = tInfo->CB_BIRKPAR.XKAPPA2 - 1.0;   // FORWARDED IN BIRK_SHL
+    tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA2;               // FORWARDED IN BIRK_1N2
+    X_SC                         = tInfo->CB_BIRKPAR.XKAPPA2 - 1.0;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIR1N2SY( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21, tInfo );        //  REGION 2, MODE 1
     //BIRK_SHL( SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
