@@ -455,6 +455,12 @@ int main( int argc, char *argv[] ){
     Lgm_Vector      Bvec, Bvec2, w;
     int             n, OverRideKp;
     char            *CmdLine;
+    SpiceChar       SpiceKernelFilesLoaded[2048];
+    SpiceChar       SpiceKernelFile[128];
+    SpiceChar       SpiceKernelType[32];
+    SpiceChar       SpiceKernelSource[128];
+    SpiceInt        SpiceHandle, kk, KernelCount;
+    SpiceBoolean    SpiceKernelFound;
 
 
     t.ColorizeText = TRUE;
@@ -940,6 +946,15 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                      */
                     furnsh_c( InputFilename );
                     printf( "\t    Using SPICE Kernel Desrciption File: %s\n", InFile );
+                    ktotal_c( "all", &KernelCount );
+                    printf( "\t    Kernel Files Loaded:\n" );
+                    SpiceKernelFilesLoaded[0] = '\0';
+                    for (kk=0; kk<KernelCount; kk++){
+                        kdata_c( kk,  "all", 128, 32, 128, SpiceKernelFile, SpiceKernelType, SpiceKernelSource, &SpiceHandle,  &SpiceKernelFound );
+                        printf( "\t\t\t\t%s\n",  SpiceKernelFile   );
+                        strcat( SpiceKernelFilesLoaded, SpiceKernelFile );
+                        if (kk<KernelCount-1) strcat( SpiceKernelFilesLoaded, ", " );
+                    }
 
 
 
@@ -1089,7 +1104,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD-3153.0, &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
+                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         //Lgm_get_QinDenton_at_JD( Lgm_JD( 2003, 10, 30, 12.0, LGM_TIME_SYS_UTC, c ), &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
@@ -1274,7 +1289,8 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
                     sprintf( Command, "sed 's/ELAPSED_TIME/%s/' <%s >%s.new", t.ElapsedTimeStr, OutFile, OutFile); system( Command );
-                    sprintf( Command, "mv %s.new %s", OutFile, OutFile); system( Command );
+                    sprintf( Command, "sed 's/SPICE_KERNEL_FILES_LOADED/%s/' <%s.new >%s.new2", SpiceKernelFilesLoaded, OutFile, OutFile); system( Command );
+                    sprintf( Command, "mv %s.new2 %s; rm %s.new", OutFile, OutFile, OutFile); system( Command );
 
 
 
@@ -3431,6 +3447,11 @@ printf("U_ARR = %g %g %g\n", U_ARR[0], U_ARR[1], U_ARR[2]);
 
 
                     H5Fclose( file );
+
+                    /*
+                     * Unload spice kernels
+                     */
+                    unload_c( InputFilename );
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure

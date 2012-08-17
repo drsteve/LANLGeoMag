@@ -121,6 +121,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
     Height = Height_a = Height_b = Height_c = 0.0;
     F = Fa = Fb = Fc = 0.0;
+    //printf("\nHmax = %g\n", Hmax);
 
 
 
@@ -174,6 +175,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, direction, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+//printf("1. PPPPPPPPPP = %g %g %g\n", P.x, P.y, P.z);
             Sa += Hdid;
             Info->Trace_s += Hdid;
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
@@ -241,6 +243,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
+//printf("2. PPPPPPPPPP = %g %g %g   Height = %g        HTRY = %g HDID = %g HNEXT = %g\n", P.x, P.y, P.z, Height, Htry, Hdid, Hnext);
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
 
@@ -265,7 +268,9 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	        Sa += Hdid;
 	    }
 
+        //if ( fabs(Hdid-Htry) > 1e-6 ) Htry = Hnext; // adaptively reset Htry
         Htry = Hnext; // adaptively reset Htry
+//printf("A. Htry = %g\n", Htry);
 
 	    /*
 	     *  Go no farther than some small distance below
@@ -273,8 +278,10 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	     */
 	    Htry_max = 0.9*Height;
 	    if (Htry > Htry_max)  Htry = Htry_max;
+//printf("B. Htry = %g      Htry, Hmin, Hmax, Htry_max = %g %g %g %g\n", Htry, Htry, Hmin, Hmax, Htry_max);
 	    if      (Htry < Hmin) Htry = Hmin;
 	    else if (Htry > Hmax) Htry = Hmax;
+//printf("C. Htry = %g\n", Htry);
 
 
     }
@@ -319,6 +326,7 @@ if (1==1){
                 Htry = 0.5*fabs(d); // LGM_1M_1O_GOLD is 0.381966...
 //            }
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+//printf("3. PPPPPPPPPP = %g %g %g           HTRY = %g\n", P.x, P.y, P.z, Htry);
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 	        F =  Height - TargetHeight;
             if ( F >= 0.0 ) {

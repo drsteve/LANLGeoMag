@@ -255,12 +255,21 @@ double I_integrand_interped( double s, _qpInfo *qpInfo ) {
      */
     mInfo = (Lgm_MagModelInfo *)qpInfo;
 
+
     B = BofS( s, mInfo );
     g = 1.0 - B/mInfo->Bm;
+//if (g<0.0){
+//printf("AHA. s = %g   B = %g   mInfo->Bm = %g\n", s, B, mInfo->Bm);
+//printf("mInfo->Sm_South, mInfo->Sm_North = %g %g\n", mInfo->Sm_South, mInfo->Sm_North);
+//
+////exit(-1);
+//}
+
     f = (g > 0.0) ? sqrt( g ) : 0.0;
+
     ++mInfo->Lgm_n_I_integrand_Calls;
 
-    return( f );
+    return(f);
 
 }
 

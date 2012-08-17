@@ -164,9 +164,9 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             //LstarInfo->mInfo->Hmax = 0.1;
             LstarInfo->mInfo->Hmax = 0.1;
 
-            //printf("0. HERE: Pmin, Pm_North, Pm_South = %g %g %g   %g %g %g   %g %g %g   SS = %g\n",   LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z,
-            //                                                                                           LstarInfo->mInfo->Pm_North.x,  LstarInfo->mInfo->Pm_North.y,  LstarInfo->mInfo->Pm_North.z,
-            //                                                                                           LstarInfo->mInfo->Pm_South.x,  LstarInfo->mInfo->Pm_South.y,  LstarInfo->mInfo->Pm_South.z, SS );
+//            printf("0. HERE: Pmin, Pm_North, Pm_South = %g %g %g   %g %g %g   %g %g %g   SS = %g\n",   LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z,
+//                                                                                                       LstarInfo->mInfo->Pm_North.x,  LstarInfo->mInfo->Pm_North.y,  LstarInfo->mInfo->Pm_North.z,
+//                                                                                                       LstarInfo->mInfo->Pm_South.x,  LstarInfo->mInfo->Pm_South.y,  LstarInfo->mInfo->Pm_South.z, SS );
 
             if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
@@ -186,6 +186,8 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
                 //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
                 if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+//printf("P0 = %g %g %g\n", LstarInfo->mInfo->Px[0], LstarInfo->mInfo->Py[0], LstarInfo->mInfo->Pz[0]);
+//printf("Plast = %g %g %g\n", LstarInfo->mInfo->Px[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Py[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Pz[LstarInfo->mInfo->nPnts-1]);
 
 
                 /*
@@ -202,12 +204,14 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 //AddNewPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
 //MGH MGH                            ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
 //MGH MGH                            AddNewPoint( SS,  LstarInfo->mInfo->Bm, &Pm_North, LstarInfo->mInfo );
+
+if (0==1){
                 ReplaceFirstPoint( 0.0, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_South, LstarInfo->mInfo );
                 ReplaceLastPoint( SS, LstarInfo->mInfo->Bm, &LstarInfo->mInfo->Pm_North, LstarInfo->mInfo );
 
                 /*
                  * Make sure we have a small margin before and after so
-                 * we dont end up trying to extrapolate if s ever getd
+                 * we dont end up trying to extrapolate if s ever gets
                  * slightly out of bounds.
                  */
                  Ptmp = LstarInfo->mInfo->Pm_South; stmp = 0.0; reset2 = FALSE;
@@ -222,13 +226,19 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                  //printf("stmp, Btmp = %g %g\n", SS+stmp, Btmp );
                  AddNewPoint( SS+stmp, Btmp, &Ptmp, LstarInfo->mInfo );
 
+//int iiii;
+//for (iiii=0; iiii<LstarInfo->mInfo->nPnts; iiii++){
+//printf("%g %g\n", LstarInfo->mInfo->s[iiii], LstarInfo->mInfo->Bmag[iiii]);
+//}
+}
+
 
                 if ( InitSpline( LstarInfo->mInfo ) ) {
 
                     /*
                      *  Do I integral with interped integrand.
                      */
-                    I = Iinv_interped( LstarInfo->mInfo  );
+                    I = Iinv_interped( LstarInfo->mInfo );
 //                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     if (LstarInfo->VerbosityLevel > 1) {
                         printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I, I0, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );

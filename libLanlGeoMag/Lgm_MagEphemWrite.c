@@ -722,7 +722,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "# \"Loss_Cone_Alpha_n\": { \"DESCRIPTION\": \"Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ).\",\n");
+    fprintf( fp, "# \"Loss_Cone_Alpha_n\": { \"DESCRIPTION\": \"Value of Northern Loss Cone angle. asin( sqrt(Bsc/Bfn) ). Bsc is the magntiude of B at spacecraft,"
+                                                               " Bfn is the magnitude of B at the northern footpoint. Note, loss-cone height is taken to be equal"
+                                                               " to the footpoint height which is %g km above the WGS84 geoid.\",\n", m->LstarInfo->mInfo->Lgm_LossConeHeight );
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_n\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Northern Loss Cone Angle\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Northern Loss Cone Angle (Degrees)\",\n");
@@ -890,7 +892,9 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "# \"Loss_Cone_Alpha_s\": { \"DESCRIPTION\": \"Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ).\",\n");
+    fprintf( fp, "# \"Loss_Cone_Alpha_s\": { \"DESCRIPTION\": \"Value of Southern Loss Cone angle. asin( sqrt(Bsc/Bfs) ). Bsc is the magntiude of B at spacecraft,"
+                                                               " Bfs is the magnitude of B at the southern footpoint. Note, loss-cone height is taken to be equal"
+                                                               " to the footpoint height which is %g km above the WGS84 geoid.\",\n", m->LstarInfo->mInfo->Lgm_LossConeHeight );
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_s\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Southern Loss Cone Angle\",\n");
     fprintf( fp, "#                              \"LABEL\": \"Southern Loss Cone Angle (Degrees)\",\n");
@@ -1241,6 +1245,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
     fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
     fprintf( fp, "#                      \"SPICE_BODY_ID\": \"%d\"\n", 0);
+    fprintf( fp, "#               \"SPICE_KERNELS_LOADED\": \"%s\"\n", "SPICE_KERNEL_FILES_LOADED" );
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents. The format for ElapsedTime is DDD:HH:MM:SS.\",\n");
