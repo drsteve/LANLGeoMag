@@ -96,28 +96,64 @@ double Lgm_get_index(int year, int month, int day, int hour, int min, int sec, i
 
   int cntr,min_index,next_index ;
   double fYear,t1,t2,indexfit ;
-  double* fYear_array ;
+  double* fYear_array, *Data_array ;
+  double      MJD, Prev_MJD, Next_MJD, Prev_UT, Next_UT;
+  long int    total_length=0, Prev_Date, Next_Date;
+  int         Prev_Year, Prev_Month, Prev_Day, Next_Year, Next_Month, Next_Day;  
+  Lgm_CTrans  *c = Lgm_init_ctrans(0);
   
-  Lgm_Read_AEfile(year, month, day) ;
 
-  fYear_array = malloc(index_length*sizeof(double)) ;
+  fYear_array = malloc(4500*sizeof(double)) ;
+  Data_array = malloc(4500*sizeof(double)) ;
+  
+  MJD = Lgm_MJD( year, month, day, 12.0, LGM_TIME_SYS_UTC, c );
 
+  Prev_MJD = MJD-1.0;
+  Lgm_mjd_to_ymdh( Prev_MJD, &Prev_Date, &Prev_Year, &Prev_Month, &Prev_Day, &Prev_UT );
+  //printf("Previous day with year=%d, month=%d, day=%d\n",Prev_Year, Prev_Month, Prev_Day);
+
+  Next_MJD = MJD+1.0;
+  Lgm_mjd_to_ymdh( Next_MJD, &Next_Date, &Next_Year, &Next_Month, &Next_Day, &Next_UT );
+  //printf("Next day with year=%d, month=%d, day=%d\n",Next_Year, Next_Month, Next_Day);
+  
+  //Read in previous day
+  Lgm_Read_AEfile(Prev_Year, Prev_Month, Prev_Day) ;
   for(cntr=0; cntr<index_length; cntr++)
     {
       fYear_array[cntr] = AEdatetime[cntr].fYear ;
+      Data_array[cntr] = index_ptr[cntr];
     }
+  total_length+=index_length;
+  
+  //Read in current day
+  Lgm_Read_AEfile(year, month, day) ;
+  for(cntr=0; cntr<index_length; cntr++)
+    {
+      fYear_array[cntr+total_length] = AEdatetime[cntr].fYear ;
+      Data_array[cntr+total_length] = index_ptr[cntr];
+    }
+  total_length+=index_length;
+
+  //Read in next day
+  Lgm_Read_AEfile(Next_Year, Next_Month, Next_Day) ;
+  for(cntr=0; cntr<index_length; cntr++)
+    {
+      fYear_array[cntr+total_length] = AEdatetime[cntr].fYear ;
+      Data_array[cntr+total_length] = index_ptr[cntr];
+    }
+  total_length+=index_length  ;  
 
   fYear = year + month/12. + day/(12.*31.) + hour/(12.*31.*24.) + min/(12.*31.*24.*60.) + 
     sec/(12.*31.*24.*60.*60.) ;
 
-  for(cntr=0; cntr<index_length; cntr++)
+  for(cntr=0; cntr<total_length; cntr++)
     {
       fYear_array[cntr] = fabs(fYear_array[cntr] - fYear) ;
     }
 
   /* figure out my best match */
 
-  min_index = gsl_stats_min_index(fYear_array,1,index_length) ;
+  min_index = gsl_stats_min_index(fYear_array,1,total_length) ;
   
   /* do a simple linear interpolation */
 
@@ -132,7 +168,7 @@ double Lgm_get_index(int year, int month, int day, int hour, int min, int sec, i
 
   /* simple weighting function */
 
-  indexfit = (t2*index_ptr[min_index] + t1*index_ptr[next_index])/(t2+t1) ;
+  indexfit = (t2*Data_array[min_index] + t1*Data_array[next_index])/(t2+t1) ;
 
   free(fYear_array) ;
 
