@@ -920,6 +920,7 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
     int         i1, i2;
     Lgm_Vector  P, Bvec;
 
+//printf("n = %d\n", Info->nPnts);
 
     /*
      * Make sure s is within bounds.
