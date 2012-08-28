@@ -325,8 +325,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"CD_MLAT\":          { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Centerted Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"CD_MLAT\",\n");
+    fprintf( fp, "#  \"CDMAG_MLAT\":       { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Centerted Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"CDMAG_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Latitude\",\n");
     fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
@@ -336,8 +336,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"CD_MLON\":          { \"DESCRIPTION\": \"Magnetic Longitude of S/C Centerted Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"CD_MLON\",\n");
+    fprintf( fp, "#  \"CDMAG_MLON\":       { \"DESCRIPTION\": \"Magnetic Longitude of S/C Centerted Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"CDMAG_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Longitude\",\n");
     fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
@@ -347,8 +347,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"CD_MLT\":           { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Centerted Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"CD_MLT\",\n");
+    fprintf( fp, "#  \"CDMAG_MLT\":        { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Centerted Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"CDMAG_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Magnetic Local Time (MLT)\",\n");
     fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
@@ -358,8 +358,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"CD_R\":             { \"DESCRIPTION\": \"Radial distance of S/C from center of CDMAG coordinate system.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"CD_R\",\n");
+    fprintf( fp, "#  \"CDMAG_R\":          { \"DESCRIPTION\": \"Radial distance of S/C from center of CDMAG coordinate system.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"CDMAG_R\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Centered Dipole Radial Distance\",\n");
     fprintf( fp, "#                              \"LABEL\": \"CD R (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
@@ -372,8 +372,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
 
 
 
-    fprintf( fp, "#  \"ED_MLAT\":          { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Eccentric Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"ED_MLAT\",\n");
+    fprintf( fp, "#  \"EDMAG_MLAT\":       { \"DESCRIPTION\": \"Magnetic Latitude of S/C in Eccentric Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"EDMAG_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Latitude\",\n");
     fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
@@ -383,8 +383,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"ED_MLON\":          { \"DESCRIPTION\": \"Magnetic Longitude of S/C Eccentric Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"ED_MLON\",\n");
+    fprintf( fp, "#  \"EDMAG_MLON\":       { \"DESCRIPTION\": \"Magnetic Longitude of S/C Eccentric Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"EDMAG_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Longitude\",\n");
     fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
@@ -394,8 +394,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"ED_MLT\":           { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Eccentric Dipole Coordinates.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"ED_MLT\",\n");
+    fprintf( fp, "#  \"EDMAG_MLT\":        { \"DESCRIPTION\": \"Magnetic Local Time of S/C in Eccentric Dipole Coordinates.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"EDMAG_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Magnetic Local Time (MLT)\",\n");
     fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
@@ -405,8 +405,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"ED_R\":             { \"DESCRIPTION\": \"Radial distance of S/C from center of EDMAG coordinate system.\",\n");
-    fprintf( fp, "#                               \"NAME\": \"ED_R\",\n");
+    fprintf( fp, "#  \"EDMAG_R\":          { \"DESCRIPTION\": \"Radial distance of S/C from center of EDMAG coordinate system.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"EDMAG_R\",\n");
     fprintf( fp, "#                              \"TITLE\": \"S/C Eccentric Dipole Radial Distance\",\n");
     fprintf( fp, "#                              \"LABEL\": \"ED R (Re)\",\n");
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
@@ -1560,7 +1560,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *Spacecraft, int IdNumber, char *In
     fprintf( fp, " %12s", "Bfs_z" );
     fprintf( fp, " %12s", "Bfs" );
 
-    fprintf( fp, " %12s", "Alpha_LC_N" ); // Southern Loss Cone
+    fprintf( fp, " %12s", "Alpha_LC_S" ); // Southern Loss Cone
 
     fprintf( fp, " %12s", "Xgsm" ); // Pmin gsm
     fprintf( fp, " %12s", "Ygsm" );

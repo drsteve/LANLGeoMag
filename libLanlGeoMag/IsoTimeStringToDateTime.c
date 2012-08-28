@@ -82,7 +82,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     double      Offset, Time;
     int         tyear, tday, tmonth, sgn;
     int         Year, wYear, Month, Day, Hours, Minutes, TZD_sgn, TZD_hh, TZD_mm, Week, DayOfWeek, DayOfYear;
-    int         ISOFormat, TZDError=FALSE, MaxWeek, InvalidDate=FALSE;
+    int         ISOFormat, TZDError=FALSE, MaxWeek, InvalidDate=FALSE, IsLeapSecondDay;
     double      Seconds;
     STRLEN      n_a;
     char        *embedding[] = { "", "-e", "0" };
@@ -678,7 +678,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     d->TZD_mm     = TZD_mm;
 
     // save # secs in a day
-    Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
+    IsLeapSecondDay = Lgm_IsLeapSecondDay( d->Date, &d->DaySeconds, c );
 
     // Julian centuries
     d->T          = (d->JD - 2451545.0)/36525.0;
@@ -686,7 +686,6 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     // decimal year
     d->fYear      = (double)d->Year + ((double)d->Doy - 1.0 + d->Time/24.0)/(365.0 + (double)Lgm_LeapYear(d->Year));
     
-
     /*
      * Test for sane numbers
      */
@@ -714,9 +713,21 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
         printf( "Minutes Out of Range! (Minutes = %d)\n", d->Minute );
         InvalidDate = TRUE;
     }
-    if ( ( d->Second < 0 ) || ( d->Second > 60 ) ) { // Yes seconds can be 60 to accomodate leap seconds
+    if ( d->Second < 0.0 ) { 
         printf( "Seconds Out of Range! (Seconds = %lf)\n", d->Second ); 
         InvalidDate = TRUE;
+    }
+    if ( d->Second >= 60.0 ) { // Yes seconds can be 60 to accomodate leap seconds
+        if ( IsLeapSecondDay && (d->Minute == 59) ) {
+            if ( d->Second >= 61.0 ){
+                // not sure we ever get here, because the date will have rolled over above the call to Lgm_IsLeapSecondDay()
+                printf( "Seconds Out of Range! (Seconds = %lf) on a leap second day (must be less than 61.0)\n", d->Second ); 
+                InvalidDate = TRUE;
+            }
+        } else {
+            printf( "Seconds Out of Range! (Seconds = %lf)\n", d->Second ); 
+            InvalidDate = TRUE;
+        }
     }
     if ( ( d->wYear < 0 ) || ( d->wYear > 9999 ) ) {
         printf( "Year Out of Range!\n", d->wYear );
@@ -737,6 +748,8 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     }
 
     if ( InvalidDate ) {
+        d->Date = -1;
+        d->Time = 0.0;
         printf( "Invalid Date!\n" );
         return(-1);
     }
