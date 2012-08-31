@@ -641,6 +641,7 @@ typedef struct Lgm_CTrans {
      */
     double      M_cd;               /**< centered  dipole Magnetic moment. (nT Re^3)*/
     double      M_cd_McIllwain;     /**<  magnetic dipole moment used by McIllwain to compute L. Sometimes want to use this for consistency? */
+    double      M_cd_2010;          /**<  magnetic dipole moment for epoch 2010-01-01T00:00:00Z. Used by us to compute L*. */
     double      CD_gcolat;          /**< Geographic colat of centered dipole axis (deg.)  */
     double      CD_glon;            /**< Geographic long. of centered dipole axis (deg.)  */
     double      ED_x0;              /**<  x-comp of dipole displacement from center. Used in eccentric dipole field. */

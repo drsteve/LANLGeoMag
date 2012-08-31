@@ -5,7 +5,7 @@ int main( ) {
     long int        Date;
     double      UTC;
     
-    Date = 20100101;    // August 12, 2004
+    Date = 20000101;    // Jan 1, 2000
 
     UTC  = 0.0;  // Universal Time Coordinated (in decimal hours)
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates

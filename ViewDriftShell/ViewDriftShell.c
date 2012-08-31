@@ -1347,7 +1347,7 @@ static float view_scale          = 4.0;
 
 
 int IdleRunning = FALSE;
-int AnimateView = FALSE;
+int AnimateView = TRUE;
 int AnimateTime = TIME_REALTIMEPLAY;
 
 static void toggle_animation (GtkWidget *widget);
@@ -1938,7 +1938,7 @@ void CreateEarth( ){
 
 
     // EqPlane image
-if (1==1){
+if (0==1){
     EqPlaneDL = glGenLists( 1 );
     glNewList( EqPlaneDL, GL_COMPILE );
         glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
@@ -2042,7 +2042,7 @@ if (0==1){
 }
 
     // MeridPlane1 image 2
-if (1==1){
+if (0==1){
     MeridPlane2DL = glGenLists( 1 );
     glNewList( MeridPlane2DL, GL_COMPILE );
         glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
@@ -2691,19 +2691,24 @@ void DrawSatLabels(){
 
 void CreateSats() {
 
-    double           tsince, JD;
+    double           tsince, JD, tUT;
+    long int         tDate;
     Lgm_Vector       Ugsm, Uteme, Ugei, EarthToSun, EarthToSun_obs, g1, g2, g3, P, Pobs, Uobs;
-    int              i, Flag1=0, Flag2=0, Flag3=0;
+    int              i, Flag1=0, Flag2=0, Flag3=0, tYear, tMonth, tDay;
     _GroupNode      *g;
     _SpaceObjects   *Group;
     _SgpInfo        *s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );;
+    Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
 
     /*
-     * All the TLEs have their own epoch times in them. And the propagator (sgp4)
+     * All the TLEs have their own epoch times0 in them. And the propagator (sgp4)
      * uses the "time since (in minutes)". So for a given time of interest, we need to
      * compute the tsince needed.
      */
     JD = CurrentJD;
+
+    Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+    Lgm_Set_Coord_Transforms( tDate, tUT, c );
 
     SatsDL = glGenLists( 1 );
     glNewList( SatsDL, GL_COMPILE );
@@ -2757,7 +2762,7 @@ void CreateSats() {
                             LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                             LgmSgp_SGP4( tsince, s );
                             Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, mInfo->c );
+                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
                             //glColor4f( 0.7, 0.1, 0.0, 0.5 );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;
@@ -2790,7 +2795,7 @@ void CreateSats() {
                             LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                             LgmSgp_SGP4( tsince, s );
                             Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, mInfo->c );
+                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
                             //glColor4f( 0.5, 0.4, 0.0, 0.5 );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;
@@ -2823,7 +2828,9 @@ void CreateSats() {
                             LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                             LgmSgp_SGP4( tsince, s );
                             Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, mInfo->c );
+                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
+printf("Date, Time: %ld %lf   Sat pnt: Ugei.x = %g Ugei.y = %g Ugei.z = %g\n", Ugei.x, Ugei.y, Ugei.z );
+printf("Sat pnt: Ugsm.x = %g Ugsm.y = %g Ugsm.z = %g\n", Ugsm.x, Ugsm.y, Ugsm.z );
                             //glColor4f( 1.0, 1.0, 1.0, 0.5 );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;
@@ -2867,34 +2874,8 @@ glDisable(GL_LIGHTING);
                         LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                         glBegin( GL_LINES );
                             LgmSgp_SGP4( tsince, s );
-//                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-Uteme.x = s->X/Re; Uteme.y = s->Y/Re; Uteme.z = s->Z/Re;
-long int tDate;
-int tYear, tMonth, tDay;
-double tUT;
-CurrentJD = Lgm_GetCurrentJD( mInfo->c );
-Lgm_jd_to_ymdh( CurrentJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-printf("tDate, tYear, tMonth, tDay, tUT = %ld, %d %d %d %lf\n", tDate, tYear, tMonth, tDay, tUT);
-Lgm_Set_Coord_Transforms( tDate, tUT, mInfo->c );
-
-//Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, mInfo->c );
-Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_TOD, mInfo->c );
-double tmp_r = Lgm_Magnitude( &Ugei );
-double tmp_dec = asin( Ugei.z/tmp_r) *DegPerRad;
-double tmp_ra  = atan2( Ugei.y, Ugei.x )*DegPerRad;
-printf("tsince = %lf\n", tsince);
-printf("tmp_r = %lf\n", tmp_r);
-printf("Uteme = %lf %lf %lf\n", Uteme.x, Uteme.y, Uteme.z);
-printf("Ugei  = %lf %lf %lf\n", Ugei.x, Ugei.y, Ugei.z);
-printf("tmp_dec = %lf\n", tmp_dec);
-printf("tmp_ra = %lf\n", tmp_ra);
-printf("tmp_dec = "); Lgm_Print_DMSd( tmp_dec ); printf(" )\n");
-printf("tmp_ra  = "); Lgm_Print_HMSd( tmp_dec/15.0 ); printf(" )\n");
-printf("JD = %lf\n", JD);
-
-
-//RA   = %15lf  ( ",  c->RA_sun);          Lgm_Print_HMSd( c->RA_sun/15.0 ); printf(" )\n");
-                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, mInfo->c );
+                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
+                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
                             glColor4f( Group->Sat[i].ssglRed, Group->Sat[i].ssglGrn, Group->Sat[i].ssglBlu, Group->Sat[i].ssglAlf );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Lgm_NormalizeVector( &Ugsm );
@@ -2921,11 +2902,11 @@ Lgm_Vector u, uu;
         Radius = Lgm_Magnitude( &u );
 
 u.x = r*sin(th)*cos(ph); u.y = r*sin(th)*sin(ph); u.z = r*cos(th);
-Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, mInfo->c );
+Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, c );
 
         // convert sun from gei->obs
-        EarthToSun = mInfo->c->Sun; Lgm_ScaleVector( &EarthToSun, mInfo->c->earth_sun_dist );
-        Lgm_Convert_Coords( &EarthToSun, &EarthToSun_obs, SatsConvertFlag, mInfo->c );
+        EarthToSun = c->Sun; Lgm_ScaleVector( &EarthToSun, c->earth_sun_dist );
+        Lgm_Convert_Coords( &EarthToSun, &EarthToSun_obs, SatsConvertFlag, c );
 
         glBegin( GL_LINES );
         g = SatSelectorInfo->SatGroupList;
@@ -2937,13 +2918,13 @@ Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, mInfo->c );
                 if ( strstr( Group->Sat[i].TLE.Name, "IRIDIUM" ) ) {
                     if ( ShowIridiumSatToGround || ShowIridiumSatToSun ) {
                         IridiumFlare( JD, &Group->Sat[i].TLE, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P );
-                        Lgm_Convert_Coords( &P, &Pobs, SatsConvertFlag, mInfo->c ); // convert S/C pos from GEI->Obs
+                        Lgm_Convert_Coords( &P, &Pobs, SatsConvertFlag, c ); // convert S/C pos from GEI->Obs
 
                         if ( ShowIridiumSatToGround ) {
                             if (Flag1){
                                 glColor4f( 1.0, 0.0, 0.0, 1.0);
                                 glVertex3f( Pobs.x, Pobs.y, Pobs.z );
-                                Lgm_Convert_Coords( &g1, &Uobs, SatsConvertFlag, mInfo->c );
+                                Lgm_Convert_Coords( &g1, &Uobs, SatsConvertFlag, c );
                                 printf("g1 diff: %g\n", Re*Lgm_VecDiffMag( &uu, &g1 ));
                                 glVertex3f( Uobs.x, Uobs.y, Uobs.z );
                             }
@@ -2951,7 +2932,7 @@ Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, mInfo->c );
                             if (Flag2){
                                 glColor4f( 0.0, 1.0, 0.0, 1.0);
                                 glVertex3f( Pobs.x, Pobs.y, Pobs.z );
-                                Lgm_Convert_Coords( &g2, &Uobs, SatsConvertFlag, mInfo->c );
+                                Lgm_Convert_Coords( &g2, &Uobs, SatsConvertFlag, c );
                                 glVertex3f( Uobs.x, Uobs.y, Uobs.z );
                                 printf("g2 diff: %g\n", Re*Lgm_VecDiffMag( &uu, &g2 ));
                             }
@@ -2959,7 +2940,7 @@ Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, mInfo->c );
                             if (Flag3){
                                 glColor4f( 0.0, 0.0, 1.0, 1.0);
                                 glVertex3f( Pobs.x, Pobs.y, Pobs.z );
-                                Lgm_Convert_Coords( &g3, &Uobs, SatsConvertFlag, mInfo->c );
+                                Lgm_Convert_Coords( &g3, &Uobs, SatsConvertFlag, c );
                                 glVertex3f( Uobs.x, Uobs.y, Uobs.z );
                                 printf("g3 diff: %g\n", Re*Lgm_VecDiffMag( &uu, &g3 ));
                             }
@@ -2988,6 +2969,7 @@ Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, mInfo->c );
     glEndList( );
 
     free(s);
+    Lgm_free_ctrans( c ); // free the CTrans structure
 
 }
 
@@ -3230,7 +3212,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
     glEndList( );
 
     free(s);
-    free(c);
+    Lgm_free_ctrans( c ); // free the CTrans structure 
 
 }
 
@@ -4243,9 +4225,9 @@ printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], vi
         position[0] = Sun.x; position[1] = Sun.y; position[2] = Sun.z;
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
-        //glLightfv (GL_LIGHT0, GL_POSITION, position);
-        LightPosition[0] = 5000.0; LightPosition[1] = LightPosition[2] = LightPosition[3] = 0.0;
-        glLightfv (GL_LIGHT0, GL_POSITION, LightPosition );
+        glLightfv (GL_LIGHT0, GL_POSITION, position);
+//        LightPosition[0] = 5000.0; LightPosition[1] = LightPosition[2] = LightPosition[3] = 0.0;
+//        glLightfv (GL_LIGHT0, GL_POSITION, LightPosition );
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
 
@@ -4492,8 +4474,8 @@ static gboolean idle( GtkWidget *widget ) {
         if ( oJD != CurrentJD ){
             Lgm_jd_to_ymdh( CurrentJD, &CurrentDate, &CurrentYear, &CurrentMonth, &CurrentDay, &CurrentUT );
             Lgm_UT_to_hmsms( CurrentUT, &CurrentHour, &CurrentMin, &CurrentSec, &CurrentMilliSec );
-//            UpdateTimeDepQuants( CurrentDate, CurrentUT );
-UpdateTimeDepQuants( ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC  );
+            UpdateTimeDepQuants( CurrentDate, CurrentUT );
+//MGH MGH MGH MGH UpdateTimeDepQuants( ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC  );
 
             if (ShowStars) ReLoadStars( );
             ReCreateSats();
@@ -8131,15 +8113,15 @@ int main( int argc, char *argv[] ) {
 
 
 
-    StartYear  = 2008; StartMonth = 7; StartDay   = 22;
+    StartYear  = 2012; StartMonth = 8; StartDay   = 31;
 //StartYear  = 2009; StartMonth = 4; StartDay   = 20;
     StartDate  = StartYear*10000 + StartMonth*100 + StartDay;
-    StartHour  = 18; StartMin = 57; StartSec   = 30; StartMilliSec = 0;
+    StartHour  = 0; StartMin = 0; StartSec   = 0; StartMilliSec = 0;
 //StartHour  = 0; StartMin = 2; StartSec   = 30; StartMilliSec = 0;
     StartUT    = (double)StartHour + (double)StartMin/60.0 + (double)(StartSec+StartMilliSec/1000.0)/3600.0;
     StartJD    = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
 
-    EndYear  = 2010; EndMonth = 7; EndDay   = 22;
+    EndYear  = 2015; EndMonth = 12; EndDay   = 31;
     EndDate  = EndYear*10000 + EndMonth*100 + EndDay;
     EndHour  = 23; EndMin = 58; EndSec   = 30; EndMilliSec = 0;
     EndDate  = EndYear*10000 + EndMonth*100 + EndDay;
@@ -8157,7 +8139,7 @@ int main( int argc, char *argv[] ) {
     nFramesLeft = (long int)((EndJD - CurrentJD) / (TimeInc/86400.0) + 1.5);
     if (nFramesLeft<0) nFramesLeft = 0;
     nFrames     = cFrame + nFramesLeft;
-    RunTime     = FALSE;
+    RunTime     = TRUE;
     DumpFrames  = FALSE;
 printf("EndJD, StartJD = %lf %lf\n", EndJD, StartJD);
 printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);

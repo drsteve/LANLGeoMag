@@ -687,11 +687,13 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
                 if (LstarInfo->VerbosityLevel > 0) {
                     // sort this out. FIX User should decide what M they want to use.
-                    M = LstarInfo->mInfo->c->M_cd_McIllwain;
-                    M = LstarInfo->mInfo->c->M_cd;
+                    //M = LstarInfo->mInfo->c->M_cd;
+                    //M = LstarInfo->mInfo->c->M_cd_McIllwain;
+                    M = LstarInfo->mInfo->c->M_cd_2010;
                     printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     printf("\t\t%sCurrent Dipole Moment, M_cd:             %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_McIllwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIllwain, PostStr);
+                    printf("\t\t%sReference Dipole Moment, M_cd_2010:      %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
                     printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, M, PostStr);
                     printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, M ), PostStr );
                     printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, M ), PostStr );

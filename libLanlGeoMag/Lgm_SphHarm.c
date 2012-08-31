@@ -281,7 +281,8 @@ void Lgm_InitSphHarm( int Model, double g[13][13], double h[13][13], int N, int 
          *  Compute dipole moments.
          */
         c->M_cd = H0;
-        c->M_cd_McIllwain = 0.311653e5;;
+        c->M_cd_McIllwain = 31165.3;
+        c->M_cd_2010      = 29950.1686985232;
 
         c->CD_gcolat = M_PI - acos(g[1][0]/H0);
         c->CD_glon   = atan(h[1][1]/g[1][1]);

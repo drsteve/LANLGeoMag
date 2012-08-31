@@ -404,6 +404,9 @@ int main( int argc, char *argv[] ){
     double          *H5_GpsTime;
     double          *H5_TiltAngle;
     double          U_ARR[4];
+    char            **H5_IntModel;
+    char            **H5_ExtModel;
+    char            **H5_FieldLineType;
     Lgm_Vector      *H5_Rgsm;
     Lgm_Vector      *H5_Bsc_gsm;
     Lgm_Vector      *H5_Bfn_geo;
@@ -432,10 +435,25 @@ int main( int argc, char *argv[] ){
     double          *H5_RadiusOfCurv;
     double          *H5_LossConeAngleN;
     double          *H5_LossConeAngleS;
+    Lgm_Vector      *H5_Pmin_gsm;
+    Lgm_Vector      *H5_Bmin_gsm;
+    double          *H5_Lsimple;
+    double          *H5_InvLat;
+    double          *H5_Lm_eq;
+    double          *H5_InvLat_eq;
+    double          *H5_BoverBeq;
+    double          *H5_MlatFromBoverBeq;
+    double          *H5_M_used;
+    double          *H5_M_ref;
+    double          *H5_M_igrf;
     int             H5_nT;
     int             H5_nAlpha;
     double          *H5_Alpha;
     double          **H5_Lstar;
+    int             **H5_DriftShellType;
+    double          **H5_Sb;
+    double          **H5_Tb;
+    double          **H5_Kappa;
     double          **H5_K;
     double          **H5_I;
     double          **H5_L;
@@ -459,14 +477,16 @@ int main( int argc, char *argv[] ){
     int             nApoPeriTimeList;
     Lgm_Vector      Bvec, Bvec2, w;
     double          Bsc_mag, Bfn_mag, Bfs_mag;
+    double          Bmin_mag, s, cl, Ek, E, pp, p2c2, Beta2, Beta, vel, T, rg;
     int             n, OverRideKp;
-    char            *CmdLine;
+    char            *CmdLine, TmpStr[2048];
     SpiceChar       SpiceKernelFilesLoaded[2048];
     SpiceChar       SpiceKernelFile[128];
     SpiceChar       SpiceKernelType[32];
     SpiceChar       SpiceKernelSource[128];
     SpiceInt        SpiceHandle, kk, KernelCount;
     SpiceBoolean    SpiceKernelFound;
+
 
 
     t.ColorizeText = TRUE;
@@ -482,6 +502,9 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_1D( H5_JD,        2000,        double );
     LGM_ARRAY_1D( H5_GpsTime,   2000,        double );
     LGM_ARRAY_1D( H5_TiltAngle, 2000,        double );
+    LGM_ARRAY_2D( H5_IntModel,  2000, 80,    char );
+    LGM_ARRAY_2D( H5_ExtModel,  2000, 80,    char );
+    LGM_ARRAY_2D( H5_FieldLineType,  2000, 80,    char );
     LGM_ARRAY_1D( H5_Rgsm,      2000,        Lgm_Vector );
     LGM_ARRAY_1D( H5_Bsc_gsm,   2000,        Lgm_Vector );
     LGM_ARRAY_1D( H5_Bfn_geo,   2000,        Lgm_Vector );
@@ -513,6 +536,20 @@ int main( int argc, char *argv[] ){
 
     LGM_ARRAY_1D( H5_LossConeAngleN, 2000,     double );
     LGM_ARRAY_1D( H5_LossConeAngleS, 2000,     double );
+
+    LGM_ARRAY_1D( H5_Pmin_gsm,       2000,     Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bmin_gsm,       2000,     Lgm_Vector );
+
+    LGM_ARRAY_1D( H5_Lsimple,        2000,     double );
+    LGM_ARRAY_1D( H5_InvLat,         2000,     double );
+    LGM_ARRAY_1D( H5_Lm_eq,          2000,     double );
+    LGM_ARRAY_1D( H5_InvLat_eq,      2000,     double );
+    LGM_ARRAY_1D( H5_BoverBeq,       2000,     double );
+    LGM_ARRAY_1D( H5_MlatFromBoverBeq, 2000,   double );
+    LGM_ARRAY_1D( H5_M_used,         2000,     double );
+    LGM_ARRAY_1D( H5_M_ref,          2000,     double );
+    LGM_ARRAY_1D( H5_M_igrf,         2000,     double );
+
 
     LGM_ARRAY_1D( ApoPeriTimeList, 20, TimeList );
     LGM_ARRAY_1D( Perigee_UTC, 10, Lgm_DateTime );
@@ -729,11 +766,15 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
         MagEphemInfo->Alpha[i] = Alpha[i];
         H5_Alpha[i] = Alpha[i];
     }
-    LGM_ARRAY_2D( H5_Lstar, 2000, nAlpha, double );
-    LGM_ARRAY_2D( H5_K,     2000, nAlpha, double );
-    LGM_ARRAY_2D( H5_I,     2000, nAlpha, double );
-    LGM_ARRAY_2D( H5_L,     2000, nAlpha, double );
-    LGM_ARRAY_2D( H5_Bm,    2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_Lstar,          2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_DriftShellType, 2000, nAlpha, int );
+    LGM_ARRAY_2D( H5_Sb,             2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_Tb,             2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_Kappa,          2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_K,              2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_I,              2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_L,              2000, nAlpha, double );
+    LGM_ARRAY_2D( H5_Bm,             2000, nAlpha, double );
 
 
 
@@ -877,7 +918,12 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
             }
 
+            /*
+             * Assume that the Outfile name specified on the command line is the basename (i.e. no extensions on the end..)
+             * Then we need to add ".txt" and ".h5" to each
+             */
             sprintf( HdfOutFile, "%s.h5", OutFile );
+            strcat( OutFile, ".txt" );
 
 
 
@@ -1104,6 +1150,21 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
                         spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+SpiceDouble  sclkdp;
+sce2c_c( BODY,    et, &sclkdp);
+printf("sclkdp = %lf\n", sclkdp);
+
+sce2t_c( BODY,    et, &sclkdp);
+printf("sclkdp = %lf\n", sclkdp);
+
+SpiceChar sclkch[30];
+sce2s_c( BODY,    et, 30, sclkch );
+printf("sclkch = %s\n", sclkch);
+
+
+
+
+
                         //printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
                         U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
 
@@ -1170,6 +1231,31 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                             // Fill arrays for dumping out as HDF5 files
                             strcpy( H5_IsoTimes[H5_nT], IsoTimeString );
+                            strcpy( H5_IntModel[H5_nT], IntModel );
+                            strcpy( H5_ExtModel[H5_nT], ExtModel );
+                            switch ( MagEphemInfo->FieldLineType ) {
+                                case LGM_OPEN_IMF:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_IMF" ); // FL Type
+                                                    break;
+                                case LGM_CLOSED:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_CLOSED" ); // FL Type
+                                                    break;
+                                case LGM_OPEN_N_LOBE:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_N_LOBE" ); // FL Type
+                                                    break;
+                                case LGM_OPEN_S_LOBE:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_S_LOBE" ); // FL Type
+                                                    break;
+                                case LGM_INSIDE_EARTH:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_INSIDE_EARTH" ); // FL Type
+                                                    break;
+                                case LGM_TARGET_HEIGHT_UNREACHABLE:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_TARGET_HEIGHT_UNREACHABLE" ); // FL Type
+                                                    break;
+                                default:
+                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "UNKNOWN FIELD TYPE" ); // FL Type
+                                                    break;
+                            }
                             H5_Date[H5_nT]           = UTC.Date;
                             H5_Doy[H5_nT]            = UTC.Doy;
                             H5_UTC[H5_nT]            = UTC.Time;
@@ -1193,11 +1279,45 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                             MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &H5_Bsc_gsm[H5_nT], MagEphemInfo->LstarInfo->mInfo );
 
+                            if ( MagEphemInfo->FieldLineType == LGM_CLOSED ) {
+                                H5_Pmin_gsm[H5_nT] = MagEphemInfo->Pmin;
+                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Pmin, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                                H5_Bmin_gsm[H5_nT] = Bvec;
+                                Bmin_mag = Lgm_Magnitude( &Bvec );
+                            } else {
+                                H5_Pmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
+                                H5_Pmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
+                                H5_Pmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
+                                H5_Bmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
+                                H5_Bmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
+                                H5_Bmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
+                                Bmin_mag = LGM_FILL_VALUE;
+                            }
+
 
                             for (i=0; i<nAlpha; i++){
-                                H5_Lstar[H5_nT][i] = MagEphemInfo->Lstar[i];
-                                H5_I[H5_nT][i]     = MagEphemInfo->I[i];
-                                H5_Bm[H5_nT][i]    = MagEphemInfo->Bm[i];
+                                H5_Lstar[H5_nT][i]          = MagEphemInfo->Lstar[i];
+                                H5_DriftShellType[H5_nT][i] = MagEphemInfo->DriftOrbitType[i];
+                                H5_Sb[H5_nT][i]             = MagEphemInfo->Sb[i];
+                                H5_I[H5_nT][i]              = MagEphemInfo->I[i];
+                                H5_Bm[H5_nT][i]             = MagEphemInfo->Bm[i];
+
+                                Ek    = 1.0; // MeV
+                                E     = Ek + LGM_Ee0; // total energy, MeV
+                                p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
+                                Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
+                                Beta  = sqrt( Beta2 );
+                                vel   = Beta*LGM_c;  // velocity in m/s
+                                vel  /= (Re*1000.0); // Re/s
+                                T     = ( MagEphemInfo->Sb[i] > 0.0 ) ? 2.0*MagEphemInfo->Sb[i]/vel : LGM_FILL_VALUE;
+
+                                pp    = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
+                                rg    = sin(MagEphemInfo->Alpha[i]*RadPerDeg)*pp/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
+
+                                H5_Tb[H5_nT][i]             = T;
+                                H5_Kappa[H5_nT][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
+
+
                                 if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
                                     H5_K[H5_nT][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
                                 } else {
@@ -1209,6 +1329,68 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                                     H5_L[H5_nT][i] = LGM_FILL_VALUE;
                                 }
                             }
+
+                            /*
+                             * Compute Lsimple
+                             */
+                            H5_Lsimple[H5_nT] = ( Bmin_mag > 0.0) ? Lgm_Magnitude( &MagEphemInfo->Pmin ) : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute InvLat
+                             */
+                            if (H5_Lsimple[H5_nT] > 0.0) {
+                                H5_InvLat[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lsimple[H5_nT]));
+                            } else {
+                                H5_InvLat[H5_nT] = LGM_FILL_VALUE;
+                            }
+
+                            /*
+                             * Compute Lm_eq
+                             */
+                            H5_Lm_eq[H5_nT] = (Bmin_mag > 0.0) ? LFromIBmM_McIlwain( 0.0, Bmin_mag, MagEphemInfo->Mcurr ) : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute InvLat_eq
+                             */
+                            if (H5_Lm_eq[H5_nT] > 0.0) {
+                                H5_InvLat_eq[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lm_eq[H5_nT]));
+                            } else {
+                                H5_InvLat_eq[H5_nT] = LGM_FILL_VALUE;
+                            }
+
+                            /*
+                             * Compute BoverBeq
+                             */
+                            Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
+                            H5_BoverBeq[H5_nT] = ( Bmin_mag > 0.0) ? Bsc_mag / Bmin_mag : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute MlatFromBoverBeq
+                             */
+                            if ( H5_BoverBeq[H5_nT] > 0.0 ) {
+                                s = sqrt( 1.0/H5_BoverBeq[H5_nT] );
+                                cl = Lgm_CdipMirrorLat( s );
+                                if ( fabs(cl) <= 1.0 ){
+                                    H5_MlatFromBoverBeq[H5_nT] = DegPerRad*acos( cl );
+                                    if (H5_S_Bmin_to_sc[H5_nT]<0.0) H5_MlatFromBoverBeq[H5_nT] *= -1.0;
+                                } else {
+                                    H5_MlatFromBoverBeq[H5_nT] = LGM_FILL_VALUE;
+                                }
+                            } else {
+                                H5_MlatFromBoverBeq[H5_nT] = LGM_FILL_VALUE;
+                            }
+
+                            /*
+                             * Save M values
+                             */
+                            H5_M_used[H5_nT] = MagEphemInfo->Mused;
+                            H5_M_ref[H5_nT]  = MagEphemInfo->Mref;
+                            H5_M_igrf[H5_nT] = MagEphemInfo->Mcurr;
+
+
+
+
+
 
                             if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_N_LOBE) ) {
 
@@ -1244,7 +1426,6 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                                 /*
                                  * Save northern loss cone.
                                  */
-                                Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
                                 Bfn_mag = Lgm_Magnitude( &H5_Bfn_gsm[H5_nT] );
                                 H5_LossConeAngleN[H5_nT] = asin( sqrt( Bsc_mag/Bfn_mag ) )*DegPerRad;
 
@@ -1352,7 +1533,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(Perigee_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "PerigeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
@@ -1383,7 +1564,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(Apogee_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "ApogeeTimes", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The times of Perigee in ISO 8601 compliant format. Defined as largest geocentric distance." );
@@ -1414,7 +1595,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "IsoTime", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The date and time in ISO 8601 compliant format." );
@@ -1726,7 +1907,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, 30 );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "IntModel", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Internal magnetic field model." );
@@ -1743,7 +1924,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, 30 );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "ExtModel", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "External magnetic field model." );
@@ -1802,7 +1983,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     atype   = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, 30 );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     DataSet = H5Dcreate( file, "FieldLineType", atype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Description of the type of field line the S/C is on., Can be one of 4 types: LGM_CLOSED      - FL hits Earth at both ends. LGM_OPEN_N_LOBE - FL is an OPEN field line rooted in the Northern polar cap. LGM_OPEN_S_LOBE - FL is an OPEN field line rooted in the Southern polar cap. LGM_OPEN_IMF    - FL does not hit Earth at eitrher end." );
@@ -1855,7 +2036,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                     // Create S_Bmin_to_sc Dataset
                     Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); 
+                    space   = H5Screate_simple( 1, Dims, NULL );
                     DataSet = H5Dcreate( file, "S_Bmin_to_sc", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Distance between Bmin point and S/C along field line (positive if north of Bmin).");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
@@ -1868,7 +2049,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                     // Create S_total Dataset
                     Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); 
+                    space   = H5Screate_simple( 1, Dims, NULL );
                     DataSet = H5Dcreate( file, "S_total", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Total Field Line length (along field line).");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
@@ -1881,7 +2062,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                     // Create d2B_ds2 Dataset
                     Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); 
+                    space   = H5Screate_simple( 1, Dims, NULL );
                     DataSet = H5Dcreate( file, "d2B_ds2", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Second derivative of |B| with respect to s (dist along FL) at minimum |B| point.");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
@@ -1894,7 +2075,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                     // Create Sb0 Dataset
                     Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); 
+                    space   = H5Screate_simple( 1, Dims, NULL );
                     DataSet = H5Dcreate( file, "Sb0", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
@@ -1907,7 +2088,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                     // Create RadiusOfCurv Dataset
                     Dims[0] = H5_nT;
-                    space   = H5Screate_simple( 1, Dims, NULL ); 
+                    space   = H5Screate_simple( 1, Dims, NULL );
                     DataSet = H5Dcreate( file, "RadiusOfCurv", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Field line radius of curvature at minimum |B| point.");
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
@@ -2493,6 +2674,63 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     status  = H5Sclose( space );
                     status  = H5Dclose( DataSet );
 
+                    // Create Sb Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Sb", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "Re" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create Tb Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Tb", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Bounce period for 1 MeV electrons.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "s" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+
+                    // Create Kappa Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "Kappa", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Kappa parameter for 1MeV electrons -- sqrt( (Minimum Radius of Curvature)/Maximum gyroradius)) (see Büchner, J., and L. M. Zelenyi (1989), Regular and Chaotic Charged Particle Motion in Magnetotaillike Field Reversals, 1. Basic Theory of Trapped Motion, J. Geophys. Res., 94(A9), 11,821–11,842, doi:10.1029/JA094iA09p11821.");
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "dimlesss" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create DriftShellType Dataset
+                    Dims[0] = H5_nT; Dims[1] = H5_nAlpha;
+                    space   = H5Screate_simple( 2, Dims, NULL ); // rank 2
+                    DataSet = H5Dcreate( file, "DriftShellType", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    sprintf( TmpStr, "Type of Drift Shell (e.g. %d=CLOSED, %d=CLOSED_SHABANSKY, %d=OPEN, %d=OPEN_SHABANSKY)", LGM_DRIFT_ORBIT_CLOSED, LGM_DRIFT_ORBIT_CLOSED_SHABANSKY, LGM_DRIFT_ORBIT_OPEN, LGM_DRIFT_ORBIT_OPEN_SHABANSKY);
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", TmpStr );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_1",   "Alpha" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "dimlesss" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
 
 
 
@@ -2524,7 +2762,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     atype    = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(H5_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     for ( iT=0; iT<H5_nT; iT++ ){
                             Offset[0]   = iT;
@@ -2544,7 +2782,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     atype    = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(Apogee_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     for ( iT=0; iT<nApogee; iT++ ){
                             Offset[0]   = iT;
@@ -2582,7 +2820,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     MemSpace = H5Screate_simple( 1, SlabSize, NULL );
                     atype    = H5Tcopy( H5T_C_S1 );
                     status  = H5Tset_size( atype, strlen(Perigee_IsoTimes[0]) );
-                    status  = H5Tset_strpad( atype, H5T_STR_NULLPAD );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
                     status  = H5Tset_cset( atype, H5T_CSET_ASCII );
                     for ( iT=0; iT<nPerigee; iT++ ){
                             Offset[0]   = iT;
@@ -2980,12 +3218,46 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
 
                     // Write IntModel
-
-
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "IntModel", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_IntModel[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &H5_IntModel[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
 
 
 
                     // Write ExtModel
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "ExtModel", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_ExtModel[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &H5_ExtModel[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
+
+
 
 
                     // Write Kp
@@ -3033,6 +3305,24 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
 
                     // Write FieldLineType
+                    SlabSize[0] = 1;
+                    DataSet  = H5Dopen( file, "FieldLineType", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    atype    = H5Tcopy( H5T_C_S1 );
+                    status  = H5Tset_size( atype, strlen(H5_FieldLineType[0]) );
+                    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
+                    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            Offset[0]   = iT;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, atype, MemSpace, space, H5P_DEFAULT, &H5_FieldLineType[iT][0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+                    status = H5Tclose( atype );
+
 
 
 
@@ -3544,9 +3834,152 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
 
 
+                    // Write Pmin_gsm
+                    SlabSize[0] = 1; SlabSize[1] = 3;
+                    DataSet  = H5Dopen( file, "Pmin_gsm", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Pmin_gsm[iT].x; U_ARR[1] = H5_Pmin_gsm[iT].y; U_ARR[2] = H5_Pmin_gsm[iT].z;
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
+
+                    // Write Bmin_gsm
+                    SlabSize[0] = 1; SlabSize[1] = 4;
+                    DataSet  = H5Dopen( file, "Bmin_gsm", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    for ( iT=0; iT<H5_nT; iT++ ){
+                            U_ARR[0] = H5_Bmin_gsm[iT].x; U_ARR[1] = H5_Bmin_gsm[iT].y; U_ARR[2] = H5_Bmin_gsm[iT].z; U_ARR[3] = Lgm_Magnitude( &H5_Bmin_gsm[iT] );
+                            Offset[0]   = iT; Offset[1] = 0;
+                            status = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                            status = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &U_ARR[0] );
+                    }
+                    status = H5Sclose( MemSpace );
+                    status = H5Dclose( DataSet );
+                    status = H5Sclose( space );
 
 
+                    // Write Lsimple
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Lsimple", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Lsimple[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
 
+
+                    // Write InvLat
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "InvLat", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_InvLat[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write Lm_eq
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "Lm_eq", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Lm_eq[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write InvLat_eq
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "InvLat_eq", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_InvLat_eq[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write BoverBeq
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "BoverBeq", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_BoverBeq[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write MlatFromBoverBeq
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "MlatFromBoverBeq", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_MlatFromBoverBeq[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write M_used
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "M_used", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_M_used[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write M_ref
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "M_ref", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_M_ref[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+
+                    // Write M_igrf
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "M_igrf", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_M_igrf[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
 
 
 
@@ -3563,6 +3996,54 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
                     MemSpace = H5Screate_simple( 2, SlabSize, NULL );
                     status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Lstar[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write Sb
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "Sb", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Sb[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write Tb
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "Tb", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Tb[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write Kappa
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "Kappa", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_DOUBLE, MemSpace, space, H5P_DEFAULT, &H5_Kappa[0][0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
+                    // Write DriftShellType
+                    SlabSize[0] = H5_nT; SlabSize[1] = H5_nAlpha;
+                    Offset[0]   = 0; Offset[1] = 0;
+                    DataSet  = H5Dopen( file, "DriftShellType", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 2, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_INT, MemSpace, space, H5P_DEFAULT, &H5_DriftShellType[0][0] );
                     status   = H5Sclose( MemSpace );
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
@@ -3647,6 +4128,10 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
     LGM_ARRAY_2D_FREE( H5_I );
     LGM_ARRAY_2D_FREE( H5_L );
     LGM_ARRAY_2D_FREE( H5_Lstar );
+    LGM_ARRAY_2D_FREE( H5_DriftShellType );
+    LGM_ARRAY_2D_FREE( H5_Sb );
+    LGM_ARRAY_2D_FREE( H5_Tb );
+    LGM_ARRAY_2D_FREE( H5_Kappa );
     LGM_ARRAY_1D_FREE( H5_Alpha );
     LGM_ARRAY_2D_FREE( Birds );
     LGM_ARRAY_2D_FREE( H5_IsoTimes );
@@ -3669,6 +4154,17 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
     LGM_ARRAY_1D_FREE( H5_RadiusOfCurv );
     LGM_ARRAY_1D_FREE( H5_LossConeAngleN );
     LGM_ARRAY_1D_FREE( H5_LossConeAngleS );
+    LGM_ARRAY_1D_FREE( H5_Pmin_gsm );
+    LGM_ARRAY_1D_FREE( H5_Bmin_gsm );
+    LGM_ARRAY_1D_FREE( H5_Lsimple );
+    LGM_ARRAY_1D_FREE( H5_InvLat );
+    LGM_ARRAY_1D_FREE( H5_Lm_eq );
+    LGM_ARRAY_1D_FREE( H5_InvLat_eq );
+    LGM_ARRAY_1D_FREE( H5_BoverBeq );
+    LGM_ARRAY_1D_FREE( H5_MlatFromBoverBeq );
+    LGM_ARRAY_1D_FREE( H5_M_used );
+    LGM_ARRAY_1D_FREE( H5_M_ref );
+    LGM_ARRAY_1D_FREE( H5_M_igrf );
     LGM_ARRAY_1D_FREE( H5_Rgsm );
     LGM_ARRAY_1D_FREE( H5_Bsc_gsm );
     LGM_ARRAY_1D_FREE( H5_Bfn_geo );
@@ -3694,6 +4190,9 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
     LGM_ARRAY_2D_FREE( Perigee_Geod );
     LGM_ARRAY_2D_FREE( Apogee_Geod );
     LGM_ARRAY_1D_FREE( ApoPeriTimeList );
+    LGM_ARRAY_2D_FREE( H5_IntModel );
+    LGM_ARRAY_2D_FREE( H5_ExtModel );
+    LGM_ARRAY_2D_FREE( H5_FieldLineType );
 
 
 
