@@ -26,6 +26,8 @@
 #define MOON_ID      301
 #define RBSPA_ID    -362
 #define RBSPB_ID    -363
+#define  MAXIV      1000
+#define  WINSIZ     ( 2 * MAXIV )
 
 /*
  * Stuff for inbound/outbound determination
@@ -362,6 +364,8 @@ double ApogeeFunc( double T, double val, void *Info ){
 int main( int argc, char *argv[] ){
 
     Lgm_ElapsedTimeInfo t;
+    long int         IdNumber;
+    char             IntDesig[10], CommonName[80];
 
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
@@ -486,6 +490,11 @@ int main( int argc, char *argv[] ){
     SpiceChar       SpiceKernelSource[128];
     SpiceInt        SpiceHandle, kk, KernelCount;
     SpiceBoolean    SpiceKernelFound;
+    SPICEDOUBLE_CELL ( cover, WINSIZ );
+    SpiceInt        niv, jj;
+    SpiceDouble     begtime, endtime;
+    SpiceChar       timestr1[51], timestr2[51];
+    SpiceChar       sclkch[30];
 
 
 
@@ -894,13 +903,22 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
             strcpy( InFile, InputFilename );
 
             if        ( !strcmp( Bird, "rbspa" ) ){
-                BODY = RBSPA_ID;
+                BODY     = RBSPA_ID;
+                IdNumber = 38752;
+                strcpy( IntDesig,   "2012-046A" );
+                strcpy( CommonName, "RBSP A" );
             } else if ( !strcmp( Bird, "rbspb" ) ){
-                BODY = RBSPB_ID;
+                BODY     = RBSPB_ID;
+                IdNumber = 38753;
+                strcpy( IntDesig, "2012-046B" );
+                strcpy( CommonName, "RBSP A" );
             } else {
                 // maybe user just has a SPICE BODY number?
+                IdNumber = -999999;
+                sprintf( IntDesig, "SPICE Object: %s", Bird );
+                sprintf( CommonName, "%s", Bird );
                 BODY = atoi( Bird );
-            }
+            } 
 
             if ( SubstituteVars ) {
 
@@ -1010,9 +1028,26 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     SpiceKernelFilesLoaded[0] = '\0';
                     for (kk=0; kk<KernelCount; kk++){
                         kdata_c( kk,  "all", 128, 32, 128, SpiceKernelFile, SpiceKernelType, SpiceKernelSource, &SpiceHandle,  &SpiceKernelFound );
-                        printf( "\t\t\t\t%s\n",  SpiceKernelFile   );
+                        printf( "\t\t\t\t%s   (Type = %s)\n",  SpiceKernelFile, SpiceKernelType );
                         strcat( SpiceKernelFilesLoaded, SpiceKernelFile );
                         if (kk<KernelCount-1) strcat( SpiceKernelFilesLoaded, ", " );
+
+                        if ( !strcmp( SpiceKernelType, "SPK" ) ){
+                            scard_c( 0, &cover );
+                            spkcov_c( SpiceKernelFile, BODY, &cover );
+                            niv = wncard_c( &cover );
+                            printf ( "\t\t\t\t========================================\n" );
+                            printf ( "\t\t\t\tCoverage for object %d\n", BODY );
+                            for ( jj = 0;  jj < niv;  jj++  ){
+                                wnfetd_c( &cover, jj, &begtime, &endtime );
+                                timout_c( begtime, "YYYY MON DD HR:MN:SC.### (UTC) ::UTC",  51, timestr1 );
+                                timout_c( endtime, "YYYY MON DD HR:MN:SC.### (UTC) ::UTC",  51, timestr2 );
+                                printf( "\t\t\t\tInterval:  %4d  Start: %s  Stop: %s\n", jj, timestr1, timestr2 );
+                            }
+                            printf ( "\n" );
+                        }
+
+
                     }
 
 
@@ -1125,7 +1160,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, Bird, 9, "FIX ME", CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, BODY, CommonName, IdNumber, IntDesig, CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {
@@ -1150,16 +1185,17 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
                         spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+/*
 SpiceDouble  sclkdp;
 sce2c_c( BODY,    et, &sclkdp);
 printf("sclkdp = %lf\n", sclkdp);
 
 sce2t_c( BODY,    et, &sclkdp);
 printf("sclkdp = %lf\n", sclkdp);
+*/
 
-SpiceChar sclkch[30];
-sce2s_c( BODY,    et, 30, sclkch );
-printf("sclkch = %s\n", sclkch);
+
+
 
 
 
@@ -1196,15 +1232,16 @@ printf("sclkch = %s\n", sclkch);
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
+                        sce2s_c( BODY,    et, 30, sclkch );
 
-
-                            /*
-                             * Compute L*s, Is, Bms, Footprints, etc...
-                             * These quantities are stored in the MagEphemInfo Structure
-                             */
-                            printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
-                            printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                            printf("\t--------------------------------------------------------------------------------------------------\n");
+                        /*
+                         * Compute L*s, Is, Bms, Footprints, etc...
+                         * These quantities are stored in the MagEphemInfo Structure
+                         */
+                        printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
+                        printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
+                        printf("\t\tMET: %s\n", sclkch );          
+                        printf("\t--------------------------------------------------------------------------------------------------\n");
 //Lgm_Vector TMPTMP;
 //Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );
 //Lgm_TraceToMinBSurf( &Rgsm, &TMPTMP, 0.1, 1e-7, MagEphemInfo->LstarInfo->mInfo );
@@ -1212,295 +1249,295 @@ printf("sclkch = %s\n", sclkch);
 //printf("Lgm_AlphaOfK( 0.1 ) = %g\n", Lgm_AlphaOfK( 0.1, MagEphemInfo->LstarInfo->mInfo ) );
 //Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
 //exit(0);
-                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+                        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 //                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &TMPTMP, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
-                            MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
-                            Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
+                        MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
+                        Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 
-                            if ( DumpShellFiles && (nAlpha > 0) ){
+                        if ( DumpShellFiles && (nAlpha > 0) ){
 
-                                sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
-                                printf( "Writing Full Shell File: %s\n", ShellFile );
-                                WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
-                            }
-
-
+                            sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
+                            printf( "Writing Full Shell File: %s\n", ShellFile );
+                            WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
+                        }
 
 
-                            // Fill arrays for dumping out as HDF5 files
-                            strcpy( H5_IsoTimes[H5_nT], IsoTimeString );
-                            strcpy( H5_IntModel[H5_nT], IntModel );
-                            strcpy( H5_ExtModel[H5_nT], ExtModel );
-                            switch ( MagEphemInfo->FieldLineType ) {
-                                case LGM_OPEN_IMF:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_IMF" ); // FL Type
-                                                    break;
-                                case LGM_CLOSED:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_CLOSED" ); // FL Type
-                                                    break;
-                                case LGM_OPEN_N_LOBE:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_N_LOBE" ); // FL Type
-                                                    break;
-                                case LGM_OPEN_S_LOBE:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_S_LOBE" ); // FL Type
-                                                    break;
-                                case LGM_INSIDE_EARTH:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_INSIDE_EARTH" ); // FL Type
-                                                    break;
-                                case LGM_TARGET_HEIGHT_UNREACHABLE:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_TARGET_HEIGHT_UNREACHABLE" ); // FL Type
-                                                    break;
-                                default:
-                                                    sprintf( H5_FieldLineType[H5_nT], "%s",  "UNKNOWN FIELD TYPE" ); // FL Type
-                                                    break;
-                            }
-                            H5_Date[H5_nT]           = UTC.Date;
-                            H5_Doy[H5_nT]            = UTC.Doy;
-                            H5_UTC[H5_nT]            = UTC.Time;
-                            H5_JD[H5_nT]             = UTC.JD;
-                            H5_InOut[H5_nT]          = MagEphemInfo->InOut;
-                            H5_GpsTime[H5_nT]        = Lgm_UTC_to_GpsSeconds( &UTC, c );
-                            H5_TiltAngle[H5_nT]      = c->psi*DegPerRad;
-                            H5_Rgsm[H5_nT]           = Rgsm;
-                            H5_Kp[H5_nT]             = MagEphemInfo->LstarInfo->mInfo->fKp;
-                            H5_Dst[H5_nT]            = MagEphemInfo->LstarInfo->mInfo->Dst;
-                            H5_S_sc_to_pfn[H5_nT]    = (MagEphemInfo->Snorth > 0.0) ? MagEphemInfo->Snorth : LGM_FILL_VALUE;
-                            H5_S_sc_to_pfs[H5_nT]    = (MagEphemInfo->Ssouth > 0.0) ? MagEphemInfo->Ssouth : LGM_FILL_VALUE;
-                            H5_S_pfs_to_Bmin[H5_nT]  = (MagEphemInfo->Smin > 0.0) ? MagEphemInfo->Smin : LGM_FILL_VALUE;
-                            H5_S_Bmin_to_sc[H5_nT]   = ((MagEphemInfo->Ssouth>0.0)&&(MagEphemInfo->Smin > 0.0)) ? MagEphemInfo->Ssouth-MagEphemInfo->Smin : LGM_FILL_VALUE;
-                            H5_S_total[H5_nT]        = ((MagEphemInfo->Snorth > 0.0)&&(MagEphemInfo->Ssouth > 0.0)) ? MagEphemInfo->Snorth + MagEphemInfo->Ssouth : LGM_FILL_VALUE;
-
-                            H5_d2B_ds2[H5_nT]        = MagEphemInfo->d2B_ds2;
-                            H5_Sb0[H5_nT]            = MagEphemInfo->Sb0;
-                            H5_RadiusOfCurv[H5_nT]   = MagEphemInfo->RofC;
 
 
-                            MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &H5_Bsc_gsm[H5_nT], MagEphemInfo->LstarInfo->mInfo );
+                        // Fill arrays for dumping out as HDF5 files
+                        strcpy( H5_IsoTimes[H5_nT], IsoTimeString );
+                        strcpy( H5_IntModel[H5_nT], IntModel );
+                        strcpy( H5_ExtModel[H5_nT], ExtModel );
+                        switch ( MagEphemInfo->FieldLineType ) {
+                            case LGM_OPEN_IMF:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_IMF" ); // FL Type
+                                                break;
+                            case LGM_CLOSED:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_CLOSED" ); // FL Type
+                                                break;
+                            case LGM_OPEN_N_LOBE:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_N_LOBE" ); // FL Type
+                                                break;
+                            case LGM_OPEN_S_LOBE:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_OPEN_S_LOBE" ); // FL Type
+                                                break;
+                            case LGM_INSIDE_EARTH:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_INSIDE_EARTH" ); // FL Type
+                                                break;
+                            case LGM_TARGET_HEIGHT_UNREACHABLE:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "LGM_TARGET_HEIGHT_UNREACHABLE" ); // FL Type
+                                                break;
+                            default:
+                                                sprintf( H5_FieldLineType[H5_nT], "%s",  "UNKNOWN FIELD TYPE" ); // FL Type
+                                                break;
+                        }
+                        H5_Date[H5_nT]           = UTC.Date;
+                        H5_Doy[H5_nT]            = UTC.Doy;
+                        H5_UTC[H5_nT]            = UTC.Time;
+                        H5_JD[H5_nT]             = UTC.JD;
+                        H5_InOut[H5_nT]          = MagEphemInfo->InOut;
+                        H5_GpsTime[H5_nT]        = Lgm_UTC_to_GpsSeconds( &UTC, c );
+                        H5_TiltAngle[H5_nT]      = c->psi*DegPerRad;
+                        H5_Rgsm[H5_nT]           = Rgsm;
+                        H5_Kp[H5_nT]             = MagEphemInfo->LstarInfo->mInfo->fKp;
+                        H5_Dst[H5_nT]            = MagEphemInfo->LstarInfo->mInfo->Dst;
+                        H5_S_sc_to_pfn[H5_nT]    = (MagEphemInfo->Snorth > 0.0) ? MagEphemInfo->Snorth : LGM_FILL_VALUE;
+                        H5_S_sc_to_pfs[H5_nT]    = (MagEphemInfo->Ssouth > 0.0) ? MagEphemInfo->Ssouth : LGM_FILL_VALUE;
+                        H5_S_pfs_to_Bmin[H5_nT]  = (MagEphemInfo->Smin > 0.0) ? MagEphemInfo->Smin : LGM_FILL_VALUE;
+                        H5_S_Bmin_to_sc[H5_nT]   = ((MagEphemInfo->Ssouth>0.0)&&(MagEphemInfo->Smin > 0.0)) ? MagEphemInfo->Ssouth-MagEphemInfo->Smin : LGM_FILL_VALUE;
+                        H5_S_total[H5_nT]        = ((MagEphemInfo->Snorth > 0.0)&&(MagEphemInfo->Ssouth > 0.0)) ? MagEphemInfo->Snorth + MagEphemInfo->Ssouth : LGM_FILL_VALUE;
 
-                            if ( MagEphemInfo->FieldLineType == LGM_CLOSED ) {
-                                H5_Pmin_gsm[H5_nT] = MagEphemInfo->Pmin;
-                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Pmin, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                                H5_Bmin_gsm[H5_nT] = Bvec;
-                                Bmin_mag = Lgm_Magnitude( &Bvec );
+                        H5_d2B_ds2[H5_nT]        = MagEphemInfo->d2B_ds2;
+                        H5_Sb0[H5_nT]            = MagEphemInfo->Sb0;
+                        H5_RadiusOfCurv[H5_nT]   = MagEphemInfo->RofC;
+
+
+                        MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &H5_Bsc_gsm[H5_nT], MagEphemInfo->LstarInfo->mInfo );
+
+                        if ( MagEphemInfo->FieldLineType == LGM_CLOSED ) {
+                            H5_Pmin_gsm[H5_nT] = MagEphemInfo->Pmin;
+                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Pmin, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                            H5_Bmin_gsm[H5_nT] = Bvec;
+                            Bmin_mag = Lgm_Magnitude( &Bvec );
+                        } else {
+                            H5_Pmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
+                            H5_Pmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
+                            H5_Pmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
+                            H5_Bmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
+                            H5_Bmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
+                            H5_Bmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
+                            Bmin_mag = LGM_FILL_VALUE;
+                        }
+
+
+                        for (i=0; i<nAlpha; i++){
+                            H5_Lstar[H5_nT][i]          = MagEphemInfo->Lstar[i];
+                            H5_DriftShellType[H5_nT][i] = MagEphemInfo->DriftOrbitType[i];
+                            H5_Sb[H5_nT][i]             = MagEphemInfo->Sb[i];
+                            H5_I[H5_nT][i]              = MagEphemInfo->I[i];
+                            H5_Bm[H5_nT][i]             = MagEphemInfo->Bm[i];
+
+                            Ek    = 1.0; // MeV
+                            E     = Ek + LGM_Ee0; // total energy, MeV
+                            p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
+                            Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
+                            Beta  = sqrt( Beta2 );
+                            vel   = Beta*LGM_c;  // velocity in m/s
+                            vel  /= (Re*1000.0); // Re/s
+                            T     = ( MagEphemInfo->Sb[i] > 0.0 ) ? 2.0*MagEphemInfo->Sb[i]/vel : LGM_FILL_VALUE;
+
+                            pp    = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
+                            rg    = sin(MagEphemInfo->Alpha[i]*RadPerDeg)*pp/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
+
+                            H5_Tb[H5_nT][i]             = T;
+                            H5_Kappa[H5_nT][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
+
+
+                            if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
+                                H5_K[H5_nT][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
                             } else {
-                                H5_Pmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
-                                H5_Pmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
-                                H5_Pmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
-                                H5_Bmin_gsm[H5_nT].x = LGM_FILL_VALUE ;
-                                H5_Bmin_gsm[H5_nT].y = LGM_FILL_VALUE ;
-                                H5_Bmin_gsm[H5_nT].z = LGM_FILL_VALUE ;
-                                Bmin_mag = LGM_FILL_VALUE;
+                                H5_K[H5_nT][i] = LGM_FILL_VALUE;
                             }
-
-
-                            for (i=0; i<nAlpha; i++){
-                                H5_Lstar[H5_nT][i]          = MagEphemInfo->Lstar[i];
-                                H5_DriftShellType[H5_nT][i] = MagEphemInfo->DriftOrbitType[i];
-                                H5_Sb[H5_nT][i]             = MagEphemInfo->Sb[i];
-                                H5_I[H5_nT][i]              = MagEphemInfo->I[i];
-                                H5_Bm[H5_nT][i]             = MagEphemInfo->Bm[i];
-
-                                Ek    = 1.0; // MeV
-                                E     = Ek + LGM_Ee0; // total energy, MeV
-                                p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
-                                Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
-                                Beta  = sqrt( Beta2 );
-                                vel   = Beta*LGM_c;  // velocity in m/s
-                                vel  /= (Re*1000.0); // Re/s
-                                T     = ( MagEphemInfo->Sb[i] > 0.0 ) ? 2.0*MagEphemInfo->Sb[i]/vel : LGM_FILL_VALUE;
-
-                                pp    = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
-                                rg    = sin(MagEphemInfo->Alpha[i]*RadPerDeg)*pp/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
-
-                                H5_Tb[H5_nT][i]             = T;
-                                H5_Kappa[H5_nT][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
-
-
-                                if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
-                                    H5_K[H5_nT][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
-                                } else {
-                                    H5_K[H5_nT][i] = LGM_FILL_VALUE;
-                                }
-                                if (MagEphemInfo->I[i]>=0.0) {
-                                    H5_L[H5_nT][i] = LFromIBmM_McIlwain(MagEphemInfo->I[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
-                                } else {
-                                    H5_L[H5_nT][i] = LGM_FILL_VALUE;
-                                }
-                            }
-
-                            /*
-                             * Compute Lsimple
-                             */
-                            H5_Lsimple[H5_nT] = ( Bmin_mag > 0.0) ? Lgm_Magnitude( &MagEphemInfo->Pmin ) : LGM_FILL_VALUE;
-
-                            /*
-                             * Compute InvLat
-                             */
-                            if (H5_Lsimple[H5_nT] > 0.0) {
-                                H5_InvLat[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lsimple[H5_nT]));
+                            if (MagEphemInfo->I[i]>=0.0) {
+                                H5_L[H5_nT][i] = LFromIBmM_McIlwain(MagEphemInfo->I[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
                             } else {
-                                H5_InvLat[H5_nT] = LGM_FILL_VALUE;
+                                H5_L[H5_nT][i] = LGM_FILL_VALUE;
                             }
+                        }
 
-                            /*
-                             * Compute Lm_eq
-                             */
-                            H5_Lm_eq[H5_nT] = (Bmin_mag > 0.0) ? LFromIBmM_McIlwain( 0.0, Bmin_mag, MagEphemInfo->Mcurr ) : LGM_FILL_VALUE;
+                        /*
+                         * Compute Lsimple
+                         */
+                        H5_Lsimple[H5_nT] = ( Bmin_mag > 0.0) ? Lgm_Magnitude( &MagEphemInfo->Pmin ) : LGM_FILL_VALUE;
 
-                            /*
-                             * Compute InvLat_eq
-                             */
-                            if (H5_Lm_eq[H5_nT] > 0.0) {
-                                H5_InvLat_eq[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lm_eq[H5_nT]));
-                            } else {
-                                H5_InvLat_eq[H5_nT] = LGM_FILL_VALUE;
-                            }
+                        /*
+                         * Compute InvLat
+                         */
+                        if (H5_Lsimple[H5_nT] > 0.0) {
+                            H5_InvLat[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lsimple[H5_nT]));
+                        } else {
+                            H5_InvLat[H5_nT] = LGM_FILL_VALUE;
+                        }
 
-                            /*
-                             * Compute BoverBeq
-                             */
-                            Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
-                            H5_BoverBeq[H5_nT] = ( Bmin_mag > 0.0) ? Bsc_mag / Bmin_mag : LGM_FILL_VALUE;
+                        /*
+                         * Compute Lm_eq
+                         */
+                        H5_Lm_eq[H5_nT] = (Bmin_mag > 0.0) ? LFromIBmM_McIlwain( 0.0, Bmin_mag, MagEphemInfo->Mcurr ) : LGM_FILL_VALUE;
 
-                            /*
-                             * Compute MlatFromBoverBeq
-                             */
-                            if ( H5_BoverBeq[H5_nT] > 0.0 ) {
-                                s = sqrt( 1.0/H5_BoverBeq[H5_nT] );
-                                cl = Lgm_CdipMirrorLat( s );
-                                if ( fabs(cl) <= 1.0 ){
-                                    H5_MlatFromBoverBeq[H5_nT] = DegPerRad*acos( cl );
-                                    if (H5_S_Bmin_to_sc[H5_nT]<0.0) H5_MlatFromBoverBeq[H5_nT] *= -1.0;
-                                } else {
-                                    H5_MlatFromBoverBeq[H5_nT] = LGM_FILL_VALUE;
-                                }
+                        /*
+                         * Compute InvLat_eq
+                         */
+                        if (H5_Lm_eq[H5_nT] > 0.0) {
+                            H5_InvLat_eq[H5_nT] = DegPerRad*acos(sqrt(1.0/H5_Lm_eq[H5_nT]));
+                        } else {
+                            H5_InvLat_eq[H5_nT] = LGM_FILL_VALUE;
+                        }
+
+                        /*
+                         * Compute BoverBeq
+                         */
+                        Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
+                        H5_BoverBeq[H5_nT] = ( Bmin_mag > 0.0) ? Bsc_mag / Bmin_mag : LGM_FILL_VALUE;
+
+                        /*
+                         * Compute MlatFromBoverBeq
+                         */
+                        if ( H5_BoverBeq[H5_nT] > 0.0 ) {
+                            s = sqrt( 1.0/H5_BoverBeq[H5_nT] );
+                            cl = Lgm_CdipMirrorLat( s );
+                            if ( fabs(cl) <= 1.0 ){
+                                H5_MlatFromBoverBeq[H5_nT] = DegPerRad*acos( cl );
+                                if (H5_S_Bmin_to_sc[H5_nT]<0.0) H5_MlatFromBoverBeq[H5_nT] *= -1.0;
                             } else {
                                 H5_MlatFromBoverBeq[H5_nT] = LGM_FILL_VALUE;
                             }
+                        } else {
+                            H5_MlatFromBoverBeq[H5_nT] = LGM_FILL_VALUE;
+                        }
+
+                        /*
+                         * Save M values
+                         */
+                        H5_M_used[H5_nT] = MagEphemInfo->Mused;
+                        H5_M_ref[H5_nT]  = MagEphemInfo->Mref;
+                        H5_M_igrf[H5_nT] = MagEphemInfo->Mcurr;
+
+
+
+
+
+
+                        if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_N_LOBE) ) {
 
                             /*
-                             * Save M values
+                             * Save northern Footpoint position in different coord systems.
                              */
-                            H5_M_used[H5_nT] = MagEphemInfo->Mused;
-                            H5_M_ref[H5_nT]  = MagEphemInfo->Mref;
-                            H5_M_igrf[H5_nT] = MagEphemInfo->Mcurr;
+                            H5_Pfn_gsm[H5_nT] = MagEphemInfo->Ellipsoid_Footprint_Pn;
+
+                            Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_GEO, c );
+                            H5_Pfn_geo[H5_nT] = W;
+
+                            Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
+                            H5_Pfn_geod[H5_nT].x = GeodLat; H5_Pfn_geod[H5_nT].y = GeodLong; H5_Pfn_geod[H5_nT].z = GeodHeight;
+
+                            Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_CDMAG, c );
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            H5_Pfn_cdmag[H5_nT].x = MLAT; H5_Pfn_cdmag[H5_nT].y = MLON; H5_Pfn_cdmag[H5_nT].z = MLT;
+
+                            Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_EDMAG, c );
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            H5_Pfn_edmag[H5_nT].x = MLAT; H5_Pfn_edmag[H5_nT].y = MLON; H5_Pfn_edmag[H5_nT].z = MLT;
+
+
+                            /*
+                             * Save northern Footpoint B-field values in different coord systems.
+                             */
+                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Pn, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                            Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
+                            H5_Bfn_gsm[H5_nT] = Bvec;
+                            H5_Bfn_geo[H5_nT] = Bvec2;
+
+
+                            /*
+                             * Save northern loss cone.
+                             */
+                            Bfn_mag = Lgm_Magnitude( &H5_Bfn_gsm[H5_nT] );
+                            H5_LossConeAngleN[H5_nT] = asin( sqrt( Bsc_mag/Bfn_mag ) )*DegPerRad;
+
+
+
+                        } else {
+
+                            H5_Pfn_gsm[H5_nT].x = H5_Pfn_gsm[H5_nT].y = H5_Pfn_gsm[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfn_geo[H5_nT].x = H5_Pfn_geo[H5_nT].y = H5_Pfn_geo[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfn_geod[H5_nT].x = H5_Pfn_geod[H5_nT].y = H5_Pfn_geod[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfn_cdmag[H5_nT].x = H5_Pfn_cdmag[H5_nT].y = H5_Pfn_cdmag[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfn_edmag[H5_nT].x = H5_Pfn_edmag[H5_nT].y = H5_Pfn_edmag[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Bfn_gsm[H5_nT].x = H5_Bfn_gsm[H5_nT].y = H5_Bfn_gsm[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Bfn_geo[H5_nT].x = H5_Bfn_geo[H5_nT].y = H5_Bfn_geo[H5_nT].z = LGM_FILL_VALUE;
+                            H5_LossConeAngleN[H5_nT] = LGM_FILL_VALUE;
+
+                        }
+
+                        if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_S_LOBE) ) {
+
+                            /*
+                             * Save Southern Footpoint position in different coord systems.
+                             */
+                            H5_Pfs_gsm[H5_nT] = MagEphemInfo->Ellipsoid_Footprint_Ps;
+
+                            Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_GEO, c );
+                            H5_Pfs_geo[H5_nT] = W;
+
+                            Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
+                            H5_Pfs_geod[H5_nT].x = GeodLat; H5_Pfs_geod[H5_nT].y = GeodLong; H5_Pfs_geod[H5_nT].z = GeodHeight;
+
+                            Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_CDMAG, c );
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            H5_Pfs_cdmag[H5_nT].x = MLAT; H5_Pfs_cdmag[H5_nT].y = MLON; H5_Pfs_cdmag[H5_nT].z = MLT;
+
+                            Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_EDMAG, c );
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            H5_Pfs_edmag[H5_nT].x = MLAT; H5_Pfs_edmag[H5_nT].y = MLON; H5_Pfs_edmag[H5_nT].z = MLT;
+
+
+                            /*
+                             * Save Southern Footpoint B-field values in different coord systems.
+                             */
+                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                            Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
+                            H5_Bfs_gsm[H5_nT] = Bvec;
+                            H5_Bfs_geo[H5_nT] = Bvec2;
+
+
+                            /*
+                             * Save southern loss cone.
+                             */
+                            Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
+                            Bfs_mag = Lgm_Magnitude( &H5_Bfs_gsm[H5_nT] );
+                            H5_LossConeAngleS[H5_nT] = asin( sqrt( Bsc_mag/Bfs_mag ) )*DegPerRad;
+
+
+                        } else {
+
+                            H5_Pfs_gsm[H5_nT].x = H5_Pfs_gsm[H5_nT].y = H5_Pfs_gsm[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfs_geo[H5_nT].x = H5_Pfs_geo[H5_nT].y = H5_Pfs_geo[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfs_geod[H5_nT].x = H5_Pfs_geod[H5_nT].y = H5_Pfs_geod[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfs_cdmag[H5_nT].x = H5_Pfs_cdmag[H5_nT].y = H5_Pfs_cdmag[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Pfs_edmag[H5_nT].x = H5_Pfs_edmag[H5_nT].y = H5_Pfs_edmag[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Bfs_gsm[H5_nT].x = H5_Bfs_gsm[H5_nT].y = H5_Bfs_gsm[H5_nT].z = LGM_FILL_VALUE;
+                            H5_Bfs_geo[H5_nT].x = H5_Bfs_geo[H5_nT].y = H5_Bfs_geo[H5_nT].z = LGM_FILL_VALUE;
+                            H5_LossConeAngleS[H5_nT] = LGM_FILL_VALUE;
+
+                        }
 
 
 
 
 
-
-                            if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_N_LOBE) ) {
-
-                                /*
-                                 * Save northern Footpoint position in different coord systems.
-                                 */
-                                H5_Pfn_gsm[H5_nT] = MagEphemInfo->Ellipsoid_Footprint_Pn;
-
-                                Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_GEO, c );
-                                H5_Pfn_geo[H5_nT] = W;
-
-                                Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
-                                H5_Pfn_geod[H5_nT].x = GeodLat; H5_Pfn_geod[H5_nT].y = GeodLong; H5_Pfn_geod[H5_nT].z = GeodHeight;
-
-                                Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_CDMAG, c );
-                                Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                                H5_Pfn_cdmag[H5_nT].x = MLAT; H5_Pfn_cdmag[H5_nT].y = MLON; H5_Pfn_cdmag[H5_nT].z = MLT;
-
-                                Lgm_Convert_Coords( &H5_Pfn_gsm[H5_nT], &W, GSM_TO_EDMAG, c );
-                                Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                                H5_Pfn_edmag[H5_nT].x = MLAT; H5_Pfn_edmag[H5_nT].y = MLON; H5_Pfn_edmag[H5_nT].z = MLT;
-
-
-                                /*
-                                 * Save northern Footpoint B-field values in different coord systems.
-                                 */
-                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Pn, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                                Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                                H5_Bfn_gsm[H5_nT] = Bvec;
-                                H5_Bfn_geo[H5_nT] = Bvec2;
-
-
-                                /*
-                                 * Save northern loss cone.
-                                 */
-                                Bfn_mag = Lgm_Magnitude( &H5_Bfn_gsm[H5_nT] );
-                                H5_LossConeAngleN[H5_nT] = asin( sqrt( Bsc_mag/Bfn_mag ) )*DegPerRad;
-
-
-
-                            } else {
-
-                                H5_Pfn_gsm[H5_nT].x = H5_Pfn_gsm[H5_nT].y = H5_Pfn_gsm[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfn_geo[H5_nT].x = H5_Pfn_geo[H5_nT].y = H5_Pfn_geo[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfn_geod[H5_nT].x = H5_Pfn_geod[H5_nT].y = H5_Pfn_geod[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfn_cdmag[H5_nT].x = H5_Pfn_cdmag[H5_nT].y = H5_Pfn_cdmag[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfn_edmag[H5_nT].x = H5_Pfn_edmag[H5_nT].y = H5_Pfn_edmag[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Bfn_gsm[H5_nT].x = H5_Bfn_gsm[H5_nT].y = H5_Bfn_gsm[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Bfn_geo[H5_nT].x = H5_Bfn_geo[H5_nT].y = H5_Bfn_geo[H5_nT].z = LGM_FILL_VALUE;
-                                H5_LossConeAngleN[H5_nT] = LGM_FILL_VALUE;
-
-                            }
-
-                            if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_S_LOBE) ) {
-
-                                /*
-                                 * Save Southern Footpoint position in different coord systems.
-                                 */
-                                H5_Pfs_gsm[H5_nT] = MagEphemInfo->Ellipsoid_Footprint_Ps;
-
-                                Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_GEO, c );
-                                H5_Pfs_geo[H5_nT] = W;
-
-                                Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
-                                H5_Pfs_geod[H5_nT].x = GeodLat; H5_Pfs_geod[H5_nT].y = GeodLong; H5_Pfs_geod[H5_nT].z = GeodHeight;
-
-                                Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_CDMAG, c );
-                                Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                                H5_Pfs_cdmag[H5_nT].x = MLAT; H5_Pfs_cdmag[H5_nT].y = MLON; H5_Pfs_cdmag[H5_nT].z = MLT;
-
-                                Lgm_Convert_Coords( &H5_Pfs_gsm[H5_nT], &W, GSM_TO_EDMAG, c );
-                                Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                                H5_Pfs_edmag[H5_nT].x = MLAT; H5_Pfs_edmag[H5_nT].y = MLON; H5_Pfs_edmag[H5_nT].z = MLT;
-
-
-                                /*
-                                 * Save Southern Footpoint B-field values in different coord systems.
-                                 */
-                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                                Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                                H5_Bfs_gsm[H5_nT] = Bvec;
-                                H5_Bfs_geo[H5_nT] = Bvec2;
-
-
-                                /*
-                                 * Save southern loss cone.
-                                 */
-                                Bsc_mag = Lgm_Magnitude( &H5_Bsc_gsm[H5_nT] );
-                                Bfs_mag = Lgm_Magnitude( &H5_Bfs_gsm[H5_nT] );
-                                H5_LossConeAngleS[H5_nT] = asin( sqrt( Bsc_mag/Bfs_mag ) )*DegPerRad;
-
-
-                            } else {
-
-                                H5_Pfs_gsm[H5_nT].x = H5_Pfs_gsm[H5_nT].y = H5_Pfs_gsm[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfs_geo[H5_nT].x = H5_Pfs_geo[H5_nT].y = H5_Pfs_geo[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfs_geod[H5_nT].x = H5_Pfs_geod[H5_nT].y = H5_Pfs_geod[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfs_cdmag[H5_nT].x = H5_Pfs_cdmag[H5_nT].y = H5_Pfs_cdmag[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Pfs_edmag[H5_nT].x = H5_Pfs_edmag[H5_nT].y = H5_Pfs_edmag[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Bfs_gsm[H5_nT].x = H5_Bfs_gsm[H5_nT].y = H5_Bfs_gsm[H5_nT].z = LGM_FILL_VALUE;
-                                H5_Bfs_geo[H5_nT].x = H5_Bfs_geo[H5_nT].y = H5_Bfs_geo[H5_nT].z = LGM_FILL_VALUE;
-                                H5_LossConeAngleS[H5_nT] = LGM_FILL_VALUE;
-
-                            }
-
-
-
-
-
-                            ++H5_nT;
+                        ++H5_nT;
 
                     }
                     fclose(fp_MagEphem);
