@@ -3,7 +3,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
     char        Str[80], *Str2;
@@ -50,6 +50,57 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     }
 
 
+    if ( nAscend > 0 ) {
+        fprintf( fp, "#  \"AscendingNodeTimes\":{ \"DESCRIPTION\": \"Ascending Node Crossing Times on this day.\",\n");
+        fprintf( fp, "#                                \"NAME\": \"Ascending Node Crossing Times\",\n");
+        fprintf( fp, "#                               \"TITLE\": \"Ascending Node Crossing Times\",\n");
+        fprintf( fp, "#                               \"LABEL\": \"Ascending Node Crossing Times\",\n");
+        fprintf( fp, "#                           \"DIMENSION\": [ %d ],\n", nAscend );
+
+        fprintf( fp, "#                              \"VALUES\": [ ");
+        for (i=0; i<nAscend-1; i++) {
+            Lgm_DateTimeToString( IsoTimeString, &Ascend_UTC[i], 0, 3 );
+            fprintf(fp, "\"%s\", ", IsoTimeString );
+        }
+        Lgm_DateTimeToString( IsoTimeString, &Ascend_UTC[i], 0, 3 );
+        fprintf(fp, "\"%s\" ],\n", IsoTimeString ); 
+
+
+        fprintf( fp, "#                       \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<nAscend-1; i++) fprintf(fp, "\"AscendTime%d\", ", i );
+        fprintf(fp, "\"AscendTime%d\" ],\n", i ); 
+
+        fprintf( fp, "#                              \"UNITS\": \"UTC\" },\n");
+        fprintf( fp, "#\n");
+
+
+
+        fprintf( fp, "#  \"AscendingPosGeod\": { \"DESCRIPTION\": \"Ascending Node Crossing Positions on this day in Geodetic Coords (lat/lon/alt).\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Ascending Node Crossing Pos Geodetic\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"Ascending Node Crossing Pos Geodetic\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"Ascending Node Crossing Pos Geodetic\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nAscend );
+
+        fprintf( fp, "#                             \"VALUES\": [ ");
+        for (i=0; i<nAscend-1; i++) {
+            Lgm_Set_Coord_Transforms( Ascend_UTC[i].Date, Ascend_UTC[i].Time, c );
+            Lgm_Convert_Coords( &Ascend_U[i], &w, GEI2000_TO_WGS84, c );
+            Lgm_WGS84_to_GEOD( &w, &GeodLat, &GeodLong, &GeodHeight );
+            fprintf(fp, "\" %.6lf, %.6lf, %.6lf\", ", GeodLat, GeodLong, GeodHeight );
+        }
+        Lgm_Set_Coord_Transforms( Ascend_UTC[i].Date, Ascend_UTC[i].Time, c );
+        Lgm_Convert_Coords( &Ascend_U[i], &w, GEI2000_TO_WGS84, c );
+        Lgm_WGS84_to_GEOD( &w, &GeodLat, &GeodLong, &GeodHeight );
+        fprintf(fp, "\" %.6lf, %.6lf, %.6lf\" ],\n", GeodLat, GeodLong, GeodHeight );
+
+
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<nAscend-1; i++) fprintf(fp, "\"AscendPosGeod%d\", ", i );
+        fprintf(fp, "\"AscendPosGeod%d\" ],\n", i ); 
+
+        fprintf( fp, "#                              \"UNITS\": \"Deg., Deg., km\" },\n");
+        fprintf( fp, "#\n");
+    }
     if ( nPerigee > 0 ) {
         fprintf( fp, "#  \"PerigeeTimes\":     { \"DESCRIPTION\": \"Perigee Times on this day.\",\n");
         fprintf( fp, "#                               \"NAME\": \"Perigee Times\",\n");

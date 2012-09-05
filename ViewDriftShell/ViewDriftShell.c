@@ -2829,8 +2829,8 @@ void CreateSats() {
                             LgmSgp_SGP4( tsince, s );
                             Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
                             Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
-printf("Date, Time: %ld %lf   Sat pnt: Ugei.x = %g Ugei.y = %g Ugei.z = %g\n", Ugei.x, Ugei.y, Ugei.z );
-printf("Sat pnt: Ugsm.x = %g Ugsm.y = %g Ugsm.z = %g\n", Ugsm.x, Ugsm.y, Ugsm.z );
+//printf("Date, Time: %ld %lf   Sat pnt: Ugei.x = %g Ugei.y = %g Ugei.z = %g\n", Ugei.x, Ugei.y, Ugei.z );
+//printf("Sat pnt: Ugsm.x = %g Ugsm.y = %g Ugsm.z = %g\n", Ugsm.x, Ugsm.y, Ugsm.z );
                             //glColor4f( 1.0, 1.0, 1.0, 0.5 );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;

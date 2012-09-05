@@ -1,7 +1,9 @@
 \begindata
-KERNELS_TO_LOAD = ( 'rbspb_2012_243_01.peph.bsp', 
-                    'rbspa_2012_243_01.peph.bsp', 
-                    'rbspa_sclk_0000.tsc', 
-                    'rbspb_sclk_0000.tsc', 
-                    'naif0010.tls' )
+KERNELS_TO_LOAD = ( 
+		'rbspb_sclk_0004.tsc',
+		'rbspb_2012_247_01.peph.bsp',
+		'rbspa_sclk_0005.tsc',
+		'rbspa_2012_247_01.peph.bsp',
+		'naif0010.tls'
+		)
 \begintext

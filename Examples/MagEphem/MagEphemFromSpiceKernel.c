@@ -358,6 +358,41 @@ double ApogeeFunc( double T, double val, void *Info ){
 }
 
 
+
+/*
+ * Returns latitude of S/C in GEO.
+ */
+typedef struct lfInfo {
+    long int        Date;
+    int             Sgn;
+    int             BODY;
+    Lgm_CTrans      *c;
+} lfInfo;
+double LatitudeFunc( double T, double val, void *Info ){
+
+    lfInfo          *a;
+    Lgm_CTrans      *c;
+    Lgm_DateTime    UTC;
+    Lgm_Vector      U, V;
+    double          R, et, pos[3], lt;
+
+    a = (lfInfo *)Info;
+    c = a->c;
+
+    Lgm_Set_Coord_Transforms( a->Date, T/3600.0, c );
+    Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
+    et = Lgm_TDBSecSinceJ2000( &UTC, c );
+    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+    U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
+    Lgm_Convert_Coords( &U, &V, GEI2000_TO_TOD, c );
+    R = Lgm_Magnitude( &V );
+    return( asin( V.z/R )*DegPerRad );
+
+}
+
+
+
+
 /*
  *  Compute magnetic ephemerii of S/C from input file that contains S/C position in GEO LAt/Lon/Rad
  */
@@ -463,20 +498,26 @@ int main( int argc, char *argv[] ){
     double          **H5_L;
     double          **H5_Bm;
 
+    lfInfo          *lfi;
+    double          La, Lb, Lmin;
     int             done, BODY;
     long int        ss, es, Seconds, Ta, Tb, Tc;
     double          R, Ra, Rb, Rc, Rmin, Tmin;
     BrentFuncInfo   bInfo;
     afInfo          *afi;
-    int             nPerigee, nApogee;
+    int             nPerigee, nApogee, nAscend;
     char            **Perigee_IsoTimes;
     char            **Apogee_IsoTimes;
+    char            **Ascend_IsoTimes;
     Lgm_DateTime    *Perigee_UTC;
     Lgm_DateTime    *Apogee_UTC;
+    Lgm_DateTime    *Ascend_UTC;
     Lgm_Vector      *Perigee_U;
     Lgm_Vector      *Apogee_U;
+    Lgm_Vector      *Ascend_U;
     double          **Perigee_Geod;
     double          **Apogee_Geod;
+    double          **Ascend_Geod;
     TimeList        *ApoPeriTimeList;
     int             nApoPeriTimeList;
     Lgm_Vector      Bvec, Bvec2, w;
@@ -563,12 +604,16 @@ int main( int argc, char *argv[] ){
     LGM_ARRAY_1D( ApoPeriTimeList, 20, TimeList );
     LGM_ARRAY_1D( Perigee_UTC, 10, Lgm_DateTime );
     LGM_ARRAY_1D( Apogee_UTC,  10, Lgm_DateTime );
+    LGM_ARRAY_1D( Ascend_UTC,  10, Lgm_DateTime );
     LGM_ARRAY_2D( Perigee_Geod, 10, 3, double );
     LGM_ARRAY_2D( Apogee_Geod,  10, 3, double );
+    LGM_ARRAY_2D( Ascend_Geod,  10, 3, double );
     LGM_ARRAY_1D( Perigee_U, 10, Lgm_Vector );
     LGM_ARRAY_1D( Apogee_U,  10, Lgm_Vector );
+    LGM_ARRAY_1D( Ascend_U,  10, Lgm_Vector );
     LGM_ARRAY_2D( Perigee_IsoTimes, 10, 80, char );
     LGM_ARRAY_2D( Apogee_IsoTimes,  10, 80, char );
+    LGM_ARRAY_2D( Ascend_IsoTimes,  10, 80, char );
 
     /*
      * Default option values.
@@ -1068,9 +1113,9 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     bInfo.Val  = 0.0;
                     bInfo.Info = (void *)afi;
                     bInfo.func = ApogeeFunc;
-                    Ta = 0;    Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
-                    Tb = 900;  Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
-                    Tc = 1800; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
+                    Ta = -900; Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
+                    Tb =    0; Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
+                    Tc =  900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
                     done = FALSE;
                     nApogee = 0;
                     nApoPeriTimeList = 0;
@@ -1078,77 +1123,134 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                         if ( (Rb < Ra) && (Rb < Rc) ) {
                             // we have a bracket. Find Min.
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
-                            Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
-                            et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-                            spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                            Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
+                            if ( (Tmin >=0) && (Tmin < 86400) ) {
+                                Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
+                                et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
+                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                                Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
 
-                            Lgm_Set_Coord_Transforms( Apogee_UTC[nApogee].Date, Apogee_UTC[nApogee].Time, c );
-                            Lgm_Convert_Coords( &Apogee_U[nApogee], &w, GEI2000_TO_WGS84, c );
-                            Lgm_WGS84_to_GEOD( &w, &Apogee_Geod[nApogee][0], &Apogee_Geod[nApogee][1], &Apogee_Geod[nApogee][2] );
+                                Lgm_Set_Coord_Transforms( Apogee_UTC[nApogee].Date, Apogee_UTC[nApogee].Time, c );
+                                Lgm_Convert_Coords( &Apogee_U[nApogee], &w, GEI2000_TO_WGS84, c );
+                                Lgm_WGS84_to_GEOD( &w, &Apogee_Geod[nApogee][0], &Apogee_Geod[nApogee][1], &Apogee_Geod[nApogee][2] );
 
-                            Lgm_DateTimeToString( Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
-                            //printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, Apogee_IsoTimes[nApogee], fabs(Rmin) );
-                            ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
-                            ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
-                            ++nApoPeriTimeList;
+                                Lgm_DateTimeToString( Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
+                                //printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                                ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
+                                ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
+                                ++nApoPeriTimeList;
 
-                            ++nApogee;
+                                ++nApogee;
+                            }
 
                         }
                         // advance another 900 seconds.
                         Ta = Tb; Ra = Rb;
                         Tb = Tc; Rb = Rc;
-                        Tc += 900.0; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
-                        if (Tc >= 86400) done = TRUE;
+                        Tc += 900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
+                        if (Tc > 86400+900) done = TRUE;
                     }
+
+
 
 
                     /*
                      * Find Perigees. Same as above except set afi->Sgn = 1.
                      */
                     afi->Sgn  = 1; // +1 => find min (perigee)   -1 => find max (apogee)
-                    Ta = 0;    Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
-                    Tb = 900;  Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
-                    Tc = 1800; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
+                    Ta = -900; Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
+                    Tb =    0; Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
+                    Tc =  900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
                     done = FALSE;
                     nPerigee = 0;
                     while ( !done ) {
                         if ( (Rb < Ra) && (Rb < Rc) ) {
                             // we have a bracket. Find Min.
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
-                            Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
-                            et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-                            spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                            Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
 
-                            Lgm_Set_Coord_Transforms( Perigee_UTC[nPerigee].Date, Perigee_UTC[nPerigee].Time, c );
-                            Lgm_Convert_Coords( &Perigee_U[nPerigee], &w, GEI2000_TO_WGS84, c );
-                            Lgm_WGS84_to_GEOD( &w, &Perigee_Geod[nPerigee][0], &Perigee_Geod[nPerigee][1], &Perigee_Geod[nPerigee][2] );
+                            if ( (Tmin >=0) && (Tmin < 86400) ) {
+                                Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
+                                et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
+                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                                Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
 
-                            Lgm_DateTimeToString( Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
-                            //printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+                                Lgm_Set_Coord_Transforms( Perigee_UTC[nPerigee].Date, Perigee_UTC[nPerigee].Time, c );
+                                Lgm_Convert_Coords( &Perigee_U[nPerigee], &w, GEI2000_TO_WGS84, c );
+                                Lgm_WGS84_to_GEOD( &w, &Perigee_Geod[nPerigee][0], &Perigee_Geod[nPerigee][1], &Perigee_Geod[nPerigee][2] );
 
-                            ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
-                            ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
-                            ++nApoPeriTimeList;
+                                Lgm_DateTimeToString( Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
+                                //printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, Perigee_IsoTimes[nPerigee], fabs(Rmin) );
 
-                            ++nPerigee;
+                                ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
+                                ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
+                                ++nApoPeriTimeList;
+
+                                ++nPerigee;
+                            }
                         }
                         // advance another 900 seconds.
                         Ta = Tb; Ra = Rb;
                         Tb = Tc; Rb = Rc;
-                        Tc += 900.0; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
-                        if (Tc >= 86400) done = TRUE;
+                        Tc += 900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
+                        if (Tc > 86400+900) done = TRUE;
                     }
-
                     free( afi );
-
 
                     /*
                      * sort the merged list of apogee/perigee times.
                      */
                     elt_qsort( ApoPeriTimeList, nApoPeriTimeList );
+
+
+
+
+                    /*
+                     * Find Times when S/C crosses nodes.
+                     */
+
+                    lfi = (lfInfo *)calloc( 1, sizeof(lfInfo) );
+                    lfi->Date = Date;
+                    lfi->BODY = BODY;
+                    lfi->c    = c;
+                    bInfo.Val  = 0.0;
+                    bInfo.Info = (void *)lfi;
+                    bInfo.func = LatitudeFunc;
+                    Ta = -900; La = bInfo.func( (double)Ta, 0.0, (void *)lfi );
+                    Tb =    0; Lb = bInfo.func( (double)Tb, 0.0, (void *)lfi );
+                    done    = FALSE;
+                    nAscend = 0;
+                    while ( !done ) {
+                        if ( (La < 0.0) && (Lb > 0.0) ) {
+                            // we have an ascending node bracketed. Find Zero.
+                            Lgm_zBrent( (double)Ta, (double)Tb, La, Lb, &bInfo, 1e-10, &Tmin, &Lmin );
+                            if ( (Tmin >=0) && (Tmin < 86400) ) {
+                                Lgm_Make_UTC( Date, Tmin/3600.0, &Ascend_UTC[nAscend], c );
+
+                                et = Lgm_TDBSecSinceJ2000( &Ascend_UTC[nAscend], c );
+                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+                                Ascend_U[nAscend].x = pos[0]/WGS84_A; Ascend_U[nAscend].y = pos[1]/WGS84_A; Ascend_U[nAscend].z = pos[2]/WGS84_A;
+
+                                Lgm_Set_Coord_Transforms( Ascend_UTC[nAscend].Date, Ascend_UTC[nAscend].Time, c );
+                                Lgm_Convert_Coords( &Ascend_U[nAscend], &w, GEI2000_TO_WGS84, c );
+                                Lgm_WGS84_to_GEOD( &w, &Ascend_Geod[nAscend][0], &Ascend_Geod[nAscend][1], &Ascend_Geod[nAscend][2] );
+
+                                Lgm_DateTimeToString( Ascend_IsoTimes[nAscend], &Ascend_UTC[nAscend], 0, 3 );
+                                //printf("nNode: %d Bracket: T = %ld %ld    L = %g %g    Tnode, Lnode = %s %g\n", nAscend, Ta, Tb, La, Lb, Ascend_IsoTimes[nAscend], Lmin );
+
+                                ++nAscend;
+                            }
+                        }
+                        // advance another 900 seconds.
+                        Ta = Tb;     La = Lb;
+                        Tb += 900; Lb = bInfo.func( (double)Tb, 0.0, (void *)lfi );
+                        if (Tb > 86400+900) done = TRUE;
+                    }
+                    free( lfi );
+
+
+
+
+
+
 
 
 
@@ -1160,7 +1262,7 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
 //printf("nPerigee = %d\n", nPerigee);
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, BODY, CommonName, IdNumber, IntDesig, CmdLine, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {
@@ -4220,12 +4322,16 @@ printf("sclkdp = %lf\n", sclkdp);
     LGM_ARRAY_1D_FREE( H5_Pfs_edmag );
     LGM_ARRAY_1D_FREE( Perigee_UTC );
     LGM_ARRAY_1D_FREE( Apogee_UTC );
+    LGM_ARRAY_1D_FREE( Ascend_UTC );
     LGM_ARRAY_1D_FREE( Perigee_U );
     LGM_ARRAY_1D_FREE( Apogee_U );
+    LGM_ARRAY_1D_FREE( Ascend_U );
     LGM_ARRAY_2D_FREE( Perigee_IsoTimes );
     LGM_ARRAY_2D_FREE( Apogee_IsoTimes );
+    LGM_ARRAY_2D_FREE( Ascend_IsoTimes );
     LGM_ARRAY_2D_FREE( Perigee_Geod );
     LGM_ARRAY_2D_FREE( Apogee_Geod );
+    LGM_ARRAY_2D_FREE( Ascend_Geod );
     LGM_ARRAY_1D_FREE( ApoPeriTimeList );
     LGM_ARRAY_2D_FREE( H5_IntModel );
     LGM_ARRAY_2D_FREE( H5_ExtModel );
