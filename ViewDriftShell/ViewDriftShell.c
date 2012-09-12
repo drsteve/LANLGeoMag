@@ -657,15 +657,15 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
 
 
 
-void BuildShaders2() {
+    void BuildShaders2() {
 
-	printf("\nLoading shaders...\n");
-    //ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex2.glsl",   GL_VERTEX_SHADER );
-    //ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment2.glsl", GL_FRAGMENT_SHADER );
-    ShadeVertex   = LoadShaderFromFile( "Shaders/CH14-WardBRDF.vert",   GL_VERTEX_SHADER );
-    ShadeFragment = LoadShaderFromFile( "Shaders/CH14-WardBRDF.frag", GL_FRAGMENT_SHADER );
+        printf("\nLoading shaders...\n");
+        //ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex2.glsl",   GL_VERTEX_SHADER );
+        //ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment2.glsl", GL_FRAGMENT_SHADER );
+        ShadeVertex   = LoadShaderFromFile( "Shaders/CH14-WardBRDF.vert",   GL_VERTEX_SHADER );
+        ShadeFragment = LoadShaderFromFile( "Shaders/CH14-WardBRDF.frag", GL_FRAGMENT_SHADER );
 
-    g_shaderMyTest = glCreateProgram();
+        g_shaderMyTest = glCreateProgram();
     glAttachShader( g_shaderMyTest, ShadeVertex );
     glAttachShader( g_shaderMyTest, ShadeFragment );
     glLinkProgram( g_shaderMyTest );
@@ -1938,7 +1938,6 @@ void CreateEarth( ){
 
 
     // EqPlane image
-if (0==1){
     EqPlaneDL = glGenLists( 1 );
     glNewList( EqPlaneDL, GL_COMPILE );
         glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
@@ -1970,13 +1969,12 @@ if (0==1){
 //        glDisable( GL_BLEND );
         glDisable( GL_TEXTURE_2D );
     glEndList( );
-}
 
 
 
 
-    // TopSide
 if (0==1){
+    // TopSide
     TopSideDL = glGenLists( 1 );
     glNewList( TopSideDL, GL_COMPILE );
     {
@@ -2039,10 +2037,8 @@ if (0==1){
 //        glDisable( GL_BLEND );
         glDisable( GL_TEXTURE_2D );
     glEndList( );
-}
 
     // MeridPlane1 image 2
-if (0==1){
     MeridPlane2DL = glGenLists( 1 );
     glNewList( MeridPlane2DL, GL_COMPILE );
         glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_earth2.ambient);
@@ -2538,7 +2534,7 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].oRed = 1.0;
         SpaceObjects->Sat[i].oGrn = 1.0;
         SpaceObjects->Sat[i].oBlu = 1.0;
-        SpaceObjects->Sat[i].oAlf = 0.8;
+        SpaceObjects->Sat[i].oAlf = 0.1;
 
         SpaceObjects->Sat[i].ogpRed = 0.2;
         SpaceObjects->Sat[i].ogpGrn = 0.2;
@@ -3926,9 +3922,9 @@ if (LightingStyle == 2){
 
 
 
-glCallList( TopSideDL );
-glCallList( MeridPlane1DL );
-glCallList( MeridPlane2DL );
+//glCallList( TopSideDL );
+//glCallList( MeridPlane1DL );
+//glCallList( MeridPlane2DL );
 
 
 
@@ -4057,10 +4053,6 @@ glFrontFace(GL_CCW);
 
     y += 20;
     Lgm_UT_to_hmsms( CurrentUT, &CurrentHour, &CurrentMin, &CurrentSec, &CurrentMilliSec );
-//Lgm_CTrans *c = Lgm_init_ctrans(0);
-//Lgm_DateTime *DateTime = Lgm_DateTime_Create( CurrentYear, CurrentMonth, CurrentDay, CurrentUT, LGM_TIME_SYS_UTC, c );
-//Lgm_DateTimeToString( Str, DateTime, 0, 3 );
-//free(c);
     sprintf(Str, "Time: %02d:%02d:%02d.%03d UTC", CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec );
     cairo_move_to( cr, 15.0, y ); cairo_show_text( cr, Str);
 
@@ -4157,7 +4149,7 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     add_quats( view_quat_diff, view_quat, view_quat );
     add_quats( view_quat_diff3, view_quat3, view_quat3 );
 
-printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], view_quat[3] );
+//printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], view_quat[3] );
 //printf("view_quat3 = %g %g %g %g\n", view_quat3[0], view_quat3[1], view_quat3[2], view_quat3[3] );
 
     /*
@@ -4262,13 +4254,13 @@ printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], vi
 
 
     /* If we can, swap buffers */
-    if (gdk_gl_drawable_is_double_buffered (gldrawable)) {
-        gdk_gl_drawable_swap_buffers (gldrawable);
+    if ( gdk_gl_drawable_is_double_buffered( gldrawable ) ) {
+        gdk_gl_drawable_swap_buffers( gldrawable );
     } else {
-        glFlush ();
+        glFlush( );
     }
 
-    gdk_gl_drawable_gl_end (gldrawable);
+    gdk_gl_drawable_gl_end( gldrawable );
 
 
 
@@ -4486,14 +4478,17 @@ static gboolean idle( GtkWidget *widget ) {
 
         expose_event( drawing_area, NULL, NULL );
 
-        if ( DumpFrames ){
+        
+        if ( DumpFrames & (CurrentSec < 0.5) ){
             int x, y, width, height, depth;
             GdkPixbuf *pixbuf;
             char PngFile[40];
             gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
             pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
-            sprintf( PngFile, "%04ld.png", cFrame );
+            //sprintf( PngFile, "%04ld.png", cFrame );
+            sprintf( PngFile, "Latest.png", cFrame );
             gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
+            g_object_unref( pixbuf );
         }
 
         if (oJD != CurrentJD){
@@ -4519,7 +4514,7 @@ static gboolean idle( GtkWidget *widget ) {
 // check this one out...
 //    gdk_window_process_updates( widget->window, FALSE );
 
-    free( c );
+    Lgm_free_ctrans( c );
 
     return TRUE;
 
@@ -4764,7 +4759,7 @@ static void ChangeStartOrEndDate( GtkWidget  *widget, gpointer data ) {
     sprintf(Str, "Frames Done: %ld    Frames Remaining: %ld    (Total: %ld)", cFrame, nFramesLeft, nFrames);
     gtk_label_set_text( GTK_LABEL(cFramesLabel), Str );
 
-    free( c );
+    Lgm_free_ctrans( c );
 
 }
 
@@ -4824,7 +4819,7 @@ printf("%s\n", Str);
     sprintf(Str, "Frames Done: %ld    Frames Remaining: %ld    (Total: %ld)", cFrame, nFramesLeft, nFrames);
     gtk_label_set_text( GTK_LABEL(cFramesLabel), Str );
 
-    free( c );
+    Lgm_free_ctrans( c );
 
 
 }
@@ -6202,7 +6197,7 @@ printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, Sp
     }
 printf("done\n");
 
-    free(tc);
+    Lgm_free_ctrans( tc );
 
 }
 
@@ -8161,7 +8156,7 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
 
     gInfo = (GuiInfo *)calloc(1, sizeof(GuiInfo));
 
-    free( c );
+    Lgm_free_ctrans( c );
 
     /*
      *  Initialize GTK

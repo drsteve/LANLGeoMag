@@ -113,7 +113,7 @@ int LoadSpaceObjects( ){
                 Group->Sat[j].oRed = 0.8;
                 Group->Sat[j].oGrn = 0.8;
                 Group->Sat[j].oBlu = 0.8;
-                Group->Sat[j].oAlf = 0.1;
+                Group->Sat[j].oAlf = 0.20;
 
                 Group->Sat[j].ogpRed = 0.2;
                 Group->Sat[j].ogpGrn = 0.2;
