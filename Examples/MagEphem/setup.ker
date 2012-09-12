@@ -1,9 +1,9 @@
 \begindata
 KERNELS_TO_LOAD = ( 
-		'rbspb_sclk_0004.tsc',
-		'rbspb_2012_247_01.peph.bsp',
-		'rbspa_sclk_0005.tsc',
-		'rbspa_2012_247_01.peph.bsp',
-		'naif0010.tls'
+		'/n/toaster/u/ectsoc/data/moc_data/b/operations_sclk_kernel/rbspb_sclk_0005.tsc',
+		'/n/toaster/u/ectsoc/data/moc_data/b/ephemeris_predict/rbspb_2012_247_02.peph.bsp',
+		'/n/toaster/u/ectsoc/data/moc_data/a/operations_sclk_kernel/rbspa_sclk_0006.tsc',
+		'/n/toaster/u/ectsoc/data/moc_data/a/ephemeris_predict/rbspa_2012_247_02.peph.bsp',
+		'/n/toaster/u/ectsoc/data/moc_data/b/leap_second_kernel/naif0010.tls'
 		)
 \begintext
