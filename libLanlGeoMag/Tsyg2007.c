@@ -38,6 +38,7 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
     } else {
 
         printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+	perror("Error");
         exit(-1);
 
     }
