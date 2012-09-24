@@ -99,10 +99,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
             for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSS[k][i] );
+	    fclose(fp);
 
         } else {
 
             printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+	    perror("Error");
             exit(-1);
 
         }
@@ -116,10 +118,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSO[k][i][j] );
+		fclose(fp);
 
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+		perror("Error");
                 exit(-1);
 
             }
@@ -134,10 +138,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSE[k][i][j] );
+		fclose(fp);
 
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+		perror("Error");
                 exit(-1);
 
             }
