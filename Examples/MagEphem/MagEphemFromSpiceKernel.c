@@ -465,6 +465,7 @@ int main( int argc, char *argv[] ){
     long int        *H5_Date;
     int             *H5_Doy;
     int             *H5_InOut;
+    int             *H5_OrbitNumber;
     double          *H5_UTC;
     double          *H5_JD;
     double          *H5_GpsTime;
@@ -532,7 +533,7 @@ int main( int argc, char *argv[] ){
     double          R, Ra, Rb, Rc, Rmin, Tmin;
     BrentFuncInfo   bInfo;
     afInfo          *afi;
-    int             nPerigee, nApogee, nAscend, OrbitNumber;
+    int             nPerigee, nApogee, nAscend;
     int             ApogeeOrbitNumber[4];
     int             PerigeeOrbitNumber[4];
     char            **Perigee_IsoTimes;
@@ -573,35 +574,36 @@ int main( int argc, char *argv[] ){
 
 
     // kludge.
-    LGM_ARRAY_2D( H5_IsoTimes,  2000, 80,    char );
-    LGM_ARRAY_1D( H5_Date,      2000,        long int );
-    LGM_ARRAY_1D( H5_Doy,       2000,        int );
-    LGM_ARRAY_1D( H5_InOut,     2000,        int );
-    LGM_ARRAY_1D( H5_UTC,       2000,        double );
-    LGM_ARRAY_1D( H5_JD,        2000,        double );
-    LGM_ARRAY_1D( H5_GpsTime,   2000,        double );
-    LGM_ARRAY_1D( H5_TiltAngle, 2000,        double );
-    LGM_ARRAY_2D( H5_IntModel,  2000, 80,    char );
-    LGM_ARRAY_2D( H5_ExtModel,  2000, 80,    char );
+    LGM_ARRAY_2D( H5_IsoTimes,   2000, 80,    char );
+    LGM_ARRAY_1D( H5_Date,       2000,        long int );
+    LGM_ARRAY_1D( H5_Doy,        2000,        int );
+    LGM_ARRAY_1D( H5_InOut,      2000,        int );
+    LGM_ARRAY_1D( H5_OrbitNumber,2000,        int );
+    LGM_ARRAY_1D( H5_UTC,        2000,        double );
+    LGM_ARRAY_1D( H5_JD,         2000,        double );
+    LGM_ARRAY_1D( H5_GpsTime,    2000,        double );
+    LGM_ARRAY_1D( H5_TiltAngle,  2000,        double );
+    LGM_ARRAY_2D( H5_IntModel,   2000, 80,    char );
+    LGM_ARRAY_2D( H5_ExtModel,   2000, 80,    char );
     LGM_ARRAY_2D( H5_FieldLineType,  2000, 80,    char );
-    LGM_ARRAY_1D( H5_Rgsm,      2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Bsc_gsm,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Bfn_geo,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Bfn_gsm,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfn_geo,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfn_gsm,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfn_geod,  2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfn_cdmag, 2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfn_edmag, 2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Bfs_geo,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Bfs_gsm,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfs_geo,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfs_gsm,   2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfs_geod,  2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfs_cdmag, 2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Pfs_edmag, 2000,        Lgm_Vector );
-    LGM_ARRAY_1D( H5_Kp,        2000,        double );
-    LGM_ARRAY_1D( H5_Dst,       2000,        double );
+    LGM_ARRAY_1D( H5_Rgsm,       2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bsc_gsm,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bfn_geo,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bfn_gsm,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfn_geo,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfn_gsm,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfn_geod,   2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfn_cdmag,  2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfn_edmag,  2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bfs_geo,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Bfs_gsm,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfs_geo,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfs_gsm,    2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfs_geod,   2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfs_cdmag,  2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Pfs_edmag,  2000,        Lgm_Vector );
+    LGM_ARRAY_1D( H5_Kp,         2000,        double );
+    LGM_ARRAY_1D( H5_Dst,        2000,        double );
 
     LGM_ARRAY_1D( H5_S_sc_to_pfn,    2000,     double );
     LGM_ARRAY_1D( H5_S_sc_to_pfs,    2000,     double );
@@ -1303,6 +1305,10 @@ int          N0, ii;
                         T0 = T0_UTC.JD;
                         N0 = 3;
 
+                    } else {
+                        printf("Unknown S/C. Orbit Numbers may be wrong.\n");
+                        T0 = 0.0;
+                        N0 = 0;
                     }
 
                     for ( ii=0; ii<nApogee; ++ii ){
@@ -1482,6 +1488,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         H5_UTC[H5_nT]            = UTC.Time;
                         H5_JD[H5_nT]             = UTC.JD;
                         H5_InOut[H5_nT]          = MagEphemInfo->InOut;
+                        H5_OrbitNumber[H5_nT]    = MagEphemInfo->OrbitNumber;
                         H5_GpsTime[H5_nT]        = Lgm_UTC_to_GpsSeconds( &UTC, c );
                         H5_TiltAngle[H5_nT]      = c->psi*DegPerRad;
                         H5_Rgsm[H5_nT]           = Rgsm;
@@ -1907,11 +1914,24 @@ printf("sclkdp = %lf\n", sclkdp);
                     status  = H5Dclose( DataSet );
 
 
-                    // Create Doy Dataset
+                    // Create InOut Dataset
                     Dims[0] = H5_nT;
                     space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
                     DataSet = H5Dcreate( file, "InOut", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
                     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Flag indicating whether we are inbound (-1) or outbound (+1)" );
+                    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+                    Lgm_WriteStringAttr( DataSet, "UNITS",      "dimless" );
+                    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+                    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+                    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+                    status  = H5Sclose( space );
+                    status  = H5Dclose( DataSet );
+
+                    // Create OrbitNumber Dataset
+                    Dims[0] = H5_nT;
+                    space   = H5Screate_simple( 1, Dims, NULL ); // rank 1
+                    DataSet = H5Dcreate( file, "OrbitNumber", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+                    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Orbit Number" );
                     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
                     Lgm_WriteStringAttr( DataSet, "UNITS",      "dimless" );
                     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
@@ -3154,6 +3174,18 @@ printf("sclkdp = %lf\n", sclkdp);
                     status   = H5Sclose( space );
                     status   = H5Dclose( DataSet );
 
+                    // Write OrbitNumber
+                    SlabSize[0] = H5_nT;
+                    Offset[0]   = 0;
+                    DataSet  = H5Dopen( file, "OrbitNumber", H5P_DEFAULT );
+                    space    = H5Dget_space( DataSet );
+                    status   = H5Sselect_hyperslab( space, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );
+                    MemSpace = H5Screate_simple( 1, SlabSize, NULL );
+                    status   = H5Dwrite( DataSet, H5T_NATIVE_INT, MemSpace, space, H5P_DEFAULT, &H5_OrbitNumber[0] );
+                    status   = H5Sclose( MemSpace );
+                    status   = H5Sclose( space );
+                    status   = H5Dclose( DataSet );
+
 
 
 
@@ -4359,6 +4391,7 @@ printf("sclkdp = %lf\n", sclkdp);
     LGM_ARRAY_1D_FREE( H5_Date );
     LGM_ARRAY_1D_FREE( H5_Doy );
     LGM_ARRAY_1D_FREE( H5_InOut );
+    LGM_ARRAY_1D_FREE( H5_OrbitNumber );
     LGM_ARRAY_1D_FREE( H5_UTC );
     LGM_ARRAY_1D_FREE( H5_JD );
     LGM_ARRAY_1D_FREE( H5_GpsTime );
