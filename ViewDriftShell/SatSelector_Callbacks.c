@@ -1,5 +1,6 @@
 #include "SatSelector.h"
 
+extern GtkWidget *PUKE_SATSEL_VBOX;
 
 
 void ChangeSatColor( GtkWidget  *button, gpointer data ) {
@@ -80,6 +81,10 @@ void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data ) {
     switch ( CheckButtonNumber ) {
 
         case 0:
+//                if ( State ) ReLoadSpaceObjects();
+//gtk_widget_destroy( PUKE_SATSEL_VBOX);
+
+
                 Group->DrawGroup = State;
                 break;
         case 1:
@@ -195,6 +200,7 @@ static void ToggleSatellites( GtkMenuItem  *menuitem, const GLuint *data ) {
     int i;
     i = GPOINTER_TO_INT( data );
     ShowSatellites[i] = !ShowSatellites[i];
+    ReLoadSpaceObjects();
 //    ReLoadTLEs( );
     ReCreateSats();
     ReCreateSatOrbits();

@@ -30,6 +30,7 @@ typedef struct Lgm_MagEphemInfo {
     double          UTC;            //!< UTC in decimal hours
 
     int             InOut;          //!< Flag indicating whether we are inbound (-1) or outbound (+1)
+    int             OrbitNumber;    //!< Orbit Number
 
     double          Lat;            //!< Geographic Latitude
     double          Lon;            //!< Geographic Longitude

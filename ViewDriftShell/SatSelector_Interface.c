@@ -313,7 +313,7 @@ _SatSelectorInfo *New_SatSelectorInfo() {
 void InitSatSelectorInfo() {
 
     /*
-     *  Figure out what Sagtellite Groups we have. These are determined by the
+     *  Figure out what Satellite Groups we have. These are determined by the
      *  files that exist in the SatGroups directory
      */
     SatSelectorInfo = New_SatSelectorInfo();
@@ -347,6 +347,10 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
 
 
     vbox1 = gtk_vbox_new (FALSE, 0); gtk_widget_show (vbox1);
+
+
+
+
 
     table1 = gtk_table_new (7, 26, FALSE); gtk_widget_show (table1);
     gtk_box_pack_start (GTK_BOX (vbox1), table1, TRUE, TRUE, 0);

@@ -391,6 +391,33 @@ double LatitudeFunc( double T, double val, void *Info ){
 }
 
 
+int GetOrbitNumber( Lgm_DateTime *UTC, int nPerigee, Lgm_DateTime *Perigee_UTC, int *PerigeeOrbitNumber ){
+
+    int i, N;
+
+    N = 0;
+    if ( UTC->JD >= Perigee_UTC[nPerigee-1].JD ) {
+
+        N = PerigeeOrbitNumber[nPerigee-1];
+
+    } else {
+
+        for ( i=0; i<nPerigee; ++i ){
+            if ( UTC->JD < Perigee_UTC[i].JD  ) {
+                N = PerigeeOrbitNumber[i] - 1;
+                break;
+            }
+        }
+
+    }
+
+
+    return( N );
+
+
+}
+
+
 
 
 /*
@@ -505,7 +532,9 @@ int main( int argc, char *argv[] ){
     double          R, Ra, Rb, Rc, Rmin, Tmin;
     BrentFuncInfo   bInfo;
     afInfo          *afi;
-    int             nPerigee, nApogee, nAscend;
+    int             nPerigee, nApogee, nAscend, OrbitNumber;
+    int             ApogeeOrbitNumber[4];
+    int             PerigeeOrbitNumber[4];
     char            **Perigee_IsoTimes;
     char            **Apogee_IsoTimes;
     char            **Ascend_IsoTimes;
@@ -1250,6 +1279,54 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
 
 
 
+                    /*
+                     * Compute the orbit number that each apogee resides in.
+                     */
+Lgm_DateTime T0_UTC;
+double       T0, Tp, Tapo;
+int          N0, ii;
+                    Tp = (Apogee_UTC[1].JD - Apogee_UTC[0].JD); // orbital period in days
+                    if        ( !strcmp( Bird, "rbspa" ) ){
+
+                        // RBSPA: Start of orbit  3 at Time: 2012-08-31T03:14:50.545
+                        Lgm_Make_UTC( 20120831, 3.0+14.0/60.0+50.545/3600.0, &T0_UTC, c );
+                        T0 = T0_UTC.JD;
+                        N0 = 3;
+
+                    } else if ( !strcmp( Bird, "rbspb" ) ){
+
+                        // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
+                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+                        T0 = T0_UTC.JD;
+                        N0 = 3;
+
+                    }
+
+                    for ( ii=0; ii<nApogee; ++ii ){
+                        Tapo = Apogee_UTC[ii].JD;
+                        ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
+                        printf("Apogee: %s   Tp = %g Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", Apogee_IsoTimes[ii], Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
+                    }
+
+
+                    /*
+                     * Compute the orbit number that each perigee starts.
+                     */
+                    if ( Apogee_UTC[0].JD > Perigee_UTC[0].JD ){
+                        // the first perigee is earlier than the first apogee
+                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0];
+                    } else {
+                        // the first apogee is earlier than the first perigee
+                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
+                    }
+                    for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
+                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeerbitNumber = %d\n", PerigeeOrbitNumber[ii] );
+
+
+
+
+
+
 
 
 
@@ -1332,6 +1409,8 @@ printf("sclkdp = %lf\n", sclkdp);
                         // Set up the trans matrices
                         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
+                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
+
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
                         sce2s_c( BODY,    et, 30, sclkch );
@@ -1342,7 +1421,7 @@ printf("sclkdp = %lf\n", sclkdp);
                          */
                         printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
                         printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                        printf("\t\tMET: %s\n", sclkch );          
+                        printf("\t\tMET: %s   OrbitNumber: %d\n", sclkch, MagEphemInfo->OrbitNumber );          
                         printf("\t--------------------------------------------------------------------------------------------------\n");
 //Lgm_Vector TMPTMP;
 //Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, MagEphemInfo->LstarInfo->mInfo->c );

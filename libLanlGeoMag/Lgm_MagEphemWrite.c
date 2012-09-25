@@ -279,6 +279,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#                              \"UNITS\": \"dimless\" },\n");
     fprintf( fp, "#\n");
 
+    fprintf( fp, "#  \"OrbitNumber\":      { \"DESCRIPTION\": \"Orbit Number.\",\n");
+    fprintf( fp, "#                               \"NAME\": \"OrbitNumber\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"Orbit Number\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Orbit Number\",\n");
+    fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
+    fprintf( fp, "#                              \"UNITS\": \"dimless\" },\n");
+    fprintf( fp, "#\n");
+
 
     fprintf( fp, "#  \"Rgeo\":             { \"DESCRIPTION\": \"Geocentric Geographic position vector of S/C.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Rgeo\",\n");
@@ -1316,6 +1324,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "%91s",  "#  +------------------------------------ Date and Time -----------------------------------+" );
     fprintf( fp, " %13s",  " +- TiltAng +" );
     fprintf( fp, " %11s",  " +- InOut +" );
+    fprintf( fp, " %11s",  " +-OrbNum-+" );
     fprintf( fp, " %41s",  " +--- Geocentric Geographic Coords --+" );
     fprintf( fp, " %41s",  " +---- Geodetic Geographic Coords ---+" );
     fprintf( fp, " %41s",  " +--------- GSM Coordinates ---------+" );
@@ -1492,6 +1501,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, " %15s", "GPS Time" );
     fprintf( fp, " %13s", "    " );
     fprintf( fp, " %11s", "    " );
+    fprintf( fp, " %11s", "    " );
 
     fprintf( fp, " %13s", "Xgeo" );
     fprintf( fp, " %13s", "Ygeo" );
@@ -1659,6 +1669,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, " %16s", "Days" );
     fprintf( fp, " %15s", "Seconds" );
     fprintf( fp, " %13s", "Degrees" );
+    fprintf( fp, " %11s", "       " );
     fprintf( fp, " %11s", "       " );
 
     fprintf( fp, " %13s", "Re" ); // Geocentric GEO
@@ -1854,6 +1865,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     fprintf( fp, " %15.3lf", Lgm_UTC_to_GpsSeconds( &c->UTC, c ) ); // GpsTime
     fprintf( fp, " %13.8lf", c->psi*DegPerRad ); // DipoleTiltAngle
     fprintf( fp, " %11d", m->InOut );        // InOut
+    fprintf( fp, " %11d", m->OrbitNumber );        // InOut
 
 
     Lgm_Convert_Coords( &m->P, &v, GSM_TO_GEO, c );

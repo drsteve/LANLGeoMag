@@ -22,6 +22,10 @@
 #include <Lgm_DynamicMemory.h>
 #include "Vds_DriftShell.h"
 
+
+GtkWidget *PUKE_SATSEL_VBOX;
+
+
 Vds_ObjectInfo  *ObjInfo;
 
 void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks);
@@ -4479,7 +4483,8 @@ static gboolean idle( GtkWidget *widget ) {
         expose_event( drawing_area, NULL, NULL );
 
         
-        if ( DumpFrames & (CurrentSec < 0.5) ){
+        if ( DumpFrames && ((CurrentSec >  59.5) || (CurrentSec < 0.5)) ){
+//        if ( DumpFrames ){
             int x, y, width, height, depth;
             GdkPixbuf *pixbuf;
             char PngFile[40];
@@ -7132,6 +7137,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     //InitSatSelectorInfo();
 
     vbox2 = CreateSatSelector( nSatTypes, SatTypes );
+PUKE_SATSEL_VBOX = vbox2;
     gtk_container_set_border_width (GTK_CONTAINER (vbox2), 20);
 
     // Page title
