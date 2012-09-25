@@ -9,7 +9,7 @@ CFLAGS     = `pkg-config --cflags lgm` $(SPICE_INC)
 CC           = gcc
 
 
-all   : MagEphemFromFile MagEphemFromSpiceKernel
+all   : MagEphemFromSpiceKernel
 
 MagEphemFromFile : Makefile  MagEphemFromFile.o
 	$(CC) $(FILES1) MagEphemFromFile.o $(HDF5_LIBS) $(LIBS) $(CFLAGS) -o MagEphemFromFile

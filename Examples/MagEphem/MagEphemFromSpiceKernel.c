@@ -554,10 +554,10 @@ int main( int argc, char *argv[] ){
     double          Bmin_mag, s, cl, Ek, E, pp, p2c2, Beta2, Beta, vel, T, rg;
     int             n, OverRideKp;
     char            *CmdLine, TmpStr[2048];
-    SpiceChar       SpiceKernelFilesLoaded[2048];
-    SpiceChar       SpiceKernelFile[128];
+    SpiceChar       SpiceKernelFilesLoaded[20480];
+    SpiceChar       SpiceKernelFile[2048];
     SpiceChar       SpiceKernelType[32];
-    SpiceChar       SpiceKernelSource[128];
+    SpiceChar       SpiceKernelSource[2048];
     SpiceInt        SpiceHandle, kk, KernelCount;
     SpiceBoolean    SpiceKernelFound;
     SPICEDOUBLE_CELL ( cover, WINSIZ );
@@ -820,8 +820,8 @@ int main( int argc, char *argv[] ){
     } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else if ( !strcmp( ExtModel, "TS07D" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS07;
-Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
+//        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS07;
+//Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
     } else { //if ( !strcmp( ExtModel, "T89c" ) ){
         // default
         printf("Unknown model. ExtModel: %s\n", ExtModel );
@@ -1099,11 +1099,14 @@ Lgm_SetCoeffs_TS07( 0, 0, &(MagEphemInfo->LstarInfo->mInfo->TS07_Info) );
                     printf( "\t    Using SPICE Kernel Desrciption File: %s\n", InFile );
                     ktotal_c( "all", &KernelCount );
                     printf( "\t    Kernel Files Loaded:\n" );
+
+
+
                     SpiceKernelFilesLoaded[0] = '\0';
                     for (kk=0; kk<KernelCount; kk++){
-                        kdata_c( kk,  "all", 128, 32, 128, SpiceKernelFile, SpiceKernelType, SpiceKernelSource, &SpiceHandle,  &SpiceKernelFound );
+                        kdata_c( kk,  "all", 2047, 32, 2047, SpiceKernelFile, SpiceKernelType, SpiceKernelSource, &SpiceHandle,  &SpiceKernelFound );
                         printf( "\t\t\t\t%s   (Type = %s)\n",  SpiceKernelFile, SpiceKernelType );
-                        strcat( SpiceKernelFilesLoaded, SpiceKernelFile );
+                        strncat( SpiceKernelFilesLoaded, SpiceKernelFile, 2048 );
                         if (kk<KernelCount-1) strcat( SpiceKernelFilesLoaded, ", " );
 
                         if ( !strcmp( SpiceKernelType, "SPK" ) ){
