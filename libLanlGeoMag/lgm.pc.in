@@ -8,5 +8,5 @@ Description: C-based library of routines for space physics applications. Include
 URL: 
 Version: @PACKAGE_VERSION@
 Requires: gsl 
-Libs: @LDFLAGS@ -L${libdir} -lLanlGeoMag -lgsl -lgslcblas -lm  -fopenmp -lgomp -lhdf5
+Libs: -Wl,-rpath,${libdir} @LDFLAGS@ -L${libdir} -lLanlGeoMag -lgsl -lgslcblas -lm  -fopenmp -lgomp -lhdf5
 Cflags: @CFLAGS@ -I${includedir} -I${includedir}/Lgm -g -Wall -O3 -funroll-all-loops -ffast-math -fopenmp
