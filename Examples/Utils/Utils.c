@@ -13,6 +13,13 @@ int main(void) {
     printf("%f\n", array[i]);
   printf("\n");
 
+  Lgm_LinSpace(1, 100, 10, array);
+
+  printf("Lgm_LinSpace:\n");
+  for (i=0;i<10;i++)
+    printf("%f\n", array[i]);
+  printf("\n");
+
 
   return (0);
 }

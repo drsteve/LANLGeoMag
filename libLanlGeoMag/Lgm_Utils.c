@@ -3,7 +3,7 @@
 
 
 /*
- * Fill an array with log spaced numberd form start to stop
+ * Fill an array with log spaced numbers from start to stop
  */
 void Lgm_LogSpace( double start, double stop, int num, double *array ){
   double delta, logmin, accDelta = 0;
@@ -12,6 +12,20 @@ void Lgm_LogSpace( double start, double stop, int num, double *array ){
   delta = (log10(stop) - logmin)/(double)num;
   for (i=0; i<num; i++) {
     array[i] = pow(10, logmin + accDelta);
+    accDelta += delta;
+  }
+}
+
+/*
+ * Fill an array with linear spaced numbers from start to stop, includes the end point
+ */
+void Lgm_LinSpace(double start, double stop, int num, double *array) {
+  double delta, linmin, accDelta = 0;
+  int i;
+  linmin = start;
+  delta = (stop-start)/((double)(num-1));
+  for (i=0; i<num; i++) {
+    array[i] = linmin + accDelta;
     accDelta += delta;
   }
 }
