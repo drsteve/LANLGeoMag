@@ -3,6 +3,7 @@
 #endif
 
 #include <stdio.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
 #include "Lgm/Lgm_CTrans.h"
@@ -171,7 +172,29 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     int         success1, success2, success3;
     char        *Line, *Filename;
     static char *ftype[] = {"1min", "1hr" };
+    char        *Path, QinDentonPath[2048];
     Lgm_CTrans  *c = Lgm_init_ctrans(0);
+
+
+    Path = getenv( "QIN_DENTON_PATH" );
+    if ( Path == NULL ) {
+        strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+    } else {
+
+        /*
+         * Test for existence
+         */
+        struct stat sts;
+        if ( ( stat( Path, &sts ) ) == -1 ) {
+            printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s\n", Path );
+            strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+        } else {
+            strcpy( QinDentonPath, Path );
+        }
+    }
+
+
+    
 
     Lgm_Doy( Date, &Year, &Month, &Day, &Doy);
     MJD = Lgm_MJD( Year, Month, Day, 12.0, LGM_TIME_SYS_UTC, c );
@@ -196,7 +219,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success1 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Prev_Year, Prev_Date, ftype[j] );
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -236,7 +259,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success2 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Year, Date, ftype[j] );
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Year, Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -277,7 +300,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success3 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", LGM_INDEX_DATA_DIR, Next_Year, Next_Date, ftype[j] );
+        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Next_Year, Next_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {

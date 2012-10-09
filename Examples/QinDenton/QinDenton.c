@@ -6,7 +6,7 @@ int main( ) {
     long int         Date;
     double           UTC, JD;
     
-    Date = 20070717;                        // August 12, 2004
+    Date = 20120917;                        // August 12, 2004
     UTC  = 12.0 + 30.0/60.0 + 00.0/3600.0;   // Universal Time Coordinated (in decimal hours)
     JD = Lgm_Date_to_JD( Date, UTC, c );    // Compute JD
 
