@@ -22,7 +22,7 @@ int main(){
    mInfo->Bfield = Lgm_B_TS04;
 //mInfo->Bfield = Lgm_B_OP77;
 //mInfo->Bfield = Lgm_B_T89;
-    mInfo->Bfield = Lgm_B_TS04_opt;
+    mInfo->Bfield = Lgm_B_TS04;
     mInfo->P      = 4.1011111111111118;
     mInfo->Dst    = 7.7777777777777777;
     mInfo->By     = 3.7244444444444444;
