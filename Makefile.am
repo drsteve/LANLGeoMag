@@ -1,7 +1,10 @@
 if HAVE_CHECK
-	MAYBE_TESTS = tests
+    MAYBE_TESTS = tests
 endif
-SUBDIRS = libLanlGeoMag . Tools $(MAYBE_TESTS)
+if ENABLE_TOOLS
+    MAYBE_TOOLS = Tools
+endif
+SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS)
 
 #ALL_EXAMPLE_FILES = $(shell cat example_file_list)
 ALL_DOC_FILES = Doc/GSM.png Doc/CoordFig.eps Doc/GSM_SM_FIG.svg \

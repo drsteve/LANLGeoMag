@@ -83,9 +83,11 @@ AS_IF([test "x$enable_eopcron" == "xyes"], [
 AC_SUBST([ENABLE_EOP_CRON])
 AC_SUBST([DAILY_CRON_DIR])
 
-
-
-
+AC_ARG_ENABLE([tools], AS_HELP_STRING([--enable-tools], [Install some tools which use LanlGeoMag (default: disable)]))
+AS_IF([test "x$enable_tools" == "xyes"],
+    [AM_CONDITIONAL([ENABLE_TOOLS], true)],
+    [AM_CONDITIONAL([ENABLE_TOOLS], false)]
+)
 
 dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
