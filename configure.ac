@@ -90,6 +90,11 @@ AS_IF([test "x$enable_tools" == "xyes"],
     [AM_CONDITIONAL([ENABLE_TOOLS], false)]
 )
 
+# Checks for programs.
+AC_PROG_CC
+#AC_PROG_F77
+
+# Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem
 dnl Can change this later to go hunting for them, but standard ld search path won't find it.
 AC_ARG_WITH([cspice-include-path],
@@ -136,14 +141,6 @@ LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 dnl Add LDFLAGS for HDF5
 HDF5_LDFLAGS="-lhdf5"
 LDFLAGS=${LDFLAGS}\ ${HDF5_LDFLAGS}
-
-
-
-# Checks for programs.
-AC_PROG_CC
-#AC_PROG_F77
-
-# Checks for libraries.
 # FIXME: Replace `main' with a function in `-lLanlGeoMag':
 #AC_CHECK_LIB([LanlGeoMag], [Lgm_Convert_Coords])
 # FIXME: Replace `main' with a function in `-lgfortran':
