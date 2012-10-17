@@ -1,10 +1,10 @@
 LGMSRCDIR=../libLanlGeoMag/
 bin_PROGRAMS = MagEphemFromSpiceKernel
 MagEphemFromSpiceKernel_SOURCES = MagEphemFromSpiceKernel.c
-MagEphemFromSpiceKernel_LDADD = $(LGMSRCDIR)/libLanlGeoMag.la /packages/lib/cspice.a #@cspice_LIBS@
+MagEphemFromSpiceKernel_LDADD = $(LGMSRCDIR)/libLanlGeoMag.la @cspice_LIBS@
 #hard-code the include path, since the headers don't go anywhere funny pre-install.
 #This may change if using, say, autoheader.
-MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm -I/packages/include/naif #@cspice_CFLAGS@
+MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
 
 #CFLAGS       = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
 #SPICE_LIBS = '/home/mgh/SPICE/cspice/lib/cspice.a'

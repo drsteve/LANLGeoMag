@@ -89,6 +89,25 @@ AS_IF([test "x$enable_tools" == "xyes"],
     [AM_CONDITIONAL([ENABLE_TOOLS], false)]
 )
 
+dnl Need to directly specify SPICE location for MagEphem
+dnl Can change this later to go hunting for them, but standard ld search path won't find it.
+AC_ARG_WITH([cspice-include-path],
+  [AS_HELP_STRING([--with-cspice-include-path=DIR], [Path to NAIF/cSPICE includes (contains SpiceUsr.h). Required if installing tools.])],
+  [cspice_CFLAGS="-I$withval"],
+  [if test "x$enable_tools" == "xyes"; then
+     AC_MSG_FAILURE([--enable-tools requires --with-cspice-include-path])
+   fi]
+)
+AC_ARG_WITH([cspice-lib-path],
+  [AS_HELP_STRING([--with-cspice-lib-path=DIR], [Path to NAIF/cSPICE library (contains cspice.a). Required if installing tools.])],
+  [cspice_LIBS="${withval}/cspice.a"],
+  [if test "x$enable_tools" == "xyes"; then
+     AC_MSG_FAILURE([--enable-tools requires --with-cspice-lib-path])
+   fi]
+)
+AC_SUBST(cspice_CFLAGS)
+AC_SUBST(cspice_LIBS)
+
 dnl Add LDFLAGS for embedded perl
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 AC_MSG_NOTICE([Adding perl LIBS ${PERL_LDFLAGS}])
