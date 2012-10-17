@@ -1,10 +1,5 @@
 SUBDIRS = Lgm EopData
 
-#AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_EMIT_KEYS=3 -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
-AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
-#AM_CFLAGS   = -fopenmp -lgomp -ffast-math
-AM_CFLAGS   = -fopenmp -lgomp
-
 # Directory where Eop-related stuff will be installed
 LGM_EOP_DATA_DIR   = ${prefix}/share/LanlGeoMag/EopData
 
@@ -39,6 +34,9 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_B_FromScatteredData
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c \
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
                             Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c Lgm_Utils.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
+libLanlGeoMag_la_LIBADD = -lgomp
+libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) -fopenmp
+libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
                             
 
 
