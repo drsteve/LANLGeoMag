@@ -116,15 +116,21 @@ AC_SUBST(cspice_LIBS)
 
 dnl Get flags for embedded perl and make sure it works
 dnl Save old CFLAGS/LDFLAGS so can restore after the check
+AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
+if test x"${HAVE_PERL}" == x"false"; then
+    AC_MSG_FAILURE([Unable to run perl])
+fi
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
+OLD_LIBS=${LIBS}
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
-AC_CHECK_LIB([perl], [perl_alloc], AC_DEFINE([HAVE_LIBPERL], [1], [libperl found]), AC_MSG_ERROR([No libperl found]))
+AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_ERROR([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
 LDFLAGS=${OLD_LDFLAGS}
+LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
 
