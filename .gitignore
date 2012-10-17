@@ -21,3 +21,6 @@ libLanlGeoMag/.deps/
 *.o
 *.lo
 *.png
+/Makefile
+Tools/Makefile
+tests/Makefile
