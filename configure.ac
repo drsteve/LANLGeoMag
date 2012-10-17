@@ -97,20 +97,20 @@ AC_PROG_CC
 # Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem
 dnl Can change this later to go hunting for them, but standard ld search path won't find it.
-AC_ARG_WITH([cspice-include-path],
-  [AS_HELP_STRING([--with-cspice-include-path=DIR], [Path to NAIF/cSPICE includes (contains SpiceUsr.h). Required if installing tools.])],
-  [cspice_CFLAGS="-I$withval"],
-  [if test "x$enable_tools" == "xyes"; then
-     AC_MSG_FAILURE([--enable-tools requires --with-cspice-include-path])
-   fi]
+AC_ARG_WITH([cspice],
+  [AS_HELP_STRING([--with-cspice=DIR], [Path to NAIF/cSPICE (contains include, lib).])],
+  [cspice_CFLAGS=-I${withval}/include; cspice_LIBS=-L${withval}/lib/cspice.a] )
+AC_ARG_WITH([cspice-includedir],
+  [AS_HELP_STRING([--with-cspice-includedir=DIR], [Path to NAIF/cSPICE includes (contains SpiceUsr.h). Required if installing tools.])],
+  [cspice_CFLAGS="-I$withval"]
 )
-AC_ARG_WITH([cspice-lib-path],
-  [AS_HELP_STRING([--with-cspice-lib-path=DIR], [Path to NAIF/cSPICE library (contains cspice.a). Required if installing tools.])],
-  [cspice_LIBS="${withval}/cspice.a"],
-  [if test "x$enable_tools" == "xyes"; then
-     AC_MSG_FAILURE([--enable-tools requires --with-cspice-lib-path])
-   fi]
+AC_ARG_WITH([cspice-libdir],
+  [AS_HELP_STRING([--with-cspice-libdir=DIR], [Path to NAIF/cSPICE library (contains cspice.a). Required if installing tools.])],
+  [cspice_LIBS="${withval}/cspice.a"]
 )
+if test "x$enable_tools" == "xyes" -a \( "x$cspice_CFLAGS" == "x" -o "x$cspice_LIBS" == "x" \); then
+   AC_MSG_FAILURE([--enable-tools requires either --with-cspice or both --with-cspice-libdir and --with-cspice-includedir])
+fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
 
