@@ -14,6 +14,7 @@ config.h*
 config.log
 config.status
 config.sub
+configure.scan
 docs/Doxyfile
 docs/Makefile
 install-sh
