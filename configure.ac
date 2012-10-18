@@ -147,9 +147,6 @@ m4_ifdef([AC_OPENMP], [AC_OPENMP], [OPENMP_CFLAGS="-fopenmp"])
 CFLAGS=${CFLAGS}\ ${OPENMP_CFLAGS}
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([OpenMP support not found])])
 
-#OPENMP_LDFLAGS="-fopenmp -lgomp"
-#LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
-
 dnl check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
