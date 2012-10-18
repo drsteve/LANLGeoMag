@@ -141,8 +141,14 @@ AC_CHECK_LIB([gslcblas], [cblas_dgemm], ,
 AC_CHECK_LIB([gsl], [gsl_spline_init], ,
     [AC_MSG_ERROR([could not find required version of GSL, are development libraries installed?])])
 
-OPENMP_LDFLAGS="-fopenmp -lgomp"
-LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
+dnl Check for openmp support
+dnl note the linker does not need an explicit -lgomp, -fopenmp handles it
+m4_ifdef([AC_OPENMP], [AC_OPENMP], [OPENMP_CFLAGS="-fopenmp"])
+CFLAGS=${CFLAGS}\ ${OPENMP_CFLAGS}
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([OpenMP support not found])])
+
+#OPENMP_LDFLAGS="-fopenmp -lgomp"
+#LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 
 dnl check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_ERROR([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
