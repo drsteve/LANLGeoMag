@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include "Lgm/Lgm_DynamicMemory.h"
+#define H5_NO_DEPRECATED_SYMBOLS
 #include <hdf5.h>
 
 char     **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims );
