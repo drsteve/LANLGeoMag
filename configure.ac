@@ -92,7 +92,6 @@ AS_IF([test "x$enable_tools" == "xyes"],
 
 # Checks for programs.
 AC_PROG_CC
-#AC_PROG_F77
 
 # Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem
@@ -149,11 +148,7 @@ dnl check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_ERROR([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
-# FIXME: Replace `main' with a function in `-lLanlGeoMag':
-#AC_CHECK_LIB([LanlGeoMag], [Lgm_Convert_Coords])
-# FIXME: Replace `main' with a function in `-lgfortran':
-#AC_CHECK_LIB([gfortran], [main])
-
+dnl check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
 PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
 
@@ -166,8 +161,6 @@ AC_TYPE_SIZE_T
 AM_PROG_CC_C_O
 
 # Checks for library functions.
-#AC_FUNC_MALLOC
-#AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memset pow sqrt strstr])
 
 AC_CONFIG_FILES([Makefile
