@@ -126,7 +126,7 @@ OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
-AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_ERROR([No libperl found, are perl development files installed?])])
+AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
 LDFLAGS=${OLD_LDFLAGS}
 LIBS=${OLD_LIBS}
@@ -151,8 +151,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([O
 #LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 
 dnl check for hdf5
-AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_ERROR([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
-AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
+AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
+AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
 dnl check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
