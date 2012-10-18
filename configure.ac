@@ -134,12 +134,13 @@ LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
 
-dnl Add LDFLAGS for gsl
-dnl GSL_LDFLAGS=-lgsl
-GSL_LDFLAGS=-lgsl
-LDFLAGS=${LDFLAGS}\ ${GSL_LDFLAGS}
-GSLCBLAS_LDFLAGS=-lgslcblas
-LDFLAGS=${LDFLAGS}\ ${GSLCBLAS_LDFLAGS}
+dnl Check for gsl, http://www.gnu.org/software/gsl/manual/html_node/Autoconf-Macros.html
+AC_CHECK_LIB([m], [cos], ,
+    [AC_MSG_ERROR([could not find math library, are development libraries installed?])])
+AC_CHECK_LIB([gslcblas], [cblas_dgemm], ,
+    [AC_MSG_ERROR([could not find required version of GSL/CBLAS, are development libraries installed?])])
+AC_CHECK_LIB([gsl], [gsl_spline_init], ,
+    [AC_MSG_ERROR([could not find required version of GSL, are development libraries installed?])])
 
 OPENMP_LDFLAGS="-fopenmp -lgomp"
 LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
@@ -166,12 +167,6 @@ AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, 
 #AC_CHECK_LIB([LanlGeoMag], [Lgm_Convert_Coords])
 # FIXME: Replace `main' with a function in `-lgfortran':
 #AC_CHECK_LIB([gfortran], [main])
-# FIXME: Replace `main' with a function in `-lm':
-AC_CHECK_LIB([m], [sin])
-# FIXME: Replace `main' with a function in `-lgsl':
-AC_CHECK_LIB([gsl], [gsl_spline_init], [], [AC_MSG_ERROR(could not find required version of GSL)])
-# FIXME: Replace `main' with a function in `-lgslcblas':
-#AC_CHECK_LIB([gslcblas], [main])
 
 AM_CONDITIONAL([HAVE_CHECK], false)
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
