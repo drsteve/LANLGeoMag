@@ -141,17 +141,17 @@ AC_CHECK_LIB([gslcblas], [cblas_dgemm], ,
 AC_CHECK_LIB([gsl], [gsl_spline_init], ,
     [AC_MSG_ERROR([could not find required version of GSL, are development libraries installed?])])
 
-dnl Check for openmp support
+# Check for openmp support
 dnl note the linker does not need an explicit -lgomp, -fopenmp handles it
 m4_ifdef([AC_OPENMP], [AC_OPENMP], [OPENMP_CFLAGS="-fopenmp"])
 CFLAGS=${CFLAGS}\ ${OPENMP_CFLAGS}
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([OpenMP support not found])])
 
-dnl check for hdf5
+# check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
-dnl check for test-runner, check
+# check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
 PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
 
