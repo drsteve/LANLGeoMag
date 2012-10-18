@@ -24,3 +24,12 @@ libLanlGeoMag/.deps/
 /Makefile
 Tools/Makefile
 tests/Makefile
+libLanlGeoMag/Makefile
+libLanlGeoMag/Lgm/Makefile
+libLanlGeoMag/EopData/Makefile
+/build-aux/
+/autom4te.cache/
+configure
+stamp-h1
+libtool
+INSTALL
