@@ -155,7 +155,7 @@ AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, 
 #AC_CHECK_LIB([gfortran], [main])
 
 AM_CONDITIONAL([HAVE_CHECK], false)
-PKG_CHECK_MODULES([CHECK], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
+PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
