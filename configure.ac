@@ -145,23 +145,9 @@ AC_CHECK_LIB([gsl], [gsl_spline_init], ,
 OPENMP_LDFLAGS="-fopenmp -lgomp"
 LDFLAGS=${LDFLAGS}\ ${OPENMP_LDFLAGS}
 
-dnl Add flags for HDF5. If specified, put FIRST in search path.
-AC_ARG_WITH([hdf5],
-  [AS_HELP_STRING([--with-hdf5=DIR], [Path to HDF5 (contains include, lib for hdf5).])],
-  [HDF5_CFLAGS=-I${withval}/include; HDF5_LDFLAGS=-L${withval}/lib]
-)
-AC_ARG_WITH([hdf5-includedir],
-  [AS_HELP_STRING([--with-hdf5-includedir=DIR], [Path to HDF5 includes (contains hdf5.h).])],
-  [HDF5_CFLAGS=-I$withval]
-)
-AC_ARG_WITH([hdf5-libdir],
-  [AS_HELP_STRING([--with-hdf5-libdir=DIR], [Path to HDF5 library (contains libhdf5).])],
-  [HDF5_LDFLAGS=-L${withval}]
-)
-CFLAGS=${HDF5_CFLAGS}\ $CFLAGS
-LDFLAGS=${HDF5_LDFLAGS}\ $LDFLAGS
-AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_ERROR([hdf5 header files not found, try --with-hdf5-includedir])])
-AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, try --with-hdf5-libdir])])
+dnl check for hdf5
+AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_ERROR([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
+AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_ERROR([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
 # FIXME: Replace `main' with a function in `-lLanlGeoMag':
 #AC_CHECK_LIB([LanlGeoMag], [Lgm_Convert_Coords])
