@@ -151,6 +151,9 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([O
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
+# check for argp (mostly for OS X)
+AC_SEARCH_LIBS([argp_parse], [argp], , [AC_MSG_FAILURE([cannot find argp library])])
+
 # check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
 PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
