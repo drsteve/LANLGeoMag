@@ -107,7 +107,7 @@ AC_ARG_WITH([cspice-libdir],
   [AS_HELP_STRING([--with-cspice-libdir=DIR], [Path to NAIF/cSPICE library (contains cspice.a). Required if installing tools.])],
   [cspice_LIBS="${withval}/cspice.a"]
 )
-if test "x$enable_tools" == "xyes" -a \( "x$cspice_CFLAGS" == "x" -o "x$cspice_LIBS" == "x" \); then
+if test "x$enable_tools" == "xyes" && { test "x$cspice_CFLAGS" == "x" || test "x$cspice_LIBS" == "x"; }; then
    AC_MSG_FAILURE([--enable-tools requires either --with-cspice or both --with-cspice-libdir and --with-cspice-includedir])
 fi
 AC_SUBST(cspice_CFLAGS)
@@ -125,7 +125,7 @@ AC_ARG_WITH([python],
 if test x"${with_python}" == x"no"; then
     AC_MSG_NOTICE([skipping Python bindings (--without-python specified)])
 else
-    if test x"${with_python}" != x"default" -a x"${with_python}" != x"yes"; then
+    if test x"${with_python}" != x"default" && test x"${with_python}" != x"yes"; then
         PYTHON=${with_python}
     fi
     AM_PATH_PYTHON([2.6], , [:])
