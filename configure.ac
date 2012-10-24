@@ -113,7 +113,8 @@ fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
 
-# Check for python
+# Check for python and SpacePy
+build_py='no'
 AC_ARG_WITH([python],
     [AS_HELP_STRING([--with-python=PYTHON],\
         [Name of (or path to) Python interpreter, or specify
@@ -124,21 +125,38 @@ AC_ARG_WITH([python],
 if test x"${with_python}" == x"no"; then
     AC_MSG_NOTICE([skipping Python bindings (--without-python specified)])
 else
-    dnl named a specific python interpreter
     if test x"${with_python}" != x"default" -a x"${with_python}" != x"yes"; then
         PYTHON=${with_python}
     fi
     AM_PATH_PYTHON([2.6], , [:])
-    AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
-    if test x"${with_python}" == x"default"; then
-        AM_COND_IF([HAVE_PYTHON], ,
-            [AC_MSG_WARN([Python 2.6+ not found; python support will not be built])])
+    dnl didn't find python, error or warn as appropriate
+    if test x"$PYTHON" == x":"; then
+        if test x"${with_python}" == x"default"; then
+          AC_MSG_WARN(
+          [Python 2.6+ not found; python support will not be built])
+        else
+            AC_MSG_FAILURE(
+            [Python 2.6+ not found; cannot enable python support])
+        fi
     else
-        dnl specifically asked for Python
-        AM_COND_IF([HAVE_PYTHON], ,
-            [AC_MSG_FAILURE([Python 2.6+ not found; cannot enable python support])])
+	AC_MSG_CHECKING([for spacepy])
+        ${PYTHON} -c "import spacepy" > /dev/null 2>/dev/null
+        if test $? != 0; then
+	    AC_MSG_RESULT([not found])
+            if test x"${with_python}" == x"default"; then
+                AC_MSG_WARN(
+                  [spacepy not found; python support will not be built])
+            else
+                AC_MSG_FAILURE(
+                [spacepy not found; cannot enable python support])
+            fi
+        else
+	    AC_MSG_RESULT([found])
+	    build_py="yes"
+        fi
     fi
 fi
+AM_CONDITIONAL([HAVE_PYTHON], [test "$build_py" == "yes"])
 
 dnl Get flags for embedded perl and make sure it works
 dnl Save old CFLAGS/LDFLAGS so can restore after the check
