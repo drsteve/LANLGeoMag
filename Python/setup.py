@@ -7,6 +7,7 @@ import glob
 import os
 import os.path
 import subprocess
+import sys
 
 
 class build(_build):
@@ -14,6 +15,8 @@ class build(_build):
 
     def make_wrapper(self):
         """Generate the wrapper using ctypesgen"""
+        if sys.version_info[0] == 3:
+            print('Python 3 is not expected to work, trying anyway...')
         if not 'LIBDIR' in os.environ:
             raise RuntimeError('LIBDIR environment variable not set. '
                                'Use Makefile to build the python wrapper.')
