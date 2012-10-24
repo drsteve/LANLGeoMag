@@ -113,6 +113,33 @@ fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
 
+# Check for python
+AC_ARG_WITH([python],
+    [AS_HELP_STRING([--with-python=PYTHON],\
+        [Name of (or path to) Python interpreter, or specify
+         --without-python to skip Python bindings.])],
+    [],
+    [with_python=default]
+)
+if test x"${with_python}" == x"no"; then
+    AC_MSG_NOTICE([skipping Python bindings (--without-python specified)])
+else
+    dnl named a specific python interpreter
+    if test x"${with_python}" != x"default" -a x"${with_python}" != x"yes"; then
+        PYTHON=${with_python}
+    fi
+    AM_PATH_PYTHON([2.6], , [:])
+    AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
+    if test x"${with_python}" == x"default"; then
+        AM_COND_IF([HAVE_PYTHON], ,
+            [AC_MSG_WARN([Python 2.6+ not found; python support will not be built])])
+    else
+        dnl specifically asked for Python
+        AM_COND_IF([HAVE_PYTHON], ,
+            [AC_MSG_FAILURE([Python 2.6+ not found; cannot enable python support])])
+    fi
+fi
+
 dnl Get flags for embedded perl and make sure it works
 dnl Save old CFLAGS/LDFLAGS so can restore after the check
 AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
@@ -178,5 +205,6 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
 		 Tools/Makefile
+		 Python/Makefile
                  ])
 AC_OUTPUT
