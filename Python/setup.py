@@ -33,19 +33,8 @@ class build(_build):
             [os.path.join(libsrcdir, 'libLanlGeoMag.la'), 'Makefile'],
             outfile):
             return #wrapper up to date
-        libglob = os.path.join(libsrcdir, '.libs', 'libLanlGeoMag.*')
-        libfile = None
-        for f in glob.glob(libglob):
-            if os.path.islink(f) or \
-                   f[-4:] == '.lai' or f[-3:] == '.la' or f[-2:] == '.a':
-                continue
-            else:
-                libfile = f
-        if libfile == None:
-            raise RuntimeError(
-                'Cannot find compiled libLanlGeoMag in ' + libsrcdir)
         cmd = ['ctypesgen.py',
-               '-l' + libfile,
+               '-lLanlGeoMag',
                '--no-macro-warnings',
                '-o', outfile,
                '--compile-libdir=' + os.path.join(libsrcdir, '.libs'),
