@@ -5,11 +5,7 @@ all-local: $(LGMSRCDIR)/libLanlGeoMag.la
 	LIBDIR=$(libdir) $(PYTHON) setup.py build
 
 install-exec-local:
-	if [ -n $(DESTDIR) ]; then
-		$(PYTHON) setup.py install --root=$(DESTDIR) --prefix=$(prefix)
-	else
-		$(PYTHON) setup.py install --prefix=$(prefix)
-	fi
+	if [ -n "$(DESTDIR)" ]; then LIBDIR=$(libdir) $(PYTHON) setup.py install --root=$(DESTDIR) --prefix=$(prefix); else LIBDIR=$(libdir) $(PYTHON) setup.py install --prefix=$(prefix); fi
 
 uninstall-local:
 	rm -f $(DESTDIR)$(libdir)/python*/site-packages/lgmpy*
