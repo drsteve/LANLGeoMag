@@ -2,7 +2,7 @@
 LGMSRCDIR=../libLanlGeoMag/
 
 all-local: $(LGMSRCDIR)/libLanlGeoMag.la
-	$(PYTHON) setup.py build
+	LIBDIR=$(libdir) $(PYTHON) setup.py build
 
 install-exec-local:
 	if [ -n $(DESTDIR) ]; then

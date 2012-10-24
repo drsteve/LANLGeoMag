@@ -2,8 +2,11 @@
 
 from distutils.core import setup
 from distutils.command.build import build as _build
-from distutils.command.install import install as _install
-import os 
+import distutils.dep_util
+import glob
+import os
+import os.path
+import subprocess
 
 
 class build(_build):
@@ -11,28 +14,60 @@ class build(_build):
 
     def make_wrapper(self):
         """Generate the wrapper using ctypesgen"""
-        #this should dump the output directly in the build dir, NOT including the pyc
-        #or put it in a temp dir since install needs to move it over??
-        #should check the generated wrapper against the age of the Lgm library to avoid thrash
-        pass
-
+        if not 'LIBDIR' in os.environ:
+            raise RuntimeError('LIBDIR environment variable not set. '
+                               'Use Makefile to build the python wrapper.')
+        outlog = os.path.join(self.build_temp, 'ctypesgen.log')
+        if not os.path.isdir(self.build_temp):
+            os.makedirs(self.build_temp)
+        outdir = os.path.join(self.build_lib, 'lgmpy')
+        if not os.path.isdir(outdir):
+            os.makedirs(outdir)
+        outfile = os.path.join(outdir, 'Lgm_Wrap.py')
+        libsrcdir = os.path.join('..', 'libLanlGeoMag')
+        if not distutils.dep_util.newer_group(
+            #Makefile will change if LIBDIR changes
+            [os.path.join(libsrcdir, 'libLanlGeoMag.la'), 'Makefile'],
+            outfile):
+            return #wrapper up to date
+        libglob = os.path.join(libsrcdir, '.libs', 'libLanlGeoMag.*')
+        libfile = None
+        for f in glob.glob(libglob):
+            if os.path.islink(f) or \
+                   f[-4:] == '.lai' or f[-3:] == '.la' or f[-2:] == '.a':
+                continue
+            else:
+                libfile = f
+        if libfile == None:
+            raise RuntimeError(
+                'Cannot find compiled libLanlGeoMag in ' + libsrcdir)
+        cmd = ['ctypesgen.py',
+               '-l' + libfile,
+               '--no-macro-warnings',
+               '-o', outfile,
+               '--compile-libdir=' + os.path.join(libsrcdir, '.libs'),
+               '--runtime-libdir=' + os.environ['LIBDIR'],
+               '--includedir=' + os.path.join(libsrcdir, 'Lgm'),
+               '--includedir=' + libsrcdir,
+               ] + \
+               list(glob.glob(os.path.join(libsrcdir, 'Lgm', '*.h')))
+        print('running ctypesgen to create wrapper')
+        FDLOG = os.open(outlog, os.O_WRONLY | os.O_CREAT)
+        try:
+            subprocess.check_call(cmd, stdout=FDLOG, stderr=FDLOG)
+        except:
+            raise
+            raise RuntimeError(
+                'Wrapper generation failed, see ' + outlog + ' for details.')
+        finally:
+            os.close(FDLOG)
+        #TODO: Technically this should compile the wrapper .py to .pyc
+        #if that's been asked for (look at build_py in distutils)
+        
     def run(self):
         """Perform the build"""
         _build.run(self)
         self.make_wrapper()
-
-
-class install(_install):
-    """Rewrite the ctypesgen wrapper and install it"""
-
-    def rewrite_wrapper(self):
-        """Point the wrapper at the final install dir, put it in build (compiled)"""
-        pass
-
-    def run(self):
-        """Perform the install"""
-        self.rewrite_wrapper() #must go first b/c it puts things in build
-        _install.run(self)
 
 
 setup(name='lgmpy',
@@ -42,6 +77,5 @@ setup(name='lgmpy',
       author_email='balarsen@lanl.gov',
       packages=['lgmpy'],
       cmdclass={'build': build,
-                'install': install,
                 },
      )
