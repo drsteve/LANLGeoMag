@@ -4,10 +4,14 @@ lgmpydir = $(pythondir)/lgmpy
 lgmpy_PYTHON = lgmpy/*.py
 nodist_lgmpy_PYTHON = Lgm_Wrap.py
 
-all-local: Lgm_Wrap.py
+all-local: Lgm_Wrap_gen.py #make generic wrapper at build time
 
-Lgm_Wrap.py: $(LGMSRCDIR)/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h Makefile
-	ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap.py --compile-libdir=$(LGMSRCDIR)/.libs --runtime-libdir=$(libdir) --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
+Lgm_Wrap_gen.py: $(LGMSRCDIR)/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h
+	ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap_gen.py --compile-libdir=$(LGMSRCDIR)/.libs --runtime-libdir=RUNTIME_LIBDIR --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
+
+#only make final Lgm_Wrap on install, so it can rewrite the library directory
+Lgm_Wrap.py: FORCE Lgm_Wrap_gen.py
+	sed -e 's|add_library_search_dirs(\['\''RUNTIME_LIBDIR'\''\])|add_library_search_dirs(\['\''$(libdir)'\''\])|' Lgm_Wrap_gen.py > Lgm_Wrap.py
 
 uninstall-local:
 	-rm -rf $(lgmpydir)
@@ -15,7 +19,9 @@ uninstall-local:
 #http://www.gnu.org/software/automake/manual/html_node/Clean.html
 mostlyclean-local: mostlyclean-local-check
 
-.PHONY: mostlyclean-local-check
+FORCE:
+
+.PHONY: mostlyclean-local-check FORCE
 
 mostlyclean-local-check:
-	-rm -f Lgm_Wrap.py ctypesgen.log
+	-rm -f Lgm_Wrap.py Lgm_Wrap_gen.py ctypesgen.log
