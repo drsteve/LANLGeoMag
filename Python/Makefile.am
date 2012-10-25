@@ -1,13 +1,13 @@
 #Don't forget: probably need to do stuff with EXTRA_DIST
-LGMSRCDIR=../libLanlGeoMag/
+LGMSRCDIR = $(top_srcdir)/libLanlGeoMag/
 lgmpydir = $(pythondir)/lgmpy
-lgmpy_PYTHON = lgmpy/*.py
+lgmpy_PYTHON = $(srcdir)/lgmpy/*.py
 nodist_lgmpy_PYTHON = Lgm_Wrap.py
 
 all-local: Lgm_Wrap_gen.py #make generic wrapper at build time
 
-Lgm_Wrap_gen.py: $(LGMSRCDIR)/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h
-	ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap_gen.py --compile-libdir=$(LGMSRCDIR)/.libs --runtime-libdir=RUNTIME_LIBDIR --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
+Lgm_Wrap_gen.py: $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h
+	ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap_gen.py --compile-libdir=$(top_builddir)/libLanlGeoMag/.libs --runtime-libdir=RUNTIME_LIBDIR --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
 
 #only make final Lgm_Wrap on install, so it can rewrite the library directory
 Lgm_Wrap.py: FORCE Lgm_Wrap_gen.py

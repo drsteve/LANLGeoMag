@@ -46,8 +46,8 @@ EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
 install-data-hook:
 if ENABLE_INDICES
 	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
-	rsync -a QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
-	rsync -a TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+	rsync -a $(srcdir)/QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
+	rsync -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
 endif
 
 uninstall-hook:
