@@ -113,6 +113,13 @@ fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
 
+# Allow disabling of Qin-Denton files
+AC_ARG_ENABLE([indices],
+  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data (default: enable)])],
+  [AM_CONDITIONAL([ENABLE_INDICES], [test x"$enableval" != x"no"])],
+  [AM_CONDITIONAL([ENABLE_INDICES], true)]
+)
+
 # Check for python and SpacePy
 build_py='no'
 AC_ARG_WITH([python],
