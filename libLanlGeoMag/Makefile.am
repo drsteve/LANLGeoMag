@@ -42,17 +42,15 @@ libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCT
 
 EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
 
-
-
-
-
-
-
-
-install-exec-hook:
-#	chmod +x $(EOPDATAdir)/GetEopFiles; $(EOPDATAdir)/GetEopFiles
-	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+install-data-hook:
 if ENABLE_INDICES
+	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	rsync -a QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
 	rsync -a TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+endif
+
+uninstall-hook:
+if ENABLE_INDICES
+	-rm -rf $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
 endif
