@@ -158,6 +158,13 @@ else
 fi
 AM_CONDITIONAL([HAVE_PYTHON], [test "$build_py" == "yes"])
 
+#allow override of the Python output directory
+AC_ARG_WITH([pythondir],
+    AS_HELP_STRING([--with-pythondir=PATH],
+    [Override the path to install Python modules [LIBDIR/pythonVER/site-packages/]]),
+    [pythondir="$withval"], [])
+AC_SUBST(pythondir)
+
 dnl Get flags for embedded perl and make sure it works
 dnl Save old CFLAGS/LDFLAGS so can restore after the check
 AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
