@@ -1,14 +1,13 @@
 #Don't forget: probably need to do stuff with EXTRA_DIST
 LGMSRCDIR=../libLanlGeoMag/
+lgmpydir = $(pythondir)/lgmpy
+lgmpy_PYTHON = lgmpy/*.py
+nodist_lgmpy_PYTHON = Lgm_Wrap.py
 
-all-local: $(LGMSRCDIR)/libLanlGeoMag.la
-	LIBDIR=$(libdir) $(PYTHON) setup.py build
+all-local: Lgm_Wrap.py
 
-install-exec-local:
-	if [ -n "$(DESTDIR)" ]; then LIBDIR=$(libdir) $(PYTHON) setup.py install --root=$(DESTDIR) --prefix=$(prefix); else LIBDIR=$(libdir) $(PYTHON) setup.py install --prefix=$(prefix); fi
-
-uninstall-local:
-	rm -rf $(DESTDIR)$(libdir)/python*/site-packages/lgmpy*
+Lgm_Wrap.py: $(LGMSRCDIR)/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h Makefile
+	ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap.py --compile-libdir=$(LGMSRCDIR)/.libs --runtime-libdir=$(libdir) --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
 
 #http://www.gnu.org/software/automake/manual/html_node/Clean.html
 mostlyclean-local: mostlyclean-local-check
@@ -16,4 +15,4 @@ mostlyclean-local: mostlyclean-local-check
 .PHONY: mostlyclean-local-check
 
 mostlyclean-local-check:
-	-rm -rf build
+	-rm -f Lgm_Wrap.py ctypesgen.log
