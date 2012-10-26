@@ -195,7 +195,7 @@ void Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *u ) {
  *
  *          \param[in] u: Cartesian vector (units of whatever you used for r)
  *
- *          \param[out] Lat Latitude in Spherical Polar - Degrees
+ *          \param[out] Lat: Latitude in Spherical Polar - Degrees
  *          \param[out] Lon: Longitude in Spherical Polar - Degrees
  *          \param[out] r: Geocentric Radius in Spherical Polar
  *
@@ -223,4 +223,176 @@ void Lgm_CartToSphCoords( Lgm_Vector *u, double *Lat, double *Lon, double *r) {
     }
 
     return;
+}
+
+/**
+ * Copies elements of a vector to an array
+ *
+ *          \param[in]  u: Cartesian vector (units of whatever you used for r)
+ *
+ *          \param[out] A: 3-element array. A[0] set to u.x, A[1] set to u.y, A[2] set to u.z.
+ *
+ */
+void Lgm_VecToArr( Lgm_Vector *u, double *A ) {
+
+    A[0] = u->x;
+    A[1] = u->y;
+    A[2] = u->z;
+    
+    return;
+
+}
+
+/**
+ * Sets elements of a vector to a value
+ *
+ *          \param[in]  u: Cartesian vector (units of whatever you used for r)
+ *
+ *          \param[out] f: value to set all vector comonents to.
+ *
+ */
+void Lgm_SetVecVal( Lgm_Vector *u, double f ) {
+
+    u->x = f;
+    u->y = f;
+    u->z = f;
+    
+    return;
+
+}
+
+/**
+ * Sets individual components of a vector.
+ *
+ *          \param[in]  u: Cartesian vector (units of whatever you used for r)
+ *
+ *          \param[out] x: x-component value.
+ *          \param[out] y: y-component value.
+ *          \param[out] z: z-component value.
+ *
+ */
+void Lgm_SetVecElements( Lgm_Vector *u, double x, double y, double z ) {
+
+    u->x = x;
+    u->y = y;
+    u->z = z;
+    
+    return;
+
+}
+
+/**
+ * Sets elements of a 2-component array to a value
+ *
+ *          \param[in]  A: 2-element array. 
+ *
+ *          \param[out] f: value to set all vector comonents to.
+ *
+ */
+void Lgm_SetArrVal2( double *A, double f ) {
+
+    A[0] = f;
+    A[1] = f;
+    
+    return;
+
+}
+/**
+ * Sets elements of a 3-component array to a value
+ *
+ *          \param[in]  A: 3-element array. 
+ *
+ *          \param[out] f: value to set all vector comonents to.
+ *
+ */
+void Lgm_SetArrVal3( double *A, double f ) {
+
+    A[0] = f;
+    A[1] = f;
+    A[2] = f;
+    
+    return;
+
+}
+/**
+ * Sets elements of a 4-component array to a value
+ *
+ *          \param[in]  A: 4-element array. 
+ *
+ *          \param[out] f: value to set all vector comonents to.
+ *
+ */
+void Lgm_SetArrVal4( double *A, double f ) {
+
+    A[0] = f;
+    A[1] = f;
+    A[2] = f;
+    A[3] = f;
+    
+    return;
+
+}
+
+
+/**
+ * Sets individual components of a vector.
+ *
+ *          \param[in]  A: 2-element array.
+ *
+ *          \param[out] x: x-component value.
+ *          \param[out] y: y-component value.
+ *          \param[out] z: z-component value.
+ *
+ */
+void Lgm_SetArrElements2( double *A, double x, double y ) {
+
+    A[0] = x;
+    A[1] = y;
+    
+    return;
+
+}
+
+
+/**
+ * Sets individual components of a vector.
+ *
+ *          \param[in]  A: 3-element array.
+ *
+ *          \param[out] x: x-component value.
+ *          \param[out] y: y-component value.
+ *          \param[out] z: z-component value.
+ *
+ */
+void Lgm_SetArrElements3( double *A, double x, double y, double z ) {
+
+    A[0] = x;
+    A[1] = y;
+    A[2] = z;
+    
+    return;
+
+}
+
+
+/**
+ * Sets individual components of a vector.
+ *
+ *          \param[in]  A: 43-element array.
+ *
+ *          \param[out] a: x-component value.
+ *          \param[out] b: y-component value.
+ *          \param[out] c: z-component value.
+ *          \param[out] d: z-component value.
+ *
+ */
+void Lgm_SetArrElements4( double *A, double a, double b, double c, double d ) {
+
+    A[0] = a;
+    A[1] = b;
+    A[2] = c;
+    A[3] = d;
+    
+    return;
+
 }

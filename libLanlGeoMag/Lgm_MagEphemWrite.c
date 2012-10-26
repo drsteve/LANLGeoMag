@@ -3,7 +3,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *ExtModel, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
     char        Str[80], *Str2;
@@ -516,15 +516,15 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#\n");
 
 
-    fprintf( fp, "#  \"Bsc_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at S/C (in GSM coords).\",\n");
+    fprintf( fp, "#  \"Bsc_gsm\":          { \"DESCRIPTION\": \"Model magnetic field vector at S/C (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bsc_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at S/C\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bsc_gsm (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bsc_gsm (nT)\",\n", ExtModel);
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bsc_gsm_x\", \"Bsc_gsm_y\", \"Bsc_gsm_z\", \"Bsc_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bsc!Bgsm_x!N , nT\", \"Bsc!Bgsm_y!N , nT\", \"Bsc!Bgsm_z!N , nT\", \"Bsc_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bsc!Bgsm_x!N , nT\", \"%s Bsc!Bgsm_y!N , nT\", \"%s Bsc!Bgsm_z!N , nT\", \"%s Bsc_gsm_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -534,7 +534,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"FieldLineType\":    { \"DESCRIPTION\": \"Description of the type of field line the S/C is on., Can be one of 4 types: LGM_CLOSED      - FL hits Earth at both ends. LGM_OPEN_N_LOBE - FL is an OPEN field line rooted in the Northern polar cap. LGM_OPEN_S_LOBE - FL is an OPEN field line rooted in the Southern polar cap. LGM_OPEN_IMF    - FL does not hit Earth at eitrher end.\",\n");
     fprintf( fp, "#                               \"NAME\": \"FieldLineType\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Field Line Type\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Field Line Type\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Field Line Type\",\n", ExtModel );
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                               \"ENUM\": [ \"LGM_CLOSED\", \"LGM_OPEN_N_LOBE\", \"LGM_OPEN_S_LOBE\", \"LGM_OPEN_IMF\" ]  },\n");
     fprintf( fp, "#\n");
@@ -542,8 +542,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
 
     fprintf( fp, "# \"S_sc_to_pfn\":       { \"DESCRIPTION\": \"Distance between S/C and Northern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfn\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance to N. Foot. along FL\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance to N. Foot. along FL (Re)\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance to N. Foot.\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Distance to N. Foot. (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -553,8 +553,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
 
     fprintf( fp, "# \"S_sc_to_pfs\":       { \"DESCRIPTION\": \"Distance between S/C and Southern Footpoint along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_sc_to_pfs\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance to S. Foot. along FL\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance to S. Foot. along FL (Re)\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance to S. Foot.\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Distance to S. Foot. (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -564,8 +564,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
 
     fprintf( fp, "# \"S_pfs_to_Bmin\":     { \"DESCRIPTION\": \"Distance between Southern Footpoint and Bmin point along field line.\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_pfs_to_Bmin\",\n");
-    fprintf( fp, "#                              \"TITLE\": \"Distance from S. Foot. to Pmin along FL\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance from S. Foot. to Pmin along FL (Re)\",\n");
+    fprintf( fp, "#                              \"TITLE\": \"Distance from S. Foot. to Pmin\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Distance from S. Foot. to Pmin (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -576,7 +576,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "# \"S_Bmin_to_sc\":     { \"DESCRIPTION\": \"Distance between Bmin point and S/C along field line (positive if north of Bmin).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_Bmin_to_sc\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Distance from Pmin to S/C along FL\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Distance from Pmin to S/C along FL (Re)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Distance from Pmin to S/C (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -587,7 +587,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "# \"S_total\":           { \"DESCRIPTION\": \"Total Field Line length (along field line).\",\n");
     fprintf( fp, "#                               \"NAME\": \"S_total\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Field Line length\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Field Line length (Re)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Field Line length (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -598,7 +598,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "# \"d2B_ds2\":           { \"DESCRIPTION\": \"Second derivative of |B| with respect to s (dist along FL) at minimum |B| point.\",\n");
     fprintf( fp, "#                               \"NAME\": \"d2B_ds2\",\n");
     fprintf( fp, "#                              \"TITLE\": \"d!A2!NB/ds!A2!N\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"d!A2!NB/ds!A2!N (nT!A2!N/Re!A2!N)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s d!A2!NB/ds!A2!N (nT!A2!N/Re!A2!N)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT!A2!N/Re!A2!N\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -609,7 +609,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "# \"Sb0\":               { \"DESCRIPTION\": \"Value of the 'Sb Integral' for equatorially mirroring particles (not generally zero).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Sb0\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Sb0\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Sb0 (Re)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Sb0 (Re)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Re\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -620,7 +620,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "# \"RadiusOfCurv\":      { \"DESCRIPTION\": \"Field line radius of curvature at minimum |B| point.\",\n");
     fprintf( fp, "#                               \"NAME\": \"RadiusOfCurv\",\n");
     fprintf( fp, "#                              \"TITLE\": \"FL Radius of Curvature at Bmin\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Radius of Curvature (R!BE!N)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Radius of Curvature (R!BE!N)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -636,12 +636,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_geo\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geo (R!BE)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfn_geo (R!BE)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [\"Pfn_geo_x\", \"Pfn_geo_y\", \"Pfn_geo_z\"],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_geo!Bx!N , R!BE\", \"Pfn_geo!By!N , R!BE\", \"Pfn_geo!Bz!N , R!BE\"],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"%s Pfn_geo!Bx!N , R!BE\", \"%s Pfn_geo!By!N , R!BE\", \"%s Pfn_geo!Bz!N , R!BE\"],\n", ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -650,12 +650,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_gsm\":          { \"DESCRIPTION\": \"Location of Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Position of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfn_gsm (R!BE)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_gsm_x\", \"Pfn_gsm_y\", \"Pfn_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"Pfn_gsm!Bx!N , R!BE\", \"Pfn_gsm!By!N , R!BE\", \"Pfn_gsm!Bz!N , R!BE\"],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [\"%s Pfn_gsm!Bx!N , R!BE\", \"%s Pfn_gsm!By!N , R!BE\", \"%s Pfn_gsm!Bz!N , R!BE\"],\n", ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -664,12 +664,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_geod_LatLon\":  { \"DESCRIPTION\": \"Geodetic Latitude and Longitude of Northern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geod_LatLon\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Latitude and Longitude of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_LatLon (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfn_geod_LatLon (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfn_geod_Lat\", \"Pfn_geod_Lon\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfn_geod Latitude, Degrees\", \"Pfn_geod Longitude, Degrees\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Pfn_geod Latitude, Degrees\", \"%s Pfn_geod Longitude, Degrees\" ],\n", ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -360.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  360.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -678,7 +678,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_geod_Height\":  { \"DESCRIPTION\": \"Geodetic Height of Northern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_geod_Height\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Height of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_Height (km)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"Pfn_geod_Height (km)\",\n" );
     fprintf( fp, "#                              \"UNITS\": \"km\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -100.0,\n");
@@ -689,7 +689,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_CD_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Northern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLAT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLAT (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -700,7 +700,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_CD_MLON\":      { \"DESCRIPTION\":\"Magnetic Longitude of Northern Footpoint Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLON of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLON (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -711,7 +711,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_CD_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Northern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_CD_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLT (Hours)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -722,7 +722,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_ED_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Northern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLAT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLAT (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -733,7 +733,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_ED_MLON\":      { \"DESCRIPTION\":  \"Magnetic Longitude of Northern Footpoint Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLON of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLON (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -744,7 +744,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfn_ED_MLT\":       { \"DESCRIPTION\":\"Magnetic Local Time of Northern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfn_ED_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLT of Northern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLT (Hours)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -756,12 +756,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Bfn_geo\":          { \"DESCRIPTION\": \"Magnetic field vector at Northern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfn_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Northern Footpoint (in GEO coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfn_geo (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bfn_geo (nT)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_geo_x\", \"Bfn_geo_y\", \"Bfn_geo_z\", \"Bfn_geo_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_geo!Bx!N , nT\", \"Bfn_geo!By!N , nT\", \"Bfn_geo!Bz!N , nT\", \"Bfn_geo_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bfn_geo!Bx!N , nT\", \"%s Bfn_geo!By!N , nT\", \"%s Bfn_geo!Bz!N , nT\", \"%s Bfn_geo_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -770,12 +770,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Bfn_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at Northern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfn_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Northern Footpoint (in GSM coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfn_gsm (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bfn_gsm (nT)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfn_gsm_x\", \"Bfn_gsm_y\", \"Bfn_gsm_z\", \"Bfn_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfn_gsm!Bx!N , nT\", \"Bfn_gsm!By!N , nT\", \"Bfn_gsm!Bz!N , nT\", \"Bfn_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bfn_gsm!Bx!N , nT\", \"%s Bfn_gsm!By!N , nT\", \"%s Bfn_gsm!Bz!N , nT\", \"%s Bfn_gsm_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -786,7 +786,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
                                                                " to the footpoint height which is %g km above the WGS84 geoid.\",\n", m->LstarInfo->mInfo->Lgm_LossConeHeight );
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_n\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Northern Loss Cone Angle\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Northern Loss Cone Angle (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s N. Loss Cone Ang. (Deg)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -807,12 +807,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_geo\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geographic Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geo (R!BE)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfs_geo (R!BE)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geo_x\", \"Pfs_geo_y\", \"Pfs_geo_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_geo!Bx!N , R!BE\", \"Pfs_geo!By!N , R!BE\", \"Pfs_geo!Bz!N , R!BE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Pfs_geo!Bx!N , R!BE\", \"%s Pfs_geo!By!N , R!BE\", \"%s Pfs_geo!Bz!N , R!BE\" ],\n", ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -821,12 +821,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_gsm\":          { \"DESCRIPTION\": \"Location of Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"GSM Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfs_gsm (R!BE)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_gsm_x\", \"Pfs_gsm_y\", \"Pfs_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_gsm!Bx!N , R!BE\", \"Pfs_gsm!By!N , R!BE\", \"Pfs_gsm!Bz!N , R!BE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Pfs_gsm!Bx!N , R!BE\", \"%s Pfs_gsm!By!N , R!BE\", \"%s Pfs_gsm!Bz!N , R!BE\" ],\n", ExtModel, ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -835,12 +835,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_geod_LatLon\":  { \"DESCRIPTION\": \"Geodetic Latitude and Longitude of Southern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geod_LatLon\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Latitude and Longitude of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_LatLon (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfs_geod_LatLon (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 2 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 2;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pfs_geod_Lat\", \"Pfs_geod_Lon\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pfs_geod Latitude, Degrees\", \"Pfs_geod Longitude, Degrees\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Pfs_geod Latitude, Degrees\", \"%s Pfs_geod Longitude, Degrees\" ],\n", ExtModel, ExtModel );
     fprintf( fp, "#                          \"VALID_MIN\": -360.0,\n");
     fprintf( fp, "#                          \"VALID_MAX\":  360.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -849,7 +849,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_geod_Height\":  { \"DESCRIPTION\": \"Geodetic Height of Southern Footpoint.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_geod_Height\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Geodetic Height of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pfs_geod_Height (km)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pfs_geod_Height (km)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"km\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -100.0,\n");
@@ -860,7 +860,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_CD_MLAT\":      { \"DESCRIPTION\": \"Magnetic Latitude of Southern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLAT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLAT (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLAT (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -871,7 +871,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_CD_MLON\":      { \"DESCRIPTION\": \"Magnetic Longitude of Southern Footpoint Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLON of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLON (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLON (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -882,7 +882,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_CD_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Southern Footpoint in Centerted Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_CD_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"CD MLT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"CD MLT (Hours)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s CD MLT (Hours)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -893,7 +893,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_ED_MLAT\":      { \"DESCRIPTION\":  \"Magnetic Latitude of Southern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLAT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLAT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLAT (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLAT (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": -90.0,\n");
@@ -904,7 +904,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_ED_MLON\":      { \"DESCRIPTION\":  \"Magnetic Longitude of Southern Footpoint Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLON\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLON of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLON (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLON (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\":   0.0,\n");
@@ -915,7 +915,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pfs_ED_MLT\":       { \"DESCRIPTION\": \"Magnetic Local Time of Southern Footpoint in Eccentric Dipole Coordinates.\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pfs_ED_MLT\",\n");
     fprintf( fp, "#                              \"TITLE\": \"ED MLT of Southern Footpoint\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"ED MLT (Hours)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s ED MLT (Hours)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Hours\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -926,12 +926,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Bfs_geo\":          { \"DESCRIPTION\": \"Magnetic field vector at Southern Footpoint (in GEO coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfs_geo\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Southern Footpoint (in GEO coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfs_geo (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bfs_geo (nT)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_geo_x\", \"Bfs_geo_y\", \"Bfs_geo_z\", \"Bfs_geo_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_geo!Bx!N , nT\", \"Bfs_geo!By!N , nT\", \"Bfs_geo!Bz!N , nT\", \"Bfs_geo_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bfs_geo!Bx!N , nT\", \"%s Bfs_geo!By!N , nT\", \"%s Bfs_geo!Bz!N , nT\", \"%s Bfs_geo_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -940,12 +940,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Bfs_gsm\":          { \"DESCRIPTION\": \"Magnetic field vector at Southern Footpoint (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bfs_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Magnetic field vector at Southern Footpoint (in GSM coords)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bfs_gsm (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bfs_gsm (nT)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bfs_gsm_x\", \"Bfs_gsm_y\", \"Bfs_gsm_z\", \"Bfs_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bfs_gsm!Bx!N , nT\", \"Bfs_gsm!By!N , nT\", \"Bfs_gsm!Bz!N , nT\", \"Bfs_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bfs_gsm!Bx!N , nT\", \"%s Bfs_gsm!By!N , nT\", \"%s Bfs_gsm!Bz!N , nT\", \"%s Bfs_gsm_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -956,7 +956,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
                                                                " to the footpoint height which is %g km above the WGS84 geoid.\",\n", m->LstarInfo->mInfo->Lgm_LossConeHeight );
     fprintf( fp, "#                               \"NAME\": \"Loss_Cone_Alpha_s\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Southern Loss Cone Angle\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Southern Loss Cone Angle (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s S. Loss Cone Ang. (Deg)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -978,12 +978,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Pmin_gsm\":         { \"DESCRIPTION\": \"Location of minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Pmin_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Minimum-|B| point (in GSM Coordinates)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Pmin_gsm (R!BE)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Pmin_gsm (R!BE)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 3 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 3;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Pmin_gsm_x\", \"Pmin_gsm_y\", \"Pmin_gsm_z\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Pmin_gsm!Bx!N , R!BE\", \"Pmin_gsm!By!N , R!BE\", \"Pmin_gsm!Bz!N , R!BE\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Pmin_gsm!Bx!N , R!BE\", \"%s Pmin_gsm!By!N , R!BE\", \"%s Pmin_gsm!Bz!N , R!BE\" ],\n", ExtModel, ExtModel, ExtModel );
     //fprintf( fp, "#                          \"VALID_MIN\": -1000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  1000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -993,12 +993,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Bmin_gsm\":         { \"DESCRIPTION\": \"B-field at minimum-|B| point (in GSM coords).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Bmin_gsm\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Minimum-|B| (in GSM Coordinates)\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Bmin_gsm (nT)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Bmin_gsm (nT)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
     fprintf( fp, "#                          \"DIMENSION\": [ 4 ],\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += 4;
     fprintf( fp, "#                      \"ELEMENT_NAMES\": [ \"Bmin_gsm_x\", \"Bmin_gsm_y\", \"Bmin_gsm_z\", \"Bmin_gsm_mag\" ],\n");
-    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"Bmin_gsm!Bx!N , nT\", \"Bmin_gsm!By!N , nT\", \"Bmin_gsm!Bz!N , nT\", \"Bmin_gsm_mag , nT\" ],\n");
+    fprintf( fp, "#                     \"ELEMENT_LABELS\": [ \"%s Bmin_gsm!Bx!N , nT\", \"%s Bmin_gsm!By!N , nT\", \"%s Bmin_gsm!Bz!N , nT\", \"%s Bmin_gsm_mag , nT\" ],\n", ExtModel, ExtModel, ExtModel, ExtModel );
     //fprintf( fp, "#                          \"VALID_MIN\": -70000.0,\n");
     //fprintf( fp, "#                          \"VALID_MAX\":  70000.0,\n");
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -1007,7 +1007,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Lsimple\":          { \"DESCRIPTION\": \"Geocentric distance to Bmin point for FL threading vehicle (i.e. |Pmin|).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Lsimple\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Lsimple\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Lsimple\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Lsimple\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Dimless\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1018,7 +1018,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"InvLat\":           { \"DESCRIPTION\": \"Invariant latitude of vehicle computed from Lambda=acos(sqrt(1/Lsimple)).\",\n");
     fprintf( fp, "#                               \"NAME\": \"InvLat\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Invariant Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Invariant Latitude (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Invariant Latitude (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1029,7 +1029,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"Lm_eq\":            { \"DESCRIPTION\": \"McIlwain L of an eq. mirroring particle on same FL as vehicle (computed from L=Lm_eq, I=0, and Bm=|Bmin_gsm|, M=M_igrf).\",\n");
     fprintf( fp, "#                               \"NAME\": \"Lm_eq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"McIlwain L for Equatorially Mirroring Particles\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Lm for Eq. Mirr. Particles\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Lm for Eq. Mirr. Particles\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Dimless\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1040,7 +1040,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"InvLat_eq\":        { \"DESCRIPTION\": \"Invariant latitude of vehicle computed from Lambda=acos(sqrt(1.0/Lm_eq)).\",\n");
     fprintf( fp, "#                               \"NAME\": \"InvLat_eq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"Lm_eq Invariant Latitude\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"Lm_eq Invariant Latitude (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s Lm_eq Invariant Latitude (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1052,7 +1052,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"BoverBeq\":         { \"DESCRIPTION\": \"Magntiude of Bsc over magnitude of Bmin.\",\n");
     fprintf( fp, "#                               \"NAME\": \"BoverBeq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"BoverBeq\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"BoverBeq\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s BoverBeq\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Dimless\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1063,7 +1063,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
     fprintf( fp, "#  \"MlatFromBoverBeq\": { \"DESCRIPTION\": \"Dipole latitude where (B/Beq)_dipole == BoverBeq.\",\n");
     fprintf( fp, "#                               \"NAME\": \"MlatFromBoverBeq\",\n");
     fprintf( fp, "#                              \"TITLE\": \"MlatFromBoverBeq\",\n");
-    fprintf( fp, "#                              \"LABEL\": \"MlatFromBoverBeq (Degrees)\",\n");
+    fprintf( fp, "#                              \"LABEL\": \"%s MlatFromBoverBeq (Degrees)\",\n", ExtModel );
     fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
     fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol++);
     //fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
@@ -1119,7 +1119,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"Lstar\":            { \"DESCRIPTION\": \"Generalized Roederer L-shell value (also known as L*).\",\n");
         fprintf( fp, "#                               \"NAME\": \"Lstar\",\n");
         fprintf( fp, "#                              \"TITLE\": \"L!A*!N\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"L!A*!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s L!A*!N\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1127,7 +1127,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Lstar_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Lstar_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L!A*!N %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s L!A*!N %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"L!A*!N %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1138,7 +1138,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"DriftShellType\":   { \"DESCRIPTION\": \"Type of Drift Shell (e.g. %d=CLOSED, %d=CLOSED_SHABANSKY, %d=OPEN, %d=OPEN_SHABANSKY)\",\n", LGM_DRIFT_ORBIT_CLOSED, LGM_DRIFT_ORBIT_CLOSED_SHABANSKY, LGM_DRIFT_ORBIT_OPEN, LGM_DRIFT_ORBIT_OPEN_SHABANSKY);
         fprintf( fp, "#                               \"NAME\": \"DriftShellType\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Drift Shell Type\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"DS Type\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s DS Type\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1146,7 +1146,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"DSType_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"DSType_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"DSType %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s DSType %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"DSType %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1158,7 +1158,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"L\":                { \"DESCRIPTION\": \"McIlwain L-shell value.\",\n");
         fprintf( fp, "#                               \"NAME\": \"L\",\n");
         fprintf( fp, "#                              \"TITLE\": \"L\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"L\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s L\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1166,7 +1166,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"L_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"L %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s L %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"L %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1178,7 +1178,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"Bm\":               { \"DESCRIPTION\": \"Magnetic field strength at mirror points for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"Bm\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Mirror Magnetic Field Strength\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"Bm (nT)\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s Bm (nT)\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1186,7 +1186,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Bm_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Bm_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"B!Dm!N %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s B!Dm!N %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"B!Dm!N %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1198,7 +1198,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"I\":                { \"DESCRIPTION\": \"Integral invariant for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"I\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Integral Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"I (R!BE)\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s I (R!BE)\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"R!BE!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1206,7 +1206,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"I_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"I %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s I %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"I %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1217,7 +1217,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         fprintf( fp, "#  \"K\":                { \"DESCRIPTION\": \"Second Invariant ( I*sqrt(Bm) ) for each pitch angle.\",\n");
         fprintf( fp, "#                               \"NAME\": \"K\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Second Invariant\",\n");
-        fprintf( fp, "#                              \"LABEL\": \"K (R!BE!N G!A0.5!N)\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s K (R!BE!N G!A0.5!N)\",\n", ExtModel );
         fprintf( fp, "#                              \"UNITS\": \"R!BE!N G!A0.5!N\",\n");
         fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
         fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
@@ -1225,7 +1225,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"K_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"K_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"K %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s K %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"K %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1244,7 +1244,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Sb_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Sb_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Sb %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s Sb %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"Sb %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1263,7 +1263,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Tb_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Tb_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Tb %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s Tb %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"Tb %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1282,7 +1282,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Kappa_%g\", ", m->Alpha[i] );
         fprintf(fp, "\"Kappa_%g\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Kappa %g!Ao!N\", ", m->Alpha[i] );
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s Kappa %g!Ao!N\", ", ExtModel, m->Alpha[i] );
         fprintf(fp, "\"Kappa %g!Ao!N\" ],\n", m->Alpha[i] ); 
         fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
         //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -1462,17 +1462,6 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
         fprintf( fp, " %*s", n+3,  Str2 );
 
-        // Kappa header
-        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
-        // add text in center
-        if ( m->nAlpha > 1 ) {
-            sprintf( TextStr, " Kappa (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
-        } else {
-            sprintf( TextStr, " Kappa " ); tsl = strlen( TextStr );
-        }
-        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
-        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
-        fprintf( fp, " %*s", n+3,  Str2 );
 
         // Tb header
         p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
@@ -1481,6 +1470,19 @@ void Lgm_WriteMagEphemHeader( FILE *fp, int SpiceBody,  char *Spacecraft, int Id
             sprintf( TextStr, " Tb (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
         } else {
             sprintf( TextStr, " Tb " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+
+        // Kappa header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, " Kappa (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, " Kappa " ); tsl = strlen( TextStr );
         }
         n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
@@ -1970,14 +1972,14 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_N_LOBE) ) {
 
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.x );     // Xgsm   North Foot
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.y );     // Ygsm
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.z );     // Zgsm
-
         Lgm_Convert_Coords( &m->Ellipsoid_Footprint_Pn, &v, GSM_TO_GEO, c );
         fprintf( fp, " %12g", v.x );                    // Xgeo   North Foot
         fprintf( fp, " %12g", v.y );                    // Ygeo
         fprintf( fp, " %12g", v.z );                    // Zgeo
+
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.x );     // Xgsm   North Foot
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.y );     // Ygsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Pn.z );     // Zgsm
 
         Lgm_WGS84_to_GEOD( &v, &GeodLat, &GeodLong, &GeodHeight );
         fprintf( fp, " %12g", GeodLat );                // Geod Lat   North Foot
@@ -2045,15 +2047,14 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     if ( (m->FieldLineType == LGM_CLOSED) || (m->FieldLineType == LGM_OPEN_S_LOBE) ) {
 
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.x );     // Xgsm   South Foot
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.y );     // Ygsm
-        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.z );     // Zgsm
-
         Lgm_Convert_Coords( &m->Ellipsoid_Footprint_Ps, &v, GSM_TO_GEO, c );
         fprintf( fp, " %12g", v.x );                    // Xgeo   South Foot
         fprintf( fp, " %12g", v.y );                    // Ygeo
         fprintf( fp, " %12g", v.z );                    // Zgeo
 
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.x );     // Xgsm   South Foot
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.y );     // Ygsm
+        fprintf( fp, " %12g", m->Ellipsoid_Footprint_Ps.z );     // Zgsm
 
         Lgm_WGS84_to_GEOD( &v, &GeodLat, &GeodLong, &GeodHeight );
         fprintf( fp, " %12g", GeodLat );                // Geod Lat   South Foot
@@ -2267,3 +2268,5 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     
     Lgm_free_ctrans( c );
 }
+
+

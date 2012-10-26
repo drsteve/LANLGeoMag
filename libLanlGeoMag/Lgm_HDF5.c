@@ -336,3 +336,114 @@ double ****Get_DoubleDataset_4D( hid_t file, char *Str, hsize_t *Dims ) {
     return( buf );
 
 }
+
+
+/*
+ *  Creates an extendible dataset (with zero "rows"). Returns handle to
+ *  dataset. Also returns handle to the dataspace.  Both of these need to be
+ *  closed by user when done. (E.g. H5Sclose( DataSpace ); and H5Dclose( DataSet ); )
+ */
+hid_t   CreateExtendableRank1DataSet( hid_t File, char *DataSetName, hid_t Type, hid_t *DataSpace ){
+
+    int             Rank;
+    hsize_t         Dims[4], MaxDims[4], ChunkDims[4];
+    hid_t           cparms, status, DataSet;
+
+
+    Rank         = 1;
+    Dims[0]      = 0;
+    MaxDims[0]   = H5S_UNLIMITED;
+    ChunkDims[0] = 1;
+    *DataSpace   = H5Screate_simple( Rank, Dims, MaxDims );
+
+    cparms  = H5Pcreate( H5P_DATASET_CREATE );
+    status  = H5Pset_chunk( cparms, Rank, ChunkDims );
+
+    DataSet = H5Dcreate( File, DataSetName, Type, *DataSpace, H5P_DEFAULT, cparms, H5P_DEFAULT );
+
+
+    return( DataSet );
+
+}
+
+
+hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, hid_t Type, hid_t *DataSpace ){
+
+    int             Rank;
+    hsize_t         Dims[4], MaxDims[4], ChunkDims[4];
+    hid_t           cparms, status, DataSet;
+
+
+    Rank         = 2;
+    Dims[0]      = 0;               Dims[1]      = Cols;
+    MaxDims[0]   = H5S_UNLIMITED;   MaxDims[1]   = Cols;
+    ChunkDims[0] = 1;               ChunkDims[1] = Cols;
+    *DataSpace   = H5Screate_simple( Rank, Dims, MaxDims );
+
+    cparms  = H5Pcreate( H5P_DATASET_CREATE );
+    status  = H5Pset_chunk( cparms, Rank, ChunkDims );
+
+    DataSet = H5Dcreate( File, DataSetName, Type, *DataSpace, H5P_DEFAULT, cparms, H5P_DEFAULT );
+
+
+    return( DataSet );
+
+}
+
+
+
+/*
+ * Convenience rotuinem to create a string data type
+ * close it with     H5Tclose( atype );
+ */
+hid_t CreateStrType( int StrLength ) {
+
+    hid_t   status, atype;
+
+    atype   = H5Tcopy( H5T_C_S1 );
+    status  = H5Tset_size( atype, StrLength );
+    status  = H5Tset_strpad( atype, H5T_STR_NULLTERM );
+    status  = H5Tset_cset( atype, H5T_CSET_ASCII );
+
+    return( atype );
+
+}
+
+
+
+
+hid_t   CreateSimpleRank1DataSet( hid_t File, char *DataSetName, int n, hid_t Type, hid_t *DataSpace ){
+
+    int             Rank;
+    hsize_t         Dims[4];
+    hid_t           status, DataSet;
+
+
+    Rank         = 1;
+    Dims[0]      = n;
+    *DataSpace   = H5Screate_simple( Rank, Dims, NULL );
+    DataSet      = H5Dcreate( File, DataSetName, Type, *DataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+
+
+    return( DataSet );
+
+}
+
+
+
+hid_t   CreateSimpleRank2DataSet( hid_t File, char *DataSetName, int n, int m, hid_t Type, hid_t *DataSpace ){
+
+    int             Rank;
+    hsize_t         Dims[4];
+    hid_t           status, DataSet;
+
+
+    Rank         = 2;
+    Dims[0]      = n;   Dims[1]      = m;
+    *DataSpace   = H5Screate_simple( Rank, Dims, NULL );
+    DataSet      = H5Dcreate( File, DataSetName, Type, *DataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+
+
+    return( DataSet );
+
+}

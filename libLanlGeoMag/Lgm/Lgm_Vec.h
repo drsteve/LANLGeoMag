@@ -27,6 +27,14 @@ double      Lgm_VecDiffMag(Lgm_Vector *a, Lgm_Vector *b );
 void        Lgm_Transpose( double A[3][3], double B[3][3] );
 void        Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c );
 void        Lgm_CartToSphCoords( Lgm_Vector *u, double *Lat, double *Lon, double *r);
+void        Lgm_SetVecVal( Lgm_Vector *u, double f );
+void        Lgm_SetVecElements( Lgm_Vector *u, double x, double y, double z );
+void        Lgm_SetArrVal2( double *A, double f );
+void        Lgm_SetArrVal3( double *A, double f );
+void        Lgm_SetArrVal4( double *A, double f );
+void        Lgm_SetArrElements2( double *A, double x, double y );
+void        Lgm_SetArrElements3( double *A, double x, double y, double z );
+void        Lgm_SetArrElements4( double *A, double a, double b, double c, double d );
 
 
 

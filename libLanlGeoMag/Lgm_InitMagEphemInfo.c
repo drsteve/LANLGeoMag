@@ -39,7 +39,7 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
     LGM_ARRAY_1D( MagEphemInfo->LMcIlwain,      MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->Lstar,          MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->DriftOrbitType, MaxPitchAngles, int );
-    
+
 
     for ( i=0; i<MaxPitchAngles; ++i ){
         MagEphemInfo->Pmn_gsm[i].x      = MagEphemInfo->Pmn_gsm[i].y = MagEphemInfo->Pmn_gsm[i].z = LGM_FILL_VALUE;
@@ -372,3 +372,266 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
 
 
 }
+
+
+
+/*
+ * This allocates/initializes memory for a MagEphemData structure.
+ */
+Lgm_MagEphemData *Lgm_InitMagEphemData( int nRows, int nPA ) {
+
+
+    Lgm_MagEphemData  *MagEphemData = (Lgm_MagEphemData *) calloc (1, sizeof(*MagEphemData));
+
+    MagEphemData->H5_nPerigee = 0;
+    MagEphemData->H5_nApogee  = 0;
+    MagEphemData->H5_nAscend  = 0;
+
+    LGM_ARRAY_2D( MagEphemData->H5_Perigee_IsoTimes,  nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_Apogee_IsoTimes,   nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_Ascend_IsoTimes,   nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_Perigee_Geod,      nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Apogee_Geod,       nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Ascend_Geod,       nRows, 3,       double );
+                                             
+    LGM_ARRAY_1D( MagEphemData->H5_Alpha,             nPA,            double );
+
+    LGM_ARRAY_2D( MagEphemData->H5_IsoTimes,          nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_FieldLineType,     nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_IntModel,          nRows, 80,      char   );
+    LGM_ARRAY_2D( MagEphemData->H5_ExtModel,          nRows, 80,      char   );
+
+    LGM_ARRAY_1D( MagEphemData->H5_Date,              nRows,          long int );
+    LGM_ARRAY_1D( MagEphemData->H5_Doy,               nRows,          int    );
+    LGM_ARRAY_1D( MagEphemData->H5_UTC,               nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_JD,                nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_GpsTime,           nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_TiltAngle,         nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_InOut,             nRows,          int    );
+    LGM_ARRAY_1D( MagEphemData->H5_OrbitNumber,       nRows,          int    );
+
+
+    LGM_ARRAY_2D( MagEphemData->H5_Rgeo,              nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rgeod,             nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rgeod_LatLon,      nRows, 2,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Rgeod_Height,      nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rgsm,              nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rsm,               nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rgei,              nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Rgse,              nRows, 3,       double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_CDMAG_MLAT,        nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_CDMAG_MLON,        nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_CDMAG_MLT,         nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_CDMAG_R,           nRows,          double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_EDMAG_MLAT,        nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_EDMAG_MLON,        nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_EDMAG_MLT,         nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_EDMAG_R,           nRows,          double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_Kp,                nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Dst,               nRows,          double );
+
+    LGM_ARRAY_2D( MagEphemData->H5_Bsc_gsm,           nRows, 4,       double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_S_sc_to_pfn,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_S_sc_to_pfs,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_S_pfs_to_Bmin,     nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_S_Bmin_to_sc,      nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_S_total,           nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_d2B_ds2,           nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Sb0,               nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_RadiusOfCurv,      nRows,          double );
+
+
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_geo,           nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_gsm,           nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_geod,          nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_geod_LatLon,   nRows, 2,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_geod_Height,   nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_cdmag,         nRows, 3,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_CD_MLAT,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_CD_MLON,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_CD_MLT,        nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfn_edmag,         nRows, 3,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_ED_MLAT,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_ED_MLON,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfn_ED_MLT,        nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bfn_geo,           nRows, 4,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bfn_gsm,           nRows, 4,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_LossConeAngleN,    nRows,          double );
+
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_geo,           nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_gsm,           nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_geod,          nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_geod_LatLon,   nRows, 2,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_geod_Height,   nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_cdmag,         nRows, 3,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_CD_MLAT,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_CD_MLON,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_CD_MLT,        nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Pfs_edmag,         nRows, 3,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_ED_MLAT,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_ED_MLON,       nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Pfs_ED_MLT,        nRows,          double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bfs_geo,           nRows, 4,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bfs_gsm,           nRows, 4,       double );
+    LGM_ARRAY_1D( MagEphemData->H5_LossConeAngleS,    nRows,          double );
+
+
+    LGM_ARRAY_2D( MagEphemData->H5_Pmin_gsm,          nRows, 3,       double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bmin_gsm,          nRows, 4,       double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_Lsimple,           nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_InvLat,            nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_Lm_eq,             nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_InvLat_eq,         nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_BoverBeq,          nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_MlatFromBoverBeq,  nRows,          double );
+
+    LGM_ARRAY_1D( MagEphemData->H5_M_used,            nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_M_ref,             nRows,          double );
+    LGM_ARRAY_1D( MagEphemData->H5_M_igrf,            nRows,          double );
+
+    LGM_ARRAY_2D( MagEphemData->H5_Lstar,             nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Sb,                nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Tb,                nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Kappa,             nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_DriftShellType,    nRows, nPA,     int    );
+    LGM_ARRAY_2D( MagEphemData->H5_L,                 nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Bm,                nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_I,                 nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_K,                 nRows, nPA,     double );
+
+    return( MagEphemData );
+
+}
+
+
+
+void Lgm_FreeMagEphemData( Lgm_MagEphemData *MagEphemData ) {
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Perigee_IsoTimes );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Apogee_IsoTimes );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Ascend_IsoTimes );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Perigee_Geod );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Apogee_Geod );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Ascend_Geod );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Alpha );
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_IsoTimes );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_FieldLineType );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_IntModel );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_ExtModel );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Date );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Doy );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_UTC );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_JD );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_GpsTime );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_TiltAngle );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_InOut );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_OrbitNumber );
+
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgeo );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgeod );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgeod_LatLon );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Rgeod_Height );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgsm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rsm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgei );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Rgse );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_CDMAG_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_CDMAG_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_CDMAG_MLT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_CDMAG_R );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_EDMAG_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_EDMAG_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_EDMAG_MLT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_EDMAG_R );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Kp );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Dst );
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bsc_gsm );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_S_sc_to_pfn );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_S_sc_to_pfs );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_S_pfs_to_Bmin );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_S_Bmin_to_sc );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_S_total );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_d2B_ds2 );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Sb0 );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_RadiusOfCurv );
+
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_geo );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_gsm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_geod );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_geod_LatLon );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_geod_Height );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_cdmag );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_CD_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_CD_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_CD_MLT );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfn_edmag );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_ED_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_ED_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfn_ED_MLT );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bfn_geo );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bfn_gsm );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_LossConeAngleN );
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_geo );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_gsm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_geod );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_geod_LatLon );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_geod_Height );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_cdmag );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_CD_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_CD_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_CD_MLT );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pfs_edmag );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_ED_MLAT );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_ED_MLON );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Pfs_ED_MLT );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bfs_geo );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bfs_gsm );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_LossConeAngleS );
+
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Pmin_gsm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bmin_gsm );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Lsimple );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_InvLat );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_Lm_eq );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_InvLat_eq );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_BoverBeq );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_MlatFromBoverBeq );
+
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_M_used );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_M_ref );
+    LGM_ARRAY_1D_FREE( MagEphemData->H5_M_igrf );
+
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Lstar );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Sb );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Tb );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Kappa );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_DriftShellType );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_L );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Bm );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_I );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_K );
+
+    return;
+
+}
+
+
+
