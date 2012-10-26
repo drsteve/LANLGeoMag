@@ -34,3 +34,4 @@ configure
 stamp-h1
 libtool
 INSTALL
+Python/Makefile

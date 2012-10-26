@@ -1,13 +1,14 @@
-SUBDIRS = Lgm EopData
+#make sure EopData is processed first, so on uninstall the data are gone.
+SUBDIRS = Lgm EopData .
 
 # Directory where Eop-related stuff will be installed
-LGM_EOP_DATA_DIR   = ${prefix}/share/LanlGeoMag/EopData
+LGM_EOP_DATA_DIR   = $(datarootdir)/LanlGeoMag/EopData
 
 # Directory where TS07-related files will be installed
-LGM_TS07_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
+LGM_TS07_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 
 # Directory where Index-related stuff will be installed
-LGM_INDEX_DATA_DIR = ${prefix}/share/LanlGeoMag/Data
+LGM_INDEX_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
@@ -42,15 +43,16 @@ libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCT
 
 EXTRA_DIST = $(EOP_DATA_FILES) QinDenton
 
-
-
-
-
-
-
-
-install-exec-hook:
-#	chmod +x $(EOPDATAdir)/GetEopFiles; $(EOPDATAdir)/GetEopFiles
+install-data-hook:
+if ENABLE_INDICES
 	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
-	rsync -ar QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
-	rsync -ar TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+	rsync -a $(srcdir)/QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
+	rsync -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+endif
+
+uninstall-hook:
+if ENABLE_INDICES
+	-rm -rf $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
+endif
+	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag

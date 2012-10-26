@@ -17,6 +17,8 @@ install-data-hook:
 	chmod +x $(DESTDIR)$(EOPDATAdir)/GetEopFiles;
 #	$(EOPDATAdir)/GetEopFiles 
 	if [ $(ENABLE_EOP_CRON) -eq 1 ]; then \
-	ln -sf $(EOPDATAdir)/GetEopFiles $(DAILY_CRON_DIR)/GetEopFiles;\
+	ln -sf $(DESTDIR)$(EOPDATAdir)/GetEopFiles $(DAILY_CRON_DIR)/GetEopFiles;\
 	fi;
-	
+
+uninstall-hook:
+	-rmdir $(DESTDIR)$(EOPDATAdir)

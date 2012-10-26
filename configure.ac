@@ -107,11 +107,70 @@ AC_ARG_WITH([cspice-libdir],
   [AS_HELP_STRING([--with-cspice-libdir=DIR], [Path to NAIF/cSPICE library (contains cspice.a). Required if installing tools.])],
   [cspice_LIBS="${withval}/cspice.a"]
 )
-if test "x$enable_tools" == "xyes" -a \( "x$cspice_CFLAGS" == "x" -o "x$cspice_LIBS" == "x" \); then
+if test "x$enable_tools" == "xyes" && { test "x$cspice_CFLAGS" == "x" || test "x$cspice_LIBS" == "x"; }; then
    AC_MSG_FAILURE([--enable-tools requires either --with-cspice or both --with-cspice-libdir and --with-cspice-includedir])
 fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
+
+# Allow disabling of Qin-Denton files
+AC_ARG_ENABLE([indices],
+  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data (default: enable)])],
+  [AM_CONDITIONAL([ENABLE_INDICES], [test x"$enableval" != x"no"])],
+  [AM_CONDITIONAL([ENABLE_INDICES], true)]
+)
+
+# Check for python and SpacePy
+build_py='no'
+AC_ARG_WITH([python],
+    [AS_HELP_STRING([--with-python=PYTHON],\
+        [Name of (or path to) Python interpreter, or specify
+         --without-python to skip Python bindings.])],
+    [],
+    [with_python=default]
+)
+if test x"${with_python}" == x"no"; then
+    AC_MSG_NOTICE([skipping Python bindings (--without-python specified)])
+else
+    if test x"${with_python}" != x"default" && test x"${with_python}" != x"yes"; then
+        PYTHON=${with_python}
+    fi
+    AM_PATH_PYTHON([2.6], , [:])
+    dnl didn't find python, error or warn as appropriate
+    if test x"$PYTHON" == x":"; then
+        if test x"${with_python}" == x"default"; then
+          AC_MSG_WARN(
+          [Python 2.6+ not found; python support will not be built])
+        else
+            AC_MSG_FAILURE(
+            [Python 2.6+ not found; cannot enable python support])
+        fi
+    else
+	AC_MSG_CHECKING([for spacepy])
+        ${PYTHON} -c "import spacepy" > /dev/null 2>/dev/null
+        if test $? != 0; then
+	    AC_MSG_RESULT([not found])
+            if test x"${with_python}" == x"default"; then
+                AC_MSG_WARN(
+                  [spacepy not found; python support will not be built])
+            else
+                AC_MSG_FAILURE(
+                [spacepy not found; cannot enable python support])
+            fi
+        else
+	    AC_MSG_RESULT([found])
+	    build_py="yes"
+        fi
+    fi
+fi
+AM_CONDITIONAL([HAVE_PYTHON], [test "$build_py" == "yes"])
+
+#allow override of the Python output directory
+AC_ARG_WITH([pythondir],
+    AS_HELP_STRING([--with-pythondir=PATH],
+    [Override the path to install Python modules [LIBDIR/pythonVER/site-packages/]]),
+    [pythondir="$withval"], [])
+AC_SUBST(pythondir)
 
 dnl Get flags for embedded perl and make sure it works
 dnl Save old CFLAGS/LDFLAGS so can restore after the check
@@ -178,5 +237,6 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
 		 Tools/Makefile
+		 Python/Makefile
                  ])
 AC_OUTPUT
