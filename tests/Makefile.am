@@ -19,3 +19,5 @@ check_McIlwain_L_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CH
 check_PolyRoots_SOURCES = check_PolyRoots.c $(lgm_includes)/Lgm_CTrans.h
 check_PolyRoots_CFLAGS = @CHECK_CFLAGS@
 check_PolyRoots_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
+
+EXTRA_DIST = check_McIlwain_L_01.expected check_McIlwain_L_02.expected check_McIlwain_L_03.expected check_McIlwain_L_04.expected check_PolyRoots_01.expected check_PolyRoots_02.expected check_PolyRoots_03.expected check_PolyRoots_04.expected
