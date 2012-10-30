@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-lgm_includes=$(top_builddir)/libLanlGeoMag/Lgm/
+lgm_includes=$(top_srcdir)/libLanlGeoMag/Lgm/
 check_PROGRAMS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots
 TESTS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots
 
