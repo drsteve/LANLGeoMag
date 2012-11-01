@@ -90,6 +90,15 @@ AS_IF([test "x$enable_tools" == "xyes"],
     [AM_CONDITIONAL([ENABLE_TOOLS], false)]
 )
 
+AC_ARG_ENABLE([static-tools], AS_HELP_STRING([--enable-static-tools], [Statically link tools (default: dynamic link). Implies --enable-tools]))
+AS_IF([test "x$enable_static_tools" == "xyes"],
+    [AM_CONDITIONAL([ENABLE_STATIC_TOOLS], true)
+     AM_CONDITIONAL([ENABLE_TOOLS], true)
+     enable_tools=yes
+    ],
+    [AM_CONDITIONAL([ENABLE_STATIC_TOOLS], false)]
+)
+
 # Checks for programs.
 AC_PROG_CC
 
