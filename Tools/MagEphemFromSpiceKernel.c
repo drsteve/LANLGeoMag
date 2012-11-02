@@ -37,7 +37,7 @@ typedef struct TimeList {
     int     val;    // set to 0 for perigee time 1 for apogee time
 } TimeList;
 
-void elt_qsort( struct TimeList *arr, unsigned n ) {
+static void elt_qsort( struct TimeList *arr, unsigned n ) {
     #define elt_lt(a,b) ((a)->key < (b)->key)
     QSORT( struct TimeList, arr, n, elt_lt );
 }

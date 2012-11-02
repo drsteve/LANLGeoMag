@@ -16,7 +16,7 @@ typedef struct FitVals {
     double  x, y, dy;
 } FitVals;
 
-void elt_qsort( struct FitVals *arr, unsigned n ) {
+static void elt_qsort( struct FitVals *arr, unsigned n ) {
     #define elt_lt(a,b) ((a)->key < (b)->key)
     QSORT( struct FitVals, arr, n, elt_lt );
 }
