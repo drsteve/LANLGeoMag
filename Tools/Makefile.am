@@ -3,11 +3,11 @@ bin_PROGRAMS = MagEphemFromSpiceKernel
 MagEphemFromSpiceKernel_SOURCES = MagEphemFromSpiceKernel.c
 MagEphemFromSpiceKernel_LDADD = $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la @cspice_LIBS@
 if ENABLE_STATIC_TOOLS
-    MagEphemFromSpiceKernel_LDFLAGS = -static
+    MagEphemFromSpiceKernel_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ -static
+    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
+else
+    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
 endif
-#hard-code the include path, since the headers don't go anywhere funny pre-install.
-#This may change if using, say, autoheader.
-MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
 
 #CFLAGS       = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
 #SPICE_LIBS = '/home/mgh/SPICE/cspice/lib/cspice.a'
