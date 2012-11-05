@@ -90,6 +90,15 @@ AS_IF([test "x$enable_tools" == "xyes"],
     [AM_CONDITIONAL([ENABLE_TOOLS], false)]
 )
 
+AC_ARG_ENABLE([static-tools], AS_HELP_STRING([--enable-static-tools], [Statically link tools (default: dynamic link). Implies --enable-tools]))
+AS_IF([test "x$enable_static_tools" == "xyes"],
+    [AM_CONDITIONAL([ENABLE_STATIC_TOOLS], true)
+     AM_CONDITIONAL([ENABLE_TOOLS], true)
+     enable_tools=yes
+    ],
+    [AM_CONDITIONAL([ENABLE_STATIC_TOOLS], false)]
+)
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -98,7 +107,7 @@ dnl Need to directly specify SPICE location for MagEphem
 dnl Can change this later to go hunting for them, but standard ld search path won't find it.
 AC_ARG_WITH([cspice],
   [AS_HELP_STRING([--with-cspice=DIR], [Path to NAIF/cSPICE (contains include, lib).])],
-  [cspice_CFLAGS=-I${withval}/include; cspice_LIBS=-L${withval}/lib/cspice.a] )
+  [cspice_CFLAGS=-I${withval}/include; cspice_LIBS=${withval}/lib/cspice.a] )
 AC_ARG_WITH([cspice-includedir],
   [AS_HELP_STRING([--with-cspice-includedir=DIR], [Path to NAIF/cSPICE includes (contains SpiceUsr.h). Required if installing tools.])],
   [cspice_CFLAGS="-I$withval"]
