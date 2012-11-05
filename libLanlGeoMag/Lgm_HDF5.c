@@ -81,12 +81,12 @@ void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val ) {
  *          \endcode
  *
  *
- *      \param[in]      file   An hdf5 file handle (e.g. as returned by a call
- *                             like 'file = H5Fopen( "MyDataFile.h5", H5F_ACC_RDONLY, H5P_DEFAULT );').
- *      \param[in]      Str    The dataset in the HDF5 file (e.g. "/IsoTime" ).
- *      \param[out]     Dims   The size of the array. (Dims[0] is the number of
- *                             strings, Dims[1] is the fixed length of each string (including the
- *                             null-term character).
+ *      \param[in]      file       An hdf5 file handle (e.g. as returned by a call
+ *                                 like 'file = H5Fopen( "MyDataFile.h5", H5F_ACC_RDONLY, H5P_DEFAULT );').
+ *      \param[in]      DataSet    The dataset in the HDF5 file (e.g. "/IsoTime" ).
+ *      \param[out]     Dims       The size of the array. (Dims[0] is the number of
+ *                                 strings, Dims[1] is the fixed length of each string (including the
+ *                                 null-term character).
  *
  *      \return         Returns a pointer to an array of null-terminated
  *                      strings. The user must free this with LGM_ARRAY_2D_FREE( ).
@@ -98,7 +98,7 @@ void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val ) {
  *      \date           2011
  *
  */
-char **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
+char **Get_StringDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     size_t      size;
     H5T_cset_t  cset;
@@ -109,7 +109,7 @@ char **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
     char        **buf1;
     char        **buf2;
 
-    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
     if ( rank != 1 ) {
@@ -185,7 +185,7 @@ char **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *
  *      \param[in]      file   An hdf5 file handle (e.g. as returned by a call
  *                             like 'file = H5Fopen( "MyDataFile.h5", H5F_ACC_RDONLY, H5P_DEFAULT );').
- *      \param[in]      Str    The dataset in the HDF5 file (e.g. "/IsoTime" ).
+ *      \param[in]      DataSet    The dataset in the HDF5 file (e.g. "/IsoTime" ).
  *      \param[out]     Dims   The size of the array. (Dims[0] is the number of
  *                             elements in the 1D array.)
  *
@@ -196,14 +196,14 @@ char **Get_StringDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *      \date           2011
  *
  */
-double *Get_DoubleDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
+double *Get_DoubleDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     hid_t     dataset, dataspace;
     herr_t    status;
     int       rank, status_n;
     double  *buf;
 
-    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
     if ( rank != 1 ) {
@@ -249,7 +249,7 @@ double *Get_DoubleDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *
  *      \param[in]      file   An hdf5 file handle (e.g. as returned by a call
  *                             like 'file = H5Fopen( "MyDataFile.h5", H5F_ACC_RDONLY, H5P_DEFAULT );').
- *      \param[in]      Str    The dataset in the HDF5 file (e.g. "/IsoTime" ).
+ *      \param[in]      DataSet    The dataset in the HDF5 file (e.g. "/IsoTime" ).
  *      \param[out]     Dims   The size of the array. (Dims contains the size in each dimension.)
  *
  *      \return         Returns a pointer to a 2D array of doubles.
@@ -259,14 +259,14 @@ double *Get_DoubleDataset_1D( hid_t file, char *Str, hsize_t *Dims ) {
  *      \date           2011
  *
  */
-double **Get_DoubleDataset_2D( hid_t file, char *Str, hsize_t *Dims ) {
+double **Get_DoubleDataset_2D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     hid_t     dataset, dataspace;
     herr_t    status;
     int       rank, status_n;
     double  **buf;
 
-    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
     if ( rank != 2 ) {
@@ -285,14 +285,14 @@ double **Get_DoubleDataset_2D( hid_t file, char *Str, hsize_t *Dims ) {
 
 }
 
-double ***Get_DoubleDataset_3D( hid_t file, char *Str, hsize_t *Dims ) {
+double ***Get_DoubleDataset_3D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     hid_t     dataset, dataspace;
     herr_t    status;
     int       rank, status_n;
     double  ***buf;
 
-    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
     if ( rank != 3 ) {
@@ -311,14 +311,14 @@ double ***Get_DoubleDataset_3D( hid_t file, char *Str, hsize_t *Dims ) {
 
 }
 
-double ****Get_DoubleDataset_4D( hid_t file, char *Str, hsize_t *Dims ) {
+double ****Get_DoubleDataset_4D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     hid_t     dataset, dataspace;
     herr_t    status;
     int       rank, status_n;
     double  ****buf;
 
-    dataset   = H5Dopen( file, Str, H5P_DEFAULT );
+    dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
     if ( rank != 4 ) {
