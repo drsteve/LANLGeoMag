@@ -991,7 +991,7 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
 
 /**
  *  Computes Flux at user-supplied constant values of E
- *  and \f$\alpga\f$.
+ *  and \f$\alpha\f$.
  *
  *  This routine ( Lgm_P2F_GetFluxAtConstEsAndAs() ) must operate on a
  *  pre-initialized Lgm_PsdToFlux structure.  The routine Lgm_P2F_SetPsd()
