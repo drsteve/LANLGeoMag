@@ -911,6 +911,31 @@ int main( int argc, char *argv[] ){
             if ( StatError != -1 ) {
 
                 FileExists = TRUE;
+
+
+
+file    = H5Fopen( HdfOutFile, H5F_ACC_RDONLY, H5P_DEFAULT );
+char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &Dims );
+H5Fclose( file );
+
+printf("File: %s contains the following times;\n", HdfOutFile );
+for (i=0; i<Dims[0]; i++){
+    IsoTimeStringToDateTime( HdfFileTimes[i], &UTC, c );
+    printf("HdfFileTimes[%d] = %s   Date = %ld\n", i, HdfFileTimes[i], UTC.Date );
+}
+
+printf("\nYou requested it to have the following times;\n");
+ss = (Date == StartDate) ? StartSeconds :     0;
+es = (Date == EndDate)   ?   EndSeconds : 86400;
+for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
+    Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
+    Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
+    printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
+}
+
+
+
+
                 if ( !Force ) {
                     printf("\n\n\tHdfOutfile already exists (use -F option to force processing): %s\n", HdfOutFile );
                 } else {
@@ -1205,13 +1230,9 @@ int          N0, ii;
 
 
                     /*
-                     * Open MagEphem txt file for writing and
-                     * Write header.
-                     */
-                    /*
+                     * Open MagEphem txt file for writing and write header.
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
-//printf("nPerigee = %d\n", nPerigee);
                     Lgm_WriteMagEphemHeader( fp_MagEphem, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
@@ -1276,10 +1297,8 @@ printf("sclkdp = %lf\n", sclkdp);
 
                         // Set mag model parameters
                         Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
-                        //Lgm_get_QinDenton_at_JD( Lgm_JD( 2003, 10, 30, 12.0, LGM_TIME_SYS_UTC, c ), &p, 1 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
-//MIKE
                         if ( Kp >= 0.0 ) {
                             MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
                             MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5);
@@ -1373,7 +1392,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GEI2000, c );  Lgm_VecToArr( &W,    &med->H5_Rgei[ med->H5_nT ][0] );
                         Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GSE, c );      Lgm_VecToArr( &W,    &med->H5_Rgse[ med->H5_nT ][0] );
 
-                        Lgm_WGS84_to_GEOD( &Rgeo, &GeodLat, &GeodLong, &GeodHeight ); 
+                        Lgm_WGS84_to_GEOD( &Rgeo, &GeodLat, &GeodLong, &GeodHeight );
                         Lgm_SetArrElements3( &med->H5_Rgeod[ med->H5_nT ][0],        GeodLat, GeodLong, GeodHeight );
                         Lgm_SetArrElements2( &med->H5_Rgeod_LatLon[ med->H5_nT ][0], GeodLat, GeodLong );
                         med->H5_Rgeod_Height[ med->H5_nT ] = GeodHeight;
