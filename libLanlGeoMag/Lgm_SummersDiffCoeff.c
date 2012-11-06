@@ -1402,7 +1402,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *          \f]
  *      Collect terms in powers of \f$x\f$, and note that \f$s=\pm 1\f$. This gives,
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              H &=& 8192  \alpha^*  x^9\\
  *                &+& (21504  \alpha^*  e s-16384  \alpha^*  s) x^8\\
  *                &+& \left(19488  \alpha^*  e^2-43008  \alpha^*  e+8192 \alpha^* \right) x^7\\
@@ -1417,7 +1417,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *      Let \f$ H =  \Sigma_{i=0}^{8} h_i x^i  \f$. This gives,
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              h_0 &=& -e^6 ( n_1 + n_2 + n_3 -1) s\\
  *              h_1 &=& 2 e^5 ( \alpha^*  e+ n_2  e+ n_3  e+(e-20)  n_1 -17 n_2 -5  n_3 +21)\\
  *              h_2 &=& e^4 \left(-4  \alpha^*  e^2-( n_1 + n_2 + n_3 ) e^2+84 \alpha^*  e+80  n_1  e+68  n_2  e+20  n_3  e-528 n_1 -321  n_2 -33  n_3 +609\right) s\\
@@ -1433,7 +1433,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *  Then, collecting terms in powers of \f$ e\f$, and defining,
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              q0 &=& 16  n_1 +4  n_2 + n_3 \\
  *              q1 &=&  n_1 + n_2 + n_3 \\
  *              q2 &=& 20  n_1 +17  n_2 +5  n_3 \\
@@ -1445,7 +1445,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *  We have,
  *
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              h_0 &=& e^6 (1- q_1 ) s\\
  *              h_1 &=& 2 e^5 (e ( \alpha^* + q_1 )- q_2 +21)\\
  *              h_2 &=& e^4 \left((-4  \alpha^* - q_1 ) e^2+4 (21  \alpha^* + q_2 ) e+3 (203- q_3 )\right) s\\
@@ -1460,7 +1460,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *  But, note that by definition, \f$ q_1 = 1\f$. Therefore \f$ h_0 = 0\f$. Define \f$ H = xG = x\Sigma_{i=0}^{8} g_i x^i \f$, so that;
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              g_0 &=& 2 e^5 ( 21 - q_2 + e \alpha^* )\\
  *              g_1 &=& e^4 s \left( 3*(203 - q_3) - 4*e^2*\alpha^* + 4*e*(21*\alpha^* + q_2) \right)\\
  *              g_2 &=& 2 e^3 \left( \alpha^*  e^3+(-84  \alpha^* - q_2 ) e^2+3 (203  \alpha^* + q_3 ) e+4 (457- q_5 )\right)\\
@@ -1475,7 +1475,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *  Putting all of this together we have,
  *
- *      \f{eqnarray*}{
+ *      \f{eqnarray*}
  *          {dx\over dy} &=& {2 y P\over xG } \\
  *          {dx\over dy} &=& {2 y \alpha^*  (s-x)^2 (e s+x)^2 (e s+4 x)^2 (e s+16 x)^2   \over x \Sigma_{i=0}^{8} g_i x^i }
  *      \f}
@@ -1490,7 +1490,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *  where,
  *
- *      \f{eqnarray*}{
+ *      \f{eqnarray*}
  *          A_1 &=& \frac{128 a+4  (1-\xi^2)   p_1  s}{ (64(1-\xi^2))} \\
  *          A_2 &=& \frac{64  a^2 +21 e  (1-\xi^2)   p_2 +8 a  p_1  s+\frac{A  \xi^2 }{ \alpha^* }}{ (64(1-\xi^2))}\\
  *          A_3 &=& \frac{42 a e  p_2 +4  a^2   p_1  s+ e^2   (1-\xi^2)   p_3  s+\frac{B  \xi^2 }{ \alpha^* }}{ (64(1-\xi^2))}\\
@@ -1505,7 +1505,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
  *
  *  and,
  *
- *      \f{eqnarray*}{
+ *      \f{eqnarray*}
  *          A &=& 4 e q_0 + 64\\
  *          B &=& e (4 (21-q_0) + e  q_2 ) s\\
  *          C &=& e^2 (21- q_2  ) \\

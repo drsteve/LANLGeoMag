@@ -40,7 +40,7 @@
  *  In matrix form the operator \f$\nabla\nabla^T - \nabla^2 I\f$ is;
  *
  *
- *      \f{eqnarray*}{
+ *      \f{eqnarray*}
  *            {\nabla\nabla^T - \nabla^2 I} & = & { \left( \begin{array}{ccc}
  *                                                            \partial_x^2         & \partial_x\partial_y &  \partial_x\partial_z \\
  *                                                            \partial_y\partial_x & \partial_y^2         & \partial_y\partial_z  \\
