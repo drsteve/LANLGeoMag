@@ -9,7 +9,6 @@ if HAVE_PYTHON
 endif
 SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 
-documentationdir = $(datarootdir)/LanlGeoMag/docs
 if DX_COND_pdf
     MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
 endif
@@ -19,7 +18,8 @@ endif
 if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
 endif
-dist_documentation_DATA = $(MAYBE_PDF) $(MAYBE_PS)
+dist_pdf_DATA = $(MAYBE_PDF)
+dist_ps_DATA = $(MAYBE_PS)
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
 
 GZIP_ENV = -7
@@ -50,13 +50,15 @@ if DX_COND_html
 all-local: @DX_DOCDIR@/html
 
 install-data-local:
-	$(MKDIR_P) -m 755 $(documentationdir)/html/
-	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(documentationdir)/html/
+	$(MKDIR_P) -m 755 $(htmldir)/html/
+	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/html/
 
 uninstall-local:
-	-rm -rf $(documentationdir)/html/
+	-rm -rf $(htmldir)/html/
 
 uninstall-hook:
-	-rmdir $(documentationdir)
-	-rmdir $(datarootdir)/LanlGeoMag/
+	-rmdir $(psdir)
+	-rmdir $(pdfdir)
+	-rmdir $(htmldir)
+	-rmdir $(docdir)
 endif
