@@ -51,4 +51,8 @@ install-data-local:
 
 uninstall-local:
 	-rm -rf $(documentationdir)/html/
+
+uninstall-hook:
+	-rmdir $(documentationdir)
+	-rmdir $(datarootdir)/LanlGeoMag/
 endif
