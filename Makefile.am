@@ -20,6 +20,7 @@ if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
 endif
 dist_documentation_DATA = $(MAYBE_PDF) $(MAYBE_PS)
+dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
 
 GZIP_ENV = -7
 
@@ -39,18 +40,12 @@ include doxygen_include.am
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
 EXTRA_DIST = lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
-	Python HACKING $(DX_CONFIG) $(MAYBE_HTML)
+	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed
 
 ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
 if DX_COND_html
-#building tag runs doxygen and makes html
-@DX_DOCDIR@/html/index.html: @DX_DOCDIR@/@DX_PROJECT@.tag
-
-#make sure index is built when EXTRA_DIST asks for html
-@DX_DOCDIR@/html: @DX_DOCDIR@/html/index.html
-
 #and make sure html is build when doing a make all
 all-local: @DX_DOCDIR@/html
 
