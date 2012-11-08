@@ -11,16 +11,21 @@ SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 
 if DX_COND_pdf
     MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
+    uninst_pdf = $(pdfdir)
 endif
 if DX_COND_ps
     MAYBE_PS = @DX_DOCDIR@/@DX_PROJECT@.ps
+    uninst_ps = $(pdfdir)
 endif
 if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
+    uninst_html = $(htmldir)
 endif
 dist_pdf_DATA = $(MAYBE_PDF)
 dist_ps_DATA = $(MAYBE_PS)
+if DX_COND_doc
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
+endif
 
 GZIP_ENV = -7
 
@@ -55,10 +60,35 @@ install-data-local:
 
 uninstall-local:
 	-rm -rf $(htmldir)/html/
-
-uninstall-hook:
-	-rmdir $(psdir)
-	-rmdir $(pdfdir)
-	-rmdir $(htmldir)
-	-rmdir $(docdir)
 endif
+
+if !DX_COND_doc
+#if didn't ask for doxygen, just install whatever is already built
+#(and uninstall whatever might be there)
+uninst_html = $(htmldir)
+uninst_ps = $(psdir)
+uninst_pdf = $(pdfdir)
+
+install-data-local:
+	if [ -f @DX_DOCDIR@/html/index.html ]; then \
+	    $(MKDIR_P) -m 755 $(htmldir)/html/; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/html/; \
+	fi
+	if [ -f @DX_DOCDIR@/@DX_PROJECT@.ps ]; then \
+	    $(MKDIR_P) -m 755 $(psdir); \
+	    $(INSTALL_DATA) @DX_PROJECT@.ps $(psdir); \
+	fi
+	if [ -f @DX_DOCDIR@/@DX_PROJECT@.pdf ]; then \
+	    $(MKDIR_P) -m 755 $(pdfdir); \
+	    $(INSTALL_DATA) @DX_PROJECT@.pdf $(pdfdir); \
+	fi
+
+uninstall-local:
+	-rm -rf $(htmldir)/html/
+	-rm -f $(psdir)/@DX_PROJECT@.ps
+	-rm -f $(pdfdir)/@DX_PROJECT@.pdf
+endif
+
+#remove any doc directories we've made
+uninstall-hook:
+	-rmdir $(uninst_ps) $(uninst_pdf) $(uninst_html) $(docdir)
