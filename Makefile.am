@@ -9,6 +9,18 @@ if HAVE_PYTHON
 endif
 SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 
+documentationdir = $(datarootdir)/LanlGeoMag/docs
+if DX_COND_pdf
+    MAYBE_PDF = @DX_DOCDIR@/@PACKAGE@.pdf
+endif
+if DX_COND_ps
+    MAYBE_PS = @DX_DOCDIR@/@PACKAGE@.ps
+endif
+if DX_COND_html
+    MAYBE_HTML = @DX_DOCDIR@/html
+endif
+dist_documentation_DATA = $(MAYBE_PDF) $(MAYBE_PS)
+
 GZIP_ENV = -7
 
 ALL_EXAMPLE_FILES = Examples
@@ -22,23 +34,25 @@ ALL_DOC_FILES = Doc/GSM.png Doc/CoordFig.eps Doc/GSM_SM_FIG.svg \
 #ALL_VIEW_DRIFT_SHELL_FILES = ViewDriftShell
 
 
-include aminclude.am                                                                                                                                                                                             
+include aminclude.am
 
-if DX_COND_man                                                                                                                                                                                                   
-
-# You'd probably want to post-process man pages and installed the patched                                                                                                                                        
-# versions.                                                                                                                                                                                                      
-
-#dist_man1_MANS = @DX_DOCDIR@/man/man1/doxample.c.1                                                                                                                                                               
-$(dist_man1_MANS): doxygen-doc                                                                                                                                                                                   
-#$(man3_MANS): doxygen-doc
-
-endif                                           
+if DX_COND_doc
+all-local: doxygen-doc
+endif
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
 EXTRA_DIST = lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
-	Python HACKING $(DX_CONFIG)
+	Python HACKING $(DX_CONFIG) $(MAYBE_HTML)
 
 ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+
+if DX_COND_html
+install-data-local:
+	mkdir -m 755 -p $(documentationdir)/html/
+	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(documentationdir)/html/
+
+uninstall-local:
+	-rm -rf $(documentationdir)/html/
+endif
