@@ -11,10 +11,10 @@ SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 
 documentationdir = $(datarootdir)/LanlGeoMag/docs
 if DX_COND_pdf
-    MAYBE_PDF = @DX_DOCDIR@/@PACKAGE@.pdf
+    MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
 endif
 if DX_COND_ps
-    MAYBE_PS = @DX_DOCDIR@/@PACKAGE@.ps
+    MAYBE_PS = @DX_DOCDIR@/@DX_PROJECT@.ps
 endif
 if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
@@ -45,6 +45,15 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
 if DX_COND_html
+#building tag runs doxygen and makes html
+@DX_DOCDIR@/html/index.html: @DX_DOCDIR@/@DX_PROJECT@.tag
+
+#make sure index is built when EXTRA_DIST asks for html
+@DX_DOCDIR@/html: @DX_DOCDIR@/html/index.html
+
+#and make sure html is build when doing a make all
+all-local: @DX_DOCDIR@/html
+
 install-data-local:
 	mkdir -m 755 -p $(documentationdir)/html/
 	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(documentationdir)/html/
