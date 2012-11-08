@@ -13,7 +13,7 @@ Lgm_Wrap_gen.py: $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la $(LGMSRCDIR)/Lgm
 
 #only make final Lgm_Wrap on install, so it can rewrite the library directory
 Lgm_Wrap.py: FORCE Lgm_Wrap_gen.py
-	sed -e 's|add_library_search_dirs(\['\''RUNTIME_LIBDIR'\''\])|add_library_search_dirs(\['\''$(libdir)'\''\])|' Lgm_Wrap_gen.py > Lgm_Wrap.py
+	$(SED) -e 's|add_library_search_dirs(\['\''RUNTIME_LIBDIR'\''\])|add_library_search_dirs(\['\''$(libdir)'\''\])|' Lgm_Wrap_gen.py > Lgm_Wrap.py
 
 uninstall-local:
 	-rm -rf $(lgmpydir)

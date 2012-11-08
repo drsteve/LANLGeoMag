@@ -93,6 +93,7 @@ AS_IF([test "x$enable_static_tools" == "xyes"],
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_SED
 
 # Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem

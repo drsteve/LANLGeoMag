@@ -143,9 +143,11 @@ doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 	rm -rf @DX_DOCDIR@
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
-@DX_DOCDIR@/latex: @DX_DOCDIR@/@DX_PROJECT@.tag $(top_srcdir)/fix_doxygen.sed
+@DX_DOCDIR@/latex/refman.tex: @DX_DOCDIR@/@DX_PROJECT@.tag $(top_srcdir)/fix_doxygen.sed
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
-	sed -n -i'.bak' -f $(top_srcdir)/fix_doxygen.sed @DX_DOCDIR@/latex/refman.tex
+	$(SED) -n -i'.bak' -f $(top_srcdir)/fix_doxygen.sed @DX_DOCDIR@/latex/refman.tex
+
+@DX_DOCDIR@/latex: @DX_DOCDIR@/latex/refman.tex
 
 DX_CLEANFILES = \
     @DX_DOCDIR@/@DX_PROJECT@.tag \
