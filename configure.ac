@@ -94,6 +94,9 @@ AS_IF([test "x$enable_static_tools" == "xyes"],
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_SED
+#check for rsync (but just use cp if don't have it)
+AC_PATH_PROG([RSYNC_CMD], [rsync], [cp])
+AC_PROG_MKDIR_P
 
 # Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem

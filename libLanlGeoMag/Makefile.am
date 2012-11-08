@@ -42,9 +42,9 @@ EXTRA_DIST = QinDenton TS07D_FILES
 
 install-data-hook:
 if ENABLE_INDICES
-	mkdir -p $(DESTDIR)$(LGM_INDEX_DATA_DIR)
-	rsync -a $(srcdir)/QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
-	rsync -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+	$(MKDIR_P) $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	$(RSYNC_CMD) -a $(srcdir)/QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
+	$(RSYNC_CMD) -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
 endif
 
 uninstall-hook:

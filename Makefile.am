@@ -50,7 +50,7 @@ if DX_COND_html
 all-local: @DX_DOCDIR@/html
 
 install-data-local:
-	mkdir -m 755 -p $(documentationdir)/html/
+	$(MKDIR_P) -m 755 $(documentationdir)/html/
 	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(documentationdir)/html/
 
 uninstall-local:
