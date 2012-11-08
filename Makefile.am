@@ -34,11 +34,7 @@ ALL_DOC_FILES = Doc/GSM.png Doc/CoordFig.eps Doc/GSM_SM_FIG.svg \
 #ALL_VIEW_DRIFT_SHELL_FILES = ViewDriftShell
 
 
-include aminclude.am
-
-if DX_COND_doc
-all-local: doxygen-doc
-endif
+include doxygen_include.am
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 

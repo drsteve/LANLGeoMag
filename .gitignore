@@ -6,7 +6,9 @@
 htmlcov*
 html*
 .pc
-*.m4
+/aclocal.m4
+/m4/lib*.m4
+/m4/lt*.m4
 *Makefile.in
 *.guess
 *.komodoproject

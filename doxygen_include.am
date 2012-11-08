@@ -1,33 +1,3 @@
-# Copyright (C) 2004 Oren Ben-Kiki
-# This file is distributed under the same terms as the Automake macro files.
-
-# Generate automatic documentation using Doxygen. Goals and variables values
-# are controlled by the various DX_COND_??? conditionals set by autoconf.
-#
-# The provided goals are:
-# doxygen-doc: Generate all doxygen documentation.
-# doxygen-run: Run doxygen, which will generate some of the documentation
-#              (HTML, CHM, CHI, MAN, RTF, XML) but will not do the post
-#              processing required for the rest of it (PS, PDF, and some MAN).
-# doxygen-man: Rename some doxygen generated man pages.
-# doxygen-ps: Generate doxygen PostScript documentation.
-# doxygen-pdf: Generate doxygen PDF documentation.
-#
-# Note that by default these are not integrated into the automake goals. If
-# doxygen is used to generate man pages, you can achieve this integration by
-# setting man3_MANS to the list of man pages generated and then adding the
-# dependency:
-#
-#   $(man3_MANS): doxygen-doc
-#
-# This will cause make to run doxygen and generate all the documentation.
-#
-# The following variable is intended for use in Makefile.am:
-#
-# DX_CLEANFILES = everything to clean.
-#
-# This is usually added to MOSTLYCLEANFILES.
-
 ## --------------------------------- ##
 ## Format-independent Doxygen rules. ##
 ## --------------------------------- ##
