@@ -15,8 +15,8 @@ Lgm_Wrap_gen.py: $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la $(LGMSRCDIR)/Lgm
 Lgm_Wrap.py: FORCE Lgm_Wrap_gen.py
 	$(SED) -e 's|add_library_search_dirs(\['\''RUNTIME_LIBDIR'\''\])|add_library_search_dirs(\['\''$(libdir)'\''\])|' Lgm_Wrap_gen.py > Lgm_Wrap.py
 
-uninstall-local:
-	-rm -rf $(lgmpydir)
+uninstall-hook:
+	-rmdir $(lgmpydir)
 
 #http://www.gnu.org/software/automake/manual/html_node/Clean.html
 mostlyclean-local: mostlyclean-local-check
