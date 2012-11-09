@@ -21,7 +21,10 @@ if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
     uninst_html = $(htmldir)
 endif
-dist_pdf_DATA = $(MAYBE_PDF) Doc/LanlGeoMag_Documentation.pdf
+if ENABLE_DOCS
+    MAYBE_STATIC_PDF = Doc/LanlGeoMag_Documentation.pdf
+endif
+dist_pdf_DATA = $(MAYBE_PDF) $(MAYBE_STATIC_PDF)
 dist_ps_DATA = $(MAYBE_PS)
 if DX_COND_doc
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
@@ -67,7 +70,8 @@ uninstall-local:
 endif
 
 if !DX_COND_doc
-#if didn't ask for doxygen, just install whatever is already built
+if ENABLE_DOCS
+#if didn't ask for doxygen, but want docs, just install whatever is already built
 #(and uninstall whatever might be there)
 uninst_html = $(htmldir)
 uninst_ps = $(psdir)
@@ -95,7 +99,8 @@ uninstall-local:
 	-rm -rf $(htmldir)/html/
 	-rm -f $(psdir)/@DX_PROJECT@.ps
 	-rm -f $(pdfdir)/@DX_PROJECT@.pdf
-endif
+endif ENABLE_DOCS
+endif !DX_COND_doc
 
 #remove any doc directories we've made
 uninstall-hook:

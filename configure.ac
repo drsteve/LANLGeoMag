@@ -125,6 +125,13 @@ AC_ARG_ENABLE([indices],
   [AM_CONDITIONAL([ENABLE_INDICES], true)]
 )
 
+# Allow disabling of ALL documentation
+AC_ARG_ENABLE([docs],
+  [AS_HELP_STRING([--disable-docs], [Disable installation of pre-built documentation. (doxygen docs will still be installed if --enable-doxygen-docs is specified.)])],
+  [AM_CONDITIONAL([ENABLE_DOCS], [test x"$enableval" != x"no"])],
+  [AM_CONDITIONAL([ENABLE_DOCS], true)]
+)
+
 # Check for python and SpacePy
 build_py='no'
 AC_ARG_WITH([python],
