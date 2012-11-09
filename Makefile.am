@@ -84,11 +84,11 @@ install-data-local:
 	fi
 	if [ -f @DX_DOCDIR@/@DX_PROJECT@.ps ]; then \
 	    $(MKDIR_P) -m 755 $(psdir); \
-	    $(INSTALL_DATA) @DX_PROJECT@.ps $(psdir); \
+	    $(INSTALL_DATA) @DX_DOCDIR@/@DX_PROJECT@.ps $(psdir); \
 	fi
 	if [ -f @DX_DOCDIR@/@DX_PROJECT@.pdf ]; then \
 	    $(MKDIR_P) -m 755 $(pdfdir); \
-	    $(INSTALL_DATA) @DX_PROJECT@.pdf $(pdfdir); \
+	    $(INSTALL_DATA) @DX_DOCDIR@/@DX_PROJECT@.pdf $(pdfdir); \
 	fi
 
 uninstall-local:
