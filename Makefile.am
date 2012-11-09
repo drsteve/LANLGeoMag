@@ -21,7 +21,7 @@ if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
     uninst_html = $(htmldir)
 endif
-dist_pdf_DATA = $(MAYBE_PDF)
+dist_pdf_DATA = $(MAYBE_PDF) Doc/LanlGeoMag_Documentation.pdf
 dist_ps_DATA = $(MAYBE_PS)
 if DX_COND_doc
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
