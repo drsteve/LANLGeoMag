@@ -295,10 +295,13 @@ AC_DEFUN([DX_IF_FEATURE], [ifelse(DX_FEATURE_$1, ON, [$2], [$3])])
 # DX_REQUIRE_PROG(VARIABLE, PROGRAM)
 # ----------------------------------
 # Require the specified program to be found for the DX_CURRENT_FEATURE to work.
+# This should be modified to call WARN if checking a default feature,
+# and FAILURE if checking non-default. But that's messy and for now,
+# all docs are non-default.
 AC_DEFUN([DX_REQUIRE_PROG], [
 AC_PATH_TOOL([$1], [$2])
 if test "$DX_FLAG_[]DX_CURRENT_FEATURE$$1" = 1; then
-    AC_MSG_WARN([$2 not found - will not DX_CURRENT_DESCRIPTION])
+    AC_MSG_FAILURE([$2 not found - required to DX_CURRENT_DESCRIPTION])
     AC_SUBST(DX_FLAG_[]DX_CURRENT_FEATURE, 0)
 fi
 ])
