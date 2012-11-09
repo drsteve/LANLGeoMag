@@ -506,11 +506,12 @@ fi
 
 # Paper size for PS and/or PDF:
 AC_ARG_VAR(DOXYGEN_PAPER_SIZE,
-           [a4wide (default), a4, letter, legal or executive])
+           [a4wide, a4, letter (default), legal or executive])
 case "$DOXYGEN_PAPER_SIZE" in
 #(
 "")
-    AC_SUBST(DOXYGEN_PAPER_SIZE, "")
+    AC_SUBST(DOXYGEN_PAPER_SIZE, "letter")
+    DX_ENV_APPEND(PAPER_SIZE, $DOXYGEN_PAPER_SIZE)
 ;; #(
 a4wide|a4|letter|legal|executive)
     DX_ENV_APPEND(PAPER_SIZE, $DOXYGEN_PAPER_SIZE)
