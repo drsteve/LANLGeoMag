@@ -56,7 +56,11 @@ all-local: @DX_DOCDIR@/html
 
 install-data-local:
 	$(MKDIR_P) -m 755 $(htmldir)/html/
-	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/html/
+	$(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(htmldir)/html/
+	if [ -d @DX_DOCDIR@/html/search ]; then \
+	    $(MKDIR_P) -m 755 $(htmldir)/html/search; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(htmldir)/html/search; \
+	fi
 
 uninstall-local:
 	-rm -rf $(htmldir)/html/
@@ -72,7 +76,11 @@ uninst_pdf = $(pdfdir)
 install-data-local:
 	if [ -f @DX_DOCDIR@/html/index.html ]; then \
 	    $(MKDIR_P) -m 755 $(htmldir)/html/; \
-	    $(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/html/; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(htmldir)/html/; \
+	fi
+	if [ -d @DX_DOCDIR@/html/search ]; then \
+	    $(MKDIR_P) -m 755 $(htmldir)/html/search; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(htmldir)/html/search; \
 	fi
 	if [ -f @DX_DOCDIR@/@DX_PROJECT@.ps ]; then \
 	    $(MKDIR_P) -m 755 $(psdir); \
