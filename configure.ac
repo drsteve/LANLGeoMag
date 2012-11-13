@@ -125,6 +125,29 @@ AC_ARG_ENABLE([indices],
   [AM_CONDITIONAL([ENABLE_INDICES], true)]
 )
 
+# Allow disabling of ALL documentation
+AC_ARG_ENABLE([docs],
+  [AS_HELP_STRING([--disable-docs], [Disable installation of pre-built documentation. (doxygen docs will still be installed if --enable-doxygen-docs is specified.)])],
+  [AM_CONDITIONAL([ENABLE_DOCS], [test x"$enableval" != x"no"])],
+  [AM_CONDITIONAL([ENABLE_DOCS], true)]
+)
+
+# Check if want call graphs
+DX_ENABLE_CALL_GRAPH=YES
+AC_ARG_ENABLE([doxygen-call-graph],
+  [AS_HELP_STRING([--disable-doxygen-call-graph], [Disable call graph if building doxygen docs.])],
+  [AS_IF([test x"$enableval" == x"no"], [DX_ENABLE_CALL_GRAPH=NO])]
+)
+DX_ENV_APPEND(CALL_GRAPH, $DX_ENABLE_CALL_GRAPH)
+
+# Check if want PDF linkx
+DX_ENABLE_PDF_HYPERLINKS=YES
+AC_ARG_ENABLE([doxygen-pdf-links],
+  [AS_HELP_STRING([--disable-doxygen-pdf-links], [Disable links in PDF if building doxygen docs. May help with strange LaTeX errors])],
+  [AS_IF([test x"$enableval" == x"no"], [DX_ENABLE_PDF_HYPERLINKS=NO])]
+)
+DX_ENV_APPEND(PDF_LINKS, $DX_ENABLE_PDF_HYPERLINKS)
+
 # Check for python and SpacePy
 build_py='no'
 AC_ARG_WITH([python],

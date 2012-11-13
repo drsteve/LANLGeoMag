@@ -11,9 +11,7 @@ if DX_COND_doc
 if DX_COND_html
 
 DX_CLEAN_HTML = @DX_DOCDIR@/html
-
-@DX_DOCDIR@/html: @DX_DOCDIR@/@DX_PROJECT@.tag
-	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
+HTML_TARGET = @DX_DOCDIR@/html
 
 endif DX_COND_html
 
@@ -75,7 +73,7 @@ DX_PS_GOAL = doxygen-ps
 
 doxygen-ps: @DX_DOCDIR@/@DX_PROJECT@.ps
 
-@DX_DOCDIR@/@DX_PROJECT@.ps: @DX_DOCDIR@/@DX_PROJECT@.tag @DX_DOCDIR@/latex/refman.tex
+@DX_DOCDIR@/@DX_PROJECT@.ps: @DX_DOCDIR@/latex/refman.tex
 	cd @DX_DOCDIR@/latex; \
 	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
 	$(DX_LATEX) refman.tex; \
@@ -104,7 +102,7 @@ DX_PDF_GOAL = doxygen-pdf
 
 doxygen-pdf: @DX_DOCDIR@/@DX_PROJECT@.pdf
 
-@DX_DOCDIR@/@DX_PROJECT@.pdf: @DX_DOCDIR@/@DX_PROJECT@.tag @DX_DOCDIR@/latex/refman.tex
+@DX_DOCDIR@/@DX_PROJECT@.pdf: @DX_DOCDIR@/latex/refman.tex
 	cd @DX_DOCDIR@/latex; \
 	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
 	$(DX_PDFLATEX) refman.tex; \
@@ -128,6 +126,8 @@ endif DX_COND_pdf
 if DX_COND_latex
 
 DX_CLEAN_LATEX = @DX_DOCDIR@/latex
+LATEX_TARGET = @DX_DOCDIR@/latex/refman.tex
+@DX_DOCDIR@/latex/refman.tex: $(top_srcdir)/fix_doxygen.sed
 
 endif DX_COND_latex
 
@@ -139,15 +139,12 @@ doxygen-run: @DX_DOCDIR@/@DX_PROJECT@.tag
 
 doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-@DX_DOCDIR@/@DX_PROJECT@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
-	rm -rf @DX_DOCDIR@
+@DX_DOCDIR@/@DX_PROJECT@.tag $(LATEX_TARGET) $(HTML_TARGET): $(DX_CONFIG) $(pkginclude_HEADERS)
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
-
-@DX_DOCDIR@/latex/refman.tex: @DX_DOCDIR@/@DX_PROJECT@.tag $(top_srcdir)/fix_doxygen.sed
-	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
+if DX_COND_latex
 	$(SED) -n -i'.bak' -f $(top_srcdir)/fix_doxygen.sed @DX_DOCDIR@/latex/refman.tex
+endif DX_COND_latex
 
-@DX_DOCDIR@/latex: @DX_DOCDIR@/latex/refman.tex
 
 DX_CLEANFILES = \
     @DX_DOCDIR@/@DX_PROJECT@.tag \
