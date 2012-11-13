@@ -1,3 +1,8 @@
+/*! \file   Lgm_DiffCoeff_param.c
+ *
+ *  \brief  Parameterized version of Summers (2005) bounce-averaged pitch-angle diffusion coefficients.
+ *
+ */
 #include <math.h>
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 /*

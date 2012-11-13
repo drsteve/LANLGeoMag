@@ -1,3 +1,8 @@
+/*! \file Lgm_CdipMirrorLat.c
+ *
+ *  \brief Routines for computing the centered dipole lattitude of the mirror point in a centered dipole field model.
+ *
+ */
 #include "Lgm/Lgm_MagModelInfo.h"
 
 

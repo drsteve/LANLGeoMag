@@ -1,3 +1,11 @@
+/*! \file Lgm_B_internal.c
+ *
+ *  \brief Wrapped versions of the internal B-field models with calling arguments the same as all of the external models.
+ *
+ *
+ *
+ *
+ */
 #include "Lgm/Lgm_MagModelInfo.h"
 
 int Lgm_B_igrf(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *MagInfo) {

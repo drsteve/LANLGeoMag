@@ -1,8 +1,14 @@
-/*
- *  Lgm_AE8_AP8.c - 2010 M. G. Henderson
+/*! \file Lgm_AE8_AP8.c
+ *
+ *  \brief A C version of the AE8/AP8 radiation belt models.
+ *
  *
  *  This is the AE8/AP8 model converted to C. The original fortran is
  *  an extremely awefull example of spaghetti progamming...
+ *
+ *  \author M. G. Henderson
+ *  \date  2010
+ *
  *
  */
 

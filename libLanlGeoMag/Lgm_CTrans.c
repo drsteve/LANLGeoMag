@@ -1,3 +1,8 @@
+/*! \file Lgm_CTrans.c
+ *
+ *  \brief Collection of numerous routines used for coordinate system transformations and ephemeris calculations.
+ *
+ */
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Quat.h"
 #include "config.h"

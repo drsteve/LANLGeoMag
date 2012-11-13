@@ -1,4 +1,13 @@
-/* 
+/*! \file Lgm_B_Dungey.c
+ *
+ *  \brief The "Dungey" magnetic field model (i.e. dipole + constant IMF Bz value.)
+ *
+ *
+ *  \author S. K. Morley
+ *  \date   2011
+ *
+ *
+ *
  */
 #include "Lgm/Lgm_MagModelInfo.h"
 

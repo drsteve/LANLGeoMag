@@ -1,3 +1,9 @@
+/*! \file  Lgm_ComputeLstarVersusPA.c
+ *
+ *  \brief Parallel routine for computing L* for multiple pitch angles at once. Uses OpenMP for parallelization.
+ *
+ *
+ */
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 #include "Lgm/Lgm_MagEphemInfo.h"

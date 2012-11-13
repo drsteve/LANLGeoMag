@@ -1,3 +1,8 @@
+/*! \file  Lgm_Cgm.c
+ *
+ *  \brief Routines to convert to/from Corrected Geomagnetic Coordinates (CGM and CBM).
+ *
+ */
 #include <stdio.h>
 #include <math.h>
 #include "Lgm/Lgm_QuadPack.h"

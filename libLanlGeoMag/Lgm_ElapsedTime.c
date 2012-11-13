@@ -1,3 +1,8 @@
+/*! \file Lgm_ElapsedTime.c
+ *
+ *  \brief  Utility routines to compute and print run-times and elapsed times. (Useful for timing long runs.)
+ *
+ */
 #include <strings.h>
 #include "Lgm/Lgm_ElapsedTime.h"
 

@@ -914,12 +914,13 @@ int main( int argc, char *argv[] ){
 
 
 
+hsize_t nFileTimes;
 file    = H5Fopen( HdfOutFile, H5F_ACC_RDONLY, H5P_DEFAULT );
-char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &Dims );
+char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &nFileTimes );
 H5Fclose( file );
 
 printf("File: %s contains the following times;\n", HdfOutFile );
-for (i=0; i<Dims[0]; i++){
+for (i=0; i<nFileTimes; i++){
     IsoTimeStringToDateTime( HdfFileTimes[i], &UTC, c );
     printf("HdfFileTimes[%d] = %s   Date = %ld\n", i, HdfFileTimes[i], UTC.Date );
 }

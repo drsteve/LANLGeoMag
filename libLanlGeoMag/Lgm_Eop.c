@@ -1,3 +1,8 @@
+/*! \file Lgm_Eop.c
+ *  
+ *  \brief  Routines for read/manipulating Earth Orientation Parameters.
+ *
+ */
 #ifdef HAVE_CONFIG_H 
 #include <config.h> 
 #endif

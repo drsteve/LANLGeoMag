@@ -1,3 +1,13 @@
+/*! \file Lgm_AE_index.c
+ *
+ * \brief Routines to retrieve the AE indices for a given time.
+ *
+ *
+ *  \author C. Jeffreys
+ *  \date   2012
+ *
+ */
+
 #include <time.h>
 #include <math.h>
 #include <stdlib.h>

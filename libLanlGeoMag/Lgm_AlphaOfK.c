@@ -1,3 +1,15 @@
+/*! \file Lgm_AlphaOfK.c
+ *
+ *  \brief Collection of routines for computing what pitch angle corresponds to a given second invarianbt, K.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2010-2011
+ *
+ *
+ *
+ */
 #include <stdio.h>
 #include <math.h>
 #include "Lgm/Lgm_QuadPack.h"

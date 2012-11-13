@@ -1,3 +1,8 @@
+/*! \file Lgm_DateAndTime.c
+ *  
+ *  \brief  Collection of routines for data and time calculations. (Also see rotuines in Lgm_CTrans.c).
+ *
+ */
 #ifdef HAVE_CONFIG_H 
 #include "config.h" 
 #endif
