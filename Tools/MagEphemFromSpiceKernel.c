@@ -1720,9 +1720,8 @@ printf("sclkdp = %lf\n", sclkdp);
 
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
-                    sprintf( Command, "sed 's+ELAPSED_TIME+%s+' <%s >%s.new", t.ElapsedTimeStr, OutFile, OutFile); system( Command );
-                    sprintf( Command, "sed 's+SPICE_KERNEL_FILES_LOADED+%s+' <%s.new >%s.new2", SpiceKernelFilesLoaded, OutFile, OutFile); system( Command );
-                    sprintf( Command, "mv %s.new2 %s; rm %s.new", OutFile, OutFile, OutFile); system( Command );
+                    sprintf( Command, "sed -i '/ELAPSED_TIME/s//%s/g' %s", t.ElapsedTimeStr, OutFile); system( Command );
+                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s//%s/' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
 
 
 
