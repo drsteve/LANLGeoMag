@@ -984,7 +984,7 @@ for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
                     /*
                      * Make kernels known to SPICE
                      */
-                    furnsh_c( InputFilename );
+                    furnsh_c( InFile );
                     printf( "\t    Using SPICE Kernel Desrciption File: %s\n", InFile );
                     ktotal_c( "all", &KernelCount );
                     printf( "\t    Kernel Files Loaded:\n" );
