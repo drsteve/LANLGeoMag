@@ -121,6 +121,7 @@ char **Get_StringDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
     size     = H5Tget_size(datatype);
     strpad   = H5Tget_strpad(datatype);
     cset     = H5Tget_cset(datatype);
+    Dims[1]  = size;
 
     LGM_ARRAY_2D(  buf1, (int)Dims[0], (int)size, char );
 
@@ -132,7 +133,7 @@ char **Get_StringDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
 
     status   = H5Dread( dataset, atype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf1[0][0] );
 
-    if ( strpad != H5T_STR_NULLTERM ) {
+//    if ( strpad != H5T_STR_NULLTERM ) {
 
         LGM_ARRAY_2D(  buf2, (int)Dims[0], (int)(size+1), char );
 
@@ -147,13 +148,13 @@ char **Get_StringDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
         LGM_ARRAY_2D_FREE( buf1 );
         return( buf2 );
 
-    } else {
+//    } else {
 
-        H5Dclose(dataset);
-        H5Sclose(dataspace);
-        return( buf1 );
+//        H5Dclose(dataset);
+//        H5Sclose(dataspace);
+//        return( buf1 );
 
-    }
+//    }
 
 }
 

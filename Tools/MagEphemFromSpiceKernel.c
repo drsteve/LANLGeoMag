@@ -914,24 +914,27 @@ int main( int argc, char *argv[] ){
 
 
 
+
 hsize_t nFileTimes;
 file    = H5Fopen( HdfOutFile, H5F_ACC_RDONLY, H5P_DEFAULT );
-char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &nFileTimes );
-H5Fclose( file );
+if (file >= 0 ){
+    char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &nFileTimes );
+    H5Fclose( file );
 
-printf("File: %s contains the following times;\n", HdfOutFile );
-for (i=0; i<nFileTimes; i++){
-    IsoTimeStringToDateTime( HdfFileTimes[i], &UTC, c );
-    printf("HdfFileTimes[%d] = %s   Date = %ld\n", i, HdfFileTimes[i], UTC.Date );
-}
+    printf("File: %s contains the following times;\n", HdfOutFile );
+    for (i=0; i<nFileTimes; i++){
+        IsoTimeStringToDateTime( HdfFileTimes[i], &UTC, c );
+        printf("HdfFileTimes[%d] = %s   Date = %ld\n", i, HdfFileTimes[i], UTC.Date );
+    }
 
-printf("\nYou requested it to have the following times;\n");
-ss = (Date == StartDate) ? StartSeconds :     0;
-es = (Date == EndDate)   ?   EndSeconds : 86400;
-for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
-    Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
-    Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
-    printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
+    printf("\nYou requested it to have the following times;\n");
+    ss = (Date == StartDate) ? StartSeconds :     0;
+    es = (Date == EndDate)   ?   EndSeconds : 86400;
+    for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
+        Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
+        Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
+        printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
+    }
 }
 
 
@@ -1720,8 +1723,8 @@ printf("sclkdp = %lf\n", sclkdp);
 
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
-                    sprintf( Command, "sed -i '/ELAPSED_TIME/s//%s/g' %s", t.ElapsedTimeStr, OutFile); system( Command );
-                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s//%s/' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
+                    sprintf( Command, "sed -i '/ELAPSED_TIME/s++%s+g' %s", t.ElapsedTimeStr, OutFile); system( Command );
+                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
 
 
 
