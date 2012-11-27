@@ -915,8 +915,10 @@ int main( int argc, char *argv[] ){
 
 
 
+if (0==1){
 hsize_t nFileTimes;
-file    = H5Fopen( HdfOutFile, H5F_ACC_RDONLY, H5P_DEFAULT );
+// attempt to open in read-write mode.
+file    = H5Fopen( HdfOutFile,  H5F_ACC_RDONLY, H5P_DEFAULT );
 if (file >= 0 ){
     char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &nFileTimes );
     H5Fclose( file );
@@ -935,6 +937,7 @@ if (file >= 0 ){
         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
         printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
     }
+}
 }
 
 

@@ -191,7 +191,7 @@
     DataSpace = H5Dget_space( DataSet );\
 \
     MemSpace  = H5Screate_simple( Rank, SlabSize, NULL );\
-    for (i-0;i<n;i++) {\
+    for (i=0;i<n;i++) {\
         Offset[0] = i;\
         status    = H5Sselect_hyperslab( DataSpace, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );\
         status    = H5Dwrite( DataSet, Type, MemSpace, DataSpace, H5P_DEFAULT, &buf[i][0] );\
