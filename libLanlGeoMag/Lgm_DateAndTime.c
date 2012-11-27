@@ -948,6 +948,11 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     UTC->fYear  = (double)UTC->Year + ((double)UTC->Doy + UTC->Time/24.0)/(365.0 + (double)Lgm_LeapYear(UTC->Year));
     UTC->TimeSystem = LGM_TIME_SYS_UTC;
 
+    t = UTC->Time;
+    UTC->Hour   = (int)t;    t = (t - UTC->Hour)*60.0;
+    UTC->Minute = (int)t;    t = (t - UTC->Minute)*60.0;
+    UTC->Second = t;
+
     return( 1 ); // eventually return FALSE if invalid date.
 
 }
