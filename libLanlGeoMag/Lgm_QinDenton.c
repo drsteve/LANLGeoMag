@@ -381,12 +381,16 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
     Lgm_read_QinDenton( p->Date, q );
 
-    if (q->nPnts < 3) {
+    if (q->nPnts < 2) {
 
         printf("Not enough QinDenton values to interpolate\n");
         p->Dst = -5.0;
         p->fKp = 2.0;
 
+    } else if ( (JD < q->MJD[0]) || (JD > q->MJD[q->nPnts-1]) ){
+        printf("No Qin Denton data in range -- would require extrapolation.\n");
+        p->Dst = -5.0;
+        p->fKp = 2.0;
     } else {
 
         nq = q->nPnts;
@@ -395,7 +399,11 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
         acc    = gsl_interp_accel_alloc( );
         //spline = gsl_spline_alloc( gsl_interp_cspline, nq );
-        spline = gsl_spline_alloc( gsl_interp_akima, nq );
+        if ( nq < 5 ) {
+            spline = gsl_spline_alloc( gsl_interp_linear, nq );
+        } else {
+            spline = gsl_spline_alloc( gsl_interp_akima, nq );
+        }
 
 
 
