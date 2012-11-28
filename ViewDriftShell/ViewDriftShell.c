@@ -4483,15 +4483,15 @@ static gboolean idle( GtkWidget *widget ) {
         expose_event( drawing_area, NULL, NULL );
 
         
-        if ( DumpFrames && ((CurrentSec >  59.5) || (CurrentSec < 0.5)) ){
-//        if ( DumpFrames ){
+//        if ( DumpFrames && ((CurrentSec >  59.5) || (CurrentSec < 0.5)) ){
+        if ( DumpFrames ){
             int x, y, width, height, depth;
             GdkPixbuf *pixbuf;
             char PngFile[40];
             gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
             pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
-            //sprintf( PngFile, "%04ld.png", cFrame );
-            sprintf( PngFile, "Latest.png", cFrame );
+            sprintf( PngFile, "%04ld.png", cFrame );
+            //sprintf( PngFile, "Latest.png", cFrame );
             gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
             g_object_unref( pixbuf );
         }

@@ -314,6 +314,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
 
     f->Extrapolate = TRUE;
     f->nMaxwellians = 2;
+f->nMaxwellians = 1;
 
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;

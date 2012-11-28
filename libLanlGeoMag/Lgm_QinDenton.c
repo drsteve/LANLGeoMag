@@ -387,8 +387,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         p->Dst = -5.0;
         p->fKp = 2.0;
 
-    } else if ( (JD < q->MJD[0]) || (JD > q->MJD[q->nPnts-1]) ){
-        printf("No Qin Denton data in range -- would require extrapolation.\n");
+    } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
+        printf("No Qin Denton data in range -- would require extrapolation. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
         p->Dst = -5.0;
         p->fKp = 2.0;
     } else {
