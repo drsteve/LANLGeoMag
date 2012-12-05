@@ -232,7 +232,11 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 //    reset = TRUE;
     while ( !done ) {
 
+//Lgm_Vector BBB;
+
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+//Info->Bfield( &P, &BBB,  Info );
+//printf("P=%.15lf %.15lf %.15lf  B=%.15lf %.15lf %.15lf   F = %g   Htry = %g   Hnext = %g\n", P.x, P.y, P.z, BBB.x, BBB.y, BBB.z, F, Htry, Hnext );
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
 	    F =  Height - TargetHeight;

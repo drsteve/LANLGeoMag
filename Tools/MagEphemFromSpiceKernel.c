@@ -1306,6 +1306,10 @@ printf("sclkdp = %lf\n", sclkdp);
                         Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
+                        if ( OverRideKp ) {
+                            Kp = T89Q_Kp;
+                        }
+
                         if ( Kp >= 0.0 ) {
                             MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
                             MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5);
@@ -1338,6 +1342,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         /*
                          * Write a row of data into the txt file
                          */
+printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mInfo->fKp);
                         Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 

@@ -15,8 +15,8 @@ int main(){
 
     mInfo = Lgm_InitMagInfo( );
 
-    Date = 20000101;                        // August 12, 2004
-    UTC  = 0.0 + 0.0/60.0 + 0.0/3600.0;   // Universal Time Coordinated (in decimal hours)
+    Date = 20121010;                        // August 12, 2004
+    UTC  = 16.0 + 27.0/60.0 + 29.99/3600.0;   // Universal Time Coordinated (in decimal hours)
     JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
 
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
@@ -29,8 +29,9 @@ int main(){
     Lgm_set_QinDenton( &p, mInfo );
 
     
-    u.x = 3.0; u.y = 4.0; u.z = 3.0;
-mInfo->Kp = 3;
+//    u.x = 3.0; u.y = 4.0; u.z = 3.0;
+    u.x = 1.490696277499862; u.y =  0.000943013537158; u.z =  0.051705206498810;
+//mInfo->Kp = 3;
 
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
     mInfo->Bfield( &u, &B, mInfo );
@@ -45,6 +46,12 @@ mInfo->Kp = 3;
     printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
+
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
     mInfo->Bfield( &u, &B, mInfo );
     printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
     printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );

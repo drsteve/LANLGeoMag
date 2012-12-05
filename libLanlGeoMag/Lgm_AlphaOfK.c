@@ -35,7 +35,7 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
  *      \param[in]      u   Position (in GSM) to use.
  *      \param[in,out]  m   A properly initialized and configured Lgm_MagModelInfo structure.
  *
- *      \returns        TraceFlag, the flag retuend by the Lgm_Trace() call.
+ *      \returns        TraceFlag, the flag returned by the Lgm_Trace() call.
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
@@ -112,8 +112,8 @@ void  Lgm_TearDown_AlphaOfK( Lgm_MagModelInfo *m ) {
 
 
 /**
- *   This routine returns the pitch angle that corresponds to a given value of K
- *   \f$ K = I \sqrt{B_m}\f$.
+ *   This routine returns the equatorial pitch angle that corresponds to a
+ *   given value of K \f$ K = I \sqrt{B_m}\f$.
  *
  *      \param[in]      K   The value of the second invariant, K        <b> ( Re G^(1/2) )</b>
  *      \param[in,out]  m   A properly initialized and configured Lgm_MagModelInfo structure.
@@ -152,6 +152,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
     }
     a0 = DegPerRad*asin( sqrt( m->Bmin/B ) );
     f0 = Lgm_AlphaOfK_Func( K, a0, m );
+//printf("a0 = %g   f0 = %g    (B=%g)\n", a0, f0, B);
     if ( fabs(f0) < 1e-4 ) return( a0 );
 
 
@@ -163,6 +164,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
     a1 = 90.0;
     f1 = K - 0.0;
     f1 = Lgm_AlphaOfK_Func( K, a1, m );
+//printf("a1 = %g   f1 = %g\n", a1, f1);
     if ( fabs(f1) < 1e-4 ) return( a1 );
 
 
@@ -202,15 +204,35 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
             a1 = a;
             f1 = f;
         }
+//printf("a = %g    a0, a1 = %g %g     f0, f1 = %g %g\n", a, a0, a1, f0, f1);
 
     }
 
+
     /*
-     * Take the midpoint of the remaining bracket range as the answer.
+     * Check to make sure we have found a good alpha. I.e., make sure both f0 and f1 are small
      */
-    a = 0.5*(a0+a1);
+    if ( (fabs(f0) < 1e-3) && (fabs(f1) < 1e-3) ) {
+
+        /*
+         * Take the midpoint of the remaining bracket range as the answer.
+         */
+        a = 0.5*(a0+a1);
+
+    } else {
+
+        /*
+         * Assume value is no good...
+         */
+        a = -9e99;
+
+    }
 
 
+
+
+
+//printf("a = %g    a0, a1 = %g %g\n", a, a0, a1);
     return( a );
 
 
@@ -366,6 +388,7 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
     if ( fabs( Alpha - 90.0 ) < 1e-5 ) return( Kt - 0.0 );
 
     K = Lgm_KofAlpha( Alpha, m );
+//printf("Lgm_AlphaOfK_Func: Alpha, K = %g %g\n",  Alpha, K );
 
     if ( K < 0.0 ) {
 

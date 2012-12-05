@@ -548,7 +548,7 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
                 mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
 
                 f->K[k]    = K[k];
-                //printf("K[%d] = %g   f->DateTime.UTC = %g f->Position = %g %g %g\n", k, K[k], f->DateTime.Time, f->Position.x, f->Position.y, f->Position.z);
+                //printf("\n\nK[%d] = %g   f->DateTime.UTC = %g f->Position = %g %g %g\n", k, K[k], f->DateTime.Time, f->Position.x, f->Position.y, f->Position.z);
                 AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
                 SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
                 if ( AlphaEq > 0.0 ) {
@@ -670,12 +670,14 @@ double Cost( double *x, void *data ){
     FitData = (_FitData *)data;
 
     // These constraints wont work for nMaxwellians>2
+/*
     if ( (x[1] > 2.0) || ( x[1] < -30.0) ) return( 9e99 );
     if ( (fabs( x[2] ) > 1000.0) || (fabs( x[2] ) < 1.0) ) return( 9e99 );
     if ( FitData->nMaxwellians > 1 ) {
         if ( (x[3] > 2.0) || ( x[3] < -30.0) ) return( 9e99 );
         if ( (fabs( x[4] ) > 1000.0) || (fabs( x[4] ) < 1.0) ) return( 9e99 );
     }
+*/
 
 
     

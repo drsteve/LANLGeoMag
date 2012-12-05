@@ -126,7 +126,7 @@ int Lgm_ModMid( Lgm_Vector *u, Lgm_Vector *b0, Lgm_Vector *v, double H, int n, d
     Bmag = Lgm_NormalizeVector(&B);
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
-        printf("Lgm_ModMid(): Bmag too small during final Euler step (z1 = %g %g %g Bmag = %g) is too small (returning with 0).\n", z1.x, z1.y, z1.z, Bmag );
+        printf("Lgm_ModMid(): Bmag too small during final Euler step (z1 = %g %g %g B = %g %g %g Bmag = %g) is too small (returning with 0).\n", z1.x, z1.y, z1.z, B.x, B.y, B.z, Bmag );
 //printf("z0, z1 = %g %g %g    %g %g %g   z2 = %g %g %g\n", z0.x, z0.y, z0.z, z1.x, z1.y, z1.z, z2.x, z2.y, z2.z );
 
         return(0);

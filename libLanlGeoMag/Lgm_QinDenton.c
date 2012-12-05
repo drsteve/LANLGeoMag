@@ -406,6 +406,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         }
 
 
+// Need to prtoect the interpolations from bad values!!!!
 
         // interpolate ByIMF
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->ByIMF[i]; }
@@ -423,9 +424,16 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Den_P[i]; }
         gsl_spline_init( spline, x, y, nq ); p->Den_P = gsl_spline_eval( spline, MJD, acc );
 
+
         // interpolate Pdyn
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Pdyn[i]; }
         gsl_spline_init( spline, x, y, nq ); p->Pdyn = gsl_spline_eval( spline, MJD, acc );
+/*
+        if ( p->Pdyn < 0.1 ) {
+            printf("Dynamic Pressure < 0.1 nPa. Resetting to .1 nPa\n");
+            p->Pdyn = 0.1;
+        }
+*/
 
         // interpolate G1
         for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->G1[i]; }
