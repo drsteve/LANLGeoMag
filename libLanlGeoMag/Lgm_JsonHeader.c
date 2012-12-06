@@ -28,6 +28,8 @@ void Lgm_json_initvar(long start_column, int dimension, char* name, Lgm_json_var
   var->dimension = dimension;
   var->start_column = start_column;
   var->name = name;
+  var->n_attrs = 0;
+  var->attributes = NULL;
 }
 
 void Lgm_json_addAttr(char *name, char *value, Lgm_json_variable *var) {
@@ -38,8 +40,9 @@ void Lgm_json_addAttr(char *name, char *value, Lgm_json_variable *var) {
   atr.value = value;
 
   var->n_attrs++;
-  
   var->attributes = (Lgm_json_attr*) calloc(var->n_attrs, sizeof(Lgm_json_attr));
+ 
+printf("n_attrs: %d  %d bytes\n", var->n_attrs, sizeof(var->attributes));
  
   
 

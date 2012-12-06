@@ -1,6 +1,7 @@
 
 #include <Lgm_JsonHeader.h>
 #include <Lgm_Utils.h>
+#include <stdio.h>
 
 /* typedef struct Lgm_json_variable { */
 /*   long start_column; */
@@ -38,7 +39,7 @@ int main(void) {
   Lgm_json_addAttr("LABEL", "Energy [MeV]", &energy_var);
   Lgm_json_addAttr("LABEL", "Counts", &counts_var);
 
-  printf("%s\n", energy_var.n_attrs);
+  printf("%d\n", (int)energy_var.n_attrs);
   printf("%s\n", energy_var.attributes[0].name);
   printf("%s\n", energy_var.attributes[0].value);
 
