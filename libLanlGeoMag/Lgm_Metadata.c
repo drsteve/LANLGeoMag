@@ -25,6 +25,8 @@ char *Lgm_metadata_JSONheader(int n_vars, ...) {
     char *p;
     char *tmp_str;
     Lgm_metadata_variable* var_tmp;
+    int current_col=0;
+    char int_str[80]; 
 
     // start the block
     p = Buffer;
@@ -32,6 +34,11 @@ char *Lgm_metadata_JSONheader(int n_vars, ...) {
     
     for (i=0; i<n_vars; i++) {
       var_tmp = va_arg(hv, Lgm_metadata_variable* );
+      if (var_tmp->data) {
+	sprintf(int_str, "%d", current_col);
+	Lgm_metadata_addAttr("START_COLUMN", int_str, var_tmp);
+	current_col += var_tmp->dimension;
+      }
 
       tmp_str = Lgm_metadata_toJSON(var_tmp, i == (n_vars-1), '#');
       p += sprintf(p, "%s", tmp_str);
@@ -89,28 +96,35 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
 }
 
 
-void Lgm_metadata_initvar(int start_column, int dimension, char* name, Lgm_metadata_variable *var) {
+void Lgm_metadata_initvar(int dimension, int data, char* name, Lgm_metadata_variable *var) {
   char int_str[80]; 
   var->dimension = dimension;
-  var->start_column = start_column;
   var->name = name;
   var->n_attrs = 0;
   var->attributes = NULL;
-
-  sprintf(int_str, "%d", var->start_column);
-  Lgm_metadata_addAttr("START_COLUMN", int_str, var);
+  var->data = data;
   sprintf(int_str, "%d", var->dimension);
   Lgm_metadata_addAttr("DIMENSION", int_str, var);
 
 }
 
-void Lgm_metadata_addAttr(char *name, char *value, Lgm_metadata_variable *var) {
+int Lgm_metadata_addAttr(char *name, char *value, Lgm_metadata_variable *var) {
   Lgm_metadata_attr atr;
   Lgm_metadata_variable newvar;
   Lgm_metadata_attr* old_attr;
 
   atr.name = name;
   atr.value = value;
+
+  // make sure the name is not already there, if it is ignore it
+  {
+    int i;
+    for (i=0; i<var->n_attrs; i++) {
+      if (strcmp(var->attributes[i].name, name) == 0) { // there are equal
+	return (Lgm_metadata_FAILURE);
+      }
+    }
+  }
 
   old_attr = var->attributes;
 
@@ -130,7 +144,9 @@ void Lgm_metadata_addAttr(char *name, char *value, Lgm_metadata_variable *var) {
   strcpy(var->attributes[var->n_attrs - 1].value, value);
 
  free(old_attr);
-
+ return (Lgm_metadata_SUCCESS);
 }
+
+
 
 
