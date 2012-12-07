@@ -150,7 +150,8 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
     } else {
         B = m->Ellipsoid_Footprint_Bn;
     }
-    a0 = DegPerRad*asin( sqrt( m->Bmin/B ) );
+//klude. Adding 0.5 to make it find stuff.
+    a0 = 0.5 + DegPerRad*asin( sqrt( m->Bmin/B ) );
     f0 = Lgm_AlphaOfK_Func( K, a0, m );
 //printf("a0 = %g   f0 = %g    (B=%g)\n", a0, f0, B);
     if ( fabs(f0) < 1e-4 ) return( a0 );
@@ -209,17 +210,28 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
     }
 
 
+
+
     /*
      * Check to make sure we have found a good alpha. I.e., make sure both f0 and f1 are small
      */
-    if ( (fabs(f0) < 1e-3) && (fabs(f1) < 1e-3) ) {
+    if ( fabs(f1) < 0.01 ) {
+
+    
+        /*
+         * Take the upper bracket as answer.
+         */
+        a = a1;
+
+
+    } else if ( fabs(f0) < 0.01 ) {
 
         /*
-         * Take the midpoint of the remaining bracket range as the answer.
+         * Take the lower bracket as answer.
          */
-        a = 0.5*(a0+a1);
+        a = a0;
 
-    } else {
+    }  else {
 
         /*
          * Assume value is no good...
@@ -227,7 +239,6 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
         a = -9e99;
 
     }
-
 
 
 
@@ -259,6 +270,7 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
     m->Bm = m->Bmin/sa2; 
+//printf("Bmirror = %lf\n", m->Bm );
 
 
 

@@ -366,7 +366,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
-    int                 t, nq, i, ny, nm, nd;
+    int                 t, nq, i, ny, nm, nd, nGood;
     double              *x, *y, MJD, UTC;
     gsl_interp_accel    *acc;
     gsl_spline          *spline;
@@ -388,9 +388,11 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         p->fKp = 2.0;
 
     } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
+
         printf("No Qin Denton data in range -- would require extrapolation. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
         p->Dst = -5.0;
         p->fKp = 2.0;
+
     } else {
 
         nq = q->nPnts;
@@ -398,155 +400,464 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         y  = (double *)calloc( nq, sizeof(double) );
 
         acc    = gsl_interp_accel_alloc( );
-        //spline = gsl_spline_alloc( gsl_interp_cspline, nq );
-        if ( nq < 5 ) {
-            spline = gsl_spline_alloc( gsl_interp_linear, nq );
-        } else {
-            spline = gsl_spline_alloc( gsl_interp_akima, nq );
-        }
 
 
-// Need to prtoect the interpolations from bad values!!!!
+
+
+
+
 
         // interpolate ByIMF
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->ByIMF[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->ByIMF = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->ByIMF[i] > -100.0) && (q->ByIMF[i] < 100.0) ) {
+                x[nGood] = q->MJD[i];
+                y[nGood] = q->ByIMF[i];
+                ++nGood;
+            }
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->ByIMF = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->ByIMF = 0.0;
+            printf("No Good Qin Denton data in range for ByIMF. Setting ByIMF to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->ByIMF, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate BzIMF
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->BzIMF[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->BzIMF = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->BzIMF[i] > -100.0) && (q->BzIMF[i] < 100.0) ) {
+                x[nGood] = q->MJD[i];
+                y[nGood] = q->BzIMF[i];
+                ++nGood;
+            }
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->BzIMF = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->BzIMF = 0.0;
+            printf("No Good Qin Denton data in range for BzIMF. Setting BzIMF to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->BzIMF, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate V_SW
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->V_SW[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->V_SW = gsl_spline_eval( spline, MJD, acc );
-
-        // interpolate Den_P
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Den_P[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Den_P = gsl_spline_eval( spline, MJD, acc );
-
-
-        // interpolate Pdyn
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Pdyn[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Pdyn = gsl_spline_eval( spline, MJD, acc );
-/*
-        if ( p->Pdyn < 0.1 ) {
-            printf("Dynamic Pressure < 0.1 nPa. Resetting to .1 nPa\n");
-            p->Pdyn = 0.1;
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->V_SW[i] > 100.0) && (q->V_SW[i] < 2000.0) ) {
+                x[nGood] = q->MJD[i];
+                y[nGood] = q->V_SW[i];
+                ++nGood;
+            }
         }
-*/
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->V_SW = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->V_SW = 400.0;
+            printf("No Good Qin Denton data in range for V_SW. Setting V_SW to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->V_SW, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
-        // interpolate G1
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->G1[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->G1 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate G2
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->G2[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->G2 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate G3
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->G3[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->G3 = gsl_spline_eval( spline, MJD, acc );
+
+
+        /*
+         * Interpolate Den_P. We really should expect (or trust) densities less than about 0.2 cm^-3.
+         * And values less than 1 cm^-3 should be suspect....
+         */
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( q->Den_P[i] > 0.1 ) {
+                x[nGood] = q->MJD[i];
+                y[nGood] = q->Den_P[i];
+                ++nGood;
+            }
+        }
+        if ( nGood >= 2 ) {
+            spline = gsl_interp_alloc( gsl_interp_linear, nGood );
+            gsl_interp_init( spline, x, y, nGood );
+            p->Den_P = gsl_interp_eval( spline, x, y, MJD, NULL );
+            gsl_interp_free( spline );
+        } else {
+            p->Den_P = 1.0;
+            printf("No Good Qin Denton data in range for Den_P. Setting Den_P to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Den_P, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+
+
+
+        /*
+         * Interpolate Pdyn. Since Pdyn is basned one Den_P, use Den_P as a filter on what's good.
+         */
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->Den_P[i] > 0.1) && (q->Pdyn[i] > 0.0) ) {
+                x[nGood] = q->MJD[i];
+                y[nGood] = q->Pdyn[i];
+                ++nGood;
+            }
+        }
+        if ( nGood >= 2 ) {
+            spline = gsl_interp_alloc( gsl_interp_linear, nGood );
+            gsl_interp_init( spline, x, y, nGood );
+            p->Pdyn = gsl_interp_eval( spline, x, y, MJD, NULL );
+            gsl_interp_free( spline );
+        } else {
+            p->Pdyn = 2.3;
+            printf("No Good Qin Denton data in range for Pdyn. Setting Pdyn to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Pdyn, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+
+
+
+
+        // interpolate G1 -- dont yet have a good idea of what values are reasonable here...
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->G1[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->G1 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->G1 = 0.0;
+            printf("No Good Qin Denton data in range for G1. Setting G1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate G2 -- dont yet have a good idea of what values are reasonable here...
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->G2[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->G2 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->G2 = 0.0;
+            printf("No Good Qin Denton data in range for G2. Setting G2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate G3 -- dont yet have a good idea of what values are reasonable here...
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->G3[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->G3 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->G3 = 0.0;
+            printf("No Good Qin Denton data in range for G3. Setting G3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+
+
+
+
 
         // interpolate Kp
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->fKp[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->fKp = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->fKp[i] >= 0.0) && (q->fKp[i] <= 9.0)){
+                x[nGood] = q->MJD[i]; 
+                y[nGood] = q->fKp[i]; 
+                ++nGood;
+            }
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->fKp = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->fKp = 2.0;
+            printf("No Good Qin Denton data in range for fKp. Setting fKp to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->fKp, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate akp3
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->akp3[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->akp3 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->akp3[i] >= 0.0) && (q->akp3[i] <= 9.0)){
+                x[nGood] = q->MJD[i]; 
+                y[nGood] = q->akp3[i]; 
+                ++nGood;
+            }
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->akp3 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->akp3 = 2.0;
+            printf("No Good Qin Denton data in range for akp3. Setting akp3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->akp3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate Dst
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Dst[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Dst = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            if ( (q->Dst[i] >= -2500.0) && (q->Dst[i] < 500.0)){
+                x[nGood] = q->MJD[i]; 
+                y[nGood] = q->Dst[i]; 
+                ++nGood;
+            }
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Dst = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->Dst = 0.0;
+            printf("No Good Qin Denton data in range for Dst. Setting Dst to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Dst, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
-        // interpolate Bz1
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz1[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz1 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate Bz2
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz2[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz2 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate Bz3
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz3[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz3 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate Bz4
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz4[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz4 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate Bz5
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz5[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz5 = gsl_spline_eval( spline, MJD, acc );
 
-        // interpolate Bz6
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->Bz6[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->Bz6 = gsl_spline_eval( spline, MJD, acc );
+        // interpolate Bz1 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz1[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz1 = gsl_spline_eval( spline, MJD, acc );
+        } else {
+            p->Bz1 = 0.0;
+            printf("No Good Qin Denton data in range for Bz1. Setting Bz1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate Bz2 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz2[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz2 = gsl_spline_eval( spline, MJD, acc );
+        } else {
+            p->Bz2 = 0.0;
+            printf("No Good Qin Denton data in range for Bz2. Setting Bz2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate Bz3 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz3[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz3 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->Bz3 = 0.0;
+            printf("No Good Qin Denton data in range for Bz3. Setting Bz3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate Bz4 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz4[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz4 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->Bz4 = 0.0;
+            printf("No Good Qin Denton data in range for Bz4. Setting Bz4 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz4, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate Bz5 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz5[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz5 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->Bz5 = 0.0;
+            printf("No Good Qin Denton data in range for Bz5. Setting Bz5 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz5, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+        // interpolate Bz6 -- are these even used?
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->Bz6[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->Bz6 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->Bz6 = 0.0;
+            printf("No Good Qin Denton data in range for Bz6. Setting Bz6 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz6, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
+
+
+
+
 
         // interpolate W1
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W1[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W1 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W1[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W1 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W1 = 0.0;
+            printf("No Good Qin Denton data in range for W1. Setting W1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate W2
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W2[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W2 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W2[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W2 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W2 = 0.0;
+            printf("No Good Qin Denton data in range for W2. Setting W2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate W3
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W3[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W3 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W3[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W3 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W3 = 0.0;
+            printf("No Good Qin Denton data in range for W3. Setting W3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate W4
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W4[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W4 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W4[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W4 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W4 = 0.0;
+            printf("No Good Qin Denton data in range for W4. Setting W4 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W4, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate W5
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W5[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W5 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W5[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W5 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W5 = 0.0;
+            printf("No Good Qin Denton data in range for W5. Setting W5 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W5, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
         // interpolate W6
-        for ( i=0; i<nq; i++ ){ x[i] = q->MJD[i]; y[i] = q->W6[i]; }
-        gsl_spline_init( spline, x, y, nq ); p->W6 = gsl_spline_eval( spline, MJD, acc );
+        for ( nGood=0, i=0; i<nq; i++ ){
+            x[nGood] = q->MJD[i]; 
+            y[nGood] = q->W6[i]; 
+            ++nGood;
+        }
+        if ( nGood > 2 ) {
+            spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
+            gsl_spline_init( spline, x, y, nGood );
+            p->W6 = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free (spline);
+        } else {
+            p->W6 = 0.0;
+            printf("No Good Qin Denton data in range for W6. Setting W6 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W6, q->MJD[0], q->MJD[q->nPnts-1], MJD);
+        }
 
 
 
         free(x);
         free(y);
-        gsl_spline_free (spline);
         gsl_interp_accel_free (acc);
 
     }
 
     if ( q->Verbosity > 0 ) {
         printf("\n");
-        printf("         QinDenton Parameters\n");
-        printf("    --------------------------------\n");
-        printf("        Date = %8ld\n", p->Date );
-        printf("          JD = %11.7lf\n", p->JD );
-        printf("         MJD = %11.7lf\n", p->MJD );
-        printf("         UTC = %11.7lf  ( ", p->UTC );     Lgm_Print_HMSd( UTC ); printf(" )\n");
-        printf("       ByIMF = %11.7g nT\n", p->ByIMF );
-        printf("       BzIMF = %11.7g nT\n", p->BzIMF );
-        printf("        V_SW = %11.7g km/s\n", p->V_SW );
-        printf("       Den_P = %11.7g nPa\n", p->Den_P );
-        printf("        Pdyn = %11.7g nPa\n", p->Pdyn );
-        printf("          G1 = %11.7g\n", p->G1 );
-        printf("          G2 = %11.7g\n", p->G2 );
-        printf("          G3 = %11.7g\n", p->G3 );
-        printf("          Kp = %11.7g\n", p->fKp );
-        printf("        akp3 = %11.7g\n", p->akp3 );
-        printf("         Dst = %11.7g nT\n", p->Dst );
-        printf("         Bz1 = %11.7g nT\n", p->Bz1 );
-        printf("         Bz2 = %11.7g nT\n", p->Bz2 );
-        printf("         Bz3 = %11.7g nT\n", p->Bz3 );
-        printf("         Bz4 = %11.7g nT\n", p->Bz4 );
-        printf("         Bz5 = %11.7g nT\n", p->Bz5 );
-        printf("         Bz6 = %11.7g nT\n", p->Bz6 );
-        printf("          W1 = %11.7g\n", p->W1 );
-        printf("          W2 = %11.7g\n", p->W2 );
-        printf("          W3 = %11.7g\n", p->W3 );
-        printf("          W4 = %11.7g\n", p->W4 );
-        printf("          W5 = %11.7g\n", p->W5 );
-        printf("          W6 = %11.7g\n", p->W6 );
+        printf("\t\t         QinDenton Parameters\n");
+        printf("\t\t    --------------------------------\n");
+        printf("\t\t        Date = %8ld\n", p->Date );
+        printf("\t\t          JD = %11.7lf\n", p->JD );
+        printf("\t\t         MJD = %11.7lf\n", p->MJD );
+        printf("\t\t         UTC = %11.7lf  ( ", p->UTC );     Lgm_Print_HMSd( UTC ); printf(" )\n");
+        printf("\t\t       ByIMF = %11.7g nT\n", p->ByIMF );
+        printf("\t\t       BzIMF = %11.7g nT\n", p->BzIMF );
+        printf("\t\t        V_SW = %11.7g km/s\n", p->V_SW );
+        printf("\t\t       Den_P = %11.7g #/cm^3\n", p->Den_P );
+        printf("\t\t        Pdyn = %11.7g nPa\n", p->Pdyn );
+        printf("\t\t          G1 = %11.7g\n", p->G1 );
+        printf("\t\t          G2 = %11.7g\n", p->G2 );
+        printf("\t\t          G3 = %11.7g\n", p->G3 );
+        printf("\t\t          Kp = %11.7g\n", p->fKp );
+        printf("\t\t        akp3 = %11.7g\n", p->akp3 );
+        printf("\t\t         Dst = %11.7g nT\n", p->Dst );
+        printf("\t\t         Bz1 = %11.7g nT\n", p->Bz1 );
+        printf("\t\t         Bz2 = %11.7g nT\n", p->Bz2 );
+        printf("\t\t         Bz3 = %11.7g nT\n", p->Bz3 );
+        printf("\t\t         Bz4 = %11.7g nT\n", p->Bz4 );
+        printf("\t\t         Bz5 = %11.7g nT\n", p->Bz5 );
+        printf("\t\t         Bz6 = %11.7g nT\n", p->Bz6 );
+        printf("\t\t          W1 = %11.7g\n", p->W1 );
+        printf("\t\t          W2 = %11.7g\n", p->W2 );
+        printf("\t\t          W3 = %11.7g\n", p->W3 );
+        printf("\t\t          W4 = %11.7g\n", p->W4 );
+        printf("\t\t          W5 = %11.7g\n", p->W5 );
+        printf("\t\t          W6 = %11.7g\n", p->W6 );
 
         printf("\n");
     }

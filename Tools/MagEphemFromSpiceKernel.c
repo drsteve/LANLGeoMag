@@ -1303,7 +1303,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 0 ); // for date 20120616 this puts us back to halloween storm (Oct 29, 2003)
+                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
                         if ( OverRideKp ) {

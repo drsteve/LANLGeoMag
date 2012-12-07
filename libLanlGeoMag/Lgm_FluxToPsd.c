@@ -1074,7 +1074,7 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
      */
     Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
-    {
+    {   // start parallel
         //#pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
         //#pragma omp for schedule(dynamic, 1)
         for ( k=0; k<nA; k++ ){
@@ -1100,7 +1100,7 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
         }
-    }
+    }   // end parallel
     Lgm_TearDown_AlphaOfK( mInfo );
 
 
