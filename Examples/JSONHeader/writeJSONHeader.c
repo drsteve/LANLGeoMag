@@ -3,15 +3,6 @@
 #include <Lgm_Utils.h>
 #include <stdio.h>
 
-/* typedef struct Lgm_metadata_variable { */
-/*   long start_column; */
-/*   int dimension; */
-/*   char* name; */
-/*   json_attr *attributes; */
-/*   long n_attrs; */
-/* } json_variable; */
-
-
 int main(void) {
   
   /* Create some data that we would like to write out a header for
@@ -39,7 +30,7 @@ int main(void) {
 
   printf("**************************\n\n");  
 
-  Lgm_metadata_initvar(0, 1, "COUNTS", &counts_meta);
+  Lgm_metadata_initvar(1, 1, "COUNTS", &counts_meta);
   Lgm_metadata_addAttr("LABEL", "Counts", &counts_meta);
 
   json_header = Lgm_metadata_JSONheader(2, &energy_meta, &counts_meta);

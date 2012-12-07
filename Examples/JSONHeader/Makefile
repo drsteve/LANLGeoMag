@@ -1,7 +1,7 @@
 all: writeJSONHeader
 
 writeJSONHeader: writeJSONHeader.c
-	gcc writeJSONHeader.c `pkg-config --cflags --libs lgm` -o writeJSONHeader -Wall
+	gcc writeJSONHeader.c `pkg-config --cflags --libs lgm` -g -o writeJSONHeader -Wall
 
 
 clean:

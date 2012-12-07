@@ -7,22 +7,13 @@
 #include "Lgm/Lgm_Metadata.h"
 
 
-/* #  "DOY":              { "DESCRIPTION": "Ordinal Day of Year.", */
-/* #                               "NAME": "DOY", */
-/* #                              "TITLE": "Day Of Year", */
-/* #                              "LABEL": "DOY", */
-/* #                       "START_COLUMN": 2, */
-/* #                              "UNITS": "Days", */
-/* #                          "VALID_MIN": 0, */
-/* #                          "VALID_MAX": 366 }, */
-
-
-#define MAXHEADERLEN 100000
-#define MAXSINGLEVARHEADER 10000
+#define Lgm_metadata_MAXHEADERLEN 100000
+#define Lgm_metadata_MAXSINGLEVARHEADER 10000
+#define Lgm_metadata_TABCHAR "    "
 
 char *Lgm_metadata_JSONheader(int n_vars, ...) {
   va_list hv;
-  char Buffer[MAXHEADERLEN];
+  char Buffer[Lgm_metadata_MAXHEADERLEN];
   char *outstr;
   size_t L;
 
@@ -61,7 +52,7 @@ char *Lgm_metadata_JSONheader(int n_vars, ...) {
 }
 
 char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) {
-  char Buffer[MAXSINGLEVARHEADER]; 
+  char Buffer[Lgm_metadata_MAXSINGLEVARHEADER]; 
   char *outstr;
   size_t L;
   char *p;
@@ -69,7 +60,7 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
   p = Buffer;
 
   // add the name and start attrs
-  p += sprintf(p, "%c  \"%s\":\t{ ", comment, var->name);
+  p += sprintf(p, "%c  \"%s\":%s{ ", comment, var->name, Lgm_metadata_TABCHAR);
   // go through each attribute and add it to the string
   {
     int i;
@@ -80,7 +71,7 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
       p += sprintf(p, "\"%s\"  ", (var->attributes)[i].value);
       // what ending do I need?
       if (i+1 < var->n_attrs)
-	p += sprintf(p, ",\n%c \t\t", comment );
+	p += sprintf(p, ",\n%c %s%s", comment, Lgm_metadata_TABCHAR, Lgm_metadata_TABCHAR );
       else
 	p += sprintf(p, "}");
       /* if (!last) */
@@ -99,7 +90,7 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
 
 
 void Lgm_metadata_initvar(int start_column, int dimension, char* name, Lgm_metadata_variable *var) {
-  char int_str[80];  // this limits to 999 columms or dimensions
+  char int_str[80]; 
   var->dimension = dimension;
   var->start_column = start_column;
   var->name = name;
