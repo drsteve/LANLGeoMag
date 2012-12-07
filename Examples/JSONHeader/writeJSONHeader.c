@@ -20,48 +20,32 @@ int main(void) {
 
   double energy[10];
   double counts[10];
-  Lgm_metadata_variable energy_var;
-  Lgm_metadata_variable counts_var;
-  char* h_energy; 
-  char* h_counts;
+  Lgm_metadata_variable energy_meta;
+  Lgm_metadata_variable counts_meta;
+  char* json_header; 
 
   // populate the energy and counts
   Lgm_LinSpace(1, 100, 10, energy);
   Lgm_LogSpace(100, 1000, 10, counts);
 
-  Lgm_metadata_initvar(0, 1, "ENERGY", &energy_var);
-  h_energy = Lgm_metadata_toJSON(&energy_var); 
-  printf("\n\n%s\n\n", h_energy);
+  Lgm_metadata_initvar(0, 1, "ENERGY", &energy_meta);
+  Lgm_metadata_addAttr("UNITS", "MeV", &energy_meta);
+  Lgm_metadata_addAttr("LABEL", "Energy [MeV]", &energy_meta);
+  Lgm_metadata_addAttr("COMMENT", "I AM A COMMENT ON THE ENERGY", &energy_meta);
+
+  json_header = Lgm_metadata_JSONheader(1, &energy_meta);
+  
+
+  Lgm_metadata_initvar(0, 1, "COUNTS", &counts_meta);
+  Lgm_metadata_addAttr("LABEL", "Counts", &counts_meta);
+
+  json_header = Lgm_metadata_JSONheader(2, &energy_meta, &counts_meta);
 
 
-  Lgm_metadata_addAttr("UNITS", "MeV", &energy_var);
-  h_energy = Lgm_metadata_toJSON(&energy_var); 
-  printf("\n\n%s\n\n", h_energy);
+  printf("\n\n**************************\n");
+  printf("%s", json_header);
 
-
-
-  Lgm_metadata_addAttr("LABEL", "Energy [MeV]", &energy_var);
-  Lgm_metadata_addAttr("COMMENT", "I AM A COMMENT ON THE ENERGY", &energy_var);
-
-  h_energy = Lgm_metadata_toJSON(&energy_var); 
-  printf("\n\n%s\n\n", h_energy);
-
-  /* printf("%s\n", energy_var.name); */
-  /* printf("%d\n", (int)energy_var.n_attrs); */
-  /* printf("%s\n", energy_var.attributes[0].name); */
-  /* printf("%s\n", energy_var.attributes[1].name); */
-
-
-  Lgm_metadata_initvar(0, 1, "COUNTS", &counts_var);
-  Lgm_metadata_addAttr("LABEL", "Counts", &counts_var);
-  h_counts = Lgm_metadata_toJSON(&counts_var); 
-
-  printf("%s\n", counts_var.name);
-  printf("%d\n", (int)counts_var.n_attrs);
-  printf("%s\n", counts_var.attributes[0].name);
-  printf("\n\n%s\n\n", h_counts);
-
-
+  printf("**************************\n\n");
 
 
   return (0);

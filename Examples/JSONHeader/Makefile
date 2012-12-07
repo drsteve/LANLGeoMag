@@ -5,4 +5,4 @@ writeJSONHeader: writeJSONHeader.c
 
 
 clean:
-	rm *~ *.o writeJSONHeader
+	rm -f *~ *.o writeJSONHeader

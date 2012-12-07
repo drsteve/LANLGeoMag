@@ -1,4 +1,5 @@
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -16,37 +17,81 @@
 /* #                          "VALID_MAX": 366 }, */
 
 
-#define MAXHEADERLEN 10000
+#define MAXHEADERLEN 100000
+#define MAXSINGLEVARHEADER 10000
 
-
-char* Lgm_metadata_toJSON(Lgm_metadata_variable *var) {
-  char Buffer[MAXHEADERLEN]; 
+char *Lgm_metadata_JSONheader(int n_vars, ...) {
+  va_list hv;
+  char Buffer[MAXHEADERLEN];
   char *outstr;
-  int i, j, k;
+  size_t L;
+
+  va_start(hv, n_vars);
+  
+  // loop over n_vars vars making them all into JSON headers
+  {
+    int i;
+    char *p;
+    char *tmp_str;
+    Lgm_metadata_variable* var_tmp;
+
+    // start the block
+    p = Buffer;
+    p += sprintf(p, "%c {\n", '#');
+    
+    for (i=0; i<n_vars; i++) {
+      var_tmp = va_arg(hv, Lgm_metadata_variable* );
+
+      tmp_str = Lgm_metadata_toJSON(var_tmp, i == (n_vars-1), '#');
+      p += sprintf(p, "%s", tmp_str);
+      if (i < n_vars-1)
+	p += sprintf(p, ",\n");
+      else 
+	p += sprintf(p, "\n");
+	
+    }
+    p += sprintf(p, "%c } # ENDJSON\n", '#');
+  }
+  va_end(hv);
+  L = strlen(Buffer);
+  outstr = malloc( (L + 1)*sizeof(char));
+  strncpy(outstr, Buffer, L);
+  outstr[L] = '\0';
+  return (outstr);
+}
+
+char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) {
+  char Buffer[MAXSINGLEVARHEADER]; 
+  char *outstr;
   size_t L;
   char *p;
 
-  //TODO make the # optional
-  // start the block
   p = Buffer;
-  p += sprintf(p, "# {\n");
-  
+
   // add the name and start attrs
-  p += sprintf(p, "#  \"%s\":\t{ ", var->name);
+  p += sprintf(p, "%c  \"%s\":\t{ ", comment, var->name);
   // go through each attribute and add it to the string
-  for (i=0;i<var->n_attrs;i++) {
-    // add the name
-    p += sprintf(p, " \"%s\": ", (var->attributes)[i].name);
-    // add the value
-    p += sprintf(p, "\"%s\"  ", (var->attributes)[i].value);
-    if (i+1 < var->n_attrs)
-      p += sprintf(p, ", \n# \t\t " );
-    else
-      p += sprintf(p, "}, \n");
+  {
+    int i;
+    for (i=0;i<var->n_attrs;i++) {
+      // add the name
+      p += sprintf(p, " \"%s\": ", (var->attributes)[i].name);
+      // add the value
+      p += sprintf(p, "\"%s\"  ", (var->attributes)[i].value);
+      // what ending do I need?
+      if (i+1 < var->n_attrs)
+	p += sprintf(p, ",\n%c \t\t", comment );
+      else
+	p += sprintf(p, "}");
+      /* if (!last) */
+      /* 	p += sprintf(p, ",\n"); */
+      /* else */
+      /* 	p += sprintf(p, "\n"); */
+    }
   }
 
-  outstr = malloc( (strlen(Buffer) + 1)*sizeof(char));
   L = strlen(Buffer);
+  outstr = malloc( (L + 1)*sizeof(char));
   strncpy(outstr, Buffer, L);
   outstr[L] = '\0';
   return (outstr);
@@ -92,12 +137,6 @@ void Lgm_metadata_addAttr(char *name, char *value, Lgm_metadata_variable *var) {
   strcpy(var->attributes[var->n_attrs - 1].name, name);
   var->attributes[var->n_attrs - 1].value = malloc((1+strlen(value))*sizeof(char));
   strcpy(var->attributes[var->n_attrs - 1].value, value);
-
-  printf("%s  n_attrs: %d  %d bytes\n", var->name, var->n_attrs, sizeof(var->attributes));
- printf("  added %s:%s\n", var->attributes[var->n_attrs - 1].name, var->attributes[var->n_attrs - 1].value);
-  
-
-  /* Lgm_metadata_initvar(var->start_column, var->dimension, var->name,  newvar); */
 
  free(old_attr);
 
