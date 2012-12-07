@@ -20,7 +20,7 @@ void Lgm_json_initvar(long start_column, int dumension, char* name, Lgm_json_var
 
 void Lgm_json_addAttr(char *name, char *value, Lgm_json_variable *var);
 
-void Lgm_json_toString(Lgm_json_variable *var, char* stringout);
+char* Lgm_json_toString(Lgm_json_variable *var);
 
 
 #endif

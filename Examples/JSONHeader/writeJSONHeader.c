@@ -25,31 +25,30 @@ int main(void) {
   char* h_energy; 
   char* h_counts;
 
-  // populate the enery and counts
+  // populate the energy and counts
   Lgm_LinSpace(1, 100, 10, energy);
   Lgm_LogSpace(100, 1000, 10, counts);
 
   Lgm_json_initvar(0, 1, "ENERGY", &energy_var);
-  Lgm_json_initvar(0, 1, "COUNTS", &counts_var);
-
   printf("%s\n", energy_var.name);
-  printf("%s\n", counts_var.name);
-
   Lgm_json_addAttr("UNITS", "MeV", &energy_var);
   Lgm_json_addAttr("LABEL", "Energy [MeV]", &energy_var);
-  Lgm_json_addAttr("LABEL", "Counts", &counts_var);
-
   printf("%d\n", (int)energy_var.n_attrs);
   printf("%s\n", energy_var.attributes[0].name);
-  printf("%s\n", energy_var.attributes[0].value);
+  printf("%s\n", energy_var.attributes[1].name);
+  h_energy = Lgm_json_toString(&energy_var); 
+  printf("\n\n%s\n\n", h_energy);
 
 
-  /* Lgm_json_toString(energy_var, h_energy); */
-  /* Lgm_json_toString(counts_var, h_counts); */
+  Lgm_json_initvar(0, 1, "COUNTS", &counts_var);
+  printf("%s\n", counts_var.name);
+  Lgm_json_addAttr("LABEL", "Counts", &counts_var);
+  printf("%d\n", (int)counts_var.n_attrs);
+  printf("%s\n", counts_var.attributes[0].name);
+  h_counts = Lgm_json_toString(&counts_var); 
+  printf("\n\n%s\n\n", h_counts);
 
 
-  /* printf("%s\n\n", h_energy); */
-  /* printf("%s\n\n", h_counts); */
 
 
   return (0);
