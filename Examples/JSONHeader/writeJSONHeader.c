@@ -16,15 +16,19 @@ int main(void) {
   char* json_header; 
 
   // create a 1 dimensional variable, with data, a name, and the variable
-  Lgm_metadata_initvar(1, // Dimension
-		       1, // has data (bool)
-		       "ENERGY", // Name
-		       &energy_meta // the variable to store it
+  Lgm_metadata_initvar(&energy_meta, // the variable to store it
+		       1,            // Dimension
+		       1,            // has data (bool)
+		       "ENERGY"      // Name 
 		       );
   // add an attribute to the variable (all arguments must be strings)
-  Lgm_metadata_addAttr("UNITS", "MeV", &energy_meta);
-  Lgm_metadata_addAttr("LABEL", "Energy [MeV]", &energy_meta);
-  Lgm_metadata_addAttr("COMMENT", "I AM A COMMENT ON THE ENERGY", &energy_meta);
+  Lgm_metadata_addStringAttr(&energy_meta, // the variable to add it to
+			     "UNITS",      // name
+			     "MeV",        // value
+			     0             // boolean it is not an array 
+			     );
+  Lgm_metadata_addStringAttr(&energy_meta, "LABEL", "Energy [MeV]",0);
+  Lgm_metadata_addStringAttr(&energy_meta, "COMMENT", "I AM A COMMENT ON THE ENERGY", 0);
 
   // create the JSON header
   //   this is a variadic function, number of vars and all the vars
@@ -32,10 +36,10 @@ int main(void) {
   printf("\n\n**************************\n");
   printf("%s", json_header);
 
-  printf("**************************\n\n");  
+  printf("**************************\n\n");
 
-  Lgm_metadata_initvar(1, 1, "COUNTS", &counts_meta);
-  Lgm_metadata_addAttr("LABEL", "Counts", &counts_meta);
+  Lgm_metadata_initvar(&counts_meta, 1, 1, "COUNTS");
+  Lgm_metadata_addStringAttr(&counts_meta, "LABEL", "Counts", 0);
 
   // make a string with both vars in it, order is specified in call
   json_header = Lgm_metadata_JSONheader(2, &energy_meta, &counts_meta);
@@ -47,9 +51,9 @@ int main(void) {
   printf("**************************\n\n");
 
   // create a variable with no data
-  Lgm_metadata_initvar(1, 0, "INSTITUTION", &meta_meta);
-  Lgm_metadata_addAttr("NAME", "Los Alamos National Laboratory", &meta_meta);
-  Lgm_metadata_addAttr("GROUP", "ISR-1 Space Science and Applications", &meta_meta);
+  Lgm_metadata_initvar(&meta_meta, 1, 0, "INSTITUTION");
+  Lgm_metadata_addStringAttr(&meta_meta, "NAME", "Los Alamos National Laboratory", 0);
+  Lgm_metadata_addStringAttr(&meta_meta, "GROUP", "ISR-1 Space Science and Applications", 0);
 
   // order is again set by the order in this call
   json_header = Lgm_metadata_JSONheader(3, &meta_meta, &energy_meta, &counts_meta);
