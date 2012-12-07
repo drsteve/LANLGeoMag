@@ -34,7 +34,10 @@ int main(void) {
   Lgm_metadata_addAttr("COMMENT", "I AM A COMMENT ON THE ENERGY", &energy_meta);
 
   json_header = Lgm_metadata_JSONheader(1, &energy_meta);
-  
+  printf("\n\n**************************\n");
+  printf("%s", json_header);
+
+  printf("**************************\n\n");  
 
   Lgm_metadata_initvar(0, 1, "COUNTS", &counts_meta);
   Lgm_metadata_addAttr("LABEL", "Counts", &counts_meta);
