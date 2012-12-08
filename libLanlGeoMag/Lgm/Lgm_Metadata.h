@@ -11,6 +11,7 @@
 
 typedef struct Lgm_metadata_attr {
   int array;  // boolean for if this is an array of metadata
+  int string; // boolean for if this is a string attr
   char *name;
   char *value;
 } Lgm_metadata_attr;
@@ -43,13 +44,15 @@ char *Lgm_metadata_JSONheader(int n_vars, ...);
 
 char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment);
 
-char *Lgm_metadata_stringArraytoString(int len, char** instring);
+char *Lgm_metadata_stringArrayToString(int len, char** instring);
 
 char *Lgm_metadata_intArrayToString(int len, int* invals);
 
-char *Lgm_metadata_doubleArrayToString(int len, int* invals);
+char *Lgm_metadata_doubleArrayToString(int len, double* invals);
 
 int Lgm_metadata_addIntAttr(Lgm_metadata_variable *var, char *name, int len, int *invals);
+
+int Lgm_metadata_addDoubleAttr(Lgm_metadata_variable *var, char *name, int len, double *invals);
 
 int Lgm_metadata_addStringAttrArray(Lgm_metadata_variable *var, char *name, int len, char **invals );
 

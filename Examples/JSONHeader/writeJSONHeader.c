@@ -63,6 +63,28 @@ int main(void) {
 
   printf("**************************\n\n");
 
+  Lgm_metadata_addStringAttrArray2(&meta_meta, "SPACECRAFT", 2, "RBSPA", "RBSPB");
+
+  json_header = Lgm_metadata_JSONheader(3, &meta_meta, &energy_meta, &counts_meta);
+  printf("\n\n**************************\n");
+  printf("%s", json_header);
+
+  printf("**************************\n\n");
+
+  {
+    int invals[] = {1,2,3};
+    double invals2[] = {1.1, 2.2, 3.3};
+    Lgm_metadata_addIntAttr( &meta_meta, "THREE_INTS", 3, invals);
+    Lgm_metadata_addDoubleAttr( &meta_meta, "THREE_DOUBLES", 3, invals2);
+  }
+
+  json_header = Lgm_metadata_JSONheader(3, &meta_meta, &energy_meta, &counts_meta);
+  printf("\n\n**************************\n");
+  printf("%s", json_header);
+
+  printf("**************************\n\n");
+
+
 
   return (0);
 }

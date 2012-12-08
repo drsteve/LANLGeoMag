@@ -84,18 +84,23 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
   p += sprintf(p, "%c  \"%s\":%s{ ", comment, var->name, Lgm_metadata_TABCHAR);
   // go through each attribute and add it to the string
   {
-    char sep;
     int i;
+    double tmp;
     for (i=0;i<var->n_attrs;i++) {
-      // what sep are we using " or nothing
-      if ((var->attributes)[i].value[0] == '[') // from Lgm_metadata_addIntAttr()
-	sep = ' ';
-      else
-	sep = '"';
       // add the name
-      p += sprintf(p, " %c%s%c: ", sep, (var->attributes)[i].name, sep);
+      p += sprintf(p, " \"%s\": ", (var->attributes)[i].name);
+      // if an array need a [
+      if ((var->attributes)[i].array) 
+	p += sprintf(p, "[ ");     
       // add the value
-      p += sprintf(p, "%c%s%c  ", sep, (var->attributes)[i].value, sep);
+      if (sscanf((var->attributes)[i].value, "%lf", &tmp)) // returns 1 if the string can be a double
+	p += sprintf(p, "%s  ", (var->attributes)[i].value);
+      else
+	p += sprintf(p, "\"%s\"  ", (var->attributes)[i].value);
+      // if an array need a ]
+      if ((var->attributes)[i].array) 
+	p += sprintf(p, "]");     
+
       // what ending do I need?
       if (i+1 < var->n_attrs)
 	p += sprintf(p, ",\n%c %s%s", comment, Lgm_metadata_TABCHAR, Lgm_metadata_TABCHAR );
@@ -113,18 +118,20 @@ char* Lgm_metadata_toJSON(Lgm_metadata_variable *var, short last, char comment) 
 
 /******************************************************************************/
 
-char *Lgm_metadata_stringArraytoString(int len, char** instring) {
+char *Lgm_metadata_stringArrayToString(int len, char** instring) {
   char Buffer[Lgm_metadata_MAXHEADERLEN];
   char *outstr;
   char *p;
   size_t L;
   int i;
 
+  // TODO in here there is no " at the start or stop of an array, feels odd
+ 
   p = Buffer;
   for (i=0; i<len-1; i++){
-    p += sprintf(p, "%s, ", instring[i]);
+    p += sprintf(p, "%s\", ", instring[i]);
   }
-  p += sprintf(p, "%s, ", instring[i]);  // i should have the right value in it
+  p += sprintf(p, "\"%s", instring[i]);  // i should have the right value in it
 
   L = strlen(Buffer);
   outstr = malloc( (L + 1)*sizeof(char));
@@ -146,18 +153,18 @@ char *Lgm_metadata_intArrayToString(int len, int* invals) {
   for (i=0; i<len-1; i++){
     p += sprintf(p, "%d, ", invals[i]);
   }
-  p += sprintf(p, "%d, ", invals[i]);  // i should have the right value in it
+  p += sprintf(p, "%d ", invals[i]);  // i should have the right value in it
 
   L = strlen(Buffer);
   outstr = malloc( (L + 1)*sizeof(char));
   strncpy(outstr, Buffer, L);
-  outstr[L] = '\0';                                                                                     
+  outstr[L] = '\0';  
   return (outstr);
 }
 
 /******************************************************************************/
 
-char *Lgm_metadata_doubleArrayToString(int len, int* invals) {
+char *Lgm_metadata_doubleArrayToString(int len, double* invals) {
   char Buffer[Lgm_metadata_MAXHEADERLEN];
   char *outstr;
   char *p;
@@ -168,7 +175,7 @@ char *Lgm_metadata_doubleArrayToString(int len, int* invals) {
   for (i=0; i<len-1; i++){
     p += sprintf(p, "%lf, ", invals[i]);
   }
-  p += sprintf(p, "%lf, ", invals[i]);  // i should have the right value in it
+  p += sprintf(p, "%lf ", invals[i]);  // i should have the right value in it
 
   L = strlen(Buffer);
   outstr = malloc( (L + 1)*sizeof(char));
@@ -187,20 +194,34 @@ int Lgm_metadata_addIntAttr(Lgm_metadata_variable *var, char *name, int len, int
 
   outstr = Lgm_metadata_intArrayToString(len,invals);
 
-  return (Lgm_metadata_addStringAttr(var, name, outstr, len) );
+  return (Lgm_metadata_addStringAttr(var, name, outstr, len>1) );
 }
 
 /******************************************************************************/
 
-int Lgm_metadata_addStringAttrArray(Lgm_metadata_variable *var, char *name, int len, char **invals ) {
+int Lgm_metadata_addDoubleAttr(Lgm_metadata_variable *var, char *name, int len, double *invals) {
   char *outstr;
   // make sure the name is not already there, if it is ignore it
   if (Lgm_metadata_AttrInVar(var, name))
     return (Lgm_metadata_FAILURE); // it is there we are done
 
-  outstr = Lgm_metadata_stringArrayToString(len, invals);
+  outstr = Lgm_metadata_doubleArrayToString(len,invals);
 
-  return (Lgm_metadata_addStringAttr(var, name, outstr, len) );
+  return (Lgm_metadata_addStringAttr(var, name, outstr, len>1) );
+}
+
+
+/******************************************************************************/
+
+int Lgm_metadata_addStringAttrArray(Lgm_metadata_variable *var, char *name, int len, char **invals ) {
+  char *outstr;
+
+  // make sure the name is not already there, if it is ignore it
+  if (Lgm_metadata_AttrInVar(var, name))
+    return (Lgm_metadata_FAILURE); // it is there we are done
+
+  outstr = Lgm_metadata_stringArrayToString(len, invals);
+  return (Lgm_metadata_addStringAttr(var, name, outstr, len>1) );
 }
 
 /******************************************************************************/
@@ -215,6 +236,7 @@ int Lgm_metadata_addStringAttrArray2(Lgm_metadata_variable *var, char *name, int
     return (Lgm_metadata_FAILURE); // it is there we are done
 
   va_start(hv, len);
+
   LGM_ARRAY_2D( outstrarr,len, 80, char ); // this 80 is a limitiation here!!!
   for (i=0;i<len;i++) {
     outstrarr[i] = va_arg(hv, char*);
@@ -237,11 +259,8 @@ int Lgm_metadata_addStringAttr(Lgm_metadata_variable *var, char *name, char * va
 
   atr.name = name;
   atr.value = value;
-  if (array)
-    atr.array = 1;
-  else
-    atr.array = 0;
-
+  atr.array = array;
+ 
   old_attr = var->attributes;
 
   var->n_attrs++;
@@ -252,12 +271,14 @@ int Lgm_metadata_addStringAttr(Lgm_metadata_variable *var, char *name, char * va
     for (i=0; i<var->n_attrs-1;i++) { // the -1 is since we have a ++ above
       var->attributes[i].name = old_attr[i].name;
       var->attributes[i].value = old_attr[i].value;
+      var->attributes[i].array = old_attr[i].array;
     }
   }
   var->attributes[var->n_attrs - 1].name = malloc((1+strlen(name))*sizeof(char));
   strcpy(var->attributes[var->n_attrs - 1].name, name);
   var->attributes[var->n_attrs - 1].value = malloc((1+strlen(value))*sizeof(char));
   strcpy(var->attributes[var->n_attrs - 1].value, value);
+  var->attributes[var->n_attrs - 1].array = array;
 
   /* Lgm_metadata_initvar(var->start_column, var->dimension, var->name,  newvar); */
  free(old_attr);
