@@ -51,6 +51,8 @@ char *Lgm_metadata_JSONheader(int n_vars, ...) {
 	Lgm_metadata_addIntAttr(var_tmp, "START_COLUMN", 1, &current_col); // the & since it wants a pointer
 	current_col += var_tmp->dimension;
       }
+      Lgm_metadata_addStringAttr(var_tmp, "NAME", var_tmp->name, 0); // the & since it wants a pointer
+
 
       tmp_str = Lgm_metadata_toJSON(var_tmp, i == (n_vars-1), '#');
       p += sprintf(p, "%s", tmp_str);
