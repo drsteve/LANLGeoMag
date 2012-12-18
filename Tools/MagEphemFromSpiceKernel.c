@@ -563,7 +563,7 @@ int main( int argc, char *argv[] ){
      * Define pitch angles to use.
      */
     nAlpha = arguments.nPA;
-    Inc    = (arguments.EndPA - arguments.StartPA)/(double)(nAlpha-1);
+    Inc    = ( nAlpha > 1 ) ? (arguments.EndPA - arguments.StartPA)/(double)(nAlpha-1) : 0.0;
     for (i=0; i<nAlpha; i++ ) Alpha[i] = arguments.StartPA + i*Inc;
 
 
