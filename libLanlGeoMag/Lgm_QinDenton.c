@@ -384,8 +384,32 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
     if (q->nPnts < 2) {
 
         printf("Not enough QinDenton values to interpolate\n");
-        p->Dst = -5.0;
-        p->fKp = 2.0;
+        p->Dst   =   -5.0;  // nT
+        p->fKp   =    2.0;  // dimensionless
+        p->V_SW  =  400.0;  // km/s
+        p->Den_P =    5.0;  // #/cm^-3
+        p->Pdyn  =    p->Den_P * 1e6 * LGM_PROTON_MASS * p->V_SW*p->V_SW*1e6 * 1e9;   // nPa
+        p->ByIMF =    5.0; // nT 
+        p->BzIMF =   -5.0; // nT 
+        p->G1    =    0.0; // units? what's a good nominal value here?
+        p->G2    =    0.0; // units? what's a good nominal value here?
+        p->G3    =    0.0; // units? what's a good nominal value here?
+        p->akp3  =    2.0; // unitless
+        p->W1    =    0.0; // units? what's a good nominal value here?
+        p->W2    =    0.0; // units? what's a good nominal value here?
+        p->W3    =    0.0; // units? what's a good nominal value here?
+        p->W4    =    0.0; // units? what's a good nominal value here?
+        p->W5    =    0.0; // units? what's a good nominal value here?
+        p->W6    =    0.0; // units? what's a good nominal value here?
+        p->Bz1   =    0.0; // nT
+        p->Bz2   =    0.0; // nT
+        p->Bz3   =    0.0; // nT
+        p->Bz4   =    0.0; // nT
+        p->Bz5   =    0.0; // nT
+        p->Bz6   =    0.0; // nT
+
+
+        
 
     } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
 
