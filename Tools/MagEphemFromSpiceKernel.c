@@ -680,7 +680,7 @@ int main( int argc, char *argv[] ){
     } else if ( !strcmp( ExtModel, "IGRF" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
     } else if ( !strcmp( ExtModel, "OP77Q" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_OP77;
         Kp = 2;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89Q" ) ){

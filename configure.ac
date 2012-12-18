@@ -118,6 +118,17 @@ fi
 AC_SUBST(cspice_CFLAGS)
 AC_SUBST(cspice_LIBS)
 
+if test "x$enable_tools" == "xyes"; then
+   OLD_CPPFLAGS=${CPPFLAGS}
+   CPPFLAGS=${CPPFLAGS}\ ${cspice_CFLAGS}
+   OLD_LIBS=${LIBS}
+   LIBS=${LIBS}\ ${cspice_LIBS}
+   AC_CHECK_HEADER([SpiceUsr.h], , [AC_MSG_FAILURE([SpiceUsr.h not found or not usable.])])
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [return 0;])], , [AC_MSG_FAILURE([cspice.a not found or not usable.])])
+   CPPFLAGS=${OLD_CPPFLAGS}
+   LIBS=${OLD_LIBS}
+fi
+
 # Allow disabling of Qin-Denton files
 AC_ARG_ENABLE([indices],
   [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data (default: enable)])],

@@ -126,18 +126,26 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     P = *u;
     R = Lgm_Magnitude( &P );
     F = R - R0;
+//printf("R, R0, F = %g %g %g    P = %g %g %g  ss, R, F = %g %g %g\n", R, R0, F, P.x, P.y, P.z, ss, R, F);
     if (F < 0.0 ){
         // we are already below target height.
         // Trace until we are not.
         Htry  = 0.1;
+Htry  = ( fabs(F) < 0.1 ) ? 0.5*fabs(F) : 0.1;
+        Count = 0;
         while ( !done ) {
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
-            if ( F > 0.0 ){
+//printf("P = %g %g %g  ss, R, F = %g %g %g\n", P.x, P.y, P.z, ss, R, F);
+            if ( Count > 100 ) {
+                printf("In File %s, Line %d: Too many iterations to get above target height -- bailing.\n", __FILE__, __LINE__); 
+                return(-1);
+            } else if ( F > 0.0 ){
                 done = TRUE;
             }
+            ++Count;
         }
 
         /*
