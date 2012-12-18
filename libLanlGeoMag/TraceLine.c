@@ -126,23 +126,40 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     P = *u;
     R = Lgm_Magnitude( &P );
     F = R - R0;
-//printf("R, R0, F = %g %g %g    P = %g %g %g  ss, R, F = %g %g %g\n", R, R0, F, P.x, P.y, P.z, ss, R, F);
     if (F < 0.0 ){
-        // we are already below target height.
-        // Trace until we are not.
-        Htry  = 0.1;
-Htry  = ( fabs(F) < 0.1 ) ? 0.5*fabs(F) : 0.1;
+        /*
+         * We are already below target height.
+         * Trace until we are not. But dont use a stepsize so large that we
+         * pass right through and drop below on the other side.  This can still
+         * happen if the part of the FL extending above the target sphere's
+         * radius is very small. In that case, we'll likely bail due to 
+         */
+
+        Htry  = ( fabs(F) < 0.1 ) ? 0.5*fabs(F) : 0.1;
         Count = 0;
         while ( !done ) {
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
             ss += Hdid;  // Note that we should trap conditions where Hdid != Htry since this will be a problem...
             R = Lgm_Magnitude( &P );
             F = R - R0;
-//printf("P = %g %g %g  ss, R, F = %g %g %g\n", P.x, P.y, P.z, ss, R, F);
-            if ( Count > 100 ) {
+            if ( R < WGS84_B/WGS84_A ){
+                /*
+                 *  Guard against tracing into the Earth. Can happen if we
+                 *  overshoot the target radius.
+                 */
+                printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height  -- bailing.\n", __FILE__, __LINE__); 
+                return(-1);
+            } else if ( Count > 100 ) {
+                /*
+                 *  Guard against too many iterations.
+                 */
                 printf("In File %s, Line %d: Too many iterations to get above target height -- bailing.\n", __FILE__, __LINE__); 
                 return(-1);
             } else if ( F > 0.0 ){
+                /*
+                 *  We have risen above the target height. We now have one side
+                 *  of our bracket. (The F>0 side).
+                 */
                 done = TRUE;
             }
             ++Count;
@@ -196,9 +213,7 @@ Htry  = ( fabs(F) < 0.1 ) ? 0.5*fabs(F) : 0.1;
          * trying until we get there.
          */
         htry = Htry; Hdid = 0.0; Count = 0;
-//printf("n= %d P = %g %g %g  htry = %g\n", n, P.x, P.y, P.z, htry);
         while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100) ) {
-//printf("htry = %g\n", htry);
             if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 2\n"); return(-1);}
             Hdid += hdid;
             htry = Htry - Hdid;
@@ -207,7 +222,7 @@ Htry  = ( fabs(F) < 0.1 ) ? 0.5*fabs(F) : 0.1;
 
 
 
-if ( fabs(Htry-Hdid)>1e-4) printf("Htry, Hdid = %g %g    htry = %g   Count = %d\n", Htry, Hdid, htry, Count);
+        if ( fabs(Htry-Hdid)>1e-4) printf("Htry, Hdid = %g %g    htry = %g   Count = %d\n", Htry, Hdid, htry, Count);
 
 
         R = Lgm_Magnitude( &P );
