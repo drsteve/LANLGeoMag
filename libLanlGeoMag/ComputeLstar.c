@@ -947,11 +947,20 @@ LstarInfo->mInfo->Hmax = 0.1;
 if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-11, LstarInfo->mInfo ) ){ return(-4); }
 LstarInfo->Spherical_Footprint_Pn[k] = w;
 LstarInfo->mInfo->Hmax = 0.05;
+//Lgm_Vector puke;
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &puke, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("LstarInfo->mInfo->Pm_North (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
+//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_South, &puke, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("LstarInfo->mInfo->Pm_South (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
+//Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Pn[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("LstarInfo->Spherical_Footprint_Pn[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
 Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
 if (LstarInfo->VerbosityLevel > 1) {
     printf("\t\t%sTracing Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
 }
 LstarInfo->Spherical_Footprint_Ps[k] = v2;
+//Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
+//printf("LstarInfo->Spherical_Footprint_Ps[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
 Type = ClassifyFL( k, LstarInfo );
 if (LstarInfo->VerbosityLevel > 1) {
     printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
