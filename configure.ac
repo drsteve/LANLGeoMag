@@ -124,7 +124,8 @@ if test "x$enable_tools" == "xyes"; then
    OLD_LIBS=${LIBS}
    LIBS=${LIBS}\ ${cspice_LIBS}
    AC_CHECK_HEADER([SpiceUsr.h], , [AC_MSG_FAILURE([SpiceUsr.h not found or not usable.])])
-   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [return 0;])], , [AC_MSG_FAILURE([cspice.a not found or not usable.])])
+   AC_MSG_CHECKING([for cspice.a])
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [return 0;])], [AC_MSG_RESULT([found])], [AC_MSG_FAILURE([cspice.a not found or not usable.])])
    CPPFLAGS=${OLD_CPPFLAGS}
    LIBS=${OLD_LIBS}
 fi
