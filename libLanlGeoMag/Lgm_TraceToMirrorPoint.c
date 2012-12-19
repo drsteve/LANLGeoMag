@@ -23,7 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Lgm/Lgm_MagModelInfo.h"
+#if USE_OPENMP
 #include <omp.h>
+#endif
 
 #define LC_TOL  0.99    // Allow height to be as low as .99*Lgm_LossConeHeight, before we call it "in the loss cone"
 

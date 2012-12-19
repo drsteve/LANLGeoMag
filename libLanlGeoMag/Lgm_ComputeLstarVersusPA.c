@@ -7,7 +7,9 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 #include "Lgm/Lgm_MagEphemInfo.h"
+#if USE_OPENMP
 #include <omp.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

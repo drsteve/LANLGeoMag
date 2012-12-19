@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#if USE_OPENMP
 #include <omp.h>
+#endif
 #include "Lgm/Lgm_FluxToPsd.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
