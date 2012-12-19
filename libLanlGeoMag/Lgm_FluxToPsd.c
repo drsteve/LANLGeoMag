@@ -541,8 +541,10 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
         { // start parallel
 
+#if USE_OPENMP
 //            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
 //            #pragma omp for schedule(dynamic, 1)
+#endif
             for ( k=0; k<nK; k++ ){
 
                 mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
@@ -1075,8 +1077,10 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
     Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
     {   // start parallel
+#if USE_OPENMP
         //#pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
         //#pragma omp for schedule(dynamic, 1)
+#endif
         for ( k=0; k<nA; k++ ){
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo

@@ -242,9 +242,34 @@ AC_CHECK_LIB([gsl], [gsl_spline_init], ,
 
 # Check for openmp support
 dnl note the linker does not need an explicit -lgomp, -fopenmp handles it
-m4_ifdef([AC_OPENMP], [AC_OPENMP], [OPENMP_CFLAGS="-fopenmp"])
-CFLAGS=${CFLAGS}\ ${OPENMP_CFLAGS}
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([OpenMP support not found])])
+m4_ifdef([AC_OPENMP], [
+dnl use the nice macro if we have it
+AC_OPENMP
+AS_IF([test "x$ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp" == "xunsupported"], [
+    USE_OPENMP=0], [
+    USE_OPENMP=1])
+], [
+dnl don't have the nice macro, just try one quick flag...
+AC_ARG_ENABLE([openmp],
+    [AS_HELP_STRING([--disable-openmp], [do not use OpenMP])])
+OLD_CFLAGS=${CFLAGS}
+CFLAGS=${CFLAGS}\ -fopenmp
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], [
+USE_OPENMP=1
+OPENMP_CFLAGS="-fopenmp"
+], [
+USE_OPENMP=0])
+CFLAGS=${OLD_CFLAGS}])
+# if we don't have openmp support, check if we asked for it...
+if test $USE_OPENMP -eq 0; then
+    if test "x$enable_openmp" = "xyes"; then
+        AC_MSG_FAILURE([OpenMP support not found.])
+    fi
+    if test "x$enable_openmp" != "xno"; then
+        AC_MSG_WARN([OpenMP support not found; building without OpenMP])
+    fi
+fi
+AC_SUBST([USE_OPENMP])
 
 # check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])

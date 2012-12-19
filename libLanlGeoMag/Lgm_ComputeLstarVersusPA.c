@@ -147,8 +147,10 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
              *  will use 8 threads to do the loop in parallel. Be very careful what gets
              *  set private here -- the threads must not interfere with each other.
              */
+#if USE_OPENMP
             #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk,PreStr,PostStr)
             #pragma omp for schedule(dynamic, 1)
+#endif
             for ( i=0; i<MagEphemInfo->nAlpha; i++ ){  // LOOP OVER PITCH ANGLES
 
                 /*
