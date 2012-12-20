@@ -269,7 +269,9 @@ if test $USE_OPENMP -eq 0; then
         AC_MSG_WARN([OpenMP support not found; building without OpenMP])
     fi
 fi
-AC_SUBST([USE_OPENMP])
+AC_SUBST([OPENMP_CFLAGS])
+AC_DEFINE_UNQUOTED([USE_OPENMP], [$USE_OPENMP], [
+Enable multithreading/processing w/OpenMP])
 
 # check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])

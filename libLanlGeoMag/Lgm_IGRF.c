@@ -37,6 +37,9 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_IGRF.h"
 #define TINY 1.0e-25
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #if USE_OPENMP
 #include <omp.h>
 #endif

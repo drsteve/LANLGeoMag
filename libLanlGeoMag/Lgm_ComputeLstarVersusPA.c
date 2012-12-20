@@ -7,6 +7,9 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 #include "Lgm/Lgm_MagEphemInfo.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #if USE_OPENMP
 #include <omp.h>
 #endif
