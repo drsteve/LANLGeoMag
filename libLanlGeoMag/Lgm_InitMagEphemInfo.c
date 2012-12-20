@@ -629,6 +629,8 @@ void Lgm_FreeMagEphemData( Lgm_MagEphemData *MagEphemData ) {
     LGM_ARRAY_2D_FREE( MagEphemData->H5_I );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_K );
 
+    free( MagEphemData );
+
     return;
 
 }

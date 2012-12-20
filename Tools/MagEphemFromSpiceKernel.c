@@ -937,6 +937,7 @@ if (file >= 0 ){
         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
         printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
     }
+    LGM_ARRAY_2D_FREE( HdfFileTimes );
 }
 }
 
@@ -1324,6 +1325,9 @@ printf("sclkdp = %lf\n", sclkdp);
                         MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
+//Rgsm.x = -2.91482;
+//Rgsm.y =  9.26544;
+//Rgsm.z =  0.279211;
 
                         sce2s_c( BODY,    et, 30, sclkch );
 
@@ -1753,7 +1757,6 @@ printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mI
     } // end JD loop
 
 
-    //Lgm_DateTime_Destroy( myUTC );
     free( ShellFile );
     free( OutFile );
     free( HdfOutFile );
