@@ -16,7 +16,9 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_SphHarm.h"
 #define TINY 1.0e-25
+#if USE_OPENMP
 #include <omp.h>
+#endif
 
 double Lgm_fac1( int n ){                                                                                                                                                                            
     int     i;                                                                                                                                                                                 
