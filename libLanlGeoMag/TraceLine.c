@@ -489,8 +489,8 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
     ++n;
 
-    if (n > LGM_MAX_INTERP_PNTS){
-	    printf("Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", LGM_MAX_INTERP_PNTS);
+    if (n > LGM_MAX_INTERP_PNTS-1){
+	    printf("Warning: n > LGM_MAX_INTERP_PNTS-1 (%d)\n", LGM_MAX_INTERP_PNTS-1);
     }
 
 
@@ -516,44 +516,83 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
         while ( (fabs(htry) > 0.5*Info->Lgm_TraceLine_Tol) && (Count<100)) {
             //printf( "P = %g %g %g\n", P.x, P.y, P.z);
             //printf( "Pa = %g %g %g\n", Pa.x, Pa.y, Pa.z);
-            if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 4\n");return(-1);}
+            if ( Lgm_MagStep( &P, &u_scale, htry, &hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { 
+                printf("In File %s, Line %d: Problem in call to Lgm_MagStep() (R=%g)  -- bailing.\n", __FILE__, __LINE__, Lgm_Magnitude( &P ) ); 
+                printf("BAILING 4\n");
+                return(-1);
+            }
+
+            R = Lgm_Magnitude( &P );
+            if ( R < WGS84_B/WGS84_A ){
+                /*
+                 *  Guard against tracing into the Earth. Can happen if we
+                 *  overshoot the target radius.
+                 */
+                printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+                return(-1);
+            } else if ( Count >= 100 ) {
+                /*
+                 *  For some reason, we cannot make the step work in 100 tries.
+                 */
+                printf("In File %s, Line %d: Too many interations to achieve step (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+                return(-1);
+            }
+
             htry = Htry - hdid;
             Hdid += hdid;
             ++Count;
         }
 
 
+
         R = Lgm_Magnitude( &P );
 	    F =  R - R0;
-//printf( "P = %g %g %g    R, R0, F, Htry  = %g %g %g %g    ss, MinDist = %g %g\n", P.x, P.y, P.z, R, R0, F, Htry, ss, MinDist);
+        if ( R < WGS84_B/WGS84_A ){
 
-	    if ( m > 5000 ) {
+            /*
+             *  Guard against tracing into the Earth. Can happen if we
+             *  overshoot the target radius.
+             */
+            printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+            return(-1);
+
+	    } else if ( m > 5000 ) {
+
             // Too many times through the loop!!!!
 	        v->x = v->y = v->z = 0.0;
             return(0);
+
         } else if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
+
 	        || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
 	        /*
 	         *  Open FL!
 	         */
 	        v->x = v->y = v->z = 0.0;
 	        return(0);
-//      } else if ( (ss > 0.0) && ((R-1.0) < 1e-8) && (F < 0.0) ) {
+
         } else if ( (ss > 0.0) && ((R-1.0) < Info->Lgm_TraceLine_Tol) ) {
-            // We have detected a change in sign for F, and we have gone some distance already, and we seem to be very close to surface of the Earth...
-            // But we havent yet gone Min dist.
-            // Something may have gone wrong?
+
+            /*
+             *  We have detected a change in sign for F, and we have gone some
+             *  distance already, and we seem to be very close to surface of
+             *  the Earth...  But we havent yet gone Min dist.  Something may
+             *  have gone wrong?
+             */
             done = TRUE;
             Pc = P;
             Rc = R;
             Fc = F;
             Sc = Sa + Hdid;
+
 	    } else if ( (ss < MinDist) || ( F > 0.0 ) ) { // keep on stepping
+
             Pa = P;
             Fa = F;
             Ra = R;
             Sa = 0.0;
             ss += Hdid;
+
             /*
              * Compute field strength and save the results in the array.
              */
@@ -569,17 +608,22 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
                 Info->BminusBcdip[n] = Info->Bmag[n] - Lgm_Magnitude( &Bcdip );     // save field strength (and increment counter)
                 ++n;
             }
+
         } else {
+
             done = TRUE;
             Pc = P;
             Rc = R;
             Fc = F;
             Sc = Sa + Hdid;
+
         }
 
-        if ( n > LGM_MAX_INTERP_PNTS-10 ) {
+        if ( n > LGM_MAX_INTERP_PNTS-1 ) {
+
             printf("Lgm_TraceLine2(): Trying to add too many points to interpolation arrays - bailing.\n");
             return( -1 );
+
         }
 
 	    /*
@@ -950,7 +994,8 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
      */
     if ( (s < Info->s[0]) || (s > Info->s[Info->nPnts-1]) ) {
         printf("BofS: ( Line %d in file %s ). Trying to evaluate BofS( s, Info ) for an s that is outside of the bounds of the interpolating arrays.\n\tInfo->nPnts = %d, Info->s[0] = %.8g, Info->s[%d] = %.8g, s = %.8g\n", __LINE__, __FILE__, Info->nPnts, Info->s[0], Info->nPnts-1, Info->s[Info->nPnts-1], s);
-        exit(-1);
+raise(6);
+//        exit(-1);
     }
 
 
@@ -1246,6 +1291,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
 
         //if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
+        R = Lgm_Magnitude( &P );
         ss += Hdid;  
 
         /*
@@ -1264,7 +1310,22 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
             ++n;
         }
 
-        if ( (ss >= S) || (n > (LGM_MAX_INTERP_PNTS-10) ) ) done = TRUE;
+        if ( R < WGS84_B/WGS84_A ){
+            /*
+             *  Guard against tracing into the Earth. Can happen if we
+             *  overshoot the target radius.
+             */
+            printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+            return(-1);
+        } else if ( n > LGM_MAX_INTERP_PNTS-1  ) {
+            /*
+             *  Guard against cramming too many points into interpolation arrays
+             */
+	        printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
+            return(-1);
+        } else if ( ss >= S ) {
+            done = TRUE;
+        }
 
     }
     
