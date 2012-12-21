@@ -29,6 +29,9 @@
 #define  MAXIV      1000
 #define  WINSIZ     ( 2 * MAXIV )
 
+#define T89Q_KP  2.0
+#define OP77Q_KP 2.0
+
 /*
  * Stuff for inbound/outbound determination
  */
@@ -459,7 +462,7 @@ int main( int argc, char *argv[] ){
     herr_t          status;
     hsize_t         Dims[4], Offset[4], SlabSize[4];
     int             iT;
-    double          Kp, T89Q_Kp;
+    double          ForceKp;
     double          GeodLat, GeodLong, GeodHeight, MLAT, MLON, MLT;
     Lgm_MagEphemData *med;
 
@@ -578,7 +581,7 @@ int main( int argc, char *argv[] ){
      */
     FootpointHeight = arguments.FootPointHeight;
     Quality         = arguments.Quality;
-    Kp              = arguments.Kp;
+    ForceKp         = arguments.Kp;
     Verbosity       = arguments.Verbosity;
     Colorize        = arguments.Colorize;
     Force           = arguments.Force;
@@ -618,8 +621,8 @@ int main( int argc, char *argv[] ){
         printf("\n");
         printf( "\t                Internal Model: %s\n", IntModel );
         printf( "\t                External Model: %s\n", ExtModel );
-        if ( Kp >= 0.0 ) {
-            printf( "\t              Forcing Kp to be: %g\n", Kp );
+        if ( ForceKp >= 0.0 ) {
+            printf( "\t              Forcing Kp to be: %g\n", ForceKp );
         }
         printf( "\t          FootpointHeight [km]: %g\n", FootpointHeight );
         printf( "\t                    L* Quality: %d\n", Quality );
@@ -681,11 +684,11 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
     } else if ( !strcmp( ExtModel, "OP77Q" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_OP77;
-        Kp = 2;
+        ForceKp    = OP77Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89Q" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
-        T89Q_Kp = 2;
+        ForceKp    = T89Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
@@ -708,6 +711,7 @@ int main( int argc, char *argv[] ){
         // default
         MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
     }
+
 
 
 
@@ -1307,14 +1311,11 @@ printf("sclkdp = %lf\n", sclkdp);
                         Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
-                        if ( OverRideKp ) {
-                            Kp = T89Q_Kp;
-                        }
 
-                        if ( Kp >= 0.0 ) {
-                            MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
-                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5);
-                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 5) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
+                        if ( ForceKp >= 0.0 ) {
+                            MagEphemInfo->LstarInfo->mInfo->fKp = ForceKp;
+                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(ForceKp+0.5);
+                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 6) MagEphemInfo->LstarInfo->mInfo->Kp = 6;
                             if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
                         }
 
@@ -1325,9 +1326,6 @@ printf("sclkdp = %lf\n", sclkdp);
                         MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
-//Rgsm.x = -2.91482;
-//Rgsm.y =  9.26544;
-//Rgsm.z =  0.279211;
 
                         sce2s_c( BODY,    et, 30, sclkch );
 
@@ -1337,7 +1335,7 @@ printf("sclkdp = %lf\n", sclkdp);
                          */
                         printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
                         printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                        printf("\t\tMET: %s   OrbitNumber: %d\n", sclkch, MagEphemInfo->OrbitNumber );
+                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
                         printf("\t--------------------------------------------------------------------------------------------------\n");
                         Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
@@ -1346,7 +1344,6 @@ printf("sclkdp = %lf\n", sclkdp);
                         /*
                          * Write a row of data into the txt file
                          */
-printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mInfo->fKp);
                         Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 
