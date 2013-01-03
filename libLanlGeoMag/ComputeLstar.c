@@ -961,27 +961,38 @@ if (LstarInfo->VerbosityLevel > 1) {
 LstarInfo->Spherical_Footprint_Ps[k] = v2;
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Ps[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
-Type = ClassifyFL( k, LstarInfo );
-if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
-}
-//printf("k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
-//if (0==1){
-if ( Type > 1 ){
-    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-    //printf("\t\tRedoing!  k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
-    if (LstarInfo->VerbosityLevel > 1) {
-        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
-    }
-}
-//}
 
-            PredMinusActualMlat = pred_mlat - mlat;
+            Type = ClassifyFL( k, LstarInfo );
             if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, Ifound, Ifound-I, PostStr );
-                printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
             }
+
+            if ( Type > 1 ){
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
+                }
+                FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+
+                PredMinusActualMlat = pred_mlat - mlat;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                }
+
+            } else {
+
+                PredMinusActualMlat = pred_mlat - mlat;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I, PostStr );
+                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                }
+
+
+            }
+
+
 
 
 
@@ -1219,10 +1230,10 @@ M = ELECTRON_MASS; // kg
              *  the field line is defined that we are trying to save.
              */
             //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ){
-            Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo );
+             if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ) {
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
-            //}
+            }
 
 
 
@@ -1324,9 +1335,9 @@ FIX
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
         printf("\t\t%s  L* (Using McIllwain M):                %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
-        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n%s", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n%s", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n%s", PreStr, PostStr );
+        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
         printf("\n\n\n" );
     }
 
