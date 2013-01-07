@@ -3,7 +3,7 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector       B2;
     int		         iopt;
-    double	         parmod[11], ps, X, Y, Z, Bx, By, Bz;
+    double	         parmod[11], ps, Bmag, R, X, Y, Z, Bx, By, Bz;
 
 
     parmod[1]  = Info->P; 	// Pressure in nPa
@@ -21,6 +21,7 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     ps = Info->c->psi;  // dipole tilt angle
     X = v->x; Y = v->y; Z = v->z;
+    R = Lgm_Magnitude( v );
 
     Tsyg_TS04( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->TS04_Info );
     /*
@@ -48,12 +49,16 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     B->x = Bx + B2.x;
     B->y = By + B2.y;
     B->z = Bz + B2.z;
+    Bmag = Lgm_Magnitude( B );
 /*
     B->x = B2.x;
     B->y = B2.y;
     B->z = B2.z;
     printf("Bigrf =  (%f, %f, %f)\n", B2.x, B2.y, B2.z);
 */
+
+
+
 
 
     ++Info->nFunc;

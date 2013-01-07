@@ -87,7 +87,7 @@
 int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info ) {
 
     int		    i, reset, flag1, flag2, InitiallyBelowTargetHeight, done;
-    double	    sgn=1.0, R, Rtarget, Rinitial, Rplus;
+    double	    sgn=1.0, R, Rtarget, Rinitial, Rplus, H, Hinitial;
     Lgm_Vector	w, Bvec;
     double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, Hdid, Hnext, Htry;
     double      d2Px_ds2, d2Py_ds2, d2Pz_ds2;
@@ -150,7 +150,11 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
      */
 
     // determine if we are initially below the target height
-    InitiallyBelowTargetHeight = ( Rinitial <= Rtarget ) ? TRUE : FALSE; 
+    //InitiallyBelowTargetHeight = ( Rinitial <= Rtarget ) ? TRUE : FALSE; 
+
+    Lgm_WGS84_to_GeodHeight( u, &Hinitial );
+    InitiallyBelowTargetHeight = ( Hinitial <= Height ) ? TRUE : FALSE;
+    
 
     // determine which direction will take us above the target R
     if (InitiallyBelowTargetHeight){
@@ -171,10 +175,10 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         P = *u;
         while( !done ) {
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0) return(LGM_BAD_TRACE);
-            R = Lgm_Magnitude( &P );
-            if (R > Rtarget) {
+            Lgm_WGS84_to_GeodHeight( &P, &H );
+            if (H > Height) {
                 done = TRUE;
-            } else if ( R < Rinitial ) {
+            } else if ( H <  Hinitial ) {
                 done = TRUE;
                 return( -1 );
             }
@@ -259,6 +263,20 @@ Info->Hmax = 0.10;
         Info->Ellipsoid_Footprint_Bs    = Lgm_Magnitude( &Bvec );
 
 	    Lgm_Convert_Coords( v1, &w, GSM_TO_SM, Info->c );
+
+        /*
+         * It is not a closed FL, but it may stilkl have a min-B
+         * Try to find it.
+         */
+        if ( Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info ) ) {
+            Info->Pmin = *v3;
+            Info->Bfield( v3, &Bvec, Info );
+            Info->Bvecmin = Bvec;
+            Info->Bmin = Lgm_Magnitude( &Bvec );
+        } else {
+            v3->x = v3->y = v3->z = -1e31;
+        }
+
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );
 
 
@@ -270,6 +288,20 @@ Info->Hmax = 0.10;
         Info->Ellipsoid_Footprint_Bn    = Lgm_Magnitude( &Bvec );
 
 	    Lgm_Convert_Coords( v2, &w, GSM_TO_SM, Info->c );
+
+        /*
+         * It is not a closed FL, but it may stilkl have a min-B
+         * Try to find it.
+         */
+        if ( Lgm_TraceToMinBSurf( v2, v3, 0.1, TOL2, Info ) ) {
+            Info->Pmin = *v3;
+            Info->Bfield( v3, &Bvec, Info );
+            Info->Bvecmin = Bvec;
+            Info->Bmin = Lgm_Magnitude( &Bvec );
+        } else {
+            v3->x = v3->y = v3->z = -1e31;
+        }
+
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );
 
     } else if ( InitiallyBelowTargetHeight ) {

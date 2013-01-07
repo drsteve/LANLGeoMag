@@ -954,9 +954,12 @@ LstarInfo->mInfo->Hmax = 0.05;
 //printf("LstarInfo->mInfo->Pm_South (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Pn[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Pn[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
+if (LstarInfo->VerbosityLevel > 1) {
+    printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
+}
 Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
 if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sTracing Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+    printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
 }
 LstarInfo->Spherical_Footprint_Ps[k] = v2;
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );

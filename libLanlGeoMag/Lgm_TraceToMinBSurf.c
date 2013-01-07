@@ -148,7 +148,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 	        Pa = Pb; Ba = Bb; Sa = Sb;
 	        Pb = P;  Bb = B;  Sb = Sa + Hdid;
             if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
-                    || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
+                    || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) || ( s > 1000.0 ) ) {
 		        /*
 		         *  Open FL!
 		         */

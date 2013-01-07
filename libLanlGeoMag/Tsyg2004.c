@@ -353,146 +353,158 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
                                 //  (WITH THE POTENTIAL "PENETRATED" INTERCONNECTION FIELD):
 
 
-    if (IOPGEN <= 1) {
-        SHLCAR3X3( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ, tInfo );    // DIPOLE SHIELDING FIELD
-        *BXCF = CFX*XAPPA3;
-        *BYCF = CFY*XAPPA3;
-        *BZCF = CFZ*XAPPA3;
-    } else {
-        *BXCF = 0.0;
-        *BYCF = 0.0;
-        *BZCF = 0.0;
-    }
+        if (IOPGEN <= 1) {
+            SHLCAR3X3( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ, tInfo );    // DIPOLE SHIELDING FIELD
+            *BXCF = CFX*XAPPA3;
+            *BYCF = CFY*XAPPA3;
+            *BZCF = CFZ*XAPPA3;
+        } else {
+            *BXCF = 0.0;
+            *BYCF = 0.0;
+            *BZCF = 0.0;
+        }
 
-    if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
-        DSTT = -20.;
-        if (DST < DSTT) DSTT = DST;
-// Cache this.
-        ZNAM = mypow( fabs( DSTT ), 0.37 );
-        tInfo->CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
-        tInfo->CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
-        tInfo->CB_TAIL.D = A[36]*exp(-W1/A[37])  +A[69];
-        tInfo->CB_TAIL.DELTADY = 4.7;
-        DEFORMED( IOPT, PS, XX, YY, ZZ, BXT1, BYT1, BZT1, BXT2, BYT2, BZT2, tInfo );     // TAIL FIELD (THREE MODES)
-    } else {
-        *BXT1=0.0;
-        *BYT1=0.0;
-        *BZT1=0.0;
-        *BXT2=0.0;
-        *BYT2=0.0;
-        *BZT2=0.0;
-    }
+        if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
+            DSTT = -20.;
+            if (DST < DSTT) DSTT = DST;
+    // Cache this.
+            ZNAM = mypow( fabs( DSTT ), 0.37 );
+            tInfo->CB_TAIL.DXSHIFT1 = A[24]-A[25]/ZNAM;
+            tInfo->CB_TAIL.DXSHIFT2 = A[26]-A[27]/ZNAM;
+            tInfo->CB_TAIL.D = A[36]*exp(-W1/A[37])  +A[69];
+            tInfo->CB_TAIL.DELTADY = 4.7;
+            DEFORMED( IOPT, PS, XX, YY, ZZ, BXT1, BYT1, BZT1, BXT2, BYT2, BZT2, tInfo );     // TAIL FIELD (THREE MODES)
+        } else {
+            *BXT1=0.0;
+            *BYT1=0.0;
+            *BZT1=0.0;
+            *BXT2=0.0;
+            *BYT2=0.0;
+            *BZT2=0.0;
+        }
 
-    if  ( (IOPGEN == 0) || (IOPGEN == 3) ) {
-        ZNAM = fabs( DST );
-        if ( DST >= -20.0 ) ZNAM = 20.0;
-        ZNAM05 = 0.05*ZNAM;
-// Cache this.
-        tInfo->CB_BIRKPAR.XKAPPA1 = A[32]*mypow( ZNAM05, A[33] );
-// Cache this.
-        tInfo->CB_BIRKPAR.XKAPPA2 = A[34]*mypow( ZNAM05, A[35] );
-        BIRK_TOT( IOPB, PS, XX, YY, ZZ, BXR11, BYR11, BZR11, BXR12, BYR12,
-                BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, tInfo );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
-    } else {
-        *BXR11 = 0.0;
-        *BYR11 = 0.0;
-        *BZR11 = 0.0;
-        *BXR21 = 0.0;
-        *BYR21 = 0.0;
-        *BZR21 = 0.0;
-    }
-
-
-    if  ( (IOPGEN == 0) || (IOPGEN == 4) ) {
-        tInfo->CB_RCPAR.PHI  = A[38];
-        ZNAM = fabs( DST );
-        if ( DST >= -20.0 ) ZNAM = 20.0;
-        ooZNAM20 = 20.0/ZNAM;
-//could create a LUT for this pow.
-        tInfo->CB_RCPAR.SC_SY = A[28]* mypow( ooZNAM20, A[29]) * XAPPA;    //
-//could create a LUT for this pow.
-        tInfo->CB_RCPAR.SC_AS = A[30]* mypow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
-                                //  SCALING COMPLETELY INDEPENDENT OF THE GENERAL SCALING DUE TO THE
-                                //  MAGNETOPAUSE COMPRESSION/EXPANSION
-        FULL_RC( IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC, tInfo );    // SHIELDED RING CURRENT (SRC AND PRC)
-    } else {
-        *BXSRC = 0.0;
-        *BYSRC = 0.0;
-        *BZSRC = 0.0;
-        *BXPRC = 0.0;
-        *BYPRC = 0.0;
-        *BZPRC = 0.0;
-    }
+        if  ( (IOPGEN == 0) || (IOPGEN == 3) ) {
+            ZNAM = fabs( DST );
+            if ( DST >= -20.0 ) ZNAM = 20.0;
+            ZNAM05 = 0.05*ZNAM;
+    // Cache this.
+            tInfo->CB_BIRKPAR.XKAPPA1 = A[32]*mypow( ZNAM05, A[33] );
+    // Cache this.
+            tInfo->CB_BIRKPAR.XKAPPA2 = A[34]*mypow( ZNAM05, A[35] );
+            BIRK_TOT( IOPB, PS, XX, YY, ZZ, BXR11, BYR11, BZR11, BXR12, BYR12,
+                    BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, tInfo );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
+        } else {
+            *BXR11 = 0.0;
+            *BYR11 = 0.0;
+            *BZR11 = 0.0;
+            *BXR21 = 0.0;
+            *BYR21 = 0.0;
+            *BZR21 = 0.0;
+        }
 
 
-
-    if ( (IOPGEN == 0) || (IOPGEN == 5) ) {
-        *HXIMF = 0.0;
-        *HYIMF = BYIMF;
-        *HZIMF = BZIMF;    //  THESE ARE COMPONENTS OF THE PENETRATED FIELD PER UNIT OF THE PENETRATION COEFFICIENT.
-                //  IN OTHER WORDS, THESE ARE DERIVATIVES OF THE PENETRATION FIELD COMPONENTS WITH RESPECT
-                //  TO THE PENETRATION COEFFICIENT.   WE ASSUME THAT ONLY TRANSVERSE COMPONENT OF THE
-                //  FIELD PENETRATES INSIDE.
-    } else {
-        *HXIMF = 0.0;
-        *HYIMF = 0.0;
-        *HZIMF = 0.0;
-    }
+        if  ( (IOPGEN == 0) || (IOPGEN == 4) ) {
+            tInfo->CB_RCPAR.PHI  = A[38];
+            ZNAM = fabs( DST );
+            if ( DST >= -20.0 ) ZNAM = 20.0;
+            ooZNAM20 = 20.0/ZNAM;
+    //could create a LUT for this pow.
+            tInfo->CB_RCPAR.SC_SY = A[28]* mypow( ooZNAM20, A[29]) * XAPPA;    //
+    //could create a LUT for this pow.
+            tInfo->CB_RCPAR.SC_AS = A[30]* mypow( ooZNAM20, A[31]) * XAPPA;    //  MULTIPLICATION  BY XAPPA IS MADE IN ORDER TO MAKE THE SRC AND PRC
+                                    //  SCALING COMPLETELY INDEPENDENT OF THE GENERAL SCALING DUE TO THE
+                                    //  MAGNETOPAUSE COMPRESSION/EXPANSION
+            FULL_RC( IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC, tInfo );    // SHIELDED RING CURRENT (SRC AND PRC)
+        } else {
+            *BXSRC = 0.0;
+            *BYSRC = 0.0;
+            *BZSRC = 0.0;
+            *BXPRC = 0.0;
+            *BYPRC = 0.0;
+            *BZPRC = 0.0;
+        }
 
 
 
-    /*
-     *    NOW, ADD UP ALL THE COMPONENTS:
-     */
-//could create a LUT for this pow.
-    DLP1 = mypow( 0.5*PDYN, A[21] );
-//could create a LUT for this pow.
-    DLP2 = mypow( 0.5*PDYN, A[22] );
-
-    TAMP1 = A[2]  + A[3]*DLP1 +  A[4]*A[39]*W1/sqrt(W1*W1+A[39]*A[39]) + A[5]*DST;
-    TAMP2 = A[6]  + A[7]*DLP2 +  A[8]*A[40]*W2/sqrt(W2*W2+A[40]*A[40]) + A[9]*DST;
-    A_SRC = A[10] + A[11]*A[41]*W3/sqrt(W3*W3+A[41]*A[41]) + A[12]*DST;
-    A_PRC = A[13] + A[14]*A[42]*W4/sqrt(W4*W4+A[42]*A[42]) + A[15]*DST;
-    A_R11 = A[16] + A[17]*A[43]*W5/sqrt(W5*W5+A[43]*A[43]);
-    A_R21 = A[18] + A[19]*A[44]*W6/sqrt(W6*W6+A[44]*A[44]);
-
-    BBX = A[1]* *BXCF + TAMP1* *BXT1 + TAMP2* *BXT2 + A_SRC* *BXSRC + A_PRC* *BXPRC + A_R11* *BXR11 + A_R21* *BXR21 + A[20]* *HXIMF;
-    BBY = A[1]* *BYCF + TAMP1* *BYT1 + TAMP2* *BYT2 + A_SRC* *BYSRC + A_PRC* *BYPRC + A_R11* *BYR11 + A_R21* *BYR21 + A[20]* *HYIMF;
-    BBZ = A[1]* *BZCF + TAMP1* *BZT1 + TAMP2* *BZT2 + A_SRC* *BZSRC + A_PRC* *BZPRC + A_R11* *BZR11 + A_R21* *BZR21 + A[20]* *HZIMF;
+        if ( (IOPGEN == 0) || (IOPGEN == 5) ) {
+            *HXIMF = 0.0;
+            *HYIMF = BYIMF;
+            *HZIMF = BZIMF;    //  THESE ARE COMPONENTS OF THE PENETRATED FIELD PER UNIT OF THE PENETRATION COEFFICIENT.
+                    //  IN OTHER WORDS, THESE ARE DERIVATIVES OF THE PENETRATION FIELD COMPONENTS WITH RESPECT
+                    //  TO THE PENETRATION COEFFICIENT.   WE ASSUME THAT ONLY TRANSVERSE COMPONENT OF THE
+                    //  FIELD PENETRATES INSIDE.
+        } else {
+            *HXIMF = 0.0;
+            *HYIMF = 0.0;
+            *HZIMF = 0.0;
+        }
 
 
 
-    /*
-     *    AND WE HAVE THE TOTAL EXTERNAL FIELD.
-     *
-     *
-     *    NOW, LET US CHECK WHETHER WE HAVE THE CASE (1). IF YES - ALL DONE:
-     */
+        /*
+         *    NOW, ADD UP ALL THE COMPONENTS:
+         */
+    //could create a LUT for this pow.
+        DLP1 = mypow( 0.5*PDYN, A[21] );
+    //could create a LUT for this pow.
+        DLP2 = mypow( 0.5*PDYN, A[22] );
 
-    if (SIGMA < S0-DSIG) {        //  (X,Y,Z) IS INSIDE THE MAGNETOSPHERE
-        *BX = BBX;
-        *BY = BBY;
-        *BZ = BBZ;
-    } else {            //  THIS IS THE MOST COMPLEX CASE: WE ARE INSIDE
-                    //  THE INTERPOLATION REGION
-        FINT = 0.5*(1.-(SIGMA-S0)/DSIG);
-        FEXT = 0.5*(1.+(SIGMA-S0)/DSIG);
+        TAMP1 = A[2]  + A[3]*DLP1 +  A[4]*A[39]*W1/sqrt(W1*W1+A[39]*A[39]) + A[5]*DST;
+        TAMP2 = A[6]  + A[7]*DLP2 +  A[8]*A[40]*W2/sqrt(W2*W2+A[40]*A[40]) + A[9]*DST;
+        A_SRC = A[10] + A[11]*A[41]*W3/sqrt(W3*W3+A[41]*A[41]) + A[12]*DST;
+        A_PRC = A[13] + A[14]*A[42]*W4/sqrt(W4*W4+A[42]*A[42]) + A[15]*DST;
+        A_R11 = A[16] + A[17]*A[43]*W5/sqrt(W5*W5+A[43]*A[43]);
+        A_R21 = A[18] + A[19]*A[44]*W6/sqrt(W6*W6+A[44]*A[44]);
 
-        DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, tInfo );
-        *BX = (BBX+QX)*FINT + OIMFX*FEXT - QX;
-        *BY = (BBY+QY)*FINT + OIMFY*FEXT - QY;
-        *BZ = (BBZ+QZ)*FINT + OIMFZ*FEXT - QZ;
-    }
+        BBX = A[1]* *BXCF + TAMP1* *BXT1 + TAMP2* *BXT2 + A_SRC* *BXSRC + A_PRC* *BXPRC + A_R11* *BXR11 + A_R21* *BXR21 + A[20]* *HXIMF;
+        BBY = A[1]* *BYCF + TAMP1* *BYT1 + TAMP2* *BYT2 + A_SRC* *BYSRC + A_PRC* *BYPRC + A_R11* *BYR11 + A_R21* *BYR21 + A[20]* *HYIMF;
+        BBZ = A[1]* *BZCF + TAMP1* *BZT1 + TAMP2* *BZT2 + A_SRC* *BZSRC + A_PRC* *BZPRC + A_R11* *BZR11 + A_R21* *BZR21 + A[20]* *HZIMF;
+
+
+
+        /*
+         *    AND WE HAVE THE TOTAL EXTERNAL FIELD.
+         *
+         *
+         *    NOW, LET US CHECK WHETHER WE HAVE THE CASE (1). IF YES - ALL DONE:
+         */
+
+        if (SIGMA < S0-DSIG) {          //  (X,Y,Z) IS INSIDE THE MAGNETOSPHERE
+
+            tInfo->Region = LGM_TS04_MAGNETOSPHERE;
+
+            *BX = BBX;
+            *BY = BBY;
+            *BZ = BBZ;
+
+        } else {                        //  THIS IS THE MOST COMPLEX CASE: WE ARE INSIDE
+                                        //  THE INTERPOLATION REGION
+
+            tInfo->Region = LGM_TS04_BOUNDARY;
+            FINT = 0.5*(1.-(SIGMA-S0)/DSIG);
+            FEXT = 0.5*(1.+(SIGMA-S0)/DSIG);
+
+            DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, tInfo );
+            *BX = (BBX+QX)*FINT + OIMFX*FEXT - QX;
+            *BY = (BBY+QY)*FINT + OIMFY*FEXT - QY;
+            *BZ = (BBZ+QZ)*FINT + OIMFZ*FEXT - QZ;
+
+        }
 
 
     } else {    // THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING
-        // POSSIBILITY IS NOW THE CASE (3):
-    DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, tInfo );
-    *BX = OIMFX - QX;
-    *BY = OIMFY - QY;
-    *BZ = OIMFZ - QZ;
+                // POSSIBILITY IS NOW THE CASE (3):
+
+        tInfo->Region = LGM_TS04_IMF;
+        DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, tInfo );
+        *BX = OIMFX - QX;
+        *BY = OIMFY - QY;
+        *BZ = OIMFZ - QZ;
+
+        
     }
 
+//printf("P = %g %g %g   Region = %d\n", X, Y, Z, tInfo->Region );
 
     return;
 

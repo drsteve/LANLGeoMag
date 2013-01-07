@@ -1523,13 +1523,6 @@ printf("sclkdp = %lf\n", sclkdp);
                         MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
-Rgsm.x = -2.65353;
-Rgsm.y =  8.95423;
-Rgsm.z = -0.0816511;
-
-Rgsm.x = -2.46843;
-Rgsm.y =  9.10625;
-Rgsm.z = -0.38037;
 
                         sce2s_c( BODY,    et, 30, sclkch );
 

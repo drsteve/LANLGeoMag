@@ -17,6 +17,11 @@
 #define FALSE   0
 #endif
 
+#define LGM_TS04_MAGNETOSPHERE  1  // "case 1" -- see T04 code
+#define LGM_TS04_BOUNDARY       2  // "case 2" -- see T04 code
+#define LGM_TS04_IMF            3  // "case 3" -- see T04 code
+
+
 
 /*
  * Define some structures to accomodate the FORTRAN common blocks
@@ -77,6 +82,13 @@ typedef struct LgmTsyg2004_Info {
     double      SQPR[4][4][4], SQQS[4][4][4], EPR[4][4][4], EQS[4][4][4];
     double      XAPPA;
 
+    /*
+     * variable to capture the "region" we are in. Can be;
+     *      LGM_TS04_MAGNETOSPHERE
+     *      LGM_TS04_BOUNDARY
+     *      LGM_TS04_IMF
+     */
+    int         Region;
 
 
 

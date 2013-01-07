@@ -237,18 +237,20 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
 //Info->Bfield( &P, &BBB,  Info );
 //printf("P=%.15lf %.15lf %.15lf  B=%.15lf %.15lf %.15lf   F = %g   Htry = %g   Hnext = %g\n", P.x, P.y, P.z, BBB.x, BBB.y, BBB.z, F, Htry, Hnext );
+//printf("s = %g\n", s);
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
 
-            if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
-                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
+        if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
+                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) || ( s > 1000.0 ) ) {
 	        /*
 	         *  Open FL!
 	         */
 	        v->x = v->y = v->z = 0.0;
 	        return(0);
+
 	    } else if ( F < 0.0 ) {
 	        done = TRUE;
 	        Pc = P;
