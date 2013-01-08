@@ -19,6 +19,7 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  *
  * Returns a flag that is set as follows;
  *
+ *     -1: Too many minima -- bad or weird field line.
  *      0: Field line has only a single minimum.
  *      1: Field line has multiple minima, but these wont affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
  *      2: Field line has multiple minima, and these will affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
@@ -66,13 +67,13 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         OldDiff = Diff;
         Diff    = m->Bmag[i] - m->Bmag[i-1];
 
-        if ( (Diff > 0.0) && (OldDiff < 0.0) ) {
+        if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima < 100)  ) {
             iMinima[nMinima] = i-1;
             Minima[nMinima] = m->Bmag[i-1];
             ++nMinima;
         }
 
-        if ( (Diff < 0.0) && (OldDiff > 0.0) ) {
+        if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima < 100) ) {
             iMaxima[nMaxima] = i-1;
             Maxima[nMaxima] = m->Bmag[i-1];
             ++nMaxima;
@@ -82,7 +83,11 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     if ( Verbosity > 1 ) {
 
         if ( nMinima > 1 ) {
-            printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            if ( nMinima >= 99 ) {
+                printf("\t\tThis Field line has multiple minima (at least %d minima detected). Probably on a bizzare field line (TS04 model?)\n", nMinima );
+            } else {
+                printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMinima; i++ ){
                     printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
@@ -92,7 +97,11 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         }
 
         if ( nMaxima > 1 ) {
-            printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            if ( nMinima >= 99 ) {
+                printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizzare field line (TS04 model?)\n", nMaxima );
+            } else {
+                printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMaxima; i++ ){
                     printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
@@ -115,6 +124,10 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     for ( i=0; i<nMaxima; i++ ){
         if ( Maxima[i] > m->Bm ) Type = 2;
     }
+
+
+    // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
+    if ( nMinima > 90 ) Type = -1;
 
     
     return( Type );
