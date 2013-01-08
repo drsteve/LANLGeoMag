@@ -15,6 +15,12 @@ Lgm_Vector *Lgm_CreateVector( double x, double y, double z ){
     return( v );
 }
 
+/*
+ * Free an Lgm_Vector
+ */
+void Lgm_FreeVector( Lgm_Vector *v ) {
+  free(v);
+}
 
 /*
  * Given vectors a and b, compute the cross product, c.
@@ -42,7 +48,7 @@ double Lgm_DotProduct(Lgm_Vector *a, Lgm_Vector *b) {
 double Lgm_NormalizeVector(Lgm_Vector *a) {
     double magnitude, inv;
 
-    magnitude = sqrt((a->x * a->x) + (a->y * a->y) + (a->z * a->z));
+    magnitude = Lgm_Magnitude(a);
     if (magnitude > 0.0) {
         inv = 1.0/magnitude;
         a->x *= inv;
@@ -240,8 +246,26 @@ void Lgm_VecToArr( Lgm_Vector *u, double *A ) {
     A[2] = u->z;
     
     return;
-
 }
+
+/**
+ * Copies elements of a 3 element array to a vector
+ *
+ *          \param[in]  A: 3-element array. A[0] set to u.x, A[1] set to u.y, A[2] set to u.z.
+ *
+ *          \param[out] u: Cartesian vector (units of whatever you used for r)
+ *
+ */
+void Lgm_ArrToVec( double *A, Lgm_Vector *u) {
+
+    u->x = A[0];
+    u->y = A[1];
+    u->z = A[2];
+    
+    return;
+}
+
+
 
 /**
  * Sets elements of a vector to a value
@@ -341,7 +365,6 @@ void Lgm_SetArrVal4( double *A, double f ) {
  *
  *          \param[out] x: x-component value.
  *          \param[out] y: y-component value.
- *          \param[out] z: z-component value.
  *
  */
 void Lgm_SetArrElements2( double *A, double x, double y ) {
@@ -355,7 +378,7 @@ void Lgm_SetArrElements2( double *A, double x, double y ) {
 
 
 /**
- * Sets individual components of a vector.
+ * Sets individual components of an array.
  *
  *          \param[in]  A: 3-element array.
  *
@@ -376,9 +399,9 @@ void Lgm_SetArrElements3( double *A, double x, double y, double z ) {
 
 
 /**
- * Sets individual components of a vector.
+ * Sets individual components of an array.
  *
- *          \param[in]  A: 43-element array.
+ *          \param[in]  A: 4-element array.
  *
  *          \param[out] a: x-component value.
  *          \param[out] b: y-component value.

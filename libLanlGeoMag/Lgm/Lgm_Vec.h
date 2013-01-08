@@ -13,6 +13,7 @@ typedef struct LgmPosition {
 } LgmPosition;
 
 Lgm_Vector *Lgm_CreateVector( double x, double y, double z );
+void        Lgm_FreeVector( Lgm_Vector *v );
 void 	    Lgm_CrossProduct(Lgm_Vector *, Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_DotProduct(Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_NormalizeVector(Lgm_Vector *);
@@ -35,6 +36,8 @@ void        Lgm_SetArrVal4( double *A, double f );
 void        Lgm_SetArrElements2( double *A, double x, double y );
 void        Lgm_SetArrElements3( double *A, double x, double y, double z );
 void        Lgm_SetArrElements4( double *A, double a, double b, double c, double d );
+void        Lgm_VecToArr( Lgm_Vector *u, double *A );
+void        Lgm_ArrToVec( double *A, Lgm_Vector *u);
 
 
 
