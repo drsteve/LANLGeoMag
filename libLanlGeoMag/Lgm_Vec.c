@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "Lgm/Lgm_Vec.h"
 #include "Lgm/Lgm_CTrans.h"
 
@@ -21,6 +22,15 @@ Lgm_Vector *Lgm_CreateVector( double x, double y, double z ){
 void Lgm_FreeVector( Lgm_Vector *v ) {
   free(v);
 }
+
+/*
+ * Print an Lgm_Vector
+ */
+void Lgm_PrintVector(Lgm_Vector *v) {
+  printf("x:%lf y:%lf z:%lf mag:%lf\n", v->x, v->y, v->z, Lgm_Magnitude(v));
+  return;
+}
+
 
 /*
  * Given vectors a and b, compute the cross product, c.

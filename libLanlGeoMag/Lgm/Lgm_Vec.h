@@ -14,6 +14,7 @@ typedef struct LgmPosition {
 
 Lgm_Vector *Lgm_CreateVector( double x, double y, double z );
 void        Lgm_FreeVector( Lgm_Vector *v );
+void        Lgm_PrintVector(Lgm_Vector *v);
 void 	    Lgm_CrossProduct(Lgm_Vector *, Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_DotProduct(Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_NormalizeVector(Lgm_Vector *);
