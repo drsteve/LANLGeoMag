@@ -31,6 +31,36 @@ void Lgm_PrintVector(Lgm_Vector *v) {
   return;
 }
 
+/*
+ * Divide each component of a vector by a scalar 
+ */
+void Lgm_VecDivideScalar( Lgm_Vector *v, double x) {
+  v->x /= x;
+  v->y /= x;
+  v->z /= x;
+}
+
+/*
+ * Multiply each component of a vector by a scalar 
+ */
+void Lgm_VecMultiplyScalar( Lgm_Vector *v, double x) {
+  v->x *= x;
+  v->y *= x;
+  v->z *= x;
+}
+
+
+/*
+ * Given vectors a and b, compute the angle between them in degrees
+ */
+double Lgm_VectorAngle(Lgm_Vector *a, Lgm_Vector *b) {
+  double ang;
+  Lgm_NormalizeVector(a);
+  Lgm_NormalizeVector(b);
+  ang = acos(Lgm_DotProduct(a, b));
+  return (ang*DegPerRad);
+}
+
 
 /*
  * Given vectors a and b, compute the cross product, c.

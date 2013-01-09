@@ -5,8 +5,8 @@
 
 
 int main(void) {
-  Lgm_Vector *v;
-  double Lat, Lon, r;
+  Lgm_Vector *v, *v2;
+  double Lat, Lon, r, ang;
   double Arr[3];
 
   v = Lgm_CreateVector(1,2,3);
@@ -37,8 +37,24 @@ int main(void) {
   Lgm_ArrToVec(Arr, v);
   Lgm_PrintVector(v);
 
+  Lgm_VecDivideScalar(v, 2);
+  Lgm_PrintVector(v);
+
+  Lgm_VecMultiplyScalar(v, 2);
+  Lgm_PrintVector(v);
+
+  v2 = Lgm_CreateVector(1,0,0);
+  Lgm_SetVecElements(v, 0, 1, 0);
+  ang = Lgm_VectorAngle(v, v2);
+  printf("Angle:%lf\n", ang);
+
+  Lgm_SetVecElements(v, 0, 1, 0);
+  Lgm_SetVecElements(v2, 0, 1, 0);
+  ang = Lgm_VectorAngle(v, v2);
+  printf("Angle:%lf\n", ang);
 
   Lgm_FreeVector(v);
+  Lgm_FreeVector(v2);
   return(0);
 }
 
