@@ -12,6 +12,12 @@ typedef struct LgmPosition {
     double z;
 } LgmPosition;
 
+typedef struct Lgm_SlerpInfo {
+    double CosPhi;
+    double SinPhi;
+    double Phi;
+} Lgm_SlerpInfo;
+
 Lgm_Vector *Lgm_CreateVector( double x, double y, double z );
 void 	    Lgm_CrossProduct(Lgm_Vector *, Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_DotProduct(Lgm_Vector *, Lgm_Vector *);
@@ -35,6 +41,9 @@ void        Lgm_SetArrVal4( double *A, double f );
 void        Lgm_SetArrElements2( double *A, double x, double y );
 void        Lgm_SetArrElements3( double *A, double x, double y, double z );
 void        Lgm_SetArrElements4( double *A, double a, double b, double c, double d );
+
+void        Lgm_InitSlerp( Lgm_Vector *a, Lgm_Vector *b, Lgm_SlerpInfo *si );
+void        Lgm_Slerp( Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *z, double alpha, Lgm_SlerpInfo *si );
 
 
 
