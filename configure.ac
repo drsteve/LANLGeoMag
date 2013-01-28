@@ -219,18 +219,23 @@ if test x"${HAVE_PERL}" == x"false"; then
     AC_MSG_FAILURE([Unable to run perl])
 fi
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
-PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+#Compile the static tools with a standard rpath for perl...
+PERL_LDFLAGS_TOOLS=`perl -MExtUtils::Embed -e ldopts`
+#library needs rpath-link so other libs can link against it.
+PERL_LDFLAGS=`echo ${PERL_LDFLAGS_TOOLS} | ${SED} -e s/\ -Wl,-rpath,/\ -Wl,-rpath-link,/g`
+
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
-LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
+LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS_TOOLS}
 AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
 LDFLAGS=${OLD_LDFLAGS}
 LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
+AC_SUBST(PERL_LDFLAGS_TOOLS)
 
 dnl Check for gsl, http://www.gnu.org/software/gsl/manual/html_node/Autoconf-Macros.html
 AC_CHECK_LIB([m], [cos], ,
