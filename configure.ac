@@ -285,7 +285,16 @@ AC_SEARCH_LIBS([argp_parse], [argp], , [AC_MSG_FAILURE([cannot find argp library
 
 # check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
-PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
+PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), [
+OLD_LIBS=${LIBS}
+LIBS=${LIBS}\ -lcheck
+AC_MSG_CHECKING([for alternate check])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <check.h>], [])], [
+AC_MSG_RESULT([found])
+AM_CONDITIONAL([HAVE_CHECK], true)], [
+AC_MSG_RESULT([not found])
+AC_MSG_WARN([check not found; testsuite not available])
+LIBS=${OLD_LIBS}])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
