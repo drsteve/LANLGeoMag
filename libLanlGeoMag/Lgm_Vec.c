@@ -55,9 +55,12 @@ void Lgm_VecMultiplyScalar( Lgm_Vector *v, double x) {
  */
 double Lgm_VectorAngle(Lgm_Vector *a, Lgm_Vector *b) {
   double ang;
-  Lgm_NormalizeVector(a);
-  Lgm_NormalizeVector(b);
-  ang = acos(Lgm_DotProduct(a, b));
+  Lgm_Vector  u, v;
+  u = *a;
+  v = *b;
+  Lgm_NormalizeVector(&u);
+  Lgm_NormalizeVector(&v);
+  ang = acos(Lgm_DotProduct(&u, &v));
   return (ang*DegPerRad);
 }
 
