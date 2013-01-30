@@ -220,6 +220,9 @@ if test x"${HAVE_PERL}" == x"false"; then
 fi
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+#get out JUST the rpath bit, since this needs to go in LDFLAGS
+PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
+
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
@@ -227,7 +230,7 @@ CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
 AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
-LDFLAGS=${OLD_LDFLAGS}
+LDFLAGS=${OLD_LDFLAGS}\ ${PERL_RPATH}
 LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
@@ -282,7 +285,16 @@ AC_SEARCH_LIBS([argp_parse], [argp], , [AC_MSG_FAILURE([cannot find argp library
 
 # check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
-PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
+PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), [
+OLD_LIBS=${LIBS}
+LIBS=${LIBS}\ -lcheck
+AC_MSG_CHECKING([for alternate check])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <check.h>], [])], [
+AC_MSG_RESULT([found])
+AM_CONDITIONAL([HAVE_CHECK], true)], [
+AC_MSG_RESULT([not found])
+AC_MSG_WARN([check not found; testsuite not available])
+LIBS=${OLD_LIBS}])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
