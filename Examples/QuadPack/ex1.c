@@ -1,3 +1,6 @@
+/*
+ * Examples showing how to use the Quadpack routines to do simple integrals.
+ */
 #include <stdio.h>
 #include <math.h>
 #include <Lgm_QuadPack.h>
