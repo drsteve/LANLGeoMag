@@ -19,6 +19,9 @@ typedef struct Lgm_SlerpInfo {
 } Lgm_SlerpInfo;
 
 Lgm_Vector *Lgm_CreateVector( double x, double y, double z );
+void        Lgm_FreeVector( Lgm_Vector *v );
+void        Lgm_PrintVector(Lgm_Vector *v);
+double      Lgm_VectorAngle(Lgm_Vector *a, Lgm_Vector *b);
 void 	    Lgm_CrossProduct(Lgm_Vector *, Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_DotProduct(Lgm_Vector *, Lgm_Vector *);
 double 	    Lgm_NormalizeVector(Lgm_Vector *);
@@ -41,10 +44,17 @@ void        Lgm_SetArrVal4( double *A, double f );
 void        Lgm_SetArrElements2( double *A, double x, double y );
 void        Lgm_SetArrElements3( double *A, double x, double y, double z );
 void        Lgm_SetArrElements4( double *A, double a, double b, double c, double d );
+<<<<<<< HEAD
 
 void        Lgm_InitSlerp( Lgm_Vector *a, Lgm_Vector *b, Lgm_SlerpInfo *si );
 void        Lgm_Slerp( Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *z, double alpha, Lgm_SlerpInfo *si );
 
+=======
+void        Lgm_VecToArr( Lgm_Vector *u, double *A );
+void        Lgm_ArrToVec( double *A, Lgm_Vector *u);
+void        Lgm_VecDivideScalar( Lgm_Vector *v, double x);
+void        Lgm_VecMultiplyScalar( Lgm_Vector *v, double x);
+>>>>>>> 94d887ae12ce66f19e94658d6d2183048c95a10e
 
 
 
