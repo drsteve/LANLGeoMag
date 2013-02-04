@@ -909,7 +909,7 @@ void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
     m->G2   = p->G2;
     m->G3   = p->G3;
     m->fKp  = p->fKp;
-    m->Kp   = (int)(p->fKp+0.5); if (m->Kp > 5) m->Kp = 5; if (m->Kp < 0 ) m->Kp = 0;
+    m->Kp   = (int)(p->fKp+0.5); if (m->Kp > 6) m->Kp = 6; if (m->Kp < 0 ) m->Kp = 0;
     m->aKp3 = p->akp3;
     m->Dst  = p->Dst;
     m->W[0] = p->W1;

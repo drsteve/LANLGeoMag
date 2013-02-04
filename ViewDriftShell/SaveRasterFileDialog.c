@@ -20,7 +20,6 @@ gboolean SavePng( GtkWidget *widget, gpointer data ) {
     gchar       *Filename2;
     gchar       *ExtText;
     int         x, y, width, height, depth;
-    char        PngFile[400];
 
     Filename  = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER( widget ) );
     if (Filename == NULL){
@@ -58,7 +57,7 @@ gboolean SavePng( GtkWidget *widget, gpointer data ) {
     
 
 
-    gdk_pixbuf_unref( pixbuf );
+    g_object_unref( pixbuf );
     g_free( Filename );
     g_free( Filename2 );
     g_free( ExtText );
@@ -79,7 +78,13 @@ GtkWidget *CreateSaveRasterFileDialog( void ) {
     GtkWidget *button2;
 
 
-    filechooserdialog1 = gtk_file_chooser_dialog_new( "Save Raster Image to File", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, NULL );
+    //filechooserdialog1 = gtk_file_chooser_dialog_new( "Save Raster Image to File", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, NULL );
+    filechooserdialog1 = gtk_file_chooser_dialog_new ( "Save Raster Image to File", NULL,
+                      //parent_window,
+                      GTK_FILE_CHOOSER_ACTION_OPEN,
+                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                      NULL);
     //g_object_set( filechooserdialog1, "local-only", FALSE, NULL );
     gtk_window_set_type_hint( GTK_WINDOW(filechooserdialog1), GDK_WINDOW_TYPE_HINT_DIALOG );
     gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(filechooserdialog1), TRUE );

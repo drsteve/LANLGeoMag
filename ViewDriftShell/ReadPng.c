@@ -184,7 +184,7 @@ int ReadPng( char *Filename, int *Width, int *Height, GLubyte **qImage ) {
     for ( i=0; i<height; i++ ) {
         row_pointers[i] = png_malloc( png_ptr, width*BytesPerPixel );
     }
-    printf("width*BytesPerPixel = %d\n", width*BytesPerPixel);
+    printf("width*BytesPerPixel = %d\n", (int)(width*BytesPerPixel));
     png_set_rows( png_ptr, info_ptr, row_pointers );
 
 
