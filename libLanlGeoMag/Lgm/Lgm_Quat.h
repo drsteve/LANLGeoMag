@@ -9,7 +9,7 @@
 #define RadPerDeg        0.01745329251994329576
 #endif
 
-
+void    Lgm_PrintQuat(double Q[4]);
 double  Lgm_NormalizeQuat( double *Q );
 double  Lgm_MatrixTrace( double A[3][3] );
 void    Lgm_MatrixToQuat( double A[3][3], double *Q );

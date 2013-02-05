@@ -1,5 +1,14 @@
+#include <stdio.h>
 #include <math.h>
 #include "Lgm/Lgm_Quat.h"
+
+/*
+ * Print a quaternian
+ */
+void Lgm_PrintQuat(double Q[4]) {
+  printf("x:%lf y:%lf z:%lf w:%lf mag:%lf\n", Q[0], Q[1], Q[2], Q[3], Lgm_QuatMagnitude(Q));
+  return;
+}
 
 double Lgm_NormalizeQuat( double Q[4] ) {
 
