@@ -63,7 +63,7 @@ void Vds_FreeObjectInfo( Vds_ObjectInfo *ObjInfo ) {
  */
 void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
 
-    int     i, kk, tn, ns;
+    int     i, tn, ns;
 
 
     /*

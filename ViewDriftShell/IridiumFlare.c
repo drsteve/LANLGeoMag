@@ -11,10 +11,10 @@
  */
 void IridiumFlare( double JD, _SgpTLE *TLE, Lgm_Vector *EarthToSun, int *Flag1, int *Flag2, int *Flag3, Lgm_Vector *g1, Lgm_Vector *g2, Lgm_Vector *g3, Lgm_Vector *P ) {
 
-    double          dt, RotAngle, Q[4], f, tsince, tMin, tMax, tMinFwd, UTC;
+    double          RotAngle, Q[4], f, tsince, tMin, tMax, tMinFwd, UTC;
     int             Year, Month, Day;
     long int        Date;
-    Lgm_Vector      v, e, s, zenith, RotAxis, n1, n2, n3;
+    Lgm_Vector      v, zenith, RotAxis, n1, n2, n3;
     Lgm_Vector      sun, vv, r1, r2, r3, Pteme, Vteme;
     RayType         SatToSunRay, Ray;
     EllipsoidType   Earth;
