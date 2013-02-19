@@ -20,6 +20,7 @@ from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
 import Lgm_Vector
 import Lgm_MagModelInfo
 import Lgm_CTrans
+import magcoords
 from _Bfield_dict import Bfield_dict
 
 def _simpleL(position, MagModelInfo):
@@ -121,7 +122,11 @@ def Closed_Field(*args, **kwargs):
     elif len(args) == 2:
         # input checking
         if kwargs['coord_system'] != 'GSM':
-            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+        #    raise(NotImplementedError('Different coord systems are not yet ready to use') )
+            pos = magcoords.coordTrans(args[0], args[1], kwargs['coord_system'],'GSM')
+        else:
+            pos = args[0]
+        
         # could consider a Lgm_MagModelInfo param to use an existing one
         mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
         mmi.Kp = kwargs['Kp']
@@ -135,7 +140,7 @@ def Closed_Field(*args, **kwargs):
         Lgm_Set_Coord_Transforms( datelong, utc, mmi.c) # dont need pointer as it is one
 
         try:
-            position = Lgm_Vector.Lgm_Vector(*args[0])
+            position = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
             raise(TypeError('position must be an iterable') )
     else:

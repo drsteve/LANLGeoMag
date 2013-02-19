@@ -371,7 +371,7 @@ def get_Lstar(pos, date, alpha = 90.,
         ans[pa]['LHilton'] = datamodel.dmarray([numpy.nan])
         ans[pa]['Bmin'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
         ans[pa]['Bmirror'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
-
+    
     if trace != 'LGM_CLOSED':
         return ans
         # if this is not LGM_CLOSED then don't both with any pitch angle?  true?
@@ -429,7 +429,7 @@ def get_Lstar(pos, date, alpha = 90.,
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
             elif LS_Flag == -1: # mirror below northern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'N_LOSS'})
-            elif LS_Flag == 0: # valid calc
+            elif LS_Flag >= 0: # valid calc
                 ans[pa]['Lstar'] = datamodel.dmarray([lstarinf.LS], attrs={'info':'GOOD'}) # want better word?
 
             MagEphemInfo.Lstar[i] = lstarinf.LS
