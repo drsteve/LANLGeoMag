@@ -1769,61 +1769,69 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
     gsl_interp_accel    *acc;
     gsl_spline          *spline;
     double              *xa2, *ya2;
-    int                 i, Flag, RetVal;
+    int                 i, n2, RetVal;
 
+    xa2 = (double *)calloc( n, sizeof(double) );
+    ya2 = (double *)calloc( n, sizeof(double) );
+    
     /*
      *  Put array into ascending order if it isnt already. (gsl needs this).
      */
-    Flag = 0;
     if ( xa[1] < xa[0] ) {
 
-        xa2 = (double *)calloc( n, sizeof(double) );
-        ya2 = (double *)calloc( n, sizeof(double) );
-
-        for (i=0; i<n; i++){
-            xa2[i] = xa[n-1-i];
-            ya2[i] = ya[n-1-i];
+        for (n2=0, i=0; i<n; i++){
+            if ( ya[i] > LGM_FILL_VALUE ) {
+                xa2[n2] = xa[n-1-i];
+                ya2[n2] = ya[n-1-i];
+                ++n2;
+                }
         }
 
-        Flag = 1;
-
     } else {
-
-        xa2 = xa;
-        ya2 = ya;
-
+        for (n2=0, i=0; i<n; i++){
+            if ( ya[i] > LGM_FILL_VALUE ) {
+                xa2[n2] = xa[i];
+                ya2[n2] = ya[i];
+                ++n2;
+                }
+        }
     }
-
 
 
     /*
      * Check to see if x would cause an extrapolation instead of an interp.
      */
-    if ( (x<xa2[0]) || (x>xa2[n-1]) ){
-
+    if ( (x<xa2[0]) || (x>xa2[n2-1]) ){
         *y = LGM_FILL_VALUE;
         RetVal = -1;
-
-    } else {
-
+        }
+    else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
         acc    = gsl_interp_accel_alloc( );
-        spline = gsl_spline_alloc( gsl_interp_akima, n );
-        gsl_spline_init( spline, xa2, ya2, n );
+        spline = gsl_spline_alloc( gsl_interp_akima, n2 );
+        gsl_spline_init( spline, xa2, ya2, n2 );
         *y = gsl_spline_eval( spline, x, acc );
         gsl_spline_free( spline );
         gsl_interp_accel_free( acc );
         RetVal = 1;
-
+    } else if ( n2 > 1) { //fall back to linear
+        acc    = gsl_interp_accel_alloc( );
+        spline = gsl_spline_alloc( gsl_interp_linear, n2 );
+        gsl_spline_init( spline, xa2, ya2, n2 );
+        *y = gsl_spline_eval( spline, x, acc );
+        gsl_spline_free( spline );
+        gsl_interp_accel_free( acc );
+        RetVal = 1;
+    } else {
+       *y = LGM_FILL_VALUE;
+        RetVal = -1; 
     }
 
 
     /*
-     * If we had to allocate new mem, free it now.
+     * Free new vars
      */
-    if ( Flag ){
-        free( xa2 );
-        free( ya2 );
-    }
+    free( xa2 );
+    free( ya2 );
 
     return( RetVal );
 
