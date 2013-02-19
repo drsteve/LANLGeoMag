@@ -49,7 +49,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     double      Height, StartHeight;
     double	    Height_a, Height_b, Height_c, HeightPlus, HeightMinus, direction;
     Lgm_Vector	Pa, Pc, P;
-    int		    done, reset, AboveTargetHeight;
+    int		    done, reset, AboveTargetHeight, Count;
 
     reset = TRUE;
     Info->Trace_s = 0.0;
@@ -239,16 +239,19 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     P     = Pa;
     done  = FALSE;
     //reset = TRUE;
+    Count = 0;
     while ( !done ) {
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
         Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
-//printf("2. PPPPPPPPPP = %g %g %g   Height = %g        HTRY = %g HDID = %g HNEXT = %g\n", P.x, P.y, P.z, Height, Htry, Hdid, Hnext);
+//Lgm_Vector BBBBB;
+//Info->Bfield( &P, &BBBBB, Info );
+//printf("2. PPPPPPPPPP = %g %g %g    BBBBBBBBBB = %g %g %g Height = %g        HTRY = %g HDID = %g HNEXT = %g\n", P.x, P.y, P.z, BBBBB.x, BBBBB.y, BBBBB.z, Height, Htry, Hdid, Hnext);
 	    F =  Height - TargetHeight;
 	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
 
         if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
-                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) ) {
+                || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) || ( s > 1000.0 ) ) {
 	        /*
 	         *  Open FL!
 	         */
@@ -283,6 +286,11 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 	    else if (Htry > Hmax) Htry = Hmax;
 //printf("C. Htry = %g\n", Htry);
 
+        if ( Count > 1000) {
+            printf("File: %s Lgm_TraceToSphericalEarth(), Line: %d; Too many iterations trying to reach target height (are we in a weird field region?) Returning with -1.\n", __FILE__, __LINE__ );
+            return(-1);
+        }
+        ++Count;
 
     }
 

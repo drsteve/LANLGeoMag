@@ -220,6 +220,9 @@ if test x"${HAVE_PERL}" == x"false"; then
 fi
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+#get out JUST the rpath bit, since this needs to go in LDFLAGS
+PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
+
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
@@ -227,7 +230,7 @@ CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
 AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
-LDFLAGS=${OLD_LDFLAGS}
+LDFLAGS=${OLD_LDFLAGS}\ ${PERL_RPATH}
 LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
@@ -242,9 +245,36 @@ AC_CHECK_LIB([gsl], [gsl_spline_init], ,
 
 # Check for openmp support
 dnl note the linker does not need an explicit -lgomp, -fopenmp handles it
-m4_ifdef([AC_OPENMP], [AC_OPENMP], [OPENMP_CFLAGS="-fopenmp"])
-CFLAGS=${CFLAGS}\ ${OPENMP_CFLAGS}
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], , [AC_MSG_FAILURE([OpenMP support not found])])
+m4_ifdef([AC_OPENMP], [
+dnl use the nice macro if we have it
+AC_OPENMP
+AS_IF([test "x$ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp" == "xunsupported"], [
+    USE_OPENMP=0], [
+    USE_OPENMP=1])
+], [
+dnl don't have the nice macro, just try one quick flag...
+AC_ARG_ENABLE([openmp],
+    [AS_HELP_STRING([--disable-openmp], [do not use OpenMP])])
+OLD_CFLAGS=${CFLAGS}
+CFLAGS=${CFLAGS}\ -fopenmp
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], [
+USE_OPENMP=1
+OPENMP_CFLAGS="-fopenmp"
+], [
+USE_OPENMP=0])
+CFLAGS=${OLD_CFLAGS}])
+# if we don't have openmp support, check if we asked for it...
+if test $USE_OPENMP -eq 0; then
+    if test "x$enable_openmp" = "xyes"; then
+        AC_MSG_FAILURE([OpenMP support not found.])
+    fi
+    if test "x$enable_openmp" != "xno"; then
+        AC_MSG_WARN([OpenMP support not found; building without OpenMP])
+    fi
+fi
+AC_SUBST([OPENMP_CFLAGS])
+AC_DEFINE_UNQUOTED([USE_OPENMP], [$USE_OPENMP], [
+Enable multithreading/processing w/OpenMP])
 
 # check for hdf5
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
@@ -255,7 +285,16 @@ AC_SEARCH_LIBS([argp_parse], [argp], , [AC_MSG_FAILURE([cannot find argp library
 
 # check for test-runner, check
 AM_CONDITIONAL([HAVE_CHECK], false)
-PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), AC_MSG_WARN([check not found; testsuite not available]))
+PKG_CHECK_MODULES([check], [check >= 0.9.4], AM_CONDITIONAL([HAVE_CHECK], true), [
+OLD_LIBS=${LIBS}
+LIBS=${LIBS}\ -lcheck
+AC_MSG_CHECKING([for alternate check])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <check.h>], [])], [
+AC_MSG_RESULT([found])
+AM_CONDITIONAL([HAVE_CHECK], true)], [
+AC_MSG_RESULT([not found])
+AC_MSG_WARN([check not found; testsuite not available])
+LIBS=${OLD_LIBS}])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])

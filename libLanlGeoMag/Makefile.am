@@ -36,8 +36,8 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_B_FromScatteredData
                             Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
 			    Lgm_Metadata.c  #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
 
-libLanlGeoMag_la_LIBADD = @PERL_LDFLAGS@ -lgomp
-libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ -fopenmp
+libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
+libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 
 EXTRA_DIST = QinDenton TS07D_FILES

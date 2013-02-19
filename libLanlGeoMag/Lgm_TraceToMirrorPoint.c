@@ -22,8 +22,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "Lgm/Lgm_MagModelInfo.h"
+#if USE_OPENMP
 #include <omp.h>
+#endif
 
 #define LC_TOL  0.99    // Allow height to be as low as .99*Lgm_LossConeHeight, before we call it "in the loss cone"
 
@@ -230,13 +235,13 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
         if (Htry > Hmax) Htry = Hmax;
 
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
-//printf("P = %g %g %g\n", P.x, P.y, P.z);
 
 
         /*
          *  Get value of quantity we want to minimize
          */
         Info->Bfield( &P, &Bvec, Info );
+//printf("P = %.15lf %.15lf %.15lf    Bvec = %g %g %g \n", P.x, P.y, P.z, Bvec.x, Bvec.y, Bvec.z );
         R = Lgm_Magnitude( &P );
         F = Lgm_Magnitude( &Bvec ) - Bm;
         if (fabs(F)<Fmin) { Fmin = fabs(F); Pmin = P; }

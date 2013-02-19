@@ -37,8 +37,12 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_IGRF.h"
 #define TINY 1.0e-25
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#if USE_OPENMP
 #include <omp.h>
-
+#endif
 
 
 
@@ -135,8 +139,10 @@ void    _Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
      * precompute some quantities
      */
     {
+#if USE_OPENMP
         //#pragma omp parallel private(m)
         //#pragma omp for
+#endif
         for (n=1; n<=N; ++n){
             for (m=0; m<=n; ++m) f1[n][m] = c->Lgm_IGRF_g[n][m]*Cmp[m] + c->Lgm_IGRF_h[n][m]*Smp[m];
         }
@@ -468,8 +474,10 @@ void    _Lgm_IGRF3( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 //    { // BEGIN PARALLEL
         // this granularity here is too small. Parallel version actually runs slower. But serially, its faster than 
         // previous versions.
+#if USE_OPENMP
         //#pragma omp parallel firstprivate(m,n,P_nm1_m,P_nm2_m,dP_nm1_m,dP_nm2_m,P_n_m,dP_n_m,val,val2) 
         //#pragma omp for schedule(static,1) reduction(+:B_r,B_theta,B_phi)
+#endif
         for ( m=0; m<= N; ++m ) {
 
             P_n_m    = Pnn[m];

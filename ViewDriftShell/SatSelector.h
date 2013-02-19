@@ -138,7 +138,7 @@ void        Add_SatGroupNode( _GroupNode **List, char *GroupName, _SpaceObjects 
 int         Delete_SatGroupNode( _GroupNode **List, char *GroupName );
 void        InitSatSelectorInfo( );
 void        FreeSatSelectorInfo( );
-GtkWidget   *CreateSatSelector( );
+GtkWidget   *CreateSatSelector( int nGroups, char *GroupNames[] );
 void        ToggleOrbitOptions( GtkWidget  *w, unsigned int *data );
 void        ChangeOrbitOptions( GtkWidget  *w, unsigned int *data );
 void        ChangeSatColor( GtkWidget  *button, gpointer data );

@@ -3,10 +3,11 @@ bin_PROGRAMS = MagEphemFromSpiceKernel
 MagEphemFromSpiceKernel_SOURCES = MagEphemFromSpiceKernel.c
 MagEphemFromSpiceKernel_LDADD = $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la @cspice_LIBS@
 if ENABLE_STATIC_TOOLS
-    MagEphemFromSpiceKernel_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ -static
-    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
+    MagEphemFromSpiceKernel_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ -static @OPENMP_CFLAGS@
+    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@ @OPENMP_CFLAGS@
 else
-    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@
+    MagEphemFromSpiceKernel_LDFLAGS = $(AM_LDFLAGS) @OPENMP_CFLAGS@
+    MagEphemFromSpiceKernel_CFLAGS = $(AM_CFLAGS) -I$(LGMSRCDIR) -I$(LGMSRCDIR)/Lgm @cspice_CFLAGS@ @OPENMP_CFLAGS@
 endif
 
 #CFLAGS       = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math

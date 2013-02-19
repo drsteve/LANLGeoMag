@@ -1,10 +1,12 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#if USE_OPENMP
 #include <omp.h>
+#endif
 #include "Lgm/Lgm_FluxToPsd.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
@@ -81,10 +83,13 @@ double  Lgm_Ek_to_Mu( double Ek, double a, double B, double E0 ) {
 
 
 /**
- * Returns Particle's Kinetic Energy, \f$E_k\f$, given: Particle's relativistic
- * first invariant, \f$\alpha\f$, Pitch Angle \f$\alpha\f$ and the local
- * B-field strength and rest energy. This is the inverse of Lgm_Ek_to_Mu(). See
- * description of Lgm_Ek_to_Mu() for more details on the equations used.
+ *  \brief
+ *     Computes kinetic energy from Mu, pitch angle, B-field strength, and rest energy.
+ *  \details
+ *     This Returns Particle's Kinetic Energy, \f$E_k\f$, given: Particle's relativistic
+ *     first invariant, \f$\alpha\f$, Pitch Angle \f$\alpha\f$ and the local
+ *     B-field strength and rest energy. This is the inverse of Lgm_Ek_to_Mu(). See
+ *     description of Lgm_Ek_to_Mu() for more details on the equations used.
  *
  *      \param[in]      Mu  First adiabatic invariant.      <b>( MeV/G )</b>
  *      \param[in]      a   Pitch Angle of Particle.        <b>( Degrees )</b>
@@ -117,51 +122,53 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 
 
 /**
- * Compute \f$ p^2c^2 \f$  given a particle's kinetic energy and rest energy.
+ *  \brief
+ *      Compute \f$ p^2c^2 \f$  given a particle's kinetic energy and rest energy.
+ *  \details
  *
- *  Some relativistic equations:
+ *      Some relativistic equations:
  *
- *  With,
- *          \f{eqnarray*}
- *                  m       &=& \mbox{Particle mass.}\\
- *                  m_\circ &=& \mbox{Particle rest mass.}\\
- *                  v       &=& \mbox{Particle speed.}\\
- *                  c       &=& \mbox{Speed of Light.}\\
- *                  \gamma  &=& (1-v^2/c^2)^{-1/2}.\\
+ *      With,
+ *              \f{eqnarray*}
+ *                      m       &=& \mbox{Particle mass.}\\
+ *                      m_\circ &=& \mbox{Particle rest mass.}\\
+ *                      v       &=& \mbox{Particle speed.}\\
+ *                      c       &=& \mbox{Speed of Light.}\\
+ *                      \gamma  &=& (1-v^2/c^2)^{-1/2}.\\
  *
- *          \f}
+ *              \f}
  *
- *      \f[
- *          m = m_\circ \gamma = m_\circ (1-v^2/c^2)^{-1/2}
- *      \f]
+ *          \f[
+ *              m = m_\circ \gamma = m_\circ (1-v^2/c^2)^{-1/2}
+ *          \f]
  *
- *  Rearrange this to get,
- *      \f[
- *          (mc^2)^2 = (m_\circ c^2)^ + p^2c^2
- *      \f]
+ *      Rearrange this to get,
+ *          \f[
+ *              (mc^2)^2 = (m_\circ c^2)^ + p^2c^2
+ *          \f]
  *
- *  With,
- *          \f{eqnarray*}
- *              E  = mc^2             &=& \mbox{Total Energy of particle} \\
- *              E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
- *              p                     &=& \mbox{relativistic momentum of particle}
- *          \f}
+ *      With,
+ *              \f{eqnarray*}
+ *                  E  = mc^2             &=& \mbox{Total Energy of particle} \\
+ *                  E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
+ *                  p                     &=& \mbox{relativistic momentum of particle}
+ *              \f}
  *
- *  this is,
- *      \f[
- *          E^2 = E_\circ^2 + (pc)^2
- *      \f]
+ *      this is,
+ *          \f[
+ *              E^2 = E_\circ^2 + (pc)^2
+ *          \f]
  *
- *  so,
- *      \f[
- *          p^2c^2  = E^2 - E_\circ^2
- *      \f]
+ *      so,
+ *          \f[
+ *              p^2c^2  = E^2 - E_\circ^2
+ *          \f]
  *
- *  Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
- *          \f{eqnarray*}
- *              p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
- *                      &=& E_k (E_k+2E_\circ)
- *          \f}
+ *      Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
+ *              \f{eqnarray*}
+ *                  p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
+ *                          &=& E_k (E_k+2E_\circ)
+ *              \f}
  *
  *
  *      \param[in]      Ek (\f$ = E_k) \f$  Kinetic Energy of Particle.   <b>( MeV )</b>
@@ -178,66 +185,77 @@ double  Lgm_p2c2( double Ek, double E0 ) {
 
 
 /**
- * Returns \f$ (v/c)^2 \f$ as a function of \f$E_k\f$ and \f$E_\circ\f$ using the following relation,
+ *  \brief
+ *      Returns \f$ \beta^2 = (v/c)^2 \f$ as a function of \f$E_k\f$ and \f$E_\circ\f$. 
+ *  \details
+ *      Uses the following relation,
+ *      
  *
  *          \f{eqnarray*}
- *              (v/c)^2 &=& m^2v^2/(m^2c^2) \\
- *                      &=& m^2v^2c^2/(m^2c^4) \\
- *                      &=& p^2c^2/(m^2c^4) \\
- *                      &=& p^2c^2/E^2 \\
- *                      &=& {E_k(E_k+2E_\circ) \over (E_k+E_\circ)^2}
+ *              \beta^2 &=& 1 - {1\over \gamma^2} \\
+ *                      &=& 1 - {1\over (1+E_k/E_\circ)^2}
  *          \f}
  *
- *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( MeV )</b>
- *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
  *
- *      \return       v2overc2 (\f$ = v^2/c^2)\f$)                      <b>( dimensionless )</b>
+ *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( arbitrary units )</b>
+ *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( units of Ek )</b>
+ *
+ *      \return       (\f$ \beta^2 = v^2/c^2)\f$)                      <b>( dimensionless )</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
  */
 double  Lgm_v2overc2( double Ek, double E0 ) {
-    double  E = Ek + E0;
-    return( Ek*(Ek+2.0*E0)/(E*E) );    // dimensionless
+    double  gamma = 1.0 + Ek/E0;
+    return( 1.0 - 1.0/(gamma*gamma) );    // dimensionless
 }
 
 
 /**
- *   Returns relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$
- *   Note that \f$ (v/c)^2 = E_k(E_k+2E_\circ)/(E_k+E_\circ)^2 \f$ (see Lgm_v2overc2().)
+ *  \brief
+ *      Computes relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$.
+ *  \details
+ *       Returns relativistic factor \f$\gamma=[1-(v/c)^2]^{-1/2}\f$ .
+ *       Since \f$E=\gamma m_\circ c^2 = \gamma E_\circ\f$ and 
+ *       \f$E=E_k+E_\circ\f$, we have;
  *
- *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( MeV )</b>
- *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( MeV )</b>
+ *              \f[
+ *                  \gamma = { E_k\over E_\circ } + 1
+ *              \f]
  *
- *      \return       gamma (\f$ = [ 1 - (v/c)^2 ]^{-1/2} \f$)          <b>( dimensionless )</b>
+ *
+ *      \param[in]    Ek   Kinetic Energy of Particle.                  <b>( arbitrary units )</b>
+ *      \param[in]    E0 (\f$ = E_\circ) \f$ Rest energy of Particle.   <b>( units of Ek )</b>
+ *
+ *      \return       \f$\gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$)          <b>( dimensionless )</b>
  *
  *      \author         Mike Henderson
  *      \date           2010-2011
  */
 double  Lgm_gamma( double Ek, double E0 ) {
-    double  E = Ek + E0;
-    return( 1.0/sqrt( 1.0 - Ek*(Ek+2.0*E0)/(E*E) ) );    // dimensionless
+    return( 1.0 + Ek/E0 );  // dimensionless
 }
 
 
 /**
- *  Convert differential flux to phase space density.
+ *  \brief
+ *      Convert differential flux to phase space density.
+ *  \details
+ *      The basic relationship is;
+ *          \f[
+ *          f = {j \over p^2}
+ *          \f]
  *
- *  The basic relationship is;
- *      \f[
- *      f = {j \over p^2}
- *      \f]
+ *      Multiplying the top and bottom by \f$ c^2 \f$ gives,
+ *          \f{eqnarray*}
+ *              f &=& {j c^2 \over p^2c^2 } \\
+ *              f &=& { j\over c } {c^3 \over (p^2c^2)}
+ *          \f}
  *
- *  Multiplying the top and bottom by \f$ c^2 \f$ gives,
- *      \f{eqnarray*}
- *          f &=& {j c^2 \over p^2c^2 } \\
- *          f &=& { j\over c } {c^3 \over (p^2c^2)}
- *      \f}
- *
- *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
- *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm}
- *  \mbox{MeV}\right]^3 \f$. These are the standard GEM phase space density
- *  units.
+ *      The reason for making it \f$ c^3 \f$ is that the final units simplify to,
+ *      \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm}
+ *      \mbox{MeV}\right]^3 \f$. These are the standard GEM phase space density
+ *      units.
  *
  *      \param[in]      j               Differential Flux in units of   <b>#/cm^2/s/sr/MeV</b>
  *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of             <b>Mev^2</b>
@@ -256,21 +274,22 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
 
 
 /**
- * Convert phase space density to differential flux.
+ *  \brief
+ *      Convert phase space density to differential flux.
+ *  \details
+ *      The basic relationship is;
+ *          \f[
+ *          f = j/p^2
+ *          \f]
  *
- *  The basic relationship is;
- *      \f[
- *      f = j/p^2
- *      \f]
+ *      Multiply top and bottom by \f$ c^2 \f$ gives,
+ *          \f{eqnarray*}
+ *              f &=& {j c^2 \over p^2c^2 } \\
+ *              f &=& { j\over c } {c^3 \over (p^2c^2)}
+ *          \f}
  *
- *  Multiply top and bottom by \f$ c^2 \f$ gives,
- *      \f{eqnarray*}
- *          f &=& {j c^2 \over p^2c^2 } \\
- *          f &=& { j\over c } {c^3 \over (p^2c^2)}
- *      \f}
- *
- *  The reason for making it \f$ c^3 \f$ is that the final units simplify to,
- *  \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
+ *      The reason for making it \f$ c^3 \f$ is that the final units simplify to,
+ *      \f$ c^3 \mbox{cm}^{-3} \mbox{MeV}^{-3}\f$ or \f$ \left[c\over \mbox{cm} \mbox{MeV}\right]^3 \f$
  *
  *      \param[in]      f    Phase space density in units of    <b>(c/cm/MeV)^3</b>
  *      \param[in]      p2c2 (\f$ = p^2 c^2\f$) in units of     <b>Mev^2</b>
@@ -288,8 +307,10 @@ double Lgm_PsdToDiffFlux( double f, double p2c2 ){
 
 
 /**
- *  Returns ma pointer to a dynamically allocated Lgm_FluxToPsd structure.
- *  User must destroy this with Lgm_F2P_FreeFluxToPsd() when done.
+ *  \brief
+ *      Returns a pointer to a dynamically allocated Lgm_FluxToPsd structure.
+ *  \details
+ *      User must destroy this with Lgm_F2P_FreeFluxToPsd() when done.
  *
  *      \param[in]      DumpDiagnostics  Boolean flag to turn on/off dumping of diagnostics.
  *      \return         A pointer to an allocated and initialized Lgm_FluxToPsd stucture.
@@ -325,8 +346,11 @@ f->nMaxwellians = 1;
 }
 
 /**
- * Destroy a dynamically allocated Lgm_FluxToPsd structure. (E.g. one that was
- * created by Lgm_F2P_CreateFluxToPsd().)
+ *  \brief
+ *      Destroy a dynamically allocated Lgm_FluxToPsd structure. 
+ *  \details
+ *      Destroys a dynamically allocated Lgm_FluxToPsd structure that was
+ *      created by Lgm_F2P_CreateFluxToPsd().
  *
  *      \param          f  Pointer to the allocated Lgm_FluxToPsd structure that you want to destroy.
  *
@@ -358,7 +382,9 @@ void Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f ) {
 
 
 /**
- *  Set Date/Time and position in the Lgm_FluxToPsd structure.
+ *  \brief
+ *      Set Date/Time and position in the Lgm_FluxToPsd structure.
+ *  \details
  *
  *
  *      \param[in]      d   Date/Time of measurement.
@@ -378,7 +404,9 @@ void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f
 
 
 /**
- *     Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *  \brief
+ *      Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *  \details
  *
  *      \param[in]      J                 2D array containing the differential flux values as a function of energy and pitch angle.
  *      \param[in]      E                 1D array containing the energy values implied by the first index of Flux[][] array.
@@ -458,36 +486,38 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
 
 
 /**
- *  Computes Phase Space Density at user-supplied constant values of \f$\mu\f$
- *  and K.
+ *  \brief
+ *      Computes Phase Space Density at user-supplied constant values of \f$\mu\f$
+ *      and K.
  *
- *  This routine ( Lgm_FluxPsd_GetPsdAtConstMusAndKs() ) must operate on a
- *  pre-initialized Lgm_FluxToPsd structure.  The routine Lgm_FluxToPsd_SetFlux()
- *  is used to add differential flux data/info to an Lgm_FluxToPsd structure
- *  and it also converts the differential flux to Phase Space Density at
- *  constant E and \f$\alpha\f$ (i.e. it computes \f$ f(E, \alpha) \f$ ).
- *
- *  However, what we really want is Phase Space Density at constant \f$\mu and
- *  K\f$ (i.e. we want \f$f( \mu, K )\f$). Although \f$mu\f$ is easy to
- *  compute, it is dependant on both E and \f$\alpha\f$. K is only dependant
- *  upon \f$\alpha\f$, but on the other hand K is not so easy to compute from
- *  \f$\alpha\f$.
- *
- *  To perform the calculation we note that \f$f( E, \alpha )\f$ is the same as
- *  \f$f( E(\mu, \alpha(K)), \alpha(K) )\f$. Thus, for a given \f$\mu\f$ and K,
- *  we can figure out what E and \f$\alpha\f$ they correspond to and then we
- *  can just use the \f$f(E, \alpha)\f$ array to compute the desired f values.
- *  The steps are;
- *
- *      - For each K, compute \f$\alpha(K)\f$. This is done with the routine
- *        Lgm_AlphaOfK().
- *
- *      - Then we compute E from \f$\alpha\f$ and the given mu and Alpha
- *        values.
- *
- *      - Then we look up \f$f(E, \alpha)\f$ from the array (interp or fit or
- *        whatever).
- *
+ *  \details
+ *      This routine ( Lgm_FluxPsd_GetPsdAtConstMusAndKs() ) must operate on a
+ *      pre-initialized Lgm_FluxToPsd structure.  The routine Lgm_FluxToPsd_SetFlux()
+ *      is used to add differential flux data/info to an Lgm_FluxToPsd structure
+ *      and it also converts the differential flux to Phase Space Density at
+ *      constant E and \f$\alpha\f$ (i.e. it computes \f$ f(E, \alpha) \f$ ).
+ *    
+ *      However, what we really want is Phase Space Density at constant \f$\mu and
+ *      K\f$ (i.e. we want \f$f( \mu, K )\f$). Although \f$mu\f$ is easy to
+ *      compute, it is dependant on both E and \f$\alpha\f$. K is only dependant
+ *      upon \f$\alpha\f$, but on the other hand K is not so easy to compute from
+ *      \f$\alpha\f$.
+ *    
+ *      To perform the calculation we note that \f$f( E, \alpha )\f$ is the same as
+ *      \f$f( E(\mu, \alpha(K)), \alpha(K) )\f$. Thus, for a given \f$\mu\f$ and K,
+ *      we can figure out what E and \f$\alpha\f$ they correspond to and then we
+ *      can just use the \f$f(E, \alpha)\f$ array to compute the desired f values.
+ *      The steps are;
+ *    
+ *          - For each K, compute \f$\alpha(K)\f$. This is done with the routine
+ *            Lgm_AlphaOfK().
+ *    
+ *          - Then we compute E from \f$\alpha\f$ and the given mu and Alpha
+ *            values.
+ *    
+ *          - Then we look up \f$f(E, \alpha)\f$ from the array (interp or fit or
+ *            whatever).
+ *    
  *      \param[in]      nMu         Number of Mu values
  *      \param[in]      Mu          1-D array of Mu values
  *      \param[in]      nK          Number of K values
@@ -541,8 +571,10 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
         { // start parallel
 
+#if USE_OPENMP
 //            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
 //            #pragma omp for schedule(dynamic, 1)
+#endif
             for ( k=0; k<nK; k++ ){
 
                 mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
@@ -680,7 +712,7 @@ double Cost( double *x, void *data ){
 */
 
 
-    
+
 
 
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
@@ -908,7 +940,9 @@ void Lgm_P2F_FreePsdToFlux( Lgm_PsdToFlux *p ) {
 
 
 /**
- *  Set Date/Time and position in the Lgm_PsdToFlux structure.
+ *  \brief
+ *      Set Date/Time and position in the Lgm_PsdToFlux structure.
+ *  \details
  *
  *
  *      \param[in]      d   Date/Time of measurement.
@@ -928,7 +962,9 @@ void Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p
 
 
 /**
- *     Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
+ *  \brief
+ *      Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
+ *  \details
  *
  *      \param[in]      P                 3D array containing the Phase Space Density as a function of Mu and K.
  *      \param[in]      L                 1D array containing the Lstar values implied by the first index of PSD[][][] array.
@@ -993,31 +1029,32 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
 
 
 /**
- *  Computes Flux at user-supplied constant values of E
- *  and \f$\alpha\f$.
- *
- *  This routine ( Lgm_P2F_GetFluxAtConstEsAndAs() ) must operate on a
- *  pre-initialized Lgm_PsdToFlux structure.  The routine Lgm_P2F_SetPsd()
- *  is used to add PSD data/info to an Lgm_PsdToFlux structure.
- *
- *  We want Flux at constant E and \f$\alpha \f$ (i.e. we want \J$f( E, \alpha
- *  )\f$).
- *
- *  To perform the calculation we note that \f$f( \mu, K )\f$ is the same as
- *  \f$f( \mu(E, \alpha), K(\alpha) )\f$. Thus, for a given E and \f$\alpha\f$,
- *  we can figure out what \f$\mu\f$ and K  they correspond to and then we can
- *  just use the \f$f(\mu, K)\f$ array to compute the desired f values. Then
- *  finally convert f to J.
- *  The steps are;
- *
- *      - For each \f$\alpha\f$ compute \f$K(\alpha)\f$. This is done with the routine
- *        Lgm_KofAlpha().
- *
- *      - Then we compute \f$\mu\f$ from E and \f$\alpha\f$.
- *
- *      - Then we look up \f$f(\mu, K)\f$ from the array (interp or fit or
- *        whatever).
- *
+ *  \brief
+ *      Computes Flux at user-supplied constant values of E
+ *      and \f$\alpha\f$.
+ *  \details
+ *      This routine ( Lgm_P2F_GetFluxAtConstEsAndAs() ) must operate on a
+ *      pre-initialized Lgm_PsdToFlux structure.  The routine Lgm_P2F_SetPsd()
+ *      is used to add PSD data/info to an Lgm_PsdToFlux structure.
+ *    
+ *      We want Flux at constant E and \f$\alpha \f$ (i.e. we want \J$f( E, \alpha
+ *      )\f$).
+ *    
+ *      To perform the calculation we note that \f$f( \mu, K )\f$ is the same as
+ *      \f$f( \mu(E, \alpha), K(\alpha) )\f$. Thus, for a given E and \f$\alpha\f$,
+ *      we can figure out what \f$\mu\f$ and K  they correspond to and then we can
+ *      just use the \f$f(\mu, K)\f$ array to compute the desired f values. Then
+ *      finally convert f to J.
+ *      The steps are;
+ *    
+ *          - For each \f$\alpha\f$ compute \f$K(\alpha)\f$. This is done with the routine
+ *            Lgm_KofAlpha().
+ *    
+ *          - Then we compute \f$\mu\f$ from E and \f$\alpha\f$.
+ *    
+ *          - Then we look up \f$f(\mu, K)\f$ from the array (interp or fit or
+ *            whatever).
+ *    
  *      \param[in]      nE          Number of E values
  *      \param[in]      E           1-D array of E values
  *      \param[in]      nA          Number of Alpha values
@@ -1075,8 +1112,10 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
     Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
     p->B = mInfo->Blocal;
     {   // start parallel
+#if USE_OPENMP
         //#pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
         //#pragma omp for schedule(dynamic, 1)
+#endif
         for ( k=0; k<nA; k++ ){
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
@@ -1095,7 +1134,7 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
 
             Lgm_InterpArr( Aarr, Karr, narr,   A[k], &p->KofA[k] );
             Lgm_InterpArr( Aarr, Larr, narr,   A[k], &p->LstarOfA[k] );
-            
+
 
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
@@ -1144,7 +1183,7 @@ assumes electrons -- generalize this...
         /*
          * Get L index and MK array
          */
-        Lstar = p->LstarOfA[k]; 
+        Lstar = p->LstarOfA[k];
         i=0; done = FALSE;
         while ( !done ){
             if (i >= p->nL ) {
@@ -1164,7 +1203,7 @@ assumes electrons -- generalize this...
          */
         for ( iMu=0; iMu<p->nMu; iMu++ ){
             for ( iK=0; iK<p->nK; iK++ ){
-                p->PSD_MK[iMu][iK] = p->PSD_LMK[iL][iMu][iK];  
+                p->PSD_MK[iMu][iK] = p->PSD_LMK[iL][iMu][iK];
             }
         }
 
@@ -1228,20 +1267,23 @@ assumes electrons -- generalize this...
 
 
 /**
- * The p structure should have an initialized PSD[L][Mu][K] array in it (i.e.
- * as added by Lgm_P2F_SetPsd()).  When transforming from PSD at constant Mu
- * and K, to Flux at constant E and Alpha, we note that a given Alpha implies
- * both a value for K and a value for L*. First, since the L* dimension is
- * usually large (because these types of arrays typically come from diffusion
- * codes), we can just use the nearest bin for iL. However, that wont
- * necessarily work so well for the K dimension because there are usually far
- * fewer of those bins. For K, we will do a full interpolation. After that we
- * will have an array of PSD(Mu) at the pitch angle we are interested in. This
- * is easily transformed into PSD(E) which we then fit with a relativistic
- * Maxwellian and evaluate at the E we desire.
+ *  \brief
+ *      Computes PSD at a given mu and K
+ *  \details
+ *     The p structure should have an initialized PSD[L][Mu][K] array in it (i.e.
+ *     as added by Lgm_P2F_SetPsd()).  When transforming from PSD at constant Mu
+ *     and K, to Flux at constant E and Alpha, we note that a given Alpha implies
+ *     both a value for K and a value for L*. First, since the L* dimension is
+ *     usually large (because these types of arrays typically come from diffusion
+ *     codes), we can just use the nearest bin for iL. However, that wont
+ *     necessarily work so well for the K dimension because there are usually far
+ *     fewer of those bins. For K, we will do a full interpolation. After that we
+ *     will have an array of PSD(Mu) at the pitch angle we are interested in. This
+ *     is easily transformed into PSD(E) which we then fit with a relativistic
+ *     Maxwellian and evaluate at the E we desire.
  *
- * In this routine, we assume we have already done the iL step to reduce the 3D
- * array down to a PSD[Mu][K] array.
+ *     In this routine, we assume we have already done the iL step to reduce the 3D
+ *     array down to a PSD[Mu][K] array.
  */
 double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p ) {
 

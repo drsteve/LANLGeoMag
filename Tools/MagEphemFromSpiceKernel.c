@@ -29,6 +29,9 @@
 #define  MAXIV      1000
 #define  WINSIZ     ( 2 * MAXIV )
 
+#define T89Q_KP  2.0
+#define OP77Q_KP 2.0
+
 /*
  * Stuff for inbound/outbound determination
  */
@@ -417,6 +420,203 @@ int GetOrbitNumber( Lgm_DateTime *UTC, int nPerigee, Lgm_DateTime *Perigee_UTC, 
 
 }
 
+void Lgm_WriteMagEphemDataKML( FILE *fp, int i, Lgm_MagEphemData *med ) {
+
+    int j;
+
+    fprintf( fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
+    fprintf( fp, "<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">\n" );
+    fprintf( fp, "  <Document>\n" );
+    fprintf( fp, "    <name>RBSP A</name>\n" );
+    fprintf( fp, "    <Snippet>Created Wed Jun 2 15:33:39 2010</Snippet>\n" );
+    fprintf( fp, "\n" );
+    fprintf( fp, "    <!-- Normal track style -->\n" );
+    fprintf( fp, "    <LookAt>\n" );
+    fprintf( fp, "      <gx:TimeSpan>\n" );
+    fprintf( fp, "        <begin>%s</begin>\n", med->H5_IsoTimes[0] );
+    fprintf( fp, "        <end>%s</end>\n", med->H5_IsoTimes[med->H5_nT-1] );
+    fprintf( fp, "      </gx:TimeSpan>\n" );
+    fprintf( fp, "      <longitude>%.10g</longitude>\n", med->H5_Pfs_geod_LatLon[0][1] );
+    fprintf( fp, "      <latitude>%.10g</latitude>\n", med->H5_Pfs_geod_LatLon[0][0] );
+    //fprintf( fp, "      <range>%.10g</range>\n", med->H5_Pfs_geod_Height[0] );
+    fprintf( fp, "      <range>%.10g</range>\n", 20000*1e3 );
+    fprintf( fp, "    </LookAt>\n" );
+    fprintf( fp, "    <Style id=\"track_n\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <scale>.5</scale>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://earth.google.com/images/kml-icons/track-directional/track-none.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "      <LabelStyle>\n" );
+    fprintf( fp, "        <scale>0</scale>\n" );
+    fprintf( fp, "      </LabelStyle>\n" );
+    fprintf( fp, "\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <!-- Highlighted track style -->\n" );
+    fprintf( fp, "    <Style id=\"track_h\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <scale>1.2</scale>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://earth.google.com/images/kml-icons/track-directional/track-none.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <StyleMap id=\"track\">\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>normal</key>\n" );
+    fprintf( fp, "        <styleUrl>#track_n</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>highlight</key>\n" );
+    fprintf( fp, "        <styleUrl>#track_h</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "    </StyleMap>\n" );
+    fprintf( fp, "    <!-- Normal multiTrack style -->\n" );
+    fprintf( fp, "    <Style id=\"multiTrack_n\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://earth.google.com/images/kml-icons/track-directional/track-0.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "      <LineStyle>\n" );
+    fprintf( fp, "        <color>99ffac59</color>\n" );
+    fprintf( fp, "        <width>6</width>\n" );
+    fprintf( fp, "      </LineStyle>\n" );
+    fprintf( fp, "\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <!-- Highlighted multiTrack style -->\n" );
+    fprintf( fp, "    <Style id=\"multiTrack_h\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <scale>1.2</scale>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://earth.google.com/images/kml-icons/track-directional/track-0.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "      <LineStyle>\n" );
+    fprintf( fp, "        <color>99ffac59</color>\n" );
+    fprintf( fp, "        <width>8</width>\n" );
+    fprintf( fp, "      </LineStyle>\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <StyleMap id=\"multiTrack\">\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>normal</key>\n" );
+    fprintf( fp, "        <styleUrl>#multiTrack_n</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>highlight</key>\n" );
+    fprintf( fp, "        <styleUrl>#multiTrack_h</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "    </StyleMap>\n" );
+    fprintf( fp, "    <!-- Normal waypoint style -->\n" );
+    fprintf( fp, "    <Style id=\"waypoint_n\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://maps.google.com/mapfiles/kml/pal4/icon61.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <!-- Highlighted waypoint style -->\n" );
+    fprintf( fp, "    <Style id=\"waypoint_h\">\n" );
+    fprintf( fp, "      <IconStyle>\n" );
+    fprintf( fp, "        <scale>1.2</scale>\n" );
+    fprintf( fp, "        <Icon>\n" );
+    fprintf( fp, "          <href>http://maps.google.com/mapfiles/kml/pal4/icon61.png</href>\n" );
+    fprintf( fp, "        </Icon>\n" );
+    fprintf( fp, "      </IconStyle>\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <StyleMap id=\"waypoint\">\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>normal</key>\n" );
+    fprintf( fp, "        <styleUrl>#waypoint_n</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "      <Pair>\n" );
+    fprintf( fp, "        <key>highlight</key>\n" );
+    fprintf( fp, "        <styleUrl>#waypoint_h</styleUrl>\n" );
+    fprintf( fp, "      </Pair>\n" );
+    fprintf( fp, "    </StyleMap>\n" );
+    fprintf( fp, "    <Style id=\"lineStyle\">\n" );
+    fprintf( fp, "      <LineStyle>\n" );
+    fprintf( fp, "        <color>99ffac59</color>\n" );
+    fprintf( fp, "        <width>6</width>\n" );
+    fprintf( fp, "      </LineStyle>\n" );
+    fprintf( fp, "    </Style>\n" );
+    fprintf( fp, "    <Schema id=\"schema\">\n" );
+    fprintf( fp, "      <gx:SimpleArrayField name=\"heartrate\" type=\"int\">\n" );
+    fprintf( fp, "        <displayName>Heart Rate</displayName>\n" );
+    fprintf( fp, "      </gx:SimpleArrayField>\n" );
+    fprintf( fp, "      <gx:SimpleArrayField name=\"cadence\" type=\"int\">\n" );
+    fprintf( fp, "        <displayName>Cadence</displayName>\n" );
+    fprintf( fp, "      </gx:SimpleArrayField>\n" );
+    fprintf( fp, "      <gx:SimpleArrayField name=\"power\" type=\"float\">\n" );
+    fprintf( fp, "        <displayName>Power</displayName>\n" );
+    fprintf( fp, "      </gx:SimpleArrayField>\n" );
+    fprintf( fp, "    </Schema>\n" );
+    fprintf( fp, "    <Folder>\n" );
+    fprintf( fp, "      <name>Tracks</name>\n" );
+
+    fprintf( fp, "      <Placemark>\n" );
+    fprintf( fp, "        <name>%s</name>\n", "Southern Footpoint" );
+    fprintf( fp, "        <styleUrl>#multiTrack</styleUrl>\n" );
+    fprintf( fp, "        <gx:Track>\n" );
+    fprintf( fp, "          <altitudeMode>absolute</altitudeMode>\n");
+    fprintf( fp, "          <gx:interpolate>1</gx:interpolate>\n");
+    for (j=0; j<med->H5_nT; j++) fprintf( fp, "          <when>%s</when>\n", med->H5_IsoTimes[j] );
+    for (j=0; j<med->H5_nT; j++) fprintf( fp, "          <gx:coord>%.10g %.10g %.10g</gx:coord>\n", med->H5_Pfs_geod_LatLon[j][1], med->H5_Pfs_geod_LatLon[j][0], med->H5_Pfs_geod_Height[j]*1e3 );
+/*
+    fprintf( fp, "          <ExtendedData>\n" );
+    fprintf( fp, "            <SchemaData schemaUrl=\"#schema\">\n" );
+    fprintf( fp, "              <gx:SimpleArrayData name=\"cadence\">\n" );
+    fprintf( fp, "                <gx:value>86</gx:value>\n" );
+    fprintf( fp, "                <gx:value>103</gx:value>\n" );
+    fprintf( fp, "                <gx:value>108</gx:value>\n" );
+    fprintf( fp, "                <gx:value>113</gx:value>\n" );
+    fprintf( fp, "                <gx:value>113</gx:value>\n" );
+    fprintf( fp, "                <gx:value>113</gx:value>\n" );
+    fprintf( fp, "                <gx:value>113</gx:value>\n" );
+    fprintf( fp, "              </gx:SimpleArrayData>\n" );
+    fprintf( fp, "              <gx:SimpleArrayData name=\"heartrate\">\n" );
+    fprintf( fp, "                <gx:value>181</gx:value>\n" );
+    fprintf( fp, "                <gx:value>177</gx:value>\n" );
+    fprintf( fp, "                <gx:value>175</gx:value>\n" );
+    fprintf( fp, "                <gx:value>173</gx:value>\n" );
+    fprintf( fp, "                <gx:value>173</gx:value>\n" );
+    fprintf( fp, "                <gx:value>173</gx:value>\n" );
+    fprintf( fp, "                <gx:value>173</gx:value>\n" );
+    fprintf( fp, "              </gx:SimpleArrayData>\n" );
+    fprintf( fp, "              <gx:SimpleArrayData name=\"power\">\n" );
+    fprintf( fp, "                <gx:value>327.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>177.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>179.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>162.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>166.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>177.0</gx:value>\n" );
+    fprintf( fp, "                <gx:value>183.0</gx:value>\n" );
+    fprintf( fp, "              </gx:SimpleArrayData>\n" );
+    fprintf( fp, "            </SchemaData>\n" );
+    fprintf( fp, "          </ExtendedData>\n" );
+*/
+    fprintf( fp, "        </gx:Track>\n" );
+    fprintf( fp, "      </Placemark>\n" );
+
+    fprintf( fp, "      <Placemark>\n" );
+    fprintf( fp, "        <name>%s</name>\n", "Northern Footpoint" );
+    fprintf( fp, "        <styleUrl>#multiTrack</styleUrl>\n" );
+    fprintf( fp, "        <gx:Track>\n" );
+    fprintf( fp, "          <altitudeMode>absolute</altitudeMode>\n");
+    fprintf( fp, "          <gx:interpolate>1</gx:interpolate>\n");
+    for (j=0; j<med->H5_nT; j++) fprintf( fp, "          <when>%s</when>\n", med->H5_IsoTimes[j] );
+    for (j=0; j<med->H5_nT; j++) fprintf( fp, "          <gx:coord>%.10g %.10g %.10g</gx:coord>\n", med->H5_Pfn_geod_LatLon[j][1], med->H5_Pfn_geod_LatLon[j][0], med->H5_Pfn_geod_Height[j] );
+    fprintf( fp, "        </gx:Track>\n" );
+    fprintf( fp, "      </Placemark>\n" );
+
+
+    fprintf( fp, "    </Folder>\n" );
+    fprintf( fp, "  </Document>\n" );
+    fprintf( fp, "</kml>\n" );
+
+
+}
 
 
 
@@ -459,7 +659,7 @@ int main( int argc, char *argv[] ){
     herr_t          status;
     hsize_t         Dims[4], Offset[4], SlabSize[4];
     int             iT;
-    double          Kp, T89Q_Kp;
+    double          ForceKp;
     double          GeodLat, GeodLong, GeodHeight, MLAT, MLON, MLT;
     Lgm_MagEphemData *med;
 
@@ -578,7 +778,7 @@ int main( int argc, char *argv[] ){
      */
     FootpointHeight = arguments.FootPointHeight;
     Quality         = arguments.Quality;
-    Kp              = arguments.Kp;
+    ForceKp         = arguments.Kp;
     Verbosity       = arguments.Verbosity;
     Colorize        = arguments.Colorize;
     Force           = arguments.Force;
@@ -618,8 +818,8 @@ int main( int argc, char *argv[] ){
         printf("\n");
         printf( "\t                Internal Model: %s\n", IntModel );
         printf( "\t                External Model: %s\n", ExtModel );
-        if ( Kp >= 0.0 ) {
-            printf( "\t              Forcing Kp to be: %g\n", Kp );
+        if ( ForceKp >= 0.0 ) {
+            printf( "\t              Forcing Kp to be: %g\n", ForceKp );
         }
         printf( "\t          FootpointHeight [km]: %g\n", FootpointHeight );
         printf( "\t                    L* Quality: %d\n", Quality );
@@ -681,11 +881,11 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_igrf;
     } else if ( !strcmp( ExtModel, "OP77Q" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_OP77;
-        Kp = 2;
+        ForceKp    = OP77Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89Q" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
-        T89Q_Kp = 2;
+        ForceKp    = T89Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
@@ -708,6 +908,7 @@ int main( int argc, char *argv[] ){
         // default
         MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
     }
+
 
 
 
@@ -937,6 +1138,7 @@ if (file >= 0 ){
         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
         printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
     }
+    LGM_ARRAY_2D_FREE( HdfFileTimes );
 }
 }
 
@@ -1306,14 +1508,11 @@ printf("sclkdp = %lf\n", sclkdp);
                         Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
                         Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
-                        if ( OverRideKp ) {
-                            Kp = T89Q_Kp;
-                        }
 
-                        if ( Kp >= 0.0 ) {
-                            MagEphemInfo->LstarInfo->mInfo->fKp = Kp;
-                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(Kp+0.5);
-                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 5) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
+                        if ( ForceKp >= 0.0 ) {
+                            MagEphemInfo->LstarInfo->mInfo->fKp = ForceKp;
+                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(ForceKp+0.5);
+                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 6) MagEphemInfo->LstarInfo->mInfo->Kp = 6;
                             if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
                         }
 
@@ -1333,7 +1532,7 @@ printf("sclkdp = %lf\n", sclkdp);
                          */
                         printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
                         printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                        printf("\t\tMET: %s   OrbitNumber: %d\n", sclkch, MagEphemInfo->OrbitNumber );
+                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
                         printf("\t--------------------------------------------------------------------------------------------------\n");
                         Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
@@ -1342,7 +1541,6 @@ printf("sclkdp = %lf\n", sclkdp);
                         /*
                          * Write a row of data into the txt file
                          */
-printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mInfo->fKp);
                         Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
 
 
@@ -1735,6 +1933,12 @@ printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mI
                     sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
 
 
+                    /*
+                     * Write KML file -- testing....
+                     */
+                    FILE *KmlFile = fopen( "Puke.kml", "w" );
+                    Lgm_WriteMagEphemDataKML( KmlFile, med->H5_nT, med );
+                    fclose( KmlFile );
 
 
 
@@ -1753,7 +1957,6 @@ printf("MagEphemInfo->LstarInfo->mInfo->fKp = %g\n", MagEphemInfo->LstarInfo->mI
     } // end JD loop
 
 
-    //Lgm_DateTime_Destroy( myUTC );
     free( ShellFile );
     free( OutFile );
     free( HdfOutFile );

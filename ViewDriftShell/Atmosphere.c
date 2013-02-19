@@ -433,7 +433,7 @@ void GetScatterColor( Lgm_Vector v, double Color[3] ){
 
     int         i, j;
     int         CameraAbove;
-    int         CameraInAtmosphere;
+    //int         CameraInAtmosphere;
     double      tFar, tNear, tMinOuter, tMaxOuter, tMinOuterFwd;
     double      CameraDepth[4], SunDepth[4], SampleDepth[4];
     double      cHeight, cAltitude, vHeight;
@@ -478,7 +478,7 @@ void GetScatterColor( Lgm_Vector v, double Color[3] ){
      *  Test to see if we are inside or outside of the atmosphere.
      */
     CameraAbove        = TRUE;
-    CameraInAtmosphere = FALSE;
+    //CameraInAtmosphere = FALSE;
     if ( tNear <= 0.0 ){
 
         /*
@@ -487,7 +487,7 @@ void GetScatterColor( Lgm_Vector v, double Color[3] ){
          */
 
         // Compute Height and Altitude of Camera.
-        CameraInAtmosphere = TRUE;
+        //CameraInAtmosphere = TRUE;
         tNear = 0.0;
         cHeight   = Lgm_NormalizeVector( &c );                          // Camera Height
         cAltitude = (cHeight - aInfo->InnerSphere.Radius)*aInfo->Scale; // Camera Altitude

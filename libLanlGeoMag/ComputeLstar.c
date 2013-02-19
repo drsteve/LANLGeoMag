@@ -19,6 +19,7 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  *
  * Returns a flag that is set as follows;
  *
+ *     -1: Too many minima -- bad or weird field line.
  *      0: Field line has only a single minimum.
  *      1: Field line has multiple minima, but these wont affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
  *      2: Field line has multiple minima, and these will affect particles for the pitch angle implied by LstarInfo->mInfo->Bm.
@@ -66,13 +67,13 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         OldDiff = Diff;
         Diff    = m->Bmag[i] - m->Bmag[i-1];
 
-        if ( (Diff > 0.0) && (OldDiff < 0.0) ) {
+        if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima < 100)  ) {
             iMinima[nMinima] = i-1;
             Minima[nMinima] = m->Bmag[i-1];
             ++nMinima;
         }
 
-        if ( (Diff < 0.0) && (OldDiff > 0.0) ) {
+        if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima < 100) ) {
             iMaxima[nMaxima] = i-1;
             Maxima[nMaxima] = m->Bmag[i-1];
             ++nMaxima;
@@ -82,7 +83,11 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     if ( Verbosity > 1 ) {
 
         if ( nMinima > 1 ) {
-            printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            if ( nMinima >= 99 ) {
+                printf("\t\tThis Field line has multiple minima (at least %d minima detected). Probably on a bizzare field line (TS04 model?)\n", nMinima );
+            } else {
+                printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
+            }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMinima; i++ ){
                     printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
@@ -92,7 +97,11 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         }
 
         if ( nMaxima > 1 ) {
-            printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            if ( nMinima >= 99 ) {
+                printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizzare field line (TS04 model?)\n", nMaxima );
+            } else {
+                printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+            }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMaxima; i++ ){
                     printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
@@ -115,6 +124,10 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     for ( i=0; i<nMaxima; i++ ){
         if ( Maxima[i] > m->Bm ) Type = 2;
     }
+
+
+    // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
+    if ( nMinima > 90 ) Type = -1;
 
     
     return( Type );
@@ -954,34 +967,48 @@ LstarInfo->mInfo->Hmax = 0.05;
 //printf("LstarInfo->mInfo->Pm_South (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Pn[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Pn[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
+if (LstarInfo->VerbosityLevel > 1) {
+    printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
+}
 Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
 if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sTracing Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+    printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
 }
 LstarInfo->Spherical_Footprint_Ps[k] = v2;
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &puke, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Ps[k] (SM Coords) = %g %g %g\n", puke.x, puke.y, puke.z );
-Type = ClassifyFL( k, LstarInfo );
-if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
-}
-//printf("k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
-//if (0==1){
-if ( Type > 1 ){
-    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-    //printf("\t\tRedoing!  k, Type = %d %d Ifound = %g\n", k, Type, Ifound);
-    if (LstarInfo->VerbosityLevel > 1) {
-        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
-    }
-}
-//}
 
-            PredMinusActualMlat = pred_mlat - mlat;
+            Type = ClassifyFL( k, LstarInfo );
             if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, Ifound, Ifound-I, PostStr );
-                printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
             }
+
+            if ( Type > 1 ){
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
+                }
+                FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+
+                PredMinusActualMlat = pred_mlat - mlat;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                }
+
+            } else {
+
+                PredMinusActualMlat = pred_mlat - mlat;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I, PostStr );
+                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                }
+
+
+            }
+
+
 
 
 
@@ -1219,10 +1246,10 @@ M = ELECTRON_MASS; // kg
              *  the field line is defined that we are trying to save.
              */
             //if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ){
-            Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo );
+             if ( Lgm_TraceToSphericalEarth( &LstarInfo->Mirror_Ps[k], &uu, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-7, LstarInfo->mInfo ) ) {
                 LstarInfo->Mirror_Ss[k] += LstarInfo->mInfo->Trace_s;
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
-            //}
+            }
 
 
 
@@ -1324,9 +1351,9 @@ FIX
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
         printf("\t\t%s  L* (Using McIllwain M):                %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
-        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n%s", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n%s", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n%s", PreStr, PostStr );
+        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
         printf("\n\n\n" );
     }
 
