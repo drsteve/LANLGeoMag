@@ -77,6 +77,7 @@ void GoFullScreen( gpointer callback_data, guint callback_action, GtkWidget *men
 void GoNormalScreen( gpointer callback_data, guint callback_action, GtkWidget *menu_item );
 GtkWidget *CreateOpenMagEphemFileDialog( void );
 GtkWidget *CreateSaveRasterFileDialog( void );
+void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius );
 
 
 

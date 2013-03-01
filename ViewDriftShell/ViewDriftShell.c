@@ -3479,7 +3479,7 @@ static void realize( GtkWidget *widget, gpointer data) {
     /*
      * Load the textures in
      */
-//    LoadTextures();
+    LoadTextures();
 
     GLfloat ambient[]         = {0.0, 0.0, 0.0, 1.0};
     GLfloat diffuse[]         = {1.0, 1.0, 1.0, 1.0};
@@ -3650,7 +3650,17 @@ void DrawScene( ) {
 
     /* Render Objects */
 //    glUseProgram( g_shaderMyTest );
-    glCallList( AxesDL );
+
+
+
+
+    /*
+     * These are the various coordinate axes.
+     */
+//    glCallList( AxesDL );
+
+
+
 //    glUseProgram( 0 );
 
     if ( ShowEarth ) glCallList( EarthDL );
@@ -3665,10 +3675,10 @@ void DrawScene( ) {
 
 //20100305
 //glUseProgram( g_shaderMyTest );
-glCallList( DipoleAxisDL );
+/////////////////////////glCallList( DipoleAxisDL );
 //glUseProgram( 0 );
 //20100305
-glCallList( SunDirectionDL );
+/////////////////////////glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
 //glCallList( EqPlaneDL );
 
@@ -3916,14 +3926,6 @@ if (LightingStyle == 2){
 
 
 
-    /*
-     * The sat positions and orbits are recomputed in the current coord system each time
-     * (this is because the orbits need different times at each point in the orbit -- i.e
-     *  a simple rotation wont do it.)
-     */
-    glCallList( SatsDL );
-    glCallList( SatOrbitsDL );
-    DrawSatLabels();
 
 
 
@@ -4020,7 +4022,7 @@ glMaterialf(  GL_BACK, GL_SHININESS, gInfo->DriftShellMaterial[i].shininess*128.
 glFrontFace(GL_CCW);
 
 
-    glCallList( ScPositionDL );
+//    glCallList( ScPositionDL );
 
     //glUseProgram( 0 );
 
@@ -4028,6 +4030,14 @@ glFrontFace(GL_CCW);
     glPopMatrix();
 
 
+    /*
+     * The sat positions and orbits are recomputed in the current coord system each time
+     * (this is because the orbits need different times at each point in the orbit -- i.e
+     *  a simple rotation wont do it.)
+     */
+    glCallList( SatsDL );
+    glCallList( SatOrbitsDL );
+    DrawSatLabels();
 
 
     int w = g_imageWidth;
@@ -5603,39 +5613,34 @@ void create_ViewDriftShell( void *data ) {
 
     // should not have to include GDK_POINTER_MOTION_MASK here but openSUSE 11.2 (or KDE 4.3) doesnt seem to pass me the
     // GDK_BUTTON1_MOTION_MASK type masks...
-//    gtk_widget_add_events( drawing_area, GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK
-//                                         | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
+    gtk_widget_add_events( drawing_area, GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK
+                                         | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
 
-    g_signal_connect_after(     G_OBJECT( drawing_area ), "realize",                  G_CALLBACK( realize ),                   NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "configure_event",          G_CALLBACK( configure_event ),           NULL );
-//   g_signal_connect(           G_OBJECT( drawing_area ), "expose_event",             G_CALLBACK( expose_event ),              NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "button_press_event",       G_CALLBACK( button_press_event ),        NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "button_release_event",     G_CALLBACK( button_release_event ),      NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "motion_notify_event",      G_CALLBACK( motion_notify_event ),       NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "map_event",                G_CALLBACK( map_event ),                 NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "unmap_event",              G_CALLBACK( unmap_event ),               NULL );
-//    g_signal_connect(           G_OBJECT( drawing_area ), "visibility_notify_event",  G_CALLBACK( visibility_notify_event ),   NULL );
-/*
-    g_signal_connect_swapped(   G_OBJECT( ViewDriftShellWindow ),       "key_press_event",          G_CALLBACK( key_press_event ),           drawing_area );
-*/
+    g_signal_connect_after(     G_OBJECT( drawing_area ),           "realize",                  G_CALLBACK( realize ),                   NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "configure_event",          G_CALLBACK( configure_event ),           NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "expose_event",             G_CALLBACK( expose_event ),              NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "button_press_event",       G_CALLBACK( button_press_event ),        NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "button_release_event",     G_CALLBACK( button_release_event ),      NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "motion_notify_event",      G_CALLBACK( motion_notify_event ),       NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "map_event",                G_CALLBACK( map_event ),                 NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "unmap_event",              G_CALLBACK( unmap_event ),               NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "visibility_notify_event",  G_CALLBACK( visibility_notify_event ),   NULL );
+    g_signal_connect_swapped(   G_OBJECT( ViewDriftShellWindow ),   "key_press_event",          G_CALLBACK( key_press_event ),           drawing_area );
 
     gtk_box_pack_start( GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0 );
     gtk_widget_show( drawing_area );
 
-//gtk_widget_show( GTK_WINDOW( ViewDriftShellWindow ) );
-//while(1);
+printf("HERE\n");
 
     /*
      *  Set Pitch Angles to Show
      */
-    //ShowAllPitchAngles = TRUE;
     ShowAllPitchAngles = FALSE;
     for (i=0; i<=ObjInfo->MagEphemInfo->nAlpha; i++){
         //ShowPitchAngle[i] = TRUE;
         ShowPitchAngle[i] = FALSE;
         ShowPitchAngle2[i] = FALSE;
     }
-//    ShowPitchAngle[9] = TRUE;
 
 
 
@@ -5667,8 +5672,6 @@ void create_ViewDriftShell( void *data ) {
 
 
     gtk_widget_show( ViewDriftShellWindow );
-//printf("here\n");
-//exit(0);
 
 
     return;
