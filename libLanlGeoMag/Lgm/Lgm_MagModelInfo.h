@@ -9,6 +9,7 @@
 #include "Lgm/Lgm_DFI_RBF.h"
 #include "Lgm/Lgm_Tsyg2004.h"
 #include "Lgm/Lgm_Tsyg2007.h"
+#include "Lgm/Lgm_Tsyg1996.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 //#include "Lgm/Lgm_FastPowPoly.h"
@@ -431,6 +432,11 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
+     *  Info structure for T96
+     */
+    LgmTsyg1996_Info    T96_Info;
+
+    /*
      *  Info structure for TS04
      */
     LgmTsyg2004_Info    TS04_Info;
@@ -603,6 +609,13 @@ void lgm_field_t96mod_mgh__(double *PARMOD, double *AMDF, int *IYEAR,int *IDAY,i
 void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *, double *, double *, double *, double * );
 
 
+/*
+ *  T96 
+ *
+ *  Function Prototypes for T96 model
+ */
+int  Lgm_B_T96( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo );
 
 /*
  *  TS04 Optimized
@@ -720,6 +733,7 @@ void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_T96(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo);

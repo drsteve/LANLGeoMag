@@ -139,6 +139,8 @@ void Lgm_Init_T96( LgmTsyg1996_Info *t ){
     t->OLD_Y  = -9e99;
     t->OLD_Z  = -9e99;
 
+    t->INTERCON_M_FLAG = 0;
+
 
     return;
 
@@ -150,21 +152,21 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
     /*
      *
      *     RELEASE DATE OF THIS (FORTRAN) VERSION:   JUNE 22, 1996.
-     *     LAST UPDATE: MAY 01, 2006:  IN THE S/R DIPOLE, SPS AND CPS WERE ADDED IN THE SAVE STATEMENT
+     *     LAST UPDATE: MAY 01, 2006:  IN THE S/R DIPOLE_T96, SPS AND CPS WERE ADDED IN THE SAVE STATEMENT
      *     ----------------------------------------------------------------------
      *     
      *       WITH TWO CORRECTIONS, SUGGESTED BY T.SOTIRELIS' COMMENTS (APR.7, 1997)
      *     
-     *       (1) A "STRAY "  CLOSING PARENTHESIS WAS REMOVED IN THE S/R   R2_BIRK
+     *       (1) A "STRAY "  CLOSING PARENTHESIS WAS REMOVED IN THE S/R   R2_BIRK_T96
      *       (2) A 0/0 PROBLEM ON THE Z-AXIS WAS SIDESTEPPED (LINES 44-46 OF THE
-     *            DOUBLE PRECISION FUNCTION XKSI)
+     *            DOUBLE PRECISION FUNCTION XKSI_T96)
      *     --------------------------------------------------------------------
      *      DATA-BASED MODEL CALIBRATED BY (1) SOLAR WIND PRESSURE PDYN (NANOPASCALS),
      *                (2) DST (NANOTESLA),  (3) BYIMF, AND (4) BZIMF (NANOTESLA).
      *      THESE INPUT PARAMETERS SHOULD BE PLACED IN THE FIRST 4 ELEMENTS
      *      OF THE ARRAY PARMOD(10).
      *     
-     *        THE REST OF THE INPUT VARIABLES ARE: THE GEODIPOLE TILT ANGLE PS (RADIANS),
+     *        THE REST OF THE INPUT VARIABLES ARE: THE GEODIPOLE_T96 TILT ANGLE PS (RADIANS),
      *      AND   X,Y,Z -  GSM POSITION (RE)
      *     
      *        IOPT  IS JUST A DUMMY INPUT PARAMETER, NECESSARY TO MAKE THIS SUBROUTINE
@@ -311,14 +313,14 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
      *    (3) OUTSIDE THE MAGNETOSPHERE AND B.LAYER
      *       FIRST OF ALL, CONSIDER THE CASES (1) AND (2):
      */
-    if ( SIGMA < (S0+DSIG) ) { // CALCULATE THE T95_06 FIELD (WITH THE POTENTIAL "PENETRATED" INTERCONNECTION FIELD):
+    if ( SIGMA < (S0+DSIG) ) { // CALCULATE THE T95_06 FIELD (WITH THE POTENTIAL "PENETRATED" INTERCON_T96NECTION FIELD):
 
 
-        DIPSHLD( PPS, XX, YY, ZZ, &CFX, &CFY, &CFZ, t );
-        TAILRC96( SPS, XX, YY, ZZ, &BXRC, &BYRC, &BZRC, &BXT2, &BYT2, &BZT2, &BXT3, &BYT3, &BZT3, t );
-        BIRK1TOT_02( PPS, XX, YY, ZZ, &R1X, &R1Y, &R1Z, t );
-        BIRK2TOT_02( PPS, XX, YY, ZZ, &R2X, &R2Y, &R2Z, t );
-        INTERCON( XX, YS*XAPPA, ZS*XAPPA, &RIMFX, &RIMFYS, &RIMFZS, t );
+        DIPSHLD_T96( PPS, XX, YY, ZZ, &CFX, &CFY, &CFZ, t );
+        TAILRC96_T96( SPS, XX, YY, ZZ, &BXRC, &BYRC, &BZRC, &BXT2, &BYT2, &BZT2, &BXT3, &BYT3, &BZT3, t );
+        BIRK1TOT_02_T96( PPS, XX, YY, ZZ, &R1X, &R1Y, &R1Z, t );
+        BIRK2TOT_02_T96( PPS, XX, YY, ZZ, &R2X, &R2Y, &R2Z, t );
+        INTERCON_T96( XX, YS*XAPPA, ZS*XAPPA, &RIMFX, &RIMFYS, &RIMFZS, t );
 
         RIMFY = RIMFYS*CT + RIMFZS*ST;
         RIMFZ = RIMFZS*CT - RIMFYS*ST;
@@ -340,14 +342,14 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
             FINT = 0.5*(1.0-g);
             FEXT = 0.5*(1.0+g);
                  
-            DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ );
+            DIPOLE_T96( PS, X, Y, Z, &QX, &QY, &QZ, t );
             *BX = (FX+QX)*FINT + OIMFX*FEXT - QX;
             *BY = (FY+QY)*FINT + OIMFY*FEXT - QY;
             *BZ = (FZ+QZ)*FINT + OIMFZ*FEXT - QZ;
         } //   THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING POSSIBILITY IS NOW THE CASE (3):
 
     } else {
-        DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ );
+        DIPOLE_T96( PS, X, Y, Z, &QX, &QY, &QZ, t );
         *BX = OIMFX - QX;
         *BY = OIMFY - QY;
         *BZ = OIMFZ - QZ;
@@ -360,17 +362,17 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
 
 /*
  *   CALCULATES GSM COMPONENTS OF THE EXTERNAL MAGNETIC FIELD DUE TO
- *    SHIELDING OF THE EARTH'S DIPOLE ONLY
+ *    SHIELDING OF THE EARTH'S DIPOLE_T96 ONLY
  */
-void DIPSHLD( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) {
+void DIPSHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) {
 
     double HX, HY, HZ;
     double FX, FY, FZ;
     double A1[] = {-9e99,  0.24777, -27.003, -0.46815,  7.0637, -1.5918, -0.90317e-01, 57.522, 13.757, 2.0100, 10.458, 4.5798, 2.1695 };
     double A2[] = {-9e99, -0.65385, -18.061, -0.40457, -5.0995, 1.2846,   0.78231e-01, 39.592, 13.291, 1.9970, 10.062, 4.5140, 2.1558 };
 
-    CYLHARM( A1, X, Y, Z, &HX, &HY, &HZ );
-    CYLHAR1( A2, X, Y, Z, &FX, &FY, &FZ );
+    CYLHARM_T96( A1, X, Y, Z, &HX, &HY, &HZ );
+    CYLHAR1_T96( A2, X, Y, Z, &FX, &FY, &FZ );
 
     *BX = HX*tInfo->cos_psi + FX*tInfo->sin_psi;
     *BY = HY*tInfo->cos_psi + FY*tInfo->sin_psi;
@@ -381,7 +383,7 @@ void DIPSHLD( double PS, double X, double Y, double Z, double *BX, double *BY, d
 
 
 /*
-*  THIS CODE YIELDS THE SHIELDING FIELD FOR THE PERPENDICULAR DIPOLE
+*  THIS CODE YIELDS THE SHIELDING FIELD FOR THE PERPENDICULAR DIPOLE_T96
 *
 *
 *
@@ -404,11 +406,11 @@ void DIPSHLD( double PS, double X, double Y, double Z, double *BX, double *BY, d
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
 */
-void CYLHARM( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void CYLHARM_T96( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     int     I;
     double  RHO, SINFI, COSFI, SINFI2, COSFI2, SI2CO2;
-    double  DZETA, XJ0, XJ1, XEXP, XKSI, BRHO, BPHI;
+    double  DZETA, XJ0, XJ1, XEXP, XKSI_T96, BRHO, BPHI;
 
     RHO = sqrt( Y*Y + Z*Z );
     if ( RHO < 1.0e-8 ) {
@@ -429,8 +431,8 @@ void CYLHARM( double A[], double X, double Y, double Z, double *BX, double *BY, 
 
     for ( I=1; I<=3; I++ ) {
         DZETA = RHO/A[I+6];
-        XJ0   = BES( DZETA, 0 );
-        XJ1   = BES( DZETA, 1 );
+        XJ0   = BES_T96( DZETA, 0 );
+        XJ1   = BES_T96( DZETA, 1 );
         XEXP  = exp( X/A[I+6] );
 
         *BX = *BX - A[I]*XJ1*XEXP*SINFI;
@@ -440,14 +442,14 @@ void CYLHARM( double A[], double X, double Y, double Z, double *BX, double *BY, 
 
     for ( I=4; I<=6; I++ ) {
         DZETA = RHO/A[I+6];
-        XKSI  = X/A[I+6];
-        XJ0   = BES( DZETA, 0 );
-        XJ1   = BES( DZETA, 1 );
-        XEXP  = exp( XKSI );
-        BRHO  = ( XKSI*XJ0-(DZETA*DZETA + XKSI - 1.0 )*XJ1/DZETA ) * XEXP*SINFI;
-        BPHI  = ( XJ0 + XJ1/DZETA*(XKSI-1.0) ) * XEXP*COSFI;
+        XKSI_T96  = X/A[I+6];
+        XJ0   = BES_T96( DZETA, 0 );
+        XJ1   = BES_T96( DZETA, 1 );
+        XEXP  = exp( XKSI_T96 );
+        BRHO  = ( XKSI_T96*XJ0-(DZETA*DZETA + XKSI_T96 - 1.0 )*XJ1/DZETA ) * XEXP*SINFI;
+        BPHI  = ( XJ0 + XJ1/DZETA*(XKSI_T96-1.0) ) * XEXP*COSFI;
 
-        *BX += A[I]*( DZETA*XJ0 + XKSI*XJ1 )*XEXP*SINFI;
+        *BX += A[I]*( DZETA*XJ0 + XKSI_T96*XJ1 )*XEXP*SINFI;
         *BY += A[I]*( BRHO*COSFI - BPHI*SINFI );
         *BZ += A[I]*( BRHO*SINFI + BPHI*COSFI );
     }
@@ -459,7 +461,7 @@ void CYLHARM( double A[], double X, double Y, double Z, double *BX, double *BY, 
 
 
 /*
- *  THIS CODE YIELDS THE SHIELDING FIELD FOR THE PARALLEL DIPOLE
+ *  THIS CODE YIELDS THE SHIELDING FIELD FOR THE PARALLEL DIPOLE_T96
  *
  *
  *
@@ -484,10 +486,10 @@ void CYLHARM( double A[], double X, double Y, double Z, double *BX, double *BY, 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *
  */
-void CYLHAR1( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void CYLHAR1_T96( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     int     I;
-    double  RHO, SINFI, COSFI, DZETA, XJ0, XJ1, XEXP, BRHO, XKSI;
+    double  RHO, SINFI, COSFI, DZETA, XJ0, XJ1, XEXP, BRHO, XKSI_T96;
 
     RHO = sqrt( Y*Y + Z*Z );
 
@@ -503,10 +505,10 @@ void CYLHAR1( double A[], double X, double Y, double Z, double *BX, double *BY, 
 
     for ( I=1; I<=3; I++ ) {
         DZETA = RHO/A[I+6];
-        XKSI  = X/A[I+6];
-        XJ0   = BES( DZETA, 0 );
-        XJ1   = BES( DZETA, 1 );
-        XEXP  = exp(XKSI);
+        XKSI_T96  = X/A[I+6];
+        XJ0   = BES_T96( DZETA, 0 );
+        XJ1   = BES_T96( DZETA, 1 );
+        XEXP  = exp(XKSI_T96);
         BRHO  = XJ1*XEXP;
         *BX   = *BX - A[I]*XJ0*XEXP;
         *BY   = *BY + A[I]*BRHO*COSFI;
@@ -514,12 +516,12 @@ void CYLHAR1( double A[], double X, double Y, double Z, double *BX, double *BY, 
     }
     for ( I=4; I<=6; I++ ) {
         DZETA = RHO/A[I+6];
-        XKSI  = X/A[I+6];
-        XJ0   = BES(DZETA,0);
-        XJ1   = BES(DZETA,1);
-        XEXP  = DEXP(XKSI);
-        BRHO  = (DZETA*XJ0+XKSI*XJ1)*XEXP;
-        *BX   += A[I]*( DZETA*XJ1 - XJ0*(XKSI+1.0) ) * XEXP;
+        XKSI_T96  = X/A[I+6];
+        XJ0   = BES_T96(DZETA,0);
+        XJ1   = BES_T96(DZETA,1);
+        XEXP  = exp(XKSI_T96);
+        BRHO  = (DZETA*XJ0+XKSI_T96*XJ1)*XEXP;
+        *BX   += A[I]*( DZETA*XJ1 - XJ0*(XKSI_T96+1.0) ) * XEXP;
         *BY   += A[I]*BRHO*COSFI;
         *BZ   += A[I]*BRHO*SINFI;
     }
@@ -533,7 +535,7 @@ void CYLHAR1( double A[], double X, double Y, double Z, double *BX, double *BY, 
  * Bessel functions of x of the first kind of order 0
  * Its much easier to just use the built-in math function j0()....
  */
-double BES0( double X ) {
+double BES_T960_T96( double X ) {
 
     double X32, R, XD3, F0, T0;
 
@@ -555,14 +557,14 @@ double BES0( double X ) {
  * Bessel functions of x of the first kind of order 1
  * Its much easier to just use the built-in math function j1()....
  */
-double BES1( double X ) {
+double BES_T961_T96( double X ) {
 
-    double X32, R, BES1XM1, XD3, F1, T1;
+    double X32, R, BES_T961_T96XM1, XD3, F1, T1;
 
     if ( fabs(X) < 3.0 ) {
         X32 = X*X/9.0;
-        BES1XM1 =0.5-X32*(0.56249985-X32*(0.21093573-X32* (0.03954289-X32*(0.00443319-X32*(0.00031761 -X32*0.00001109)))));
-        R = BES1XM1*X;
+        BES_T961_T96XM1 =0.5-X32*(0.56249985-X32*(0.21093573-X32* (0.03954289-X32*(0.00443319-X32*(0.00031761 -X32*0.00001109)))));
+        R = BES_T961_T96XM1*X;
     } else {
         XD3  = 3.0/X;
         F1   =  0.79788456+XD3*(0.00000156+XD3*(0.01659667+XD3* (0.00017105-XD3*(0.00249511-XD3*(0.00113653 -XD3*0.00020033)))));
@@ -577,13 +579,13 @@ double BES1( double X ) {
  * Bessel functions of x of the first kind of order K
  * Its much easier to just use the built-in math function jn(K,X)....
  */
-double BES( double X, int K ) {
+double BES_T96( double X, int K ) {
 
     int N;
     double  R, G, XJN, XJNM1, XJNP1, SUM;
 
-    if ( K == 0 ) return( BES0( X ) );
-    if ( K == 1 ) return( BES1( X ) );
+    if ( K == 0 ) return( BES_T960_T96( X ) );
+    if ( K == 1 ) return( BES_T961_T96( X ) );
     if ( X == 0.0 ) return( 0.0 );
 
     G = 2.0/X;
@@ -591,8 +593,8 @@ double BES( double X, int K ) {
     if ( X > (double)K ) {
 
         N = 1;
-        XJN   = BES1(X);
-        XJNM1 = BES0(X);
+        XJN   = BES_T961_T96(X);
+        XJNM1 = BES_T960_T96(X);
 
         for(;;){
 
@@ -658,7 +660,7 @@ double BES( double X, int K ) {
  *      Description of parameters:
  *
  *     X,Y,Z -   GSM POSITION
- *      BX,BY,BZ - INTERCONNECTION FIELD COMPONENTS INSIDE THE MAGNETOSPHERE
+ *      BX,BY,BZ - INTERCON_T96NECTION FIELD COMPONENTS INSIDE THE MAGNETOSPHERE
  *        OF A STANDARD SIZE (TO TAKE INTO ACCOUNT EFFECTS OF PRESSURE CHANGES,
  *         APPLY THE SCALING TRANSFORMATION)
  *
@@ -670,9 +672,7 @@ double BES( double X, int K ) {
  *       harmonics (3+3)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void INTERCON( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ){
-//NOTE!!!!!!!!!!!!!!!
-//SAVE
+void INTERCON_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ){
     int     L, I, K;
     double  CYPI, SYPI, SZRK, CZRK, SQPR, EPR, HX, HY, HZ;
     double  RP[4], RR[4], P[4], R[4];
@@ -680,9 +680,6 @@ void INTERCON( double X, double Y, double Z, double *BX, double *BY, double *BZ,
                            -11824.42793, 18015.66212, 7.99754043,    13.9669886, 90.24475036,  16.75728834,  1015.645781, 
                            1553.493216 };
 
-// M seems to be a flag indicating if we have been here before or not...
-// NOTE!!!!
-// Initialize tInfo->INTERCON_M_FLAG to 0!!!!!!!!!!!!!!!
     if ( tInfo->INTERCON_M_FLAG == 0 ) {
         tInfo->P[1] = A[10];
         tInfo->P[2] = A[11];
@@ -738,7 +735,7 @@ void INTERCON( double X, double Y, double Z, double *BX, double *BY, double *BZ,
  *      (FOR THE RING CURRENT, IT MEANS THE DISTURBANCE OF Bz=-1nT AT ORIGIN,
  *   AND FOR THE TAIL MODES IT MEANS MAXIMAL BX JUST ABOVE THE SHEET EQUAL 1 nT.
  */
-void TAILRC96( double SPS, double X, double Y, double Z, double *BXRC, double *BYRC, double *BZRC, double *BXT2, double *BYT2, double *BZT2, double *BXT3, double *BYT3, double *BZT3, LgmTsyg1996_Info *t ) {
+void TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, double *BYRC, double *BZRC, double *BXT2, double *BYT2, double *BZT2, double *BXT3, double *BYT3, double *BZT3, LgmTsyg1996_Info *t ) {
 
 
     double  ARC[] = { -9e99,    -3.087699646,     3.516259114,        18.81380577,       -13.95772338,   -5.497076303,     0.1712890838,   
@@ -861,20 +858,20 @@ void TAILRC96( double SPS, double X, double Y, double Z, double *BXRC, double *B
     DDZETADZ = ZS*DZSZ/DZETAS;
 
 
-    SHLCAR3X3( ARC, X, Y, Z, SPS, &WX, &WY, &WZ );
-    RINGCURR96( X, Y, Z, &HX, &HY, &HZ, t );
+    SHLCAR3X3_T96( ARC, X, Y, Z, SPS, &WX, &WY, &WZ );
+    RINGCURR96_T96( X, Y, Z, &HX, &HY, &HZ, t );
     *BXRC = WX + HX;
     *BYRC = WY + HY;
     *BZRC = WZ + HZ;
 
-    SHLCAR3X3( ATAIL2, X, Y, Z, SPS, &WX, &WY, &WZ );
-    TAILDISK( X, Y, Z, &HX, &HY, &HZ, t );
+    SHLCAR3X3_T96( ATAIL2, X, Y, Z, SPS, &WX, &WY, &WZ );
+    TAILDISK_T96( X, Y, Z, &HX, &HY, &HZ, t );
     *BXT2 = WX + HX;
     *BYT2 = WY + HY;
     *BZT2 = WZ + HZ;
 
-    SHLCAR3X3( ATAIL3, X, Y, Z, SPS, &WX, &WY, &WZ );
-    TAIL87( X, Z, &HX, &HZ, t );
+    SHLCAR3X3_T96( ATAIL3, X, Y, Z, SPS, &WX, &WY, &WZ );
+    TAIL87_T96( X, Z, &HX, &HZ, t );
     *BXT3 = WX + HX;
     *BYT3 = WY;
     *BZT3 = WZ + HZ;
@@ -921,7 +918,7 @@ void TAILRC96( double SPS, double X, double Y, double Z, double *BXRC, double *B
  *
  *       FOR DETAILS, SEE NB #3, PAGES 70-73
  */
-void RINGCURR96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
+void RINGCURR96_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
 
     int     I;
     double  BI, g, g2, hp, hp2, hm, hm2,S1, S2, DS1DDZ, DS2DDZ, DS1DRHOS, DS2DRHOS;
@@ -987,7 +984,8 @@ void RINGCURR96( double X, double Y, double Z, double *BX, double *BY, double *B
 
     if (RHOS < 1.0e-5) {
         DRHOSDX = 0.0;
-        DRHOSDY = DSIGN(1.0,Y);
+        //DRHOSDY = DSIGN(1.0,Y);
+        DRHOSDY = ( (Y>=0.0) ? +1.0 : -1.0);
         DRHOSDZ = 0.0;
     } else {
         g = XS/RHOS;
@@ -1078,7 +1076,7 @@ void RINGCURR96( double X, double Y, double Z, double *BX, double *BY, double *B
  *
  *             FOR DETAILS, SEE NB #3, PAGES 74-
  */
-void  TAILDISK( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
+void  TAILDISK_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
 
     static double F[]    = { -9e99, -745796.7338, 1176470.141, -444610.529, -57508.01028 };
     static double BETA[] = { -9e99, 7.9250000, 8.0850000, 8.4712500, 27.89500 };
@@ -1114,7 +1112,8 @@ void  TAILDISK( double X, double Y, double Z, double *BX, double *BY, double *BZ
     RHOS = sqrt( g2 + Y*Y );
     if ( RHOS < 1.e-5 ) {
         DRHOSDX = 0.0;
-        DRHOSDY = DSIGN( 1.0, Y );
+        //DRHOSDY = DSIGN( 1.0, Y );
+        DRHOSDY = ( (Y>=0.0) ? +1.0 : -1.0);
         DRHOSDZ = 0.0;
     } else {
         DRHOSDX = (XS-XSHIFT)*DXSX/RHOS;
@@ -1194,12 +1193,12 @@ void  TAILDISK( double X, double Y, double Z, double *BX, double *BY, double *BZ
  *      D   IS THE Y-DEPENDENT SHEET HALF-THICKNESS (INCREASING TOWARDS FLANKS)
  *      RPS  IS THE TILT-DEPENDENT SHIFT OF THE SHEET IN THE Z-DIRECTION,
  *           CORRESPONDING TO THE ASYMPTOTIC HINGING DISTANCE, DEFINED IN THE
- *           MAIN SUBROUTINE (TAILRC96) FROM THE PARAMETERS RH AND DR OF THE
+ *           MAIN SUBROUTINE (TAILRC96_T96) FROM THE PARAMETERS RH AND DR OF THE
  *           T96-TYPE MODULE, AND
  *      WARP  IS THE BENDING OF THE SHEET FLANKS IN THE Z-DIRECTION, DIRECTED
- *           OPPOSITE TO RPS, AND INCREASING WITH DIPOLE TILT AND |Y|
+ *           OPPOSITE TO RPS, AND INCREASING WITH DIPOLE_T96 TILT AND |Y|
  */
-void  TAIL87( double X, double Z, double *BX, double *BZ, LgmTsyg1996_Info *t ) {
+void  TAIL87_T96( double X, double Z, double *BX, double *BZ, LgmTsyg1996_Info *t ) {
 
     double  ZS, ZP, ZM, XNX, XNX2, XC1, XC2, XC22, XR2, XC12, D2, B20, B2P, B2M;
     double  B, BP, BM, XA1, XAP1, XAM1, XA2, XAP2, XAM2, XNA, XNAP, XNAM, F, FP, FM;
@@ -1355,7 +1354,7 @@ void  TAIL87( double X, double Z, double *BX, double *BZ, LgmTsyg1996_Info *t ) 
  *   18 "Cartesian" harmonics
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void SHLCAR3X3( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ ) {
+void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ ) {
 
     int     L, M, K, N, I;
     double  CPS, S3PS, P, Q, CYPI, CYQI, SYPI, SYQI, R, S, SZRK, CZSK, CZRK, SZSK;
@@ -1448,7 +1447,7 @@ void SHLCAR3X3( double A[] , double X, double Y, double Z, double SPS, double *H
 *   CURRENT LOOPS, CIRCULAR ONES ARE USED IN THIS VERSION FOR APPROXIMATING THE
 *   FIELD IN THE OUTER REGION, WHICH IS FASTER.
 */
-void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
+void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
 
 
 
@@ -1581,7 +1580,7 @@ void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *
         XI[2] = Y;
         XI[3] = Z;
         XI[4] = PS;
-        DIPLOOP1( XI, D1, XX1, YY1, t );
+        DIPLOOP1_T96( XI, D1, XX1, YY1, t );
         *BX = *BY = *BZ = 0.0;
         for ( I=1; I<=26; I++ ) {
             *BX += C1[I]*D1[1][I];
@@ -1626,7 +1625,7 @@ void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *
         XI[2] = Y1;
         XI[3] = Z1;
         XI[4] = PS;
-        DIPLOOP1( XI, D1, XX1, YY1, t );
+        DIPLOOP1_T96( XI, D1, XX1, YY1, t );
         BX1 = BY1 = BZ1 = 0.0;
         for ( I=1; I<=26; I++ ) {
             BX1 += C1[I]*D1[1][I];  //   BX1,BY1,BZ1  ARE FIELD COMPONENTS
@@ -1705,7 +1704,7 @@ void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *
         XI[2] = Y2;
         XI[3] = Z2;
         XI[4] = PS;
-        DIPLOOP1( XI, D1, XX1, YY1, t );
+        DIPLOOP1_T96( XI, D1, XX1, YY1, t );
         BX2 = BY2 = BZ2 = 0.0;
         for ( I=1; I<=26; I++ ) {
             BX2 += C1[I]*D1[1][I]; //  BX2,BY2,BZ2  ARE FIELD COMPONENTS IN THE SOUTHERN BOUNDARY POINT
@@ -1734,7 +1733,7 @@ void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *
     /*
      *   NOW, LET US ADD THE SHIELDING FIELD
      */
-    BIRK1SHLD( PS, X, Y, Z, &BSX, &BSY, &BSZ );
+    BIRK1SHLD_T96( PS, X, Y, Z, &BSX, &BSY, &BSZ );
     *BX += BSX;
     *BY += BSY;
     *BZ += BSZ;
@@ -1769,7 +1768,7 @@ void  BIRK1TOT_02( double PS, double X, double Y, double Z, double *BX, double *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
-void DIPLOOP1( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg1996_Info *t ) {
+void DIPLOOP1_T96( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg1996_Info *t ) {
 
     int     I;
     double  X, Y, Z, PS, SPS, RH, DR;
@@ -1804,15 +1803,15 @@ void DIPLOOP1( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg199
         C     = SQP-SQM;
         g = RH+1.0; g2 = g*g;
         h = RH-1.0; h2 = h*h;
-        Q     = DSQRT( g2 + DR2 ) - DSQRT( h2 + DR2 );
+        Q     = sqrt( g2 + DR2 ) - sqrt( h2 + DR2 );
         SPSAS = SPS/R * C/Q;
         CPSAS = sqrt( 1.0-SPSAS*SPSAS );
         XD =  ( XX[I]*DIPX )*CPSAS;
         YD =  ( YY[I]*DIPY );
         ZD = -( XX[I]*DIPX )*SPSAS;
-        DIPXYZ( X-XD, Y-YD, Z-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z);
+        DIPXYZ_T96( X-XD, Y-YD, Z-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z);
         if ( fabs(YD) > 1.0e-10 ) {
-            DIPXYZ( X-XD, Y+YD, Z-ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
+            DIPXYZ_T96( X-XD, Y+YD, Z-ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
         } else {
             BX2X = BY2X = BZ2X = 0.0;
             BX2Z = BY2Z = BZ2Z = 0.0;
@@ -1844,7 +1843,7 @@ void DIPLOOP1( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg199
     ZOCT1 = X*SPSAS + Z*CPSAS;
 
 
-    CROSSLP( XOCT1, YOCT1, ZOCT1, &BXOCT1, &BYOCT1, &BZOCT1, t->CB_T96_LOOPDIP1.XCENTRE[1], t->CB_T96_LOOPDIP1.RADIUS[1], t->CB_T96_LOOPDIP1.TILT );
+    CROSSLP_T96( XOCT1, YOCT1, ZOCT1, &BXOCT1, &BYOCT1, &BZOCT1, t->CB_T96_LOOPDIP1.XCENTRE[1], t->CB_T96_LOOPDIP1.RADIUS[1], t->CB_T96_LOOPDIP1.TILT );
     D[1][25] =  BXOCT1*CPSAS + BZOCT1*SPSAS;
     D[2][25] =  BYOCT1;
     D[3][25] = -BXOCT1*SPSAS + BZOCT1*CPSAS;
@@ -1865,7 +1864,7 @@ void DIPLOOP1( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg199
     XOCT2 = X*CPSAS - Z*SPSAS - t->CB_T96_LOOPDIP1.XCENTRE[2];
     YOCT2 = Y;
     ZOCT2 = X*SPSAS + Z*CPSAS;
-    CIRCLE( XOCT2, YOCT2, ZOCT2, t->CB_T96_LOOPDIP1.RADIUS[2], &BX, &BY, &BZ );
+    CIRCLE_T96( XOCT2, YOCT2, ZOCT2, t->CB_T96_LOOPDIP1.RADIUS[2], &BX, &BY, &BZ );
 
     D[1][26] =  BX*CPSAS+BZ*SPSAS;
     D[2][26] =  BY;
@@ -1884,7 +1883,7 @@ void DIPLOOP1( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg199
  *  RETURNS COMPONENTS OF THE FIELD FROM A CIRCULAR CURRENT LOOP OF RADIUS RL
  *  USES THE SECOND (MORE ACCURATE) APPROXIMATION GIVEN IN ABRAMOWITZ AND STEGUN
  */
-void CIRCLE( double X, double Y, double Z, double RL, double *BX, double *BY, double *BZ ) {
+void CIRCLE_T96( double X, double Y, double Z, double RL, double *BX, double *BY, double *BZ ) {
 
     double  PI, RHO2, RHO, g, g2, R22, R2, R12, R32, XK2, XK2S, DL, K, E, BRHO;
 
@@ -1928,7 +1927,7 @@ void CIRCLE( double X, double Y, double Z, double RL, double *BX, double *BY, do
  *    EQUATORIAL PLANE BY THE ANGLE AL (RADIANS) AND SHIFTED IN THE POSITIVE
  *     X-DIRECTION BY THE DISTANCE  XC.
  */
-void CROSSLP( double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double RL, double AL ) {
+void CROSSLP_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double RL, double AL ) {
 
     double  CAL, SAL, Y1, Z1, Y2, Z2, BX1, BY1, BZ1, BX2, BY2, BZ2;
 
@@ -1939,8 +1938,8 @@ void CROSSLP( double X, double Y, double Z, double *BX, double *BY, double *BZ, 
     Z1 =  Y*SAL + Z*CAL;
     Y2 =  Y*CAL + Z*SAL;
     Z2 = -Y*SAL + Z*CAL;
-    CIRCLE( X-XC, Y1, Z1, RL, &BX1, &BY1, &BZ1 );
-    CIRCLE( X-XC, Y2, Z2, RL, &BX2, &BY2, &BZ2 );
+    CIRCLE_T96( X-XC, Y1, Z1, RL, &BX1, &BY1, &BZ1 );
+    CIRCLE_T96( X-XC, Y2, Z2, RL, &BX2, &BY2, &BZ2 );
     *BX =   BX1+BX2;
     *BY =  (BY1+BY2)*CAL + (BZ1-BZ2)*SAL;
     *BZ = -(BY1-BY2)*SAL + (BZ1+BZ2)*CAL;
@@ -1952,10 +1951,10 @@ void CROSSLP( double X, double Y, double Z, double *BX, double *BY, double *BZ, 
 
 
 /*
- *       RETURNS THE FIELD COMPONENTS PRODUCED BY THREE DIPOLES, EACH
+ *       RETURNS THE FIELD COMPONENTS PRODUCED BY THREE DIPOLE_T96S, EACH
  *        HAVING M=Me AND ORIENTED PARALLEL TO X,Y, and Z AXIS, RESP.
  */
-void DIPXYZ( double X, double Y, double Z, double *BXX, double *BYX, double *BZX, double *BXY, double *BYY, double *BZY, double *BXZ, double *BYZ, double *BZZ ) {
+void DIPXYZ_T96( double X, double Y, double Z, double *BXX, double *BYX, double *BZX, double *BXY, double *BYY, double *BZY, double *BXZ, double *BYZ, double *BZZ ) {
 
     double  X2, Y2, Z2, R2, XMR5, XMR53;
 
@@ -2094,10 +2093,10 @@ CONDIP1( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmT
 
         ZD = ZZ[I];
 
-        DIPXYZ( XSM-XD, Y-YD, ZSM-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z );
-        DIPXYZ( XSM-XD, Y+YD, ZSM-ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
-        DIPXYZ( XSM-XD, Y-YD, ZSM+ZD, &BX3X, &BY3X, &BZ3X, &BX3Y, &BY3Y, &BZ3Y, &BX3Z, &BY3Z, &BZ3Z );
-        DIPXYZ( XSM-XD, Y+YD, ZSM+ZD, &BX4X, &BY4X, &BZ4X, &BX4Y, &BY4Y, &BZ4Y, &BX4Z, &BY4Z, &BZ4Z );
+        DIPXYZ_T96( XSM-XD, Y-YD, ZSM-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z );
+        DIPXYZ_T96( XSM-XD, Y+YD, ZSM-ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
+        DIPXYZ_T96( XSM-XD, Y-YD, ZSM+ZD, &BX3X, &BY3X, &BZ3X, &BX3Y, &BY3Y, &BZ3Y, &BX3Z, &BY3Z, &BZ3Z );
+        DIPXYZ_T96( XSM-XD, Y+YD, ZSM+ZD, &BX4X, &BY4X, &BZ4X, &BX4Y, &BY4Y, &BZ4Y, &BX4Z, &BY4Z, &BZ4Z );
 
         IX = I*3 + 3;
         IY = IX + 1;
@@ -2135,8 +2134,8 @@ CONDIP1( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmT
     for ( I=1; I<=5; I++ ) {
 
         ZD = ZZ[I+9];
-        DIPXYZ( XSM, Y, ZSM-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z );
-        DIPXYZ( XSM, Y, ZSM+ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
+        DIPXYZ_T96( XSM, Y, ZSM-ZD, &BX1X, &BY1X, &BZ1X, &BX1Y, &BY1Y, &BZ1Y, &BX1Z, &BY1Z, &BZ1Z );
+        DIPXYZ_T96( XSM, Y, ZSM+ZD, &BX2X, &BY2X, &BZ2X, &BX2Y, &BY2Y, &BZ2Y, &BX2Z, &BY2Z, &BZ2Z );
         IX = 58 + I*2;
         IZ = IX + 1;
         D[1][IX] = (BX1X-BX2X)*CPS + (BZ1X-BZ2X)*SPS;
@@ -2173,7 +2172,7 @@ CONDIP1( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmT
  *    Revised  June 12, 1996.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void BIRK1SHLD( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
  
     static double A[] = { -9e99, 1.174198045,-1.463820502,4.840161537,-3.674506864,
@@ -2279,12 +2278,12 @@ void BIRK1SHLD( double PS, double X, double Y, double Z, double *BX, double *BY,
 
 
 
-void BIRK2TOT_02( double PS, double X, double Y, double Z,double *BX, double *BY,double *BZ, LgmTsyg1996_Info *tInfo ) {
+void BIRK2TOT_02_T96( double PS, double X, double Y, double Z,double *BX, double *BY,double *BZ, LgmTsyg1996_Info *tInfo ) {
 
     double  WX, WY, WZ, HX, HY, HZ;
 
-    BIRK2SHL( X, Y, Z, PS, &WX, &WY, &WZ );
-    R2_BIRK( X, Y, Z, PS, &HX, &HY, &HZ );
+    BIRK2SHL_T96( X, Y, Z, PS, &WX, &WY, &WZ );
+    R2_BIRK_T96( X, Y, Z, PS, &HX, &HY, &HZ );
 
     *BX = WX + HX;
     *BY = WY + HY;
@@ -2311,7 +2310,7 @@ void BIRK2TOT_02( double PS, double X, double Y, double Z,double *BX, double *BY
  *   harmonics
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void BIRK2SHL( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ ) {
+void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ ) {
 
     double  P[3], R[3], Q[3], S[3];
 
@@ -2416,7 +2415,7 @@ void BIRK2SHL( double X, double Y, double Z, double PS, double *HX, double *HY, 
  *  RETURNS THE MODEL FIELD FOR THE REGION 2 BIRKELAND CURRENT/PARTIAL RC
  *    (WITHOUT SHIELDING FIELD)
  */
-void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ ) {
+void R2_BIRK_T96( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ ) {
 //!!!!SAVE PSI,CPS,SPS
     static double   DELARG  = 0.030;
     static double   DELARG1 = 0.015;
@@ -2432,7 +2431,7 @@ void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, d
     XSM = X*CPS - Z*SPS;
     ZSM = Z*CPS + X*SPS;
 
-    XKS = XKSI( XSM, Y, ZSM );
+    XKS = XKSI_T96( XSM, Y, ZSM );
     if ( XKS < -(DELARG+DELARG1) ) {
         R2OUTER( XSM, Y, ZSM, &BXSM, BY, &BZSM );
         BXSM = -BXSM*0.02; //  ALL COMPONENTS ARE MULTIPLIED BY THE
@@ -2443,8 +2442,8 @@ void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, d
 
     if ( (XKS >= -(DELARG+DELARG1)) && (XKS < (-DELARG+DELARG1)) ) {
         R2OUTER( XSM, Y, ZSM, &BXSM1, &BY1, &BZSM1 );
-        R2SHEET( XSM, Y, ZSM, &BXSM2, &BY2, &BZSM2 );
-        F2 = -0.02*TKSI( XKS, -DELARG, DELARG1 );
+        R2SHEET_T96( XSM, Y, ZSM, &BXSM2, &BY2, &BZSM2 );
+        F2 = -0.02*TKSI_T96( XKS, -DELARG, DELARG1 );
         F1 = -0.02 - F2;
         BXSM = BXSM1*F1 + BXSM2*F2;
         *BY   = BY1*F1   + BY2*F2;
@@ -2452,16 +2451,16 @@ void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, d
     }
 
     if ( (XKS >= (-DELARG+DELARG1)) && (XKS < (DELARG-DELARG1)) ) {
-        R2SHEET( XSM, Y, ZSM, &BXSM, BY, &BZSM );
+        R2SHEET_T96( XSM, Y, ZSM, &BXSM, BY, &BZSM );
         BXSM = -BXSM*0.02;
         *BY   = -(*BY)*0.02;
         BZSM = -BZSM*0.02;
     }
 
     if ( (XKS >= (DELARG-DELARG1)) && (XKS < (DELARG+DELARG1)) ) {
-        R2INNER( XSM, Y, ZSM, &BXSM1, &BY1, &BZSM1 );
-        R2SHEET( XSM, Y, ZSM, &BXSM2, &BY2, &BZSM2 );
-        F1 = -0.02*TKSI( XKS, DELARG, DELARG1 );
+        R2INNER_T96( XSM, Y, ZSM, &BXSM1, &BY1, &BZSM1 );
+        R2SHEET_T96( XSM, Y, ZSM, &BXSM2, &BY2, &BZSM2 );
+        F1 = -0.02*TKSI_T96( XKS, DELARG, DELARG1 );
         F2 = -0.02 - F1;
         BXSM = BXSM1*F1 + BXSM2*F2;
         *BY   = BY1*F1   + BY2*F2;
@@ -2469,7 +2468,7 @@ void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, d
     }
 
     if ( XKS >= (DELARG+DELARG1) ) {
-        R2INNER( XSM, Y, ZSM, &BXSM, BY, &BZSM );
+        R2INNER_T96( XSM, Y, ZSM, &BXSM, BY, &BZSM );
         BXSM = -BXSM*0.02;
         *BY   = -(*BY)*0.02;
         BZSM = -BZSM*0.02;
@@ -2483,21 +2482,21 @@ void R2_BIRK( double X, double Y, double Z, double PS, double *BX, double *BY, d
 
 
 
-void  R2INNER( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void  R2INNER_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     static double PL[] = { -9e99, 154.185, -2.12446, 0.601735E-01, -0.153954E-02, 0.355077E-04, 29.9996, 262.886, 99.9132 };
     static double PN[] = { -9e99, -8.1902, 6.5239, 5.504, 7.7815, 0.8573, 3.0986, 0.0774, -0.038 };
     double  CBX[6], CBY[6], CBZ[6];
     double  DBX8, DBY8, DBZ8, DBX6, DBY6, DBZ6, DBX7, DBY7, DBZ7;
 
-    BCONIC( X, Y, Z, CBX, CBY, CBZ, 5 );
+    BCONIC_T96( X, Y, Z, CBX, CBY, CBZ, 5 );
 
     /*
      *   NOW INTRODUCE  ONE  4-LOOP SYSTEM:
      */
-    LOOPS4( X, Y, Z, &DBX8, &DBY8, &DBZ8, PN[1], PN[2], PN[3], PN[4], PN[5], PN[6] );
-    DIPDISTR( X-PN[7], Y, Z, &DBX6, &DBY6, &DBZ6, 0);
-    DIPDISTR( X-PN[8], Y, Z, &DBX7, &DBY7, &DBZ7, 1);
+    LOOPS4_T96( X, Y, Z, &DBX8, &DBY8, &DBZ8, PN[1], PN[2], PN[3], PN[4], PN[5], PN[6] );
+    DIPDISTR_T96( X-PN[7], Y, Z, &DBX6, &DBY6, &DBZ6, 0);
+    DIPDISTR_T96( X-PN[8], Y, Z, &DBX7, &DBY7, &DBZ7, 1);
 
     // NOW COMPUTE THE FIELD COMPONENTS:
     *BX = PL[1]*CBX[1] + PL[2]*CBX[2] + PL[3]*CBX[3] + PL[4]*CBX[4] + PL[5]*CBX[5] + PL[6]*DBX6 + PL[7]*DBX7 + PL[8]*DBX8;
@@ -2511,30 +2510,10 @@ void  R2INNER( double X, double Y, double Z, double *BX, double *BY, double *BZ 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  *   "CONICAL" HARMONICS
  */
-void  BCONIC( double X, double Y, double Z, double CBX[], double CBY[], double CBZ[], int NMAX ) {
+void  BCONIC_T96( double X, double Y, double Z, double CBX[], double CBY[], double CBZ[], int NMAX ) {
 
     int     M;
     double RO2, RO, CF, SF, CFM1, SFM1, R2, R, C, S, CH, SH, TNHM1, CNHM1, TNH;
@@ -2584,16 +2563,16 @@ void  BCONIC( double X, double Y, double Z, double CBX[], double CBY[], double C
 
 /*
  *   RETURNS FIELD COMPONENTS FROM A LINEAR DISTRIBUTION OF DIPOLAR SOURCES
- *     ON THE Z-AXIS.  THE PARAMETER MODE DEFINES HOW THE DIPOLE STRENGTH
+ *     ON THE Z-AXIS.  THE PARAMETER MODE DEFINES HOW THE DIPOLE_T96 STRENGTH
  *     VARIES ALONG THE Z-AXIS:  MODE=0 IS FOR A STEP-FUNCTION (Mx=const > 0
  *         FOR Z > 0, AND Mx=-const < 0 FOR Z < 0)
- *      WHILE MODE=1 IS FOR A LINEAR VARIATION OF THE DIPOLE MOMENT DENSITY
+ *      WHILE MODE=1 IS FOR A LINEAR VARIATION OF THE DIPOLE_T96 MOMENT DENSITY
  *       SEE NB#3, PAGE 53 FOR DETAILS.
  *
  *
  * INPUT: X,Y,Z OF A POINT OF SPACE, AND MODE
  */
-void  DIPDISTR( double X, double Y, double Z, double *BX, double *BY, double *BZ, int MODE ) {
+void  DIPDISTR_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, int MODE ) {
 
     double  X2, Y2, RHO2, RHO4, R2, R3;
 
@@ -2618,7 +2597,7 @@ void  DIPDISTR( double X, double Y, double Z, double *BX, double *BY, double *BZ
 
 
 
-void R2OUTER ( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void R2OUTER_T9_T966 ( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     double DBX1, DBY1, DBZ1, DBX2, DBY2, DBZ2, DBX3, DBY3, DBZ3, DBX4, DBY4, DBZ4, DBX5, DBY5, DBZ5;
     
@@ -2628,19 +2607,19 @@ void R2OUTER ( double X, double Y, double Z, double *BX, double *BY, double *BZ 
     /* 
      * THREE PAIRS OF CROSSED LOOPS:
      */
-    CROSSLP( X, Y, Z, &DBX1, &DBY1, &DBZ1, PN[1], PN[2], PN[3] );
-    CROSSLP( X, Y, Z, &DBX2, &DBY2, &DBZ2, PN[4], PN[5], PN[6] );
-    CROSSLP( X, Y, Z, &DBX3, &DBY3, &DBZ3, PN[7], PN[8], PN[9] );
+    CROSSLP_T96( X, Y, Z, &DBX1, &DBY1, &DBZ1, PN[1], PN[2], PN[3] );
+    CROSSLP_T96( X, Y, Z, &DBX2, &DBY2, &DBZ2, PN[4], PN[5], PN[6] );
+    CROSSLP_T96( X, Y, Z, &DBX3, &DBY3, &DBZ3, PN[7], PN[8], PN[9] );
 
     /*
      *  NOW AN EQUATORIAL LOOP ON THE NIGHTSIDE
      */
-    CIRCLE( X-PN[10], Y, Z, PN[11], &DBX4, &DBY4, &DBZ4 );
+    CIRCLE_T96( X-PN[10], Y, Z, PN[11], &DBX4, &DBY4, &DBZ4 );
 
     /*
      *  NOW A 4-LOOP SYSTEM ON THE NIGHTSIDE
      */
-    LOOPS4( X, Y, Z, &DBX5, &DBY5, &DBZ5, PN[12], PN[13], PN[14], PN[15], PN[16], PN[17] );
+    LOOPS4_T96( X, Y, Z, &DBX5, &DBY5, &DBZ5, PN[12], PN[13], PN[14], PN[15], PN[16], PN[17] );
 
     /*
      *  NOW COMPUTE THE FIELD COMPONENTS:
@@ -2665,7 +2644,7 @@ void R2OUTER ( double X, double Y, double Z, double *BX, double *BY, double *BZ 
  *        R - LOOP RADIUS (THE SAME FOR ALL FOUR)
  *        THETA, PHI  -  SPECIFY THE ORIENTATION OF THE NORMAL OF THE 1ST LOOP
  */
-void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double YC, double ZC, double R, double THETA, double PHI ) {
+void LOOPS4_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double YC, double ZC, double R, double THETA, double PHI ) {
 
     double  CT, ST, CP, SP, XS, YSS, ZS, XSS, ZSS, BXSS, BYS, BZSS, BXS;
     double  BZ1, BX1, BY1, BZ2, BX2, BY2, BZ3, BX3, BY3, BZ4, BY4, BX4;
@@ -2680,7 +2659,7 @@ void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, d
     XSS = XS*CT - ZS*ST;
     ZSS = ZS*CT + XS*ST;
 
-    CIRCLE( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
+    CIRCLE_T96( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
     BXS = BXSS*CT + BZSS*ST;
     BZ1 = BZSS*CT - BXSS*ST;
     BX1 = BXS*CP - BYS*SP;
@@ -2693,7 +2672,7 @@ void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, d
     XSS = XS*CT - ZS*ST;
     ZSS = ZS*CT + XS*ST;
 
-    CIRCLE( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
+    CIRCLE_T96( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
     BXS = BXSS*CT + BZSS*ST;
     BZ2 = BZSS*CT - BXSS*ST;
     BX2 = BXS*CP  + BYS*SP;
@@ -2706,7 +2685,7 @@ void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, d
     XSS = XS*CT - ZS*ST;
     ZSS = ZS*CT + XS*ST;
 
-    CIRCLE( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
+    CIRCLE_T96( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
     BXS = BXSS*CT + BZSS*ST;
     BZ3 = BZSS*CT - BXSS*ST;
     BX3 = -BXS*CP - BYS*SP;
@@ -2719,7 +2698,7 @@ void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, d
     XSS = XS*CT - ZS*ST;
     ZSS = ZS*CT + XS*ST;
 
-    CIRCLE( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
+    CIRCLE_T96( XSS, YSS, ZSS, R, &BXSS, &BYS, &BZSS );
     BXS = BXSS*CT + BZSS*ST;
     BZ4 = BZSS*CT - BXSS*ST;
     BX4 = -BXS*CP + BYS*SP;
@@ -2742,7 +2721,7 @@ void LOOPS4( double X, double Y, double Z, double *BX, double *BY, double *BZ, d
 
 
 
-void R2SHEET( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void R2SHEET_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     static double PNONX[] = { -9e99, -19.0969, -9.28828, -0.129687, 5.58594, 22.5055, 0.483750e-01, 0.396953e-01, 0.579023e-01};
     static double PNONY[] = { -9e99, -13.6750, -6.70625, 2.31875, 11.4062, 20.4562, 0.478750e-01, 0.363750e-01, 0.567500e-01 };
@@ -2796,7 +2775,7 @@ void R2SHEET( double X, double Y, double Z, double *BX, double *BY, double *BZ )
     double  RHO2, R, RHO, C1P, S1P, S2P, C2P, S3P, C3P, S4P, CT, ST, S1, S2, S3, S4, S5, T1Y, T1Z;
 
  
-    XKS = XKSI( X, Y, Z );    //  variation across the current sheet
+    XKS = XKSI_T96( X, Y, Z );    //  variation across the current sheet
     q2 = XKS*XKS;
 
     T1X = XKS/sqrt( q2 + PNONX[6]*PNONX[6] );
@@ -2843,21 +2822,21 @@ void R2SHEET( double X, double Y, double Z, double *BX, double *BY, double *BZ )
      *                   NOW COMPUTE THE GSM FIELD COMPONENTS:
      *
      */
-    S1 = FEXP( CT, PNONX[1] ); S2 = FEXP( CT, PNONX[2] ); S3 = FEXP( CT, PNONX[3] ); S4 = FEXP( CT, PNONX[4] ); S5 = FEXP( CT, PNONX[5] );
+    S1 = FEXP_T96( CT, PNONX[1] ); S2 = FEXP_T96( CT, PNONX[2] ); S3 = FEXP_T96( CT, PNONX[3] ); S4 = FEXP_T96( CT, PNONX[4] ); S5 = FEXP_T96( CT, PNONX[5] );
     *BX =   S1*((A[1]+A[2]*T1X+A[3]*T2X+A[4]*T3X)     + C1P*(A[5]+A[6]*T1X+A[7]*T2X+A[8]*T3X)     + C2P*(A[9]+A[10]*T1X+A[11]*T2X+A[12]*T3X)  + C3P*(A[13]+A[14]*T1X+A[15]*T2X+A[16]*T3X))
           + S2*((A[17]+A[18]*T1X+A[19]*T2X+A[20]*T3X) + C1P*(A[21]+A[22]*T1X+A[23]*T2X+A[24]*T3X) + C2P*(A[25]+A[26]*T1X+A[27]*T2X+A[28]*T3X) + C3P*(A[29]+A[30]*T1X+A[31]*T2X+A[32]*T3X))
           + S3*((A[33]+A[34]*T1X+A[35]*T2X+A[36]*T3X) + C1P*(A[37]+A[38]*T1X+A[39]*T2X+A[40]*T3X) + C2P*(A[41]+A[42]*T1X+A[43]*T2X+A[44]*T3X) + C3P*(A[45]+A[46]*T1X+A[47]*T2X+A[48]*T3X))
           + S4*((A[49]+A[50]*T1X+A[51]*T2X+A[52]*T3X) + C1P*(A[53]+A[54]*T1X+A[55]*T2X+A[56]*T3X) + C2P*(A[57]+A[58]*T1X+A[59]*T2X+A[60]*T3X) + C3P*(A[61]+A[62]*T1X+A[63]*T2X+A[64]*T3X))
           + S5*((A[65]+A[66]*T1X+A[67]*T2X+A[68]*T3X) + C1P*(A[69]+A[70]*T1X+A[71]*T2X+A[72]*T3X) + C2P*(A[73]+A[74]*T1X+A[75]*T2X+A[76]*T3X) + C3P*(A[77]+A[78]*T1X+A[79]*T2X+A[80]*T3X));
 
-    S1 = FEXP( CT, PNONY[1] ); S2 = FEXP( CT, PNONY[2] ); S3 = FEXP( CT, PNONY[3] ); S4 = FEXP( CT, PNONY[4] ); S5 = FEXP( CT, PNONY[5] );
+    S1 = FEXP_T96( CT, PNONY[1] ); S2 = FEXP_T96( CT, PNONY[2] ); S3 = FEXP_T96( CT, PNONY[3] ); S4 = FEXP_T96( CT, PNONY[4] ); S5 = FEXP_T96( CT, PNONY[5] );
     *BY =    S1*(S1P*(B[1] +B[2]*T1Y+ B[3]*T2Y+ B[4]*T3Y)  + S2P*(B[5]+ B[6]*T1Y +B[7]*T2Y +B[8]*T3Y)  + S3P*(B[9] +B[10]*T1Y+B[11]*T2Y+B[12]*T3Y) + S4P*(B[13]+B[14]*T1Y+B[15]*T2Y+B[16]*T3Y))
            + S2*(S1P*(B[17]+B[18]*T1Y+B[19]*T2Y+B[20]*T3Y) + S2P*(B[21]+B[22]*T1Y+B[23]*T2Y+B[24]*T3Y) + S3P*(B[25]+B[26]*T1Y+B[27]*T2Y+B[28]*T3Y) + S4P*(B[29]+B[30]*T1Y+B[31]*T2Y+B[32]*T3Y))
            + S3*(S1P*(B[33]+B[34]*T1Y+B[35]*T2Y+B[36]*T3Y) + S2P*(B[37]+B[38]*T1Y+B[39]*T2Y+B[40]*T3Y) + S3P*(B[41]+B[42]*T1Y+B[43]*T2Y+B[44]*T3Y) + S4P*(B[45]+B[46]*T1Y+B[47]*T2Y+B[48]*T3Y))
            + S4*(S1P*(B[49]+B[50]*T1Y+B[51]*T2Y+B[52]*T3Y) + S2P*(B[53]+B[54]*T1Y+B[55]*T2Y+B[56]*T3Y) + S3P*(B[57]+B[58]*T1Y+B[59]*T2Y+B[60]*T3Y) + S4P*(B[61]+B[62]*T1Y+B[63]*T2Y+B[64]*T3Y))
            + S5*(S1P*(B[65]+B[66]*T1Y+B[67]*T2Y+B[68]*T3Y) + S2P*(B[69]+B[70]*T1Y+B[71]*T2Y+B[72]*T3Y) + S3P*(B[73]+B[74]*T1Y+B[75]*T2Y+B[76]*T3Y) + S4P*(B[77]+B[78]*T1Y+B[79]*T2Y+B[80]*T3Y));
 
-    S1 = FEXP1( CT, PNONZ[1] ); S2 = FEXP1( CT, PNONZ[2] ); S3 = FEXP1( CT, PNONZ[3] ); S4 = FEXP1( CT, PNONZ[4] ); S5 = FEXP1( CT, PNONZ[5] );
+    S1 = FEXP1_T96( CT, PNONZ[1] ); S2 = FEXP1_T96( CT, PNONZ[2] ); S3 = FEXP1_T96( CT, PNONZ[3] ); S4 = FEXP1_T96( CT, PNONZ[4] ); S5 = FEXP1_T96( CT, PNONZ[5] );
     *BZ =   S1*((C[1] +C[2]*T1Z +C[3]*T2Z +C[4]*T3Z)  + C1P*(C[5] +C[6]*T1Z +C[7]*T2Z +C[8]*T3Z)  + C2P*(C[9] +C[10]*T1Z+C[11]*T2Z+C[12]*T3Z) + C3P*(C[13]+C[14]*T1Z+C[15]*T2Z+C[16]*T3Z))
           + S2*((C[17]+C[18]*T1Z+C[19]*T2Z+C[20]*T3Z) + C1P*(C[21]+C[22]*T1Z+C[23]*T2Z+C[24]*T3Z) + C2P*(C[25]+C[26]*T1Z+C[27]*T2Z+C[28]*T3Z) + C3P*(C[29]+C[30]*T1Z+C[31]*T2Z+C[32]*T3Z))
           + S3*((C[33]+C[34]*T1Z+C[35]*T2Z+C[36]*T3Z) + C1P*(C[37]+C[38]*T1Z+C[39]*T2Z+C[40]*T3Z) + C2P*(C[41]+C[42]*T1Z+C[43]*T2Z+C[44]*T3Z) + C3P*(C[45]+C[46]*T1Z+C[47]*T2Z+C[48]*T3Z))
@@ -2872,7 +2851,7 @@ void R2SHEET( double X, double Y, double Z, double *BX, double *BY, double *BZ )
 
 
 
-double XKSI( double X, double Y, double Z ) {
+double XKSI_T96( double X, double Y, double Z ) {
 
     double  A11A12, A21A22, A41A42, A51A52, A61A62, B11B12, B21B22, C61C62, C71C72, R0, DR, TNOON, DTETA;
     double  DR2, X2, Y2, Z2, XY, XYZ, R2, R, R3, R4, XR, YR, ZR;
@@ -2942,36 +2921,36 @@ double XKSI( double X, double Y, double Z ) {
 
 
 
-double FEXP( double S, double A ) {
+double FEXP_T96( double S, double A ) {
     if ( A <  0.0 ) return( sqrt(-2.0*A*M_E)*S*exp(A*S*S) );
     if ( A >= 0.0 ) return( S*exp(A*(S*S-1.0)) );
 }
 
 
-double  FEXP1( double S, double A ) {
+double  FEXP_T961_T96( double S, double A ) {
     if ( A <= 0.0 ) return( exp( A*S*S ) );
     if ( A > 0.0 )  return( exp( A*(S*S-1.0) ) );
 }
 
 
 
-double  TKSI( double XKSI, double XKS0, double DXKSI ) {
+double  TKSI_T96( double XKSI_T96, double XKS0, double DXKSI_T96 ) {
 
     double  R, TDZ3, g, BR3;
 
-    TDZ3 = 2.0*DXKSI*DXKSI*DXKSI;
+    TDZ3 = 2.0*DXKSI_T96*DXKSI_T96*DXKSI_T96;
 
-    if ( (XKSI-XKS0) < -DXKSI ) R = 0.0;
-    if ( (XKSI-XKS0) >= DXKSI ) R = 1.0;
+    if ( (XKSI_T96-XKS0) < -DXKSI_T96 ) R = 0.0;
+    if ( (XKSI_T96-XKS0) >= DXKSI_T96 ) R = 1.0;
 
-    if ( (XKSI >= (XKS0-DXKSI)) && (XKSI < XKS0) ) {
-        g = XKSI-XKS0+DXKSI;
+    if ( (XKSI_T96 >= (XKS0-DXKSI_T96)) && (XKSI_T96 < XKS0) ) {
+        g = XKSI_T96-XKS0+DXKSI_T96;
         BR3   = g*g*g;
         R = 1.5*BR3/(TDZ3+BR3);
     }
 
-    if ( (XKSI >= XKS0) && (XKSI < (XKS0+DXKSI)) ) {
-        g = XKSI-XKS0-DXKSI;
+    if ( (XKSI_T96 >= XKS0) && (XKSI_T96 < (XKS0+DXKSI_T96)) ) {
+        g = XKSI_T96-XKS0-DXKSI_T96;
         BR3 = g*g*g;
         R   = 1.0 + 1.5*BR3/(TDZ3-BR3);
     }
@@ -2986,11 +2965,11 @@ void    DIPOLE_T96( double PS, double X, double Y, double Z, double *BX, double 
     /*
      *        A DOUBLE PRECISION ROUTINE
      *
-     *    CALCULATES GSM COMPONENTS OF A GEODIPOLE FIELD WITH THE DIPOLE MOMENT
+     *    CALCULATES GSM COMPONENTS OF A GEODIPOLE_T96 FIELD WITH THE DIPOLE_T96 MOMENT
      *    CORRESPONDING TO THE EPOCH OF 1980.
      *
      *  ----INPUT PARAMETERS:
-     *       PS - GEODIPOLE TILT ANGLE IN RADIANS,
+     *       PS - GEODIPOLE_T96 TILT ANGLE IN RADIANS,
      *       X,Y,Z - GSM COORDINATES IN RE (1 RE = 6371.2 km)
      *
      *  ----OUTPUT PARAMETERS:
