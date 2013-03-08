@@ -7,7 +7,7 @@ int main(){
 
     long int            Date;
     double              UTC;
-    Lgm_Vector          u, B;
+    Lgm_Vector          u, B, ugsm;
     Lgm_MagModelInfo    *mInfo;
     int                 i, j;
 
@@ -17,7 +17,6 @@ int main(){
 
     mInfo = Lgm_InitMagInfo( );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
-
     mInfo->Bfield = Lgm_B_T89;
    mInfo->Bfield = Lgm_B_TS04;
 //mInfo->Bfield = Lgm_B_OP77;
@@ -48,7 +47,9 @@ int main(){
     for (i=0; i<=5; i++) {
         mInfo->Kp = i;
         u.x = -6.6; u.y =  0.0;  u.z =  0.0;
-        mInfo->Bfield( &u, &B, mInfo );
+//Lgm_Convert_Coords( &u, &ugsm, GEO_TO_GSM, mInfo->c );
+//Lgm_Convert_Coords( &u, &ugsm, SM_TO_GSM, mInfo->c );
+        mInfo->Bfield( &ugsm, &B, mInfo );
         printf( "%13i", mInfo->Kp);
         printf( "%13g%13g%13g", u.x, u.y, u.z );
         printf( "%13g%13g%13g", B.x, B.y, B.z );
