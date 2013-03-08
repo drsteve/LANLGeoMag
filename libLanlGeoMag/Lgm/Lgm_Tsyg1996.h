@@ -78,7 +78,7 @@ typedef struct LgmTsyg1996_Info {
  *  Function declarations
  */
 void    Lgm_Init_T96( LgmTsyg1996_Info *t );
-//void    Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) ;
+void    Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) ;
 void    DIPSHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) ;
 void    CYLHARM_T96( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
 void    CYLHAR1_T96( double A[], double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
@@ -100,10 +100,11 @@ void    R2_BIRK_T96( double X, double Y, double Z, double PS, double *BX, double
 void    R2INNER_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
 void    BCONIC_T96( double X, double Y, double Z, double CBX[], double CBY[], double CBZ[], int NMAX ) ;
 void    DIPDISTR_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, int MODE ) ;
-void    R2OUTER_T96 ( double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
-void    LOOPS4_T96 (double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double YC, double ZC, double R, double THETA, double PHI ) ;
+void    R2OUTER_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
+void    LOOPS4_T96(double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double YC, double ZC, double R, double THETA, double PHI ) ;
 void    R2SHEET_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
 void    DIPOLE_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo ) ;
+void    CONDIP1_T96( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmTsyg1996_Info *t );
 double  BES0_T96( double X );
 double  BES1_T96( double X );
 double  BES_T96( double X, int K );

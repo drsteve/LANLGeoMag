@@ -222,8 +222,8 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
     BZIMF = PARMOD[4];
  
     PPS = PS;
-//    SPS = SINPS;
-    t->sin_psi = SINPS;
+    t->cos_psi = COSPS;
+    SPS = t->sin_psi = SINPS;
  
     SqrtPDYN = sqrt( PDYN );
     DEPR = 0.8*DST - 13.0*SqrtPDYN;  // DEPR is an estimate of total near-Earth depression, based on DST and Pdyn (usually, DEPR < 0 )
@@ -317,10 +317,15 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
 
 
         DIPSHLD_T96( PPS, XX, YY, ZZ, &CFX, &CFY, &CFZ, t );
+//printf("CFX, CFY, CFZ = %g %g %g\n", CFX, CFY, CFZ);
         TAILRC96_T96( SPS, XX, YY, ZZ, &BXRC, &BYRC, &BZRC, &BXT2, &BYT2, &BZT2, &BXT3, &BYT3, &BZT3, t );
+//printf("SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 = %g %g %g %g %g %g %g %g %g %g\n", SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 );
         BIRK1TOT_02_T96( PPS, XX, YY, ZZ, &R1X, &R1Y, &R1Z, t );
+//printf("R1X, R1Y, R1Z = %g %g %g\n", R1X, R1Y, R1Z );
         BIRK2TOT_02_T96( PPS, XX, YY, ZZ, &R2X, &R2Y, &R2Z, t );
+//printf("R2X, R2Y, R2Z = %g %g %g\n", R2X, R2Y, R2Z );
         INTERCON_T96( XX, YS*XAPPA, ZS*XAPPA, &RIMFX, &RIMFYS, &RIMFZS, t );
+//printf("RIMFX, RIMFYS, RIMFZS = %g %g %g\n", RIMFX, RIMFYS, RIMFZS );
 
         RIMFY = RIMFYS*CT + RIMFZS*ST;
         RIMFZ = RIMFZS*CT - RIMFYS*ST;
@@ -343,6 +348,7 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
             FEXT = 0.5*(1.0+g);
                  
             DIPOLE_T96( PS, X, Y, Z, &QX, &QY, &QZ, t );
+//printf("QX, QY, QZ = %g %g %g\n", QX, QY, QZ );
             *BX = (FX+QX)*FINT + OIMFX*FEXT - QX;
             *BY = (FY+QY)*FINT + OIMFY*FEXT - QY;
             *BZ = (FZ+QZ)*FINT + OIMFZ*FEXT - QZ;
@@ -373,6 +379,9 @@ void DIPSHLD_T96( double PS, double X, double Y, double Z, double *BX, double *B
 
     CYLHARM_T96( A1, X, Y, Z, &HX, &HY, &HZ );
     CYLHAR1_T96( A2, X, Y, Z, &FX, &FY, &FZ );
+//printf("HX, HY, HZ = %g %g %g\n", HX, HY, HZ);
+//printf("FX, FY, FZ = %g %g %g\n", FX, FY, FZ);
+//printf("tInfo->cos_psi, tInfo->sin_psi = %g %g\n", tInfo->cos_psi, tInfo->sin_psi);
 
     *BX = HX*tInfo->cos_psi + FX*tInfo->sin_psi;
     *BY = HY*tInfo->cos_psi + FY*tInfo->sin_psi;
@@ -676,7 +685,7 @@ void INTERCON_T96( double X, double Y, double Z, double *BX, double *BY, double 
     int     L, I, K;
     double  CYPI, SYPI, SZRK, CZRK, SQPR, EPR, HX, HY, HZ;
     double  RP[4], RR[4], P[4], R[4];
-    double  A[] = { -9e99, -8.411078731, 5932254.951, -9073284.93, -11.68794634, 6027598.824, -9218378.368, -6.508798398,
+    static double  A[] = { -9e99, -8.411078731, 5932254.951, -9073284.93, -11.68794634, 6027598.824, -9218378.368, -6.508798398,
                            -11824.42793, 18015.66212, 7.99754043,    13.9669886, 90.24475036,  16.75728834,  1015.645781, 
                            1553.493216 };
 
@@ -688,14 +697,17 @@ void INTERCON_T96( double X, double Y, double Z, double *BX, double *BY, double 
         tInfo->R[2] = A[14];
         tInfo->R[3] = A[15];
         for ( I=1; I<=3; I++ ) {
-            tInfo->RP[I] = 1.0/tInfo->P[I];
-            tInfo->RR[I] = 1.0/tInfo->R[I];
+            RP[I] = tInfo->RP[I] = 1.0/tInfo->P[I];
+            RR[I] = tInfo->RR[I] = 1.0/tInfo->R[I];
+        }
+        for ( I=1; I<=3; I++ ) {
             for ( K=1; K<=3; K++ ) {
-                tInfo->SQPR[I][K] = sqrt( RP[I]*RP[I] + RR[K]*RR[K] );
+                tInfo->SQPR[I][K] = sqrt( tInfo->RP[I]*tInfo->RP[I] + tInfo->RR[K]*tInfo->RR[K] );
             }
         }
         tInfo->INTERCON_M_FLAG = 1; // flag that we've been here.
-    }
+    } 
+
 
 
     /*
@@ -703,24 +715,25 @@ void INTERCON_T96( double X, double Y, double Z, double *BX, double *BY, double 
      */
     *BX = *BY = *BZ = 0.0;
     for ( L=0, I=1; I<=3; I++ ) {
-        CYPI = cos( Y*RP[I] );
-        SYPI = sin( Y*RP[I] );
+        CYPI = cos( Y*tInfo->RP[I] );
+        SYPI = sin( Y*tInfo->RP[I] );
  
         for ( K=1; K<=3; K++ ) {
-            SZRK = sin( Z*RR[K] );
-            CZRK = cos( Z*RR[K] );
+            SZRK = sin( Z*tInfo->RR[K] );
+            CZRK = cos( Z*tInfo->RR[K] );
             //SQPR = sqrt( RP[I]*RP[I] + RR[K]*RR[K] );
             SQPR = tInfo->SQPR[I][K];
             EPR  = exp( X*SQPR );
  
             HX = -SQPR*EPR*CYPI*SZRK;
-            HY =  RP[I]*EPR*SYPI*SZRK;
-            HZ = -RR[K]*EPR*CYPI*CZRK;
+            HY =  tInfo->RP[I]*EPR*SYPI*SZRK;
+            HZ = -tInfo->RR[K]*EPR*CYPI*CZRK;
             ++L;
  
             *BX += A[L]*HX;
             *BY += A[L]*HY;
             *BZ += A[L]*HZ;
+//printf("BX, BY, BZ = %g %g %g     Diff = %g\n", *BX, *BY, *BZ, SQPR-tInfo->SQPR[I][K] );
         }
     }
 
@@ -819,7 +832,7 @@ void TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, doubl
     RPS   = 0.5*(C11+C12)*SPS;      //  THIS IS THE SHIFT OF OF THE SHEET WITH RESPECT TO GSM EQ.PLANE FOR THE 3RD (ASYMPTOTIC) TAIL MODE
 
     R     = sqrt( X*X + Y*Y + Z*Z );
-    gp = R+RH; gp2 = g*g;
+    gp = R+RH; gp2 = gp*gp;
     SQ1   = sqrt( gp2 + DR2 );
     gm = R-RH; gm2 = gm*gm;
     SQ2   = sqrt( gm2 + DR2 );
@@ -857,6 +870,25 @@ void TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, doubl
     DDZETADY = (ZS*DZSY + D*DDDY)/DZETAS;
     DDZETADZ = ZS*DZSZ/DZETAS;
 
+    t->CB_T96_WARP.CPSS      = CPSS;
+    t->CB_T96_WARP.SPSS      = SPSS;
+    t->CB_T96_WARP.DPSRR     = DPSRR;
+    t->CB_T96_WARP.RPS       = RPS;
+    t->CB_T96_WARP.WARP      = WARP;
+    t->CB_T96_WARP.D         = D;
+    t->CB_T96_WARP.XS        = XS;
+    t->CB_T96_WARP.ZS        = ZS;
+    t->CB_T96_WARP.DXSX      = DXSX;
+    t->CB_T96_WARP.DXSY      = DXSY;
+    t->CB_T96_WARP.DXSZ      = DXSZ;
+    t->CB_T96_WARP.DZSX      = DZSX;
+    t->CB_T96_WARP.DZSY      = DZSY;
+    t->CB_T96_WARP.DZSZ      = DZSZ;
+    t->CB_T96_WARP.DZETAS    = DZETAS;
+    t->CB_T96_WARP.DDZETADX  = DDZETADX;
+    t->CB_T96_WARP.DDZETADY  = DDZETADY;
+    t->CB_T96_WARP.DDZETADZ  = DDZETADZ;
+    t->CB_T96_WARP.ZSWW      = ZSWW;
 
     SHLCAR3X3_T96( ARC, X, Y, Z, SPS, &WX, &WY, &WZ );
     RINGCURR96_T96( X, Y, Z, &HX, &HY, &HZ, t );
@@ -877,25 +909,6 @@ void TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, doubl
     *BZT3 = WZ + HZ;
 
 
-    t->CB_T96_WARP.CPSS      = CPSS;
-    t->CB_T96_WARP.SPSS      = SPSS;
-    t->CB_T96_WARP.DPSRR     = DPSRR;
-    t->CB_T96_WARP.RPS       = RPS;
-    t->CB_T96_WARP.WARP      = WARP;
-    t->CB_T96_WARP.D         = D;
-    t->CB_T96_WARP.XS        = XS;
-    t->CB_T96_WARP.ZS        = ZS;
-    t->CB_T96_WARP.DXSX      = DXSX;
-    t->CB_T96_WARP.DXSY      = DXSY;
-    t->CB_T96_WARP.DXSZ      = DXSZ;
-    t->CB_T96_WARP.DZSX      = DZSX;
-    t->CB_T96_WARP.DZSY      = DZSY;
-    t->CB_T96_WARP.DZSZ      = DZSZ;
-    t->CB_T96_WARP.DZETAS    = DZETAS;
-    t->CB_T96_WARP.DDZETADX  = DDZETADX;
-    t->CB_T96_WARP.DDZETADY  = DDZETADY;
-    t->CB_T96_WARP.DDZETADZ  = DDZETADZ;
-    t->CB_T96_WARP.ZSWW      = ZSWW;
 
     return;
 
@@ -1488,7 +1501,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
     static double   XLTNGHT = 70.0; 
     double          RH, DR;
 
-    double D1[4][27], D2[3][79], XI[4];
+    double D1[4][27], D2[4][80], XI[5];
 
     int     LOC, I;
     double  TNOONN, TNOONS, DTETDN, DR2, SPS, R, R2, R3, RMRH, RPRH, SQM, SQP, C, g, g2, h, h2, Q;
@@ -1553,7 +1566,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
     TAS  = atan2( sqrt(XAS*XAS + Y*Y), ZAS );
     STAS = sin(TAS);
     g = STAS; g2 = g*g; g3 = g2*g; g6 = g3*g3;
-    F    = pow ( STAS/( g6*(1.0-R3) + R3 ), 0.1666666667 );
+    F    = STAS/pow( g6*(1.0-R3) + R3 , 0.1666666667 );
 
     TET0 = asin(F);
     if ( TAS > 1.5707963 ) TET0 = 3.141592654-TET0;
@@ -1569,12 +1582,14 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
      * NOW LET'S DEFINE WHICH OF THE FOUR REGIONS (HIGH-LAT., NORTHERN PSBL,
      *   PLASMA SHEET, SOUTHERN PSBL) DOES THE POINT (X,Y,Z) BELONG TO:
      */
+    //printf("0. TET0, TETR1N, TETR1S, DTET0 = %g %g %g %g\n", TET0, TETR1N, TETR1S, DTET0);
     if ( ( TET0 <  (TETR1N-DTET0) ) || ( TET0 >  (TETR1S+DTET0) ) ) LOC = 1; // HIGH-LAT.
     if ( ( TET0 >  (TETR1N+DTET0) ) && ( TET0 <  (TETR1S-DTET0) ) ) LOC = 2; // PL.SHEET
     if ( ( TET0 >= (TETR1N-DTET0) ) && ( TET0 <= (TETR1N+DTET0) ) ) LOC = 3; // NORTH PSBL
     if ( ( TET0 >= (TETR1S-DTET0) ) && ( TET0 <= (TETR1S+DTET0) ) ) LOC = 4; // SOUTH PSBL
 
 
+    //printf( "LOC=%d\n", LOC );
     if ( LOC == 1 ) {   // IN THE HIGH-LAT. REGION USE THE SUBROUTINE DIPOCT
         XI[1] = X;
         XI[2] = Y;
@@ -1586,6 +1601,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
             *BX += C1[I]*D1[1][I];
             *BY += C1[I]*D1[2][I];
             *BZ += C1[I]*D1[3][I];
+            //printf("1. C1[%d], D1[1][%d], D1[1][%d], D1[1][%d], BX, BY, BZ = %g %g %g %g %g %g %g\n", I, I, I, I, C1[I], D1[1][I], D1[2][I], D1[3][I], *BX, *BY, *BZ);
         }
     }
 
@@ -1594,7 +1610,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         XI[2] = Y;
         XI[3] = Z;
         XI[4] = PS;
-        CONDIP1( XI, D2, XX2, YY2, ZZ2 );
+        CONDIP1_T96( XI, D2, XX2, YY2, ZZ2, t );
         *BX = *BY = *BZ = 0.0;
         for ( I=1; I<=79; I++ ) {
             *BX += C2[I]*D2[1][I];
@@ -1643,7 +1659,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         XI[2] = Y2;
         XI[3] = Z2;
         XI[4] = PS;
-        CONDIP1( XI, D2, XX2, YY2, ZZ2 );
+        CONDIP1_T96( XI, D2, XX2, YY2, ZZ2, t );
         BX2 = BY2 = BZ2 = 0.0;
         for ( I=1; I<=79; I++ ) {
             BX2 += C2[I]*D2[1][I]; // BX2,BY2,BZ2  ARE FIELD COMPONENTS IN THE SOUTHERN BOUNDARY POINT
@@ -1687,7 +1703,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         XI[2] = Y1;
         XI[3] = Z1;
         XI[4] = PS;
-        CONDIP1( XI, D2, XX2, YY2, ZZ2 );
+        CONDIP1_T96( XI, D2, XX2, YY2, ZZ2, t );
         BX1 = BY1 = BZ1 = 0.0;
         for ( I=1; I<=79; I++ ) {
             BX1 += C2[I]*D2[1][I]; // !  BX1,BY1,BZ1  ARE FIELD COMPONENTS IN THE NORTHERN BOUNDARY POINT
@@ -1734,9 +1750,12 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
      *   NOW, LET US ADD THE SHIELDING FIELD
      */
     BIRK1SHLD_T96( PS, X, Y, Z, &BSX, &BSY, &BSZ );
+    //printf("2. BSX, BSY, BSZ = %g %g %g\n", BSX, BSY, BSZ);
+    //printf("2.5 BX, BY, BZ = %g %g %g\n", *BX, *BY, *BZ);
     *BX += BSX;
     *BY += BSY;
     *BZ += BSZ;
+    //printf("3. BX, BY, BZ = %g %g %g\n", *BX, *BY, *BZ);
 
     return;
 
@@ -1780,6 +1799,8 @@ void DIPLOOP1_T96( double XI[5], double D[4][27], double *XX, double *YY, LgmTsy
 
     RH = t->CB_T96_RHDR.RH;
     DR = t->CB_T96_RHDR.DR;
+//printf("RH, DR = %g %g\n", RH, DR);
+//exit(0);
 
     DIPX = t->CB_T96_LOOPDIP1.DIPX;
     DIPY = t->CB_T96_LOOPDIP1.DIPY;
@@ -1792,7 +1813,7 @@ void DIPLOOP1_T96( double XI[5], double D[4][27], double *XX, double *YY, LgmTsy
     SPS = sin(PS);
 
     for ( I=1; I<=12; I++ ) {
-        g = XX[I]*DIPX; g2 = g*g; h = YY[I]*DIPY;
+        g = XX[I]*DIPX; g2 = g*g; h = YY[I]*DIPY; h2 = h*h;
         R2 =  g2 + h2;
         R     = sqrt( R2 );
         RMRH  = R-RH;
@@ -2004,7 +2025,7 @@ void DIPXYZ_T96( double X, double Y, double Z, double *BXX, double *BYX, double 
  *              (see the notebook #2, pp.113-..., for details)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-CONDIP1( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmTsyg1996_Info *t ) {
+void CONDIP1_T96( double XI[5], double D[4][80], double *XX, double *YY, double *ZZ, LgmTsyg1996_Info *t ) {
 
 
     int     M, I, IX, IY, IZ;
@@ -2199,10 +2220,10 @@ void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double 
     double  CPS, SPS, S3PS, CYPI, CYQI, SYPI, SYQI, SZRK, CZSK, CZRK, SZSK, SQPR, SQQS, EPR, EQS, HX, HY, HZ;
 
 
-    P1[1] = A[65];
-    R1[1] = A[69];
-    Q1[1] = A[73];
-    S1[1] = A[77];
+//    P1[1] = A[65];
+//    R1[1] = A[69];
+//    Q1[1] = A[73];
+//    S1[1] = A[77];
 
     *BX = *BY = *BZ = 0.0;
     CPS  = cos(PS);
@@ -2210,10 +2231,14 @@ void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double 
     S3PS = 4.0*CPS*CPS-1.0;
 
     for ( I=1; I<=4; I++ ) {
-        RP[I] = 1.0/P1[I];
-        RR[I] = 1.0/R1[I];
-        RQ[I] = 1.0/Q1[I];
-        RS[I] = 1.0/S1[I];
+//        RP[I] = 1.0/P1[I];
+//        RR[I] = 1.0/R1[I];
+//        RQ[I] = 1.0/Q1[I];
+//        RS[I] = 1.0/S1[I];
+        RP[I] = 1.0/A[I+64];
+        RR[I] = 1.0/A[I+68];
+        RQ[I] = 1.0/A[I+72];
+        RS[I] = 1.0/A[I+76];
     }
 
     L = 0;
@@ -2324,10 +2349,10 @@ void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *
     double  SPS, CPS, S3PS, SYPI, CYPI, SYQI, CYQI, SZRK, CZSK, SZSK;
     double  CZRK, SQPR, SQQS, EPR, EQS, DX, DY, DZ;
 
-    P[1] = A[17];
-    R[1] = A[19];
-    Q[1] = A[21];
-    S[1] = A[23];
+    P[1] = A[17]; P[2] = A[18];
+    R[1] = A[19]; R[2] = A[20];
+    Q[1] = A[21]; Q[2] = A[22];
+    S[1] = A[23]; S[2] = A[24];
 
     SPS  = sin(PS);
     CPS  = cos(PS);
@@ -2422,18 +2447,18 @@ void R2_BIRK_T96( double X, double Y, double Z, double PS, double *BX, double *B
     static double   PSI     = 10.0;
     double          CPS, SPS, XSM, ZSM, BXSM, BZSM, F2, F1, BXSM1, BY1, BZSM1, BXSM2, BY2, BZSM2, XKS;
 
-    if ( fabs(PSI-PS) > 1.e-10) {
+//    if ( fabs(PSI-PS) > 1.e-10) {
          PSI = PS;
          CPS = cos(PS);
          SPS = sin(PS);
-    }
+//    }
 
     XSM = X*CPS - Z*SPS;
     ZSM = Z*CPS + X*SPS;
 
     XKS = XKSI_T96( XSM, Y, ZSM );
     if ( XKS < -(DELARG+DELARG1) ) {
-        R2OUTER( XSM, Y, ZSM, &BXSM, BY, &BZSM );
+        R2OUTER_T96( XSM, Y, ZSM, &BXSM, BY, &BZSM );
         BXSM = -BXSM*0.02; //  ALL COMPONENTS ARE MULTIPLIED BY THE
         *BY   = -(*BY)*0.02;   //  FACTOR -0.02, IN ORDER TO NORMALIZE THE
         BZSM = -BZSM*0.02; //  FIELD (SO THAT Bz=-1 nT at X=-5.3 RE, Y=Z=0)
@@ -2441,7 +2466,7 @@ void R2_BIRK_T96( double X, double Y, double Z, double PS, double *BX, double *B
 
 
     if ( (XKS >= -(DELARG+DELARG1)) && (XKS < (-DELARG+DELARG1)) ) {
-        R2OUTER( XSM, Y, ZSM, &BXSM1, &BY1, &BZSM1 );
+        R2OUTER_T96( XSM, Y, ZSM, &BXSM1, &BY1, &BZSM1 );
         R2SHEET_T96( XSM, Y, ZSM, &BXSM2, &BY2, &BZSM2 );
         F2 = -0.02*TKSI_T96( XKS, -DELARG, DELARG1 );
         F1 = -0.02 - F2;
@@ -2597,7 +2622,7 @@ void  DIPDISTR_T96( double X, double Y, double Z, double *BX, double *BY, double
 
 
 
-void R2OUTER_T9_T966 ( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void R2OUTER_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
 
     double DBX1, DBY1, DBZ1, DBX2, DBY2, DBZ2, DBX3, DBY3, DBZ3, DBX4, DBY4, DBZ4, DBX5, DBY5, DBZ5;
     
@@ -2927,30 +2952,30 @@ double FEXP_T96( double S, double A ) {
 }
 
 
-double  FEXP_T961_T96( double S, double A ) {
+double  FEXP1_T96( double S, double A ) {
     if ( A <= 0.0 ) return( exp( A*S*S ) );
     if ( A > 0.0 )  return( exp( A*(S*S-1.0) ) );
 }
 
 
 
-double  TKSI_T96( double XKSI_T96, double XKS0, double DXKSI_T96 ) {
+double  TKSI_T96( double XKSI, double XKS0, double DXKSI ) {
 
     double  R, TDZ3, g, BR3;
 
-    TDZ3 = 2.0*DXKSI_T96*DXKSI_T96*DXKSI_T96;
+    TDZ3 = 2.0*DXKSI*DXKSI*DXKSI;
 
-    if ( (XKSI_T96-XKS0) < -DXKSI_T96 ) R = 0.0;
-    if ( (XKSI_T96-XKS0) >= DXKSI_T96 ) R = 1.0;
+    if ( (XKSI-XKS0) < -DXKSI ) R = 0.0;
+    if ( (XKSI-XKS0) >= DXKSI ) R = 1.0;
 
-    if ( (XKSI_T96 >= (XKS0-DXKSI_T96)) && (XKSI_T96 < XKS0) ) {
-        g = XKSI_T96-XKS0+DXKSI_T96;
+    if ( (XKSI >= (XKS0-DXKSI)) && (XKSI < XKS0) ) {
+        g = XKSI-XKS0 + DXKSI;
         BR3   = g*g*g;
         R = 1.5*BR3/(TDZ3+BR3);
     }
 
-    if ( (XKSI_T96 >= XKS0) && (XKSI_T96 < (XKS0+DXKSI_T96)) ) {
-        g = XKSI_T96-XKS0-DXKSI_T96;
+    if ( (XKSI >= XKS0) && (XKSI < (XKS0+DXKSI)) ) {
+        g = XKSI-XKS0 - DXKSI;
         BR3 = g*g*g;
         R   = 1.0 + 1.5*BR3/(TDZ3-BR3);
     }

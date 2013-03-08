@@ -18,6 +18,7 @@ int Lgm_B_T96( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     R = Lgm_Magnitude( v );
 
     Tsyg_T96( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->T96_Info );
+//printf("t->CB_T96_DX1.DX = %g\n", Info->CB_T96_DX1.DX);
     /*
     printf("Bts04 =  (%g, %g, %g)\n", Bx, By, Bz);
     B_cdip(  v, &B2, Info );
