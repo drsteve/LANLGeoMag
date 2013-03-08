@@ -485,6 +485,71 @@
 
 
 
+/*
+ *  Macros for dynamically allocating arrays plus init'ing them to a given value
+ */
+#define LGM_ARRAY_1D_WITH_VAL( prow, col, type, val ) {\
+    long int i;\
+    LGM_ARRAY_1D( prow, col, type );\
+    for (i=0; i<col; i++){\
+        prow[i] = val;\
+    }\
+}\
+
+#define LGM_ARRAY_2D_WITH_VAL( prow, row, col, type, val ) {\
+    long int i, j;\
+    LGM_ARRAY_2D( prow, row, col, type );\
+    for (i=0; i<row; i++){\
+        for (j=0; j<col; j++){\
+            prow[i][j] = val;\
+        }\
+    }\
+}\
+
+#define LGM_ARRAY_3D_WITH_VAL( prow, grid, row, col, type, val ) {\
+    long int i, j, k;\
+    LGM_ARRAY_3D( prow, grid, row, col, type );\
+    for (i=0; i<row; i++){\
+        for (j=0; j<col; j++){\
+            for (k=0; k<grid; k++){\
+                prow[i][j][k] = val;\
+            }\
+        }\
+    }\
+}\
+
+#define LGM_ARRAY_4D_WITH_VAL( pn4, n4, n3, n2, n1, type, val ) {\
+    long int i, j, k, l;\
+    LGM_ARRAY_4D( pn4, n4, n3, n2, n1, type );\
+    for (i=0; i<n1; i++){\
+        for (j=0; j<n2; j++){\
+            for (k=0; k<n3; k++){\
+                for (l=0; l<n4; l++){\
+                    pn4[i][j][k][l] = val;\
+                }\
+            }\
+        }\
+    }\
+}\
+
+#define LGM_ARRAY_5D_WITH_VAL( pn5, n5, n4, n3, n2, n1, type, val ) {\
+    long int i, j, k, l;\
+    LGM_ARRAY_5D( pn5, n5, n4, n3, n2, n1, type );\
+    for (i=0; i<n1; i++){\
+        for (j=0; j<n2; j++){\
+            for (k=0; k<n3; k++){\
+                for (l=0; l<n4; l++){\
+                    for (m=0; m<n5; m++){\
+                        pn5[i][j][k][l][m] = val;\
+                    }\
+                }\
+            }\
+        }\
+    }\
+}\
+
+
+
 #endif
 
 
