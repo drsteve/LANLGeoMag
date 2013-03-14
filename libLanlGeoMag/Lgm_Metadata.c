@@ -14,7 +14,7 @@
 /******************************************************************************/
 
 void Lgm_metadata_initvar(Lgm_metadata_variable *var, int dimension, int data, char* name) {
-  int dm[] = {1};
+  int dm[] = {dimension};
   var->dimension = dimension;
   var->name = name;
   var->n_attrs = 0;
