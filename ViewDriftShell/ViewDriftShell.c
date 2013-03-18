@@ -3657,7 +3657,7 @@ void DrawScene( ) {
     /*
      * These are the various coordinate axes.
      */
-//    glCallList( AxesDL );
+    glCallList( AxesDL );
 
 
 
@@ -3675,10 +3675,10 @@ void DrawScene( ) {
 
 //20100305
 //glUseProgram( g_shaderMyTest );
-/////////////////////////glCallList( DipoleAxisDL );
+glCallList( DipoleAxisDL );
 //glUseProgram( 0 );
 //20100305
-/////////////////////////glCallList( SunDirectionDL );
+glCallList( SunDirectionDL );
 //20100305    glCallList( EqPlaneGridDL );
 //glCallList( EqPlaneDL );
 

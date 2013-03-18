@@ -57,11 +57,11 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 1200;
+    NX     = 100;
     LX_MIN = -30.0;
     LX_MAX =  30.0;
 
-    NY     = 1200;
+    NY     = 100;
     LY_MIN = -30.0;
     LY_MAX =  30.0;
 
@@ -75,6 +75,10 @@ int main(){
     Lgm_set_QinDenton( &p, mInfo );
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
+    
+    Lgm_Set_Open_Limits( mInfo, -200.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
 
     LGM_ARRAY_2D( Image, NX, NY, double );
@@ -83,6 +87,7 @@ int main(){
         #pragma omp parallel private(x,y,j,GeodLat,GeodLong,u,v,v1,v2,v3,Flag,mInfo2)
         #pragma omp for schedule(dynamic, 1)
         for ( i=0; i<NX; i++ ) {
+        //for ( i=25; i<=25; i++ ) {
             x = (LX_MAX-LX_MIN) * i / ((double)(NX-1)) + LX_MIN;
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );
@@ -94,11 +99,12 @@ int main(){
 
                 GeodLat  = 90.0 - sqrt( x*x + y*y );
                 GeodLong = atan2( y, x )*DegPerRad;
-
-
                 Lgm_GEOD_to_WGS84( GeodLat, GeodLong, GeodHeight, &v );
                 Lgm_Convert_Coords( &v, &u, WGS84_TO_GSM, mInfo->c );
 
+
+
+//mInfo2->VerbosityLevel = 5;
                 Flag = Lgm_Trace( &u, &v1, &v2, &v3, GeodHeight, 1e-7, 1e-7, mInfo2 );
                 Lgm_Convert_Coords( &v3, &w, GSM_TO_SM, mInfo->c );
                 Image[i][j] = (double)ClassifyFL_Enhanced(Flag, &w)+100;
@@ -114,7 +120,7 @@ int main(){
 
 
 
-    DumpGif( "Image_TS04", NX, NY, Image );
+    DumpGif( "Image_T96_3", NX, NY, Image );
     LGM_ARRAY_2D_FREE( Image );
 
     Lgm_FreeMagInfo( mInfo );

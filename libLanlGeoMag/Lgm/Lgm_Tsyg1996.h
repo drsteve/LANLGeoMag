@@ -64,6 +64,36 @@ typedef struct LgmTsyg1996_Info {
     double      P[4], R[4], RP[4], RR[4], SQPR[4][4];
 
 
+    int         BIRK1SHLD_T96_FLAG;
+    double      BIRK1SHLD_T96_XOLD;
+    double      BIRK1SHLD_T96_YOLD;
+    double      BIRK1SHLD_T96_ZOLD;
+    double      BIRK1SHLD_T96_RP[5], BIRK1SHLD_T96_RR[5], BIRK1SHLD_T96_RQ[5], BIRK1SHLD_T96_RS[5];
+    double      BIRK1SHLD_T96_SQPR[5][5], BIRK1SHLD_T96_SQQS[5][5];
+    double      BIRK1SHLD_T96_EPR[5][5], BIRK1SHLD_T96_EQS[5][5];
+    double      BIRK1SHLD_T96_SYPI[5], BIRK1SHLD_T96_CYPI[5], BIRK1SHLD_T96_SYQI[5], BIRK1SHLD_T96_CYQI[5];
+    double      BIRK1SHLD_T96_SZRK[5], BIRK1SHLD_T96_CZRK[5], BIRK1SHLD_T96_SZSK[5], BIRK1SHLD_T96_CZSK[5];
+
+    int         BIRK2SHL_T96_FLAG;
+    double      BIRK2SHL_T96_XOLD;
+    double      BIRK2SHL_T96_YOLD;
+    double      BIRK2SHL_T96_ZOLD;
+    double      BIRK2SHL_T96_RP[5], BIRK2SHL_T96_RR[5], BIRK2SHL_T96_RQ[5], BIRK2SHL_T96_RS[5];
+    double      BIRK2SHL_T96_SQPR[5][5], BIRK2SHL_T96_SQQS[5][5];
+    double      BIRK2SHL_T96_EPR[5][5], BIRK2SHL_T96_EQS[5][5];
+    double      BIRK2SHL_T96_SYPI[5], BIRK2SHL_T96_CYPI[5], BIRK2SHL_T96_SYQI[5], BIRK2SHL_T96_CYQI[5];
+    double      BIRK2SHL_T96_SZRK[5], BIRK2SHL_T96_CZRK[5], BIRK2SHL_T96_SZSK[5], BIRK2SHL_T96_CZSK[5];
+
+
+    int         SHLCAR3X3_T96_FLAG[4];
+    double      SHLCAR3X3_T96_XOLD[4];
+    double      SHLCAR3X3_T96_YOLD[4];
+    double      SHLCAR3X3_T96_ZOLD[4];
+    double      SHLCAR3X3_T96_RP[4][5], SHLCAR3X3_T96_RR[4][5], SHLCAR3X3_T96_RQ[4][5], SHLCAR3X3_T96_RS[4][5];
+    double      SHLCAR3X3_T96_SQPR[4][5][5], SHLCAR3X3_T96_SQQS[4][5][5];
+    double      SHLCAR3X3_T96_EPR[4][5][5], SHLCAR3X3_T96_EQS[4][5][5];
+    double      SHLCAR3X3_T96_SYPI[4][5], SHLCAR3X3_T96_CYPI[4][5], SHLCAR3X3_T96_SYQI[4][5], SHLCAR3X3_T96_CYQI[4][5];
+    double      SHLCAR3X3_T96_SZRK[4][5], SHLCAR3X3_T96_CZRK[4][5], SHLCAR3X3_T96_SZSK[4][5], SHLCAR3X3_T96_CZSK[4][5];
 
 
 } LgmTsyg1996_Info;
@@ -87,15 +117,15 @@ void    TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, do
 void    RINGCURR96_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) ;
 void    TAILDISK_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) ;
 void    TAIL87_T96( double X, double Z, double *BX, double *BZ, LgmTsyg1996_Info *t ) ;
-void    SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ ) ;
+void    SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ, int ArrayID, LgmTsyg1996_Info *t ) ;
 void    BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) ;
 void    BIRK2TOT_02_T96( double PS, double X, double Y, double Z,double *BX, double *BY,double *BZ, LgmTsyg1996_Info *tInfo ) ;
 void    DIPLOOP1_T96( double XI[5], double D[4][27], double *XX, double *YY, LgmTsyg1996_Info *t ) ;
 void    CIRCLE_T96( double X, double Y, double Z, double RL, double *BX, double *BY, double *BZ ) ;
 void    CROSSLP_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ, double XC, double RL, double AL ) ;
 void    DIPXYZ_T96( double X, double Y, double Z, double *BXX, double *BYX, double *BZX, double *BXY, double *BYY, double *BZY, double *BXZ, double *BYZ, double *BZZ ) ;
-void    BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
-void    BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ ) ;
+void    BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) ;
+void    BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ, LgmTsyg1996_Info *t ) ;
 void    R2_BIRK_T96( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ ) ;
 void    R2INNER_T96( double X, double Y, double Z, double *BX, double *BY, double *BZ ) ;
 void    BCONIC_T96( double X, double Y, double Z, double CBX[], double CBY[], double CBZ[], int NMAX ) ;

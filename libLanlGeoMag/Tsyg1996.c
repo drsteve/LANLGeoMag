@@ -131,7 +131,7 @@
 
 void Lgm_Init_T96( LgmTsyg1996_Info *t ){
 
-    int                 i, j;
+    int  q;
 
     // Init some params
     t->OLD_PS = -9e99;
@@ -141,6 +141,28 @@ void Lgm_Init_T96( LgmTsyg1996_Info *t ){
 
     t->INTERCON_M_FLAG = 0;
 
+
+
+    // cached vars in BIRK1SHLD_T96()
+    t->BIRK1SHLD_T96_FLAG = FALSE;
+    t->BIRK1SHLD_T96_XOLD = -9e99;
+    t->BIRK1SHLD_T96_YOLD = -9e99;
+    t->BIRK1SHLD_T96_ZOLD = -9e99;
+
+    // cached vars in BIRK2SHL_T96()
+    t->BIRK2SHL_T96_FLAG = FALSE;
+    t->BIRK2SHL_T96_XOLD = -9e99;
+    t->BIRK2SHL_T96_YOLD = -9e99;
+    t->BIRK2SHL_T96_ZOLD = -9e99;
+
+    // cached vars in SHLCAR3X3_T96()
+    for (q=0; q<=3; q++ ) {
+        t->SHLCAR3X3_T96_FLAG[q] = FALSE;
+        t->SHLCAR3X3_T96_XOLD[q] = -9e99;
+        t->SHLCAR3X3_T96_YOLD[q] = -9e99;
+        t->SHLCAR3X3_T96_ZOLD[q] = -9e99;
+    }
+    
 
     return;
 
@@ -317,15 +339,15 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
 
 
         DIPSHLD_T96( PPS, XX, YY, ZZ, &CFX, &CFY, &CFZ, t );
-//printf("CFX, CFY, CFZ = %g %g %g\n", CFX, CFY, CFZ);
+//printf("CFX, CFY, CFZ = %.15lf %.15lf %.15lf\n", CFX, CFY, CFZ);
         TAILRC96_T96( SPS, XX, YY, ZZ, &BXRC, &BYRC, &BZRC, &BXT2, &BYT2, &BZT2, &BXT3, &BYT3, &BZT3, t );
-//printf("SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 = %g %g %g %g %g %g %g %g %g %g\n", SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 );
+//printf("SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 = %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf\n", SPS, BXRC, BYRC, BZRC, BXT2, BYT2, BZT2, BXT3, BYT3, BZT3 );
         BIRK1TOT_02_T96( PPS, XX, YY, ZZ, &R1X, &R1Y, &R1Z, t );
-//printf("R1X, R1Y, R1Z = %g %g %g\n", R1X, R1Y, R1Z );
+//printf("R1X, R1Y, R1Z = %.15lf %.15lf %.15lf\n", R1X, R1Y, R1Z );
         BIRK2TOT_02_T96( PPS, XX, YY, ZZ, &R2X, &R2Y, &R2Z, t );
-//printf("R2X, R2Y, R2Z = %g %g %g\n", R2X, R2Y, R2Z );
+//printf("R2X, R2Y, R2Z = %.15lf %.15lf %.15lf\n", R2X, R2Y, R2Z );
         INTERCON_T96( XX, YS*XAPPA, ZS*XAPPA, &RIMFX, &RIMFYS, &RIMFZS, t );
-//printf("RIMFX, RIMFYS, RIMFZS = %g %g %g\n", RIMFX, RIMFYS, RIMFZS );
+//printf("RIMFX, RIMFYS, RIMFZS = %.15lf %.15lf %.15lf\n", RIMFX, RIMFYS, RIMFZS );
 
         RIMFY = RIMFYS*CT + RIMFZS*ST;
         RIMFZ = RIMFZS*CT - RIMFYS*ST;
@@ -352,6 +374,9 @@ void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, 
             *BX = (FX+QX)*FINT + OIMFX*FEXT - QX;
             *BY = (FY+QY)*FINT + OIMFY*FEXT - QY;
             *BZ = (FZ+QZ)*FINT + OIMFZ*FEXT - QZ;
+//printf("FX, QX, FINT, OIMFX, FEXT = %g %g %g %g %g\n", FX, QX, FINT, OIMFX, FEXT);
+//printf("FY, QY, FINT, OIMFY, FEXT = %g %g %g %g %g\n", FY, QY, FINT, OIMFY, FEXT);
+//printf("FZ, QZ, FINT, OIMFZ, FEXT = %g %g %g %g %g\n", FZ, QZ, FINT, OIMFZ, FEXT);
         } //   THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING POSSIBILITY IS NOW THE CASE (3):
 
     } else {
@@ -890,19 +915,19 @@ void TAILRC96_T96( double SPS, double X, double Y, double Z, double *BXRC, doubl
     t->CB_T96_WARP.DDZETADZ  = DDZETADZ;
     t->CB_T96_WARP.ZSWW      = ZSWW;
 
-    SHLCAR3X3_T96( ARC, X, Y, Z, SPS, &WX, &WY, &WZ );
+    SHLCAR3X3_T96( ARC, X, Y, Z, SPS, &WX, &WY, &WZ, 1, t );
     RINGCURR96_T96( X, Y, Z, &HX, &HY, &HZ, t );
     *BXRC = WX + HX;
     *BYRC = WY + HY;
     *BZRC = WZ + HZ;
 
-    SHLCAR3X3_T96( ATAIL2, X, Y, Z, SPS, &WX, &WY, &WZ );
+    SHLCAR3X3_T96( ATAIL2, X, Y, Z, SPS, &WX, &WY, &WZ, 2, t );
     TAILDISK_T96( X, Y, Z, &HX, &HY, &HZ, t );
     *BXT2 = WX + HX;
     *BYT2 = WY + HY;
     *BZT2 = WZ + HZ;
 
-    SHLCAR3X3_T96( ATAIL3, X, Y, Z, SPS, &WX, &WY, &WZ );
+    SHLCAR3X3_T96( ATAIL3, X, Y, Z, SPS, &WX, &WY, &WZ, 3, t );
     TAIL87_T96( X, Z, &HX, &HZ, t );
     *BXT3 = WX + HX;
     *BYT3 = WY;
@@ -1367,49 +1392,88 @@ void  TAIL87_T96( double X, double Z, double *BX, double *BZ, LgmTsyg1996_Info *
  *   18 "Cartesian" harmonics
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ ) {
+void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, double *HX, double *HY, double *HZ, int ArrayID, LgmTsyg1996_Info *t ) {
 
-    int     L, M, K, N, I;
+    int     L, M, K, N, I, q;
     double  CPS, S3PS, P, Q, CYPI, CYQI, SYPI, SYQI, R, S, SZRK, CZSK, CZRK, SZSK;
     double  SQPR, SQQS, EPR, EQS, DX, DY, DZ;
     
-
-    CPS  = sqrt( 1.0-SPS*SPS );
+    q = ArrayID;
+//    CPS  = sqrt( 1.0-SPS*SPS );
+    SPS = t->sin_psi;
+    CPS = t->cos_psi;
     S3PS = 4.0*CPS*CPS - 1.0;   //  THIS IS SIN(3*PS)/SIN(PS)
- 
     *HX = *HY = *HZ = 0.0;
+
+
+    /*
+     * Compute/cache one-time reciprocal terms
+     */
+    if ( !t->SHLCAR3X3_T96_FLAG[q] ) {
+
+        for ( I=1; I<=3; I++ ) {
+            t->SHLCAR3X3_T96_RP[q][I] = 1.0/A[36+I];
+            t->SHLCAR3X3_T96_RQ[q][I] = 1.0/A[42+I];
+            t->SHLCAR3X3_T96_RR[q][I] = 1.0/A[39+I];
+            t->SHLCAR3X3_T96_RS[q][I] = 1.0/A[45+I];
+        }
+        for ( I=1; I<=3; I++ ) {
+            for ( K=1; K<=3; K++ ) {
+                t->SHLCAR3X3_T96_SQPR[q][I][K] = sqrt( t->SHLCAR3X3_T96_RP[q][I]*t->SHLCAR3X3_T96_RP[q][I] + t->SHLCAR3X3_T96_RR[q][K]*t->SHLCAR3X3_T96_RR[q][K] );
+                t->SHLCAR3X3_T96_SQQS[q][I][K] = sqrt( t->SHLCAR3X3_T96_RQ[q][I]*t->SHLCAR3X3_T96_RQ[q][I] + t->SHLCAR3X3_T96_RS[q][K]*t->SHLCAR3X3_T96_RS[q][K] );
+            }
+        }
+
+        t->SHLCAR3X3_T96_FLAG[q] = TRUE;
+        
+    }
+
+    /*
+     * compute only if X, Y, Z if change.
+     */
+    if ( fabs(t->SHLCAR3X3_T96_XOLD[q] - X) > 1e-12 ) {
+        for ( I=1; I<=3; I++ ) {
+            for ( K=1; K<=3; K++ ) {
+                t->SHLCAR3X3_T96_EPR[q][I][K]  = exp( X*t->SHLCAR3X3_T96_SQPR[q][I][K] );
+                t->SHLCAR3X3_T96_EQS[q][I][K]  = exp( X*t->SHLCAR3X3_T96_SQQS[q][I][K] );
+            }
+        }
+        t->SHLCAR3X3_T96_XOLD[q] = X;
+    }
+
+    if ( fabs(t->SHLCAR3X3_T96_YOLD[q] - Y) > 1e-12 ) {
+        for ( I=1; I<=3; I++ ) {
+            t->SHLCAR3X3_T96_SYPI[q][I] = sin( Y*t->SHLCAR3X3_T96_RP[q][I] );
+            t->SHLCAR3X3_T96_CYPI[q][I] = cos( Y*t->SHLCAR3X3_T96_RP[q][I] );
+            t->SHLCAR3X3_T96_SYQI[q][I] = sin( Y*t->SHLCAR3X3_T96_RQ[q][I] );
+            t->SHLCAR3X3_T96_CYQI[q][I] = cos( Y*t->SHLCAR3X3_T96_RQ[q][I] );
+        }
+        t->SHLCAR3X3_T96_YOLD[q] = Y;
+    }
+
+    if ( fabs(t->SHLCAR3X3_T96_ZOLD[q] - Z) > 1e-12 ) {
+        for ( K=1; K<=3; K++ ) {
+            t->SHLCAR3X3_T96_SZRK[q][K] = sin( Z*t->SHLCAR3X3_T96_RR[q][K] );
+            t->SHLCAR3X3_T96_CZRK[q][K] = cos( Z*t->SHLCAR3X3_T96_RR[q][K] );
+            t->SHLCAR3X3_T96_SZSK[q][K] = sin( Z*t->SHLCAR3X3_T96_RS[q][K] );
+            t->SHLCAR3X3_T96_CZSK[q][K] = cos( Z*t->SHLCAR3X3_T96_RS[q][K] );
+        }
+        t->SHLCAR3X3_T96_ZOLD[q] = Z;
+    }
+    
 
     L = 0;
     for ( M=1; M<=2; M++ ) {     //    M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY) AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
         for ( I=1; I<=3; I++ ) {
-
-            P = A[36+I];
-            Q = A[42+I];
-            CYPI = cos(Y/P);
-            CYQI = cos(Y/Q);
-            SYPI = sin(Y/P);
-            SYQI = sin(Y/Q);
- 
             for ( K=1; K<=3; K++ ) {
-
-                R = A[39+K];
-                S = A[45+K];
-                SZRK = sin(Z/R);
-                CZSK = cos(Z/S);
-                CZRK = cos(Z/R);
-                SZSK = sin(Z/S);
-                SQPR = sqrt(1.0/(P*P) + 1.0/(R*R));
-                SQQS = sqrt(1.0/(Q*Q) + 1.0/(S*S));
-                EPR  = exp(X*SQPR);
-                EQS  = exp(X*SQQS);
-
                 for ( N=1; N<=2; N++ ) { //  N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT AND N=2 IS FOR THE SECOND ONE
+
                     ++L;
                     if ( M == 1 ) {
                         if ( N == 1 ) {
-                            DX = -SQPR*EPR*CYPI*SZRK;
-                            DY =  EPR/P*SYPI*SZRK;
-                            DZ = -EPR/R*CYPI*CZRK;
+                            DX = -t->SHLCAR3X3_T96_SQPR[q][I][K] * t->SHLCAR3X3_T96_EPR[q][I][K] * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
+                            DY =  t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RP[q][I]     * t->SHLCAR3X3_T96_SYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
+                            DZ = -t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RR[q][K]     * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_CZRK[q][K];
                             *HX += A[L]*DX;
                             *HY += A[L]*DY;
                             *HZ += A[L]*DZ;
@@ -1423,9 +1487,9 @@ void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, doubl
                         }
                     } else {
                         if ( N == 1 ) {
-                            DX = -SPS*SQQS*EQS*CYQI*CZSK;
-                            DY =  SPS*EQS/Q*SYQI*CZSK;
-                            DZ =  SPS*EQS/S*CYQI*SZSK;
+                            DX = -SPS * t->SHLCAR3X3_T96_SQQS[q][I][K] * t->SHLCAR3X3_T96_EQS[q][I][K] * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
+                            DY =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RQ[q][I]     * t->SHLCAR3X3_T96_SYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
+                            DZ =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RS[q][K]     * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_SZSK[q][K];
                             *HX += A[L]*DX;
                             *HY += A[L]*DY;
                             *HZ += A[L]*DZ;
@@ -1439,10 +1503,10 @@ void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, doubl
                         }
                     }
 
-                }
-            }
-        }
-    }
+                } // end N
+            } // end K
+        } // end I
+    } // end M
 
     return;
 
@@ -1603,6 +1667,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
             *BZ += C1[I]*D1[3][I];
             //printf("1. C1[%d], D1[1][%d], D1[1][%d], D1[1][%d], BX, BY, BZ = %g %g %g %g %g %g %g\n", I, I, I, I, C1[I], D1[1][I], D1[2][I], D1[3][I], *BX, *BY, *BZ);
         }
+        //printf("LOC = %d,   BX, BY, BZ = %.15lf, %.15lf, %.15lf\n", LOC, *BX, *BY, *BZ );
     }
 
     if ( LOC == 2 ) {
@@ -1626,9 +1691,11 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         SQR = sqrt(R);
 
         g = sin(T01); g2  =g*g; g3 = g*g2; g6 = g3*g3;
-        ST01AS = pow( SQR/(R3+1.0/g6-1.0), 0.1666666667 );
+        ST01AS = SQR / pow( (R3 + 1.0/g6 - 1.0), 0.1666666667 );
+
         g = sin(T02); g2  =g*g; g3 = g*g2; g6 = g3*g3;
-        ST02AS = pow( SQR/(R3+1.0/g6-1.0), 0.1666666667 );
+        ST02AS = SQR / pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
+
         CT01AS = sqrt(1.0-ST01AS*ST01AS);
         CT02AS = sqrt(1.0-ST02AS*ST02AS);
         XAS1   = R*ST01AS*cos(PAS);
@@ -1688,9 +1755,12 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         SQR = sqrt(R);
 
         g = sin(T01); g2 = g*g; g3 = g2*g; g6 = g3*g3;
-        ST01AS = pow( SQR/(R3+1.0/g6-1.0), 0.1666666667 );
+        ST01AS = SQR/pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
+
         g = sin(T02); g2 = g*g; g3 = g2*g; g6 = g3*g3;
-        ST02AS = pow( SQR/(R3+1.0/g6-1.0), 0.1666666667 );
+        ST02AS = SQR/pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
+        //printf("T01, T02, SQR, R3, ST01AS, ST02AS = %g %g %g %g %g %g\n", T01, T02, SQR, R3, ST01AS, ST02AS);
+
         CT01AS = -sqrt(1.0-ST01AS*ST01AS);
         CT02AS = -sqrt(1.0-ST02AS*ST02AS);
         XAS1   = R*ST01AS*cos(PAS);
@@ -1736,11 +1806,16 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         SS   = sqrt( g2 + h2 + q2 );
         g = X-X1; g2 = g*g; h = Y-Y1; h2 = h*h; q = Z-Z1; q2 = q*q;
         DS   = sqrt( g2 + h2 + q2 );
+        //printf("LOC = %d,   SS, DS = %.15lf, %.15lf\n", LOC, SS, DS );
         FRAC = DS/SS;
         g = 1.0 - FRAC;
         *BX = BX1*g + BX2*FRAC;
         *BY = BY1*g + BY2*FRAC;
         *BZ = BZ1*g + BZ2*FRAC;
+        //printf("LOC = %d,   g, FRAC = %.15lf, %.15lf\n", LOC, g, FRAC );
+        //printf("LOC = %d,   BX, BY, BZ = %.15lf, %.15lf, %.15lf\n", LOC, *BX, *BY, *BZ );
+        //printf("LOC = %d,   BX1, BY1, BZ1 = %.15lf, %.15lf, %.15lf\n", LOC, BX1, BY1, BZ1 );
+        //printf("LOC = %d,   BX2, BY2, BZ2 = %.15lf, %.15lf, %.15lf\n", LOC, BX2, BY2, BZ2 );
 
     } // END OF THE CASE 4
 
@@ -1749,7 +1824,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
     /*
      *   NOW, LET US ADD THE SHIELDING FIELD
      */
-    BIRK1SHLD_T96( PS, X, Y, Z, &BSX, &BSY, &BSZ );
+    BIRK1SHLD_T96( PS, X, Y, Z, &BSX, &BSY, &BSZ, t );
     //printf("2. BSX, BSY, BSZ = %g %g %g\n", BSX, BSY, BSZ);
     //printf("2.5 BX, BY, BZ = %g %g %g\n", *BX, *BY, *BZ);
     *BX += BSX;
@@ -2193,7 +2268,7 @@ void CONDIP1_T96( double XI[5], double D[4][80], double *XX, double *YY, double 
  *    Revised  June 12, 1996.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ ) {
+void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *t ) {
 
  
     static double A[] = { -9e99, 1.174198045,-1.463820502,4.840161537,-3.674506864,
@@ -2220,55 +2295,78 @@ void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double 
     double  CPS, SPS, S3PS, CYPI, CYQI, SYPI, SYQI, SZRK, CZSK, CZRK, SZSK, SQPR, SQQS, EPR, EQS, HX, HY, HZ;
 
 
-//    P1[1] = A[65];
-//    R1[1] = A[69];
-//    Q1[1] = A[73];
-//    S1[1] = A[77];
-
     *BX = *BY = *BZ = 0.0;
-    CPS  = cos(PS);
-    SPS  = sin(PS);
-    S3PS = 4.0*CPS*CPS-1.0;
+    //SPS  = sin(PS); CPS = cos(PS);
+    SPS  = t->sin_psi; CPS = t->cos_psi;
+    S3PS = 4.0*CPS*CPS - 1.0;
 
-    for ( I=1; I<=4; I++ ) {
-//        RP[I] = 1.0/P1[I];
-//        RR[I] = 1.0/R1[I];
-//        RQ[I] = 1.0/Q1[I];
-//        RS[I] = 1.0/S1[I];
-        RP[I] = 1.0/A[I+64];
-        RR[I] = 1.0/A[I+68];
-        RQ[I] = 1.0/A[I+72];
-        RS[I] = 1.0/A[I+76];
+
+   /*
+    * Precompute one-time values.
+    */
+    if ( !t->BIRK1SHLD_T96_FLAG ) {
+        for ( I=1; I<=4; I++ ) {
+            t->BIRK1SHLD_T96_RP[I] = 1.0/A[I+64];
+            t->BIRK1SHLD_T96_RR[I] = 1.0/A[I+68];
+            t->BIRK1SHLD_T96_RQ[I] = 1.0/A[I+72];
+            t->BIRK1SHLD_T96_RS[I] = 1.0/A[I+76];
+        }
+        for ( I=1; I<=4; I++ ) {
+            for ( K=1; K<=4; K++ ) {
+                t->BIRK1SHLD_T96_SQPR[I][K] = sqrt( t->BIRK1SHLD_T96_RP[I]*t->BIRK1SHLD_T96_RP[I] + t->BIRK1SHLD_T96_RR[K]*t->BIRK1SHLD_T96_RR[K] );
+                t->BIRK1SHLD_T96_SQQS[I][K] = sqrt( t->BIRK1SHLD_T96_RQ[I]*t->BIRK1SHLD_T96_RQ[I] + t->BIRK1SHLD_T96_RS[K]*t->BIRK1SHLD_T96_RS[K] );
+            }
+        }
+        t->BIRK1SHLD_T96_FLAG = TRUE;
     }
+
+
+    /*
+     * compute only if X, Y, Z if change.
+     */
+    if ( fabs(t->BIRK1SHLD_T96_XOLD - X) > 1e-12 ) {
+        for ( I=1; I<=4; I++ ) {
+            for ( K=1; K<=4; K++ ) {
+                t->BIRK1SHLD_T96_EPR[I][K]  = exp( X*t->BIRK1SHLD_T96_SQPR[I][K] );
+                t->BIRK1SHLD_T96_EQS[I][K]  = exp( X*t->BIRK1SHLD_T96_SQQS[I][K] );
+            }
+        }
+        t->BIRK1SHLD_T96_XOLD = X;
+    }
+
+    if ( fabs(t->BIRK1SHLD_T96_YOLD - Y) > 1e-12 ) {
+        for ( I=1; I<=4; I++ ) {
+            t->BIRK1SHLD_T96_SYPI[I] = sin( Y*t->BIRK1SHLD_T96_RP[I] );
+            t->BIRK1SHLD_T96_CYPI[I] = cos( Y*t->BIRK1SHLD_T96_RP[I] );
+            t->BIRK1SHLD_T96_SYQI[I] = sin( Y*t->BIRK1SHLD_T96_RQ[I] );
+            t->BIRK1SHLD_T96_CYQI[I] = cos( Y*t->BIRK1SHLD_T96_RQ[I] );
+        }
+        t->BIRK1SHLD_T96_YOLD = Y;
+    }
+
+    if ( fabs(t->BIRK1SHLD_T96_ZOLD - Z) > 1e-12 ) {
+        for ( K=1; K<=4; K++ ) {
+            t->BIRK1SHLD_T96_SZRK[K] = sin( Z*t->BIRK1SHLD_T96_RR[K] );
+            t->BIRK1SHLD_T96_CZRK[K] = cos( Z*t->BIRK1SHLD_T96_RR[K] );
+            t->BIRK1SHLD_T96_SZSK[K] = sin( Z*t->BIRK1SHLD_T96_RS[K] );
+            t->BIRK1SHLD_T96_CZSK[K] = cos( Z*t->BIRK1SHLD_T96_RS[K] );
+        }
+        t->BIRK1SHLD_T96_ZOLD = Z;
+    }
+
+
 
     L = 0;
     for ( M=1; M<=2; M++ ) { // M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY) AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
-
         for ( I=1; I<=4; I++ ) {
-
-            CYPI = cos( Y*RP[I] );
-            CYQI = cos( Y*RQ[I] );
-            SYPI = sin( Y*RP[I] );
-            SYQI = sin( Y*RQ[I] );
-
             for ( K=1; K<=4; K++ ) {
-
-                SZRK = sin( Z*RR[K] );
-                CZSK = cos( Z*RS[K] );
-                CZRK = cos( Z*RR[K] );
-                SZSK = sin( Z*RS[K] );
-                SQPR = sqrt( RP[I]*RP[I] + RR[K]*RR[K] );
-                SQQS = sqrt( RQ[I]*RQ[I] + RS[K]*RS[K] );
-                EPR  = exp( X*SQPR );
-                EQS  = exp( X*SQQS );
-
                 for ( N=1; N<=2; N++ ) { // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT AND N=2 IS FOR THE SECOND ONE
 
                     if ( M == 1 ) {
                         if (N == 1) {
-                            HX = -SQPR*EPR*CYPI*SZRK;
-                            HY =  RP[I]*EPR*SYPI*SZRK;
-                            HZ = -RR[K]*EPR*CYPI*CZRK;
+                            HX = -t->BIRK1SHLD_T96_SQPR[I][K]*t->BIRK1SHLD_T96_EPR[I][K]*t->BIRK1SHLD_T96_CYPI[I]*t->BIRK1SHLD_T96_SZRK[K];
+                            HY =  t->BIRK1SHLD_T96_RP[I]*t->BIRK1SHLD_T96_EPR[I][K]*t->BIRK1SHLD_T96_SYPI[I]*t->BIRK1SHLD_T96_SZRK[K];
+                            HZ = -t->BIRK1SHLD_T96_RR[K]*t->BIRK1SHLD_T96_EPR[I][K]*t->BIRK1SHLD_T96_CYPI[I]*t->BIRK1SHLD_T96_CZRK[K];
                         } else {
                             HX *= CPS;
                             HY *= CPS;
@@ -2276,9 +2374,9 @@ void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double 
                         }
                     } else {
                         if (N == 1) {
-                            HX = -SPS*SQQS*EQS*CYQI*CZSK;
-                            HY =  SPS*RQ[I]*EQS*SYQI*CZSK;
-                            HZ =  SPS*RS[K]*EQS*CYQI*SZSK;
+                            HX = -SPS*t->BIRK1SHLD_T96_SQQS[I][K]*t->BIRK1SHLD_T96_EQS[I][K]*t->BIRK1SHLD_T96_CYQI[I]*t->BIRK1SHLD_T96_CZSK[K];
+                            HY =  SPS*t->BIRK1SHLD_T96_RQ[I]*t->BIRK1SHLD_T96_EQS[I][K]*t->BIRK1SHLD_T96_SYQI[I]*t->BIRK1SHLD_T96_CZSK[K];
+                            HZ =  SPS*t->BIRK1SHLD_T96_RS[K]*t->BIRK1SHLD_T96_EQS[I][K]*t->BIRK1SHLD_T96_CYQI[I]*t->BIRK1SHLD_T96_SZSK[K];
                         } else {
                             HX *= S3PS;
                             HY *= S3PS;
@@ -2303,11 +2401,11 @@ void BIRK1SHLD_T96( double PS, double X, double Y, double Z, double *BX, double 
 
 
 
-void BIRK2TOT_02_T96( double PS, double X, double Y, double Z,double *BX, double *BY,double *BZ, LgmTsyg1996_Info *tInfo ) {
+void BIRK2TOT_02_T96( double PS, double X, double Y, double Z,double *BX, double *BY,double *BZ, LgmTsyg1996_Info *t ) {
 
     double  WX, WY, WZ, HX, HY, HZ;
 
-    BIRK2SHL_T96( X, Y, Z, PS, &WX, &WY, &WZ );
+    BIRK2SHL_T96( X, Y, Z, PS, &WX, &WY, &WZ, t );
     R2_BIRK_T96( X, Y, Z, PS, &HX, &HY, &HZ );
 
     *BX = WX + HX;
@@ -2335,7 +2433,7 @@ void BIRK2TOT_02_T96( double PS, double X, double Y, double Z,double *BX, double
  *   harmonics
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ ) {
+void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *HY, double *HZ, LgmTsyg1996_Info *t ) {
 
     double  P[3], R[3], Q[3], S[3];
 
@@ -2349,49 +2447,81 @@ void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *
     double  SPS, CPS, S3PS, SYPI, CYPI, SYQI, CYQI, SZRK, CZSK, SZSK;
     double  CZRK, SQPR, SQQS, EPR, EQS, DX, DY, DZ;
 
-    P[1] = A[17]; P[2] = A[18];
-    R[1] = A[19]; R[2] = A[20];
-    Q[1] = A[21]; Q[2] = A[22];
-    S[1] = A[23]; S[2] = A[24];
-
-    SPS  = sin(PS);
-    CPS  = cos(PS);
+    SPS = t->sin_psi;
+    CPS = t->cos_psi;
+    //SPS  = sin(PS);
+    //CPS  = cos(PS);
     S3PS = 4.0*CPS*CPS-1.0; //   THIS IS SIN(3*PS)/SIN(PS)
+
+
+   /*
+    * Precompute one-time values.
+    */
+    if ( !t->BIRK2SHL_T96_FLAG ) {
+        for ( I=1; I<=2; I++ ) {
+            t->BIRK2SHL_T96_RP[I] = 1.0/A[I+16];
+            t->BIRK2SHL_T96_RR[I] = 1.0/A[I+18];
+            t->BIRK2SHL_T96_RQ[I] = 1.0/A[I+20];
+            t->BIRK2SHL_T96_RS[I] = 1.0/A[I+22];
+        }
+        for ( I=1; I<=2; I++ ) {
+            for ( K=1; K<=2; K++ ) {
+                t->BIRK2SHL_T96_SQPR[I][K] = sqrt( t->BIRK2SHL_T96_RP[I]*t->BIRK2SHL_T96_RP[I] + t->BIRK2SHL_T96_RR[K]*t->BIRK2SHL_T96_RR[K] );
+                t->BIRK2SHL_T96_SQQS[I][K] = sqrt( t->BIRK2SHL_T96_RQ[I]*t->BIRK2SHL_T96_RQ[I] + t->BIRK2SHL_T96_RS[K]*t->BIRK2SHL_T96_RS[K] );
+            }
+        }
+        t->BIRK2SHL_T96_FLAG = TRUE;
+    }
+
+    /*
+     * compute only if X, Y, Z if change.
+     */
+    if ( fabs(t->BIRK2SHL_T96_XOLD - X) > 1e-12 ) {
+        for ( I=1; I<=2; I++ ) {
+            for ( K=1; K<=2; K++ ) {
+                t->BIRK2SHL_T96_EPR[I][K]  = exp( X*t->BIRK2SHL_T96_SQPR[I][K] );
+                t->BIRK2SHL_T96_EQS[I][K]  = exp( X*t->BIRK2SHL_T96_SQQS[I][K] );
+            }
+        }
+        t->BIRK2SHL_T96_XOLD = X;
+    }
+
+    if ( fabs(t->BIRK2SHL_T96_YOLD - Y) > 1e-12 ) {
+        for ( I=1; I<=2; I++ ) {
+            t->BIRK2SHL_T96_SYPI[I] = sin( Y*t->BIRK2SHL_T96_RP[I] );
+            t->BIRK2SHL_T96_CYPI[I] = cos( Y*t->BIRK2SHL_T96_RP[I] );
+            t->BIRK2SHL_T96_SYQI[I] = sin( Y*t->BIRK2SHL_T96_RQ[I] );
+            t->BIRK2SHL_T96_CYQI[I] = cos( Y*t->BIRK2SHL_T96_RQ[I] );
+        }
+        t->BIRK2SHL_T96_YOLD = Y;
+    }
+
+    if ( fabs(t->BIRK2SHL_T96_ZOLD - Z) > 1e-12 ) {
+        for ( K=1; K<=2; K++ ) {
+            t->BIRK2SHL_T96_SZRK[K] = sin( Z*t->BIRK2SHL_T96_RR[K] );
+            t->BIRK2SHL_T96_CZRK[K] = cos( Z*t->BIRK2SHL_T96_RR[K] );
+            t->BIRK2SHL_T96_SZSK[K] = sin( Z*t->BIRK2SHL_T96_RS[K] );
+            t->BIRK2SHL_T96_CZSK[K] = cos( Z*t->BIRK2SHL_T96_RS[K] );
+        }
+        t->BIRK2SHL_T96_ZOLD = Z;
+    }
+
+
 
     *HX = *HY= *HZ = 0.0; 
     L = 0;
 
     for ( M=1; M<=2; M++ ) { // M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY) AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
-
         for ( I=1; I<=2; I++ ) {
-
-            SYPI = sin( Y/P[I] );
-            CYPI = cos( Y/P[I] );
-
-            SYQI = sin( Y/Q[I] );
-            CYQI = cos( Y/Q[I] );
-
             for ( K=1; K<=2; K++ ) {
-
-                SZRK = sin( Z/R[K] );
-                CZSK = cos( Z/S[K] );
-
-                SZSK = sin( Z/S[K] );
-                CZRK = cos( Z/R[K] );
-
-                SQPR = sqrt( 1.0/(P[I]*P[I]) + 1.0/(R[K]*R[K]) );
-                SQQS = sqrt( 1.0/(Q[I]*Q[I]) + 1.0/(S[K]*S[K]) );
-                EPR  = exp( X*SQPR );
-                EQS  = exp( X*SQQS );
-
                 for ( N=1; N<=2; N++ ) { // N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT AND N=2 IS FOR THE SECOND ONE
 
                     ++L;
                     if (M == 1) {
                         if (N == 1) {
-                            DX = -SQPR*EPR*CYPI*SZRK;
-                            DY =  EPR/P[I]*SYPI*SZRK;
-                            DZ = -EPR/R[K]*CYPI*CZRK;
+                            DX = -t->BIRK2SHL_T96_SQPR[I][K] * t->BIRK2SHL_T96_EPR[I][K] * t->BIRK2SHL_T96_CYPI[I] * t->BIRK2SHL_T96_SZRK[K];
+                            DY =  t->BIRK2SHL_T96_RP[I]      * t->BIRK2SHL_T96_EPR[I][K] * t->BIRK2SHL_T96_SYPI[I] * t->BIRK2SHL_T96_SZRK[K];
+                            DZ = -t->BIRK2SHL_T96_RR[K]      * t->BIRK2SHL_T96_EPR[I][K] * t->BIRK2SHL_T96_CYPI[I] * t->BIRK2SHL_T96_CZRK[K];
                             *HX += A[L]*DX;
                             *HY += A[L]*DY;
                             *HZ += A[L]*DZ;
@@ -2405,9 +2535,9 @@ void BIRK2SHL_T96( double X, double Y, double Z, double PS, double *HX, double *
                         }
                      } else {
                         if (N == 1) {
-                            DX = -SPS*SQQS*EQS*CYQI*CZSK;
-                            DY =  SPS*EQS/Q[I]*SYQI*CZSK;
-                            DZ =  SPS*EQS/S[K]*CYQI*SZSK;
+                            DX = -SPS * t->BIRK2SHL_T96_SQQS[I][K] * t->BIRK2SHL_T96_EQS[I][K] * t->BIRK2SHL_T96_CYQI[I] * t->BIRK2SHL_T96_CZSK[K];
+                            DY =  SPS * t->BIRK2SHL_T96_RQ[I]      * t->BIRK2SHL_T96_EQS[I][K] * t->BIRK2SHL_T96_SYQI[I] * t->BIRK2SHL_T96_CZSK[K];
+                            DZ =  SPS * t->BIRK2SHL_T96_RS[K]      * t->BIRK2SHL_T96_EQS[I][K] * t->BIRK2SHL_T96_CYQI[I] * t->BIRK2SHL_T96_SZSK[K];
                             *HX += A[L]*DX;
                             *HY += A[L]*DY;
                             *HZ += A[L]*DZ;
