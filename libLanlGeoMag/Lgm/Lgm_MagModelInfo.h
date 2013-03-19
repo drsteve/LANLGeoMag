@@ -230,6 +230,11 @@ typedef struct Lgm_MagModelInfo {
     int                 imin2;          //   array between which smin is located.
 
 
+    Lgm_Vector          v1_final;       //< Place to store the final value of v1 when tryingm to trace to N foot.
+    Lgm_Vector          v2_final;       //< Place to store the final value of v2 when tryingm to trace to S foot.
+    Lgm_Vector          v3_final;       //< Place to store the final value of v3 when tryingm to trace to Min B.
+
+
 
     /*
      *  GSL defs for spline interpolation

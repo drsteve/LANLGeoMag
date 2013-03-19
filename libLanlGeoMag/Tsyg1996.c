@@ -1396,7 +1396,7 @@ void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, doubl
 
     int     L, M, K, N, I, q;
     double  CPS, S3PS, P, Q, CYPI, CYQI, SYPI, SYQI, R, S, SZRK, CZSK, CZRK, SZSK;
-    double  SQPR, SQQS, EPR, EQS, DX, DY, DZ;
+    double  SQPR, SQQS, EPR, EQS, DX, DY, DZ, DX1, DY1, DZ1, DX2, DY2, DZ2, g, h, b, e, f;
     
     q = ArrayID;
 //    CPS  = sqrt( 1.0-SPS*SPS );
@@ -1462,51 +1462,92 @@ void SHLCAR3X3_T96( double A[] , double X, double Y, double Z, double SPS, doubl
     }
     
 
+//    L = 0;
+//    for ( M=1; M<=2; M++ ) {     //    M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY) AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
+//        for ( I=1; I<=3; I++ ) {
+//            for ( K=1; K<=3; K++ ) {
+//                for ( N=1; N<=2; N++ ) { //  N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT AND N=2 IS FOR THE SECOND ONE
+//
+//                    ++L;
+//                    if ( M == 1 ) {
+//                        if ( N == 1 ) {
+//                            DX = -t->SHLCAR3X3_T96_SQPR[q][I][K] * t->SHLCAR3X3_T96_EPR[q][I][K] * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
+//                            DY =  t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RP[q][I]     * t->SHLCAR3X3_T96_SYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
+//                            DZ = -t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RR[q][K]     * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_CZRK[q][K];
+//                            *HX += A[L]*DX;
+//                            *HY += A[L]*DY;
+//                            *HZ += A[L]*DZ;
+//                        } else {
+//                            DX = DX*CPS;
+//                            DY = DY*CPS;
+//                            DZ = DZ*CPS;
+//                            *HX += A[L]*DX;
+//                            *HY += A[L]*DY;
+//                            *HZ += A[L]*DZ;
+//                        }
+//                    } else {
+//                        if ( N == 1 ) {
+//                            DX = -SPS * t->SHLCAR3X3_T96_SQQS[q][I][K] * t->SHLCAR3X3_T96_EQS[q][I][K] * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
+//                            DY =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RQ[q][I]     * t->SHLCAR3X3_T96_SYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
+//                            DZ =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RS[q][K]     * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_SZSK[q][K];
+//                            *HX += A[L]*DX;
+//                            *HY += A[L]*DY;
+//                            *HZ += A[L]*DZ;
+//                        } else {
+//                            DX = DX*S3PS;
+//                            DY = DY*S3PS;
+//                            DZ = DZ*S3PS;
+//                            *HX += A[L]*DX;
+//                            *HY += A[L]*DY;
+//                            *HZ += A[L]*DZ;
+//                        }
+//                    }
+//
+//                } // end N
+//            } // end K
+//        } // end I
+//    } // end M
+
+
     L = 0;
     for ( M=1; M<=2; M++ ) {     //    M=1 IS FOR THE 1ST SUM ("PERP." SYMMETRY) AND M=2 IS FOR THE SECOND SUM ("PARALL." SYMMETRY)
         for ( I=1; I<=3; I++ ) {
             for ( K=1; K<=3; K++ ) {
-                for ( N=1; N<=2; N++ ) { //  N=1 IS FOR THE FIRST PART OF EACH COEFFICIENT AND N=2 IS FOR THE SECOND ONE
 
                     ++L;
                     if ( M == 1 ) {
-                        if ( N == 1 ) {
-                            DX = -t->SHLCAR3X3_T96_SQPR[q][I][K] * t->SHLCAR3X3_T96_EPR[q][I][K] * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
-                            DY =  t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RP[q][I]     * t->SHLCAR3X3_T96_SYPI[q][I] * t->SHLCAR3X3_T96_SZRK[q][K];
-                            DZ = -t->SHLCAR3X3_T96_EPR[q][I][K]  * t->SHLCAR3X3_T96_RR[q][K]     * t->SHLCAR3X3_T96_CYPI[q][I] * t->SHLCAR3X3_T96_CZRK[q][K];
-                            *HX += A[L]*DX;
-                            *HY += A[L]*DY;
-                            *HZ += A[L]*DZ;
-                        } else {
-                            DX = DX*CPS;
-                            DY = DY*CPS;
-                            DZ = DZ*CPS;
-                            *HX += A[L]*DX;
-                            *HY += A[L]*DY;
-                            *HZ += A[L]*DZ;
-                        }
+                        g = A[L] + A[L+1]*CPS;
+                        e = g * t->SHLCAR3X3_T96_EPR[q][I][K];
+                        f = t->SHLCAR3X3_T96_SZRK[q][K];
+                        h = e * t->SHLCAR3X3_T96_CYPI[q][I];
+                        b = e * t->SHLCAR3X3_T96_SYPI[q][I];
+                        DX1 = -t->SHLCAR3X3_T96_SQPR[q][I][K] * h * f;
+                        DY1 =  t->SHLCAR3X3_T96_RP[q][I]      * b * f;
+                        DZ1 = -t->SHLCAR3X3_T96_RR[q][K]      * h * t->SHLCAR3X3_T96_CZRK[q][K];
+                        *HX += DX1;
+                        *HY += DY1;
+                        *HZ += DZ1;
                     } else {
-                        if ( N == 1 ) {
-                            DX = -SPS * t->SHLCAR3X3_T96_SQQS[q][I][K] * t->SHLCAR3X3_T96_EQS[q][I][K] * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
-                            DY =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RQ[q][I]     * t->SHLCAR3X3_T96_SYQI[q][I] * t->SHLCAR3X3_T96_CZSK[q][K];
-                            DZ =  SPS * t->SHLCAR3X3_T96_EQS[q][I][K]  * t->SHLCAR3X3_T96_RS[q][K]     * t->SHLCAR3X3_T96_CYQI[q][I] * t->SHLCAR3X3_T96_SZSK[q][K];
-                            *HX += A[L]*DX;
-                            *HY += A[L]*DY;
-                            *HZ += A[L]*DZ;
-                        } else {
-                            DX = DX*S3PS;
-                            DY = DY*S3PS;
-                            DZ = DZ*S3PS;
-                            *HX += A[L]*DX;
-                            *HY += A[L]*DY;
-                            *HZ += A[L]*DZ;
-                        }
+                        g = A[L] + A[L+1]*S3PS;
+                        e = SPS * g * t->SHLCAR3X3_T96_EQS[q][I][K];
+                        f = t->SHLCAR3X3_T96_CZSK[q][K];
+                        h = e * t->SHLCAR3X3_T96_CYQI[q][I];
+                        b = e * t->SHLCAR3X3_T96_SYQI[q][I];
+                        DX2 = -t->SHLCAR3X3_T96_SQQS[q][I][K] * h * f;
+                        DY2 =  t->SHLCAR3X3_T96_RQ[q][I]      * b * f;
+                        DZ2 =  t->SHLCAR3X3_T96_RS[q][K]      * h * t->SHLCAR3X3_T96_SZSK[q][K];
+                        *HX += DX2;
+                        *HY += DY2;
+                        *HZ += DZ2;
                     }
+                    ++L;
 
-                } // end N
             } // end K
         } // end I
     } // end M
+
+
+
 
     return;
 
@@ -1571,7 +1612,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
     double  TNOONN, TNOONS, DTETDN, DR2, SPS, R, R2, R3, RMRH, RPRH, SQM, SQP, C, g, g2, h, h2, Q;
     double  SPSAS, CPSAS, XAS, ZAS, PAS, TAS, STAS, g3, g6, F, TET0, DTET, TETR1N, TETR1S;
     double  T01, T02, SQR, ST01AS, ST02AS, CT01AS, CT02AS, XAS1, Y1, ZAS1, X1, Z1, BX1, BY1, BZ1;
-    double  XAS2, Y2, ZAS2, X2, Z2, BX2, BY2, BZ2, q, q2, SS, DS, FRAC, BSX, BSY, BSZ;
+    double  XAS2, Y2, ZAS2, X2, Z2, BX2, BY2, BZ2, q, q2, SS, DS, FRAC, BSX, BSY, BSZ, SinPAS, CosPAS;
     
 
 
@@ -1635,7 +1676,7 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
     TET0 = asin(F);
     if ( TAS > 1.5707963 ) TET0 = 3.141592654-TET0;
     
-    g = sin(PAS*0.5); g2 = g*g; // cant we use a half-angle rel here?
+    g = sin(PAS*0.5); g2 = g*g; // can we use a half-angle rel here?
     DTET   = DTETDN*g2;
     TETR1N = TNOONN+DTET;
     TETR1S = TNOONS-DTET;
@@ -1691,15 +1732,19 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         SQR = sqrt(R);
 
         g = sin(T01); g2  =g*g; g3 = g*g2; g6 = g3*g3;
+        // we could avoid a pow() here altogether by inverting denom. (then it becomes (1/D)^6
         ST01AS = SQR / pow( (R3 + 1.0/g6 - 1.0), 0.1666666667 );
 
         g = sin(T02); g2  =g*g; g3 = g*g2; g6 = g3*g3;
+        // we could avoid a pow() here altogether by inverting denom. (then it becomes (1/D)^6
         ST02AS = SQR / pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
 
         CT01AS = sqrt(1.0-ST01AS*ST01AS);
         CT02AS = sqrt(1.0-ST02AS*ST02AS);
-        XAS1   = R*ST01AS*cos(PAS);
-        Y1     = R*ST01AS*sin(PAS);
+        SinPAS = sin(PAS);
+        CosPAS = cos(PAS);
+        XAS1   = R*ST01AS*CosPAS;
+        Y1     = R*ST01AS*SinPAS;
         ZAS1   = R*CT01AS;
         X1     = XAS1*CPSAS+ZAS1*SPSAS;
         Z1     = -XAS1*SPSAS+ZAS1*CPSAS; // X1,Y1,Z1 ARE COORDS OF THE NORTHERN BOUNDARY POINT
@@ -1716,8 +1761,8 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
             BZ1 += C1[I]*D1[3][I];  //
         }
 
-        XAS2 = R*ST02AS*cos(PAS);
-        Y2   = R*ST02AS*sin(PAS);
+        XAS2 = R*ST02AS*CosPAS;
+        Y2   = R*ST02AS*SinPAS;
         ZAS2 = R*CT02AS;
         X2   = XAS2*CPSAS+ZAS2*SPSAS;
         Z2   = -XAS2*SPSAS+ZAS2*CPSAS; // X2,Y2,Z2 ARE COORDS OF THE SOUTHERN BOUNDARY POINT
@@ -1755,16 +1800,20 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
         SQR = sqrt(R);
 
         g = sin(T01); g2 = g*g; g3 = g2*g; g6 = g3*g3;
+        // we could avoid a pow() here altogether by inverting denom. (then it becomes (1/D)^6
         ST01AS = SQR/pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
 
         g = sin(T02); g2 = g*g; g3 = g2*g; g6 = g3*g3;
+        // we could avoid a pow() here altogether by inverting denom. (then it becomes (1/D)^6
         ST02AS = SQR/pow( R3 + 1.0/g6 - 1.0, 0.1666666667 );
         //printf("T01, T02, SQR, R3, ST01AS, ST02AS = %g %g %g %g %g %g\n", T01, T02, SQR, R3, ST01AS, ST02AS);
 
         CT01AS = -sqrt(1.0-ST01AS*ST01AS);
         CT02AS = -sqrt(1.0-ST02AS*ST02AS);
-        XAS1   = R*ST01AS*cos(PAS);
-        Y1     = R*ST01AS*sin(PAS);
+        SinPAS = sin(PAS);
+        CosPAS = cos(PAS);
+        XAS1   = R*ST01AS*CosPAS;
+        Y1     = R*ST01AS*SinPAS;
         ZAS1   = R*CT01AS;
         X1     = XAS1*CPSAS+ZAS1*SPSAS;
         Z1     = -XAS1*SPSAS+ZAS1*CPSAS; // X1,Y1,Z1 ARE COORDS OF THE NORTHERN BOUNDARY POINT
@@ -1781,8 +1830,8 @@ void  BIRK1TOT_02_T96( double PS, double X, double Y, double Z, double *BX, doub
             BZ1 += C2[I]*D2[3][I];
         }
 
-        XAS2 = R*ST02AS*cos(PAS);
-        Y2   = R*ST02AS*sin(PAS);
+        XAS2 = R*ST02AS*CosPAS;
+        Y2   = R*ST02AS*SinPAS;
         ZAS2 = R*CT02AS;
         X2   = XAS2*CPSAS+ZAS2*SPSAS;
         Z2   = -XAS2*SPSAS+ZAS2*CPSAS; // X2,Y2,Z2 ARE COORDS OF THE SOUTHERN BOUNDARY POINT
