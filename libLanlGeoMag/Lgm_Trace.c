@@ -205,10 +205,16 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Info->Hmax = 10.0;
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
+
+    
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
     Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
+    Info->v2_final = *v2;
+
+
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
     Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
+    Info->v1_final = *v1;
 
     Info->Stotal = LGM_FILL_VALUE;
     Info->Smin   = LGM_FILL_VALUE;
@@ -224,6 +230,7 @@ Info->Hmax = 0.10;
         //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
         //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
         Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
+        Info->v3_final = *v3;
         Info->Pmin = *v3;
         //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );
@@ -265,15 +272,17 @@ Info->Hmax = 0.10;
 	    Lgm_Convert_Coords( v1, &w, GSM_TO_SM, Info->c );
 
         /*
-         * It is not a closed FL, but it may stilkl have a min-B
+         * It is not a closed FL, but it may still have a min-B
          * Try to find it.
          */
         if ( Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info ) ) {
+            Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
+            Info->v3_final = *v3;
             v3->x = v3->y = v3->z = -1e31;
         }
 
@@ -294,11 +303,13 @@ Info->Hmax = 0.10;
          * Try to find it.
          */
         if ( Lgm_TraceToMinBSurf( v2, v3, 0.1, TOL2, Info ) ) {
+            Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
+            Info->v3_final = *v3;
             v3->x = v3->y = v3->z = -1e31;
         }
 

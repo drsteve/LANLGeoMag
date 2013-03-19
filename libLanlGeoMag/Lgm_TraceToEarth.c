@@ -68,6 +68,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
         // must be inside the Earth, which is no good -- bail with
         // LGM_INSIDE_EARTH error code
+        *v = P;
         return( LGM_INSIDE_EARTH );
 
     } else {
@@ -82,6 +83,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         if ( Height < 0.0 )  {
 
             // inside the Earth, which is no good -- bail with error
+            *v = P;
             return( LGM_INSIDE_EARTH );
 
         }
@@ -143,13 +145,19 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         Htry = 0.01;
 
         // sgn = +1
-        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) {
+            *v = P;
+            return(-1);
+        }
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &HeightPlus );
         //HeightPlus = WGS84_A*(Lgm_Magnitude( &w )-1.0);
 
         // sgn = -1
-        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        P = *u; if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) {
+            *v = P;
+            return(-1);
+        }
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &HeightMinus );
         //HeightMinus = WGS84_A*(Lgm_Magnitude( &w )-1.0);
@@ -166,7 +174,10 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         while ( !done ) {
             Htry = fabs(0.9*(TargetHeight - Height));	    // This computes Htry as 90% of the distance to the TargetHeight
             if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
-            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, direction, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, direction, &s, &reset, Info->Bfield, Info ) < 0 ) {
+                *v = P;
+                return(-1);
+            }
             Sa += Hdid;
             Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
             Lgm_WGS84_to_GeodHeight( &w, &Height );
@@ -175,6 +186,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
                 done = TRUE;
             } else if ( Height < StartHeight ) {
                 // We are going back down again -- Target Height unreachable? -- Bail out
+                *v = P;
                 return( LGM_TARGET_HEIGHT_UNREACHABLE );
             }
         }
@@ -234,7 +246,10 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 
 //Lgm_Vector BBB;
 
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) {
+            *v = P;
+            return(-1);
+        }
 //Info->Bfield( &P, &BBB,  Info );
 //printf("P=%.15lf %.15lf %.15lf  B=%.15lf %.15lf %.15lf   F = %g   Htry = %g   Hnext = %g\n", P.x, P.y, P.z, BBB.x, BBB.y, BBB.z, F, Htry, Hnext );
 //printf("s = %g\n", s);
@@ -248,7 +263,8 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 	        /*
 	         *  Open FL!
 	         */
-	        v->x = v->y = v->z = 0.0;
+	        //v->x = v->y = v->z = 0.0;
+            *v = P;
 	        return(0);
 
 	    } else if ( F < 0.0 ) {

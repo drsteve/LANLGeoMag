@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 
-AC_INIT([LanlGeoMag], [1.5.13], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag], [1.5.14], [mghenderson@lanl.gov])
 
 AC_PREREQ([2.59])
 #THE_PKG_RELEASE=0
