@@ -15,7 +15,7 @@ if DX_COND_pdf
 endif
 if DX_COND_ps
     MAYBE_PS = @DX_DOCDIR@/@DX_PROJECT@.ps
-    uninst_ps = $(pdfdir)
+    uninst_ps = $(psdir)
 endif
 if DX_COND_html
     MAYBE_HTML = @DX_DOCDIR@/html
