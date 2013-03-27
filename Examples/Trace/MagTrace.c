@@ -97,11 +97,11 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 1000;
+    NX     = 10;
     LX_MIN = -30.0;
     LX_MAX =  30.0;
 
-    NY     = 1000;
+    NY     = 10;
     LY_MIN = -30.0;
     LY_MAX =  30.0;
 
@@ -118,6 +118,7 @@ int main(){
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
     
     Lgm_Set_Open_Limits( mInfo, -100.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
@@ -163,7 +164,7 @@ int main(){
 
 
 
-    DumpGif( "Image_T96_3", NX, NY, Image );
+    DumpGif( "Image_T01S_2", NX, NY, Image );
     LGM_ARRAY_2D_FREE( Image );
 
     Lgm_FreeMagInfo( mInfo );
