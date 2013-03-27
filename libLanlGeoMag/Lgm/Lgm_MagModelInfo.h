@@ -7,9 +7,10 @@
 #include "Lgm/Lgm_Octree.h"
 #include "Lgm/Lgm_Constants.h"
 #include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/Lgm_Tsyg1996.h"
+#include "Lgm/Lgm_Tsyg2001.h"
 #include "Lgm/Lgm_Tsyg2004.h"
 #include "Lgm/Lgm_Tsyg2007.h"
-#include "Lgm/Lgm_Tsyg1996.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 //#include "Lgm/Lgm_FastPowPoly.h"
@@ -442,6 +443,11 @@ typedef struct Lgm_MagModelInfo {
     LgmTsyg1996_Info    T96_Info;
 
     /*
+     *  Info structure for T01S
+     */
+    LgmTsyg2001_Info    T01_Info;
+
+    /*
      *  Info structure for TS04
      */
     LgmTsyg2004_Info    TS04_Info;
@@ -646,15 +652,7 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  */
 double mypow( double, double );
 int     Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void    T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
-                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
-                    double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
-                    double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
-                    double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,
-                    double *BXR12, double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21,
-                    double *BXR22, double *BYR22, double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF,
-                    double *BX, double *BY, double *BZ);
+void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
 
 
 /*

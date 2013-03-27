@@ -130,6 +130,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     Lgm_Init_T96( &MagInfo->T96_Info );
 
     /*
+     * Inits for T01
+     */
+    Lgm_Init_T01S( &MagInfo->T01_Info );
+
+    /*
      * Inits for TS04
      */
     Lgm_Init_TS04( &MagInfo->TS04_Info );
