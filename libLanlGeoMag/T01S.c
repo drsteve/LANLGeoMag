@@ -18,7 +18,7 @@ int Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     ps = Info->c->psi;  // dipole tilt angle
     X = v->x; Y = v->y; Z = v->z;
 
-    Tsyg_T01S( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz );
+    Tsyg_T01S( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->T01_Info );
     /*
     printf("Bt01s =  (%g, %g, %g)\n", Bx, By, Bz);
     B_cdip(  v, &B2, Info );

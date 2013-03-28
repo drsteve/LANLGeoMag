@@ -63,6 +63,12 @@ int main(){
     printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
     printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
+
 
     Lgm_FreeMagInfo( mInfo );
 

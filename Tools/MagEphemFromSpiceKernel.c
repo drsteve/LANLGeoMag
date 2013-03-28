@@ -891,6 +891,8 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
     } else if ( !strcmp( ExtModel, "T96" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T96;
+    } else if ( !strcmp( ExtModel, "T01S" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T01S;
     } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else if ( !strcmp( ExtModel, "TS07D" ) ){
