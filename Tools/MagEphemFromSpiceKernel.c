@@ -134,7 +134,7 @@ static struct argp_option Options[] = {
     {"IntModel",        'i',    "model",                        0,        "Internal Magnetic Field Model to use. Can be CDIP, EDIP, IGRF. Default is IGRF.\n\n", 0},
 
     { 0, 0, 0, 0,   "External Model Options:", 3},
-    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, TS04D, TS07D.\n", 0},
+    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T01S, TS04D, TS07D.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
 
 /*
@@ -155,6 +155,9 @@ static struct argp_option Options[] = {
 "\tparameters.\n"
 "T89D\n"
 "\tTsyganenko 1989 model with Qin-Denton input\n"
+"\tparameters.\n"
+"T01S\n"
+"\tTsyganenko 2001 storm model with Qin-Denton input\n"
 "\tparameters.\n"
 "TS04D\n"
 "\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
