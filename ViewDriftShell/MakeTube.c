@@ -6,7 +6,7 @@
 
 
 
-#define MaxCurvePoints 1500
+#define MaxCurvePoints 5000
 
 void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius ){
 

@@ -94,6 +94,7 @@
 #define LGM_EXTMODEL_OP77               7
 #define LGM_EXTMODEL_SCATTERED_DATA     8
 #define LGM_EXTMODEL_SCATTERED_DATA2    9
+#define LGM_EXTMODEL_TU82               10
 
 
 
@@ -585,6 +586,16 @@ int Lgm_B1_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B2_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B3_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+
+/*
+ *  TU82
+ *
+ *  Function Prototypes for TU82 model
+ */
+int Lgm_Brc_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bt_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bmp_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_B_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
 /*
