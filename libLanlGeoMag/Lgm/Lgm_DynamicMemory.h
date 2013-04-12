@@ -355,6 +355,11 @@
     }\
 }\
 
+#define LGM_ARRAY_FROM_DATA_2D_FREE( pn5 ) {\
+    free( *pn5 );\
+}\
+
+
 
 /*
  * Macros for dynamically allocating/freeing 3D arrays of any type
@@ -386,6 +391,11 @@
     }\
 }\
     
+
+#define LGM_ARRAY_FROM_DATA_3D_FREE( pn5 ) {\
+    free( **pn5 );\
+    free( *pn5 );\
+}\
 
 
 
@@ -429,6 +439,11 @@
     pn4 = &pn4[0];\
 }\
     
+#define LGM_ARRAY_FROM_DATA_4D_FREE( pn4 ) {\
+    free( ***pn4 );\
+    free( **pn4 );\
+    free( *pn4 );\
+}\
 
 
 
@@ -482,6 +497,12 @@
 }\
 
 
+#define LGM_ARRAY_FROM_DATA_5D_FREE( pn5 ) {\
+    free( ****pn5 );\
+    free( ***pn5 );\
+    free( **pn5 );\
+    free( *pn5 );\
+}\
 
 
 
