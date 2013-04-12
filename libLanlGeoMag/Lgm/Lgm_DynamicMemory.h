@@ -372,7 +372,7 @@
     int      i;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
-        fprintf(stderr, "LGM_ARRAY_FROM_DATA_3D Macro: Could not allocate space for data\n");\
+        fprintf(stderr, "LGM_ARRAY_FROM_DATA_3D Macro: pdata is NULL\n");\
         exit(1);\
     }\
     prow = (type **)calloc( grid*row, sizeof( type * ));\
@@ -412,7 +412,7 @@
     register type ***pn3, **pn2;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
-        fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: Could not allocate space for data\n");\
+        fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: pdata is NULL\n");\
         exit(1);\
     }\
     pn2 = (type **)calloc( n4*n3*n2, sizeof( type * ));\
@@ -463,7 +463,7 @@
     register type ****pn4, ***pn3, **pn2;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
-        fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: Could not allocate space for data\n");\
+        fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: pdata is NULL\n");\
         exit(1);\
     }\
     pn2 = (type **)calloc( n5*n4*n3*n2, sizeof( type * ));\
