@@ -795,7 +795,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             if ( g > 1e-40 ) { // dont use if it looks bogus
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = f->E[j];
-                //printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
+//printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
                 ++(FitData->n);
             }
         }
@@ -831,8 +831,9 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     printf("out[4] = %g\n", out[4]);
     printf("out[5] = %g\n", out[5]);
     printf("out[6] = %g\n", out[6]);
-    printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
-
+    */
+//printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
+    /*
     FILE *fp;
     printf("E = %g\n", E);
     fp = fopen("data.txt", "w");
@@ -850,7 +851,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
         psd = Model( x,  FitData->nMaxwellians, E );
         //psd = (double)a;
 
-    //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+//printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
     } else {
         psd = -9e99;
     }

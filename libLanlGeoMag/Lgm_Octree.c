@@ -184,7 +184,7 @@ void Lgm_FreeOctree( Lgm_Octree *ot ) {
  *  Create a root-level node for an octree.
  *
  *
- *      \returns        void
+ *      \returns        Pointer to Lgm_OctreeCell
  *
  *      \author         Mike Henderson
  *      \date           2009-2012
@@ -446,21 +446,6 @@ double InsertCell( Lgm_OctreeCell *Cell, Lgm_Vector *q, pQueue **PQ, double MaxD
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     return( dist );
@@ -559,7 +544,7 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
 
 
 /**
- *   Descend to the leaf node that is closest to the query point. This routine
+ *   Descend toward the leaf node that is closest to the query point. This routine
  *   is used by Lgm_Octree_kNN().
  *
  *      \param[in]      Node        Pointer to a node (cell) in thge octree
@@ -568,7 +553,7 @@ void InsertPoint( Lgm_OctreeCell *Cell, int j, Lgm_Vector *q, pQueue **PQ ) {
  *      \param[in]      MaxDist2    The maximum distance (squared) to care
  *                                  about. Square distances beyond this value are ignored.
  *
- *      \returns        pointer to closest leaf node.
+ *      \returns        pointer to node one level closer to leaf node that is closest to query point.
  *
  *      \author         Mike Henderson
  *      \date           2009-2012
@@ -587,7 +572,7 @@ Lgm_OctreeCell *DescendTowardClosestLeaf( Lgm_OctreeCell *Node, pQueue **PQ, Lgm
 
 
 //    while( Cell->Octant ) { // loop until we reach a leaf (i.e. until Octant is NULL)
-    if ( Cell->Octant ) { // do this if its a leaf cell
+    if ( Cell->Octant ) { 
 
         min_dist = 9e99;
         min_i    = 0;
@@ -691,7 +676,7 @@ pQueue *PopObj( pQueue **PQ ) {
  *  of data is stored as an Octree. All distances are in the normalized units
  *  (i.e. scaled from [0.0-1.0] ).
  *
- *    \param[in]     q           Query position. I.e. the point we want to find NNs for.
+ *    \param[in]     q          Query position. I.e. the point we want to find NNs for.
  *    \param[in]     Root       Root node of Octree.
  *    \param[in]     K          Number of NNs to find.
  *    \param[in]     MaxDist2   Threshold distance^2 beyond which we give up on finding

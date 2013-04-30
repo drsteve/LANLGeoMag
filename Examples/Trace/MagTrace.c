@@ -170,6 +170,7 @@ int main(){
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TU82, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP88, mInfo );
     
     Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
