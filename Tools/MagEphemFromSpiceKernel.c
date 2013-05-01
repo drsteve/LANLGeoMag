@@ -84,7 +84,7 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromSpiceKernel";
-const  char *argp_program_version     = "1.0.1";
+const  char *argp_program_version     = "1.1.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
@@ -134,7 +134,7 @@ static struct argp_option Options[] = {
     {"IntModel",        'i',    "model",                        0,        "Internal Magnetic Field Model to use. Can be CDIP, EDIP, IGRF. Default is IGRF.\n\n", 0},
 
     { 0, 0, 0, 0,   "External Model Options:", 3},
-    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T01S, TS04D, TS07D.\n", 0},
+    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T01D, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
 
 /*

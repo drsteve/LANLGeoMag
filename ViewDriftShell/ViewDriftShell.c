@@ -3493,6 +3493,7 @@ static void realize( GtkWidget *widget, gpointer data) {
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
 
 
@@ -3556,6 +3557,9 @@ static void realize( GtkWidget *widget, gpointer data) {
     // Create Drift Shell surfaces
     GenerateDriftShellLists( ObjInfo );
 
+
+    // Misc Field Lines
+//    GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3723,6 +3727,9 @@ CHECK COORDS!
 
 
 
+
+
+
 if (LightingStyle == 2){
 //  cgGLBindProgram(myCgVertexProgram);
 //  checkForCgError("binding vertex program");
@@ -3750,6 +3757,19 @@ if (LightingStyle == 2){
 //ViewPosition[2] = aInfo->Camera.z;
 //glUniform3fv( ViewPositionLoc, 1, LightPosition );
 //glUniform3fv( LightDirLoc, 1, LightPosition );
+
+
+
+
+
+//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+//glCallList( ObjInfo->MiscFieldLines );
+
+
+
 
     if ( ShowAllPitchAngles ) {
         /*
@@ -4220,6 +4240,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
 
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
+//glClearColor( 1.0, 1.0, 1.0, 1.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {
 

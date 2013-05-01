@@ -94,7 +94,8 @@
 #define LGM_EXTMODEL_OP77               7
 #define LGM_EXTMODEL_SCATTERED_DATA     8
 #define LGM_EXTMODEL_SCATTERED_DATA2    9
-
+#define LGM_EXTMODEL_TU82               10
+#define LGM_EXTMODEL_OP88               11
 
 
 
@@ -575,6 +576,21 @@ int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m );
 
 
+/*
+ *
+ *  Function Prototypes for Olsen Pfitzer 1988  Model
+ *
+ */
+int     Lgm_B_OP88( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void    Lgm_OP88_BDYN( double DEN, double VEL, double DST, double X, double Y, double Z, double *BX, double *BY, double *BZ );
+void    Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double STAIL );
+void    Lgm_OP88_BFMAGP( double *XX, double *BB );
+void    Lgm_OP88_BFTAIL( double *XX,  double *BB );
+void    Lgm_OP88_BFRING( double *XX,  double *BB );
+double  Lgm_OP88_RINGST( double SOFFD,  double DST );
+double  Lgm_OP88_STDOFF( double VEL,  double DEN );
+
+
 
 /*
  *  T87
@@ -585,6 +601,16 @@ int Lgm_B1_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B2_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B3_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+
+/*
+ *  TU82
+ *
+ *  Function Prototypes for TU82 model
+ */
+int Lgm_Brc_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bt_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bmp_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_B_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
 /*
