@@ -3,8 +3,8 @@
 
 void    Lgm_LogSpace( double start, double stop, long num, double *array );
 void    Lgm_LinSpace(double start, double stop, long num, double *array);
-long     Lgm_Bisect(double *data, double value, long len);
-
+long    Lgm_Bisect(double *data, double value, long len);
+void    Lgm_MinMax(double *inval, long len, double *min, double *max);
 
 
 
