@@ -54,7 +54,21 @@ void Lgm_pQueue_Destroy( Lgm_pQueue *p ) {
 
 
 void Lgm_pQueue_Insert( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
-    int i;
+    int i, n;
+
+    if ( p->HeapSize >= p->nHeapArray-1 ) {
+        n = 2*p->nHeapArray;
+        p->HeapArray  = (Lgm_pQueue_Node *)realloc( p->HeapArray, n*sizeof(Lgm_pQueue_Node) );
+        if ( !p->HeapArray ) {
+            printf("Lgm_pQueue_Insert: Memory allocation failure. Tryingm to realloc %d elements\n");
+            exit(1);
+        } else {
+            p->nHeapArray = n;
+printf("realloced HeapArray. Size = %d\n", p->nHeapArray);
+        }
+        
+    }
+
     for ( i = ++(p->HeapSize); (i > 1)&&( X->key < p->HeapArray[i/2].key); i /= 2 ) {
         p->HeapArray[i] = p->HeapArray[i/2];
     }
@@ -67,6 +81,7 @@ void Lgm_pQueue_Insert( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
 void Lgm_pQueue_PercolateDown( long int i, Lgm_pQueue *p ) {
     int             C;
     Lgm_pQueue_Node t;
+
     t = p->HeapArray[i];
     for ( ; 2*i <= p->HeapSize; i = C ) {
         C = 2*i;
@@ -81,8 +96,10 @@ void Lgm_pQueue_PercolateDown( long int i, Lgm_pQueue *p ) {
     return;
 }
 
-void Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
+int Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
 
+
+    if ( p->HeapSize <= 0 ) return(0);
 
     // return the first element
     *X = p->HeapArray[1];
@@ -93,7 +110,7 @@ void Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
     // reorder tree
     Lgm_pQueue_PercolateDown( 1, p );
     
-    return;
+    return(1);
 
 }
 
@@ -106,7 +123,7 @@ int main(){
     Lgm_pQueue      *p;
     Lgm_pQueue_Node  X, Y;
 
-    p = Lgm_pQueue_Create( 1000 );
+    p = Lgm_pQueue_Create( 3 );
 
     X.key = 1.0;    Lgm_pQueue_Insert( &X, p );
     X.key = 25.0;   Lgm_pQueue_Insert( &X, p );
@@ -119,6 +136,12 @@ int main(){
     X.key = 1000.0; Lgm_pQueue_Insert( &X, p );
     X.key = 2.0;    Lgm_pQueue_Insert( &X, p );
     X.key = 19.0;   Lgm_pQueue_Insert( &X, p );
+    X.key = 11.1;   Lgm_pQueue_Insert( &X, p );
+    X.key = 16.2;   Lgm_pQueue_Insert( &X, p );
+
+for (i=0; i<1000; ++i){
+    X.key = 16.2;   Lgm_pQueue_Insert( &X, p );
+}
 
 for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
     
@@ -133,6 +156,11 @@ for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n"
     Lgm_pQueue_Pop( &Y, p ); printf("Y.key = %g\n", Y.key); //for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
     Lgm_pQueue_Pop( &Y, p ); printf("Y.key = %g\n", Y.key); //for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
     Lgm_pQueue_Pop( &Y, p ); printf("Y.key = %g\n", Y.key); //for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
+
+
+for (i=0; i<2000; ++i){
+    if ( Lgm_pQueue_Pop( &Y, p ) )  printf("Y.key = %g\n", Y.key); //for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
+}
         
 
 
