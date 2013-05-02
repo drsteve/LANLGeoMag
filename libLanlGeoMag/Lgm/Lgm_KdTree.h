@@ -1,11 +1,11 @@
 #ifndef LGM_KDTREE
 #define LGM_KDTREE
 
-#include "Lgm_Vec.h"
+#include "Lgm_PriorityQueue.h"
 
 #define     KDTREE_MAX_LEVEL            1000
 #define     KDTREE_ROOT_LEVEL           0
-#define     KDTREE_MAX_DATA_PER_NODE    1           // Too high slows things down. Fastest seems to be 4-5 range...
+#define     KDTREE_MAX_DATA_PER_NODE    1           // Algorithm now depends on there being no more than 1 point per leaf....
 
 #define     TRUE    1
 #define     FALSE   0
@@ -88,6 +88,7 @@ typedef struct _Lgm_KdTree {
     double            Diff;          //<! Max-Min
     long int          kNN_Lookups;   //<! Numbenr of kNN lookups performed
     int               SplitStrategy; //<! Strategy for doing dimension splitting. (Can be one of LGM_KDTREE_SPLIT_SEQUENTIAL, LGM_KDTREE_SPLIT_RANDOM, LGM_KDTREE_SPLIT_MAXRANGE)
+    Lgm_pQueue       *PQ;            //<! Heap-based priority queue.
 
     Lgm_KdTreeNode   *Root;          //<! Pointer to the Root node of the KdTree
 
@@ -96,11 +97,11 @@ typedef struct _Lgm_KdTree {
 
 /**
  *
- * This structure holds the "Priority Queue" information that is used as part
- * of the kNN (k Nearest Neighbor) search algorithm.
+ * This structure holds the "Priority Queue" node information that is used as part
+ * of the kNN (k Nearest Neighbor) search algorithm. 
  *
  */
-typedef struct _Lgm_KdTree_pQueue {
+typedef struct _Lgm_KdTree_pQueue_Node {
 
     Lgm_KdTreeNode  *Obj;
     double          MinDist2;           //<! Minimum possible distance^2 between object and query point.
@@ -109,10 +110,10 @@ typedef struct _Lgm_KdTree_pQueue {
     int             IsPoint;            //<! If this is TRUE, then a data point is stored in Obj.Data[j] Else its a non-leaf node.
     int             j;                  //<! Index where data point is stored.
 
-    struct _Lgm_KdTree_pQueue *Prev;    //<! Next node in linked list
-    struct _Lgm_KdTree_pQueue *Next;    //<! Prev node in linked list
+//    struct _Lgm_KdTree_pQueue *Prev;    //<! Next node in linked list
+//    struct _Lgm_KdTree_pQueue *Next;    //<! Prev node in linked list
 
-} Lgm_KdTree_pQueue;
+} Lgm_KdTree_pQueue_Node;
 
 
 
@@ -121,11 +122,11 @@ Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigne
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
 int                 Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN );
 double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
-double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_KdTree_pQueue **PQ, double MaxDist2 );
-void                Lgm_KdTree_InsertPoint( Lgm_KdTreeNode *Node, int j, double *q, Lgm_KdTree_pQueue **PQ );
-Lgm_KdTree_pQueue  *Lgm_KdTree_PopObj( Lgm_KdTree_pQueue **PQ );
-void                Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_KdTree_pQueue **PQ, double *q, double MaxDist2 );
-void                Lgm_KdTree_PrintPQ( Lgm_KdTree_pQueue **PQ );
+double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_pQueue *PQ, double MaxDist2 );
+void                Lgm_KdTree_InsertPoint( Lgm_KdTreeNode *Node, int j, double *q, Lgm_pQueue *PQ );
+//Lgm_KdTree_pQueue  *Lgm_KdTree_PopObj( Lgm_KdTree_pQueue **PQ );
+void                Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQ, double *q, double MaxDist2 );
+void                Lgm_KdTree_PrintPQ( Lgm_pQueue *PQ );
 
 
 #endif

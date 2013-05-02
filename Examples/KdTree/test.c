@@ -39,7 +39,7 @@ int main( ) {
 
 
     printf("Testing kNN (k-Nearest-Neighbor) search.\n");
-    nSearches = 100000;
+    nSearches = 20000;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
     // generate random query point
     LGM_ARRAY_2D( q, nSearches, D, double );
@@ -48,13 +48,16 @@ int main( ) {
 clock_t StartTime = clock();
     for ( k=0; k<nSearches; k++ ) {
         for ( d=0; d<D; d++ ) q[k][d] = 1.0*rand()/(double)RAND_MAX - 0.0;
+
 /*
         printf("Query Point: q = (" );
         for (d=0; d<D; d++) printf("  %g", q[k][d] );
         printf(" )\n");
 */
+
         
         Lgm_KdTree_kNN( q[k], D, KdTree, K, &Kgot, 2.0*2.0, kNN );
+
 /*
         printf("K, Kgot = %d %d\n", K, Kgot );
         for (i=0; i<Kgot; i++){
@@ -64,6 +67,7 @@ clock_t StartTime = clock();
         }
         printf("\n");
 */
+
     }
 clock_t EndTime = clock();
 printf("Sec = %g\n", (EndTime-StartTime)/(double)CLOCKS_PER_SEC);
@@ -89,7 +93,6 @@ StartTime = clock();
             Idx[j] = j;
         }
         quicksort2uli( n, Dist-1, Idx-1 );
-/*
         printf("Query Point: q = (" );
         for (d=0; d<D; d++) printf("  %g", q[k][d] );
         printf(" )\n");
@@ -99,7 +102,7 @@ StartTime = clock();
             printf(" )\n");
         }
         printf("\n");
-*/
+
     }
 EndTime = clock();
 printf("Time = %g\n", (EndTime-StartTime)/(double)CLOCKS_PER_SEC);

@@ -42,11 +42,11 @@ void Lgm_pQueue_Insert( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
         n = 2*p->nHeapArray;
         p->HeapArray  = (Lgm_pQueue_Node *)realloc( p->HeapArray, n*sizeof(Lgm_pQueue_Node) );
         if ( !p->HeapArray ) {
-            printf("Lgm_pQueue_Insert: Memory allocation failure. Tryingm to realloc %d elements\n");
+            printf("Lgm_pQueue_Insert: Memory allocation failure. Trying to realloc %d elements\n");
             exit(1);
         } else {
             p->nHeapArray = n;
-printf("realloced HeapArray. Size = %d\n", p->nHeapArray);
+            //printf("Realloced HeapArray. Size = %d\n", p->nHeapArray);
         }
         
     }
@@ -96,55 +96,3 @@ int Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
 
 }
 
-
-
-
-int main(){
-
-    int              i;
-    Lgm_pQueue      *p;
-    Lgm_pQueue_Node  X, Y;
-    double          *v, a[3], b[3], c[5], d[2];
-
-    a[0] = 1.0;
-    a[1] = 2.0;
-    a[2] = 3.0;
-
-    b[0] = 4.0;
-    b[1] = 5.0;
-    b[2] = 6.0;
-
-    c[0] = 7.0;
-    c[1] = 8.0;
-    c[2] = 9.0;
-    c[1] = 10.0;
-    c[2] = 11.0;
-
-    d[0] = 12.0;
-    d[1] = 13.0;
-
-    p = Lgm_pQueue_Create( 3 );
-
-    X.key = 1.0;    X.Data = (void *) a; Lgm_pQueue_Insert( &X, p );
-    X.key = 25.0;   X.Data = (void *) b; Lgm_pQueue_Insert( &X, p );
-    X.key = 17.0;   X.Data = (void *) c; Lgm_pQueue_Insert( &X, p );
-    X.key = 16.2;   X.Data = (void *) d; Lgm_pQueue_Insert( &X, p );
-
-
-for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
-    
-
-for (i=0; i<2000; ++i){
-    if ( Lgm_pQueue_Pop( &Y, p ) )  {
-        v = (double *)Y.Data;
-        printf("Y.key = %g       v[1] = %g\n", Y.key, v[1]); //for (i=0; i<=p->HeapSize; i++ ) printf("%g ", p->HeapArray[i].key ); printf("\n");
-    }
-}
-        
-
-
-
-    Lgm_pQueue_Destroy( p );
-
-    return(0);
-}
