@@ -5,9 +5,9 @@
 /*
  * Fill an array with log spaced numbers from start to stop
  */
-void Lgm_LogSpace( double start, double stop, int num, double *array ){
+void Lgm_LogSpace( double start, double stop, long num, double *array ){
   double delta, logmin, accDelta = 0;
-  int i;
+  long i;
   logmin = log10(start);
   delta = (log10(stop) - logmin)/(double)num;
   for (i=0; i<num; i++) {
@@ -19,9 +19,9 @@ void Lgm_LogSpace( double start, double stop, int num, double *array ){
 /*
  * Fill an array with linear spaced numbers from start to stop, includes the end point
  */
-void Lgm_LinSpace(double start, double stop, int num, double *array) {
+void Lgm_LinSpace(double start, double stop, long num, double *array) {
   double delta, linmin, accDelta = 0;
-  int i;
+  long i;
   linmin = start;
   delta = (stop-start)/((double)(num-1));
   for (i=0; i<num; i++) {
@@ -30,12 +30,11 @@ void Lgm_LinSpace(double start, double stop, int num, double *array) {
   }
 }
 
-
 /*
  * given a sorted array, data, find the index where value should be inserted to maintain order
  */
-int Lgm_Bisect(double *data, double value, int len) {
-  int mid, hi=len, lo = 0;
+long Lgm_Bisect(double *data, double value, long len) {
+  long mid, hi=len, lo = 0;
   while (lo <hi) {
     mid = (lo+hi) / 2;  // integer division
     if (value < data[mid])
@@ -44,6 +43,19 @@ int Lgm_Bisect(double *data, double value, int len) {
       lo = mid+1;
   }
   return (lo);
+}
+
+/*
+ * given an array return the the minimum and maximum of the array 
+ */
+void    Lgm_MinMax(double *inval, long len, double *min, double *max) {
+  long i;
+  *min = inval[0];
+  *max = inval[0];
+  for (i=1;i<len;i++){
+    if (inval[i] > *max) *max = inval[i];
+    if (inval[i] < *min) *min = inval[i];
+  }
 }
 
 
