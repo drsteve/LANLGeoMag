@@ -5,7 +5,7 @@
 
 #define     KDTREE_MAX_LEVEL            1000
 #define     KDTREE_ROOT_LEVEL           0
-#define     KDTREE_MAX_DATA_PER_NODE    1           // Algorithm now depends on there being no more than 1 point per leaf....
+#define     KDTREE_MAX_DATA_PER_NODE    40         // Algorithm now depends on there being no more than 1 point per leaf....
 
 #define     TRUE    1
 #define     FALSE   0
@@ -51,6 +51,7 @@ typedef struct _Lgm_KdTreeNode {
     unsigned int         Level;         //<! keeps track of what level we are on
     unsigned int         D;             //<! keeps track of number of dimensions
     unsigned int         d;             //<! keeps track of the splitting dimension. (-1 for root node).
+    unsigned int         CutVal;        //<! keeps track of the Cutting value.
     double              *Min;           //<! Array of Minima - min value for each dimension for the data stored in or below this node.
     double              *Max;           //<! Array of Maxima - max value for each dimension for the data stored in or below this node.
     double              *Diff;          //<! Array of Ranges (Max-Min) for each dimension for the data stored in or below this node.
@@ -88,7 +89,8 @@ typedef struct _Lgm_KdTree {
     double            Diff;          //<! Max-Min
     long int          kNN_Lookups;   //<! Numbenr of kNN lookups performed
     int               SplitStrategy; //<! Strategy for doing dimension splitting. (Can be one of LGM_KDTREE_SPLIT_SEQUENTIAL, LGM_KDTREE_SPLIT_RANDOM, LGM_KDTREE_SPLIT_MAXRANGE)
-    Lgm_pQueue       *PQ;            //<! Heap-based priority queue.
+    Lgm_pQueue       *PQN;           //<! Heap-based priority queue for nodes. Min-dist is highest priority.
+    Lgm_pQueue       *PQP;           //<! Heap-based priority queue for points. Max-dist is highest priority.
 
     Lgm_KdTreeNode   *Root;          //<! Pointer to the Root node of the KdTree
 
@@ -125,7 +127,7 @@ double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
 double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_pQueue *PQ, double MaxDist2 );
 void                Lgm_KdTree_InsertPoint( Lgm_KdTreeNode *Node, int j, double *q, Lgm_pQueue *PQ );
 //Lgm_KdTree_pQueue  *Lgm_KdTree_PopObj( Lgm_KdTree_pQueue **PQ );
-void                Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQ, double *q, double MaxDist2 );
+void                Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 );
 void                Lgm_KdTree_PrintPQ( Lgm_pQueue *PQ );
 
 

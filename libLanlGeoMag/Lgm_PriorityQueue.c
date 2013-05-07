@@ -96,3 +96,17 @@ int Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
 
 }
 
+
+int Lgm_pQueue_Peek( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
+
+
+    if ( p->HeapSize <= 0 ) return(0);
+
+    // return the first element
+    *X = p->HeapArray[1];
+
+    return(1);
+
+}
+
+

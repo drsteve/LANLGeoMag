@@ -13,6 +13,7 @@
 typedef struct Lgm_pQueue_Node {
 
     double  key;    //<! A number defining the priority level. Lower means higher priority.
+    int     index;  //<! variable that can be used to point to individual items in the Data.
     void  *Data;
 
 } Lgm_pQueue_Node;
@@ -45,6 +46,7 @@ void        Lgm_pQueue_Destroy( Lgm_pQueue *p );
 void        Lgm_pQueue_Insert( Lgm_pQueue_Node *X, Lgm_pQueue *p );
 void        Lgm_pQueue_PercolateDown( long int i, Lgm_pQueue *p );
 int         Lgm_pQueue_Pop( Lgm_pQueue_Node *X, Lgm_pQueue *p );
+int         Lgm_pQueue_Peek( Lgm_pQueue_Node *X, Lgm_pQueue *p );
 
 
 
