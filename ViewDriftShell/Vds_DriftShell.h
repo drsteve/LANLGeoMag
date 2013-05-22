@@ -47,7 +47,14 @@ typedef struct Vds_ObjectInfo {
     double               ny4_gsm[90][500][200];  //!< ???? Normals?
     double               nz4_gsm[90][500][200];  //!< ???? Normals?
 
+    int                 nFLs;
+    int                 nPnts5[10];
+    double              x5_gsm[10][10000];
+    double              y5_gsm[10][10000];
+    double              z5_gsm[10][10000];
 
+
+    GLuint               MiscFieldLines;         //!< OpenGL Display List for Misc Field Lines
     GLuint               DriftShellList2;        //!< OpenGL Display List for Drift Shell Field Lines (Full)
     GLuint               DriftShellList3;        //!< OpenGL Display List for Drift Shell Field Lines (Mirror-to-Miroor)
     GLuint               DriftShellList4;        //!< OpenGL Display List for Drift Shell Surfaces

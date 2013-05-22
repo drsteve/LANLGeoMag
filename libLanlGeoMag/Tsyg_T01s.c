@@ -121,14 +121,14 @@ void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
          &BXR12, &BYR12, &BZR12, &BXR21, &BYR21, &BZR21, &BXR22, &BYR22, &BZR22, &HXIMF, 
          &HYIMF, &HZIMF, &BBX, &BBY, &BBZ, t );
 
-//printf("BXCF, BYCF, BZCF = %g %g %g\n", BXCF, BYCF, BZCF );
-//printf("BXT1, BYT1, BZT1 = %g %g %g\n", BXT1, BYT1, BZT1 );
-//printf("BXT2, BYT2, BZT2 = %g %g %g\n", BXT2, BYT2, BZT2 );
-//printf("BXSRC, BYSRC, BZSRC = %g %g %g\n", BXSRC, BYSRC, BZSRC );
-//printf("BXPRC, BYPRC, BZPRC = %g %g %g\n", BXPRC, BYPRC, BZPRC );
-//printf("BXR11, BYR11, BZR11 = %g %g %g\n", BXR11, BYR11, BZR11 );
-//printf("BXR21, BYR21, BZR21 = %g %g %g\n", BXR21, BYR21, BZR21 );
-//printf("BXR22, BYR22, BZR22 = %g %g %g\n", BXR22, BYR22, BZR22 );
+//printf("C: BXCF, BYCF, BZCF = %le %le %le\n", BXCF, BYCF, BZCF );
+//printf("C: BXT1, BYT1, BZT1 = %e %e %e\n", BXT1, BYT1, BZT1 );
+//printf("C: BXT2, BYT2, BZT2 = %e %e %e\n", BXT2, BYT2, BZT2 );
+//printf("C: BXSRC, BYSRC, BZSRC = %e %e %e\n", BXSRC, BYSRC, BZSRC );
+//printf("C: BXPRC, BYPRC, BZPRC = %e %e %e\n", BXPRC, BYPRC, BZPRC );
+//printf("C: BXR11, BYR11, BZR11 = %e %e %e\n", BXR11, BYR11, BZR11 );
+//printf("C: BXR21, BYR21, BZR21 = %e %e %e\n", BXR21, BYR21, BZR21 );
+//printf("C: BXR22, BYR22, BZR22 = %e %e %e\n\n", BXR22, BYR22, BZR22 );
 
     *BX = BBX;
     *BY = BBY;
@@ -1884,6 +1884,7 @@ void    T01S_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZCh
      *  Flag that we've been through once already with this value of J
      */
     t->DoneJ[J] = TRUE;
+t->DoneJ[J] = FALSE;
 
 
     L  = 0;
