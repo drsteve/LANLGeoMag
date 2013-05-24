@@ -46,10 +46,10 @@ static void elt_qsort( struct TimeList *arr, unsigned n ) {
 }
 
 /*
- * This routine is for figuring out wheter we are inbound or outbound at any given time...
+ * This routine is for figuring out whether we are inbound or outbound at any given time...
  * Takers:
  *    List of JD times of apogee/perigee crossings and current JD.
- *    The TimeList structure contans a key (JD) and a value indicating apogee or perigee.
+ *    The TimeList structure contains a key (JD) and a value indicating apogee or perigee.
  * Returns;
  *    0 if not enough points
  *    1 if outbound
@@ -96,7 +96,7 @@ static char doc[] =
 
 "Where 'RBSPA_2012_139_2014_213_01_deph.bsp' is a \"binary SPK\" SPICE kernel, and 'naif0009.tls' is a \"text leap second kernel (LSK)\" file.  In SPICE, SPK kernel files contain information that is used to compute the ephemeris (trajectory) of an object.\n\n"
 
-"The output is written into daily files with filename given by the specified template. OutFile may contain time variables that will be substituted.  The available time variables are '%YYYY', '%MM', and '%DD' which correspond repectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of month. \n\n"
+"The output is written into daily files with filename given by the specified template. OutFile may contain time variables that will be substituted.  The available time variables are '%YYYY', '%MM', and '%DD' which correspond respectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of month. \n\n"
 
 "The %B variable will also get substituted by the list of birds given in the -b option.  Here is an example using time-variables.\n\n"
 
@@ -120,7 +120,7 @@ static char ArgsDoc[] = "InFile OutFile";
  *   meaning;
  *      NAME - Name of option's long argument (can be zero).
  *       KEY - Character used as key for the parser and it's short name.
- *       ARG - Name of the option's argument (zero if there isnt one).
+ *       ARG - Name of the option's argument (zero if there isn't one).
  *     FLAGS - OPTION_ARG_OPTIONAL, OPTION_ALIAS, OPTION_HIDDEN, OPTION_DOC,
  *             or OPTION_NO_USAGE
  */
@@ -171,13 +171,13 @@ static struct argp_option Options[] = {
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,        "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,        "Quality to use for L* calculations. Default is 3."      },
-    {"UseEop",          'z',    0,                            0,        "Use Earth Orientation Parameters whn comoputing ephemerii" },
+    {"UseEop",          'z',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Coords",          'C',    "coord_system",               0,        "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
 
     { 0, 0, 0, 0,   "Output Options:", 5},
     {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
     {"Verbosity",       'v',    "verbosity",                  0,        "Verbosity level to use. (0-4)"      },
-    {"DumpShellFiles",  'd',    0,                            0,        "Dump full binary shell files (for use in viaualizing drift shells)." },
+    {"DumpShellFiles",  'd',    0,                            0,        "Dump full binary shell files (for use in visualizing drift shells)." },
     {"Colorize",        'c',    0,                            0,        "Colorize output"                         },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
 
@@ -270,7 +270,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'e': // external model
             strcpy( arguments->ExtModel, arg );
             break;
-        case 'i': // inbternal model
+        case 'i': // internal model
             strcpy( arguments->IntModel, arg );
             break;
         case 'p':
@@ -860,7 +860,7 @@ int main( int argc, char *argv[] ){
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
     } else {
-        // doesnt seem to like allocating zero size...
+        // doesn't seem to like allocating zero size...
         MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
     }
 
@@ -1101,7 +1101,7 @@ int main( int argc, char *argv[] ){
             printf( "     HDF5 Output File: %s\n\n", HdfOutFile);
 
 
-            // Create Base directory if it hasnt been created yet.
+            // Create Base directory if it hasn't been created yet.
             char *dirc = strdup( OutFile );
             BaseDir    = dirname(dirc);
             sprintf( Command, "mkdir -p %s", BaseDir); system( Command );
@@ -1190,7 +1190,7 @@ if (file >= 0 ){
                  */
                 if ( (fp_in = fopen( InFile, "r" ) ) == NULL ){
 
-                    printf("\tCould not open SPICE Kernel Desrciption File ( %s ) for reading\n", InFile );
+                    printf("\tCould not open SPICE Kernel Description File ( %s ) for reading\n", InFile );
 
                 } else {
 
@@ -1200,7 +1200,7 @@ if (file >= 0 ){
                      * Make kernels known to SPICE
                      */
                     furnsh_c( InFile );
-                    printf( "\t    Using SPICE Kernel Desrciption File: %s\n", InFile );
+                    printf( "\t    Using SPICE Kernel Description File: %s\n", InFile );
                     ktotal_c( "all", &KernelCount );
                     printf( "\t    Kernel Files Loaded:\n" );
 
