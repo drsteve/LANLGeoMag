@@ -187,9 +187,9 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
          */
         struct stat sts;
         if ( ( stat( Path, &sts ) ) == -1 ) {
-            printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s\n", Path );
             strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
             strcat( QinDentonPath, "/QinDenton" );
+            printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s. Setting QinDentonPath to: %s \n", Path, QinDentonPath );
         } else {
             strcpy( QinDentonPath, Path );
         }
