@@ -179,6 +179,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     Path = getenv( "QIN_DENTON_PATH" );
     if ( Path == NULL ) {
         strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+        strcat( QinDentonPath, "/QinDenton" );
     } else {
 
         /*
@@ -188,6 +189,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
         if ( ( stat( Path, &sts ) ) == -1 ) {
             printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s\n", Path );
             strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+            strcat( QinDentonPath, "/QinDenton" );
         } else {
             strcpy( QinDentonPath, Path );
         }
@@ -219,7 +221,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success1 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -265,7 +267,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success2 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Year, Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Year, Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -310,7 +312,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success3 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Next_Year, Next_Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Next_Year, Next_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
