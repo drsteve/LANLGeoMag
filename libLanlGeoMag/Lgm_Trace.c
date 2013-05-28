@@ -20,19 +20,20 @@
 
 
 /**
- *  This routine attempts to trace to the Earth (from the input position) in both
- *  directions along the field line.  If the field line is closed (meaning
- *  that we hit the Earth in both directions), then the routine will also
- *  trace to the minimum-B point.
+ *  \brief
+ *      This routine attempts to trace to the Earth (from the input position) in both
+ *      directions along the field line.  If the field line is closed (meaning
+ *      that we hit the Earth in both directions), then the routine will also
+ *      trace to the minimum-B point.
  *  
- *  This is a convenience routine that calls the routines Lgm_TraceToEarth()
- *  and Lgm_TraceToMinBSurf() (and performs some aditional calculations also).
- *  Note that the routine Lgm_TraceToEarth() traces to a height above the WGS84
- *  ellipsoid. Thus the target height here ( the input parameter Height ) is
- *  the geodetic height above the WGS84 ellipsoid. If you want to trace to a
- *  spherical representation of the Earth, use Lgm_TraceToSphericalEarth()
- *  instead.
- *  
+ *  \detail
+ *      This is a convenience routine that calls the routines Lgm_TraceToEarth()
+ *      and Lgm_TraceToMinBSurf() (and performs some aditional calculations also).
+ *      Note that the routine Lgm_TraceToEarth() traces to a height above the WGS84
+ *      ellipsoid. Thus the target height here ( the input parameter Height ) is
+ *      the geodetic height above the WGS84 ellipsoid. If you want to trace to a
+ *      spherical representation of the Earth, use Lgm_TraceToSphericalEarth()
+ *      instead.
  *  
  *      \param[in]       u     Input position vector in GSM coordinates.
  *      \param[out]     v1     Southern footpoint (where field line crosses the given geodetic height in the south) in GSM coordinates.
@@ -57,6 +58,7 @@
  *      - Hmax (maximum step size used for tracing. Not really useful to the user.)
  *      - Pmin. Position of Bmin along the field line. In Re relative to GSM coord system. (Same as v3.)
  *      - Smin. Distance from southern footpoint to Pmin along the FL. (in Re).
+ *      - Stotal. Distance from southern footpoint to northern footpoint along the FL. (in Re).
  *      - Bvecmin. The GSM components of the magnetic field vector at Pmin. Units are nT.
  *      - Bmin. The magnitude of Bvecmin. Units of nT.
  *      - Ellipsoid_Footprint_Pn. GSM position of northern footpoint. (Same as v2.)
@@ -69,7 +71,8 @@
  *      - Sb0. Approximation for the Sb integral for nearly equatorially mirroring particles. Units of Re. See eqn 2.13b in Roederer.
  *
  *
- *
+ *  \author         M. Henderson
+ *  \date           1999-2011
  *
  *
  *
@@ -138,6 +141,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
 
     // determine the desired target height in km
     Rtarget  = WGS84_A + Height;
+
 
 
     /*

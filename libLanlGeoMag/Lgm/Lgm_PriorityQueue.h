@@ -14,7 +14,7 @@ typedef struct Lgm_pQueue_Node {
 
     double  key;    //<! A number defining the priority level. Lower means higher priority.
     int     index;  //<! variable that can be used to point to individual items in the Data.
-    void  *Data;
+    void    *Data;
 
 } Lgm_pQueue_Node;
 

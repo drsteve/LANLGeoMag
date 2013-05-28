@@ -1,3 +1,6 @@
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+
 #include "Lgm/Lgm_PriorityQueue.h"
 
 
@@ -110,3 +113,4 @@ int Lgm_pQueue_Peek( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
 }
 
 
+#pragma GCC pop_options

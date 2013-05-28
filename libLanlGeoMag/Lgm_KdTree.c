@@ -1,3 +1,6 @@
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+
 #include "Lgm/Lgm_KdTree.h"
 #include "Lgm/quicksort.h"
 #include <stdio.h>
@@ -7,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 
 
 /**
@@ -74,8 +78,8 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
     Lgm_KdTree_SubDivideVolume( t, kt );
     kt->Root = t;
 
-    kt->PQN = Lgm_pQueue_Create( 500 );
-    kt->PQP = Lgm_pQueue_Create( 500 );
+    kt->PQN = Lgm_pQueue_Create( 5000 );
+    kt->PQP = Lgm_pQueue_Create( 5000 );
 
     return( kt );
     
@@ -142,7 +146,7 @@ void Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt ) {
     int                 Level, q, d, D, NewLevel;
     unsigned long int   j, nLeft, nRight;
     double             *Pos;
-    double               V, c, Diff, MaxDiff;
+    double               V, c, MaxDiff;
     unsigned long int   *Idx;
 
 
@@ -219,11 +223,10 @@ void Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt ) {
      */
     nRight = t->nData/2;
     nLeft  = t->nData - nRight;
-    //V = 0.5*(Pos[nLeft] + Pos[nRight]);
-    //V = Pos[nLeft];
-    //printf("Split at: %g %g %g\n", Pos[nLeft], Pos[nRight], V );
-    t->d      = q;          // splitting dimension
-    t->CutVal = Pos[nLeft]; // splitting value
+    V      = Pos[nLeft];
+    t->d      = q;   // splitting dimension
+    t->CutVal = V;   // splitting value (values less than this go to the left, values greater than or equal go the right).
+//printf("d cut = %d %g\n", d, t->CutVal);
 
     t->Left->Data       = (Lgm_KdTreeData *) calloc( nLeft, sizeof( Lgm_KdTreeData ) );
     t->Left->Min        = (double *) calloc( D, sizeof( double ) );
@@ -379,21 +382,16 @@ void Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt ) {
  *    \date          2013
  *
  */
-int Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN ) {
+int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN ) {
 
-    int                  k, d, done, index;
+    int                  k, index;
     Lgm_KdTreeNode      *Root, *p;
-    double              *q;
     double              dist, maxd2;
-    double              FarthestPointDist2, ClosestNodeDist2;
-    Lgm_pQueue          *PQN, *PQP;
-    Lgm_pQueue_Node     New, ClosestNode, FarthestPoint;
+    Lgm_pQueue          *PQP;
+    Lgm_pQueue_Node     FarthestPoint;
 
     maxd2 = MaxDist2;
 
-    // reset priority queue heap for nodes
-    PQN = KdTree->PQN;
-    PQN->HeapSize = 0;
 
     // reset priority queue heap for points
     PQP = KdTree->PQP;
@@ -411,68 +409,9 @@ int Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, d
      */
     if ( Root->nDataBelow < K ) return( KDTREE_KNN_NOT_ENOUGH_DATA );
 
-    q = (double *) calloc( D, sizeof(double) );
 
-    /*
-     *  Add Root Node to the Priority Queue.
-     */
-    for (d=0; d<D; d++) q[d] = q_in[d];
-    dist = Lgm_KdTree_MinDist( Root, q );
-    if ( dist > maxd2 ) { free(q); return(0); }
+    Lgm_KdTree_DepthFirstSearch( Root, PQP, K, q, &maxd2 );
 
-    New.key   = dist;  // lowest dist is highest priority
-    New.index = -1;  
-    New.Data  = (void *)Root;
-    Lgm_pQueue_Insert( &New, PQN );
-
-
-
-
-    /*
-     *  Process items on the Priority Queue until we are done.
-     */
-    k    = 0;       // havent found any NNs yet.
-    done = FALSE;
-    while( !done ) {
-
-
-        /*
-         * Pop the highest priority item off of the Priority Queue.
-         * This is the closest object to the query point. 
-         */
-        if ( Lgm_pQueue_Peek( &ClosestNode, PQN ) ) {
-
-            ClosestNodeDist2  = ClosestNode.key;
-            
-            if ( ClosestNodeDist2 < maxd2 ) {
-
-                Lgm_pQueue_Pop( &ClosestNode, PQN ); 
-                ClosestNodeDist2  = ClosestNode.key;
-                p = (Lgm_KdTreeNode *)ClosestNode.Data;
-
-                Lgm_KdTree_DescendTowardClosestLeaf( p, PQN, PQP, K, q, &maxd2 );
-
-            } else {
-
-                done = TRUE;
-
-            }
-
-            if ( PQP->HeapSize >= K ) {
-                Lgm_pQueue_Peek( &FarthestPoint, PQP );
-                FarthestPointDist2  = -FarthestPoint.key;
-                if ( FarthestPointDist2 < ClosestNodeDist2 ) done = TRUE;
-            }
-
-        } else {
-
-            done = TRUE;
-
-        }
-
-
-
-    }
 
 // these are in reverse order -- fix...
     k = 0;
@@ -499,7 +438,6 @@ int Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, d
     /*
      *  return success
      */
-    free( q );
     return( KDTREE_KNN_SUCCESS );
 
 }
@@ -552,6 +490,44 @@ inline double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
 
 }
 
+
+/**
+ *  This routine computes the minimum distance between a point and a KdTree
+ *  node (each node maintains a region of D-dimensional space). Basically, we
+ *  compute the closest distance between the query point and any point on the
+ *  hyper-rectangle defined in the node. Bails early if this distance is
+ *  detected to exceed md2.
+ *
+ *      \param[in]      Node    Pointer to a node in the kdtree
+ *      \param[in]      q       The D-dimensional query point.
+ *      \param[in]      md2     Max dist^2 to consider.
+ *
+ *      \returns        The minimum distance between the point and the node.
+ *
+ *      \author         Mike Henderson
+ *      \date           2013
+ *
+ */
+inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 ) {
+
+    int     d;
+    double  distance2, delta, qd;
+
+
+    /*
+     * The region in each node is defined by the Min[] and Max[] arrays.
+     * E.g., Min[0]/Max[0] is the bounds in the zeroeth dimension, etc.
+     */
+
+    for ( distance2=0.0, d=0; d<Node->D; d++ ) {
+        qd = *(q + d);
+        if      ( qd < Node->Min[d] ) { delta = Node->Min[d] - qd; distance2 += delta*delta; if ( distance2 > md2 ) return( FALSE ); }
+        else if ( qd > Node->Max[d] ) { delta = qd - Node->Max[d]; distance2 += delta*delta; if ( distance2 > md2 ) return( FALSE ); }
+    }
+    if ( distance2 < md2 ) return( TRUE );
+
+}
+
 /**
  *   Descend to the leaf node that is closest to the query point. This routine
  *   is used by Lgm_KdTree_kNN().
@@ -568,16 +544,18 @@ inline double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
  *      \date           2013
  *
  */
-void Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 ) {
+void Lgm_KdTree_DepthFirstSearch( Lgm_KdTreeNode *Node, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 ) {
 
     int                 i, d;
-    double              dL, dR, *pos, dist, g, ddd;
+    double              *pos, dist, ddd, q_d, v_d, diff;
     Lgm_KdTreeNode     *L, *R;
     Lgm_pQueue_Node     New, FarthestPoint;
 
 
+    
     L = Node->Left;
     R = Node->Right;
+
 
     New.index = -1;
 
@@ -588,42 +566,54 @@ void Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN,
 
         /*
          * This is not a leaf node -- should be no points contained in this
-         * node. There are both left and right subtrees defined.  Throw both on
-         * the queue for further processing. Make sure the closest one is
-         * searched first.
+         * node. There are both left and right subtrees defined.  Search the
+         * best one first. Then search the farthest one.
          */
+        q_d = q[ Node->d ]; // The component of the query vector in the cut-dimension.
+        v_d = Node->CutVal; // The value of the cutting line (in dimension Node->d).
 
-        dL = Lgm_KdTree_MinDist( L, q );
-        dR = Lgm_KdTree_MinDist( R, q );
-        if ( dL < dR ) {
-            if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( L, PQN, PQP, K, q, MaxDist2 ); }
-            if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( R, PQN, PQP, K, q, MaxDist2 ); }
+    
+        if ( q_d < v_d ) {
+            // follow the left subtree first -- its the closest.
+            Lgm_KdTree_DepthFirstSearch( L, PQP, K, q, MaxDist2 );
+
+            /*
+             * Only search the other subtree if there is a chance a point can
+             * be found there.  So far, we know that the point is on the left
+             * side of the cut line. Therefore, the dist to the cutline is
+             * greater than the current MaxDist2 value, the right subtree isa
+             * too far away.  Note: this test is just based on the component
+             * distances, not the true distance. We couyld try the true
+             * distance though...
+             */
+            diff = q_d - v_d;
+            if ( diff*diff < *MaxDist2 ) {
+                 //if ( Lgm_KdTree_MinDist( R, q ) < *MaxDist2 ) Lgm_KdTree_DepthFirstSearch( R, PQP, K, q, MaxDist2 ); 
+                 if ( Lgm_KdTree_DoSearch( R, q, *MaxDist2 ) ) Lgm_KdTree_DepthFirstSearch( R, PQP, K, q, MaxDist2 ); 
+            }
+
         } else {
-            if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( R, PQN, PQP, K, q, MaxDist2 ); }
-            if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( L, PQN, PQP, K, q, MaxDist2 ); }
+            // follow the right subtree first -- its the closest
+            Lgm_KdTree_DepthFirstSearch( R, PQP, K, q, MaxDist2 );
+
+            // Search left if there is a chance of finding a point.
+            diff = q_d - v_d;
+            if ( diff*diff < *MaxDist2 ) {
+                //if ( Lgm_KdTree_MinDist( L, q ) < *MaxDist2 ) Lgm_KdTree_DepthFirstSearch( L, PQP, K, q, MaxDist2 ); 
+                if ( Lgm_KdTree_DoSearch( L, q, *MaxDist2 ) ) Lgm_KdTree_DepthFirstSearch( L, PQP, K, q, MaxDist2 ); 
+            }
         }
 
-    } else if ( L ) {
+    } else if ( L )  {
 
-        /*
-         * This is not a leaf node -- should be no points contained in this
-         * node. Only left subtree defined.  Throw both on the queue for
-         * further processing. 
-         */
-        dL = Lgm_KdTree_MinDist( L, q );
-        if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( L, PQN, PQP, K, q, MaxDist2 ); }
+        Lgm_KdTree_DepthFirstSearch( L, PQP, K, q, MaxDist2 );
 
     } else if ( R ) {
 
-        /*
-         * This is not a leaf node -- should be no points contained in this
-         * node. Only right subtree defined.  Throw both on the queue for
-         * further processing. 
-         */
-        dR = Lgm_KdTree_MinDist( R, q );
-        if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }//Lgm_KdTree_DescendTowardClosestLeaf( R, PQN, PQP, K, q, MaxDist2 ); }
+        Lgm_KdTree_DepthFirstSearch( R, PQP, K, q, MaxDist2 );
 
     } else {
+
 
         /*
          *  This is a leaf node that may contain multiple points. Add them all
@@ -632,29 +622,35 @@ void Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN,
         for (i=0; i<Node->nData; i++ ) {
 
             pos = Node->Data[i].Position;
-            for ( dist=0.0, d=0; d<Node->D; d++) { g = pos[d] - q[d]; dist += g*g; }
 
             if ( PQP->HeapSize < K ) {
                 // add point no matter what if we dont have a full set yet.
+                for ( dist=0.0, d=0; d<Node->D; d++) { diff = pos[d] - q[d]; dist += diff*diff; }
                 New.key   = -dist;
                 New.index = i;
                 New.Data  = (void *)Node;
                 Lgm_pQueue_Insert( &New, PQP );
+                if ( PQP->HeapSize >= K ) *MaxDist2 = -PQP->HeapArray[1].key; // reset the MaxDist2 value -- all closer points must be closer than this.
             } else {
                 // only add point if its closer than the farthest.
-                Lgm_pQueue_Peek( &FarthestPoint, PQP );
-                ddd = -FarthestPoint.key;
+                ddd = -PQP->HeapArray[1].key;
+                for ( dist=0.0, d=0; d<Node->D; d++) { 
+                    diff = pos[d] - q[d]; 
+                    dist += diff*diff; 
+                    if ( dist >= ddd ) break; // its already bigger -- so stop expending effort.
+                }
+
                 if ( dist < ddd ) {
                     New.key   = -dist;
                     New.index = i;
                     New.Data  = (void *)Node;
 
                     Lgm_pQueue_Pop( &FarthestPoint, PQP );  // remove the farthest
-                    //printf("MaxDist2 = %g\n", *MaxDist2);
-
                     Lgm_pQueue_Insert( &New, PQP );         // insert new (closer) point
-                    *MaxDist2 = dist;                       // reset the MaxDist2 value -- all closer points must be closer than this.
+                    *MaxDist2 = -PQP->HeapArray[1].key;     // reset the MaxDist2 value -- all closer points must be closer than this.
                 }
+
+
             }
 
         }
@@ -668,6 +664,7 @@ void Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN,
  *   Prints the contents of the priority queue. For dubugging only. This routine
  *   is used by Lgm_KdTree_kNN().
  *
+THIS IS NO LONGER VALID..
  *      \param[in]  PQ          The "priority queue".
  *
  *      \returns        void
@@ -708,3 +705,261 @@ void Lgm_KdTree_PrintPQ( Lgm_pQueue *PQ ) {
 }
 
 
+/**
+ *   Descend to the leaf node that is closest to the query point. This routine
+ *   is used by Lgm_KdTree_kNN2().
+ *   Non-recursive version...
+ *
+ *      \param[in]      Node        Pointer to a node in the kdtree
+ *      \param[in]      PQ          The "priority queue"
+ *      \param[in]      q           The D-dim query point.
+ *      \param[in]      MaxDist2    The maximum distance (squared) to care
+ *                                  about. Square distances beyond this value are ignored.
+ *
+ *      \returns        pointer one level closer to leaf node that is closest to query point.
+ *
+ *      \author         Mike Henderson
+ *      \date           2013
+ *
+ */
+void Lgm_KdTree_DescendTowardClosestLeaf2( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 ) {
+
+    int                 i, d;
+    double              dL, dR, *pos, dist, g, ddd;
+    Lgm_KdTreeNode     *L, *R;
+    Lgm_pQueue_Node     New, FarthestPoint;
+
+
+    L = Node->Left;
+    R = Node->Right;
+
+    New.index = -1;
+
+    if ( L && R ) {
+
+        /*
+         * This is not a leaf node -- should be no points contained in this
+         * node. There are both left and right subtrees defined.  Search the
+         * best one first. Then search the farthest one.
+         */
+        dL = Lgm_KdTree_MinDist( L, q );
+        dR = Lgm_KdTree_MinDist( R, q );
+        if ( dL < dR ) {
+            if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }
+            if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }
+        } else {
+            if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }
+            if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }
+        }
+
+    } else if ( L ) {
+
+        /*
+         * This is not a leaf node -- should be no points contained in this
+         * node. Only left subtree defined.  Throw both on the queue for
+         * further processing. 
+         */
+        dL = Lgm_KdTree_MinDist( L, q );
+        if (dL < *MaxDist2) { New.key  = dL; New.Data = (void *)L; Lgm_pQueue_Insert( &New, PQN ); }
+
+    } else if ( R ) {
+
+        /*
+         * This is not a leaf node -- should be no points contained in this
+         * node. Only right subtree defined.  Throw both on the queue for
+         * further processing. 
+         */
+        dR = Lgm_KdTree_MinDist( R, q );
+        if (dR < *MaxDist2) { New.key  = dR; New.Data = (void *)R; Lgm_pQueue_Insert( &New, PQN ); }
+
+    } else {
+
+        /*
+         *  This is a leaf node that may contain multiple points. Add them all
+         *  to the Points Priority Queue. Maintain in max order (by negating the distance).
+         */
+        for (i=0; i<Node->nData; i++ ) {
+
+            pos = Node->Data[i].Position;
+            for ( dist=0.0, d=0; d<Node->D; d++) { g = pos[d] - q[d]; dist += g*g; }
+
+            if ( PQP->HeapSize < K ) {
+                // add point no matter what if we dont have a full set yet.
+                New.key   = -dist;
+                New.index = i;
+                New.Data  = (void *)Node;
+                Lgm_pQueue_Insert( &New, PQP );
+                if ( PQP->HeapSize >= K ) *MaxDist2 = -PQP->HeapArray[1].key; // reset the MaxDist2 value -- all closer points must be closer than this.
+            } else {
+                // only add point if its closer than the farthest.
+                ddd = -PQP->HeapArray[1].key;
+                if ( dist < ddd ) {
+                    New.key   = -dist;
+                    New.index = i;
+                    New.Data  = (void *)Node;
+
+                    Lgm_pQueue_Pop( &FarthestPoint, PQP );  // remove the farthest
+                    Lgm_pQueue_Insert( &New, PQP );         // insert new (closer) point
+                    *MaxDist2 = -PQP->HeapArray[1].key;     // reset the MaxDist2 value -- all closer points must be closer than this.
+                }
+            }
+
+        }
+
+    }
+
+    return;
+}
+
+
+
+
+/**
+ *  Finds the k Nearest Neighbors (kNN) of a query point q given that the set
+ *  of data is stored as a KdTree. 
+ *  Non-recursive version...
+ *
+ *    \param[in]     q          Query position (D-dimensional) . I.e. the point we want to find NNs for.
+ *    \param[in]     Root       Root node of KdTree.
+ *    \param[in]     K          Number of NNs to find.
+ *    \param[in]     MaxDist2   Threshold distance^2 beyond which we give up on finding
+ *                              NNs.  (i.e. could find them, but we arent interested
+ *                              because they'd be too far from our query point to be
+ *                              useful).
+ *    \param[out]    Kgot       Number of NNs (within MaxDist2) that we actually found.
+ *    \param[out]    kNN        List of kNN Data items. Sorted (closest first).
+ *
+ *    \returns       KDTREE_KNN_SUCCESS         Search succeeded.
+ *                   KDTREE_KNN_TOO_FEW_NNS     Search terminated because we couldnt find K NNs that were close enough.
+ *                   KDTREE_KNN_NOT_ENOUGH_DATA KdTree doesnt contain enough data points.
+ *
+ *    \author        Mike Henderson
+ *    \date          2013
+ *
+ */
+int Lgm_KdTree_kNN2( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN ) {
+
+    int                  k, d, done, index;
+    Lgm_KdTreeNode      *Root, *p;
+    double              *q;
+    double              dist, maxd2;
+    double              FarthestPointDist2, ClosestNodeDist2;
+    Lgm_pQueue          *PQN, *PQP;
+    Lgm_pQueue_Node     New, ClosestNode, FarthestPoint;
+
+    maxd2 = MaxDist2;
+
+    // reset priority queue heap for nodes
+    PQN = KdTree->PQN;
+    PQN->HeapSize = 0;
+
+    // reset priority queue heap for points
+    PQP = KdTree->PQP;
+    PQP->HeapSize = 0;
+
+
+
+    Root = KdTree->Root;
+    *Kgot = 0;
+
+
+    /*
+     * Check to see if there are enough points.
+     * Bailout with error flag -1 if not.
+     */
+    if ( Root->nDataBelow < K ) return( KDTREE_KNN_NOT_ENOUGH_DATA );
+
+    q = (double *) calloc( D, sizeof(double) );
+
+    /*
+     *  Add Root Node to the Priority Queue.
+     */
+    for (d=0; d<D; d++) q[d] = q_in[d];
+    dist = Lgm_KdTree_MinDist( Root, q );
+    if ( dist > maxd2 ) { free(q); return(0); }
+
+    New.key   = dist;  // lowest dist is highest priority
+    New.index = -1;
+    New.Data  = (void *)Root;
+    Lgm_pQueue_Insert( &New, PQN );
+
+
+
+
+    /*
+     *  Process items on the Priority Queue until we are done.
+     */
+    k    = 0;       // havent found any NNs yet.
+    done = FALSE;
+    while( !done ) {
+
+        /*
+         * Pop the highest priority item off of the Priority Queue.
+         * This is the closest object to the query point. 
+         */
+        //if ( Lgm_pQueue_Peek( &ClosestNode, PQN ) ) {
+        if ( PQN->HeapSize > 0 ) {
+
+            //ClosestNodeDist2  = ClosestNode.key;
+            ClosestNodeDist2  = PQN->HeapArray[1].key;
+
+            if ( ClosestNodeDist2 < maxd2 ) {
+
+                Lgm_pQueue_Pop( &ClosestNode, PQN );
+                ClosestNodeDist2  = ClosestNode.key;
+                p = (Lgm_KdTreeNode *)ClosestNode.Data;
+
+                Lgm_KdTree_DescendTowardClosestLeaf2( p, PQN, PQP, K, q, &maxd2 );
+
+            } else {
+
+                done = TRUE;
+
+            }
+            if ( PQP->HeapSize >= K ) {
+                //Lgm_pQueue_Peek( &FarthestPoint, PQP );
+                //FarthestPointDist2  = -FarthestPoint.key;
+                FarthestPointDist2  = -PQP->HeapArray[1].key;
+                if ( FarthestPointDist2 < ClosestNodeDist2 ) done = TRUE;
+            }
+
+        } else {
+
+            done = TRUE;
+
+        }
+
+
+
+    }
+
+// these are in reverse order -- fix...
+    k = 0;
+    while ( Lgm_pQueue_Pop( &FarthestPoint, PQP ) && (k <= K) ) {
+
+        dist  = -FarthestPoint.key;
+        index = FarthestPoint.index;
+        p     = (Lgm_KdTreeNode *)FarthestPoint.Data;
+
+        kNN[ k   ]       = p->Data[index];
+        kNN[ k++ ].Dist2 = dist; // save the dist2 into the data struct
+        *Kgot = k;
+
+    }
+
+
+
+
+    //Lgm_KdTree_PrintPQ( &PQ ); //only for debugging
+
+    ++(KdTree->kNN_Lookups);
+
+
+    /*
+     *  return success
+     */
+    free( q );
+    return( KDTREE_KNN_SUCCESS );
+
+}
+#pragma GCC pop_options

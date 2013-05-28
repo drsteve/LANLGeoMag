@@ -326,6 +326,8 @@ int Lgm_B_T87( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector 	B1, B2, B3, B4;
 
+    if ( Info->Kp > 5 ) Info->Kp = 5;
+
     Lgm_B1_T87( v, &B1,  Info );
     Lgm_B2_T87( v, &B2,  Info );
     Lgm_B3_T87( v, &B3,  Info );

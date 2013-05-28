@@ -3,9 +3,9 @@
 
 #include "Lgm_PriorityQueue.h"
 
-#define     KDTREE_MAX_LEVEL            1000
-#define     KDTREE_ROOT_LEVEL           0
-#define     KDTREE_MAX_DATA_PER_NODE    40         // Algorithm now depends on there being no more than 1 point per leaf....
+#define     KDTREE_MAX_LEVEL            1000    // Maximum depth of the tree
+#define     KDTREE_ROOT_LEVEL           0       // Depth of root node
+#define     KDTREE_MAX_DATA_PER_NODE    22      // Maximum number of data points in a leaf node
 
 #define     TRUE    1
 #define     FALSE   0
@@ -18,9 +18,9 @@
 #define     KDTREE_IS_NULL                 -2
 
 
-#define     LGM_KDTREE_SPLIT_SEQUENTIAL     0
-#define     LGM_KDTREE_SPLIT_RANDOM         1
-#define     LGM_KDTREE_SPLIT_MAXRANGE       2
+#define     LGM_KDTREE_SPLIT_SEQUENTIAL     0  // Split on each dimension sequentially
+#define     LGM_KDTREE_SPLIT_RANDOM         1  // Split on each dimension randomly
+#define     LGM_KDTREE_SPLIT_MAXRANGE       2  // Split on dimension with maximum range of points
 
 
 
@@ -51,7 +51,7 @@ typedef struct _Lgm_KdTreeNode {
     unsigned int         Level;         //<! keeps track of what level we are on
     unsigned int         D;             //<! keeps track of number of dimensions
     unsigned int         d;             //<! keeps track of the splitting dimension. (-1 for root node).
-    unsigned int         CutVal;        //<! keeps track of the Cutting value.
+    double               CutVal;        //<! keeps track of the Cutting value.
     double              *Min;           //<! Array of Minima - min value for each dimension for the data stored in or below this node.
     double              *Max;           //<! Array of Maxima - max value for each dimension for the data stored in or below this node.
     double              *Diff;          //<! Array of Ranges (Max-Min) for each dimension for the data stored in or below this node.
@@ -122,13 +122,17 @@ typedef struct _Lgm_KdTree_pQueue_Node {
 void                Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt );
 Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long int N, int D ) ;
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
-int                 Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN );
 double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
+inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 );
 double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_pQueue *PQ, double MaxDist2 );
 void                Lgm_KdTree_InsertPoint( Lgm_KdTreeNode *Node, int j, double *q, Lgm_pQueue *PQ );
 //Lgm_KdTree_pQueue  *Lgm_KdTree_PopObj( Lgm_KdTree_pQueue **PQ );
-void                Lgm_KdTree_DescendTowardClosestLeaf( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 );
 void                Lgm_KdTree_PrintPQ( Lgm_pQueue *PQ );
 
+int                 Lgm_KdTree_kNN( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN );
+void                Lgm_KdTree_DepthFirstSearch( Lgm_KdTreeNode *Node, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 );
+
+int                 Lgm_KdTree_kNN2( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, double MaxDist2, Lgm_KdTreeData *kNN );
+void                Lgm_KdTree_DescendTowardClosestLeaf2( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN, Lgm_pQueue *PQP, int K, double *q, double *MaxDist2 );
 
 #endif
