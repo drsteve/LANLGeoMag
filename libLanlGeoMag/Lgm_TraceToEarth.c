@@ -1,3 +1,18 @@
+/*! \file Lgm_TraceToEarth.c
+ *
+ *  \brief Routines to find the footpoint in a given direction along a field line.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
+
+
 /* TraceToEarth, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *    - Attempts to trace FL down to (some height above) the Earth.

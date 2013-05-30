@@ -1,3 +1,17 @@
+/*! \file Lgm_TraceToMinBSurf.c
+ *
+ *  \brief Routines to find the Minimum-B surface along a field line.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
+
 /* trace_test, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *

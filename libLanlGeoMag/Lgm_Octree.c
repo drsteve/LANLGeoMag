@@ -1,3 +1,16 @@
+/*! \file Lgm_Octree.c
+ *
+ *  \brief Set of routines for creating octrees (3D trees) and find k Nearest Neighbors.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2009-2012
+ *
+ *
+ *
+ */
+
 #include "Lgm/Lgm_Octree.h"
 #include <stdio.h>
 #include <stdlib.h>

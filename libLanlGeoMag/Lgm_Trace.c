@@ -1,3 +1,17 @@
+/*! \file Lgm_Trace.c
+ *
+ *  \brief Convenience routine to find north and south footpoints and Bmin location in magnetopshere.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
+
 /* 
  * Trace, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *

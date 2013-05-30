@@ -49,7 +49,7 @@ typedef struct _FitData {
  *
  *      we have,
  *
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              \mu = {p_\perp^2 \over 2 m_\circ B } &=& {p^2c^2\over (2 m_\circ c^2 B)} \sin^2(\alpha) \\
  *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
@@ -129,7 +129,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *      Some relativistic equations:
  *
  *      With,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                      m       &=& \mbox{Particle mass.}\\
  *                      m_\circ &=& \mbox{Particle rest mass.}\\
  *                      v       &=& \mbox{Particle speed.}\\
@@ -148,7 +148,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      With,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                  E  = mc^2             &=& \mbox{Total Energy of particle} \\
  *                  E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
  *                  p                     &=& \mbox{relativistic momentum of particle}
@@ -165,7 +165,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                  p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
  *                          &=& E_k (E_k+2E_\circ)
  *              \f}
@@ -191,7 +191,7 @@ double  Lgm_p2c2( double Ek, double E0 ) {
  *      Uses the following relation,
  *      
  *
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              \beta^2 &=& 1 - {1\over \gamma^2} \\
  *                      &=& 1 - {1\over (1+E_k/E_\circ)^2}
  *          \f}
@@ -247,7 +247,7 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *          \f]
  *
  *      Multiplying the top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -283,7 +283,7 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *          \f]
  *
  *      Multiply top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -965,7 +965,7 @@ void Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p
 /**
  *  \brief
  *      Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
- *  \details
+ *  \detail
  *
  *      \param[in]      P                 3D array containing the Phase Space Density as a function of Mu and K.
  *      \param[in]      L                 1D array containing the Lstar values implied by the first index of PSD[][][] array.
@@ -1038,7 +1038,7 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
  *      pre-initialized Lgm_PsdToFlux structure.  The routine Lgm_P2F_SetPsd()
  *      is used to add PSD data/info to an Lgm_PsdToFlux structure.
  *    
- *      We want Flux at constant E and \f$\alpha \f$ (i.e. we want \J$f( E, \alpha
+ *      We want Flux at constant E and \f$\alpha \f$ (i.e. we want J\f$( E, \alpha
  *      )\f$).
  *    
  *      To perform the calculation we note that \f$f( \mu, K )\f$ is the same as
@@ -1772,6 +1772,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
  *     Fills the given array with a geomteric sequence of values.
  *
  *  \details
+ *     Blah blah
  *
  *      \param[in]      a  Starting value.
  *      \param[in]      b  Ending value.

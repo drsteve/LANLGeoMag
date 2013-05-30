@@ -1,3 +1,16 @@
+/*! \file Lgm_QinDenton.c
+ *
+ *  \brief Routines for reading in and setting the QinDenton magnetic field model input parameters.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   20??
+ *
+ *
+ *
+ */
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -1,3 +1,9 @@
+/*! \file   Lgm_KdTree.c
+ *  \brief  Set of routines for creating kdtrees (K-dimensional trees) and find k Nearest Neighbors.
+ *  \author M.G. Henderson
+ *  \date   2013
+ */
+
 #pragma GCC push_options
 #pragma GCC optimize ("O3")
 
@@ -13,22 +19,29 @@
 
 
 
-/**
- *   Store given N-dimensional data into a D-dimensional KD-tree data structure.
+/** 
+ *   \brief
+ *      Store given N-dimensional data into a D-dimensional KD-tree data structure.
  *
- *   Given arrays of positions and data, this routine recursively partitions
- *   the data into a kdtree data structure. 
+ *   \details
+ *      Given arrays of positions and data, this routine recursively partitions
+ *      the data into a kdtree data structure. 
  *
- *      \param[in]      Points      An array of position vectors in D-dimensional space. ObjectPoints[d][n] is the dth component of the nth point.
- *      \param[in]      Objects     An array of objects in D-dimensional space. Objects[n] is the nth pointer to an object.
- *      \param[in]      N           Number of points.
- *      \param[in]      D           Number of dimensions.
+ *   \param[in]      Points      An array of position vectors in D-dimensional space. ObjectPoints[d][n] is the dth component of the nth point.
  *
- *      \returns        returns a pointer to the a KdTree structure. User is
+ *   \param[in]      Objects     An array of objects in D-dimensional space. Objects[n] is the nth pointer to an object.
+ *                               This is an array of 'void *' pointers. This allows the user to use any object type here, so long as they are properly
+ *                               typecast.
+ *
+ *   \param[in]      N           Number of points.
+ *
+ *   \param[in]      D           Number of dimensions.
+ *
+ *   \returns        returns a pointer to the a KdTree structure. User is
  *                      responsible to freeing this with Lgm_FreeKdTree( )
  *
- *      \author         Mike Henderson
- *      \date           2013
+ *   \author         Mike Henderson
+ *   \date           2013
  *
  */
 Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long int N, int D ) {
@@ -89,13 +102,20 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
 
 
 /**
- *  Create a root-level node for an kdtree.
+ *  \brief
+ *      Create a root-level node for an kdtree.
  *
+ *  \details
+ *      This routine allocates memory for a root-level node of a KdTree with
+ *      dimension D. The returned pointer to an Lgm_KdTreeNode must be
+ *      destroyed with a call to Lgm_FreeKdTree().
  *
- *      \returns        void
+ *   \param[in]      D      Integer dimension of the KdTree.
  *
- *      \author         Mike Henderson
- *      \date           2013
+ *   \returns        void
+ *
+ *   \author         Mike Henderson
+ *   \date           2013
  *
  */
 Lgm_KdTreeNode *Lgm_CreateKdTreeRoot( int D ) {
@@ -130,8 +150,9 @@ Lgm_KdTreeNode *Lgm_CreateKdTreeRoot( int D ) {
 
 
 /**
- *  Recursively subdivide volume. Stop when the number of data points per node
- *  is lower than the threshold given by KDTREE_MAX_DATA_PER_NODE.
+ *  \brief
+ *      Recursively subdivide volume. Stop when the number of data points per node
+ *      is lower than the threshold given by KDTREE_MAX_DATA_PER_NODE.
  *
  *    \param[in]     Node in the kdtree to subdivide.
  *
@@ -361,8 +382,9 @@ void Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt ) {
 
 
 /**
- *  Finds the k Nearest Neighbors (kNN) of a query point q given that the set
- *  of data is stored as a KdTree. 
+ *  \brief
+ *      Finds the k Nearest Neighbors (kNN) of a query point q given that the set
+ *      of data is stored as a KdTree. 
  *
  *    \param[in]     q          Query position (D-dimensional) . I.e. the point we want to find NNs for.
  *    \param[in]     Root       Root node of KdTree.
@@ -454,10 +476,13 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
 
 
 /**
- *  This routine computes the minimum distance between a point and a KdTree
- *  node (each node maintains a region of D-dimensional space). Basically, we
- *  compute the closest distance between the query point and any point on the
- *  hyper-rectangle defined in the node.
+ *  \brief
+ *      This routine computes the minimum distance between a point and a KdTree
+ *      node (each node maintains a region of D-dimensional space). 
+ *
+ *  \details
+ *      Basically, we compute the closest distance between the query point and
+ *      any point on the hyper-rectangle defined in the node.
  *
  *      \param[in]      Node    Pointer to a node in the kdtree
  *      \param[in]      q       The D-dimensional query point.
@@ -492,11 +517,13 @@ inline double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
 
 
 /**
- *  This routine computes the minimum distance between a point and a KdTree
- *  node (each node maintains a region of D-dimensional space). Basically, we
- *  compute the closest distance between the query point and any point on the
- *  hyper-rectangle defined in the node. Bails early if this distance is
- *  detected to exceed md2.
+ *  \brief
+ *      Determine if a search of this subtree is waranted.
+ *
+ *  \details
+ *      Rather than compute the entire minimum distance between the point and
+ *      the hyper-rectangular boundaing box, this routine bails early if the
+ *      min-dist^2 exceeds a maximum threshold.
  *
  *      \param[in]      Node    Pointer to a node in the kdtree
  *      \param[in]      q       The D-dimensional query point.
@@ -529,8 +556,9 @@ inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 ) {
 }
 
 /**
- *   Descend to the leaf node that is closest to the query point. This routine
- *   is used by Lgm_KdTree_kNN().
+ *  \brief
+ *      Recursively descend to the leaf node that is closest to the query point
+ *      floowed by the farthest node. This routine is used by Lgm_KdTree_kNN().
  *
  *      \param[in]      Node        Pointer to a node in the kdtree
  *      \param[in]      PQ          The "priority queue"
@@ -661,10 +689,11 @@ void Lgm_KdTree_DepthFirstSearch( Lgm_KdTreeNode *Node, Lgm_pQueue *PQP, int K, 
 }
 
 /**
- *   Prints the contents of the priority queue. For dubugging only. This routine
- *   is used by Lgm_KdTree_kNN().
+ *  \brief
+ *      Prints the contents of the priority queue. For dubugging only. This routine
+ *      is used by Lgm_KdTree_kNN(). THIS ROUTINE IS NO LONGER VALID..
  *
-THIS IS NO LONGER VALID..
+ *
  *      \param[in]  PQ          The "priority queue".
  *
  *      \returns        void
@@ -706,9 +735,9 @@ void Lgm_KdTree_PrintPQ( Lgm_pQueue *PQ ) {
 
 
 /**
- *   Descend to the leaf node that is closest to the query point. This routine
- *   is used by Lgm_KdTree_kNN2().
- *   Non-recursive version...
+ *  \brief
+ *      Descend to the leaf node that is closest to the query point. This routine
+ *      is used by Lgm_KdTree_kNN2().  Allows for non-recursive version of depth-first search.
  *
  *      \param[in]      Node        Pointer to a node in the kdtree
  *      \param[in]      PQ          The "priority queue"
@@ -815,9 +844,9 @@ void Lgm_KdTree_DescendTowardClosestLeaf2( Lgm_KdTreeNode *Node, Lgm_pQueue *PQN
 
 
 /**
- *  Finds the k Nearest Neighbors (kNN) of a query point q given that the set
- *  of data is stored as a KdTree. 
- *  Non-recursive version...
+ *  \brief
+ *      Finds the k Nearest Neighbors (kNN) of a query point q given that the set
+ *      of data is stored as a KdTree.  Non-recursive version.
  *
  *    \param[in]     q          Query position (D-dimensional) . I.e. the point we want to find NNs for.
  *    \param[in]     Root       Root node of KdTree.

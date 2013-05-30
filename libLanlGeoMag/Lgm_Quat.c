@@ -1,3 +1,16 @@
+/*! \file Lgm_Quat.c
+ *
+ *  \brief Set of routines for performing operations on quaternions.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2013
+ *
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include "Lgm/Lgm_Quat.h"

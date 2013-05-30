@@ -120,7 +120,10 @@ typedef struct _Lgm_KdTree_pQueue_Node {
 
 
 void                Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt );
+
+/*! Store given N-dimensional data into a D-dimensional KD-tree data structure. */
 Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long int N, int D ) ;
+
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
 double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
 inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 );
