@@ -1,12 +1,21 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagEphemInfo.h"
+
+#ifndef LGM_INDEX_DATA_DIR
+#warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"
+#define LGM_INDEX_DATA_DIR    /usr/local/share/LanlGeoMag/Data
+#endif
+
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
 void Lgm_WriteMagEphemHeader( FILE *fp, char *ExtModel, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
-    char        Str[80], *Str2;
+    char        Str[80], *Str2, *QDpath, QDloc[80];
     char        *p, TextStr[80], IsoTimeString[80];
     long int    CreateDate;
     double      JD, UTC, R;
@@ -1312,6 +1321,14 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *ExtModel, int SpiceBody,  char *Sp
     fprintf( fp, "#                        \"ElapsedTime\": \"%s\",\n", "ELAPSED_TIME" );
     fprintf( fp, "#                          \"CreatedBy\": \"%s\",\n", getenv( "USER" ) );
     fprintf( fp, "#                          \"CreatedOn\": \"%s\",\n", getenv("HOSTNAME") );
+    QDpath = getenv("QIN_DENTON_PATH");
+    if (QDpath==NULL) {
+        strcpy(QDloc, LGM_INDEX_DATA_DIR);
+        strcat(QDloc, "/QinDenton");
+    } else {
+        strcpy(QDloc, QDpath);    
+    }
+    fprintf( fp, "#                      \"QinDentonPath\": \"%s\",\n", QDloc );
     fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
     fprintf( fp, "#  },\n");
 
