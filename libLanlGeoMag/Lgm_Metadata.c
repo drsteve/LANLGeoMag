@@ -14,12 +14,15 @@
 /******************************************************************************/
 
 void Lgm_metadata_initvar(Lgm_metadata_variable *var, int dimension, int data, char* name) {
+  int dm[] = {dimension};
   var->dimension = dimension;
   var->name = name;
   var->n_attrs = 0;
   var->attributes = NULL;
   var->data = data;
-  Lgm_metadata_addIntAttr(var, "DIMENSION", 1, &dimension); // the & since it wants a pointer
+  //Lgm_metadata_addIntAttr(var, "DIMENSION", 1, &dimension); // the & since it wants a pointer
+  Lgm_metadata_addStringAttr(var, "DIMENSION", Lgm_metadata_intArrayToString(1, &dm), 1);
+ 
 }
 
 /******************************************************************************/

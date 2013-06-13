@@ -1,6 +1,16 @@
 #ifndef VIEWDRIFTSHELL_H
 #define VIEWDRIFTSHELL_H
 
+#define GL_GLEXT_PROTOTYPES 1
+
+#include <gtk/gtkgl.h>
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include <GL/glx.h>
+
 #include "support.h"
 #include <Lgm/Lgm_MagEphemInfo.h>
 #include "PsdAssim.h"
@@ -21,19 +31,12 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include <gtk/gtkgl.h>
 
 #ifdef G_OS_WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #endif
 
-#define GL_GLEXT_PROTOTYPES 1
-
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
 
 
 #include "SatSelector.h"
@@ -72,6 +75,9 @@ void raise_OpenMagEphemFileDialog( gpointer callback_data, guint callback_action
 void raise_SaveRasterFileDialog( gpointer callback_data, guint callback_action, GtkWidget *menu_item ) ;
 void GoFullScreen( gpointer callback_data, guint callback_action, GtkWidget *menu_item );
 void GoNormalScreen( gpointer callback_data, guint callback_action, GtkWidget *menu_item );
+GtkWidget *CreateOpenMagEphemFileDialog( void );
+GtkWidget *CreateSaveRasterFileDialog( void );
+void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius );
 
 
 

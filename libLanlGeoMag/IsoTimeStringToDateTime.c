@@ -1,3 +1,15 @@
+/*! \file IsoTimeStringToDateTime.c
+ *
+ *  \brief A Perl-based ISO 8601 time-parser. Results stored in a Lgm_DateTime structure.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2010-2011
+ *
+ *
+ *
+ */
 #include <EXTERN.h>
 #include <perl.h>
 #include "Lgm/Lgm_CTrans.h"

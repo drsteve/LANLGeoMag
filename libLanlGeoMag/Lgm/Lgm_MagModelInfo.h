@@ -7,6 +7,8 @@
 #include "Lgm/Lgm_Octree.h"
 #include "Lgm/Lgm_Constants.h"
 #include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/Lgm_Tsyg1996.h"
+#include "Lgm/Lgm_Tsyg2001.h"
 #include "Lgm/Lgm_Tsyg2004.h"
 #include "Lgm/Lgm_Tsyg2007.h"
 #include "gsl/gsl_errno.h"
@@ -92,7 +94,8 @@
 #define LGM_EXTMODEL_OP77               7
 #define LGM_EXTMODEL_SCATTERED_DATA     8
 #define LGM_EXTMODEL_SCATTERED_DATA2    9
-
+#define LGM_EXTMODEL_TU82               10
+#define LGM_EXTMODEL_OP88               11
 
 
 
@@ -227,6 +230,11 @@ typedef struct Lgm_MagModelInfo {
     double              Kappa, RofC;    // Curvature and Radius of Curvature at Pmin.
     int                 imin1;          // imin1 and imin2 are the indices in the
     int                 imin2;          //   array between which smin is located.
+
+
+    Lgm_Vector          v1_final;       //< Place to store the final value of v1 when tryingm to trace to N foot.
+    Lgm_Vector          v2_final;       //< Place to store the final value of v2 when tryingm to trace to S foot.
+    Lgm_Vector          v3_final;       //< Place to store the final value of v3 when tryingm to trace to Min B.
 
 
 
@@ -431,6 +439,16 @@ typedef struct Lgm_MagModelInfo {
 
 
     /*
+     *  Info structure for T96
+     */
+    LgmTsyg1996_Info    T96_Info;
+
+    /*
+     *  Info structure for T01S
+     */
+    LgmTsyg2001_Info    T01_Info;
+
+    /*
      *  Info structure for TS04
      */
     LgmTsyg2004_Info    TS04_Info;
@@ -558,6 +576,21 @@ int Lgm_B_OP77( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m );
 
 
+/*
+ *
+ *  Function Prototypes for Olsen Pfitzer 1988  Model
+ *
+ */
+int     Lgm_B_OP88( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void    Lgm_OP88_BDYN( double DEN, double VEL, double DST, double X, double Y, double Z, double *BX, double *BY, double *BZ );
+void    Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double STAIL );
+void    Lgm_OP88_BFMAGP( double *XX, double *BB );
+void    Lgm_OP88_BFTAIL( double *XX,  double *BB );
+void    Lgm_OP88_BFRING( double *XX,  double *BB );
+double  Lgm_OP88_RINGST( double SOFFD,  double DST );
+double  Lgm_OP88_STDOFF( double VEL,  double DEN );
+
+
 
 /*
  *  T87
@@ -568,6 +601,16 @@ int Lgm_B1_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B2_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B3_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 int Lgm_B_T87( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+
+/*
+ *  TU82
+ *
+ *  Function Prototypes for TU82 model
+ */
+int Lgm_Brc_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bt_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_Bmp_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
+int Lgm_B_TU82( Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo * );
 
 
 /*
@@ -603,6 +646,13 @@ void lgm_field_t96mod_mgh__(double *PARMOD, double *AMDF, int *IYEAR,int *IDAY,i
 void lgm_field_t96mod_( int *, int *, int *, int *, double *, double *, double *, double *, double *, double *, double * );
 
 
+/*
+ *  T96 
+ *
+ *  Function Prototypes for T96 model
+ */
+int  Lgm_B_T96( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void Tsyg_T96( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg1996_Info *tInfo );
 
 /*
  *  TS04 Optimized
@@ -628,15 +678,7 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  */
 double mypow( double, double );
 int     Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ);
-void    T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
-                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
-                    double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
-                    double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
-                    double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,
-                    double *BXR12, double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21,
-                    double *BXR22, double *BYR22, double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF,
-                    double *BX, double *BY, double *BZ);
+void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
 
 
 /*
@@ -720,6 +762,7 @@ void Lgm_Set_Lgm_B_T01S(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_TS04_opt(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_T89(Lgm_MagModelInfo *MagInfo);
+void Lgm_Set_Lgm_B_T96(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_OP77(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_cdip_InternalModel(Lgm_MagModelInfo *MagInfo);
 void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo);

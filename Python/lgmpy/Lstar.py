@@ -29,7 +29,7 @@ import Lgm_Wrap
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
     SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
     LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children, \
-    Lgm_ComputeLstarVersusPA, Lgm_B_TS04
+    Lgm_ComputeLstarVersusPA, Lgm_B_TS04, Lgm_B_T96, Lgm_QinDentonOne, Lgm_set_QinDenton, Lgm_get_QinDenton_at_JD
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
 import Lgm_CTrans
@@ -330,10 +330,10 @@ def get_Lstar(pos, date, alpha = 90.,
     except KeyError:
         raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
 
-    MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
     MagEphemInfo.UTC    = utc
+    MagEphemInfo.LstarInfo.contents.mInfo.contents.Kp = Kp
 
     # Save nAlpha, and Alpha array to MagEphemInfo structure
     MagEphemInfo.nAlpha = len(Alpha)
@@ -371,7 +371,7 @@ def get_Lstar(pos, date, alpha = 90.,
         ans[pa]['LHilton'] = datamodel.dmarray([numpy.nan])
         ans[pa]['Bmin'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
         ans[pa]['Bmirror'] = datamodel.dmarray([numpy.nan], attrs={'units':'nT'})
-
+    
     if trace != 'LGM_CLOSED':
         return ans
         # if this is not LGM_CLOSED then don't both with any pitch angle?  true?
@@ -429,7 +429,7 @@ def get_Lstar(pos, date, alpha = 90.,
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
             elif LS_Flag == -1: # mirror below northern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'N_LOSS'})
-            elif LS_Flag == 0: # valid calc
+            elif LS_Flag >= 0: # valid calc
                 ans[pa]['Lstar'] = datamodel.dmarray([lstarinf.LS], attrs={'info':'GOOD'}) # want better word?
 
             MagEphemInfo.Lstar[i] = lstarinf.LS
@@ -932,7 +932,7 @@ def get_Lstar2(pos, date, alpha = 90.,
                   params = None, coord_system='GSM',
                   Bfield = 'Lgm_B_OP77',
                   internal_model = 'Lgm_B_IGRF',
-                  LstarThresh = 10.0,  # beyond this Lsimple don't compute Lstar
+                  LstarThresh = 10.0,  # beyond this Lsimple don't compute Lstar;; not used in get_Lstar2
                   extended_out = False,
                   LstarQuality = 3, 
                   FootpointHeight=100., 
@@ -1010,7 +1010,7 @@ def get_Lstar2(pos, date, alpha = 90.,
 
 
 
-    if QinDenton and Bfield == 'Lgm_B_TS04': # these are the params we will use.
+    if QinDenton:# and Bfield == 'Lgm_B_TS04': # these are the params we will use.
         # Grab the QinDenton data
         # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
         # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );

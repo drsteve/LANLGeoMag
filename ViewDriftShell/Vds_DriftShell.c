@@ -1,6 +1,48 @@
 #include "ViewDriftShell.h"
 #include "Vds_DriftShell.h"
+typedef struct _MaterialProp {
+  GLfloat ambient[4];
+  GLfloat diffuse[4];
+  GLfloat specular[4];
+  GLfloat shininess;
+} MaterialProp;
 
+static MaterialProp mat_FieldLineType0 = {
+  {0.0, 0.06, 0.1, 1.0},
+  {  0.0/255.0, 105.0/255.0,  27.0/255.0, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
+static MaterialProp mat_FieldLineType1 = {
+  {0.0, 0.06, 0.1, 1.0},
+  {152.0/255.0, 153.0/255.0, 122.0/255.0, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
+static MaterialProp mat_FieldLineType2 = {
+  {0.0, 0.06, 0.1, 1.0},
+  { 98.0/255.0*0.6,  99.0/255.0*0.6,  77.0/255.0*0.6, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
+static MaterialProp mat_FieldLineType3 = {
+  {0.0, 0.06, 0.1, 1.0},
+  { 19.0/255.0,  83.0/255.0, 194.0/255.0, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
+static MaterialProp mat_FieldLineType4 = {
+  {0.0, 0.06, 0.1, 1.0},
+  {150.0/255.0,  20.0/255.0,  20.0/255.0, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
+static MaterialProp mat_FieldLineType5 = {
+  {0.0, 0.06, 0.1, 1.0},
+  {148.0/255.0, 103.0/255.0,  19.0/255.0, 1.0},
+  {0.50196078, 0.50196078, 0.50196078, 1.0},
+  0.25
+};
 
 /**
  *  \brief
@@ -63,7 +105,7 @@ void Vds_FreeObjectInfo( Vds_ObjectInfo *ObjInfo ) {
  */
 void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
 
-    int     i, kk, tn, ns;
+    int     i, tn, ns;
 
 
     /*
@@ -474,7 +516,8 @@ void GenerateDriftShellLists( Vds_ObjectInfo *ObjInfo ){
         glNewList( ObjInfo->DriftShellList4 + p, GL_COMPILE );
             for (i=0;i<ObjInfo->nFieldPoints[p]-1;i++) {
                 glBegin(GL_QUAD_STRIP);
-                for (k=0;k<ObjInfo->nShellPoints4;k++) {
+                //for (k=0;k<ObjInfo->nShellPoints4;k++) {
+                for (k=0;k<ObjInfo->nShellPoints4*3/4;k++) {
                     glNormal3f( ObjInfo->nx4_gsm[p][k][i], ObjInfo->ny4_gsm[p][k][i], ObjInfo->nz4_gsm[p][k][i] );
                     glVertex3f( ObjInfo->x4_gsm[p][k][i], ObjInfo->y4_gsm[p][k][i], ObjInfo->z4_gsm[p][k][i] );
                     glNormal3f( ObjInfo->nx4_gsm[p][k][i+1], ObjInfo->ny4_gsm[p][k][i+1], ObjInfo->nz4_gsm[p][k][i+1] );
@@ -573,7 +616,8 @@ if (0==1){
     for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++){
         glNewList( ObjInfo->DriftShellList3 + i, GL_COMPILE );
 
-        for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]; ns++){
+        //for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]; ns++){
+        for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]*3/4; ns++){
 
                 // North Foot Points
                 glPushMatrix(); 
@@ -629,6 +673,98 @@ void ReGenerateFieldLineLists( Vds_ObjectInfo *ObjInfo ){
     glDeleteLists( ObjInfo->DriftShellList2, ObjInfo->MagEphemInfo->nAlpha );
     glDeleteLists( ObjInfo->DriftShellList3, ObjInfo->MagEphemInfo->nAlpha );
     GenerateFieldLineLists( ObjInfo );
+}
+
+
+/*
+ *   Kludge to do arbitrary FLs
+ */
+void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
+
+    double  x, y, z;
+    int     i, j, ns, Gap, Flag;
+    FILE    *fp;
+
+    fp = fopen( "/home/mgh//git/LanlGeoMag/Examples/Trace/FieldLines.txt", "r" );
+    i = 0; j = 0; Flag = 0;
+    while ( fscanf( fp, "%lf %lf %lf %d", &x, &y, &z, &Gap ) != EOF ) {
+
+        if ( (Gap==3) && (Flag==1) ) {
+            ++j;
+            i=0;
+        }
+
+        ObjInfo->x5_gsm[j][i] = x;
+        ObjInfo->y5_gsm[j][i] = y;
+        ObjInfo->z5_gsm[j][i] = z;
+        ++i;
+        ObjInfo->nPnts5[j] = i;
+
+        Flag = 1;
+    }
+    ++j;
+    fclose( fp );
+    ObjInfo->nFLs = j;
+
+
+    /*
+     *  Create List for the Full Field Lines
+     */
+    ObjInfo->MiscFieldLines = glGenLists( 1 );
+    glNewList( ObjInfo->MiscFieldLines, GL_COMPILE );
+    for (j=0; j<ObjInfo->nFLs; j++){
+        switch ( j ){
+        case 0:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType0.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType0.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType0.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType0.shininess * 128.0);
+            break;
+        case 1:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType1.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType1.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType1.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType1.shininess * 128.0);
+            break;
+        case 2:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType2.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType2.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType2.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType2.shininess * 128.0);
+            break;
+        case 3:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType3.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType3.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType3.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType3.shininess * 128.0);
+            break;
+        case 4:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType4.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType4.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType4.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType4.shininess * 128.0);
+            break;
+        case 5:
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType5.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType5.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType5.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType5.shininess * 128.0);
+            break;
+        }
+
+        MakeTube( ObjInfo->x5_gsm[j], ObjInfo->y5_gsm[j], ObjInfo->z5_gsm[j], ObjInfo->nPnts5[j], 12, 0.3/7 );
+        //MakeTube( ObjInfo->x5_gsm[j], ObjInfo->y5_gsm[j], ObjInfo->z5_gsm[j], ObjInfo->nPnts5[j], 12, 0.3 );
+    }
+//exit(0);
+    glEndList( );
+
+
+
+}
+
+void ReGenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
+    glDeleteLists( ObjInfo->MiscFieldLines, 1 );
+    GenerateMiscFieldLineLists( ObjInfo );
 }
 
 

@@ -17,7 +17,7 @@ int main(){
 
     mInfo->Bfield = Lgm_B_TS04;
     mInfo->Bfield = Lgm_B_OP77;
-    mInfo->Bfield = Lgm_B_TS04_opt;
+    mInfo->Bfield = Lgm_B_TS04;
     mInfo->Bfield = Lgm_B_cdip;
     mInfo->Bfield = Lgm_B_T89;
     mInfo->P      = 4.1011111111111118;

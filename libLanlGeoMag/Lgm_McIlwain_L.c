@@ -1,3 +1,16 @@
+/*! \file Lgm_McIlwain_L.c
+ *
+ *  \brief Routine for computing the pitch-angle-dependent McIlwain L-shell parameter.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   20??
+ *
+ *
+ *
+ */
+
 #include "Lgm/Lgm_MagModelInfo.h"                                                                                                                                                                                
 #include <stdio.h>
 #include <stdlib.h>

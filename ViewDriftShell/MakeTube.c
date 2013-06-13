@@ -6,12 +6,12 @@
 
 
 
-#define MaxCurvePoints 1500
+#define MaxCurvePoints 5000
 
 void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius ){
 
 	double CurvePoint[MaxCurvePoints][3], TangentVector[MaxCurvePoints][3]; 
-	double a, b, c, L, Linv, min, sgn, AngInc, Angle;
+	double a, b, c, L, Linv, min, AngInc, Angle;
 	double x[MaxCurvePoints][3], y[MaxCurvePoints][3], z[MaxCurvePoints][3], tmp[3];
 	double CirclePoints[100][3], CirclePoints_p[100][3];
 	double ***Mesh, ***Normals;
@@ -120,7 +120,7 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 	for (j=0; j<3; ++j){
 		if (fabs(x[0][j]) < min){
 			min = fabs(x[0][j]);
-			sgn = (x[0][j] < 0.0) ? -1.0 : 1.0;
+			//sgn = (x[0][j] < 0.0) ? -1.0 : 1.0;
 			k = j;
 		}
 	}

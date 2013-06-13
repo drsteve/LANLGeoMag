@@ -63,15 +63,47 @@ def runPA(quality):
         except (IndexError, TypeError): #get_Lstar returns a 0-D nan in some cases...
             vals.extend([dum[pp]['Lstar'].tolist()])
     fig = plt.figure()
-    plt.plot(vals, drawstyle='steps-mid')
+    expect = float(tb.hypot(loci.data[1]))
+    plt.plot(100*(dm.dmarray(vals)-expect)/expect, drawstyle='steps-mid')
+    plt.ylim([-0.01, 0.01])
     plt.xlabel('Pitch Angle')
-    plt.ylabel('L* (LanlGeoMag)')
+    plt.ylabel('100*(L* - L*$_{exp}$)/L*$_{exp}$')
     plt.title('Cent. dipole [-5,0,0]$_{SM}$'+'; Quality ({0})'.format(str(quality)))
-    figname = 'LGM_L*_vs_PA_cdip_q{0}'.format(str(quality))
+    figname = 'MagEphem_CDIP_test_q{0}'.format(str(quality))   #'LGM_L*_vs_PA_cdip_q{0}'.format(str(quality))
+    plt.savefig(''.join([figname,'.png']), dpi=300)
+    plt.savefig(''.join([figname,'.pdf']))
+
+def dungeyLeq(r):
+    b = (30500/14.474)**(1./3.)
+    return r/(1 + 0.5*(r/b)**3)
+
+
+def runPAdungey(quality):
+    #test for range of pitch angles
+    ticks = spt.tickrange('2002-04-18', '2002-04-19', 1)
+    loci = spc.Coords([[-4,0,0], [-5,0,0]], 'SM', 'car')
+    vals = []
+    for pp in range(1,91):
+        dum = lgmpy.get_Lstar(loci.data[1], ticks.UTC[1], alpha=pp, coord_system='SM', 
+                              Bfield='Lgm_B_Dungey', extended_out=True, LstarQuality=quality)
+        try:
+            vals.extend(dum[pp]['Lstar'])
+        except (IndexError, TypeError): #get_Lstar returns a 0-D nan in some cases...
+            vals.extend([dum[pp]['Lstar'].tolist()])
+    fig = plt.figure()
+    expect = dungeyLeq(tb.hypot(loci.data[1]))
+    #print(expect)
+    plt.plot(100*(dm.dmarray(vals)-expect)/expect, drawstyle='steps-mid')
+    plt.ylim([-0.01, 0.01])
+    plt.xlabel('Pitch Angle')
+    plt.ylabel('100*(L* - L*$_{exp}$)/L*$_{exp}$')
+    plt.title('Dungey model [-5,0,0]$_{SM}$'+'; Quality ({0})'.format(str(quality)))
+    figname = 'MagEphem_Dungey_test_q{0}'.format(str(quality))   #'LGM_L*_vs_PA_cdip_q{0}'.format(str(quality))
     plt.savefig(''.join([figname,'.png']), dpi=300)
     plt.savefig(''.join([figname,'.pdf']))
 
 if __name__ == '__main__':
-    for qq in range(0, 8):
+    for qq in [1,2,3,4,5,6]:
         runPA(qq)
+        runPAdungey(qq)
     #runQs()

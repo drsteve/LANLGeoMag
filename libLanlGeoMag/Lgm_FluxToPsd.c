@@ -49,7 +49,7 @@ typedef struct _FitData {
  *
  *      we have,
  *
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              \mu = {p_\perp^2 \over 2 m_\circ B } &=& {p^2c^2\over (2 m_\circ c^2 B)} \sin^2(\alpha) \\
  *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
@@ -129,7 +129,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *      Some relativistic equations:
  *
  *      With,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                      m       &=& \mbox{Particle mass.}\\
  *                      m_\circ &=& \mbox{Particle rest mass.}\\
  *                      v       &=& \mbox{Particle speed.}\\
@@ -148,7 +148,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      With,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                  E  = mc^2             &=& \mbox{Total Energy of particle} \\
  *                  E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
  *                  p                     &=& \mbox{relativistic momentum of particle}
@@ -165,7 +165,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
- *              \f{eqnarray*}
+ *              \f{eqnarray*}{
  *                  p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
  *                          &=& E_k (E_k+2E_\circ)
  *              \f}
@@ -191,7 +191,7 @@ double  Lgm_p2c2( double Ek, double E0 ) {
  *      Uses the following relation,
  *      
  *
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              \beta^2 &=& 1 - {1\over \gamma^2} \\
  *                      &=& 1 - {1\over (1+E_k/E_\circ)^2}
  *          \f}
@@ -247,7 +247,7 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *          \f]
  *
  *      Multiplying the top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -283,7 +283,7 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *          \f]
  *
  *      Multiply top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}
+ *          \f{eqnarray*}{
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -795,7 +795,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             if ( g > 1e-40 ) { // dont use if it looks bogus
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = f->E[j];
-                //printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
+//printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
                 ++(FitData->n);
             }
         }
@@ -831,8 +831,9 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
     printf("out[4] = %g\n", out[4]);
     printf("out[5] = %g\n", out[5]);
     printf("out[6] = %g\n", out[6]);
-    printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
-
+    */
+//printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
+    /*
     FILE *fp;
     printf("E = %g\n", E);
     fp = fopen("data.txt", "w");
@@ -850,7 +851,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
         psd = Model( x,  FitData->nMaxwellians, E );
         //psd = (double)a;
 
-    //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+//printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
     } else {
         psd = -9e99;
     }
@@ -964,7 +965,7 @@ void Lgm_P2F_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_PsdToFlux *p
 /**
  *  \brief
  *      Adds (to a Lgm_PsdToFlux structure) the user-supplied arrays containing PSD[Mu][K],  Mu[], K[]
- *  \details
+ *  \detail
  *
  *      \param[in]      P                 3D array containing the Phase Space Density as a function of Mu and K.
  *      \param[in]      L                 1D array containing the Lstar values implied by the first index of PSD[][][] array.
@@ -1037,7 +1038,7 @@ void Lgm_P2F_SetPsd( double ***P, double *L, int nL, double *Mu, int nMu, double
  *      pre-initialized Lgm_PsdToFlux structure.  The routine Lgm_P2F_SetPsd()
  *      is used to add PSD data/info to an Lgm_PsdToFlux structure.
  *    
- *      We want Flux at constant E and \f$\alpha \f$ (i.e. we want \J$f( E, \alpha
+ *      We want Flux at constant E and \f$\alpha \f$ (i.e. we want J\f$( E, \alpha
  *      )\f$).
  *    
  *      To perform the calculation we note that \f$f( \mu, K )\f$ is the same as
@@ -1771,6 +1772,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
  *     Fills the given array with a geomteric sequence of values.
  *
  *  \details
+ *     Blah blah
  *
  *      \param[in]      a  Starting value.
  *      \param[in]      b  Ending value.
@@ -1811,61 +1813,69 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
     gsl_interp_accel    *acc;
     gsl_spline          *spline;
     double              *xa2, *ya2;
-    int                 i, Flag, RetVal;
+    int                 i, n2, RetVal;
 
+    xa2 = (double *)calloc( n, sizeof(double) );
+    ya2 = (double *)calloc( n, sizeof(double) );
+    
     /*
      *  Put array into ascending order if it isnt already. (gsl needs this).
      */
-    Flag = 0;
     if ( xa[1] < xa[0] ) {
 
-        xa2 = (double *)calloc( n, sizeof(double) );
-        ya2 = (double *)calloc( n, sizeof(double) );
-
-        for (i=0; i<n; i++){
-            xa2[i] = xa[n-1-i];
-            ya2[i] = ya[n-1-i];
+        for (n2=0, i=0; i<n; i++){
+            if ( ya[i] > LGM_FILL_VALUE ) {
+                xa2[n2] = xa[n-1-i];
+                ya2[n2] = ya[n-1-i];
+                ++n2;
+                }
         }
 
-        Flag = 1;
-
     } else {
-
-        xa2 = xa;
-        ya2 = ya;
-
+        for (n2=0, i=0; i<n; i++){
+            if ( ya[i] > LGM_FILL_VALUE ) {
+                xa2[n2] = xa[i];
+                ya2[n2] = ya[i];
+                ++n2;
+                }
+        }
     }
-
 
 
     /*
      * Check to see if x would cause an extrapolation instead of an interp.
      */
-    if ( (x<xa2[0]) || (x>xa2[n-1]) ){
-
+    if ( (x<xa2[0]) || (x>xa2[n2-1]) ){
         *y = LGM_FILL_VALUE;
         RetVal = -1;
-
-    } else {
-
+        }
+    else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
         acc    = gsl_interp_accel_alloc( );
-        spline = gsl_spline_alloc( gsl_interp_akima, n );
-        gsl_spline_init( spline, xa2, ya2, n );
+        spline = gsl_spline_alloc( gsl_interp_akima, n2 );
+        gsl_spline_init( spline, xa2, ya2, n2 );
         *y = gsl_spline_eval( spline, x, acc );
         gsl_spline_free( spline );
         gsl_interp_accel_free( acc );
         RetVal = 1;
-
+    } else if ( n2 > 1) { //fall back to linear
+        acc    = gsl_interp_accel_alloc( );
+        spline = gsl_spline_alloc( gsl_interp_linear, n2 );
+        gsl_spline_init( spline, xa2, ya2, n2 );
+        *y = gsl_spline_eval( spline, x, acc );
+        gsl_spline_free( spline );
+        gsl_interp_accel_free( acc );
+        RetVal = 1;
+    } else {
+       *y = LGM_FILL_VALUE;
+        RetVal = -1; 
     }
 
 
     /*
-     * If we had to allocate new mem, free it now.
+     * Free new vars
      */
-    if ( Flag ){
-        free( xa2 );
-        free( ya2 );
-    }
+    free( xa2 );
+    free( ya2 );
 
     return( RetVal );
 

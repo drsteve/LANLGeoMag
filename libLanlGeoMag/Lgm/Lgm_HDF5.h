@@ -72,6 +72,32 @@
 }
 
 
+#define LGM_HDF5_EXTEND_RANK3_DATASET( File, DataSetName, nRow, nCol, nDepth, Type, buf ) {\
+{\
+    hsize_t     Rank, NewSize[4], Offset[4], SlabSize[4];\
+    hid_t       DataSet, DataSpace, MemSpace;\
+    herr_t      status;\
+    \
+    Rank        = 3;\
+    NewSize[0]  = nRow+1;  NewSize[1]  = nCol;      NewSize[2]  = nDepth;\
+    Offset[0]   = nRow;    Offset[1]   = 0;         Offset[2]   = 0;\
+    SlabSize[0] = 1;       SlabSize[1] = nCol;      SlabSize[2] = nDepth;\
+    \
+    DataSet   = H5Dopen( File, DataSetName, H5P_DEFAULT );\
+    status    = H5Dextend( DataSet, &NewSize[0] );\
+    \
+    DataSpace = H5Dget_space( DataSet );\
+    status    = H5Sselect_hyperslab( DataSpace, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );\
+    \
+    MemSpace  = H5Screate_simple( Rank, SlabSize, NULL );\
+    status    = H5Dwrite( DataSet, Type, MemSpace, DataSpace, H5P_DEFAULT, buf );\
+    \
+    status = H5Sclose( MemSpace );\
+    status = H5Dclose( DataSet );\
+    status = H5Sclose( DataSpace );\
+    \
+}\
+}
 
 
 
@@ -219,5 +245,6 @@ void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val );
 
 hid_t   CreateExtendableRank1DataSet( hid_t File, char *DataSetName, hid_t Type, hid_t *DataSpace );
 hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, hid_t Type, hid_t *DataSpace );
+hid_t   CreateExtendableRank3DataSet( hid_t File, char *DataSetName, int nCol, int nDepth, hid_t Type, hid_t *DataSpace );
 
 #endif

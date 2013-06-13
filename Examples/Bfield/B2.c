@@ -29,8 +29,8 @@ int main(){
     Lgm_set_QinDenton( &p, mInfo );
 
     
-//    u.x = 3.0; u.y = 4.0; u.z = 3.0;
-    u.x = 1.490696277499862; u.y =  0.000943013537158; u.z =  0.051705206498810;
+    u.x = -6.6; u.y = 0.0; u.z = 0.0;
+//    u.x = 1.490696277499862; u.y =  0.000943013537158; u.z =  0.051705206498810;
 //mInfo->Kp = 3;
 
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
@@ -57,6 +57,17 @@ int main(){
     printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
     printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
+
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
+    mInfo->Bfield( &u, &B, mInfo );
+    printf( "%20.14lf%20.14lf%20.14lf", u.x, u.y, u.z );
+    printf( "%20.14lf%20.14lf%20.14lf", B.x, B.y, B.z );
+    printf( "%20.14lf\n", Lgm_Magnitude( &B ) );
 
 
     Lgm_FreeMagInfo( mInfo );

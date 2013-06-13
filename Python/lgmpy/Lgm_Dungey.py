@@ -15,7 +15,7 @@ import numpy as np
 
 from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
     Lgm_B_Dungey, LGM_EXTMODEL_NULL, LGM_DUNGEY
-
+import magcoords
 import MagData
 import Lgm_Vector
 import Lgm_CTrans
@@ -52,9 +52,14 @@ class Lgm_Dungey(MagData.MagData):
 
         # pos must be an Lgm_Vector or list or sensible ndarray
         try:
+            if coord_system != 'GSM':
+                pos = magcoords.coordTrans(pos, time, coord_system,'GSM')
+                #raise(NotImplementedError('Different coord systems are not yet ready to use') )
+            else:
+                pass
             self._Vpos = self._pos2Lgm_Vector(pos)
             assert self._Vpos
-        except:
+        except AssertionError:
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
 
         # time must be a datetime
@@ -74,9 +79,6 @@ class Lgm_Dungey(MagData.MagData):
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
-
-        if coord_system != 'GSM':
-            raise(NotImplementedError('Different coord systems are not yet ready to use') )
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
         self._mmi.InternalModel = INTERNAL_MODEL

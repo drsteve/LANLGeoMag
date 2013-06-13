@@ -29,6 +29,7 @@ GtkWidget *PUKE_SATSEL_VBOX;
 Vds_ObjectInfo  *ObjInfo;
 
 void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks);
+void CreateCutEllipsoid( double ra, double rb, int n);
 
 /*
  *  Menu Bar stuff
@@ -1408,7 +1409,7 @@ void LoadTextures(){
         strcpy( MapImageFilename, "/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
         ReadPng( MapImageFilename, &Width, &Height, &pImage );
     }
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+    printf("PNG image %s: Width, Height = %d %d\n", MapImageFilename, Width, Height );
 
 
     /* Put the image into texture memory */
@@ -1424,7 +1425,7 @@ void LoadTextures(){
     /*
      * Build a sequence of MIPMAPS to reduce artifatcs in rendering the texture.
      */
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage );
     free( pImage );
 
     /*
@@ -2104,7 +2105,7 @@ void CreateHiResEarthQuad( int LoadQuad, int nph, int nth, long int QuadId, GLui
     int             Height, i, j, ii, jj;
     double          th1, th2, r;
     double          st1, st2, ct1, ct2, sp1, cp1;
-    double          ths, the, phs, phe, dth, dph, th, ph;
+    double          ths, phs, dth, dph, th, ph;
     double          xi1, yi1, yi2, th_res, ph_res;
     Lgm_Vector      u;
     static GLuint   DisplayList;
@@ -2152,8 +2153,8 @@ void CreateHiResEarthQuad( int LoadQuad, int nph, int nth, long int QuadId, GLui
         glEnable( GL_TEXTURE_2D );
         th_res = 180.0/(double)nth*RadPerDeg;
         ph_res = 180.0/(double)nth*RadPerDeg;
-        ths = j* th_res; the = ths + th_res;
-        phs = i* ph_res-M_PI; phe = phs + ph_res;
+        ths = j* th_res; 
+        phs = i* ph_res-M_PI; 
         dth = th_res/10.0;
         dph = ph_res/10.0;
         for (th = ths, jj=0; jj<10; jj++){
@@ -2350,13 +2351,13 @@ void LoadStars( ) {
     double      RA, DEC, MAG;
     Lgm_Vector  P_gei, P;
     char        TYPE;
-    float       quadratic[] = {1.0, 0.0, 0.0 };
+    GLfloat     quadratic[3] = {1.0f, 0.0f, 0.0f };
 
     StarsDL = glGenLists( 1 );
     glNewList( StarsDL, GL_COMPILE );
         glDisable(GL_LIGHTING);
         glPointSize( 3.0 );
-        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
+        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
         glEnable(GL_POINT_SMOOTH);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
@@ -2693,7 +2694,7 @@ void CreateSats() {
 
     double           tsince, JD, tUT;
     long int         tDate;
-    Lgm_Vector       Ugsm, Uteme, Ugei, EarthToSun, EarthToSun_obs, g1, g2, g3, P, Pobs, Uobs;
+    Lgm_Vector       Ugsm, Ugei, EarthToSun, EarthToSun_obs, g1, g2, g3, P, Pobs, Uobs;
     int              i, Flag1=0, Flag2=0, Flag3=0, tYear, tMonth, tDay;
     _GroupNode      *g;
     _SpaceObjects   *Group;
@@ -2892,14 +2893,14 @@ glDisable(GL_LIGHTING);
         // draw lines from sat to ground due to iridium flares
         glEnable(GL_LINE_SMOOTH);
         glLineWidth( 3.0 );
-double th,ph,r, Radius;
+double th,ph,r;
 Lgm_Vector u, uu;
         th =  35.888;
         ph = -106.306;
         r  = 0.000;
         Lgm_GEOD_to_WGS84( th, ph, r, &u );
         //printf("u= %g %g %g\n", u.x, u.y, u.z );
-        Radius = Lgm_Magnitude( &u );
+        //Radius = Lgm_Magnitude( &u );
 
 u.x = r*sin(th)*cos(ph); u.y = r*sin(th)*sin(ph); u.z = r*cos(th);
 Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, c );
@@ -2981,10 +2982,10 @@ void ReCreateSats( ) {
 void CreateSatOrbits() {
 
     double              tsince, tsince0, JD, dt;
-    double              tJD, tUT, period, tinc, OrbitFrac = 0.125, Theta, DS;
+    double              tJD, tUT, period, tinc, OrbitFrac = 0.125, Theta;
     long int            tDate;
     int                 tYear, tMonth, tDay;
-    Lgm_Vector          Ugsm[10001], Ugei, aa, bb, cc, uu;
+    Lgm_Vector          Ugsm[10001], Ugei, aa, bb, uu;
     int                 i, j, n, nMax;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
     _GroupNode          *g;
@@ -3492,6 +3493,7 @@ static void realize( GtkWidget *widget, gpointer data) {
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
 
 
@@ -3555,6 +3557,9 @@ static void realize( GtkWidget *widget, gpointer data) {
     // Create Drift Shell surfaces
     GenerateDriftShellLists( ObjInfo );
 
+
+    // Misc Field Lines
+//    GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3649,7 +3654,17 @@ void DrawScene( ) {
 
     /* Render Objects */
 //    glUseProgram( g_shaderMyTest );
+
+
+
+
+    /*
+     * These are the various coordinate axes.
+     */
     glCallList( AxesDL );
+
+
+
 //    glUseProgram( 0 );
 
     if ( ShowEarth ) glCallList( EarthDL );
@@ -3712,6 +3727,9 @@ CHECK COORDS!
 
 
 
+
+
+
 if (LightingStyle == 2){
 //  cgGLBindProgram(myCgVertexProgram);
 //  checkForCgError("binding vertex program");
@@ -3739,6 +3757,19 @@ if (LightingStyle == 2){
 //ViewPosition[2] = aInfo->Camera.z;
 //glUniform3fv( ViewPositionLoc, 1, LightPosition );
 //glUniform3fv( LightDirLoc, 1, LightPosition );
+
+
+
+
+
+//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+//glCallList( ObjInfo->MiscFieldLines );
+
+
+
 
     if ( ShowAllPitchAngles ) {
         /*
@@ -3915,14 +3946,6 @@ if (LightingStyle == 2){
 
 
 
-    /*
-     * The sat positions and orbits are recomputed in the current coord system each time
-     * (this is because the orbits need different times at each point in the orbit -- i.e
-     *  a simple rotation wont do it.)
-     */
-    glCallList( SatsDL );
-    glCallList( SatOrbitsDL );
-    DrawSatLabels();
 
 
 
@@ -4019,7 +4042,7 @@ glMaterialf(  GL_BACK, GL_SHININESS, gInfo->DriftShellMaterial[i].shininess*128.
 glFrontFace(GL_CCW);
 
 
-    glCallList( ScPositionDL );
+//    glCallList( ScPositionDL );
 
     //glUseProgram( 0 );
 
@@ -4027,6 +4050,14 @@ glFrontFace(GL_CCW);
     glPopMatrix();
 
 
+    /*
+     * The sat positions and orbits are recomputed in the current coord system each time
+     * (this is because the orbits need different times at each point in the orbit -- i.e
+     *  a simple rotation wont do it.)
+     */
+    glCallList( SatsDL );
+    glCallList( SatOrbitsDL );
+    DrawSatLabels();
 
 
     int w = g_imageWidth;
@@ -4209,6 +4240,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
 
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
+//glClearColor( 1.0, 1.0, 1.0, 1.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {
 
@@ -4491,7 +4524,7 @@ static gboolean idle( GtkWidget *widget ) {
             gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
             pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
             //sprintf( PngFile, "%04ld.png", cFrame );
-            sprintf( PngFile, "Latest.png", cFrame );
+            sprintf( PngFile, "Latest.png" );
             gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
             g_object_unref( pixbuf );
         }
@@ -5495,20 +5528,14 @@ void create_ViewDriftShell( void *data ) {
 
     GdkGLConfig         *glconfig;
     gint                major, minor;
-//    Lgm_MagModelInfo    *mInfo;
     GtkWidget           *vbox;
     GtkWidget           *menu;
-    GtkWidget           *button;
-//    GtkWidget       *EventBox;
     GtkWidget           *Menubar;
     GtkAccelGroup       *AccelGroup;
     GtkItemFactory      *ItemFactory;
     int                 nMenuItems;
-//    int             row;
 
     int                 i;
-//    Lgm_Vector          u;
-//    double              Q[4];
 
 
     /*
@@ -5555,8 +5582,8 @@ void create_ViewDriftShell( void *data ) {
     /*
      * Top-level window.
      */
-    ViewDriftShellWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (ViewDriftShellWindow), "Drift Shell");
+    ViewDriftShellWindow = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_window_set_title( GTK_WINDOW (ViewDriftShellWindow), "Drift Shell" );
     g_signal_connect( G_OBJECT(ViewDriftShellWindow), "delete_event", G_CALLBACK(quit_app), NULL );
 
 
@@ -5586,7 +5613,7 @@ void create_ViewDriftShell( void *data ) {
     nMenuItems  = sizeof( MenuItems ) / sizeof( MenuItems[0] );
     gtk_item_factory_create_items( ItemFactory, nMenuItems, MenuItems, NULL );
     Menubar = gtk_item_factory_get_widget( ItemFactory, "<main>" );
-    gtk_box_pack_start( vbox , Menubar, FALSE, FALSE, 0);
+    gtk_box_pack_start( GTK_BOX(vbox) , Menubar, FALSE, FALSE, 0);
     gtk_window_add_accel_group( GTK_WINDOW( ViewDriftShellWindow ), AccelGroup);
     gtk_widget_show( Menubar );
 
@@ -5601,8 +5628,6 @@ void create_ViewDriftShell( void *data ) {
 
 
 
-
-
     /*
      * Set OpenGL-capability to the widget.
      */
@@ -5613,32 +5638,31 @@ void create_ViewDriftShell( void *data ) {
     gtk_widget_add_events( drawing_area, GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK
                                          | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
 
-    g_signal_connect_after(     G_OBJECT( drawing_area ), "realize",                  G_CALLBACK( realize ),                   NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "configure_event",          G_CALLBACK( configure_event ),           NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "expose_event",             G_CALLBACK( expose_event ),              NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "button_press_event",       G_CALLBACK( button_press_event ),        NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "button_release_event",     G_CALLBACK( button_release_event ),      NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "motion_notify_event",      G_CALLBACK( motion_notify_event ),       NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "map_event",                G_CALLBACK( map_event ),                 NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "unmap_event",              G_CALLBACK( unmap_event ),               NULL );
-    g_signal_connect(           G_OBJECT( drawing_area ), "visibility_notify_event",  G_CALLBACK( visibility_notify_event ),   NULL );
-    g_signal_connect_swapped(   G_OBJECT( ViewDriftShellWindow ),       "key_press_event",          G_CALLBACK( key_press_event ),           drawing_area );
+    g_signal_connect_after(     G_OBJECT( drawing_area ),           "realize",                  G_CALLBACK( realize ),                   NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "configure_event",          G_CALLBACK( configure_event ),           NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "expose_event",             G_CALLBACK( expose_event ),              NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "button_press_event",       G_CALLBACK( button_press_event ),        NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "button_release_event",     G_CALLBACK( button_release_event ),      NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "motion_notify_event",      G_CALLBACK( motion_notify_event ),       NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "map_event",                G_CALLBACK( map_event ),                 NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "unmap_event",              G_CALLBACK( unmap_event ),               NULL );
+    g_signal_connect(           G_OBJECT( drawing_area ),           "visibility_notify_event",  G_CALLBACK( visibility_notify_event ),   NULL );
+    g_signal_connect_swapped(   G_OBJECT( ViewDriftShellWindow ),   "key_press_event",          G_CALLBACK( key_press_event ),           drawing_area );
 
     gtk_box_pack_start( GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0 );
     gtk_widget_show( drawing_area );
 
+printf("HERE\n");
 
     /*
      *  Set Pitch Angles to Show
      */
-    //ShowAllPitchAngles = TRUE;
     ShowAllPitchAngles = FALSE;
     for (i=0; i<=ObjInfo->MagEphemInfo->nAlpha; i++){
         //ShowPitchAngle[i] = TRUE;
         ShowPitchAngle[i] = FALSE;
         ShowPitchAngle2[i] = FALSE;
     }
-//    ShowPitchAngle[9] = TRUE;
 
 
 
@@ -5824,13 +5848,13 @@ printf("indx = %d\n", indx);
     if ( indx == 0 ) {
         // If "Custom:"
         if ( Flag ){
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[k]), &material->diffuse );
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[k]), &material->ambient );
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[k]), &material->specular );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellDiffuseColorButton[k]), &material->diffuse );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellAmbientColorButton[k]), &material->ambient );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->DriftShellSpecularColorButton[k]), &material->specular );
         } else {
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineDiffuseColorButton[k]), &material->diffuse );
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineAmbientColorButton[k]), &material->ambient );
-            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineSpecularColorButton[k]), &material->specular );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineDiffuseColorButton[k]), &material->diffuse );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineAmbientColorButton[k]), &material->ambient );
+//            gtk_color_button_get_color( GTK_COLOR_BUTTON(gInfo->FieldLineSpecularColorButton[k]), &material->specular );
         }
     } else if ( indx < nNamedMaterials ) {
 
@@ -6214,9 +6238,9 @@ GtkWidget *PitchAngleDisplayProperties(){
     int         ii;
     GtkObject   *spinbutton1_adj;
     GdkColor    color;
-    GtkWidget   *frame, *treeview, *scrolledwindow, *radiobutton, *filechooserbutton;
+    GtkWidget   *frame, *treeview, *scrolledwindow, *filechooserbutton;
     GtkWidget   *window1, *vseparator, *hseparator, *alignment, *image;
-    GtkWidget   *vbox2, *table1, *table3, *label, *RowHbox, *hbox, *hbox2;
+    GtkWidget   *vbox2, *table1, *table3, *label, *RowHbox, *hbox;
     GtkWidget   *notebook, *checkbutton, *spinbutton, *button, *colorbutton;
     GSList      *RadioCoordSystemGroup = NULL;
     GSList      *RadioLightingGroup = NULL;
@@ -6856,17 +6880,17 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
         GtkTreeIter     iter;
-        GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
+        GtkTreeStore    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
         GtkCellRenderer *cr = gtk_cell_renderer_text_new();
         g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
-        gtk_tree_store_clear( ts );
+        gtk_tree_store_clear( GTK_TREE_STORE(ts) );
 
         for (ii=nNamedMaterials-1; ii>=0; ii--){
-            gtk_tree_store_insert( ts, &iter, NULL, 0 );
-            gtk_tree_store_set(ts, &iter, 0, NamedMaterials[ii].Name, -1);
+            gtk_tree_store_insert( GTK_TREE_STORE(ts), &iter, NULL, 0 );
+            gtk_tree_store_set(GTK_TREE_STORE(ts), &iter, 0, NamedMaterials[ii].Name, -1);
         }
-        gtk_tree_store_insert( ts, &iter, NULL, 0 );
-        gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
+        gtk_tree_store_insert( GTK_TREE_STORE(ts), &iter, NULL, 0 );
+        gtk_tree_store_set(GTK_TREE_STORE(ts), &iter, 0, "Custom:", -1);
 
         gInfo->FieldLineMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) );
         gtk_widget_set_size_request( gInfo->FieldLineMaterialButton[i], 30, 20);
@@ -7050,17 +7074,17 @@ GtkWidget *PitchAngleDisplayProperties(){
 
 
         GtkTreeIter     iter;
-        GtkTreeModel    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
+        GtkTreeStore    *ts = gtk_tree_store_new(1, G_TYPE_STRING);
         GtkCellRenderer *cr = gtk_cell_renderer_text_new();
         g_object_set( G_OBJECT(cr), "font", "Arial bold 8", NULL );
-        gtk_tree_store_clear( ts );
+        gtk_tree_store_clear( GTK_TREE_STORE(ts) );
 
         for (ii=nNamedMaterials-1; ii>=0; ii--){
-            gtk_tree_store_insert( ts, &iter, NULL, 0 );
-            gtk_tree_store_set(ts, &iter, 0, NamedMaterials[ii].Name, -1);
+            gtk_tree_store_insert( GTK_TREE_STORE(ts), &iter, NULL, 0 );
+            gtk_tree_store_set(GTK_TREE_STORE(ts), &iter, 0, NamedMaterials[ii].Name, -1);
         }
-        gtk_tree_store_insert( ts, &iter, NULL, 0 );
-        gtk_tree_store_set(ts, &iter, 0, "Custom:", -1);
+        gtk_tree_store_insert( GTK_TREE_STORE(ts), &iter, NULL, 0 );
+        gtk_tree_store_set(GTK_TREE_STORE(ts), &iter, 0, "Custom:", -1);
 
         gInfo->DriftShellMaterialButton[i] = gtk_combo_box_new_with_model( GTK_TREE_MODEL(ts) );
         gtk_widget_set_size_request( gInfo->DriftShellMaterialButton[i], 30, 20);
@@ -8088,7 +8112,7 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
 
 int main( int argc, char *argv[] ) {
 
-    int         fd, i;
+    int         i;
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
 
     

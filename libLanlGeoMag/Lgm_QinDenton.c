@@ -1,3 +1,16 @@
+/*! \file Lgm_QinDenton.c
+ *
+ *  \brief Routines for reading in and setting the QinDenton magnetic field model input parameters.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   20??
+ *
+ *
+ *
+ */
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -179,6 +192,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     Path = getenv( "QIN_DENTON_PATH" );
     if ( Path == NULL ) {
         strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+        strcat( QinDentonPath, "/QinDenton" );
     } else {
 
         /*
@@ -186,8 +200,9 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
          */
         struct stat sts;
         if ( ( stat( Path, &sts ) ) == -1 ) {
-            printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s\n", Path );
             strcpy( QinDentonPath, LGM_INDEX_DATA_DIR );
+            strcat( QinDentonPath, "/QinDenton" );
+            printf("Environment variable QIN_DENTON_PATH points to a non-existent directory: %s. Setting QinDentonPath to: %s \n", Path, QinDentonPath );
         } else {
             strcpy( QinDentonPath, Path );
         }
@@ -219,7 +234,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success1 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -265,7 +280,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success2 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Year, Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Year, Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -310,7 +325,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     j = 0; done = FALSE; success3 = FALSE;
     while ( !done ){
 
-        sprintf( Filename, "%s/QinDenton/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Next_Year, Next_Date, ftype[j] );
+        sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Next_Year, Next_Date, ftype[j] );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
@@ -909,7 +924,7 @@ void Lgm_set_QinDenton( Lgm_QinDentonOne *p, Lgm_MagModelInfo *m ) {
     m->G2   = p->G2;
     m->G3   = p->G3;
     m->fKp  = p->fKp;
-    m->Kp   = (int)(p->fKp+0.5); if (m->Kp > 5) m->Kp = 5; if (m->Kp < 0 ) m->Kp = 0;
+    m->Kp   = (int)(p->fKp+0.5); if (m->Kp > 6) m->Kp = 6; if (m->Kp < 0 ) m->Kp = 0;
     m->aKp3 = p->akp3;
     m->Dst  = p->Dst;
     m->W[0] = p->W1;

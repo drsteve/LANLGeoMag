@@ -1,3 +1,17 @@
+/*! \file Lgm_Trace.c
+ *
+ *  \brief Convenience routine to find north and south footpoints and Bmin location in magnetopshere.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
+
 /* 
  * Trace, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
@@ -20,19 +34,20 @@
 
 
 /**
- *  This routine attempts to trace to the Earth (from the input position) in both
- *  directions along the field line.  If the field line is closed (meaning
- *  that we hit the Earth in both directions), then the routine will also
- *  trace to the minimum-B point.
+ *  \brief
+ *      This routine attempts to trace to the Earth (from the input position) in both
+ *      directions along the field line.  If the field line is closed (meaning
+ *      that we hit the Earth in both directions), then the routine will also
+ *      trace to the minimum-B point.
  *  
- *  This is a convenience routine that calls the routines Lgm_TraceToEarth()
- *  and Lgm_TraceToMinBSurf() (and performs some aditional calculations also).
- *  Note that the routine Lgm_TraceToEarth() traces to a height above the WGS84
- *  ellipsoid. Thus the target height here ( the input parameter Height ) is
- *  the geodetic height above the WGS84 ellipsoid. If you want to trace to a
- *  spherical representation of the Earth, use Lgm_TraceToSphericalEarth()
- *  instead.
- *  
+ *  \detail
+ *      This is a convenience routine that calls the routines Lgm_TraceToEarth()
+ *      and Lgm_TraceToMinBSurf() (and performs some aditional calculations also).
+ *      Note that the routine Lgm_TraceToEarth() traces to a height above the WGS84
+ *      ellipsoid. Thus the target height here ( the input parameter Height ) is
+ *      the geodetic height above the WGS84 ellipsoid. If you want to trace to a
+ *      spherical representation of the Earth, use Lgm_TraceToSphericalEarth()
+ *      instead.
  *  
  *      \param[in]       u     Input position vector in GSM coordinates.
  *      \param[out]     v1     Southern footpoint (where field line crosses the given geodetic height in the south) in GSM coordinates.
@@ -57,6 +72,7 @@
  *      - Hmax (maximum step size used for tracing. Not really useful to the user.)
  *      - Pmin. Position of Bmin along the field line. In Re relative to GSM coord system. (Same as v3.)
  *      - Smin. Distance from southern footpoint to Pmin along the FL. (in Re).
+ *      - Stotal. Distance from southern footpoint to northern footpoint along the FL. (in Re).
  *      - Bvecmin. The GSM components of the magnetic field vector at Pmin. Units are nT.
  *      - Bmin. The magnitude of Bvecmin. Units of nT.
  *      - Ellipsoid_Footprint_Pn. GSM position of northern footpoint. (Same as v2.)
@@ -69,7 +85,8 @@
  *      - Sb0. Approximation for the Sb integral for nearly equatorially mirroring particles. Units of Re. See eqn 2.13b in Roederer.
  *
  *
- *
+ *  \author         M. Henderson
+ *  \date           1999-2011
  *
  *
  *
@@ -140,6 +157,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Rtarget  = WGS84_A + Height;
 
 
+
     /*
      * Note, that if the initial point is already below the target height it
      * must be attached to the Earth at least at that point.  So keep track of
@@ -205,10 +223,16 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Info->Hmax = 10.0;
 Info->Hmax = 0.50;
 Info->Hmax = 0.10;
+
+    
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
     Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
+    Info->v2_final = *v2;
+
+
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
     Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
+    Info->v1_final = *v1;
 
     Info->Stotal = LGM_FILL_VALUE;
     Info->Smin   = LGM_FILL_VALUE;
@@ -224,6 +248,7 @@ Info->Hmax = 0.10;
         //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
         //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
         Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
+        Info->v3_final = *v3;
         Info->Pmin = *v3;
         //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );
@@ -265,15 +290,17 @@ Info->Hmax = 0.10;
 	    Lgm_Convert_Coords( v1, &w, GSM_TO_SM, Info->c );
 
         /*
-         * It is not a closed FL, but it may stilkl have a min-B
+         * It is not a closed FL, but it may still have a min-B
          * Try to find it.
          */
         if ( Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info ) ) {
+            Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
+            Info->v3_final = *v3;
             v3->x = v3->y = v3->z = -1e31;
         }
 
@@ -294,11 +321,13 @@ Info->Hmax = 0.10;
          * Try to find it.
          */
         if ( Lgm_TraceToMinBSurf( v2, v3, 0.1, TOL2, Info ) ) {
+            Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
+            Info->v3_final = *v3;
             v3->x = v3->y = v3->z = -1e31;
         }
 

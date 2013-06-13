@@ -36,7 +36,14 @@ GtkWidget *CreateOpenMagEphemFileDialog( void ) {
     GtkWidget *button2;
 
 
-    filechooserdialog1 = gtk_file_chooser_dialog_new( "Open MagEphem File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL );
+    filechooserdialog1 = gtk_file_chooser_dialog_new( "Open MagEphem File", NULL, 
+                      GTK_FILE_CHOOSER_ACTION_OPEN,
+                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                      NULL);
+
+
+
     //g_object_set( filechooserdialog1, "local-only", FALSE, NULL );
     gtk_window_set_type_hint( GTK_WINDOW(filechooserdialog1), GDK_WINDOW_TYPE_HINT_DIALOG );
     gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(filechooserdialog1), TRUE );
