@@ -1,7 +1,21 @@
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 
 #include <gsl/gsl_poly.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_erf.h>
+#include <gsl/gsl_errno.h>
 
+struct normalizerForWavePowerSpectrumFunctionParams {double w; double wce; double wpe; double wmean; double wmin; double wmax; double dw; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double xmin; double xmax;};
+struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams {int tensorFlag; int s; double KE; double aStar; double wce; double xmin; double xmax; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double wm; double dw; double wlc; double wuc; double Bw; double alpha; int nCyclotronLow; int nCyclotronHigh; double *Nw; int nNw; int Dir;};
+double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p);
+int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double alpha, int s, int nCyclotron, double aStar, double xlc, double xuc, double *resonantRoots, int *nRoots);
+double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNumber, double x, double y, double P, double R, double L, double S, double theta);
+double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta2, double x, double y);
+double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
+double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
+//old calling style double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(int tensorFlag, int s, double KE, double aStar, double wce, double xm, double xmin, double xmax, double dx, double wm, double dw, double wlc, double wuc, double Bw, double alpha, double tanTheta, int nCyclotronLow, int nCyclotronHigh, double *Nw, int nNw, int Directions);
+int Lgm_SimpleRiemannSum(double (*f)(double, _qpInfo *), _qpInfo *qpInfo, double xleft, double xright, double *result, int VerbosityLevel );
 
 /**
  *  \brief
@@ -59,7 +73,6 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
      *  Putting B in units of nT, we have,
      *      Omega = 1e-9 * q*B/(m*c)
      */
-
 
     return( 1e-9*B*q/m );
 
@@ -154,7 +167,6 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
     int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
     int              VerbosityLevel = 0;
     Lgm_SummersInfo  si;
-
     si.Version = Version;
     si.n1 = n1;
     si.n2 = n2;
@@ -293,22 +305,66 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
+//printf("There is an interior singularity in Daa: Alpha0=%g, Ek=%g\n", Alpha0, Ek);
+                /* Approach #1 from Mike: use dqagp to break up the integral into regions that have singularities.  */
                 dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach #2: break up the integral into regions without interior singularities by hand and use dqags to ingegrate 
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, points[1]-0.001, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, points[1]+0.001, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+ 		*/
+		/* Approach #3: use GSL's implementation of quadpack to do the integral in parts
+		gsl_integration_workspace * w =gsl_integration_workspace_alloc( 1000 );
+		gsl_function F;
+		F.function = SummersIntegrand_Gaa;
+		F.params = &si;
+		gsl_integration_qags(&F, a_new, points[1]-0.001, epsabs, epsrel, (size_t) 1000, w, Daa_ba, &abserr);
+		gsl_integration_qags(&F, points[1]+0.001, b_new, epsabs, epsrel, (size_t) 1000, w, Daa_ba, &abserr);
+		gsl_integration_workspace_free(w);
+ 		*/
+		/* Approach #4: use GSL's implementation of quadpack to do the integral all at once
+		gsl_integration_workspace * w =gsl_integration_workspace_alloc( 1000 );
+		gsl_function F;
+		F.function = SummersIntegrand_Gaa;
+		F.params = &si;
+		points[0] = a_new; points[2] = b_new;
+		gsl_integration_qagp(&F, points, (size_t) 3, epsabs, epsrel, (size_t) 1000, w, Daa_ba, &abserr);
+		gsl_integration_workspace_free(w);
+ 		* */
             } else {
                 dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach #2: use GSL's implementation of the simple quadpack routine dqag to do the integral 
+		gsl_integration_workspace * w =gsl_integration_workspace_alloc( 1000 );
+		gsl_function F;
+		F.function = SummersIntegrand_Gaa;
+		F.params = &si;
+		gsl_integration_qag(&F, a_new, b_new, epsabs, epsrel, (size_t) 1000, GSL_INTEG_GAUSS15, w, Daa_ba, &abserr);
+		gsl_integration_workspace_free(w);
+ 		*/
             }
         } else {
             *Daa_ba = 0.0;
         }
 
-
         Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
-        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
+		/* Approach 1 */
                 dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach 2 
+                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, points[1]-0.001, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, points[1]+0.001, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+ 		*/
             } else {
                 dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach #2: use GSL's implementation of the simple quadpack routine dqag to do the integral 
+		gsl_integration_workspace * w =gsl_integration_workspace_alloc( 1000 );
+		gsl_function F;
+		F.function = SummersIntegrand_Gap;
+		F.params = &si;
+		gsl_integration_qag(&F, a_new, b_new, epsabs, epsrel, (size_t) 1000, GSL_INTEG_GAUSS15, w, Dap_ba, &abserr);
+		gsl_integration_workspace_free(w);
+ 		*/
             }
         } else {
             *Dap_ba = 0.0;
@@ -318,9 +374,22 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
         npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
         if ( b_new > a_new ) {
             if ( npts2 > 2 ) {
+		/* Approach 1 */
                 dqagp( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach 2 
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, points[1]-0.001, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, points[1]+0.001, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+ 		*/
             } else {
                 dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+		/* Approach #2: use GSL's implementation of the simple quadpack routine dqag to do the integral 
+		gsl_integration_workspace * w =gsl_integration_workspace_alloc( 1000 );
+		gsl_function F;
+		F.function = SummersIntegrand_Gpp;
+		F.params = &si;
+		gsl_integration_qag(&F, a_new, b_new, epsabs, epsrel, (size_t) 1000, GSL_INTEG_GAUSS15, w, Dpp_ba, &abserr);
+		gsl_integration_workspace_free(w);
+ 		*/
             }
         } else {
             *Dpp_ba = 0.0;
@@ -335,6 +404,225 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
 
     return(1);
 
+}
+
+/*
+ *  Following routine is identical to Lgm_SummersDxxBounceAvg except that there are additional parameters that describe the wave normal angle distribution, which in this routine, 
+ *  consists of a sum of gaussians in the tangent of the wave normal angle.  
+ *
+ *   	x1					tangent of the minimum wave normal angle (the angle between the magnetic field and the k-vector of the wave)
+ *   	x2					tangent of the maximum wave normal angle 
+ *   	numberOfWaveNormalAngleDistributions	the number of gaussian distributions in the tangent of the wave normal angle that are weighted and summed together	
+ *   	xmArray					an array with at least numberOfWaveNormalAngleDistributions elements, each element contains the	tangent of the 
+ *   							mean wave normal angle for that component
+ *   	dxArray					an array with at least numberOfWaveNormalAngleDistributions elements, each element contains the	tangent of the 
+ *   	 						spread in wave normal angles for that component
+ */
+ 
+int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+
+    double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
+    double           epsabs, epsrel, abserr, work[2002], points[10];
+    double           ySing, a_new, b_new, B;
+    int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
+    int              VerbosityLevel = 1;
+    Lgm_SummersInfo  si;
+    si.Version = Version;
+    si.n1 = n1;
+    si.n2 = n2;
+    si.n3 = n3;
+    if ( Version == LGM_SUMMERS_2007 ){
+        if ( fabs(1.0-(n1+n2+n3)) > 1e-10 ) {
+            printf("Lgm_SummersDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            return(-1);
+        }
+    }
+
+
+
+
+    if ( (fabs(Alpha0-90.0) < 1e-8)||(fabs(Alpha0) < 1e-8) ) {
+
+        *Daa_ba = 0.0;
+        *Dap_ba = 0.0;
+        *Dpp_ba = 0.0;
+        return( 0 );
+
+    }
+
+    /*
+     *  Set Rho. See Eqn(3) of Summers2007.
+     *      Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )
+     *  Note: If wm-w1 = w2-wm, then this is the same as the Summers2005 paper.
+     */
+    Rho = ( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )/M_2_SQRTPI;
+
+    /*
+     * convert w1, w2, wm, dw to radians/second
+     */
+
+    w1 = w1*M_2PI ;
+    w2 = w2*M_2PI ;
+    wm = wm*M_2PI ;
+    dw = dw*M_2PI ;
+
+    /*
+     *  Quadpack integration tolerances.
+     */
+    epsabs = 0.0;
+    epsrel = 1e-5;
+
+
+    /*
+     *  Pack integrand parameters into structure
+     */
+    if ( WaveMode == LGM_R_MODE_WAVE ) {
+        si.s = 1;
+    } else if ( WaveMode == LGM_L_MODE_WAVE ) {
+        si.s = -1;
+    } else {
+        printf("Lgm_SummersDxxBounceAvg(): Unknown wavemode = %d\n", WaveMode );
+        return(0);
+    }
+
+
+    Beq = M_CDIP/(L*L*L);
+    if ( Species == LGM_ELECTRONS ) {
+        si.Lambda  = -1.0;
+        E0          = LGM_Ee0;      // set rest energy to electron rest energy (MeV)
+        Omega_SigEq = Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS );
+    } else if ( Species == LGM_PROTONS ) {
+        si.Lambda = LGM_EPS;
+        E0         = LGM_Ep0;       // set rest energy to proton rest energy (MeV)
+        Omega_SigEq = Lgm_GyroFreq( LGM_e, Beq, LGM_PROTON_MASS );
+    } else {
+        printf("Lgm_SummersDxxBounceAvg(): Unknown species = %d\n", Species );
+        return(0);
+    }
+    Omega_eEq = Lgm_GyroFreq( -LGM_e, Beq, LGM_ELECTRON_MASS );
+    si.Omega_eEq   = Omega_eEq;    // Equatorial electron gyro-frequency.
+    si.Omega_SigEq = Omega_SigEq;  // Equatorial gyro-frequency for given species.
+
+    si.E           = Ek/E0;        // Dimensionless energy Ek/E0 (kinetic energy over rest energy).
+    si.Alpha0      = Alpha0*M_PI/180.0;
+    si.SinAlpha0   = sin(si.Alpha0);
+    si.SinAlpha02  = si.SinAlpha0*si.SinAlpha0;
+    si.CosAlpha0   = cos(si.Alpha0);
+    si.CosAlpha02  = si.CosAlpha0*si.CosAlpha0;
+    si.TanAlpha0   = si.SinAlpha0/si.CosAlpha0;
+    si.TanAlpha02  = si.TanAlpha0*si.TanAlpha0;
+    si.L           = L;
+    si.aStarEq     = aStarEq;
+//    si.dB          = dB;
+    si.BwFuncData  = BwFuncData;
+    si.BwFunc      = BwFunc;
+    si.w1          = w1;           // Lower freq cuttof.
+    si.w2          = w2;           // Upper freq cuttof.
+    si.wm          = wm;           // Frequency of max wave power.
+    si.dw          = dw;           // Frequency bandwidth (at equator).
+    si.x1          = x1;           // Lower tan(wave normal angle) cutoff.
+    si.x2          = x2;           // Upper tan(wave normal angle) cutoff.
+    si.numberOfWaveNormalAngleDistributions = (int) numberOfWaveNormalAngleDistributions; 
+    si.xm          = (double *) xmArray;           // tan(wave normal angle) with max wave power.
+    si.dx          = (double *) dxArray;           // spread in tan(wave normal angle).
+    si.weightsOnWaveNormalAngleDistributions = (double *) weightsOnWaveNormalAngleDistributions;           
+    si.MaxWaveLat  = MaxWaveLat*RadPerDeg;   // Assume there are no waves at +/-MaxWaveLat.
+    si.Rho         = Rho;
+    si.Directions  = Directions;
+
+    /*
+     *  Set integration limits
+     */
+    a = 0.0;                                            // radians
+    B = acos( Lgm_CdipMirrorLat( si.SinAlpha0 ) );     // radians
+    b = ( B < si.MaxWaveLat ) ? B : si.MaxWaveLat;
+    if ( fabs(a-b) < 1e-9 ) {
+
+        *Daa_ba = 0.0;
+        *Dap_ba = 0.0;
+        *Dpp_ba = 0.0;
+        return( 0 );
+
+    } else {
+
+
+        /*
+         *  Perform integrations. The points[] array contains a list of points
+         *  in the integrand where integrable singularities occur. dqagp() uses
+         *  these to break up the integral at these points (dqagp() is an
+         *  extrapolation algorithm so it handles singularities very well.)
+         *  Note: the value of npts2 must be 2+ the number of points added.
+         *  This is because it adds the endpoints internally (so dont add those
+         *  here).
+         *
+         *  An approximate form of T( SinAlpha0 ), related to bounce period is given in
+         *  Schultz and Lanzeroti (Eqns 1.28a-d). Here we do it exactly.
+         *      T0 = 1.38017299815047317375;
+         *      T1 = 0.74048048969306104115;
+         *      T  = T0 - 0.5*(T0-T1)*(si.SinAlpha0 + sqrt(si.SinAlpha0));
+         */
+        npts2 = 2;
+        //dqagp( CdipIntegrand_Sb, (_qpInfo *)&si, a, b, npts2, points, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work );
+        dqags( CdipIntegrand_Sb, (_qpInfo *)&si, a, B, epsabs, epsrel, &T, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+	Lgm_SimpleRiemannSum( SummersIntegrand_Gaa, (_qpInfo *)&si, a, b, Daa_ba, VerbosityLevel );
+/*	Comment all the old stuff out since we are just doing a very simple Riemann sum to compare with old results
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+printf("done finding cutoffs\n");
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gaa, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
+printf("done finding singularity\n");
+        if ( b_new > a_new ) {
+            if ( npts2 > 2 ) {
+printf("There is an interior singularity: Alpha0=%g, Ek=%g\n", Alpha0, Ek);
+                dqagp( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+printf("done finding integral\n");
+            } else {
+                dqags( SummersIntegrand_Gaa, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Daa_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+printf("done finding integral\n");
+            }
+        } else {
+            *Daa_ba = 0.0;
+        }
+*/
+
+	Lgm_SimpleRiemannSum( SummersIntegrand_Gap, (_qpInfo *)&si, a, b, Dap_ba, VerbosityLevel );
+/*	Comment all the old stuff out since we are just doing a very simple Riemann sum to compare with old results
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2; npts2 += Lgm_SummersFindSingularities( SummersIntegrand_Gap, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
+        if ( b_new > a_new ) {
+            if ( npts2 > 2 ) {
+                dqagp( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+//printf("There is an interior singularity: Alpha0=%g, Ek=%g\n", Alpha0, Ek);
+            } else {
+                dqags( SummersIntegrand_Gap, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dap_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+            }
+        } else {
+            *Dap_ba = 0.0;
+        }
+*/
+
+	Lgm_SimpleRiemannSum( SummersIntegrand_Gpp, (_qpInfo *)&si, a, b, Dpp_ba, VerbosityLevel );
+/*	Comment all the old stuff out since we are just doing a very simple Riemann sum to compare with old results
+        Lgm_SummersFindCutoffs2( SummersIntegrand_Gpp, (_qpInfo *)&si, FALSE, a, b, &a_new, &b_new );
+        npts2 = 2 + Lgm_SummersFindSingularities( SummersIntegrand_Gpp, (_qpInfo *)&si, FALSE, a_new, b_new, &points[1], &ySing );
+        if ( b_new > a_new ) {
+            if ( npts2 > 2 ) {
+                dqagp( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, npts2, points, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+//printf("There is an interior singularity: Alpha0=%g, Ek=%g\n", Alpha0, Ek);
+            } else {
+                dqags( SummersIntegrand_Gpp, (_qpInfo *)&si, a_new, b_new, epsabs, epsrel, Dpp_ba, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, VerbosityLevel );
+            }
+        } else {
+            *Dpp_ba = 0.0;
+        }
+*/
+        *Daa_ba /= T;
+        *Dap_ba /= T;
+        *Dpp_ba /= T;
+
+    }
+
+
+    return(1);
 }
 
 /**
@@ -531,6 +819,10 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      *  si->w2          upper cutoff frequency.
      *  si->wm          frequency of max power.
      *  si->dw          frequency bandwidth. (Semi bandwidth is sigma*dw).
+     *  si->x1          lower cutoff in tan(wave normal angle).
+     *  si->x2          upper cutoff in tan(wave normal angle).
+     *  si->xm          tan(wave normal angle) with max power.
+     *  si->dx          spread in tan(wave normal angle) (Semi bandwidth is dx).
      *  si->Lambda      -1 for electrons LGM_EPS (=me/mp) for protons.
      *  si->s           +1 for R-mode -1 for L-mode.
      *  si->Rho         Rho = sqrt(PI)/2.0( erf( (wm-w1)/dw ) + erf( (w2-wm)/dw ) )   Eq (3) in Summers2007
@@ -590,6 +882,11 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
         Daa = Lgm_SummersDaaLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
 
+    } else if ( si->Version == LGM_GLAUERT_AND_HORNE_HIGH_FREQ ) {
+
+	Daa = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 0);
+
     } else {
 
         printf("SummersIntegrand_Gaa: Unknown version of Summers Diff. Coeff Model. Version = %d\n", si->Version );
@@ -609,8 +906,9 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
      */
     f = Da0a0 * CosLat*v/sqrt(1.0-BoverBm);
 
-//printf("%e %e\n", Lat*DegPerRad, f);
+//printf("%20.11e %20.11e\n", Lat*DegPerRad, f);
 //printf("%g %g\n", Lat*DegPerRad, f);
+//printf("%g %g %g %g\n", Lat*DegPerRad, Daa, TanAlpha2, si->TanAlpha02);
     return( f );
 
 }
@@ -718,6 +1016,12 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
         Dap = Lgm_SummersDapLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
+
+    } else if ( si->Version == LGM_GLAUERT_AND_HORNE_HIGH_FREQ ) {
+
+	Dap = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
+		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 1);
 
     } else {
 
@@ -831,6 +1135,12 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
         Dpp = Lgm_SummersDppLocal_2007( SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig,
                     si->Rho, si->Sig, x1, x2, xm, dx, si->Lambda, si->s, si->n1, si->n2, si->n3, aStar, si->Directions );
 
+    } else if ( si->Version == LGM_GLAUERT_AND_HORNE_HIGH_FREQ ) {
+
+	Dpp = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
+		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 2);
+
     } else {
 
         printf("SummersIntegrand_Gpp: Unknown version of Summers Diff. Coeff Model. Version = %d\n", si->Version );
@@ -888,6 +1198,7 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
     double complex  z1, z2, z3, z4, z[4];
     double          Daa, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
     double          x, x2, x3, x4, y, g, F, DD, fac;
+    double 	    regularizerForSingularity=0.0;
 
     /*
      * Solve for resonant roots.
@@ -990,10 +1301,11 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
                     xms  = x - s;
                     xpse = x + s*LGM_EPS;
                     F = y*xms*xms*xpse*xpse/(x*g);
-
                     u = 1.0 - x*Mu/(y*Beta);
                     arg = (x-xm)/dx;
-                    Daa += u*u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+		    /* modified fabs(BetaMu-F) to take away the singularity (Cunningham 1/30/2013) */
+		    if (fabs(BetaMu-F) < regularizerForSingularity) { Daa += u*u *fabs(F) / ( dx * regularizerForSingularity ) * exp( -arg*arg ); }
+		    else { Daa += u*u *fabs(F) / ( dx * fabs(BetaMu - F) ) * exp( -arg*arg ); }
                 }
             }
 
@@ -1043,6 +1355,7 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
     double complex  z1, z2, z3, z4, z[4];
     double          Dap, R, x0, y0, Ep1, Ep12, xms, xpse, u, arg, c1, c2, c3, c4;
     double          x, x2, x3, x4, y, g, F, DD, fac;
+    double 	    regularizerForSingularity=0.0;
 
     /*
      * Solve for resonant roots.
@@ -1150,7 +1463,9 @@ double Lgm_SummersDapLocal( double SinAlpha2, double E, double dBoverB2, double 
 
                     u = 1.0 - x*Mu/(y*Beta);
                     arg = (x-xm)/dx;
-                    Dap += x/y * u *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+		    /* modified fabs(BetaMu-F) to take away the singularity (Cunningham 1/30/2013) */
+		    if (fabs(BetaMu-F) < regularizerForSingularity) { Dap += x/y * u *fabs(F) / ( dx * regularizerForSingularity) * exp( -arg*arg ); }
+		    else { Dap += x/y * u *fabs(F) / ( dx * fabs(BetaMu - F) ) * exp( -arg*arg ); }
                 }
             }
 
@@ -1202,6 +1517,7 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
     double complex  z1, z2, z3, z4, z[4];
     double          Dpp, R, x0, y0, Ep1, Ep12, xms, xpse, arg, c1, c2, c3, c4;
     double          x, x2, x3, x4, y, g, F, DD, fac;
+    double 	    regularizerForSingularity=0.0;
 
     /*
      * Solve for resonant roots.
@@ -1306,7 +1622,9 @@ double Lgm_SummersDppLocal( double SinAlpha2, double E, double dBoverB2, double 
                     F = y*xms*xms*xpse*xpse/(x*g);
 
                     arg = (x-xm)/dx;
-                    Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs( BetaMu - F ) ) * exp( -arg*arg );
+		    /* modified fabs(BetaMu-F) to take away the singularity (Cunningham 1/30/2013) */
+		    if (fabs(BetaMu-F) < regularizerForSingularity) {Dpp += x*x/(y*y) *fabs(F) / ( dx * regularizerForSingularity) * exp( -arg*arg );}
+		    else {Dpp += x*x/(y*y) *fabs(F) / ( dx * fabs(BetaMu - F) ) * exp( -arg*arg );}
                 }
             }
 
@@ -2089,21 +2407,24 @@ double Lgm_SummersDppLocal_2007( double SinAlpha2, double E, double dBoverB2, do
 }
 
 
-
 /**
  *  \brief
- *      Finds singularities in the integrands
+ *      Attempts to find the location of the maximum of the function, f, that is closest to the left-hand edge of the specified range in latitude.
  *
  *  \details
+ *      If the smallest increment in latitude (0.01 degrees) is larger than the size of the interval, the function is identically zero, or the 
+ *      maximum of the function is at the left- or right-hand edge, then the routine returns '0' and stores Lat1 in *x.  Otherwise, the location 
+ *      of the maximum is stored in *x and the value of f at the maximum is stored in *y.  If the maximum is a singularity, then the routine 
+ *      returns a '1'; otherwise the routine returns a '0'.
  */
-int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y ) {
+int Lgm_SummersFindFirstMaximumFromLeft( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y ) {
 
     int     done, founda, foundb, foundc, Found;
-    double  a, b, c, d, fa, fb, fc, fd, inc, D1, D2, DELTA;
+    double  a, b, c, d, fa, fb, fc, fd, fbb, inc, D1, D2, DELTA;
 
-    inc = 0.01*RadPerDeg;
+    inc = 0.01*RadPerDeg;		//alternatively, tried 0.1*RadPerDeg to try to speed things up, but this misses local maxima
 
-
+//printf("In Lgm_SummersFindSingularities: Lat0=%g, Lat1=%g\n", Lat0, Lat1);
     /*
      * Find a non-zero starting point
      */
@@ -2112,6 +2433,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
         a += inc;
         if ( a > Lat1 ){
             if (Verbose) printf("Warning: Line %d in %s Lat1-Lat0 too small?\n", __LINE__, __FILE__);
+	    (*x) = Lat1; 		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
             return(FALSE);
             //done = TRUE;
         } else {
@@ -2131,7 +2453,8 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     while ( !done ) {
         b += inc;
         if ( b > Lat1 ){
-            if (Verbose) printf("Warning: Line %d in %s Function monotonically non-increasing\n", __LINE__, __FILE__);
+            if (Verbose) printf("Warning: Line %d in %s Function monotonically non-increasing over entire interval\n", __LINE__, __FILE__);
+	    (*x) = Lat1; 		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
             return(FALSE);
             //done = TRUE;
         } else {
@@ -2140,6 +2463,10 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
                 foundb = TRUE;
                 done   = TRUE;
             }
+	    else 			//added by Greg Cunningham on 1-28-2013; since f is monotonically non-increasing, update (a,fa) so that it represents the minimum 
+		{
+		a = b; fa=fb; 
+		}
         }
     }
 
@@ -2150,7 +2477,8 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
     while ( !done ) {
         c += inc;
         if ( c > Lat1 ){
-            if (Verbose) printf("Warning: Line %d in %s Function non-decreasing.\n", __LINE__, __FILE__);
+            if (Verbose) printf("Warning: Line %d in %s Function monotonically non-decreasing over entire interval\n", __LINE__, __FILE__);
+	    (*x) = Lat1;		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
             return(FALSE);
             //done = TRUE;
         } else {
@@ -2159,10 +2487,14 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
                 foundc = TRUE;
                 done   = TRUE;
             }
+	    else 			//added by Greg Cunningham on 1-28-2013; since f is monotonically non-decreasing, update (b,fb) so that it represents the peak 
+		{
+		b = c; fb = fc;  
+		}
         }
     }
 
-    //printf("Found Bracket: %g %g %g %g %g %g\n", a, b, c, fa, fb, fc );
+if(Verbose) {printf("Found Bracket: %20.11e %20.11e %20.11e %20.11e %20.11e %20.11e\n", a, b, c, fa, fb, fc );}
 
 
     done = FALSE;
@@ -2172,6 +2504,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
         D2 = c-b;
 
         if ( fabs(c-a) < 1e-14 ) {
+        //if ( fabs(c-a) < 1e-6 ) { an alternative that Greg Cunningham tried on 1-28-2013 to speed things up and be consistent with exclusion of the singularity
             done = TRUE;
         } else {
 
@@ -2193,7 +2526,7 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
                     c = d; fc = fd;
                 }
             }
-            //printf("a, b, c, d = %g %g %g %g\n", a, b, c, d);
+if(Verbose) {printf("a, b, c, d = %20.11e %20.11e %20.11e %20.11e; fa, fb, fc, fd=%20.11e %20.11e %20.11e %20.11e\n", a, b, c, d, fa, fb, fc, fd);}
 
         }
 
@@ -2210,8 +2543,10 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
             Found = TRUE;
         }
     } else {
-        DELTA = fb - fabs(f( b-1e-4, qpInfo ));
-        Found = ( DELTA > 1.0 ) ?  1 : 0;
+	fbb = fabs(f( b-1e-4, qpInfo ));
+        DELTA = fb - fbb;
+        Found = ( DELTA > 1.0 ) ?  1 : 0;  
+        //Found = ( DELTA > (0.1*fmax(fb, fbb) )) ?  1 : 0;  an alternative relative test that Greg Cunningham tried on 1-28-2013 to speed things up
     }
 
     if ( Found ) {
@@ -2223,6 +2558,26 @@ int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpI
 
 }
 
+
+/**
+ *  \brief
+ *      Finds all of the singularities in a specified latitude range.
+ *
+ *  \details
+ */
+
+int Lgm_SummersFindSingularities( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *x, double *y ) {
+	int 	thisn, npts;
+
+	npts = 0;
+	while ((Lat0 < Lat1)&&(npts<8))
+		{
+		thisn = Lgm_SummersFindFirstMaximumFromLeft( f, qpInfo, Verbose, Lat0, Lat1, x+npts, y );
+		Lat0 = (double) (*(x+npts));
+		npts += thisn;
+		}
+	return(npts);
+ }
 
 
 /**
@@ -2281,6 +2636,7 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
             while( !done ) {
                 D = x1-x0;
                 if ( fabs(D) < 1e-8 ) {
+                //if ( fabs(x1-x0) < 0.001 ) {  an alternative tried by Greg Cunningham on 1-28-2013 to improve speed and be consistent with precision on integral
                     done = TRUE;
                 } else {
                     x = x0 +0.5*D;
@@ -2340,6 +2696,7 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
             while( !done ) {
                 D = x1-x0;
                 if ( fabs(D) < 1e-8 ) {
+                //if ( fabs(x1-x0) < 0.001 ) {  an alternative tried by Greg Cunningham on 1-28-2013 to improve speed and be consistent with precision on integral
                     done = TRUE;
                 } else {
                     x = x0 + 0.5*D;
@@ -2377,6 +2734,7 @@ int Lgm_SummersFindCutoffs( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, i
  */
 int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, int Verbose, double Lat0, double Lat1, double *a, double *b ) {
 
+	double 	inc;
     /*
      * Make a series of attempts at progressively finer increments.  Another
      * way to accellerate this would be to keep track of the cutoffs we already
@@ -2391,14 +2749,918 @@ int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, 
 
 }
 
+/*
+ *  	The following routine is written to have the same interface as Lgm_SummersDxxLocal so that the code can be easily inserted alongside the Summers' 
+ *  	approach.   Some of the parameters needed for the Summers' approach mean something different for the Glauert and Horne approach, e.g. s=+1 means 
+ *  	R-mode in Summers but s is used to define the sign on the cyclotron freq in Glauert and Horne.  Currently, the input 's' parameter is ignored since 
+ *  	only R-mode waves are used below.  The Summers' Lambda parameter is used to define the 's' needed for Glauert and Horne.  
+ *  	Other paramters are ignored because my Glauert and Horne code only works for electrons, e.g. Sig and Omega_Sig; need to extend the code
+ *  	to handle protons in addition to electrons.
+ */
+
+double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double wxl, double wxh, double wxm, double wdx, double xmin, double xmax, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, double Lambda, int sIn, double aStar, int Directions, int tensorFlag )
+{
+	double 	alpha, KE, wce, wlc, wuc, wm, dw, Bw, B;
+	int	gsl_err, iTheta, nTheta, i, s;
+	double	theta, dTheta, wpe, totalDaa, dTanTheta, tanTheta, localDaa, Daa;
+
+//printf("In Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local: SinAlpha2=%g, E=%g, dBoverB2=%g, BoverBeq=%g, Omega_e=%g, Omega_Sig=%g, Rho=%g, Sig=%g, wxl=%g, wxh=%g, wxm=%g, wdx=%g, xmin=%g, xmax=%g, Lambda=%g, s=%d, aStar=%g, Directions=%d, tensorFlag=%d\n", SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, wxl, wxh, wxm, wdx, xmin, xmax, xm, dx, Lambda, sIn, aStar, Directions, tensorFlag);
+//printf("                       :number of wave normal angle distributions to sum together is %d, with the following parameters (xm, dx, weight)\n", numberOfWaveNormalAngleDistributions);
+//for (i=0; i<numberOfWaveNormalAngleDistributions; i++) {printf("                      %g %g %g\n", xmArray[i], dxArray[i], weightsOnWaveNormalAngleDistributions[i]);}
+
+/*	Convert from 'Summers' parameters to 'Glauert and Horne' parameters  */
+	if ((SinAlpha2>=0.0) && (SinAlpha2<=1.0)) {alpha = asin(sqrt(SinAlpha2));}//FIXME: this means we can only handle particles with parallel momentum in the same direction as the field
+	if (Lambda == -1) {KE = E*LGM_Ee0; s=-1;}				  // Lambda is set to -1 for electrons in Lgm_SummersDxxBounceAvg
+	if (Lambda == LGM_EPS) {KE = E*LGM_Ep0; s=1;} 				  // Lambda is set to LGM_ESP for protons in Lgm_SummersDxxBounceAvg
+	wce=Omega_e/(2.0*M_PI);							  // Mike uses all frequencies in units of rads/second; I used Hz for frequencies in my implementation of Glauert and Horne
+	wlc=wxl*wce;								  // wxl is the lower frequency cutoff normalized by local electron gyrofrequency; wlc is the lower frequency cutoff in Hz
+	wuc=wxh*wce;								  // wxh is the upper frequency cutoff normalized by local electron gyrofrequency; wuc is the upper frequency cutoff in Hz
+	wm=wxm*wce;								  // wxm is the mean frequency normalized by local electron gyrofrequency; wm is the mean frequency in Hz
+	dw=wdx*wce;								  // wdx is the frequency range normalized by local electron gyrofrequency; dw is the frequency range in Hz
+	Bw = sqrt(dBoverB2*pow(Omega_e*LGM_ELECTRON_MASS*1e12/LGM_e, 2.0));	  // Bw is wave amplitude in pT, so we need to multiply dBoverB2 by B^2, where B is the field in pT
+		
+/*	General parameters */
+	nTheta=90;
+	dTheta = ((double) M_PI)*90.0/180.0/((double) nTheta);   			//integrate only over [0,pi/2]: what about anti-parallel propagation?
+/*	
+ *	Set up the function that is integrated over tan(theta) to produce the normalizer N(w); this normalizer is only valid for the local plasma environment, 
+ *	so it must be re-evaluated at each point along a field line, e.g. 
+ */
+	double result, error;
+    	struct	normalizerForWavePowerSpectrumFunctionParams p;
+	int	nNw=1000;
+	double 	Nw[nNw]; //precomputed normalizer as a function of frequency
+	wpe=sqrt(1.0/aStar)*wce;
+	p.wce=wce; p.wpe=wpe; p.wmean=wm; p.wmin=wlc; p.wmax=wuc; p.dw=dw; p.xmin=xmin; p.xmax=xmax; 
+	p.numberOfWaveNormalAngleDistributions=numberOfWaveNormalAngleDistributions; 
+	p.xmArray=(double *) xmArray; p.dxArray=(double *) dxArray; p.weightsOnWaveNormalAngleDistributions=(double *) weightsOnWaveNormalAngleDistributions;
+	gsl_integration_workspace * work=gsl_integration_workspace_alloc(1000);
+	gsl_function F;
+	gsl_set_error_handler_off(); // so that we don't core dump if the integration routine can't converge on an answer
+	F.function = &normalizerForWavePowerSpectrumFunction;
+	F.params=&p;
+	for (i=0; i<nNw; i++)
+		{
+		p.w = wlc+((wuc-wlc)*(i+0.5)/((double) nNw));
+		result = 0.0;
+		gsl_err = (int) gsl_integration_qags(&F, xmin, xmax, 0, 1e-4, 1000, work, &result, &error);  		
+    		if (gsl_err != GSL_SUCCESS ) 
+			{
+			printf("gsl_integration_qags failed to produce N(w) for w=%g, i=%d of %d with errno=%d, result=%g, error=%g; returning without computing any diffusion coefficients\n", p.w, i, nNw, gsl_err, result, error);
+			return(0.0);
+			}	
+		Nw[i] = result;
+		}
+	gsl_integration_workspace_free(work);
+/*	Need to insert Jay's test here and expand it to include the other ranges of wn (not just wn<wlc, which is what I have now).  May need to change how integration is done. */
+/*	Perform the integration over theta: currently done naively, need to port to GSL? */
+	struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams p2;
+	p2.tensorFlag=(int) tensorFlag; p2.s=(int) s; p2.KE=(double) KE; p2.aStar=(double) aStar; p2.wce=(double) wce; 
+	p2.wm=(double) wm; p2.dw=(double) dw; p2.wlc=(double) wlc; p2.wuc=(double) wuc; p2.xmin=(double) xmin; p2.xmax=(double) xmax; 
+	p2.xmArray=(double *) xmArray; p2.dxArray=(double *) dxArray; p2.weightsOnWaveNormalAngleDistributions=(double *) weightsOnWaveNormalAngleDistributions; 
+	p2.numberOfWaveNormalAngleDistributions=(int) numberOfWaveNormalAngleDistributions; 
+	p2.Bw=(double) Bw; p2.alpha=(double) alpha; p2.nCyclotronLow=(int) -5; p2.nCyclotronHigh=(int) 5; p2.Nw=(double *) &Nw[0]; p2.nNw=(int) nNw; p2.Dir=(int) Directions;
+	totalDaa = (double) 0.0;
+	Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) xmin,(double) xmax, &totalDaa, (int) 0);
+	return(totalDaa);
+}
+
+double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p2)
+{
+	double 	unweightedDaa;
+		
+	unweightedDaa = (double) localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(tanTheta, p2);
+	return(unweightedDaa*tanTheta);
+}
+
+/*
+ *	The following routine computes the diffusion coefficient Daa (or Dap or Dpp) at a specific value of the tangent of the wave normal angle using the derivation in Glauert and Horne 2005.
+ *	Note that the frequencies in Glauert and Horne use units of radians/second, whereas I use units of cycles/second (Hz).  The difference is mostly irrelevant since the 
+ *	solution to the dispersion relation is done using normalized frequencies (frequency divided by gyrofrequency).  The appearance of w^2 in the weighting coefficient, where
+ *	w_i is a resonant frequency, is effectively divided out by the k^2 in the N(w) term, so the units here also cancel out.  All of the terms dw/dk similarly cancel out in 
+ *	terms of whether or not one uses frequency in Hz or radians/second.  The only place it remains, then, is in the term dw in the denominator of Asquared.  The term dw in Hz
+ *	must be multiplied by 2*pi in order to match Glauert and Horne 2005.
+ *
+ *	tensorFlag 	specifies calculation of Daa (0), Dap (1) or Dpp (2).
+ *
+ *	Modified by Greg Cunningham on 6-1-2013 to eliminate resonant roots for which the wave normal angle is larger than the resonance cone angle.  This change was made at the same
+ *	time as the change above to the normalizer routine, normalizerForWavePowerSpectrumFunction, that computes N(w).
+ */
+
+//double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(int tensorFlag, int s, double KE, double aStar, double wce, double xm, double xmin, double xmax, double dx, double wm, double dw, double wlc, double wuc, double Bw, double alpha, double tanTheta, int nCyclotronLow, int nCyclotronHigh, double *Nw, int nNw, int Dir) 
+double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p)
+{
+    	int    	nRoots, i, j, nCyclotron, indexIntoNw, test;
+    	double 	Gamma, Gamma2, Beta, Beta2, Mu2;
+    	double 	a, a2;
+    	double 	cosAlpha, SinAlpha, SinAlpha2,theta,cosTheta,cosTheta2,tanTheta2;
+    	double 	z[9];
+    	double 	x,y,nSquared,R,L,S,D,P;
+    	double 	momentum;
+	double 	term1, term2, term3a, term3b, term4, localDaa, Bsquared, Asquared, thisg, g, vpar, dwdk, phink2;
+	double 	wpe, wi, E, result;
+	int 	tensorFlag, s, nCyclotronLow, nCyclotronHigh, nNw, Dir;
+	double 	KE, aStar, wce, xm, xmin, xmax, dx, weight, wm, dw, wlc, wuc, Bw, alpha, *Nw;
+
+	tensorFlag=(int) p->tensorFlag; s=(int) p->s; KE=(double) p->KE; aStar=(double) p->aStar; wce=(double) p->wce; 
+	wm=(double) p->wm; dw=(double) p->dw; wlc=(double) p->wlc; wuc=(double) p->wuc; xmin=(double) p->xmin; xmax=(double) p->xmax; 
+	Bw=(double) p->Bw; alpha=(double) p->alpha; nCyclotronLow=(int) p->nCyclotronLow; nCyclotronHigh=(int) p->nCyclotronHigh; Nw=(double *) p->Nw; nNw=(int) p->nNw; Dir=(int) p->Dir;
+
+	if ((tensorFlag!=0)&&(tensorFlag!=1)&&(tensorFlag!=2)) 
+		{
+		printf("Warning: in localDaaAtSpecificThetaGlauertAndHorne, tensorFlag does not have a value of 0, 1 or 2\n");
+		return(0.0); // no valid specification of tensorFlag
+		}
+	if ((tanTheta<xmin)||(tanTheta>xmax)) return(0.0); 		// no need to perform the calculation since the input wave normal angle is outside the limited range of applicability
+	wpe=sqrt(1.0/aStar)*wce;
+
+/*	Define constants that are needed */
+	theta = atan(tanTheta); 					//FIXME: this means that the function is only valid for wave normal angles between -pi/2 and pi/2
+    	SinAlpha=sin(alpha);             
+    	SinAlpha2=SinAlpha*SinAlpha;             
+    	cosAlpha=cos(alpha);             
+    	Mu2=1.0-SinAlpha2;
+    	E=KE/0.511;               					//input normalized energy (KE/m0c2)
+    	Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    	momentum=sqrt((KE+LGM_Ee0)*(KE+LGM_Ee0)-(LGM_Ee0*LGM_Ee0));	//momentum in MeV/c
+    	tanTheta2=tanTheta*tanTheta;
+    	cosTheta=cos(theta);
+    	cosTheta2=cosTheta*cosTheta;					
+    	Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  // square of (v_par/c)*cos(theta)
+	Beta=sqrt(Beta2);
+	localDaa=0.0;
+    	for (nCyclotron=nCyclotronLow; nCyclotron<=nCyclotronHigh; nCyclotron++)   		//input cyclotron mode
+		{
+/*		resonance condition depends on nCyclotron */
+    		a  = s*nCyclotron/Gamma; a2 = a*a; 			//assume electrons so lambda absorbed in basic formula; s is 1 for R-mode, -1 for L-mode; FIXME: is this right?
+
+/* 		Solve for resonant roots. Only the non-evanescent roots with specified polarization in the specified frequency passband are retained. */
+		i=(int) computeResonantRootsUsingColdElectronPlasma(KE, theta, alpha, s, nCyclotron, aStar, wlc/wce, wuc/wce, &z[0], &nRoots);  
+//		printf("For nCyclotron=%d, number of resonant roots is %d\n", nCyclotron, nRoots);
+
+/*		Sum over the resonant roots, weighting each one */
+    		for ( i=0; i<nRoots; i++ ) 
+			{
+			x=z[i];
+			y=(x-a)/Beta;											
+			if (((y<0)&&((Dir == LGM_BKWD)||(Dir== LGM_FRWD_BKWD)))||((y>0)&&((Dir == LGM_FRWD)||(Dir == LGM_FRWD_BKWD))))// to make consistent with Summers
+			  {
+			  nSquared=(y/x)*(y/x);
+			  R=1.0-((1.0/(aStar*x*x))*(x/(x-1.0)));
+			  L=1.0-((1.0/(aStar*x*x))*(x/(x+1.0)));
+			  S=0.5*(R+L);
+			  D=0.5*(R-L);
+			  P=1.0-(1.0/(aStar*x*x));
+
+/*			  Modification by Greg Cunningham on 6-1-2013: test to see if the resonant root has a resonance cone angle that is less than the given wave normal angle */ 
+			  test = ((-1.0*P/S*0.99)<(tanTheta2))&&(-1.0*P/S > 0.0);
+			  if (test == 0) 
+				{
+/*			  	Evaluate the terms needed to weight this particular resonance */
+			  	wi=x*wce;										//resonant frequency in Hz
+			  	indexIntoNw = (int) (nNw*(wi-wlc)/(wuc-wlc));
+			  	if (indexIntoNw < 0) {indexIntoNw=0;}
+			  	if (indexIntoNw > (nNw-1)) {indexIntoNw=nNw-1;}
+			  	result=Nw[indexIntoNw];
+			  	phink2=(double) besselFunctionNormalizer(s, momentum, alpha, nCyclotron, x, y, P, R, L, S, theta);  	
+			  	dwdk=(double) electronColdPlasmaGroupVelocity(wce*wce, wpe*wpe, tanTheta2, x, y);	//the group velocity
+			  	vpar = (double) (momentum*1e6*Joules_Per_eV*cosAlpha)/(Gamma*LGM_c*LGM_ELECTRON_MASS);  //vpar in m/s; note that momentum is in MeV/c, so need to convert to kg*m/s
+			  	g=0.0;
+			  	for (j=0; j<p->numberOfWaveNormalAngleDistributions; j++)
+					{
+					xm=(double) p->xmArray[j]; dx=(double) p->dxArray[j]; weight = (double) p->weightsOnWaveNormalAngleDistributions[j];
+			  		thisg=weight*exp(-1.0*(tanTheta-xm)*(tanTheta-xm)/(dx*dx));				//g(tanTheta)
+					g += thisg;
+					}	
+			  	Asquared = (pow(Bw*1e-12, 2.0)/(2.0*M_PI*dw))*(2/sqrt(M_PI))/(gsl_sf_erf((wm-wlc)/dw)+gsl_sf_erf((wuc-wm)/dw));	//wave spectral intensity in T^2/Hz (actually, these units are somewhat of a misnomer since dw (which is in Hz) has to be multiplied by 2*pi in order to get it in units of radians/second instead of cycles/sec
+			  	Bsquared=Asquared*exp(-1.0*(wi-wm)*(wi-wm)/(dw*dw));
+			  	term1 = (LGM_e*LGM_e*wi*wi/(4.0*M_PI*(1.0+tanTheta2)*result));
+			  	term2 = pow(((s*nCyclotron*wce/(Gamma*wi))-SinAlpha2)/cosAlpha, 2.0);			//FIXME: using wce assumes resonance condition for electrons; check for protons
+			  	term3a = Bsquared*g*phink2;
+			  	term3b = 1.0/fabs(vpar-(dwdk/cosTheta));						//FIXME: don't I need to check to make sure vpar is ne to dwdk/cosTheta?  
+			  	//if (term3b > 3e-5) {term3b = 3e-5;}                                                   //regularize the singularity
+			  	term4 = SinAlpha*cosAlpha/((s*nCyclotron*wce/(Gamma*wi))-SinAlpha2); 			//FIXME: using wce assumes resonance condition for electrons; check for protons
+//			  	printf("cyclotron number=%d resonant root number=%d root=%g Term1=%g term2=%g Bsquared=%g g=%g phink2=%g term3b=%g term4=%g\n", nCyclotron, i, wi, term1, term2, Bsquared, g, phink2, term3b, term4);
+			  	if (tensorFlag == 0) { localDaa += term1*term2*term3a*term3b;}				// compute Daa
+			  	if (tensorFlag == 1) { localDaa += term1*term2*term3a*term3b*term4;}			// compute Dap
+			  	if (tensorFlag == 2) { localDaa += term1*term2*term3a*term3b*term4*term4;}		// compute Dpp
+				}
+			  }
+			}
+		}
+	localDaa /= pow(momentum*1e6*Joules_Per_eV/LGM_c, 2.0);  							//divide Glauert/Horne Daa by momentum^2 in (kg*m/s)^2 to get Summers
+	if (fpclassify(localDaa) != FP_NORMAL) {localDaa = 0.0;}							//eliminate the possible of returning a number that is not a number
+	return(localDaa);
+}
+
+/*
+ *	The following routine computes the frequencies, w_i, at which the dispersion relation and resonance condition are both simultaneously satisfied.
+ *	The dispersion relation that is used is an approximation which assumes that the ion contribution is minimal (frequency is greater than 0.1 times
+ *	the electron gyrofrequency); this may be called the cold electron magnetoplasma dispersion relation.  The inputs to this routine are 
+ *	
+ *		KE		the kinetic energy of the particle (in MeV), needed to compute the parallel velocity for the resonance condition
+ *		theta		wave normal angle (in radians) FIXME: don't I need to do something special here if theta=0 or pi/2?
+ *		alpha		particle pitch angle (in radians), needed to compute the parallel velocity for the resonance condition
+ *		s		particle type (-1=electron, +1=proton)
+ *		aStar		the 'cold plasma parameter': square of the ratio of the electron gyrofrequency to the electron plasmafrequency
+ *		xlc		the lower normalized frequency (w/wce) limit of the 'passband' in which roots must be
+ *		xuc		the higher normalized frequency (w/wce) limit of the 'passband' in which roots must be
+ *		resonantRoots	an array pre-allocated to have at most 9 entries, into which the real part of the roots in normalized frequency are stored
+ *		nRoots		the number of roots that are not evanescent (complex part=0), have non-zero real component, have the correct polarization, 
+ *					and are in the specified normalized frequency passband
+ *
+ */
+int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double alpha, int s, int nCyclotron, double aStar, double xlc, double xuc, double *resonantRoots, int *nRoots)
+{
+	double		E, Gamma, Gamma2, Beta, Beta2, Beta4, tanTheta, tanTheta2, cosTheta, cosTheta2, sinAlpha, sinAlpha2, Mu2, a, a2, a3, a4, Coeff[9];
+    	double complex  zz[9];
+    	double          gsl_z[30];
+	int		i,gsl_err;
+	double 		x,y,nSquared,P,R,S,L,D,changeInPolarization,polarization;
+
+/* 	Define constants.  */
+    	E=KE/LGM_Ee0;               			// the dimensionless energy equal to the kinetic energy (in MeV) divided by the rest mass energy of the electron
+    	Gamma = E+1.0; Gamma2 = Gamma*Gamma;		// the Lorentz factor and its square
+    	tanTheta=tan(theta); tanTheta2=tanTheta*tanTheta;
+    	cosTheta=cos(theta); cosTheta2=cosTheta*cosTheta;
+    	sinAlpha=sin(alpha); sinAlpha2=sinAlpha*sinAlpha;             
+    	Mu2=1.0-sinAlpha2;
+    	Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  	// square of (v_par/c)*cos(theta)
+    	Beta4 = Beta2*Beta2;
+    	a  = s*nCyclotron/Gamma; a2 = a*a; a3=a2*a; a4=a2*a2; //s=-1 for electrons, s=+1 for protons
+
+/*	
+ *	Define the coefficients of the 8th degree polynomial whose roots in x=(wave freq)/(electron gyrofrequency) are solutions to the resonance condition 
+ *	y=(x-a)/beta and the dispersion equation D(x)=0 for a cold electron magnetoplasma (the wave frequency is assumed to be between 0.1 and 0.9 times the 
+ *	electron gyrofrequency and so the ion terms can be ignored).  After finding the roots, we throw away the evanescent terms (these waves do not 
+ *	propagate freely because they have a complex component) and the polarizations that we don't want.
+ *	
+ *	The coefficients defined below were determined using the following command in Mathematica:
+ *
+ *	Expand[(((x^2*(x^2-1)-(x^2/aStar))*((x-a)/beta)^2-(x^2*(x+1)-(x/aStar))*(x^2*(x-1)-(x/aStar)))*(((x-a)/beta)^2-(x^2-(1/aStar)))*tanTheta^2) 
+ *	+ ((x^2-(1/aStar))*(((x-a)/beta)^2*(x -1)-(x^2*(x-1)-(x/aStar)))*(((x-a)/beta)^2*(x+1)-(x^2*(x+1)-(x/aStar))))]
+ *	
+ */
+    	Coeff[0] = a4/(Beta4*aStar); 		// x^0 term
+    	Coeff[1] = -4.0*a3/(Beta4*aStar); 		// x^1 term
+    	Coeff[2] = -1.0/pow(aStar,3.0)-(a4/Beta4)+(6.0*a2/(aStar*Beta4))-(a4/(aStar*Beta4))-(2.0*a2/(aStar*aStar*Beta2))-(2.0*a2/(aStar*Beta2))-(tanTheta2/(aStar*aStar*aStar))-(a4*tanTheta2/Beta4)-(a4*tanTheta2/(aStar*Beta4))-(2.0*a2*tanTheta2/(aStar*aStar*Beta2))-(a2*tanTheta2/(aStar*Beta2));
+    	Coeff[3] = 4.0*a3/Beta4 - (4.0*a/(aStar*Beta4)) + (4.0*a3/(aStar*Beta4)) + (4.0*a/(aStar*aStar*Beta2)) + (4.0*a/(aStar*Beta2))+(4.0*a3*tanTheta2/Beta4)+(4.0*a3*tanTheta2/(aStar*Beta4))+(4.0*a*tanTheta2/(aStar*aStar*Beta2))+(2.0*a*tanTheta2/(aStar*Beta2));
+    	Coeff[4] = (3.0/(aStar*aStar))+(1.0/aStar)-(6.0*a2/Beta4)+(a4/Beta4)+(1.0/(aStar*Beta4))-(6.0*a2/(aStar*Beta4))+(2.0*a2/Beta2)- (2.0/(aStar*aStar*Beta2))-(2.0/(aStar*Beta2))+(4.0*a2/(aStar*Beta2))+(3.0*tanTheta2/(aStar*aStar))+(tanTheta2/aStar)-(6.0*a2*tanTheta2/Beta4)+(a4*tanTheta2/Beta4)-(6.0*a2*tanTheta2/(aStar*Beta4))+(2.0*a2*tanTheta2/Beta2)-(2.0*tanTheta2/(aStar*aStar*Beta2))-(tanTheta2/(aStar*Beta2))+(4.0*a2*tanTheta2/(aStar*Beta2));
+    	Coeff[5] = (4.0*a/Beta4)-(4.0*a3/Beta4)+(4.0*a/(aStar*Beta4))-(4.0*a/Beta2)-(8.0*a/(aStar*Beta2))+(4.0*a*tanTheta2/Beta4)-(4.0*a3*tanTheta2/Beta4)+(4.0*a*tanTheta2/(aStar*Beta4))-(4.0*a*tanTheta2/Beta2)-(8.0*a*tanTheta2/(aStar*Beta2));
+    	Coeff[6] = -1.0-(3.0/aStar)-(1.0/Beta4)+(6.0*a2/Beta4)-(1.0/(aStar*Beta4))+(2.0/Beta2)-(2.0*a2/Beta2)+(4.0/(aStar*Beta2))-(tanTheta2)+(3.0*tanTheta2/aStar)-(tanTheta2/Beta4)+(6.0*a2*tanTheta2/Beta4)-(tanTheta2/(aStar*Beta4))+(2.0*tanTheta2/Beta2)-(2.0*a2*tanTheta2/Beta2)+(4.0*tanTheta2/(aStar*Beta2));
+    	Coeff[7] = (-4.0*a/Beta4)+(4.0*a/Beta2)-(4.0*a*tanTheta2/Beta4)+(4.0*a*tanTheta2/Beta2);
+    	Coeff[8] = 1.0+(1.0/Beta4)-(2/Beta2)+tanTheta2+(tanTheta2/Beta4)-(2.0*tanTheta2/Beta2);
+
+/* 	Solve for resonant roots and put into a complex array for further processing.  */
+    	gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 9 );
+    	gsl_err = gsl_poly_complex_solve( Coeff, 9, w, gsl_z );
+    	gsl_poly_complex_workspace_free( w );
+    	(*nRoots) = 0;
+    	if (gsl_err != GSL_SUCCESS ) 
+		{
+		//printf("Problem with finding resonant roots!  Returning with nRoots=0\n");
+		return((int) (-1));
+		}	
+    	for (i=0; i<8; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
+
+/* 	Gather applicable roots together into the resonantRoot array. */
+    	Beta=sqrt(Beta2);
+    	for ( i=0; i<8; i++ ) 
+		{
+        	if ( ( fabs(cimag(zz[i])) < 1e-10 ) && ( creal(zz[i]) > 0.0 ) )   //not an evanescent wave and index of refraction<infinity
+			{
+			x=creal(zz[i]);
+			y=(x-a)/Beta;
+			if ((y<0.0)||(y>=0.0)) 						//FIXME: should I be including waves in both directions or not?
+				{
+				nSquared=(y/x)*(y/x);
+				R=1.0-((1.0/(aStar*x*x))*(x/(x-1.0)));
+				L=1.0-((1.0/(aStar*x*x))*(x/(x+1.0)));
+				S=0.5*(R+L);
+				D=0.5*(R-L);
+				P=1.0-(1.0/(aStar*x*x));
+				if ((P/S > 0.0)&&(P/S < 1.0)) { changeInPolarization=asin(sqrt(P/S))*180.0/314159; } else { changeInPolarization=90.0;}  
+				if ((changeInPolarization>0.01)&&(changeInPolarization<89.99)) {printf("Polarization label can change as a function of wave normal angle\n");}
+				polarization = (nSquared-S)/D;
+/*		
+ *				Only keep the roots that correspond to R-mode polarization and are in the specified 'passband' in normalized frequency.  In Summers' formulation, 
+ *				he explicitly only computes the right-hand or left-hand polarized waves because the two roots factor easily for parallel-propagating waves, but in the 
+ *				general case we have to compute all the roots and throw out the ones that don't have the specified polarization.  This is complicated by the fact that 
+ *				the polarization label may change as a function of wave normal angle (as indicated above).  Not sure what to do in this case; ideally one would track the 
+ *				wave branch back to parallel-propagating and use that label...  FIXME: I'm currently assuming only use R-mode with electrons and L-mode with protons.
+ */
+				if (((s==1)&&(polarization < 0.0))||((s==-1)&&(polarization > 0.0))) 
+					{ 
+					if ((x>xlc)&&(x<xuc)) 
+						{
+						resonantRoots[(*nRoots)]= x; (*nRoots)+=1;
+						}
+					}
+				}
+			}
+		}
+return(0);
+}
+
+/* 
+ *	The value of group velocity dw/dk for a cold electron plasma is obtained by recognizing that the dispersion relation is D(w,k,theta)=0 so that dD/dw=0 
+ *	(since D is zero for all w).  Carrying through with partial derivatives wrt to w and k we find that dD/dw+dD/dk*dk/dw=0, and hence dk/dw=-(dD/dw)/(dD/dk).  
+ *	Using the identities x=w/wce and y=ck/wce we find that -(dD/dx)/(dD/dy)=-(wce*dD/dw)/((wce/c)*(dD/dy))=-c*(dD/dw)/(dD/dk)=c*dk/dw, or dk/dw=1/c*[-(dD/dx)/(dD/dy)], 
+ *	or dw/dk=c*[-(dD/dx)/(dD/dy)]^-1.  The values of dD/dx and dD/dy are found in mathematica by evaluating the following 3 expressions: 
+ *
+ *		A[x, y] := wce^2*x^2*(y^2/x^2-(1-(wpe^2/(wce^2*x^2))))*((wce^2*x^2*(x^2-1)-(wpe^2*x^2))*wce^2*y^2-((wce^2*x^2*(x+1)-(wpe^2*x))*(wce^2*x^2*(x-1)-(wpe^2*x))))
+ *		B[x, y] := -1.0*(wce^2*x^2-wpe^2)*(y^2*wce^2*(x-1)-(wce^2*x^2*(x-1)-(wpe^2*x)))*(y^2*wce^2*(x+1)-(wce^2*x^2*(x+1)-(wpe^2*x)))
+ *		Simplify[-1.0*D[A[x, y]*tanTheta2 - B[x, y], x]/D[A[x, y]*tanTheta2 - B[x, y], y]]	
+ *
+ *	where 
+ *		wce=electron gyrofrequency 
+ *		wpe=electron plasmafrequency
+ *		x=normalized wave frequency (w/wce)
+ *		y=normalized wave number (ck/wce)
+ *		tanTheta2=tangent squared of the wave normal angle
+ *	
+ *	returns the group velocity in m/s.
+ */
+double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta2, double x, double y)
+{
+	double 	x2, x4, x6, y2, y4, wce4, wce6, wpe4, wpe6, dkdwnumerator, dkdwdenominator, dkdwTimesC, groupVelocity, aStar, aStar2, aStar3;
+
+	x2 = x*x; x4=x2*x2; x6=x4*x2; y2 = y*y; y4=y2*y2; wce4=wce2*wce2; wce6=wce4*wce2; wpe4=wpe2*wpe2; wpe6=wpe4*wpe2;
+
+/*	This version is not numerically stable
+	dkdwnumerator = (2.0+(2.0*tanTheta2))*wpe6*x+(wce2*wpe4*x*((-12.0-(12.0*tanTheta2))*x2+((4.0+(4.0*tanTheta2))*y2)))+ 
+   		(wce4*wpe2*x*(((18.0 + (18.0*tanTheta2))*x4)+(x2*(-4.0-(4.0*tanTheta2)-(16.0*y2)-(16.0*tanTheta2*y2)))+(y2*(4.0+(2.0*tanTheta2)+(2.0*y2)+(2.0*tanTheta2*y2)))))+ 
+   		(wce6*x*((-8.0-(8.0*tanTheta2))*x6+((2.0+(2.0*tanTheta2))*y4)+(x2*y2*((-8.0-8.0*tanTheta2)-4.0*y2-(4.0*tanTheta2*y2)))+(x4*(6.0+(6.0*tanTheta2)+(12.0*y2)+(12.0*tanTheta2*y2)))));
+	dkdwdenominator = (-4.0-(4.0*tanTheta2))*wce2*wpe4*x2*y+ 
+   		(wce4*wpe2*y*((8.0+(8.0*tanTheta2))*x4+(4.0*y2)+(x2*(-4.0-(2.0*tanTheta2)-(4.0*y2)-(4.0*tanTheta2*y2)))))+ 
+   		(wce6*x2*y*((-4.0-(4.0*tanTheta2))*x4+((-4.0-(4.0*tanTheta2))*y2)+(x2*(4.0+(4.0*tanTheta2)+(4.0*y2)+(4.0*tanTheta2*y2)))));
+*/
+/* 	In the following version, divide both numerator and denominator by wpe^6 in order to make it more numerically stable */
+	aStar=wce2/wpe2; aStar2=aStar*aStar; aStar3=aStar2*aStar;
+	dkdwnumerator = (2.0+(2.0*tanTheta2))*x+(aStar*x*((-12.0-(12.0*tanTheta2))*x2+((4.0+(4.0*tanTheta2))*y2)))+ 
+   		(aStar2*x*(((18.0 + (18.0*tanTheta2))*x4)+(x2*(-4.0-(4.0*tanTheta2)-(16.0*y2)-(16.0*tanTheta2*y2)))+(y2*(4.0+(2.0*tanTheta2)+(2.0*y2)+(2.0*tanTheta2*y2)))))+ 
+   		(aStar3*x*((-8.0-(8.0*tanTheta2))*x6+((2.0+(2.0*tanTheta2))*y4)+(x2*y2*((-8.0-8.0*tanTheta2)-4.0*y2-(4.0*tanTheta2*y2)))+(x4*(6.0+(6.0*tanTheta2)+(12.0*y2)+(12.0*tanTheta2*y2)))));
+	dkdwdenominator = (-4.0-(4.0*tanTheta2))*aStar*x2*y+ 
+   		(aStar2*y*((8.0+(8.0*tanTheta2))*x4+(4.0*y2)+(x2*(-4.0-(2.0*tanTheta2)-(4.0*y2)-(4.0*tanTheta2*y2)))))+ 
+   		(aStar3*x2*y*((-4.0-(4.0*tanTheta2))*x4+((-4.0-(4.0*tanTheta2))*y2)+(x2*(4.0+(4.0*tanTheta2)+(4.0*y2)+(4.0*tanTheta2*y2)))));
+	dkdwTimesC = dkdwnumerator/dkdwdenominator;
+	groupVelocity=(1.0/dkdwTimesC)*LGM_c;
+//printf("for wce2=%g wpe2=%g tanTheta2=%g x=%g y=%g group velocity is %g m/s\n", wce2, wpe2, tanTheta2, x, y, groupVelocity);
+	return(groupVelocity);
+}
+
+/*
+ *	Compute N(w), a normalization that ensures that the energy per unit frequency is given by B^2(w) for any wave normal angle distribution consistent with the dispersion relation.
+ *	I believe that the idea here is that the wave power is partitioned into wave normal angles as well as frequency; however, for a specified wave normal angle and frequency, there
+ * 	are only two wave number magnitudes, |k|, that satisfy the dispersion relation and presumably only one that is the right 'mode'.  This is the wave number magnitude we use in the
+ *	equations from Glauert and Horne.  Thus, we need to perform an integral of the function h(X)=1/2pi^2[g(X)k^2/(1+X^2)^3/2][dk/dw]X over X.  First, we define the function h(X) and 
+ *	then we integrate over it, using quadpack since this is what Mike uses to do the Summers' integrals.
+ *
+ *	Modified by Greg Cunningham on 6-1-2013 to account for the fact that, for each frequency w (which is contained in the struct element p.w), there is potentially a resonance cone angle, 
+ *	theta, in the interval 0<=theta<=pi/2 that limits the range of theta over which resonant roots should be accepted to [0,theta].  If the input argument, tanTheta, is not within this
+ *	range then the routine should return zero since we will not be accepting resonant roots for values of theta outside this range.
+ */
+
+double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p) 
+{
+	double	w,w2,wce,wce2,wpe,wpe2,tanTheta2,sinTheta2,sinTheta4,cosTheta2;
+	double 	P,R,L,S,D,P2,D2,A,B,F,F2,n2_1,n2_2,n2,polarization1,polarization2,k,k2,c2,x,y,h,thisg,g,dwdk,dkdw;
+	double	xmean, xmin, xmax, dx, weight, test;
+	int	j;
+
+	struct 	normalizerForWavePowerSpectrumFunctionParams *params;
+	params =(struct normalizerForWavePowerSpectrumFunctionParams *) p;
+	w = (double) params->w; w2=w*w;
+	wce = (double) params->wce; wce2=wce*wce; 
+	wpe = (double) params->wpe; wpe2=wpe*wpe; 
+	xmin = (double) params->xmin;
+	xmax = (double) params->xmax;
+	tanTheta2=tanTheta*tanTheta;
+	sinTheta2 = tanTheta2/(1.0+tanTheta2); sinTheta4=sinTheta2*sinTheta2;
+	cosTheta2 = 1.0/(1.0+tanTheta2);
+	P = 1.0-(wpe2/w2); P2=P*P;
+	L = 1.0-((wpe2/w2)*(w/(w+wce)));  
+	R = 1.0-((wpe2/w2)*(w/(w-wce)));  
+	S = 0.5*(R+L);
+	D = 0.5*(R-L); D2=D*D;
+	A = S*sinTheta2+(P*cosTheta2);
+	B = R*L*sinTheta2+(P*S*(1.0+cosTheta2));
+	F2 = (R*L-(P*S))*(R*L-(P*S))*sinTheta4+(4.0*P2*D2*cosTheta2);
+	test = ((-1.0*P/S*0.99)<(tanTheta2))&&(-1.0*P/S > 0.0);
+	if (test) 
+		{
+		//FIXME: may want to print this warning out printf("In normalizerForWavePowerSpectrumFunction, resonance cone angle is less than the input theta: tanTheta=%g w=%g, wce=%g, wpe=%g, P=%g, L=%g, R=%g, S=%g, D=%g, A=%g, B=%g, F2=%g\n", tanTheta, w, wce, wpe, P, L, R, S, D, A, B, F2);
+		return(0.0);
+		}
+	if (F2 < 0.0) 
+		{
+		//FIXME: may want to print this warning out printf("warning: F2<0 in normalizerForWavePowerSpectrumFunction, function evaluates to 0\n"); 
+		return(0.0);
+		}
+	else
+		{
+		F = sqrt(F2);
+		n2_1 = (B+F)/(2.0*A);
+		n2_2 = (B-F)/(2.0*A);
+		}
+/*	Find the solution for which the polarization is R-mode */
+	polarization1 = (n2_1-S)/D;
+	polarization2 = (n2_2-S)/D;
+	if (polarization1 > 0.0)   //FIXME: this is fixed to use R-mode and electrons only; need to generalize
+		{
+		if (polarization2 > 0.0)
+			{
+			//FIXME: may want to print this out printf("warning: both solutions to dispersion relation in normalizerForWavePowerSpectrumFunction are R-mode: pick first one\n");
+			}
+		n2 = n2_1;
+		}
+	else 
+		{
+		if (polarization2 < 0.0)
+			{
+			//FIXME: may want to print this out printf("warning: both solutions to dispersion relation in normalizerForWavePowerSpectrumFunction are not R-mode: function evaluates to 0\n");
+			if (test) { printf("\n");}
+			return(0.0);
+			}
+		n2 = n2_2;
+		}
+/*
+ *	Compute k2 from w2 and n2=(ck)^2/w^2
+ */
+	c2 = (LGM_c*LGM_c);  // squared speed of light in m^2/s^2
+	k2 = n2*w2/c2; k=sqrt(k2);
+/*	Compute the group velocity */
+	x = w/wce; y=LGM_c*k/wce;
+	dwdk = (double) electronColdPlasmaGroupVelocity(wce2, wpe2, tanTheta2, x, y);
+	dkdw = (1.0/dwdk);
+/*	Evaluate the function at this w */
+	if ((tanTheta>=xmin)&&(tanTheta<=xmax))
+		{
+		g = 0.0;
+		for (j=0; j<params->numberOfWaveNormalAngleDistributions; j++)
+			{
+			xmean = (double) params->xmArray[j];
+			dx = (double) params->dxArray[j];
+			weight = (double) params->weightsOnWaveNormalAngleDistributions[j];
+			thisg = weight*exp(-1.0*(tanTheta-xmean)*(tanTheta-xmean)/(dx*dx));
+			g += thisg;
+			}
+ 		h=(1.0/(2.0*M_PI*M_PI))*(g*k2/pow(1.0+tanTheta2,1.5))*dkdw*tanTheta;
+		}
+	else {h=0.0;}  // tanTheta is outside range of valid wave normal angles, so integrand is zero
+//printf(" for tanTheta=%g, x=%g, y=%g, dwdk=%g, h=%g\n", tanTheta, x, y, dwdk, h);
+	if (test) { printf(" n2=%g, dkdw=%g, h=%g\n", n2,dkdw,h);}
+	return(h);
+}
+
+/*
+ *	The following function evaluates the normalizing constant |/phi_{nk}|^2 in equation A13 of Glauert and Horne 2005.
+ *	The Bessel functions are evaluated using the argument \frac{k_{/perp}p_{/perp}}{m_{/sigma}/Omega_{/sigma}} where /sigma
+ *	denotes the particle type (electron or proton) and the gyrofreq is signed.  Because p is specified in units of MeV/c, 
+ *	and y=ck/wce, the product p*y/m_e 
+ *	has units of MeV/kg; need to convert MeV to kg*m/sec
+ *	so that the units work out properly.  Since 1 MeV=1e6 eV=1.6e-13 Joules and c=3e8 m/s, we have p(MeV/c)*1.6e-13/3e8 has
+ *	units of kg*m/s.  Meanwhile, y=ck/wce must be divided by c to get k/wce, which has units of 1/(m/s) so that y*p*sin(theta)/m_e,
+ *	where m_e is the electron mass in kg, is unitless.
+ *
+ *	s			particle type (-1=electron, +1=proton)
+ *	p			momentum (in units of MeV/c)
+ *	alpha			local pitch angle (in radians)
+ *	nCyclotronNumber	the 'n' in the resonance condition
+ *	x			normalized wave frequency w/wce, where wce is the electron gyrofrequency
+ *	y			normalized wave number ck/wce, where c is the speed of light
+ *	P, R, L, S		dispersion relation values as labeled in Stix 1962 page 11
+ *	theta			wave normal angle
+ *
+ */
+double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNumber, double x, double y, double P, double R, double L, double S, double theta)
+{
+	double 	n2,arg,sinTheta,sinTheta2,cosTheta,phink2;
+	double	J[3];
+	int	i,thisN;
+
+	n2 = (y/x)*(y/x);		//square of the index of refraction, n=ck/w
+	sinTheta=sin(theta); sinTheta2=sinTheta*sinTheta; 
+	cosTheta=cos(theta);
+	arg = s*(y/LGM_c)*sinTheta*p*sin(alpha)*(1e6*Joules_Per_eV/LGM_c)/LGM_ELECTRON_MASS; //the argument
+	thisN = nCyclotronNumber-1;
+	if (thisN < 0) 
+		{
+		thisN = -1*thisN;
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, (double) (-1.0*arg),&J[0]);
+		}
+	else
+		{
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, arg, &J[0]);
+		}
+	thisN = nCyclotronNumber;
+	if (thisN < 0) 
+		{
+		thisN = -1*thisN;
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, (double) (-1.0*arg),&J[1]);
+		}
+	else
+		{
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, arg, &J[1]);
+		}
+	thisN = nCyclotronNumber+1;
+	if (thisN < 0) 
+		{
+		thisN = -1*thisN;
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, (double) (-1.0*arg),&J[2]);
+		}
+	else
+		{
+		i=gsl_sf_bessel_Jn_array(thisN, thisN, arg, &J[2]);
+		}
+	phink2=pow((((n2-L)/(n2-S))*J[2]+(((n2-R)/(n2-S))*J[0]))*((n2*sinTheta2-P)/(2.0*n2))+(sinTheta*cosTheta*J[1]/tan(alpha)), 2.0)/(pow((R-L)/(2.0*(n2-S)),2.0)*pow((P-(n2*sinTheta2))/n2, 2.0)+pow(P*cosTheta/n2, 2.0));
+	return(phink2);
+}
+
+/*
+ *	The following routine finds intervals in theta for which it is possible that there is a resonant root at the intersection between the resonance condition 
+ *	and the dispersion relation.  Inputs are 
+ *		wn	doppler shift, s*n*wce/gamma, normalized by the gyrofrequency, wce, to give s*n/gamma
+ *		wlc	lower cutoff frequency normalized by the gyrofrequency
+ *		wuc	uppper cutoff frequency normalized by the gyrofrequency
+ *		aStar	the squared ratio of the electron gyrofrequency to the plasma frequency, wpe
+ *		mode	=1 for R-mode, =-1 for L-mode
+ *		vpar	the parallel velocity divided by the speed of light
+ *
+ *	The code determines the intervals in theta for which one of two conditions is met (either the minimum of one monotonic function is less than the maximum of 
+ *	the other, or vice versa).  A list of theta intervals is returned by the code.
+ *
+ */
+int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, double aStar, int mode, double vpar, int *nIntervals, double *thetaStart, double *thetaEnd) 
+{
+	double	x, dw, thisThetaStart[2], thisThetaEnd[2];
+	int	thisN, i;
+
+	*nIntervals = 0;
+	thisN = 0;
+	/* 	x is either wuc or wlc depending on the inequality */
+	if (wn < wlc) 
+		{
+		/* condition (i) from Jay Albert's 2007 paper: if either condition is satisfied, there can be a root */
+		x = wuc;
+		dw = wlc-wn;
+		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) mode, nIntervals, thetaStart, thetaEnd);
+
+		/* condition (ii) from Jay Albert's 2007 paper */
+		x = wlc;
+		dw = wuc-wn;
+		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
+		}
+	if (wn > wuc)
+		{
+		/* condition (i) from Jay Albert's 2007 paper: if either condition is satisfied, there can be a root */
+		x = wuc;
+		dw = wuc-wn;
+		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) mode, nIntervals, thetaStart, thetaEnd);
+
+		/* condition (ii) from Jay Albert's 2007 paper */
+		x = wlc;
+		dw = wlc-wn;
+		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
+		}
+	if ((wn <= wuc) && (wn >= wlc))
+		{
+		/* condition (i) from Jay Albert's 2007 paper automatically satisifed */
+		/* condition (ii) from Jay Albert's 2007 paper */
+		x = wlc;
+		if (wn-wlc > (wuc-wn)) {dw = wlc-wn;} else {dw=wuc-wn;}
+		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, nIntervals, thetaStart, thetaEnd);
+		}
+/*printf("In computeWaveNormalAngleIntervalsWhereResonantRootsMayExist: \n");
+printf("	from condition (i), have nIntervals=%d\n", *nIntervals);
+for (i=0; i<*nIntervals; i++)
+	{
+	printf("	interval %d is [%g, %g]\n", i, thetaStart[i], thetaEnd[i]);
+	}
+printf("	from condition (ii), have nIntervals=%d\n", thisN);
+for (i=0; i<thisN; i++)
+	{
+	printf("	interval %d is [%g, %g]\n", i, thisThetaStart[i], thisThetaEnd[i]);
+	}
+*/
+	/* combine intervals */
+	if ((*nIntervals) == 0) {return(0);}				/* means that condition (i) is not satisified for any theta */
+	if (thisN == 0) {(*nIntervals) = 0; return(0);}			/* means that condition (ii) is not satisified for any theta */
+	if ((*nIntervals) == 1)
+		{
+		if (thisN == 1)
+			{
+			i = mergeOneIntervalWithOneInterval(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
+			*nIntervals = i;
+			return(i);
+			}
+		if (thisN == 2)
+			{
+			i = mergeTwoIntervalsWithOneInterval(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
+			*nIntervals = i;
+			return(i);
+			}
+		}
+	if ((*nIntervals) == 2)
+		{
+		if (thisN == 1)
+			{
+			i = mergeOneIntervalWithTwoIntervals(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
+			*nIntervals = i;
+			return(i);
+			}
+		if (thisN == 2)
+			{
+			i = mergeTwoIntervalsWithTwoIntervals(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
+			*nIntervals = i;
+			return(i);
+			}
+		
+		}
+	return(0);
+}
+
+int mergeOneIntervalWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
+{
+	if (thisThetaStart[0] < thetaStart[0])
+		{
+		if (thisThetaEnd[0] < thetaStart[0]) {return(0);}	// the two intervals do not overlap; return 0 intervals
+		else 							// the intervals overlap; only question is what is endpoint of intersection
+			{
+			if (thisThetaEnd[0] < thetaEnd[0]) { thetaEnd[0] = thisThetaEnd[0]; } 
+			return(1);
+			}
+		}
+	else 
+		{
+		if (thisThetaStart[0] > thetaEnd[0]) {return(0);}	// the two intervals do not overlap; return 0 intervals
+		else 							// the intervals overlap; only question is what is endpoint
+			{
+			thetaStart[0] = thisThetaStart[0];
+			if (thisThetaEnd[0] < thetaEnd[0]) { thetaEnd[0] = thisThetaEnd[0]; } 
+			return(1);
+			}
+		}
+	return(0);
+}
+
+/* 
+ *	In the following code it is assumed we have two collections of intervals.  Both collections have two intervals and we are interested in the
+ *	intersection of the two intervals.  The first interval of each collection starts at 0 and the second interval of each collection ends at pi/2.  
+ *	Return two intervals that are the intersection of the contributing intervals.
+ */
+
+int mergeTwoIntervalsWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
+{
+	if (thisThetaEnd[0] < thetaEnd[0]) 			//left-hand interval of one collection is subsumed by the other
+		{
+		if (thisThetaStart[1] < thetaEnd[0])		//right-hand interval of this same collection intersects left-hand interval of the other; have 3 intervals
+			{
+			thetaStart[2] = thetaStart[1];
+			thetaEnd[2] = thetaEnd[1];
+			thetaStart[1] = thisThetaStart[1];
+			thetaEnd[1] = thetaEnd[0];
+			thetaEnd[0] = thisThetaEnd[0];
+			return(3);
+			}
+		else
+			{
+			thetaEnd[0] = thisThetaEnd[0];
+			if (thisThetaStart[1] > thetaStart[1])	// right-hand interval from thisTheta* is subsumed by right-hand interval from theta*, so redefine left edge
+				{
+				thetaStart[1] = thisThetaStart[1];
+				return(2);
+				}
+			else { return(2); }			
+			}
+		}
+	else
+		{
+		if (thisThetaEnd[0] > thetaStart[1])		// have 3 intervals
+			{
+			thetaStart[2] = thisThetaStart[1];
+			thetaEnd[2] = thetaEnd[1];
+			thetaEnd[1] = thisThetaEnd[0];
+			return(3);
+			}
+		else
+			{
+			if (thisThetaStart[1] > thetaStart[1])
+				{
+				thetaStart[1] = thisThetaStart[1];
+				return(2);
+				}
+			else {return(2);}			// the two intervals described by thisTheta* subsume the two intervals described by theta*, so no change needed
+			}
+		}
+	return(0);
+}
+
+/*
+ *	Merge an interval of the sort (a,b) with two intervals of the sort [0,c)+(d,pi/2]
+ */
+
+int mergeOneIntervalWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
+{
+	if (thisThetaStart[0] < thetaEnd[0])
+		{
+		if (thisThetaEnd[0] < thetaEnd[0]) 		// interval (a,b) subsumed by left-hand interval described by theta*, return (a,b) interval only
+			{
+			thetaStart[0] = thisThetaStart[0];
+			thetaEnd[0] = thisThetaEnd[0];
+			return(1);
+			}
+		else
+			{
+			if (thisThetaEnd[0] > thetaStart[1]) 	// two intervals 
+				{
+				thetaStart[0] = thisThetaStart[0];
+				thetaEnd[1] = thisThetaEnd[0];
+				return(2);
+				}
+			else					// one interval
+				{
+				thetaStart[0] = thisThetaStart[0];
+				return(1);
+				}
+			}
+		}
+	else
+		{
+		if (thisThetaStart[0] > thetaStart[1])		// interval (a,b) subsumed by right-hand interval described by theta*, return (a,b) only
+			{
+			thetaStart[0] = thisThetaStart[0];
+			thetaEnd[0] = thisThetaEnd[0];
+			return(1);
+			}
+		else
+			{
+			if (thisThetaEnd[0] < thetaStart[1]) {return(0);}	// no intersection, return 0
+			else 
+				{
+				thetaStart[0] = thetaStart[1];
+				thetaEnd[0] = thisThetaEnd[0];
+				return(1);
+				}	
+			}
+		}
+	return(0);
+}
+
+int mergeTwoIntervalsWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
+{
+	double	newThetaStart[3], newThetaEnd[3];
+	int	i, j;
+
+	newThetaStart[0] = thisThetaStart[0];
+	newThetaStart[1] = thisThetaStart[1];
+	newThetaEnd[0] = thisThetaEnd[0];
+	newThetaEnd[1] = thisThetaEnd[1];
+	i= mergeOneIntervalWithTwoIntervals(thetaStart, thetaEnd, newThetaStart, newThetaEnd);
+	for (j=0; j<i; j++)
+		{
+		thetaStart[j] = newThetaStart[j];
+		thetaEnd[j] = newThetaEnd[j];
+		}
+	return(i);
+}
+
+int findSingleIntervalInTheta(double x, double dw, double aStar, double vpar, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd)
+{
+	double	R,L,S,P,D,E,F,arg,root1,root2;
+
+	R = 1.0-(x/(aStar*x*x*(x-1)));
+	L = 1.0-(x/(aStar*x*x*(x+1)));
+	S = (R+L)/2.0;
+	P = 1.0-(1.0/(aStar*x*x));
+	D = S*pow(dw, 4.0);
+	E = -1.0*(R*L+(P*S))*pow(dw, 2.0)*pow(vpar, 2.0)*pow(x, 2.0)+((P-S)*pow(dw, 4.0));
+	F = -1.0*((P*S-(R*L))*pow(dw, 2.0)*pow(vpar, 2.0)*x*x)+(P*R*L*pow(vpar, 4.0)*pow(x, 4.0));
+	arg = E*E-(4.0*D*F);
+//printf("In findSingleIntervalInTheta: inequalitySign=%d x=%g dw=%g aStar=%g vpar=%g R=%g L=%g S=%g P=%g D=%g E=%g F=%g E^2-4DF=%g\n", inequalitySign,x,dw,aStar,vpar,R,L,S,P,D,E,F,arg);
+	if (arg < 0.0) 	
+		{ 					/* then entire interval is either satisfied or not */
+		if ((inequalitySign*(D+E+F)) < 0.0)  	/* entire interval does satisify the inequality, so can return whole interval, otherwise go on to condition (ii) */
+			{
+			*nIntervals = (int) 1;
+			thetaStart[0] = (double) 0.0;
+			thetaEnd[0] = (double) (M_PI/2.0);
+			return(0); 
+			}
+		}
+	else 			
+		{			/* there are roots of the quadratic D+Ex+Fx^2, where x=cos^2(theta)*/
+		if (F > 0.0)
+			{
+			root1 = (-1.0*E+sqrt(arg))/(2.0*F);  		/* because taking the inverse cos of the sqrt of the root will reverse the order of the roots */
+			root2 = (-1.0*E-sqrt(arg))/(2.0*F);
+			}
+		else
+			{
+			root2 = (-1.0*E+sqrt(arg))/(2.0*F);  		/* because taking the inverse cos of the sqrt of the root will reverse the order of the roots */
+			root1 = (-1.0*E-sqrt(arg))/(2.0*F);
+			}
+		if (root1 < 0.0) {root1 = 0.0;}
+		if (root1 > 1.0) {root1 = 1.0;}
+		if (root2 < 0.0) {root2 = 0.0;}
+		if (root2 > 1.0) {root2 = 1.0;}
+//printf("		root1=%g root2=%g\n", root1, root2);
+		if ((root1-root2) > 1e-8) 
+			{
+			if ((inequalitySign*F) > 0.0) 	/* then the quadratic is concave up/down and the interval in cos^2(theta) that can have roots is [root1, root2] */
+				{
+				*nIntervals = (int) 1;
+				thetaStart[0] = (double) acos(sqrt(root1)); 
+				thetaEnd[0] = (double) acos(sqrt(root2));
+				}
+			else 		/* then the quadratic is concave down/up and the intervals in cos^2(theta) that can have roots are [0,root1] and [root2,1]; get rid of degenerate intervals */
+				{
+				if (root1 == 1)
+					{
+					if (root2 ==0)
+						{
+						*nIntervals = 0;
+						}
+					else 
+						{
+						*nIntervals = 1;
+						thetaStart[0] = (double) acos(sqrt(root2));
+						thetaEnd[0] = (double) (M_PI/2.0);
+						}
+					}
+				else
+					{
+					thetaStart[0] = (double) 0.0;
+					thetaEnd[0] = (double) acos(sqrt(root1));
+					if (root2 ==0)
+						{
+						*nIntervals = (int) 1;
+						}
+					else 
+						{
+						*nIntervals = (int) 2;
+						thetaStart[1] = (double) acos(sqrt(root2));
+						thetaEnd[1] = (double) (M_PI/2.0);
+						}
+					}
+				}
+			}
+		else			/* this is the case when the quadratic effectively touches zero and so the whole interval can have roots or not */
+			{
+			if ((inequalitySign*(D+E+F)) < 0.0)  	/* entire interval satisifies the inequality, so return whole interval */
+				{
+				*nIntervals = (int) 1;
+				thetaStart[0] = (double) 0.0;
+				thetaEnd[0] = (double) (M_PI/2.0);
+				return(0); 
+				}
+			}
+		}
+	return(0);
+}
 
 
+/*
+ *  Following routine is just a very simple Riemann sum to evaluate the integral of a function, f, over the range [xleft,xright].  
+ *  The function is parameterized by args.  The result of the integration is put into result.
+ */
 
+int Lgm_SimpleRiemannSum(double (*f)(double, _qpInfo *), _qpInfo *args, double xleft, double xright, double *result, int VerbosityLevel )
+{
+	int	nIntervals, nSubIntervals, i;
+	double	x,sum,dx, epsabs=0.0, epsrel=0.1,abserr;
+	size_t 	neval;
 
+/*	Approach #1: use a simple Riemann sum
+	nIntervals = 100;
 
+	dx = (xright-xleft)/((double) nIntervals);
+	sum = 0.0;
+	for (i=0; i<nIntervals; i++)
+		{
+		x = xleft+((i+0.5)*dx);
+		sum += dx*f(x,args);
+		}
+	*result = sum;
+*/
 
+/* 	Approach #2: use GSL's implementation of the simple quadpack routine qng (non-adaptive Gauss-Kronrod quadrature) to do the integral 
+	gsl_function F;
+	F.function = f;
+	F.params = args;
+ 	gsl_integration_qng (&F, xleft, xright, epsabs, epsrel, result, &abserr, &neval);
+	printf("Number of evaluations needed by non-adaptive Gauss-Kronrod quadrature to achieve %g relative accuracy is %d\n", epsrel, neval);
+*/
 
+/* 	Approach #3: use GSL's implementation of more complicated quadpack routine qag (adaptive quadrature with no singularities) to do the integral */
+	nSubIntervals = 20;
+	gsl_integration_workspace * w =gsl_integration_workspace_alloc( nSubIntervals );
+	gsl_function F;
+	F.function = f;
+	F.params = args;
+	gsl_integration_qag(&F, xleft, xright, epsabs, epsrel, (size_t) nSubIntervals, GSL_INTEG_GAUSS21, w, result, &abserr);
+//	printf("Number of evaluations needed by adaptive Gauss-Kronrod 21-point quadrature to achieve %g relative accuracy is %d, abserr is %g and integral is %g\n", epsrel, w->size, abserr, *result);
+	gsl_integration_workspace_free(w);
 
-
-
-
+	return(0);
+}
