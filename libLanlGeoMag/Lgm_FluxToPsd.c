@@ -1828,7 +1828,7 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
                 xa2[n2] = xa[n-1-i];
                 ya2[n2] = ya[n-1-i];
                 ++n2;
-                }
+            }
         }
 
     } else {
@@ -1837,7 +1837,7 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
                 xa2[n2] = xa[i];
                 ya2[n2] = ya[i];
                 ++n2;
-                }
+            }
         }
     }
 
@@ -1846,10 +1846,10 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
      * Check to see if x would cause an extrapolation instead of an interp.
      */
     if ( (x<xa2[0]) || (x>xa2[n2-1]) ){
+//printf("here:  x = %lf     xa2[0] = %lf    n2 = %d  xa2[n2-1] = %lf\n", x, xa2[0], n2, xa2[n2-1]);
         *y = LGM_FILL_VALUE;
         RetVal = -1;
-        }
-    else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
+    } else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
         acc    = gsl_interp_accel_alloc( );
         spline = gsl_spline_alloc( gsl_interp_akima, n2 );
         gsl_spline_init( spline, xa2, ya2, n2 );
