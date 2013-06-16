@@ -378,10 +378,6 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         DLP2 = pow( a, A[43] );
 
         a     = sqrt(PDYN);
-<<<<<<< HEAD
-//printf("DST = %g\n", DST);
-=======
->>>>>>> 3762d7ce48aaf8660e5ee10bf9c190c8db3e399e
         TAMP1 = A[2]  + A[3]*DLP1 + A[4]*VBIMF1 + A[5]*DST;
         TAMP2 = A[6]  + A[7]*DLP2 + A[8]*VBIMF1 + A[9]*DST;
         A_SRC = A[10] + A[11]*DST + A[12]*a;
