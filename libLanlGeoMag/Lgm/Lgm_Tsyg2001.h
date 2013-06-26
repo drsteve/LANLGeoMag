@@ -90,7 +90,7 @@ typedef struct LgmTsyg2001_Info {
  *  Function declarations
  */
 void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
-                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
+                    double BZIMF, double G1, double G2, double G3, double PS, double X, double Y, double Z,
                     double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
                     double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
                     double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,

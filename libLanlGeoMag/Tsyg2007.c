@@ -26,19 +26,22 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
     /*
      *  Read in coeffs
      */
-    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2008/2008_070_13.par", LGM_TS07_DATA_DIR );
+    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2002/2002_107_00_00.par", LGM_TS07_DATA_DIR );
+
+
+
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
         for ( k=1; k<=101; k++ ) {
             fscanf( fp, "%lf", &t->A[k] );
-            //printf("t->A[%d] = %g\n", k, t->A[k]);
-	    fclose(fp);
+            printf("t->A[%d] = %g\n", k, t->A[k]);
         }
+	    fclose(fp);
 
     } else {
 
-        printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
-	perror("Error");
+        printf("Lgm_SetCoeffs_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
+	    //perror("Error");
         exit(-1);
 
     }
@@ -187,9 +190,6 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
     double  PDYN, *A;
 
 
-
-
-
     PDYN = PARMOD[1]; // following other versions...
     A = tInfo->A;
 
@@ -199,6 +199,13 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
     TS07D_EXTERN( 0, A, NTOT, PS, PDYN, X, Y, Z, &BXCF, &BYCF, &BZCF, BXTS, BYTS, BZTS,
             BXTO, BYTO, BZTO, BXTE, BYTE, BZTE, &BXR11, &BYR11, &BZR11, &BXR12, &BYR12, &BZR12,
             &BXR21a, &BYR21a, &BZR21a, &BXR21s, &BYR21s, &BZR21s, BX, BY, BZ, tInfo );
+
+//    printf("BXCF,   BYCF,   BZCF   = %g %g %g\n", BXCF, BYCF, BZCF );
+//    printf("BXR11,  BYR11,  BZR11  = %g %g %g\n", BXR11, BYR11, BZR11 );
+//    printf("BXR12,  BYR12,  BZR12  = %g %g %g\n", BXR12, BYR12, BZR12 );
+//    printf("BXR21a, BYR21a, BZR21a = %g %g %g\n", BXR21a, BYR21a, BZR21a );
+//    printf("BXR21s, BYR21s, BZR21s = %g %g %g\n", BXR21s, BYR21s, BZR21s );
+//    printf("BX,     BY,     BZ     = %g %g %g\n", *BX, *BY, *BZ);
 
 
 

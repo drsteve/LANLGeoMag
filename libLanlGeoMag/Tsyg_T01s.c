@@ -44,17 +44,22 @@
  *   OUTPUT:  GSM COMPONENTS OF THE EXTERNAL MAGNETIC FIELD (BX,BY,BZ, nanotesla)
  *            COMPUTED AS A SUM OF CONTRIBUTIONS FROM PRINCIPAL FIELD SOURCES
  *
- *  (C) Copr. 2001, Nikolai A. Tsyganenko, USRA, Code 690.2, NASA GSFC
+ *  (C) Copr. 2003, Nikolai A. Tsyganenko, USRA, Code 690.2, NASA GSFC
  *      Greenbelt, MD 20771, USA
  *
- *                            REFERENCE:
+ *                           REFERENCES:
  *
- *    N. A. Tsyganenko, A new data-based model of the near magnetosphere magnetic field:
- *       1. Mathematical structure.
- *       2. Parameterization and fitting to observations.
+ *  Tsyganenko, N. A., A model of the near magnetosphere with a dawn-dusk asymmetry,
+ *    1, Mathematical structure, J. Geophys. Res., 107(A8), 1179, doi:10.1029/2001JA000219,
+ *    2002.
  *
- *             (submitted to JGR, July 2001)
+ *  Tsyganenko, N. A., A model of the near magnetosphere with a dawn-dusk asymmetry
+ *     2. Parameterization and fitting to observations, J. Geophys. Res., 107(A8), 1176,
+ *     doi:10.1029/2001JA000220, 2002.
  *
+ *  Tsyganenko, N. A., H. J. Singer, and J. C. Kasper, Storm-time distortion of the
+ *     inner magnetosphere: How severe can it get ? J. Geophys. Res., 108(A5), 1209,
+ *     doi:10.1029/2002JA009808, 2003.
  *
  *  ----------------------------------------------------------------------
  *
@@ -86,36 +91,43 @@ void Lgm_Init_T01S( LgmTsyg2001_Info *t ){
 
 void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t ) {
 
-    double       PDYN, DST_AST, BYIMF=0.0, BZIMF=0.0, G1, G2;
+    double       PDYN, DST_AST, BYIMF=0.0, BZIMF=0.0, G1, G2, G3;   // added G3
 //    double       BXIMF=0.0;
     double       PSS, XX, YY, ZZ, BXCF, BYCF, BZCF, BXT1, BYT1, BZT1, BXT2, BYT2, BZT2;
     double       BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC,  BXR11, BYR11, BZR11;
     double       BXR12, BYR12, BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, HXIMF;
     double       HYIMF, HZIMF, BBX, BBY, BBZ;
 //    int           IOPGEN=0, IOPTT=0, IOPB=0, IOPR=0;
-    static double A[] = { -9e99, 1.00000,2.47341,0.40791,0.30429,-0.10637,-0.89108,3.29350,
-                          -0.05413,-0.00696,1.07869,-0.02314,-0.66173,-0.68018,-0.03246,
-                           0.02681,0.28062,0.16535,-0.02939,0.02639,-0.24891,-0.08063,
-                           0.08900,-0.02475,0.05887,0.57691,0.65256,-0.03230,2.24733,
-                           4.10546,1.13665,0.05506,0.97669,0.21164,0.64594,1.12556,0.01389,
-                           1.02978,0.02968,0.15821,9.00519,28.17582,1.35285,0.42279};
+
+    static double A[] = { -9e99, 1.00000, -1.19284, 1.32478, 0.41388, -0.07590, -1.97502, 5.68628,
+                           0.00000, 0.00000, 0.79889, -0.02588, -0.43873, 0.85784, 0.06948, 0.00000,
+                           0.45972, 0.17565, 0.07657, 0.01401, -0.13690, -0.11077, .10648, -0.02855,
+                           0.42485, 0.08011, 0.92924, 0.04264, 1.56467, 3.00000, 1.27061, 0.11224,
+                           0.93388, -0.00612, 1.22288, 0.95616, 0.31496, 1.37517, 0.12376, 0.15954,
+                           7.70000, 40.00000, 0.70733, 0.30588, 12.18290, 40.00, 82.76604, 27.22990,
+                           98.37391, 14.39243, 4.80011, 7.99216 };
+
+
 
     t->sin_psi = SINPS;
     t->cos_psi = COSPS;
+//    printf("PS, SINPS, COSPS = %g %g %g\n", PS, SINPS, COSPS );
 
     PDYN    = PARMOD[1];
     DST_AST = PARMOD[2]*0.8 - 13.0*sqrt( PDYN );
     BYIMF   = PARMOD[3];
+//printf("BYIMF = %g\n", BYIMF);
     BZIMF   = PARMOD[4];
 
-    G1   = PARMOD[5];
-    G2   = PARMOD[6];
+    G1   = 0.0;         // HERE G1 IS JUST A DUMMY PARAMETER
+    G2   = PARMOD[5];
+    G3   = PARMOD[6];
     PSS  = PS;
     XX   = X;
     YY   = Y;
     ZZ   = Z;
 
-    T01S_EXTALL( 0, 0, 0, 0, A, 43, PDYN, DST_AST, BYIMF, BZIMF, G1, G2,
+    T01S_EXTALL( 0, 0, 0, 0, A, 51, PDYN, DST_AST, BYIMF, BZIMF, G1, G2, G3,
          PSS, XX, YY, ZZ, &BXCF, &BYCF, &BZCF, &BXT1, &BYT1, &BZT1, &BXT2, &BYT2, &BZT2, 
          &BXSRC, &BYSRC, &BZSRC, &BXPRC, &BYPRC, &BZPRC,  &BXR11, &BYR11, &BZR11, 
          &BXR12, &BYR12, &BZR12, &BXR21, &BYR21, &BZR21, &BXR22, &BYR22, &BZR22, &HXIMF, 
@@ -127,8 +139,11 @@ void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
 //printf("C: BXSRC, BYSRC, BZSRC = %e %e %e\n", BXSRC, BYSRC, BZSRC );
 //printf("C: BXPRC, BYPRC, BZPRC = %e %e %e\n", BXPRC, BYPRC, BZPRC );
 //printf("C: BXR11, BYR11, BZR11 = %e %e %e\n", BXR11, BYR11, BZR11 );
+//printf("C: BXR12, BYR12, BZR12 = %e %e %e\n", BXR12, BYR12, BZR12 );
 //printf("C: BXR21, BYR21, BZR21 = %e %e %e\n", BXR21, BYR21, BZR21 );
-//printf("C: BXR22, BYR22, BZR22 = %e %e %e\n\n", BXR22, BYR22, BZR22 );
+//printf("C: BXR22, BYR22, BZR22 = %e %e %e\n", BXR22, BYR22, BZR22 );
+//printf("C: HXIMF, HYIMF, HZIMF = %e %e %e\n", HXIMF, HYIMF, HZIMF );
+//printf("C: BBX, BBY, BBZ = %e %e %e\n\n", BBX, BBY, BBZ );
 
     *BX = BBX;
     *BY = BBY;
@@ -164,7 +179,7 @@ void Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  * 
  */
 void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF, 
-                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z, 
+                    double BZIMF, double G1, double G2, double G3, double PS, double X, double Y, double Z, 
                     double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1, 
                     double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC, 
                     double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11, 
@@ -179,15 +194,15 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     double    XMXM, AXX0, ARO, SIGMA, CFX, CFY, CFZ, ZNAM;
     double    DLP1, DLP2, TAMP1, TAMP2, A_SRC, A_PRC, A_R11, XX, YY, ZZ;
     double    A_R21, QX, QY, QZ, FINT, FEXT, BBX, BBY, BBZ;
+    double    G2T1, G2T2, G3PRC, G2R11, G2R12, G2R21, G2R22;
 
 
 
     double    A0_A=34.586, A0_S0=1.1960, A0_X0=3.4397;     // SHUE ET AL. PARAMETERS
-    double    DSIG=0.003, RH2=-5.2;
+    double    DSIG=0.005, RH0=8.0, RH2=-5.2;
 
 
     XAPPA  = pow( 0.5*PDYN, A[39] );   //  NOW THIS IS A VARIABLE PARAMETER
-    //t->CB_RH0.RH0  = 8.0; // always overwritten...?
     t->CB_RH0.RH0  = A[40]; // TAIL HINGING DISTANCE
     t->CB_G.G      = A[41]; // TAIL WARPING PARAMETER
 
@@ -272,6 +287,7 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     SIGMA = sqrt( (ARO + AXX0 + sqrt( aa*aa-4.0*ASQ*AXX0 ))/(2.0*ASQ) );
 
 
+//printf("SIGMA, S0+DSIG = %g %g\n", SIGMA, S0+DSIG );
 
     /*
      *   NOW, THERE ARE THREE POSSIBLE CASES:
@@ -286,7 +302,6 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
         if ( IOPGEN <= 1 ) {
             T01S_SHLCAR3X3( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ );         //  T01S_DIPOLE SHIELDING FIELD
-//printf("PS = %g   XAPPA3 = %g\n", PS, XAPPA3);
 
             *BXCF = CFX*XAPPA3;
             *BYCF = CFY*XAPPA3;
@@ -298,7 +313,7 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         }
 
         if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
-            t->CB_TAIL.DXSHIFT1 = A[26] + A[27]*VBIMF2;
+            t->CB_TAIL.DXSHIFT1 = A[26] + A[27]*G2*40.0/sqrt(1600.0 + G2*G2);
             t->CB_TAIL.DXSHIFT2 = 0.0;
             t->CB_TAIL.D        = A[28];
             t->CB_TAIL.DELTADY  = A[29];
@@ -313,8 +328,12 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         }
 
         if ( (IOPGEN == 0) || (IOPGEN == 3) ) {
-            t->CB_BIRKPAR.XKAPPA1 = A[35] + A[36]*VBIMF2;
-            t->CB_BIRKPAR.XKAPPA2 = A[37] + A[38]*VBIMF2;
+
+            ZNAM = fabs( DST );
+            if ( ZNAM < 20.0 ) ZNAM = 20.0;
+            t->CB_BIRKPAR.XKAPPA1 = A[35]*pow( ZNAM/20.0, A[36] );
+            t->CB_BIRKPAR.XKAPPA2 = A[37]*pow( ZNAM/20.0, A[38] );
+
             T01S_BIRK_TOT( IOPB, PS, XX, YY, ZZ, BXR11, BYR11, BZR11, BXR12, BYR12, 
                                   BZR12, BXR21, BYR21, BZR21, BXR22, BYR22, BZR22, t  );    //   BIRKELAND FIELD (TWO MODES FOR R1 AND TWO MODES FOR R2)
         } else {
@@ -333,12 +352,13 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         }
 
         if ( (IOPGEN == 0) || (IOPGEN == 4) ) {
+            t->CB_RCPAR.PHI  = A[34];
             ZNAM = fabs(DST);
-            t->CB_RCPAR.PHI  = 1.5707963*tanh( ZNAM/A[34] );
             if ( ZNAM < 20.0 ) ZNAM = 20.0;
             a     = 20.0/ZNAM;
             t->CB_RCPAR.SC_SY = A[30]*pow(a, A[31])*XAPPA;
             t->CB_RCPAR.SC_AS = A[32]*pow(a, A[33])*XAPPA;
+//            printf("C: SC_SY, SC_AS = %g %g\n", t->CB_RCPAR.SC_SY, t->CB_RCPAR.SC_AS );
             T01S_FULL_RC(IOPR, PS, XX, YY, ZZ, BXSRC, BYSRC, BZSRC, BXPRC, BYPRC, BZPRC, t );  //  SHIELDED RING CURRENT (SRC AND PRC)
         } else {
             *BXSRC = 0.0;
@@ -377,15 +397,29 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         DLP1 = pow( a, A[42] );
         DLP2 = pow( a, A[43] );
 
-        a     = sqrt(PDYN);
-        TAMP1 = A[2]  + A[3]*DLP1 + A[4]*VBIMF1 + A[5]*DST;
-        TAMP2 = A[6]  + A[7]*DLP2 + A[8]*VBIMF1 + A[9]*DST;
+        G2T1  = A[44];
+        G2T2  = A[45];
+        G3PRC = A[46];
+        G2R11 = A[47];
+        G2R12 = A[48];
+        G2R21 = A[49];
+        G2R22 = A[50];
+
+
+        TAMP1 = A[2] + A[3]*DLP1 + A[4]*G2*G2T1/sqrt(G2T1*G2T1 + G2*G2) + A[5]*DST;            //   modified in this "j"-version
+        TAMP2 = A[6] + A[7]*DLP2 + A[8]*G2*G2T2/sqrt(G2T2*G2T2 + G2*G2) + A[9]*DST;
+
+        a = sqrt( PDYN );
         A_SRC = A[10] + A[11]*DST + A[12]*a;
-        A_PRC = A[13] + A[14]*DST + A[15]*a;
-        A_R11 = A[16] + A[17]*VBIMF2;
-        A_R12 = A[18] + A[19]*VBIMF2;
-        A_R21 = A[20] + A[21]*VBIMF2;
-        A_R22 = A[22] + A[23]*VBIMF2;
+        A_PRC = A[13] + A[14]*G3*G3PRC/sqrt(G3PRC*G3PRC + G3*G3) + A[15]*a;
+        A_R11 = A[16] + A[17]*G2*G2R11/sqrt(G2R11*G2R11 + G2*G2);
+        A_R12 = A[18] + A[19]*G2*G2R12/sqrt(G2R12*G2R12 + G2*G2);
+        A_R21 = A[20] + A[21]*G2*G2R21/sqrt(G2R21*G2R21 + G2*G2);
+        A_R22 = A[22] + A[23]*G2*G2R22/sqrt(G2R22*G2R22 + G2*G2);
+
+//        printf("TAMP1, TAMP2, A_SRC, A_PRC, A_R11, A_R12, A_R21, A_R22 = %g %g %g %g %g %g %g %g\n", TAMP1, TAMP2, A_SRC, A_PRC, A_R11, A_R12, A_R21, A_R22 );
+
+
 
         BBX = A[1]* *BXCF + TAMP1* *BXT1 + TAMP2* *BXT2 + A_SRC* *BXSRC + A_PRC* *BXPRC
                  + A_R11* *BXR11 + A_R12* *BXR12 + A_R21* *BXR21 + A_R22* *BXR22
@@ -398,6 +432,8 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         BBZ = A[1]* *BZCF + TAMP1* *BZT1 + TAMP2* *BZT2 + A_SRC* *BZSRC + A_PRC* *BZPRC
                  + A_R11* *BZR11 + A_R12* *BZR12 + A_R21* *BZR21 + A_R22* *BZR22
                  + A[24]* *HZIMF + A[25]* *HZIMF*STHETAH;
+
+//        printf("BBX, BBY, BBZ = %g %g %g\n", BBX, BBY, BBZ );
 
 
         /*
@@ -413,11 +449,13 @@ void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
             a = 0.5*(SIGMA-S0)/DSIG;
             FINT = 0.5 - a;
             FEXT = 0.5 + a;
+//            printf("FINT, FEXT = %g %g\n", FINT, FEXT);
     
             T01S_DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, t );
             *BX = (BBX+QX)*FINT + OIMFX*FEXT - QX;
             *BY = (BBY+QY)*FINT + OIMFY*FEXT - QY;
             *BZ = (BBZ+QZ)*FINT + OIMFZ*FEXT - QZ;
+//            printf("BX, BY, BZ = %g %g %g       QX, QY, QZ = %g %g %g\n", BX, BY, BZ, QX, QY, QZ);
         } // THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING POSSIBILITY IS NOW THE CASE (3):
 
     } else {
@@ -1009,7 +1047,7 @@ void T01S_WARPED( int IOPT, double PS, double X, double Y, double Z,
     *BX1     =  BX_AS1*DFDPHI;
 
     *BY1     =  BRHO_S*CPHI-BPHI_S*SPHI;
-    *BZ1     =  BRHO_S*SPHI+BPHI_S*CPHI;        //   DONE
+    *BZ1     =  BRHO_S*SPHI+BPHI_S*CPHI;    //   DONE
 
     BRHO_AS =   BY_AS2*CF+BZ_AS2*SF;        //   DEFORM THE 2ND MODE
     BPHI_AS =  -BY_AS2*SF+BZ_AS2*CF;
@@ -1726,7 +1764,7 @@ void    T01S_FIALCOS( double R, double THETA, double PHI, double *BTHETA, double
     int     M;
     double  SINTE, RO, COSTE, SINFI, COSFI, TG, CTG, TETANP, TETANM, TGP=0.0, TGM=0.0, TGM2=0.0, TGP2=0.0;
     double  COSM1, SINM1, TM, TGM2M, TGP2M, T, FC, FC1, TGM2M1, TG21, DTT, DTT0;
-    double  BTN[10], BPN[10], CCOS[10], SSIN[10];
+    double  BTN[11], BPN[11], CCOS[11], SSIN[11];
 
     SINTE = sin(THETA);
     RO    = R*SINTE;
@@ -2015,26 +2053,23 @@ void     T01S_FULL_RC( int IOPR, double PS, double X, double Y, double Z,
      *             IOPR=1 - SRC ONLY
      *             IOPR=2 - PRC ONLY
      */
-
-
-    static double C_SY[] = { -9e99, -957.2534900,-817.5450246,583.2991249,758.8568270,     //   CORRECTED VALUES (AS OF MAY 2006)
-                         13.17029064,68.94173502,-15.29764089,-53.43151590,27.34311724,
-                         149.5252826,-11.00696044,-179.7031814,953.0914774,817.2340042,
-                         -581.0791366,-757.5387665,-13.10602697,-68.58155678,15.22447386,
-                         53.15535633,-27.07982637,-149.1413391,10.91433279,179.3251739,
-                         -6.028703251,1.303196101,-1.345909343,-1.138296330,-0.06642634348,
-                         -0.3795246458,.07487833559,.2891156371,-.5506314391,-.4443105812,
-                         0.2273682152,0.01086886655,-9.130025352,1.118684840,1.110838825,
-                         .1219761512,-.06263009645,-.1896093743,.03434321042,.01523060688,
-                         -.4913171541,-.2264814165,-.04791374574,.1981955976,-68.32678140,
-                         -48.72036263,14.03247808,16.56233733,2.369921099,6.200577111,
-                         -1.415841250,-0.8184867835,-3.401307527,-8.490692287,3.217860767,
-                         -9.037752107,66.09298105,48.23198578,-13.67277141,-16.27028909,
-                         -2.309299411,-6.016572391,1.381468849,0.7935312553,3.436934845,
-                          8.260038635,-3.136213782,8.833214943,8.041075485,8.024818618,
-                          35.54861873,12.55415215,1.738167799,3.721685353,23.06768025,
-                          6.871230562,6.806229878,21.35990364,1.687412298,3.500885177,
-                          0.3498952546,0.6595919814};
+    static double C_SY[] = { -9e99, 1675.694858, 1780.006388, -961.6082149, -1668.914259, -27.40437029,
+                             -107.4169670, 27.76189943, 92.89740503, -43.92949274, -403.6444072,
+                             6.167161865, 298.2779761, -1680.779044, -1780.933039, 964.1861088, 1670.988659,
+                             27.48864650, 107.7809519, -27.84600972, -93.20691865, 44.28496784, 404.4537249,
+                             -6.281958730, -298.6050952, -7.971914848, 2.017383761, -1.492230168,
+                             -1.957411655, -.08525523181, -.3811813235, .08446716725, .3215044399,
+                             -.7141912767, -.9086294596, .2966677742, -.04736679933, -11.38731325,
+                             .1719795189, 1.356233066, .8613438429, -.09143823092, -.2593979098,
+                             .04244838338, .06318383319, -.5861372726, -.03368780733, -.07104470269,
+                             -.06909052953, -60.18659631, -32.87563877, 11.76450433, 5.891673644,
+                             2.562360333, 6.215377232, -1.273945165, -1.864704763, -5.394837143,
+                             -8.799382627, 3.743066561, -.7649164511, 57.09210569, 32.61236511,
+                             -11.28688017, -5.849523392, -2.470635922, -5.961417272, 1.230031099,
+                             1.793192595, 5.383736074, 8.369895153, -3.611544412, .7898988697, 7.970609948,
+                             7.981216562, 35.16822497, 12.45651654, 1.689755359, 3.678712366, 23.66117284,
+                             6.987136092, 6.886678677, 20.91245928, 1.650064156, 3.474068566, .3474715765,
+                             .6564043111 };
 
     static double C_PR[] = { -9e99, -64820.58481,-63965.62048,66267.93413,135049.7504,
                          -36.56316878,124.6614669,56.75637955,-87.56841077,5848.631425,
@@ -2252,10 +2287,10 @@ double    T01S_AP( double R, double SINT, double COST) {
                         // OF DIPOLAR COORDINATES BECOMES INACCURATE
 
     // CORRECTED VALUES (UPDATED 04/20/06 (SEE NB#9, P.37))
-    double      A1=-456.5289941, A2=375.9055332, RRC1=4.274684950,   DD1=2.439528329;
-    double    RRC2=3.367557287, DD2=3.146382545,   P1=-0.2291904607, R1=3.746064740,  DR1=1.508802177;
-    double    DLA1=0.5873525737, P2=0.1556236119,  R2=4.993638842,  DR2=3.324180497, DLA2=0.4368407663;
-    double      P3=0.1855957207, R3=2.969226745,  DR3=2.243367377;
+    double    A1   = -563.3722359,  A2 = 425.0891691, RRC1 = 4.150588549,  DD1 = 2.266150226; 
+    double    RRC2 = 3.334503403,  DD2 = 3.079071195,   P1 = 0.02602428295, R1 = 8.937790598,  DR1 = 3.327934895;
+    double    DLA1 = 0.4487061833,  P2 = 0.09125832351, R2 = 6.243029867,  DR2 = 1.750145910, DLA2 = 0.4181957162;
+    double    P3   = 0.06106691992, R3 = 2.079908581,  DR3 = 0.6828548533;
     double    ooR, ooR2, SINT1, COST1, ALPHA, GAMMA, RR1oDR1, RR1oDR1_2, RR2oDR2, RR2oDR2_2;
     double    RR3oDR3, RR3oDR3_2, COST1oDLA1, COST1oDLA1_2, COST1oDLA2, COST1oDLA2_2, ARG1;
     double    ARG2, ARG3, DEXP1, DEXP2, DEXP3, ALPHA_S, ALPHA_S2, GAMMA_S, GAMMAS2, ALSQH2;
@@ -3003,14 +3038,15 @@ void    T01S_DIPOLE( double PS, double X, double Y, double Z, double *BX, double
      */
     double    SPS, CPS, P, U, V, T, s, s2, s3, s5, Q;
 
-    //SPS = sin(PS); CPS = cos(PS);
     SPS = t->sin_psi; CPS = t->cos_psi;
+    //SPS = sin(PS); CPS = cos(PS);
     P = X*X;
     U = Z*Z;
     V = 3.0*Z*X;
     T = Y*Y;
     s = sqrt(P+T+U); s2 = s*s; s3 = s2*s; s5 = s2*s3;
     Q = 30115.0/s5;
+//printf("SPS, CPS, P, U, V, T, Q = %g %g %g %g %g %g %g\n", SPS, CPS, P, U, V, T, Q);
 
     *BX = Q*((T+U-2.0*P)*SPS-V*CPS);
     *BY = -3.0*Y*Q*(X*SPS+Z*CPS);

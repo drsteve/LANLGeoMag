@@ -111,7 +111,7 @@ int Lgm_TraceToYZPlane( Lgm_Vector *u, Lgm_Vector *v, double Xtarget, double sgn
 
         } else if ( (Stotal > 300.0) || ( Ntotal > 1500 ) ) {
 
-            printf("Stotal / Ntotal:  %g / %ld\n", Stotal, Ntotal );
+            printf("Lgm_TraceToYZPlane: %s:%d Field line too long or too many iterations: Stotal / Ntotal:  %g / %ld\n", __FILE__, __LINE__, Stotal, Ntotal );
 
 	        return( 0 );
 

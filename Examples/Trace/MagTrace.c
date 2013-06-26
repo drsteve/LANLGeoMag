@@ -107,7 +107,7 @@ int ClassifyFL_Enhanced2( int Flag, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *
             case LGM_CLOSED:
                                 if ( w.x > 0.0 ) {
                                 //if ( v3->x > 0.0 ) {
-printf("v3->x = %g\n", v3->x );
+                                    //printf("v3->x = %g\n", v3->x );
                                     NewFlag = 1;
                                 } else {
                                     NewFlag = ( fabs(w.y) > 20.0 ) ? 2 : 3;
@@ -166,8 +166,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 200; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 200; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 50; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 50; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -184,8 +184,10 @@ int main(){
 
     GeodHeight = 100.0;  //km
 
-    Date = 20080402;
+    Date = 20020417;
     UTC  = 10.0 + 50.0/60.0 + 0.0/3600.0;
+Date = 20080310;
+UTC = 0.0;
     JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
     printf("Tilt = %g\n", mInfo->c->psi*DegPerRad );
@@ -202,8 +204,10 @@ int main(){
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TU82, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP88, mInfo );
+Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
+Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
     
-    Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
+    Lgm_Set_Open_Limits( mInfo, -25.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
 
     LGM_ARRAY_2D( Image, NX, NY, double );
@@ -474,12 +478,12 @@ int main(){
 
 
 
-    DumpImage( "ImageNorth_OP88", NX, NY, Image );
-    DumpImage( "ImageSouth_OP88", NX, NY, ImageSouth );
-    DumpImage( "ImageEq_OP88", EQ_NX, EQ_NY, ImageEq );
-    DumpImage( "ImageYZ15_OP88", YZ_NY, YZ_NZ, ImageYZ15 );
-    DumpImage( "ImageYZ30_OP88", YZ_NY, YZ_NZ, ImageYZ30 );
-    DumpImage( "ImageYZ45_OP88", YZ_NY, YZ_NZ, ImageYZ45 );
+    DumpImage( "ImageNorth_TS07", NX, NY, Image );
+    DumpImage( "ImageSouth_TS07", NX, NY, ImageSouth );
+    DumpImage( "ImageEq_TS07", EQ_NX, EQ_NY, ImageEq );
+    DumpImage( "ImageYZ15_TS07", YZ_NY, YZ_NZ, ImageYZ15 );
+    DumpImage( "ImageYZ30_TS07", YZ_NY, YZ_NZ, ImageYZ30 );
+    DumpImage( "ImageYZ45_TS07", YZ_NY, YZ_NZ, ImageYZ45 );
     LGM_ARRAY_2D_FREE( Image );
     LGM_ARRAY_2D_FREE( ImageSouth );
     LGM_ARRAY_2D_FREE( ImageEq );
