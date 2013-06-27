@@ -433,7 +433,7 @@ int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  do
     si.n3 = n3;
     if ( Version == LGM_SUMMERS_2007 ){
         if ( fabs(1.0-(n1+n2+n3)) > 1e-10 ) {
-            printf("Lgm_SummersDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
+            printf("Lgm_GlauertAndHorneDxxBounceAvg: n1+n2+n3 is not 1. Got n1+n2+n3 = %g\n", n1+n2+n3 );
             return(-1);
         }
     }
@@ -884,8 +884,10 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
     } else if ( si->Version == LGM_GLAUERT_AND_HORNE_HIGH_FREQ ) {
 
-	Daa = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
-		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 0);
+	    Daa = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
+            (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, 
+            si->Lambda, si->s, aStar, si->Directions, (int) 0);
 
     } else {
 
@@ -1019,9 +1021,10 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 
     } else if ( si->Version == LGM_GLAUERT_AND_HORNE_HIGH_FREQ ) {
 
-	Dap = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
+	    Dap = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
 		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
-		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 1);
+		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, 
+            si->Lambda, si->s, aStar, si->Directions, (int) 1);
 
     } else {
 
@@ -2454,7 +2457,7 @@ int Lgm_SummersFindFirstMaximumFromLeft( double  (*f)( double, _qpInfo *), _qpIn
         b += inc;
         if ( b > Lat1 ){
             if (Verbose) printf("Warning: Line %d in %s Function monotonically non-increasing over entire interval\n", __LINE__, __FILE__);
-	    (*x) = Lat1; 		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
+	        (*x) = Lat1; 		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
             return(FALSE);
             //done = TRUE;
         } else {
@@ -2462,11 +2465,9 @@ int Lgm_SummersFindFirstMaximumFromLeft( double  (*f)( double, _qpInfo *), _qpIn
             if ( fb > fa ) {
                 foundb = TRUE;
                 done   = TRUE;
-            }
-	    else 			//added by Greg Cunningham on 1-28-2013; since f is monotonically non-increasing, update (a,fa) so that it represents the minimum 
-		{
-		a = b; fa=fb; 
-		}
+            } else {		//added by Greg Cunningham on 1-28-2013; since f is monotonically non-increasing, update (a,fa) so that it represents the minimum 
+		        a = b; fa=fb; 
+		    }
         }
     }
 
@@ -2478,7 +2479,7 @@ int Lgm_SummersFindFirstMaximumFromLeft( double  (*f)( double, _qpInfo *), _qpIn
         c += inc;
         if ( c > Lat1 ){
             if (Verbose) printf("Warning: Line %d in %s Function monotonically non-decreasing over entire interval\n", __LINE__, __FILE__);
-	    (*x) = Lat1;		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
+	        (*x) = Lat1;		//added by Greg Cunningham on 1-28-2013 so that *x contains the right-hand side of the bracket
             return(FALSE);
             //done = TRUE;
         } else {
@@ -2486,11 +2487,9 @@ int Lgm_SummersFindFirstMaximumFromLeft( double  (*f)( double, _qpInfo *), _qpIn
             if ( fc < fb ) {
                 foundc = TRUE;
                 done   = TRUE;
-            }
-	    else 			//added by Greg Cunningham on 1-28-2013; since f is monotonically non-decreasing, update (b,fb) so that it represents the peak 
-		{
-		b = c; fb = fc;  
-		}
+            } else {		//added by Greg Cunningham on 1-28-2013; since f is monotonically non-decreasing, update (b,fb) so that it represents the peak 
+		        b = c; fb = fc;  
+		    }
         }
     }
 
@@ -2758,10 +2757,13 @@ int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, 
  *  	to handle protons in addition to electrons.
  */
 
-double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(double SinAlpha2, double E, double dBoverB2, double BoverBeq, double Omega_e, double Omega_Sig, double Rho, double Sig, double wxl, double wxh, double wxm, double wdx, double xmin, double xmax, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, double Lambda, int sIn, double aStar, int Directions, int tensorFlag )
-{
+double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAlpha2, double E, double dBoverB2, double BoverBeq, 
+        double Omega_e, double Omega_Sig, double Rho, double Sig, double wxl, double wxh, double wxm, double wdx, double xmin, double xmax, 
+        int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, 
+        double Lambda, int sIn, double aStar, int Directions, int tensorFlag ) {
+
 	double 	alpha, KE, wce, wlc, wuc, wm, dw, Bw, B;
-	int	gsl_err, iTheta, nTheta, i, s;
+	int	    gsl_err, iTheta, nTheta, i, s;
 	double	theta, dTheta, wpe, totalDaa, dTanTheta, tanTheta, localDaa, Daa;
 
 //printf("In Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local: SinAlpha2=%g, E=%g, dBoverB2=%g, BoverBeq=%g, Omega_e=%g, Omega_Sig=%g, Rho=%g, Sig=%g, wxl=%g, wxh=%g, wxm=%g, wdx=%g, xmin=%g, xmax=%g, Lambda=%g, s=%d, aStar=%g, Directions=%d, tensorFlag=%d\n", SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, wxl, wxh, wxm, wdx, xmin, xmax, xm, dx, Lambda, sIn, aStar, Directions, tensorFlag);
