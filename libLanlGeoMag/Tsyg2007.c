@@ -34,7 +34,7 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
         for ( k=1; k<=101; k++ ) {
             fscanf( fp, "%lf", &t->A[k] );
-            printf("t->A[%d] = %g\n", k, t->A[k]);
+            //printf("t->A[%d] = %g\n", k, t->A[k]);
         }
 	    fclose(fp);
 
