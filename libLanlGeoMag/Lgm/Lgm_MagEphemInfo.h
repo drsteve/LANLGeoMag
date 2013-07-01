@@ -1,8 +1,8 @@
 #ifndef MAGEPHEMINFO_H
 #define MAGEPHEMINFO_H
 
-#include <Lgm/Lgm_MagModelInfo.h>
-#include <Lgm/Lgm_LstarInfo.h>
+#include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_LstarInfo.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>

@@ -392,6 +392,29 @@ hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, h
 }
 
 
+hid_t   CreateExtendableRank3DataSet( hid_t File, char *DataSetName, int nCol, int nDepth, hid_t Type, hid_t *DataSpace ){
+
+    int             Rank;
+    hsize_t         Dims[4], MaxDims[4], ChunkDims[4];
+    hid_t           cparms, status, DataSet;
+
+
+    Rank         = 3;
+    Dims[0]      = 0;               Dims[1]      = nCol;   Dims[2]      = nDepth;
+    MaxDims[0]   = H5S_UNLIMITED;   MaxDims[1]   = nCol;   MaxDims[2]   = nDepth;
+    ChunkDims[0] = 1;               ChunkDims[1] = nCol;   ChunkDims[2] = nDepth;
+    *DataSpace   = H5Screate_simple( Rank, Dims, MaxDims );
+
+    cparms  = H5Pcreate( H5P_DATASET_CREATE );
+    status  = H5Pset_chunk( cparms, Rank, ChunkDims );
+
+    DataSet = H5Dcreate( File, DataSetName, Type, *DataSpace, H5P_DEFAULT, cparms, H5P_DEFAULT );
+
+
+    return( DataSet );
+
+}
+
 
 /*
  * Convenience rotuinem to create a string data type

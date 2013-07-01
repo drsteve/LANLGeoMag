@@ -1,3 +1,16 @@
+/*! \file Lgm_Vec.c
+ *
+ *  \brief Routines for vector operations (e.g. dot-product, cross-product, etc.)
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

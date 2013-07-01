@@ -124,7 +124,8 @@ Lgm_CTrans *Lgm_CopyCTrans( Lgm_CTrans *s ) {
 
 
 /**
- *  Converts RA and DEC to unit vector in cartesian coords
+ *  \brief
+ *      Converts RA and DEC to unit vector in cartesian coords
  */
 void Lgm_Radec_to_Cart(double ra, double dec, Lgm_Vector *r) {
 
@@ -184,6 +185,7 @@ double Lgm_angle360(double angle) {
 
 
 /**
+ * \brief
  *  Compute the Julian Day number for the given date.
  *  Julian Date is the number of days since noon of Jan 1 4713 B.C.
  */
@@ -267,6 +269,7 @@ double Lgm_kepler(double M, double e) {
 }
 
 /*
+ * \brief
  *  This routine outputs the dipole tilt angle as computed in Lgm_Set_Coord_Transforms
  *
  *   	Date    -- (long int) 	containing date ( e.g. YYYYMMDD or YYYYDDD )
@@ -280,15 +283,33 @@ double Lgm_Dipole_Tilt(long int date, double UTC) {
 }
 
 
-/*
- *  This routine takes date and time and sets up all the transformation
- *  matrices to do coord transformations.
+/** 
+ *   \brief
+ *      This routine takes date and time and sets up all the transformation
+ *      matrices to do coord transformations.
  *
- *   	Date    -- (long int) 	containing date ( e.g. YYYYMMDD or YYYYDDD )
- *	    UT	    -- (double)	    decimal UT in hours ( e.g. 12.0 is noon ).
- *      c	    -- (Lgm_CTrans)	structure containing releveant trans. data
+ *   \details
+ *      This routine computes many quantities required for coordinate
+ *      transformations and stores them in the Lgm_CTrans structure pointed to
+ *      by \a c. The date can be given as an 8-digit long int of the form
+ *      YYYYMMDD or a 7-digit long int of the form YYYYDDD (Year/DayOfYear).
+ *      To discriminate between these two formats, the routine assumes the
+ *      following ranges of validity;
+ *          - yyyyddd   (where yyyy is assumed to be between 1000 A.D. and 9999 A.D.)
+ *          - yyyymmdd  (where yyyy is assumed to be between 1000 A.D. and 9999 A.D.)
+ *
+ *   \param[in]      date   The date represented as an 8-digit long int in the form YYYYMMDD (or a 7-digit date in the form YYYYDDD.)
+ *   \param[in]      UTC    The UTC time of the day in decimal hours.
+ *   \param[in,out]  c      Pointer to an Lgm_CTrans structure.
+ *
+ *
+ *   \returns        void
+ *
+ *   \author         Mike Henderson
+ *   \date           2013
+ *
  */
-void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
+void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 
     int    	    year, month, day, doy;
     double 	    TU, gmst, gast, sn, cs, Time;
@@ -1102,8 +1123,6 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
 
 
 /*
- *  Routine converts coords from one system to another. All of the major
- *  systems aout to be defined -- see ctrans.h for flag definitions.
  *
  *     Lgm_Vector *u;      -- input vector
  *     Lgm_Vector *v;      -- output vector
@@ -1112,7 +1131,95 @@ void Lgm_Set_Coord_Transforms(long int date, double UTC, Lgm_CTrans *c) {
  *     Lgm_CTrans *c;      -- structure that holds all the coord trans info
  *
  */
-void Lgm_Convert_Coords(Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c) {
+
+
+/** 
+ *   \brief
+ *      Transforms the components of a vector from one coordinate system to another.
+ *
+ *   \details
+ *      The defined coordinate systems are given in the Lgm_CTrans.h file.
+ *      Typically, the user will use a predefined nmenomic to implement the
+ *      transformation (e.g. GSM_TO_SM or SM_TO_GSM or TEME_TO_GSE, etc). For
+ *      example, to transform a position vector from GSM to SM, a complete
+ *      program (foo.c) could look something like this (compile with gcc
+ *      \`pkg-config \-\-libs \-\-cflags lgm\` foo.c -o foo);
+ *
+ *            \code
+ *                  #include <Lgm_CTrans.h>
+ *                  int main( ) {
+ *
+ *                      Lgm_CTrans  *c = Lgm_init_ctrans( 1 ); // The '1' produces verbose output.
+ *                      Lgm_Vector  Ugsm, Usm;
+ *                      long int    Date;
+ *                      double      UTC;
+ *
+ *                      // Set Date and Time
+ *                      Date = 20000101; // Jan 1, 2000
+ *                      UTC  = 3.5;      // 3:30 UTC 
+ *
+ *                      // Set a vector in GSM coordinates
+ *                      Ugsm.x = -6.6;   // Re
+ *                      Ugsm.y =  3.4;   // Re
+ *                      Ugsm.z = -2.3;   // Re
+ *
+ *                      // Set up all the necessary transformations for this Date/UTC
+ *                      Lgm_Set_Coord_Transforms( Date, UTC, c );
+ *
+ *                      // Do the transformation from GSM->SM
+ *                      Lgm_Convert_Coords( &Ugsm, &Usm, GSM_TO_SM, c );
+ *
+ *                      // Print out the final results
+ *                      printf( "Date = %8ld\n", Date );
+ *                      printf( "UTC  = %lf\n", UTC );
+ *                      printf( "Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z );
+ *                      printf( "Usm  = %.8lf %.8lf %.8lf Re\n",  Usm.x,  Usm.y,  Usm.z );
+ *
+ *                      // free the structure
+ *                      Lgm_free_ctrans( c );
+ *
+ *                      return(0);
+ *
+ *                  }
+ *                      
+ *            \endcode
+ *
+ *      Internally, the transformation is identified by decoding the number
+ *      represented by the predefined flags. Each of these are defined as a
+ *      4-digit integer of the form FFTT, where FF (the 'from' field) and TT
+ *      (the 'to' field') are both numbers of the form 0-99 (TT is zero
+ *      padded). Each of these numbers represents an identifier for a specific
+ *      coordinate system. For example, GSM is 8 and SM is 9, so the
+ *      transformation from GSM to SM as represented by GSM_TO_SM is encoded as
+ *      the number 809. The reverse transformation (specified by SM_TO_GSM) is
+ *      encoded by the number 908. The transformation is (typically)
+ *      accomplished in two stages. First, the vector is transformed into an
+ *      intermediate system (currently MOD (Mean Of Date) Inertial is used.)
+ *      Then the vector is transformed to the final system from the
+ *      intermediate system. This strategy allows for transformation between
+ *      any of the geocentric cartesian systems defined.  In practice, the user
+ *      should always use the predefined flags to make the code more readable.
+ *
+ *      This routine can be used for any cartesian vector (e.g. position
+ *      vectors or magnetic fields, etc.).
+ *
+ *
+ *   \param[in]      u      The input vector.
+ *   \param[in]      UTC    The transformed output vector.
+ *   \param[in]      flag   A flag describing the desired coordinate transformation.
+ *   \param[in,out]  c      Pointer to a properly configured Lgm_CTrans structure (See Lgm_Set_Coord_Transforms() ).
+ *
+ *  
+ *
+ *   \returns        void
+ *   \sa             Lgm_init_ctrans(),  Lgm_Set_Coord_Transforms( )
+ *
+ *   \author         Mike Henderson
+ *   \date           2013
+ *
+ *
+ */
+void Lgm_Convert_Coords( Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c ) {
 
     Lgm_Vector 	w, r, z, e, d;
     int 	    inflag, outflag;

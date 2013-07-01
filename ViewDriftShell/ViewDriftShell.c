@@ -3493,6 +3493,7 @@ static void realize( GtkWidget *widget, gpointer data) {
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
 
 
@@ -3556,6 +3557,9 @@ static void realize( GtkWidget *widget, gpointer data) {
     // Create Drift Shell surfaces
     GenerateDriftShellLists( ObjInfo );
 
+
+    // Misc Field Lines
+//    GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3723,6 +3727,9 @@ CHECK COORDS!
 
 
 
+
+
+
 if (LightingStyle == 2){
 //  cgGLBindProgram(myCgVertexProgram);
 //  checkForCgError("binding vertex program");
@@ -3750,6 +3757,19 @@ if (LightingStyle == 2){
 //ViewPosition[2] = aInfo->Camera.z;
 //glUniform3fv( ViewPositionLoc, 1, LightPosition );
 //glUniform3fv( LightDirLoc, 1, LightPosition );
+
+
+
+
+
+//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+//glCallList( ObjInfo->MiscFieldLines );
+
+
+
 
     if ( ShowAllPitchAngles ) {
         /*
@@ -4220,6 +4240,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
 
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
+//glClearColor( 1.0, 1.0, 1.0, 1.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {
 
@@ -4446,6 +4468,7 @@ static gboolean motion_notify_event( GtkWidget *widget, GdkEventMotion *event, g
 
 static gboolean idle( GtkWidget *widget ) {
 
+    static int  AllowSave = TRUE;
     double      oJD;
     char        Str[256];
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
@@ -4494,18 +4517,26 @@ static gboolean idle( GtkWidget *widget ) {
         expose_event( drawing_area, NULL, NULL );
 
         
-        if ( DumpFrames && ((CurrentSec >  59.5) || (CurrentSec < 0.5)) ){
-//        if ( DumpFrames ){
-            int x, y, width, height, depth;
-            GdkPixbuf *pixbuf;
-            char PngFile[40];
-            gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
-            pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
-            //sprintf( PngFile, "%04ld.png", cFrame );
-            sprintf( PngFile, "Latest.png" );
-            gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
-            g_object_unref( pixbuf );
+        if ( DumpFrames ){
+            if ( (CurrentSec >  59.5) || (CurrentSec < 0.5) ){
+                if ( AllowSave ) {
+                    int x, y, width, height, depth;
+                    GdkPixbuf *pixbuf;
+                    char PngFile[40];
+                    gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
+                    pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
+                    //sprintf( PngFile, "%04ld.png", cFrame );
+                    sprintf( PngFile, "Latest.png" );
+printf("Writing: %s\n", PngFile );
+                    gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
+                    g_object_unref( pixbuf );
+                    AllowSave = FALSE;
+                }
+            } else {
+                AllowSave = TRUE;
+            }
         }
+
 
         if (oJD != CurrentJD){
             sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,

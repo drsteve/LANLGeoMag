@@ -101,6 +101,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
      */
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL2, LstarInfo->mInfo );
     MagEphemInfo->FieldLineType = TraceFlag;
+//printf("P = %g %g %g   Blocal = %lf Bmin = %lf \n",  u->x, u->y, u->z, Blocal, MagEphemInfo->Bmin );
     if ( TraceFlag > 0 ) {
         MagEphemInfo->Ellipsoid_Footprint_Ps  = v1;
         MagEphemInfo->Ellipsoid_Footprint_Pn  = v2;

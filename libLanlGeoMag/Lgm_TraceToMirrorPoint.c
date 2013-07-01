@@ -1,3 +1,17 @@
+/*! \file Lgm_TraceToMirrorPoint.c
+ *
+ *  \brief Routines to find the mirror point location along a field line (for a given ptich angle).
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2004
+ *
+ *
+ *
+ */
+
+
 /* TraceToMirrorPoint, Copyright (c) 2004 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *    - Starting at Minimum-B point, and given a value of mu_eq (mu = cos(pitch angle)),

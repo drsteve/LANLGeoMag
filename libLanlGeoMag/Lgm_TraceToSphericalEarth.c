@@ -1,3 +1,17 @@
+/*! \file Lgm_TraceToSphericalEarth.c
+ *
+ *  \brief Routines to find the footpoint in a given direction along a field line assuming a spherically shaped Earth.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   2010
+ *
+ *
+ *
+ */
+
+
 /* TraceToSphericalEarth, Copyright (c) 2010 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *    - Attempts to trace FL down to (some height above) the Earth.

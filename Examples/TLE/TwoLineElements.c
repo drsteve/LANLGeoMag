@@ -22,8 +22,8 @@ int main( int argc, char *argv[] ){
     Lgm_EopOne  eop;
     int         nTLEs;
     char        Line0[100], Line1[100], Line2[100], *ptr;
-    char        *InputFile  = "ssa_swx_tle_input.txt";
-    char        *OutputFile = "ssa_swx_tle_output.txt";
+    char        *InputFile  = "SSA_Forte.txt";
+    char        *OutputFile = "Output.txt";
     FILE        *fp;
 
 
@@ -124,6 +124,7 @@ int main( int argc, char *argv[] ){
         // Call SGP4. Coords are in TEME. 
         LgmSgp_SGP4( tsince, s );
         Uteme.x = s->X/WGS84_A; Uteme.y = s->Y/WGS84_A; Uteme.z = s->Z/WGS84_A;
+printf("*%8ld %.10lf %15.9lf %15.9lf %15.9lf\n", Date, UT, Uteme.x, Uteme.y, Uteme.z  );
 
         // Example of converting TEME->GSE coords.
         Lgm_Convert_Coords( &Uteme, &Ugse, TEME_TO_WGS84, c );

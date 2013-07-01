@@ -1,3 +1,18 @@
+/*! \file Lgm_TraceToEarth.c
+ *
+ *  \brief Routines to find the footpoint in a given direction along a field line.
+ *
+ *
+ *
+ *  \author M.G. Henderson
+ *  \date   1999
+ *
+ *
+ *
+ */
+
+
+
 /* TraceToEarth, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *    - Attempts to trace FL down to (some height above) the Earth.
@@ -19,6 +34,12 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_WGS84.h"
 
+
+
+
+
+
+
 double eeFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
 
     Lgm_Vector  w;
@@ -33,7 +54,33 @@ double eeFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
 }
 
 
-
+/**
+ *  \brief
+ *      This routine attempts to trace to the Earth (from the input position) in the 
+ *      a given direction along the field line.  
+ *
+ *
+ *  \detail
+ *      \param[in]       u           Input position vector in GSM coordinates.
+ *      \param[out]      v           The final point. This will be the desired footpoint if the FL is closed. Otherwise it is where we detected the FL was open.
+ *      \param[in]      TargetHeight The altitude (in km) above the WGS84 ellispoid (i.e. geodetic height) used to define what we mean by the footpoint altitude.
+ *      \param[in]      TOL1         Tolerance for converging on footpoint location.
+ *      \param[in]      sgn          Direction for trace. +1.0 is with the field, -1.0 is against the field.
+ *      \param[in,out]  Info         Properly initialized/configured Lgm_MagModelInfo structure.
+ *  
+ *  \return 
+ *          - LGM_OPEN_IMF     ( = 0 ) if field line is open at both ends (i.e. an IMF FL). In this case, nonem of the v1, v2, v3 values are valid.
+ *          - LGM_CLOSED       ( = 1 ) if field line is closed. In this case all of the v1, v2, v3 are valid.
+ *          - LGM_OPEN_N_LOBE  ( = 2 ) if field line is northern lobe FL (v2 valid).
+ *          - LGM_OPEN_S_LOBE  ( = 3 ) if field line is southern lobe FL (v1 valid).
+ *          - LGM_INSIDE_EARTH ( = -1 ) initial point is inside Earth (no points valid).
+ *          - LGM_TARGET_HEIGHT_UNREACHABLE ( = -2 ) field line never got above the target height (no points valid).
+ *          - LGM_BAD_TRACE    ( = -3 ) Lgm_MagStep() was unable to make a non-zero step (B-field zero?).
+ *
+ *  \author         M. Henderson
+ *  \date           1999-2011
+ *
+ */
 int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double sgn, double tol, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;

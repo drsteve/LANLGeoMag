@@ -130,6 +130,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     Lgm_Init_T96( &MagInfo->T96_Info );
 
     /*
+     * Inits for T01
+     */
+    Lgm_Init_T01S( &MagInfo->T01_Info );
+
+    /*
      * Inits for TS04
      */
     Lgm_Init_TS04( &MagInfo->TS04_Info );
@@ -292,6 +297,14 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
+        case LGM_EXTMODEL_TU82:
+                                m->Bfield = Lgm_B_TU82;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+        case LGM_EXTMODEL_OP88:
+                                m->Bfield = Lgm_B_OP88;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
         case LGM_EXTMODEL_T87:
                                 m->Bfield = Lgm_B_T87;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
@@ -309,6 +322,11 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
 
         case LGM_EXTMODEL_T96:
                                 m->Bfield = Lgm_B_T96;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+
+        case LGM_EXTMODEL_T02:
+                                m->Bfield = Lgm_B_T02;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
