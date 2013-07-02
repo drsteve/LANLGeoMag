@@ -52,8 +52,7 @@ endif
 
 uninstall-hook:
 if ENABLE_INDICES
-	#if user has populated index data, don't delete the data.
-	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
 	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
 endif
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag
