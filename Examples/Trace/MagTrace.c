@@ -207,7 +207,7 @@ Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
 Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     
-    Lgm_Set_Open_Limits( mInfo, -25.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
+    Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
 
     LGM_ARRAY_2D( Image, NX, NY, double );

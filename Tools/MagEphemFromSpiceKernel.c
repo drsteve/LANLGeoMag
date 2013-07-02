@@ -134,7 +134,7 @@ static struct argp_option Options[] = {
     {"IntModel",        'i',    "model",                        0,        "Internal Magnetic Field Model to use. Can be CDIP, EDIP, IGRF. Default is IGRF.\n\n", 0},
 
     { 0, 0, 0, 0,   "External Model Options:", 3},
-    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T01D, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
+    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T96, T02, T01S, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
 
 /*
@@ -153,7 +153,7 @@ static struct argp_option Options[] = {
 "T87D\n"
 "\tTsyganenko 1987 model with Qin-Denton input\n"
 "\tparameters.\n"
-"T89D\n"
+"T02D, T89D\n"
 "\tTsyganenko 1989 model with Qin-Denton input\n"
 "\tparameters.\n"
 "T01S\n"
@@ -896,6 +896,8 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T96;
     } else if ( !strcmp( ExtModel, "T01S" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T01S;
+    } else if ( !strcmp( ExtModel, "T02" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T02;
     } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else if ( !strcmp( ExtModel, "TS07D" ) ){
