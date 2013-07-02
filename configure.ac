@@ -212,12 +212,15 @@ AC_ARG_WITH([pythondir],
     [pythondir="$withval"], [])
 AC_SUBST(pythondir)
 
-dnl Get flags for embedded perl and make sure it works
-dnl Save old CFLAGS/LDFLAGS so can restore after the check
 AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
 if test x"${HAVE_PERL}" == x"false"; then
     AC_MSG_FAILURE([Unable to run perl])
 fi
+
+AX_PROG_PERL_MODULES( [ExtUtils::Embed], , [AC_MSG_FAILURE(
+		      Required Perl module ExtUtils::Embed not found)])
+dnl Get flags for embedded perl and make sure it works
+dnl Save old CFLAGS/LDFLAGS so can restore after the check
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 #get out JUST the rpath bit, since this needs to go in LDFLAGS
