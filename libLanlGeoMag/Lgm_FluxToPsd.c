@@ -49,7 +49,7 @@ typedef struct _FitData {
  *
  *      we have,
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              \mu = {p_\perp^2 \over 2 m_\circ B } &=& {p^2c^2\over (2 m_\circ c^2 B)} \sin^2(\alpha) \\
  *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
@@ -129,7 +129,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *      Some relativistic equations:
  *
  *      With,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                      m       &=& \mbox{Particle mass.}\\
  *                      m_\circ &=& \mbox{Particle rest mass.}\\
  *                      v       &=& \mbox{Particle speed.}\\
@@ -148,7 +148,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      With,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                  E  = mc^2             &=& \mbox{Total Energy of particle} \\
  *                  E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
  *                  p                     &=& \mbox{relativistic momentum of particle}
@@ -165,7 +165,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                  p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
  *                          &=& E_k (E_k+2E_\circ)
  *              \f}
@@ -191,7 +191,7 @@ double  Lgm_p2c2( double Ek, double E0 ) {
  *      Uses the following relation,
  *      
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              \beta^2 &=& 1 - {1\over \gamma^2} \\
  *                      &=& 1 - {1\over (1+E_k/E_\circ)^2}
  *          \f}
@@ -247,7 +247,7 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *          \f]
  *
  *      Multiplying the top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -283,7 +283,7 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *          \f]
  *
  *      Multiply top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
