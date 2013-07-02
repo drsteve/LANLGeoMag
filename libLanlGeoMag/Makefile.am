@@ -40,18 +40,20 @@ libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 
-EXTRA_DIST = QinDenton TS07D_FILES
+EXTRA_DIST = TS07D_FILES
 
 install-data-hook:
 if ENABLE_INDICES
-	$(MKDIR_P) $(DESTDIR)$(LGM_INDEX_DATA_DIR)
-	$(RSYNC_CMD) -a $(srcdir)/QinDenton $(DESTDIR)$(LGM_INDEX_DATA_DIR)/.
+	$(MKDIR_P) $(DESTDIR)$(LGM_TS07_DATA_DIR)
 	$(RSYNC_CMD) -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+	$(MKDIR_P) $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	@echo Qin-Denton index files should be placed in $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 endif
 
 uninstall-hook:
 if ENABLE_INDICES
-	-rm -rf $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	#if user has populated index data, don't delete the data.
+	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
 endif
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag

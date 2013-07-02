@@ -130,9 +130,9 @@ if test "x$enable_tools" == "xyes"; then
    LIBS=${OLD_LIBS}
 fi
 
-# Allow disabling of Qin-Denton files
+# Allow disabling of TS07D files
 AC_ARG_ENABLE([indices],
-  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data (default: enable)])],
+  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data for TS07D (default: enable)])],
   [AM_CONDITIONAL([ENABLE_INDICES], [test x"$enableval" != x"no"])],
   [AM_CONDITIONAL([ENABLE_INDICES], true)]
 )
