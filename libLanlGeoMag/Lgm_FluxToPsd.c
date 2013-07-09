@@ -215,7 +215,9 @@ double  Lgm_v2overc2( double Ek, double E0 ) {
  *  \brief
  *      Computes relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$.
  *  \details
- *       Returns relativistic factor \f$\gamma=[1-(v/c)^2]^{-1/2}\f$ .
+ *       Returns relativistic gamma factor,
+ *            \f$\gamma=[1-(v/c)^2]^{-1/2}\f$ .
+ *
  *       Since \f$E=\gamma m_\circ c^2 = \gamma E_\circ\f$ and 
  *       \f$E=E_k+E_\circ\f$, we have;
  *

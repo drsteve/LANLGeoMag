@@ -128,6 +128,7 @@ static struct argp_option Options[] = {
     { 0, 0, 0, 0,   "Time Options:", 1},
     {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",          0,        "Start date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
     {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",          0,        "End date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
+    {"ModelDateTime",   'T',    "yyyymmdd[Thh:mm:ss]",          0,        "Force the model to use parameters for the given date/time. This can be used to force the model to be static instead of dynamic. Date/time in ISO 8601 format .", 0 },
     {"Delta",           'D',    "delta",                        0,        "Time cadence in (integer) seconds.", 0 },
 
     { 0, 0, 0, 0,   "Internal Model Options:", 2},
@@ -213,6 +214,9 @@ struct Arguments {
     char        StartDateTime[80];
     char        EndDateTime[80];
 
+    int         FixModelDateTime;
+    char        ModelDateTimeStr[80];
+
     long int    StartDate;          // Start date (e.g. 20130201)
     long int    EndDate;            // End date (e.g. 20130228)
 
@@ -266,6 +270,10 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
                 arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             }
             Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
+            break;
+        case 'T': // end date
+            strncpy( arguments->ModelDateTimeStr, arg, 80 );
+            arguments->FixModelDateTime = 1;
             break;
         case 'e': // external model
             strcpy( arguments->ExtModel, arg );
@@ -635,9 +643,10 @@ int main( int argc, char *argv[] ){
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
     Lgm_Vector       Rgsm, Rgeo, W, U;
-    Lgm_DateTime     UTC;
+    Lgm_DateTime     UTC, ModelDateTime;
     Lgm_Eop          *e = Lgm_init_eop( 0 );
     Lgm_EopOne       eop;
+    int              FixModelDateTime;
     int              i;
     char             IsoTimeString[1024];
     char             InputFilename[1024];
@@ -722,24 +731,26 @@ int main( int argc, char *argv[] ){
     /*
      * Default option values.
      */
-    arguments.StartPA         = 90;     // start at 90.0 Deg.
-    arguments.EndPA           = 5.0;    // stop at 2.5 Deg.
-    arguments.nPA             = 18;     // 18 pitch angles
-    arguments.silent          = 0;
-    arguments.Verbosity       = 0;
-    arguments.Quality         = 3;
-    arguments.Kp              = -999.9;
-    arguments.Delta           = 60;     // 60s default cadence
-    arguments.Colorize        = 0;
-    arguments.Force           = 0;
-    arguments.UseEop          = 0;
-    arguments.DumpShellFiles  = 0;
-    arguments.StartDate       = -1;
-    arguments.EndDate         = -1;
-    arguments.FootPointHeight = 100.0; // km
+    arguments.StartPA          = 90;     // start at 90.0 Deg.
+    arguments.EndPA            = 5.0;    // stop at 2.5 Deg.
+    arguments.nPA              = 18;     // 18 pitch angles
+    arguments.silent           = 0;
+    arguments.Verbosity        = 0;
+    arguments.Quality          = 3;
+    arguments.Kp               = -999.9;
+    arguments.Delta            = 60;     // 60s default cadence
+    arguments.Colorize         = 0;
+    arguments.Force            = 0;
+    arguments.UseEop           = 0;
+    arguments.DumpShellFiles   = 0;
+    arguments.FixModelDateTime =  0;
+    arguments.StartDate        = -1;
+    arguments.EndDate          = -1;
+    arguments.FootPointHeight  = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
     strcpy( arguments.ExtModel, "T89D" );
     strcpy( arguments.CoordSystem, "LATLONRAD" );
+    strcpy( arguments.ModelDateTimeStr,  "" );
 
 
     /*
@@ -779,22 +790,24 @@ int main( int argc, char *argv[] ){
     /*
      *  Set other options
      */
-    FootpointHeight = arguments.FootPointHeight;
-    Quality         = arguments.Quality;
-    ForceKp         = arguments.Kp;
-    Verbosity       = arguments.Verbosity;
-    Colorize        = arguments.Colorize;
-    Force           = arguments.Force;
-    UseEop          = arguments.UseEop;
-    DumpShellFiles  = arguments.DumpShellFiles;
-    Delta           = arguments.Delta;
-    StartDate       = arguments.StartDate;
-    EndDate         = arguments.EndDate;
-    StartSeconds    = arguments.StartSeconds;
-    EndSeconds      = arguments.EndSeconds;
+    FootpointHeight  = arguments.FootPointHeight;
+    Quality          = arguments.Quality;
+    ForceKp          = arguments.Kp;
+    Verbosity        = arguments.Verbosity;
+    Colorize         = arguments.Colorize;
+    Force            = arguments.Force;
+    UseEop           = arguments.UseEop;
+    DumpShellFiles   = arguments.DumpShellFiles;
+    Delta            = arguments.Delta;
+    StartDate        = arguments.StartDate;
+    EndDate          = arguments.EndDate;
+    StartSeconds     = arguments.StartSeconds;
+    EndSeconds       = arguments.EndSeconds;
+    FixModelDateTime = arguments.FixModelDateTime;
     strcpy( IntModel,  arguments.IntModel );
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
+    if ( FixModelDateTime ) IsoTimeStringToDateTime( arguments.ModelDateTimeStr, &ModelDateTime, c );
 
     LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
@@ -821,6 +834,9 @@ int main( int argc, char *argv[] ){
         printf("\n");
         printf( "\t                Internal Model: %s\n", IntModel );
         printf( "\t                External Model: %s\n", ExtModel );
+        if ( FixModelDateTime ) {
+            printf( "\t     Model Parameters Fixed to: %s  ( ", arguments.ModelDateTimeStr ); Lgm_Print_DateTime( &ModelDateTime, 4, 8 );  printf( " )\n" );
+        }
         if ( ForceKp >= 0.0 ) {
             printf( "\t              Forcing Kp to be: %g\n", ForceKp );
         }
@@ -1514,8 +1530,13 @@ printf("sclkdp = %lf\n", sclkdp);
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
-                        Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        if ( FixModelDateTime ) {
+                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, 1 );
+                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        } else {
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
+                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        }
 
 
                         if ( ForceKp >= 0.0 ) {
