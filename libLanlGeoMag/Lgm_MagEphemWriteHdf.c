@@ -1178,8 +1178,8 @@ void Lgm_WriteMagEphemDataHdf( hid_t file, int i, Lgm_MagEphemData *med ) {
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_geo",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_geo[i][0] );          // Write Bfs_geo
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_gsm",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_gsm[i][0] );          // Write Bfs_gsm
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_s", i,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleS[i] );      // Write Loss_Cone_Alpha_s
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i] );            // Write Pmin_gsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i] );            // Write Pmin_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i][0] );         // Write Pmin_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i][0] );         // Write Bmin_gsm
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lsimple",           i,                  H5T_NATIVE_DOUBLE, &med->H5_Lsimple[i] );             // Write Lsimple
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat",            i,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat[i] );              // Write InvLat
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lm_eq",             i,                  H5T_NATIVE_DOUBLE, &med->H5_Lm_eq[i] );               // Write Lm_eq

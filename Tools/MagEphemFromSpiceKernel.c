@@ -1902,8 +1902,8 @@ printf("sclkdp = %lf\n", sclkdp);
                              */
                             MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
                             Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                            Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfn_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
-                            Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfn_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
+                            Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfs_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
+                            Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfs_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
 
 
                             /*
