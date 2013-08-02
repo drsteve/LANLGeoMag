@@ -1276,7 +1276,7 @@ if (file >= 0 ){
                     while ( !done ) {
                         if ( (Rb < Ra) && (Rb < Rc) ) {
                             // we have a bracket. Find Min.
-                            Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
+                            Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                                 et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
@@ -1288,7 +1288,7 @@ if (file >= 0 ){
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Apogee_Geod[nApogee][0], &med->H5_Apogee_Geod[nApogee][1], &med->H5_Apogee_Geod[nApogee][2] );
 
                                 Lgm_DateTimeToString( med->H5_Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
-                                //printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                                printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
                                 ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
                                 ++nApoPeriTimeList;
@@ -1311,6 +1311,7 @@ if (file >= 0 ){
                     /*
                      * Find Perigees. Same as above except set afi->Sgn = 1.
                      */
+                    printf("\n");
                     afi->Sgn  = 1; // +1 => find min (perigee)   -1 => find max (apogee)
                     Ta = -900; Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
                     Tb =    0; Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
@@ -1333,7 +1334,7 @@ if (file >= 0 ){
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Perigee_Geod[nPerigee][0], &med->H5_Perigee_Geod[nPerigee][1], &med->H5_Perigee_Geod[nPerigee][2] );
 
                                 Lgm_DateTimeToString( med->H5_Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
-                                //printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+                                printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
 
                                 ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
@@ -1350,6 +1351,7 @@ if (file >= 0 ){
                     }
                     free( afi );
                     med->H5_nPerigee = nPerigee;
+                    printf("\n");
 
                     /*
                      * sort the merged list of apogee/perigee times.
@@ -1424,7 +1426,12 @@ int          N0, ii;
                     } else if ( !strcmp( Bird, "rbspb" ) ){
 
                         // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
-                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+                        //Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+                        //T0 = T0_UTC.JD;
+                        //N0 = 3;
+                          
+                        //Apogee: 2013-04-01T05:34:03.877Z   Tp = 0.376156 Tapo = 2456383.731989   Tapo-T0 = 213.093   (Tapo - T0)/Tp = 566.503   ApogeeOrbitNumber = 569
+                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+32.618/3600.0, &T0_UTC, c );
                         T0 = T0_UTC.JD;
                         N0 = 3;
 
@@ -1437,7 +1444,7 @@ int          N0, ii;
                     for ( ii=0; ii<nApogee; ++ii ){
                         Tapo = Apogee_UTC[ii].JD;
                         ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
-                        printf("Apogee: %s   Tp = %g Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
+                        printf("Apogee: %s   N0 = %d T0 = %lf Tp = %lf Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], N0, T0, Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
                     }
 
 
@@ -1452,7 +1459,7 @@ int          N0, ii;
                         PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
                     }
                     for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
-                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeerbitNumber = %d\n", PerigeeOrbitNumber[ii] );
+                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeeOrbitNumber = %d\n", PerigeeOrbitNumber[ii] );
 
 
 
