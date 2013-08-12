@@ -121,7 +121,7 @@
  */
 #define LGM_ARRAY_1D( prow, col, type ) {\
     register type *pdata;\
-    pdata = (type *)calloc( col, sizeof( type ) );\
+    pdata = (type *)calloc( (col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_1D Macro: Could not allocate space for data\n");\
         exit(1);\
@@ -140,19 +140,19 @@
 #define LGM_ARRAY_2D( prow, row, col, type ) {\
     register type *pdata;\
     int      mi;\
-    pdata = (type *)calloc( row*col, sizeof( type ) );\
+    pdata = (type *)calloc( (row)*(col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for data\n");\
         exit(1);\
     }\
-    prow = (type **)calloc( row, sizeof( type * ));\
+    prow = (type **)calloc( (row), sizeof( type * ));\
     if ( prow == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
-    for (mi=0; mi<row; mi++){\
+    for (mi=0; mi<(row); mi++){\
         prow[mi] = pdata;\
-        pdata += col;\
+        pdata += (col);\
     }\
 }\
 
@@ -169,28 +169,28 @@
 #define LGM_ARRAY_3D( pgrid, grid, row, col, type ) {\
     register type **prow, *pdata;\
     int      i;\
-    pdata = (type *)calloc( grid*row*col, sizeof( type ) );\
+    pdata = (type *)calloc( (grid)*(row)*(col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_3D Macro: Could not allocate space for data\n");\
         exit(1);\
     }\
-    prow = (type **)calloc( grid*row, sizeof( type * ));\
+    prow = (type **)calloc( (grid)*(row), sizeof( type * ));\
     if ( prow == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_3D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
-    pgrid = (type ***)calloc( grid, sizeof( type * ));\
+    pgrid = (type ***)calloc( (grid), sizeof( type * ));\
     if ( pgrid == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_3D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
-    for (i=0; i<grid*row; i++){\
+    for (i=0; i<(grid)*(row); i++){\
         prow[i] = pdata;\
-        pdata += col;\
+        pdata += (col);\
     }\
-    for (i=0; i<grid; i++){\
+    for (i=0; i<(grid); i++){\
         pgrid[i] = prow;\
-        prow += row;\
+        prow += (row);\
     }\
 }\
     
@@ -210,37 +210,37 @@
 #define LGM_ARRAY_4D( pn4, n4, n3, n2, n1, type ) {\
     long int i;\
     register type ***pn3, **pn2, *pdata;\
-    pdata = (type *)calloc( n4*n3*n2*n1, sizeof( type ) );\
+    pdata = (type *)calloc( (n4)*(n3)*(n2)*(n1), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_4D Macro: Could not allocate space for data\n");\
         exit(1);\
     }\
-    pn2 = (type **)calloc( n4*n3*n2, sizeof( type * ));\
+    pn2 = (type **)calloc( (n4)*(n3)*(n2), sizeof( type * ));\
     if ( pn2 == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_4D Macro: Could not allocate space for n2 pointers\n");\
         exit(1);\
     }\
-    pn3 = (type ***)calloc( n4*n3, sizeof( type * ));\
+    pn3 = (type ***)calloc( (n4)*(n3), sizeof( type * ));\
     if ( pn3 == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_4D Macro: Could not allocate space for n3 pointers\n");\
         exit(1);\
     }\
-    pn4 = (type ****)calloc( n4, sizeof( type * ));\
+    pn4 = (type ****)calloc( (n4), sizeof( type * ));\
     if ( pn4 == (type ****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_4D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
-    for (i=0; i<n4*n3*n2; i++){\
+    for (i=0; i<(n4)*(n3)*(n2); i++){\
         pn2[i] = pdata;\
-        pdata += n1;\
+        pdata += (n1);\
     }\
-    for (i=0; i<n4*n3; i++){\
+    for (i=0; i<(n4)*(n3); i++){\
         pn3[i] = pn2;\
-        pn2 += n2;\
+        pn2 += (n2);\
     }\
-    for (i=0; i<n4; i++){\
+    for (i=0; i<(n4); i++){\
         pn4[i] = pn3;\
-        pn3 += n3;\
+        pn3 += (n3);\
     }\
     pn4 = &pn4[0];\
 }\
@@ -262,46 +262,46 @@
 #define LGM_ARRAY_5D( pn5, n5, n4, n3, n2, n1, type ) {\
     long int i;\
     register type ****pn4, ***pn3, **pn2, *pdata;\
-    pdata = (type *)calloc( n5*n4*n3*n2*n1, sizeof( type ) );\
+    pdata = (type *)calloc( (n5)*(n4)*(n3)*(n2)*(n1), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for data\n");\
         exit(1);\
     }\
-    pn2 = (type **)calloc( n5*n4*n3*n2, sizeof( type * ));\
+    pn2 = (type **)calloc( (n5)*(n4)*(n3)*(n2), sizeof( type * ));\
     if ( pn2 == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for n2 pointers\n");\
         exit(1);\
     }\
-    pn3 = (type ***)calloc( n5*n4*n3, sizeof( type * ));\
+    pn3 = (type ***)calloc( (n5)*(n4)*(n3), sizeof( type * ));\
     if ( pn3 == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for n3 pointers\n");\
         exit(1);\
     }\
-    pn4 = (type ****)calloc( n5*n4, sizeof( type * ));\
+    pn4 = (type ****)calloc( (n5)*(n4), sizeof( type * ));\
     if ( pn4 == (type ****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
-    pn5 = (type *****)calloc( n5, sizeof( type * ));\
+    pn5 = (type *****)calloc( (n5), sizeof( type * ));\
     if ( pn5 == (type *****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
-    for (i=0; i<n5*n4*n3*n2; i++){\
+    for (i=0; i<(n5)*(n4)*(n3)*(n2); i++){\
         pn2[i] = pdata;\
-        pdata += n1;\
+        pdata += (n1);\
     }\
-    for (i=0; i<n5*n4*n3; i++){\
+    for (i=0; i<(n5)*(n4)*(n3); i++){\
         pn3[i] = pn2;\
-        pn2 += n2;\
+        pn2 += (n2);\
     }\
-    for (i=0; i<n5*n4; i++){\
+    for (i=0; i<(n5)*(n4); i++){\
         pn4[i] = pn3;\
-        pn3 += n3;\
+        pn3 += (n3);\
     }\
-    for (i=0; i<n5; i++){\
+    for (i=0; i<(n5); i++){\
         pn5[i] = pn4;\
-        pn4 += n4;\
+        pn4 += (n4);\
     }\
 }\
 
@@ -347,15 +347,15 @@
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_2D Macro: pdata is NULL\n");\
         exit(1);\
     }\
-    prow = (type **)calloc( row, sizeof( type * ));\
+    prow = (type **)calloc( (row), sizeof( type * ));\
     if ( prow == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_2D Macro: pdata is NULL\n");\
         exit(1);\
     }\
     pdata_tmp = pdata;\
-    for (i=0; i<row; i++){\
+    for (i=0; i<(row); i++){\
         prow[i] = pdata_tmp;\
-        pdata_tmp += col;\
+        pdata_tmp += (col);\
     }\
 }\
 
@@ -375,24 +375,24 @@
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_3D Macro: pdata is NULL\n");\
         exit(1);\
     }\
-    prow = (type **)calloc( grid*row, sizeof( type * ));\
+    prow = (type **)calloc( (grid)*(row), sizeof( type * ));\
     if ( prow == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_3D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
-    pgrid = (type ***)calloc( grid, sizeof( type * ));\
+    pgrid = (type ***)calloc( (grid), sizeof( type * ));\
     if ( pgrid == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_3D Macro: Could not allocate space for row pointers\n");\
         exit(1);\
     }\
     pdata_tmp = pdata;\
-    for (i=0; i<grid*row; i++){\
+    for (i=0; i<(grid)*(row); i++){\
         prow[i] = pdata_tmp;\
-        pdata_tmp += col;\
+        pdata_tmp += (col);\
     }\
-    for (i=0; i<grid; i++){\
+    for (i=0; i<(grid); i++){\
         pgrid[i] = prow;\
-        prow += row;\
+        prow += (row);\
     }\
 }\
     
@@ -415,33 +415,33 @@
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: pdata is NULL\n");\
         exit(1);\
     }\
-    pn2 = (type **)calloc( n4*n3*n2, sizeof( type * ));\
+    pn2 = (type **)calloc( (n4)*(n3)*(n2), sizeof( type * ));\
     if ( pn2 == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: Could not allocate space for n2 pointers\n");\
         exit(1);\
     }\
-    pn3 = (type ***)calloc( n4*n3, sizeof( type * ));\
+    pn3 = (type ***)calloc( (n4)*(n3), sizeof( type * ));\
     if ( pn3 == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: Could not allocate space for n3 pointers\n");\
         exit(1);\
     }\
-    pn4 = (type ****)calloc( n4, sizeof( type * ));\
+    pn4 = (type ****)calloc( (n4), sizeof( type * ));\
     if ( pn4 == (type ****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
     pdata_tmp = pdata;\
-    for (i=0; i<n4*n3*n2; i++){\
+    for (i=0; i<(n4)*(n3)*(n2); i++){\
         pn2[i] = pdata_tmp;\
-        pdata_tmp += n1;\
+        pdata_tmp += (n1);\
     }\
-    for (i=0; i<n4*n3; i++){\
+    for (i=0; i<(n4)*(n3); i++){\
         pn3[i] = pn2;\
-        pn2 += n2;\
+        pn2 += (n2);\
     }\
-    for (i=0; i<n4; i++){\
+    for (i=0; i<(n4); i++){\
         pn4[i] = pn3;\
-        pn3 += n3;\
+        pn3 += (n3);\
     }\
     /* pn4 = &pn4[0];\ */\
 }\
@@ -466,42 +466,42 @@
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: pdata is NULL\n");\
         exit(1);\
     }\
-    pn2 = (type **)calloc( n5*n4*n3*n2, sizeof( type * ));\
+    pn2 = (type **)calloc( (n5)*(n4)*(n3)*(n2), sizeof( type * ));\
     if ( pn2 == (type **)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: Could not allocate space for n2 pointers\n");\
         exit(1);\
     }\
-    pn3 = (type ***)calloc( n5*n4*n3, sizeof( type * ));\
+    pn3 = (type ***)calloc( (n5)*(n4)*(n3), sizeof( type * ));\
     if ( pn3 == (type ***)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: Could not allocate space for n3 pointers\n");\
         exit(1);\
     }\
-    pn4 = (type ****)calloc( n5*n4, sizeof( type * ));\
+    pn4 = (type ****)calloc( (n5)*(n4), sizeof( type * ));\
     if ( pn4 == (type ****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
-    pn5 = (type *****)calloc( n5, sizeof( type * ));\
+    pn5 = (type *****)calloc( (n5), sizeof( type * ));\
     if ( pn5 == (type *****)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: Could not allocate space for n4 pointers\n");\
         exit(1);\
     }\
     pdata_tmp = pdata;\
-    for (i=0; i<n5*n4*n3*n2; i++){\
+    for (i=0; i<(n5)*(n4)*(n3)*(n2); i++){\
         pn2[i] = pdata_tmp;\
         pdata_tmp += n1;\
     }\
-    for (i=0; i<n5*n4*n3; i++){\
+    for (i=0; i<(n5)*(n4)*(n3); i++){\
         pn3[i] = pn2;\
-        pn2 += n2;\
+        pn2 += (n2);\
     }\
-    for (i=0; i<n5*n4; i++){\
+    for (i=0; i<(n5)*(n4); i++){\
         pn4[i] = pn3;\
-        pn3 += n3;\
+        pn3 += (n3);\
     }\
-    for (i=0; i<n5; i++){\
+    for (i=0; i<(n5); i++){\
         pn5[i] = pn4;\
-        pn4 += n4;\
+        pn4 += (n4);\
     }\
 }\
 
@@ -520,17 +520,17 @@
  */
 #define LGM_ARRAY_1D_WITH_VAL( prow, col, type, val ) {\
     long int i;\
-    LGM_ARRAY_1D( prow, col, type );\
-    for (i=0; i<col; i++){\
+    LGM_ARRAY_1D( (prow), (col), type );\
+    for (i=0; i<(col); i++){\
         prow[i] = val;\
     }\
 }\
 
 #define LGM_ARRAY_2D_WITH_VAL( prow, row, col, type, val ) {\
     long int i, j;\
-    LGM_ARRAY_2D( prow, row, col, type );\
-    for (i=0; i<row; i++){\
-        for (j=0; j<col; j++){\
+    LGM_ARRAY_2D( prow, (row), (col), type );\
+    for (i=0; i<(row); i++){\
+        for (j=0; j<(col); j++){\
             prow[i][j] = val;\
         }\
     }\
@@ -538,10 +538,10 @@
 
 #define LGM_ARRAY_3D_WITH_VAL( prow, grid, row, col, type, val ) {\
     long int i, j, k;\
-    LGM_ARRAY_3D( prow, grid, row, col, type );\
-    for (i=0; i<row; i++){\
-        for (j=0; j<col; j++){\
-            for (k=0; k<grid; k++){\
+    LGM_ARRAY_3D( prow, (grid), (row), (col), type );\
+    for (i=0; i<(row); i++){\
+        for (j=0; j<(col); j++){\
+            for (k=0; k<(grid); k++){\
                 prow[i][j][k] = val;\
             }\
         }\
@@ -550,11 +550,11 @@
 
 #define LGM_ARRAY_4D_WITH_VAL( pn4, n4, n3, n2, n1, type, val ) {\
     long int i, j, k, l;\
-    LGM_ARRAY_4D( pn4, n4, n3, n2, n1, type );\
-    for (i=0; i<n1; i++){\
-        for (j=0; j<n2; j++){\
-            for (k=0; k<n3; k++){\
-                for (l=0; l<n4; l++){\
+    LGM_ARRAY_4D( pn4, (n4), (n3), (n2), (n1), type );\
+    for (i=0; i<(n1); i++){\
+        for (j=0; j<(n2); j++){\
+            for (k=0; k<(n3); k++){\
+                for (l=0; l<(n4); l++){\
                     pn4[i][j][k][l] = val;\
                 }\
             }\
@@ -564,12 +564,12 @@
 
 #define LGM_ARRAY_5D_WITH_VAL( pn5, n5, n4, n3, n2, n1, type, val ) {\
     long int i, j, k, l;\
-    LGM_ARRAY_5D( pn5, n5, n4, n3, n2, n1, type );\
-    for (i=0; i<n1; i++){\
-        for (j=0; j<n2; j++){\
-            for (k=0; k<n3; k++){\
-                for (l=0; l<n4; l++){\
-                    for (m=0; m<n5; m++){\
+    LGM_ARRAY_5D( pn5, (n5), (n4), (n3), (n2), (n1), type );\
+    for (i=0; i<(n1); i++){\
+        for (j=0; j<(n2); j++){\
+            for (k=0; k<(n3); k++){\
+                for (l=0; l<(n4); l++){\
+                    for (m=0; m<(n5); m++){\
                         pn5[i][j][k][l][m] = val;\
                     }\
                 }\
