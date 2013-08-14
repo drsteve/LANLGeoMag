@@ -49,7 +49,7 @@ typedef struct _FitData {
  *
  *      we have,
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              \mu = {p_\perp^2 \over 2 m_\circ B } &=& {p^2c^2\over (2 m_\circ c^2 B)} \sin^2(\alpha) \\
  *                                                   &=& {p^2c^2\over (2 E_\circ B)} \sin^2(\alpha) \\
  *                                                   &=& {E_k\over B}\left[1+{E_k \over 2 E_\circ}\right] \sin^2(\alpha)
@@ -129,7 +129,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *      Some relativistic equations:
  *
  *      With,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                      m       &=& \mbox{Particle mass.}\\
  *                      m_\circ &=& \mbox{Particle rest mass.}\\
  *                      v       &=& \mbox{Particle speed.}\\
@@ -148,7 +148,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      With,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                  E  = mc^2             &=& \mbox{Total Energy of particle} \\
  *                  E_\circ = m_\circ c^2 &=& \mbox{Rest Energy of particle} \\
  *                  p                     &=& \mbox{relativistic momentum of particle}
@@ -165,7 +165,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
  *          \f]
  *
  *      Let \f$ E = E_k+E_\circ \f$ (kinetic energy + rest energy). Then,
- *              \f{eqnarray*}{
+ *              \f{eqnarray*}
  *                  p^2c^2  &=& (E_k+E_\circ)^2 - E_\circ^2 \\
  *                          &=& E_k (E_k+2E_\circ)
  *              \f}
@@ -191,7 +191,7 @@ double  Lgm_p2c2( double Ek, double E0 ) {
  *      Uses the following relation,
  *      
  *
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              \beta^2 &=& 1 - {1\over \gamma^2} \\
  *                      &=& 1 - {1\over (1+E_k/E_\circ)^2}
  *          \f}
@@ -215,7 +215,9 @@ double  Lgm_v2overc2( double Ek, double E0 ) {
  *  \brief
  *      Computes relativistic factor \f$ \gamma = [ 1 - (v/c)^2 ]^{-1/2} \f$.
  *  \details
- *       Returns relativistic factor \f$\gamma=[1-(v/c)^2]^{-1/2}\f$ .
+ *       Returns relativistic gamma factor,
+ *            \f$\gamma=[1-(v/c)^2]^{-1/2}\f$ .
+ *
  *       Since \f$E=\gamma m_\circ c^2 = \gamma E_\circ\f$ and 
  *       \f$E=E_k+E_\circ\f$, we have;
  *
@@ -247,7 +249,7 @@ double  Lgm_gamma( double Ek, double E0 ) {
  *          \f]
  *
  *      Multiplying the top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -283,7 +285,7 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
  *          \f]
  *
  *      Multiply top and bottom by \f$ c^2 \f$ gives,
- *          \f{eqnarray*}{
+ *          \f{eqnarray*}
  *              f &=& {j c^2 \over p^2c^2 } \\
  *              f &=& { j\over c } {c^3 \over (p^2c^2)}
  *          \f}
@@ -1828,7 +1830,7 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
                 xa2[n2] = xa[n-1-i];
                 ya2[n2] = ya[n-1-i];
                 ++n2;
-                }
+            }
         }
 
     } else {
@@ -1837,7 +1839,7 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
                 xa2[n2] = xa[i];
                 ya2[n2] = ya[i];
                 ++n2;
-                }
+            }
         }
     }
 
@@ -1846,10 +1848,10 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
      * Check to see if x would cause an extrapolation instead of an interp.
      */
     if ( (x<xa2[0]) || (x>xa2[n2-1]) ){
+//printf("here:  x = %lf     xa2[0] = %lf    n2 = %d  xa2[n2-1] = %lf\n", x, xa2[0], n2, xa2[n2-1]);
         *y = LGM_FILL_VALUE;
         RetVal = -1;
-        }
-    else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
+    } else if ( n2 > 4 ) { //think Akima spline needs at least 5 points
         acc    = gsl_interp_accel_alloc( );
         spline = gsl_spline_alloc( gsl_interp_akima, n2 );
         gsl_spline_init( spline, xa2, ya2, n2 );

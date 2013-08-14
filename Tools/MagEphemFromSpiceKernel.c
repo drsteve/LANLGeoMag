@@ -128,13 +128,14 @@ static struct argp_option Options[] = {
     { 0, 0, 0, 0,   "Time Options:", 1},
     {"StartDateTime",   'S',    "yyyymmdd[Thh:mm:ss]",          0,        "Start date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
     {"EndDateTime",     'E',    "yyyymmdd[Thh:mm:ss]",          0,        "End date/time in ISO 8601 format. Seconds will be truncated to integers.", 0 },
+    {"ModelDateTime",   'T',    "yyyymmdd[Thh:mm:ss]",          0,        "Force the model to use parameters for the given date/time. This can be used to force the model to be static instead of dynamic. Date/time in ISO 8601 format .", 0 },
     {"Delta",           'D',    "delta",                        0,        "Time cadence in (integer) seconds.", 0 },
 
     { 0, 0, 0, 0,   "Internal Model Options:", 2},
     {"IntModel",        'i',    "model",                        0,        "Internal Magnetic Field Model to use. Can be CDIP, EDIP, IGRF. Default is IGRF.\n\n", 0},
 
     { 0, 0, 0, 0,   "External Model Options:", 3},
-    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T01D, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
+    {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T96, T02, T01S, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
 
 /*
@@ -153,7 +154,7 @@ static struct argp_option Options[] = {
 "T87D\n"
 "\tTsyganenko 1987 model with Qin-Denton input\n"
 "\tparameters.\n"
-"T89D\n"
+"T02D, T89D\n"
 "\tTsyganenko 1989 model with Qin-Denton input\n"
 "\tparameters.\n"
 "T01S\n"
@@ -213,6 +214,9 @@ struct Arguments {
     char        StartDateTime[80];
     char        EndDateTime[80];
 
+    int         FixModelDateTime;
+    char        ModelDateTimeStr[80];
+
     long int    StartDate;          // Start date (e.g. 20130201)
     long int    EndDate;            // End date (e.g. 20130228)
 
@@ -266,6 +270,10 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
                 arguments->EndSeconds = d.Hour*3600 + d.Minute*60 + (int)d.Second;
             }
             Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
+            break;
+        case 'T': // end date
+            strncpy( arguments->ModelDateTimeStr, arg, 80 );
+            arguments->FixModelDateTime = 1;
             break;
         case 'e': // external model
             strcpy( arguments->ExtModel, arg );
@@ -635,9 +643,10 @@ int main( int argc, char *argv[] ){
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
     Lgm_Vector       Rgsm, Rgeo, W, U;
-    Lgm_DateTime     UTC;
+    Lgm_DateTime     UTC, ModelDateTime;
     Lgm_Eop          *e = Lgm_init_eop( 0 );
     Lgm_EopOne       eop;
+    int              FixModelDateTime;
     int              i;
     char             IsoTimeString[1024];
     char             InputFilename[1024];
@@ -722,24 +731,26 @@ int main( int argc, char *argv[] ){
     /*
      * Default option values.
      */
-    arguments.StartPA         = 90;     // start at 90.0 Deg.
-    arguments.EndPA           = 5.0;    // stop at 2.5 Deg.
-    arguments.nPA             = 18;     // 18 pitch angles
-    arguments.silent          = 0;
-    arguments.Verbosity       = 0;
-    arguments.Quality         = 3;
-    arguments.Kp              = -999.9;
-    arguments.Delta           = 60;     // 60s default cadence
-    arguments.Colorize        = 0;
-    arguments.Force           = 0;
-    arguments.UseEop          = 0;
-    arguments.DumpShellFiles  = 0;
-    arguments.StartDate       = -1;
-    arguments.EndDate         = -1;
-    arguments.FootPointHeight = 100.0; // km
+    arguments.StartPA          = 90;     // start at 90.0 Deg.
+    arguments.EndPA            = 5.0;    // stop at 2.5 Deg.
+    arguments.nPA              = 18;     // 18 pitch angles
+    arguments.silent           = 0;
+    arguments.Verbosity        = 0;
+    arguments.Quality          = 3;
+    arguments.Kp               = -999.9;
+    arguments.Delta            = 60;     // 60s default cadence
+    arguments.Colorize         = 0;
+    arguments.Force            = 0;
+    arguments.UseEop           = 0;
+    arguments.DumpShellFiles   = 0;
+    arguments.FixModelDateTime =  0;
+    arguments.StartDate        = -1;
+    arguments.EndDate          = -1;
+    arguments.FootPointHeight  = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
     strcpy( arguments.ExtModel, "T89D" );
     strcpy( arguments.CoordSystem, "LATLONRAD" );
+    strcpy( arguments.ModelDateTimeStr,  "" );
 
 
     /*
@@ -779,22 +790,24 @@ int main( int argc, char *argv[] ){
     /*
      *  Set other options
      */
-    FootpointHeight = arguments.FootPointHeight;
-    Quality         = arguments.Quality;
-    ForceKp         = arguments.Kp;
-    Verbosity       = arguments.Verbosity;
-    Colorize        = arguments.Colorize;
-    Force           = arguments.Force;
-    UseEop          = arguments.UseEop;
-    DumpShellFiles  = arguments.DumpShellFiles;
-    Delta           = arguments.Delta;
-    StartDate       = arguments.StartDate;
-    EndDate         = arguments.EndDate;
-    StartSeconds    = arguments.StartSeconds;
-    EndSeconds      = arguments.EndSeconds;
+    FootpointHeight  = arguments.FootPointHeight;
+    Quality          = arguments.Quality;
+    ForceKp          = arguments.Kp;
+    Verbosity        = arguments.Verbosity;
+    Colorize         = arguments.Colorize;
+    Force            = arguments.Force;
+    UseEop           = arguments.UseEop;
+    DumpShellFiles   = arguments.DumpShellFiles;
+    Delta            = arguments.Delta;
+    StartDate        = arguments.StartDate;
+    EndDate          = arguments.EndDate;
+    StartSeconds     = arguments.StartSeconds;
+    EndSeconds       = arguments.EndSeconds;
+    FixModelDateTime = arguments.FixModelDateTime;
     strcpy( IntModel,  arguments.IntModel );
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
+    if ( FixModelDateTime ) IsoTimeStringToDateTime( arguments.ModelDateTimeStr, &ModelDateTime, c );
 
     LGM_ARRAY_2D( Birds, 20, 80, char );
     StringSplit( arguments.Birds, Birds, 80, &nBirds );
@@ -821,6 +834,9 @@ int main( int argc, char *argv[] ){
         printf("\n");
         printf( "\t                Internal Model: %s\n", IntModel );
         printf( "\t                External Model: %s\n", ExtModel );
+        if ( FixModelDateTime ) {
+            printf( "\t     Model Parameters Fixed to: %s  ( ", arguments.ModelDateTimeStr ); Lgm_Print_DateTime( &ModelDateTime, 4, 8 );  printf( " )\n" );
+        }
         if ( ForceKp >= 0.0 ) {
             printf( "\t              Forcing Kp to be: %g\n", ForceKp );
         }
@@ -896,6 +912,8 @@ int main( int argc, char *argv[] ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T96;
     } else if ( !strcmp( ExtModel, "T01S" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T01S;
+    } else if ( !strcmp( ExtModel, "T02" ) ){
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T02;
     } else if ( !strcmp( ExtModel, "TS04D" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_TS04;
     } else if ( !strcmp( ExtModel, "TS07D" ) ){
@@ -1258,7 +1276,7 @@ if (file >= 0 ){
                     while ( !done ) {
                         if ( (Rb < Ra) && (Rb < Rc) ) {
                             // we have a bracket. Find Min.
-                            Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-3, &Tmin, &Rmin );
+                            Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                                 et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
@@ -1270,7 +1288,7 @@ if (file >= 0 ){
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Apogee_Geod[nApogee][0], &med->H5_Apogee_Geod[nApogee][1], &med->H5_Apogee_Geod[nApogee][2] );
 
                                 Lgm_DateTimeToString( med->H5_Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
-                                //printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                                printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
                                 ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
                                 ++nApoPeriTimeList;
@@ -1293,6 +1311,7 @@ if (file >= 0 ){
                     /*
                      * Find Perigees. Same as above except set afi->Sgn = 1.
                      */
+                    printf("\n");
                     afi->Sgn  = 1; // +1 => find min (perigee)   -1 => find max (apogee)
                     Ta = -900; Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
                     Tb =    0; Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
@@ -1315,7 +1334,7 @@ if (file >= 0 ){
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Perigee_Geod[nPerigee][0], &med->H5_Perigee_Geod[nPerigee][1], &med->H5_Perigee_Geod[nPerigee][2] );
 
                                 Lgm_DateTimeToString( med->H5_Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
-                                //printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+                                printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
 
                                 ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
@@ -1332,6 +1351,7 @@ if (file >= 0 ){
                     }
                     free( afi );
                     med->H5_nPerigee = nPerigee;
+                    printf("\n");
 
                     /*
                      * sort the merged list of apogee/perigee times.
@@ -1406,7 +1426,12 @@ int          N0, ii;
                     } else if ( !strcmp( Bird, "rbspb" ) ){
 
                         // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
-                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+                        //Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+                        //T0 = T0_UTC.JD;
+                        //N0 = 3;
+                          
+                        //Apogee: 2013-04-01T05:34:03.877Z   Tp = 0.376156 Tapo = 2456383.731989   Tapo-T0 = 213.093   (Tapo - T0)/Tp = 566.503   ApogeeOrbitNumber = 569
+                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+32.618/3600.0, &T0_UTC, c );
                         T0 = T0_UTC.JD;
                         N0 = 3;
 
@@ -1419,7 +1444,7 @@ int          N0, ii;
                     for ( ii=0; ii<nApogee; ++ii ){
                         Tapo = Apogee_UTC[ii].JD;
                         ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
-                        printf("Apogee: %s   Tp = %g Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
+                        printf("Apogee: %s   N0 = %d T0 = %lf Tp = %lf Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], N0, T0, Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
                     }
 
 
@@ -1434,7 +1459,7 @@ int          N0, ii;
                         PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
                     }
                     for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
-                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeerbitNumber = %d\n", PerigeeOrbitNumber[ii] );
+                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeeOrbitNumber = %d\n", PerigeeOrbitNumber[ii] );
 
 
 
@@ -1512,8 +1537,13 @@ printf("sclkdp = %lf\n", sclkdp);
                         }
 
                         // Set mag model parameters
-                        Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
-                        Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        if ( FixModelDateTime ) {
+                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, 1 );
+                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        } else {
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
+                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                        }
 
 
                         if ( ForceKp >= 0.0 ) {
@@ -1879,8 +1909,8 @@ printf("sclkdp = %lf\n", sclkdp);
                              */
                             MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
                             Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                            Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfn_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
-                            Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfn_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
+                            Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfs_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
+                            Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfs_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
 
 
                             /*

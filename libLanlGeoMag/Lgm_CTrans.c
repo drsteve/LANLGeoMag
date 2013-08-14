@@ -1135,30 +1135,74 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 
 /** 
  *   \brief
- *      Routine converts coords from one system to another. 
+ *      Transforms the components of a vector from one coordinate system to another.
  *
  *   \details
  *      The defined coordinate systems are given in the Lgm_CTrans.h file.
  *      Typically, the user will use a predefined nmenomic to implement the
  *      transformation (e.g. GSM_TO_SM or SM_TO_GSM or TEME_TO_GSE, etc). For
- *      example, to transform from GSM to SM, use something like this;
+ *      example, to transform a position vector from GSM to SM, a complete
+ *      program (foo.c) could look something like this (compile with gcc
+ *      \`pkg-config \-\-libs \-\-cflags lgm\` foo.c -o foo);
  *
  *            \code
- *                      Lgm_Vector u, v;
- *                      long int   Date;
- *                      double     UTC;
- *                      Lgm_CTrans *c = Lgm_init_ctrans( 0 );
+ *                  #include <Lgm_CTrans.h>
+ *                  int main( ) {
  *
- *                      Date = 20001031;
- *                      UTC  = 12.345;
+ *                      Lgm_CTrans  *c = Lgm_init_ctrans( 1 ); // The '1' produces verbose output.
+ *                      Lgm_Vector  Ugsm, Usm;
+ *                      long int    Date;
+ *                      double      UTC;
+ *
+ *                      // Set Date and Time
+ *                      Date = 20000101; // Jan 1, 2000
+ *                      UTC  = 3.5;      // 3:30 UTC 
+ *
+ *                      // Set a vector in GSM coordinates
+ *                      Ugsm.x = -6.6;   // Re
+ *                      Ugsm.y =  3.4;   // Re
+ *                      Ugsm.z = -2.3;   // Re
+ *
+ *                      // Set up all the necessary transformations for this Date/UTC
  *                      Lgm_Set_Coord_Transforms( Date, UTC, c );
  *
- *                      u.x = -6.6; u.y = 0.0; u.z = 0.0;
- *                      printf( u_gsm = %g %g %g\n", u.x, u.y, u.z );
+ *                      // Do the transformation from GSM->SM
+ *                      Lgm_Convert_Coords( &Ugsm, &Usm, GSM_TO_SM, c );
  *
- *                      Lgm_Convert_Coords( &u, &v, GSM_TO_SM, c );
- *                      printf( v_sm = %g %g %g\n", v.x, v.y, v.z );
+ *                      // Print out the final results
+ *                      printf( "Date = %8ld\n", Date );
+ *                      printf( "UTC  = %lf\n", UTC );
+ *                      printf( "Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z );
+ *                      printf( "Usm  = %.8lf %.8lf %.8lf Re\n",  Usm.x,  Usm.y,  Usm.z );
+ *
+ *                      // free the structure
+ *                      Lgm_free_ctrans( c );
+ *
+ *                      return(0);
+ *
+ *                  }
+ *                      
  *            \endcode
+ *
+ *      Internally, the transformation is identified by decoding the number
+ *      represented by the predefined flags. Each of these are defined as a
+ *      4-digit integer of the form FFTT, where FF (the 'from' field) and TT
+ *      (the 'to' field') are both numbers of the form 0-99 (TT is zero
+ *      padded). Each of these numbers represents an identifier for a specific
+ *      coordinate system. For example, GSM is 8 and SM is 9, so the
+ *      transformation from GSM to SM as represented by GSM_TO_SM is encoded as
+ *      the number 809. The reverse transformation (specified by SM_TO_GSM) is
+ *      encoded by the number 908. The transformation is (typically)
+ *      accomplished in two stages. First, the vector is transformed into an
+ *      intermediate system (currently MOD (Mean Of Date) Inertial is used.)
+ *      Then the vector is transformed to the final system from the
+ *      intermediate system. This strategy allows for transformation between
+ *      any of the geocentric cartesian systems defined.  In practice, the user
+ *      should always use the predefined flags to make the code more readable.
+ *
+ *      This routine can be used for any cartesian vector (e.g. position
+ *      vectors or magnetic fields, etc.).
+ *
  *
  *   \param[in]      u      The input vector.
  *   \param[in]      UTC    The transformed output vector.

@@ -1,5 +1,5 @@
 #include "Lgm/Lgm_MagModelInfo.h"
-int Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
+int Lgm_B_T02( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector  B2;
     int		    iopt;
@@ -7,18 +7,18 @@ int Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
 
     parmod[1]  = Info->P; 	// Pressure in nPa
-    parmod[2]  = Info->Dst; // Dst in nT
+    parmod[2]  = Info->Dst; // Dst in nPa
     parmod[3]  = Info->By; 	// IMF By in nT
     parmod[4]  = Info->Bz; 	// IMF Bz in nT
-    parmod[5]  = Info->G2;  // G2
-    parmod[6]  = Info->G3;  // G3
+    parmod[5]  = Info->G1;  // G1
+    parmod[6]  = Info->G2;  // G2
 
     iopt = 0;		// this param supposedly doesnt actually do anything for this model
 
     ps = Info->c->psi;  // dipole tilt angle
     X = v->x; Y = v->y; Z = v->z;
 
-    Tsyg_T01S( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->T01_Info );
+    Tsyg_T02( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->T01_Info );
     switch ( Info->InternalModel ){
 
         case LGM_CDIP:
@@ -31,7 +31,7 @@ int Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
                         Lgm_B_igrf( v, &B2, Info );
                         break;
         default:
-                        fprintf(stderr, "Lgm_B_TS04: Unknown internal model (%d)\n", Info->InternalModel);
+                        fprintf(stderr, "Lgm_B_T02: Unknown internal model (%d)\n", Info->InternalModel);
                         break;
 
     }
@@ -39,7 +39,6 @@ int Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     B->x = Bx + B2.x;
     B->y = By + B2.y;
     B->z = Bz + B2.z;
-
     ++Info->nFunc;
 
     return(1);

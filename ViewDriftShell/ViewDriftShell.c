@@ -4468,6 +4468,7 @@ static gboolean motion_notify_event( GtkWidget *widget, GdkEventMotion *event, g
 
 static gboolean idle( GtkWidget *widget ) {
 
+    static int  AllowSave = TRUE;
     double      oJD;
     char        Str[256];
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
@@ -4516,18 +4517,26 @@ static gboolean idle( GtkWidget *widget ) {
         expose_event( drawing_area, NULL, NULL );
 
         
-        if ( DumpFrames && ((CurrentSec >  59.5) || (CurrentSec < 0.5)) ){
-//        if ( DumpFrames ){
-            int x, y, width, height, depth;
-            GdkPixbuf *pixbuf;
-            char PngFile[40];
-            gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
-            pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
-            //sprintf( PngFile, "%04ld.png", cFrame );
-            sprintf( PngFile, "Latest.png" );
-            gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
-            g_object_unref( pixbuf );
+        if ( DumpFrames ){
+            if ( (CurrentSec >  59.5) || (CurrentSec < 0.5) ){
+                if ( AllowSave ) {
+                    int x, y, width, height, depth;
+                    GdkPixbuf *pixbuf;
+                    char PngFile[40];
+                    gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
+                    pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
+                    //sprintf( PngFile, "%04ld.png", cFrame );
+                    sprintf( PngFile, "Latest.png" );
+printf("Writing: %s\n", PngFile );
+                    gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
+                    g_object_unref( pixbuf );
+                    AllowSave = FALSE;
+                }
+            } else {
+                AllowSave = TRUE;
+            }
         }
+
 
         if (oJD != CurrentJD){
             sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,

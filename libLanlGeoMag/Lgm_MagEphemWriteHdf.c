@@ -29,7 +29,7 @@ void Lgm_WriteMagEphemHeaderHdf( hid_t file, char *ExtModel, int SpiceBody,  cha
 
     // Create and Write AscendTimes Dataset
     atype = CreateStrType( 32 );
-    DataSet = CreateSimpleRank1DataSet( file, "AscendTimes", nPerigee, atype, &space );
+    DataSet = CreateSimpleRank1DataSet( file, "AscendTimes", nAscend, atype, &space );
     Lgm_WriteStringAttr( DataSet, "UNITS",      "UTC" );
     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "The times of Ascending Node Crossings  in ISO 8601 compliant format." );
     Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
@@ -40,8 +40,9 @@ void Lgm_WriteMagEphemHeaderHdf( hid_t file, char *ExtModel, int SpiceBody,  cha
     LGM_HDF5_WRITE_SIMPLE_RANK1_STRING_DATASET( file, "AscendTimes", med->H5_nAscend, atype, med->H5_Ascend_IsoTimes );
     status  = H5Tclose( atype );
 
+
     // Create and Write AscendPosGeod Dataset
-    DataSet = CreateSimpleRank2DataSet( file, "AscendPosGeod", med->H5_nPerigee, 3, H5T_NATIVE_DOUBLE, &space );
+    DataSet = CreateSimpleRank2DataSet( file, "AscendPosGeod", med->H5_nAscend, 3, H5T_NATIVE_DOUBLE, &space );
     Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "AscendTimes" );
     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geodetic position of ascending node croissing (lat/lon/rad)." );
     Lgm_WriteStringAttr( DataSet, "UNITS",      "Deg./Deg./km" );
@@ -50,7 +51,7 @@ void Lgm_WriteMagEphemHeaderHdf( hid_t file, char *ExtModel, int SpiceBody,  cha
     Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
     status  = H5Sclose( space );
     status  = H5Dclose( DataSet );
-printf("med->H5_Ascend_Geod[0][0] = %g\n", med->H5_Ascend_Geod[0][0]);
+    //printf("med->H5_Ascend_Geod[0][0] = %g\n", med->H5_Ascend_Geod[0][0]);
     LGM_HDF5_WRITE_SIMPLE_RANK2_DATASET( file, "AscendPosGeod", med->H5_nAscend, 3, H5T_NATIVE_DOUBLE, &med->H5_Ascend_Geod[0][0] );
 
     // Create and Write PerigeeTimes Dataset
@@ -1177,8 +1178,8 @@ void Lgm_WriteMagEphemDataHdf( hid_t file, int i, Lgm_MagEphemData *med ) {
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_geo",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_geo[i][0] );          // Write Bfs_geo
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_gsm",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_gsm[i][0] );          // Write Bfs_gsm
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_s", i,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleS[i] );      // Write Loss_Cone_Alpha_s
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i] );            // Write Pmin_gsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i] );            // Write Pmin_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i][0] );         // Write Pmin_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i][0] );         // Write Bmin_gsm
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lsimple",           i,                  H5T_NATIVE_DOUBLE, &med->H5_Lsimple[i] );             // Write Lsimple
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat",            i,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat[i] );              // Write InvLat
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lm_eq",             i,                  H5T_NATIVE_DOUBLE, &med->H5_Lm_eq[i] );               // Write Lm_eq

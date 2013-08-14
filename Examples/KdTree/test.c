@@ -23,8 +23,8 @@ int main( ) {
     /*
      * Test kNN algorithm.
      */
-    n = 25000*360;
-    D = 4;
+    n = 24*365*50;
+    D = 24;
     LGM_ARRAY_2D( u, D, n, double );
     LGM_ARRAY_2D( B, D, n, double );
     // generate random data points
@@ -40,7 +40,7 @@ int main( ) {
 
     printf("Testing kNN (k-Nearest-Neighbor) search.\n");
     nSearches = 1;
-    nSearches = 100000;
+    nSearches = 100;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
     // generate random query point
     LGM_ARRAY_2D( q, nSearches, D, double );

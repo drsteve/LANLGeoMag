@@ -929,21 +929,27 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     UTC->Month  = month;
     UTC->Day    = day;
     UTC->Doy    = doy;
-    UTC->Dow    = Lgm_DayOfWeek( year, month, day, UTC->DowStr );
-    UTC->Week   = Lgm_ISO_WeekNumber( year, month, day, &UTC->wYear );
     UTC->Time   = Time;
-//printf("Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
+//printf("Lgm_Make_UTC: Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
 
+    // convert to JD.
     UTC->JD     = Lgm_JD( UTC->Year, UTC->Month, UTC->Day, UTC->Time, LGM_TIME_SYS_UTC, c );
-//printf("Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
+//printf("Lgm_Make_UTC: Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
+
     UTC->Date   = Lgm_JD_to_Date( UTC->JD, &UTC->Year, &UTC->Month, &UTC->Day, &t );
-//printf("Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
+    
+    // redo the Doy calcs in case we got a new date (e.g. due to Time beingm > 24.0)
+    Lgm_Doy( UTC->Date, &UTC->Year, &UTC->Month, &UTC->Day, &UTC->Doy );
+//printf("Lgm_Make_UTC: Date, Year, Month, Day, Doy, Time, t = %ld, %d %d %d %d %lf %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time, t);
+
     // we could just set UTC->Time to the t from the previous call, but t will have
     // suffered round off errors. The following reduces roundoff errors.
     if      ( (UTC->Time - t) > 12.0 ) { UTC->Time -= 24.0; }
     else if ( (t - UTC->Time) > 12.0 ) { UTC->Time += 24.0; }
+//printf("Lgm_Make_UTC: Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
     Lgm_IsLeapSecondDay( UTC->Date, &UTC->DaySeconds, c );
     UTC->Time   = Lgm_RemapTime( UTC->Time, UTC->DaySeconds );
+//printf("Lgm_Make_UTC: Date, Year, Month, Day, Doy, Time = %ld, %d %d %d %d %lf\n", UTC->Date, UTC->Year, UTC->Month, UTC->Day, UTC->Doy, UTC->Time);
     UTC->T      = (UTC->JD - 2451545.0)/36525.0;
     UTC->fYear  = (double)UTC->Year + ((double)UTC->Doy + UTC->Time/24.0)/(365.0 + (double)Lgm_LeapYear(UTC->Year));
     UTC->TimeSystem = LGM_TIME_SYS_UTC;
@@ -952,6 +958,9 @@ int Lgm_Make_UTC( long int Date, double Time, Lgm_DateTime *UTC, Lgm_CTrans *c )
     UTC->Hour   = (int)t;    t = (t - UTC->Hour)*60.0;
     UTC->Minute = (int)t;    t = (t - UTC->Minute)*60.0;
     UTC->Second = t;
+
+    UTC->Dow    = Lgm_DayOfWeek( UTC->Year, UTC->Month, UTC->Day, UTC->DowStr );
+    UTC->Week   = Lgm_ISO_WeekNumber( UTC->Year, UTC->Month, UTC->Day, &UTC->wYear );
 
     return( 1 ); // eventually return FALSE if invalid date.
 

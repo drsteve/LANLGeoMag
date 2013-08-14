@@ -130,9 +130,9 @@ if test "x$enable_tools" == "xyes"; then
    LIBS=${OLD_LIBS}
 fi
 
-# Allow disabling of Qin-Denton files
+# Allow disabling of TS07D files
 AC_ARG_ENABLE([indices],
-  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data (default: enable)])],
+  [AS_HELP_STRING([--disable-indices], [Disable installation of geomagnetic index data for TS07D (default: enable)])],
   [AM_CONDITIONAL([ENABLE_INDICES], [test x"$enableval" != x"no"])],
   [AM_CONDITIONAL([ENABLE_INDICES], true)]
 )
@@ -212,12 +212,15 @@ AC_ARG_WITH([pythondir],
     [pythondir="$withval"], [])
 AC_SUBST(pythondir)
 
-dnl Get flags for embedded perl and make sure it works
-dnl Save old CFLAGS/LDFLAGS so can restore after the check
 AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
 if test x"${HAVE_PERL}" == x"false"; then
     AC_MSG_FAILURE([Unable to run perl])
 fi
+
+AX_PROG_PERL_MODULES( [ExtUtils::Embed], , [AC_MSG_FAILURE(
+		      Required Perl module ExtUtils::Embed not found)])
+dnl Get flags for embedded perl and make sure it works
+dnl Save old CFLAGS/LDFLAGS so can restore after the check
 PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
 PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 #get out JUST the rpath bit, since this needs to go in LDFLAGS

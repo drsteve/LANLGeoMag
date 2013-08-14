@@ -87,10 +87,10 @@ typedef struct LgmTsyg2001_Info {
 
 
 /*
- *  Function declarations
+ *  Function declarations for T01S (aka TSK03)
  */
 void T01S_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
-                    double BZIMF, double VBIMF1, double VBIMF2, double PS, double X, double Y, double Z,
+                    double BZIMF, double G1, double G2, double G3, double PS, double X, double Y, double Z,
                     double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
                     double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
                     double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,
@@ -130,6 +130,53 @@ double  T01S_BT_PRC_Q( double R, double SINT, double COST);
 void    T01S_FFS( double A, double A0, double DA, double *F, double *FA, double *FS );
 void    T01S_RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
 void    T01S_DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+
+
+
+/*
+ *  Function declarations for T02 (aka T01_01)
+ */
+void T02_EXTALL( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT, double PDYN, double DST, double BYIMF,
+                    double BZIMF, double G1, double G2, double PS, double X, double Y, double Z,
+                    double *BXCF, double *BYCF, double *BZCF, double *BXT1, double *BYT1, double *BZT1,
+                    double *BXT2, double *BYT2, double *BZT2, double *BXSRC, double *BYSRC, double *BZSRC,
+                    double *BXPRC, double *BYPRC, double *BZPRC,  double *BXR11, double *BYR11, double *BZR11,
+                    double *BXR12, double *BYR12, double *BZR12, double *BXR21, double *BYR21, double *BZR21,
+                    double *BXR22, double *BYR22, double *BZR22, double *HXIMF, double *HYIMF, double *HZIMF,
+                    double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+void    T02_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ );
+void    T02_DEFORMED( int IOPT, double PS, double X, double Y, double Z,
+                double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2001_Info *t );
+void    T02_WARPED( int IOPT, double PS, double X, double Y, double Z,
+                double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2001_Info *t );
+void    T02_UNWARPED( int IOPT, double X, double Y, double Z,
+                double *BX1, double *BY1, double *BZ1, double *BX2, double *BY2, double *BZ2, LgmTsyg2001_Info *t );
+void    T02_TAILDISK( double D0, double DELTADX, double DELTADY, double X, double Y, double Z, double *BX, double *BY, double *BZ);
+void    T02_SHLCAR5X5( double *A, double X, double Y, double Z, double DSHIFT, double *HX, double *HY, double *HZ );
+void    T02_BIRK_TOT( int IOPB, double PS, double X, double Y, double Z,
+                double *BX11, double *BY11, double *BZ11, double *BX12, double *BY12, double *BZ12,
+                double *BX21, double *BY21, double *BZ21, double *BX22, double *BY22, double *BZ22, LgmTsyg2001_Info *t );
+void    T02_BIRK_1N2( int NUMB, int MODE, double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t  ) ;
+void    T02_TWOCONES( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+void    T02_ONE_CONE( double *A, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+double  T02_THETA_S( double *A, double R, double THETA);
+double  T02_R_S( double *A, double R, double THETA);
+void    T02_FIALCOS( double R, double THETA, double PHI, double *BTHETA, double *BPHI, int N, double THETA0, double DT);
+void    T02_BIRK_SHL( int, int, int, int, int, double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+void    T02_FULL_RC( int IOPR, double PS, double X, double Y, double Z,
+                double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC,  double *BZPRC, LgmTsyg2001_Info *t);
+void    T02_SRC_PRC( int IOPR, double SC_SY, double SC_PR, double PHI, double PS, double X, double Y, double Z,
+                double *BXSRC, double *BYSRC, double *BZSRC, double *BXPRC, double *BYPRC, double *BZPRC, LgmTsyg2001_Info *t);
+void    T02_RC_SYMM( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  T02_AP( double R, double SINT, double COST);
+void    PT02_RC_SYMM( double X,double Y,double Z, double *BX, double *BY, double *BZ );
+double  T02_APPRC( double R, double SINT, double COST);
+void    T02_PRC_QUAD( double X, double Y, double Z, double *BX, double *BY, double *BZ);
+double  T02_BR_PRC_Q( double R, double SINT, double COST );
+double  T02_BT_PRC_Q( double R, double SINT, double COST);
+void    T02_FFS( double A, double A0, double DA, double *F, double *FA, double *FS );
+void    T02_RC_SHIELD( double *A, double PS, double X_SC, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
+void    T02_DIPOLE( double PS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *t );
 
 
 

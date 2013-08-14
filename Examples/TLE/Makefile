@@ -6,7 +6,10 @@ CC        = gcc
 
 FILES1    =  
 
-all   : TwoLineElements TwoLineElementsFromFile NearestTLE
+all   : TwoLineElements TwoLineElementsFromFile NearestTLE Forte_Meteor
+
+Forte_Meteor : Makefile $(FILES1) Forte_Meteor.c
+	$(CC) $(FILES1) Forte_Meteor.c $(LIBS) -o Forte_Meteor
 
 TwoLineElements : Makefile $(FILES1) TwoLineElements.c
 	$(CC) $(FILES1) TwoLineElements.c $(LIBS) -o TwoLineElements

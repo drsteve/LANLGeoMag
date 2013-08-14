@@ -25,7 +25,7 @@ if ENABLE_DOCS
     MAYBE_STATIC_PDF = Doc/LanlGeoMag_Documentation.pdf
 endif
 dist_pdf_DATA = $(MAYBE_PDF) $(MAYBE_STATIC_PDF)
-dist_ps_DATA = $(MAYBE_PS)
+nodist_ps_DATA = $(MAYBE_PS)
 if DX_COND_doc
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
 endif
