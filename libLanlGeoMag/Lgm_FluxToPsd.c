@@ -1826,7 +1826,7 @@ int Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y ) {
     if ( xa[1] < xa[0] ) {
 
         for (n2=0, i=0; i<n; i++){
-            if ( ya[i] > LGM_FILL_VALUE ) {
+            if ( ya[n-1-i] > LGM_FILL_VALUE ) {
                 xa2[n2] = xa[n-1-i];
                 ya2[n2] = ya[n-1-i];
                 ++n2;
