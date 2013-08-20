@@ -2,7 +2,7 @@
 
 
 msis: msis.c
-	gcc msis.c `pkg-config --cflags --libs lgm` -o msis
+	gcc msis.c `pkg-config --cflags --libs lgm` -lgomp -o msis
 
 clean:
 	rm msis

@@ -141,15 +141,22 @@ static const double RGAS = 831.4;
 void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double STL, double F107A, double F107, double *AP, double MASS, double *D, double *T, Lgm_Msis00Info *p ) {
 
     int     J, V1;
-    double  DS[10], TS[3];
+//    double  DS[10], TS[3];
     double  XLAT, ALTT, MSS, DM28M, g, g2, DMC, DZ28, DMR, TZ, XMM;
 
 
+/*
     static double MN3   = 5;
     static double ZN3[] = { -9e99, 32.5, 20.0, 15.0, 10.0, 0.0 };
     static double MN2   = 4;
     static double ZN2[] = { -9e99, 72.5, 55.0, 45.0, 32.5 };
     static const double ZMIX  = 62.5;
+*/
+    double MN3   = 5;
+    double ZN3[] = { -9e99, 32.5, 20.0, 15.0, 10.0, 0.0 };
+    double MN2   = 4;
+    double ZN2[] = { -9e99, 72.5, 55.0, 45.0, 32.5 };
+    const double ZMIX  = 62.5;
 //    static double SV[]  = {  /25*1./ };
 
 
@@ -160,6 +167,7 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
      * Test for changed input
      */
     V1 = VTST7( IYD, SEC, GLAT, GLONG, STL, F107A, F107, AP, 1, p );
+V1 =1;
 
     /*
      * Latitude variation of gravity (none for SW(2)=0)
@@ -189,17 +197,17 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
      * or altitude above ZN2(1) in mesosphere
      */
     if ( (V1 == 1) || (ALT > ZN2[1]) || (p->GTD7_ALAST > ZN2[1]) || (MSS != p->GTD7_MSSL) ) { 
-        GTS7( IYD, SEC, ALTT, GLAT, GLONG, STL, F107A, F107, AP, MSS, DS, TS, p );
+        GTS7( IYD, SEC, ALTT, GLAT, GLONG, STL, F107A, F107, AP, MSS, p->DS, p->TS, p );
         DM28M = p->DM28;
         if (p->IMR == 1 ) DM28M = p->DM28*1.0e6; // metric adjustment
         p->GTD7_MSSL = MSS;
     }
 
-    T[1] = TS[1];
-    T[2] = TS[2];
+    T[1] = p->TS[1];
+    T[2] = p->TS[2];
 
     if ( ALT >= ZN2[1] ) {
-        for ( J=1; J<=9; J++ ) D[J] = DS[J];
+        for ( J=1; J<=9; J++ ) D[J] = p->DS[J];
         p->GTD7_ALAST = ALT;
         return;
     }
@@ -250,10 +258,10 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
         // LINEAR TRANSITION TO FULL MIXING BELOW ZN2(1)
         DMC  = 0;
         if ( ALT > ZMIX ) DMC = 1.-(ZN2[1]-ALT)/(ZN2[1]-ZMIX);
-        DZ28 = DS[3];
+        DZ28 = p->DS[3];
 
         // ***** N2 DENSITY ****
-        DMR  = DS[3]/DM28M-1.0;
+        DMR  = p->DS[3]/DM28M-1.0;
         D[3] = DENSM(ALT,DM28M,XMM,&TZ,MN3,ZN3,p->TN3,p->TGN3,MN2,ZN2,p->TN2,p->TGN2, p);
         D[3] = D[3]*(1.+DMR*DMC);
 
@@ -261,7 +269,7 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
         // ***** HE DENSITY ****
         D[1] = 0;
         if ( (MASS == 4) || (MASS == 48) ) {
-            DMR  = DS[1]/( DZ28*p->PDM[2][1] ) - 1.0;
+            DMR  = p->DS[1]/( DZ28*p->PDM[2][1] ) - 1.0;
             D[1] = D[3]*p->PDM[2][1]*(1.0 + DMR*DMC);
         }
 
@@ -275,7 +283,7 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
         // ***** O2 DENSITY ****
         D[4] = 0;
         if ( MASS == 32 || MASS == 48 ) {
-          DMR  = DS[4]/(DZ28*p->PDM[2][4] ) - 1.0;
+          DMR  = p->DS[4]/(DZ28*p->PDM[2][4] ) - 1.0;
           D[4] = D[3]*p->PDM[2][4]*(1.0 + DMR*DMC);
         }
 
@@ -283,7 +291,7 @@ void GTD7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
         // ***** AR DENSITY ****
         D[5] = 0;
         if ( (MASS == 40) || (MASS == 48) ) {
-            DMR  = DS[5]/(DZ28*p->PDM[2][5]) - 1.0;
+            DMR  = p->DS[5]/(DZ28*p->PDM[2][5]) - 1.0;
             D[5] = D[3]*p->PDM[2][5]*(1.0 + DMR*DMC);
         }
 
@@ -449,9 +457,15 @@ void GHP7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
     int     L, done, IDAY;
     double  PL, ZI, CL, CL2, CD, CA, Z, g, g2, XN, P, DIFF, XM, G, SH;
 
+/*
     static double BM    = 1.3806E-19;
     static double TEST  = 0.00043;
     static double LTEST = 12;
+*/
+
+    double BM    = 1.3806E-19;
+    double TEST  = 0.00043;
+    double LTEST = 12;
 
     PL = log10( PRESS );
 
@@ -544,7 +558,8 @@ void GHP7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
 void GLATF( double LAT, double *GV, double *REFF ) {
 
     double          C2;
-    static double   DGTR = 1.74533e-2;
+    //static double   DGTR = 1.74533e-2;
+    double   DGTR = 1.74533e-2;
 
     C2 = cos( 2.0*DGTR*LAT );
     *GV = 980.616*(1.0 - 0.0026373*C2);
@@ -561,6 +576,7 @@ void GLATF( double LAT, double *GV, double *REFF ) {
 int VTST7( double IYD, double SEC, double GLAT, double GLONG, double STL, double F107A, double F107, double *AP, int IC, Lgm_Msis00Info *p ) {
 
     int fVTST7, Flag, I;
+//return(1);
 
     fVTST7 = 0;
 
@@ -680,6 +696,7 @@ int VTST7( double IYD, double SEC, double GLAT, double GLONG, double STL, double
  */
 void GTS7( double IYD, double SEC, double ALT, double GLAT, double GLONG, double STL, double F107A, double F107, double *AP, double MASS, double *D, double *T, Lgm_Msis00Info *p ) {
 
+/*
     static int      MN1     = 5;
     static double   DGTR    = 1.74533e-2;
     static double   DR      = 1.72142e-2;
@@ -687,15 +704,24 @@ void GTS7( double IYD, double SEC, double ALT, double GLAT, double GLONG, double
     static double   ALTL[]  = { -1e99, 200.0, 300.0, 160.0, 250.0, 240.0, 450.0, 320.0, 450.0 };
     static double   ZN1[]   = { -1e99, 120.0, 110.0, 100.0, 90.0, 72.5 };
     static double   ALPHA[] = { -1e99, -0.38, 0.0, 0.0, 0.0, 0.17, 0.0, -0.38, 0.0, 0.0 };
+*/
 
+    int      MN1     = 5;
+    double   DGTR    = 1.74533e-2;
+    double   DR      = 1.72142e-2;
+    int      MT[]    = { -9999, 48, 0, 4, 16, 28, 32, 40, 1, 49, 14, 17 };
+    double   ALTL[]  = { -1e99, 200.0, 300.0, 160.0, 250.0, 240.0, 450.0, 320.0, 450.0 };
+    double   ZN1[]   = { -1e99, 120.0, 110.0, 100.0, 90.0, 72.5 };
+    double   ALPHA[] = { -1e99, -0.38, 0.0, 0.0, 0.0, 0.17, 0.0, -0.38, 0.0, 0.0 };
 
     int     I, J, ValidMass;
-    double  V2, YRD, TINF, S, g, g2, G28, DAY, ZHF, XMM, Z;
-    double  ZH28, ZHM28, XMD, B28, TZ, DM28, G4, ZH04, B04, ZHM04, ZC04, HC04;
-    double  G16, ZH16, B16, ZHM16, HC16, ZC16, HC216, HCC16, ZCC16, RC16, G32, ZH32;
-    double  B32, ZHM32, HC32, ZC32, HCC32, HCC232, ZCC32, RC32, G40, ZH40, B40, ZHM40, HC40, ZC40;
-    double  G1, ZH01, B01, ZHM01, HC01, ZC01, HCC01, ZCC01, RC01, G14, ZH14, B14, ZHM14, HC14, ZC14, HCC14, ZCC14, RC14;
-    double  G16H, DB16H, THO, T2, ZSHT, ZMHO, ZSHO;
+double TINF;
+double  V2, YRD, S, g, g2, G28, DAY, ZHF, XMM, Z;
+double  ZH28, ZHM28, XMD, B28, TZ, G4, ZH04, B04, ZHM04, ZC04, HC04;
+double  G16, ZH16, B16, ZHM16, HC16, ZC16, HC216, HCC16, ZCC16, RC16, G32, ZH32;
+double  B32, ZHM32, HC32, ZC32, HCC32, HCC232, ZCC32, RC32, G40, ZH40, B40, ZHM40, HC40, ZC40;
+double  G1, ZH01, B01, ZHM01, HC01, ZC01, HCC01, ZCC01, RC01, G14, ZH14, B14, ZHM14, HC14, ZC14, HCC14, ZCC14, RC14;
+double  G16H, DB16H, THO, T2, ZSHT, ZMHO, ZSHO;
 //    double  DDUM;
 
 
@@ -706,6 +732,7 @@ void GTS7( double IYD, double SEC, double ALT, double GLAT, double GLONG, double
      * Test for changed input
      */
     V2 = VTST7( IYD, SEC, GLAT, GLONG, STL, F107A, F107, AP, 2, p );
+V2 =1;
 
     YRD    = IYD;
     p->ZA     = p->PDL[16][2];
@@ -716,7 +743,7 @@ void GTS7( double IYD, double SEC, double ALT, double GLAT, double GLONG, double
      * TINF VARIATIONS NOT IMPORTANT BELOW ZA OR ZN1(1)
      */
     if ( ALT > ZN1[1] ) {
-        if( (V2 == 1.0) || (p->GTS7_ALAST <= ZN1[1]) ) TINF = p->PTM[1]*p->PT[1]*( 1.0 + p->SW[16]*GLOBE7( YRD, SEC, GLAT, GLONG, STL, F107A, F107, AP, p->PT, p ) );
+        if( (V2 == 1) || (p->GTS7_ALAST <= ZN1[1]) ) TINF = p->PTM[1]*p->PT[1]*( 1.0 + p->SW[16]*GLOBE7( YRD, SEC, GLAT, GLONG, STL, F107A, F107, AP, p->PT, p ) );
     } else {
         TINF = p->PTM[1]*p->PT[1];
     }
@@ -735,7 +762,7 @@ void GTS7( double IYD, double SEC, double ALT, double GLAT, double GLONG, double
     /*
      * Calculate these temperatures only if input changed
      */
-    if ( (V2 == 1.0) || (ALT < 300.0) ) {
+    if ( (V2 == 1) || (ALT < 300.0) ) {
         p->TLB = p->PTM[2]*(1.0 + p->SW[17]*GLOBE7( YRD, SEC, GLAT, GLONG, STL, F107A, F107, AP, p->PD_rc[4], p ))*p->PD[1][4];
         S = p->G0/(TINF-p->TLB);
     }
@@ -1248,7 +1275,7 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
 
 
     int     I, J;
-    double  C, S, C2, C4, S2, CD14, CD18, CD32, CD39, F1, F2;
+    double  C, S, C2, C4, S2, F1, F2;
     double  T71, T72, T81, T82, P44, P45, EXP1;
 
 
@@ -1334,10 +1361,10 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
 
 
 
-    if ( (p->DAY != p->DAYL) || (P[14] != p->GLOBE7_P14) ) CD14 = cos( DR*(p->DAY-P[14]) );
-    if ( (p->DAY != p->DAYL) || (P[18] != p->GLOBE7_P18) ) CD18 = cos( 2.*DR*(p->DAY-P[18]) );
-    if ( (p->DAY != p->DAYL) || (P[32] != p->GLOBE7_P32) ) CD32 = cos( DR*(p->DAY-P[32]) );
-    if ( (p->DAY != p->DAYL) || (P[39] != p->GLOBE7_P39) ) CD39 = cos( 2.*DR*(p->DAY-P[39]) );
+    if ( (p->DAY != p->DAYL) || (P[14] != p->GLOBE7_P14) ) p->GLOBE7_CD14 = cos(     DR*(p->DAY-P[14]) );
+    if ( (p->DAY != p->DAYL) || (P[18] != p->GLOBE7_P18) ) p->GLOBE7_CD18 = cos( 2.0*DR*(p->DAY-P[18]) );
+    if ( (p->DAY != p->DAYL) || (P[32] != p->GLOBE7_P32) ) p->GLOBE7_CD32 = cos(     DR*(p->DAY-P[32]) );
+    if ( (p->DAY != p->DAYL) || (P[39] != p->GLOBE7_P39) ) p->GLOBE7_CD39 = cos( 2.0*DR*(p->DAY-P[39]) );
     p->DAYL        = p->DAY;
     p->GLOBE7_P14  = P[14];
     p->GLOBE7_P18  = P[18];
@@ -1359,22 +1386,22 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
 
 
     // SYMMETRICAL ANNUAL
-    p->T[3] = P[19]*CD32;
+    p->T[3] = P[19]*p->GLOBE7_CD32;
 
 
     // SYMMETRICAL SEMIANNUAL
-    p->T[4] = ( P[16] + P[17]*p->PLG[3][1] )*CD18;
+    p->T[4] = ( P[16] + P[17]*p->PLG[3][1] )*p->GLOBE7_CD18;
 
     // ASYMMETRICAL ANNUAL
-    p->T[5] = F1*( P[10]*p->PLG[2][1] + P[11]*p->PLG[4][1] )*CD14;
+    p->T[5] = F1*( P[10]*p->PLG[2][1] + P[11]*p->PLG[4][1] )*p->GLOBE7_CD14;
 
     // ASYMMETRICAL SEMIANNUAL
-    p->T[6] = P[38]*p->PLG[2][1]*CD39;
+    p->T[6] = P[38]*p->PLG[2][1]*p->GLOBE7_CD39;
 
     // DIURNAL
     if ( p->SW[7] != 0 ) {
-      T71 = (P[12]*p->PLG[3][2])*CD14*p->SWC[5];
-      T72 = (P[13]*p->PLG[3][2])*CD14*p->SWC[5];
+      T71 = (P[12]*p->PLG[3][2])*p->GLOBE7_CD14*p->SWC[5];
+      T72 = (P[13]*p->PLG[3][2])*p->GLOBE7_CD14*p->SWC[5];
       p->T[7] = F2* (  (P[4]*p->PLG[2][2] + P[5]*p->PLG[4][2] + P[28]*p->PLG[6][2] + T71)*p->CTLOC
                   + (P[7]*p->PLG[2][2] + P[8]*p->PLG[4][2] + P[29]*p->PLG[6][2] + T72)*p->STLOC );
     }
@@ -1382,8 +1409,8 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
 
     // SEMIDIURNAL
     if ( p->SW[8] != 0 ) {
-        T81  = ( P[24]*p->PLG[4][3]+P[36]*p->PLG[6][3] )*CD14*p->SWC[5];
-        T82  = ( P[34]*p->PLG[4][3]+P[37]*p->PLG[6][3] )*CD14*p->SWC[5];
+        T81  = ( P[24]*p->PLG[4][3]+P[36]*p->PLG[6][3] )*p->GLOBE7_CD14*p->SWC[5];
+        T82  = ( P[34]*p->PLG[4][3]+P[37]*p->PLG[6][3] )*p->GLOBE7_CD14*p->SWC[5];
         p->T[8] = F2* (  (P[6]*p->PLG[3][3] + P[42]*p->PLG[5][3] + T81)*p->C2TLOC 
                     + (P[9]*p->PLG[3][3] + P[43]*p->PLG[5][3] + T82)*p->S2TLOC );
     }
@@ -1391,8 +1418,8 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
 
     // TERDIURNAL
     if ( p->SW[14] != 0 ) {
-        p->T[14] = F2*(  ( P[40]*p->PLG[4][4] + (P[94]*p->PLG[5][4] + P[47]*p->PLG[7][4])*CD14*p->SWC[5] )*p->S3TLOC
-                    + ( P[41]*p->PLG[4][4] + (P[95]*p->PLG[5][4] + P[49]*p->PLG[7][4])*CD14*p->SWC[5] )*p->C3TLOC );
+        p->T[14] = F2*(  ( P[40]*p->PLG[4][4] + (P[94]*p->PLG[5][4] + P[47]*p->PLG[7][4])*p->GLOBE7_CD14*p->SWC[5] )*p->S3TLOC
+                    + ( P[41]*p->PLG[4][4] + (P[95]*p->PLG[5][4] + P[49]*p->PLG[7][4])*p->GLOBE7_CD14*p->SWC[5] )*p->C3TLOC );
     }
 
     // MAGNETIC ACTIVITY BASED ON DAILY AP
@@ -1404,7 +1431,7 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
         p->APDF = p->APD + (P45-1.0)*( p->APD + (exp(-P44*p->APD)-1.0)/P44 );
         if( p->SW[9] != 0) {
             p->T[9] = p->APDF*( P[33] + P[46]*p->PLG[3][1] + P[35]*p->PLG[5][1]
-                        + (P[101]*p->PLG[2][1]+P[102]*p->PLG[4][1]+P[103]*p->PLG[6][1])*CD14*p->SWC[5]
+                        + (P[101]*p->PLG[2][1]+P[102]*p->PLG[4][1]+P[103]*p->PLG[6][1])*p->GLOBE7_CD14*p->SWC[5]
                         + (P[122]*p->PLG[2][2]+P[123]*p->PLG[4][2]+P[124]*p->PLG[6][2])*p->SWC[7]*cos(HR*(TLOC-P[125])) );
         }
     } else if ( P[52] != 0) {
@@ -1417,7 +1444,7 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
         //p->APT[4] = SG2(EXP2);
         if ( p->SW[9] != 0) {
             p->T[9] = p->APT[1]*( P[51] + P[97]*p->PLG[3][1] + P[55]*p->PLG[5][1]
-                            + (P[126]*p->PLG[2][1]+P[127]*p->PLG[4][1]+P[128]*p->PLG[6][1])*CD14*p->SWC[5]
+                            + (P[126]*p->PLG[2][1]+P[127]*p->PLG[4][1]+P[128]*p->PLG[6][1])*p->GLOBE7_CD14*p->SWC[5]
                             + (P[129]*p->PLG[2][2]+P[130]*p->PLG[4][2]+P[131]*p->PLG[6][2])*p->SWC[7]*cos(HR*(TLOC-P[132])) );
         }
     }
@@ -1431,24 +1458,24 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
         // LONGITUDINAL
         if ( p->SW[11] != 0 ) {
             p->T[11] = ( 1.0 + P[81]*p->DFA*p->SWC[1] )*
-                      ( (P[65]*p->PLG[3][2]+P[66]*p->PLG[5][2]+P[67]*p->PLG[7][2] +P[104]*p->PLG[2][2]+P[105]*p->PLG[4][2]+P[106]*p->PLG[6][2] +p->SWC[5]*(P[110]*p->PLG[2][2]+P[111]*p->PLG[4][2]+P[112]*p->PLG[6][2])*CD14)*cos(DGTR*LONG)
-                      + (P[91]*p->PLG[3][2]+P[92]*p->PLG[5][2]+P[93]*p->PLG[7][2] +P[107]*p->PLG[2][2]+P[108]*p->PLG[4][2]+P[109]*p->PLG[6][2] +p->SWC[5]*(P[113]*p->PLG[2][2]+P[114]*p->PLG[4][2]+P[115]*p->PLG[6][2])*CD14)*sin(DGTR*LONG) );
+                      ( (P[65]*p->PLG[3][2]+P[66]*p->PLG[5][2]+P[67]*p->PLG[7][2] +P[104]*p->PLG[2][2]+P[105]*p->PLG[4][2]+P[106]*p->PLG[6][2] +p->SWC[5]*(P[110]*p->PLG[2][2]+P[111]*p->PLG[4][2]+P[112]*p->PLG[6][2])*p->GLOBE7_CD14)*cos(DGTR*LONG)
+                      + (P[91]*p->PLG[3][2]+P[92]*p->PLG[5][2]+P[93]*p->PLG[7][2] +P[107]*p->PLG[2][2]+P[108]*p->PLG[4][2]+P[109]*p->PLG[6][2] +p->SWC[5]*(P[113]*p->PLG[2][2]+P[114]*p->PLG[4][2]+P[115]*p->PLG[6][2])*p->GLOBE7_CD14)*sin(DGTR*LONG) );
         }
 
         // UT AND MIXED UT,LONGITUDE
         if ( p->SW[12] != 0) {
-            p->T[12] = (1.0+P[96]*p->PLG[2][1]) * (1.0+P[82]*p->DFA*p->SWC[1]) * (1.0+P[120]*p->PLG[2][1]*p->SWC[5]*CD14) * ((P[69]*p->PLG[2][1]+P[70]*p->PLG[4][1]+P[71]*p->PLG[6][1])*cos(SR*(SEC-P[72])));
+            p->T[12] = (1.0+P[96]*p->PLG[2][1]) * (1.0+P[82]*p->DFA*p->SWC[1]) * (1.0+P[120]*p->PLG[2][1]*p->SWC[5]*p->GLOBE7_CD14) * ((P[69]*p->PLG[2][1]+P[70]*p->PLG[4][1]+P[71]*p->PLG[6][1])*cos(SR*(SEC-P[72])));
             p->T[12] += p->SWC[11]*(P[77]*p->PLG[4][3]+P[78]*p->PLG[6][3]+P[79]*p->PLG[8][3]) * cos(SR*(SEC-P[80])+2.*DGTR*LONG)*(1.0+P[138]*p->DFA*p->SWC[1]);
         }
 
         // UT,LONGITUDE MAGNETIC ACTIVITY
         if ( (p->SW[13] != 0) && (SW9 != -1.0) ) {
             p->T[13] = p->APDF*p->SWC[11]*(1.+P[121]*p->PLG[2][1])* ((P[ 61]*p->PLG[3][2]+P[ 62]*p->PLG[5][2]+P[ 63]*p->PLG[7][2])* cos(DGTR*(LONG-P[ 64])))
-                        + p->APDF*p->SWC[11]*p->SWC[5]* (P[116]*p->PLG[2][2]+P[117]*p->PLG[4][2]+P[118]*p->PLG[6][2])* CD14*cos(DGTR*(LONG-P[119]))
+                        + p->APDF*p->SWC[11]*p->SWC[5]* (P[116]*p->PLG[2][2]+P[117]*p->PLG[4][2]+P[118]*p->PLG[6][2])* p->GLOBE7_CD14*cos(DGTR*(LONG-P[119]))
                         + p->APDF*p->SWC[12]* (P[ 84]*p->PLG[2][1]+P[ 85]*p->PLG[4][1]+P[ 86]*p->PLG[6][1])* cos(SR*(SEC-P[ 76]));
         } else if ( P[52] != 0 ) {
             p->T[13] = p->APT[1]*p->SWC[11]*(1.+P[133]*p->PLG[2][1])* ((P[53]*p->PLG[3][2]+P[99]*p->PLG[5][2]+P[68]*p->PLG[7][2])* cos(DGTR*(LONG-P[98])))
-                        +p->APT[1]*p->SWC[11]*p->SWC[5]* (P[134]*p->PLG[2][2]+P[135]*p->PLG[4][2]+P[136]*p->PLG[6][2])* CD14*cos(DGTR*(LONG-P[137]))
+                        +p->APT[1]*p->SWC[11]*p->SWC[5]* (P[134]*p->PLG[2][2]+P[135]*p->PLG[4][2]+P[136]*p->PLG[6][2])* p->GLOBE7_CD14*cos(DGTR*(LONG-P[137]))
                         +p->APT[1]*p->SWC[12]* (P[56]*p->PLG[2][1]+P[57]*p->PLG[4][1]+P[58]*p->PLG[6][1])* cos(SR*(SEC-P[59]));
         }
     }
@@ -1457,12 +1484,18 @@ double GLOBE7( double YRD, double SEC, double LAT, double LONG, double TLOC, dou
     // PARMS NOT USED: 83, 90,100,140-150
 
 
-    p->TINF = P[31];
+//printf("GLOBE7: p->TINF = %g\n", p->TINF);
+    //p->TINF = P[31];
+double TINF;
+    TINF = P[31];
     for ( I=1; I<=NSW; I++ ) {
-        p->TINF += fabs( p->SW[I] ) * p->T[I];
+        //p->TINF += fabs( p->SW[I] ) * p->T[I];
+//printf("    A. GLOBE7: TINF, T[%d] = %g %g \n", I, TINF, p->T[I] );
+        TINF += fabs( p->SW[I] ) * p->T[I];
     }
 
-    return( p->TINF );
+    //return( p->TINF );
+    return( TINF );
 
 }
 
@@ -1507,7 +1540,7 @@ double GLOB7S( double *P, Lgm_Msis00Info *p ) {
 
     int     I, J;
     double  TT, T[15];
-    double  CD18, CD14, CD32, CD39, T71, T72, T81, T82;
+    double  T71, T72, T81, T82;
 
 /*
     static double DR   = 1.72142E-2;
@@ -1532,10 +1565,10 @@ double GLOB7S( double *P, Lgm_Msis00Info *p ) {
 
     for ( J=1; J<=14; J++ ) T[J] = 0.0;
 
-    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P32 != P[32]) ) CD32 = cos(DR*(p->DAY-P[32]));
-    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P18 != P[18]) ) CD18 = cos(2.*DR*(p->DAY-P[18]))       ;
-    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P14 != P[14]) ) CD14 = cos(DR*(p->DAY-P[14]));
-    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P39 != P[39]) ) CD39 = cos(2.*DR*(p->DAY-P[39]));
+    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P14 != P[14]) ) p->GLOB7S_CD14 = cos(     DR*(p->DAY-P[14]) );
+    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P18 != P[18]) ) p->GLOB7S_CD18 = cos( 2.0*DR*(p->DAY-P[18]) )       ;
+    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P32 != P[32]) ) p->GLOB7S_CD32 = cos(     DR*(p->DAY-P[32]) );
+    if ( (p->DAY != p->DAYL) || (p->GLOB7S_P39 != P[39]) ) p->GLOB7S_CD39 = cos( 2.0*DR*(p->DAY-P[39]) );
     p->DAYL = p->DAY;
     p->GLOB7S_P32  = P[32];
     p->GLOB7S_P18  = P[18];
@@ -1549,28 +1582,28 @@ double GLOB7S( double *P, Lgm_Msis00Info *p ) {
     T[2] = P[2]*p->PLG[3][1]+P[3]*p->PLG[5][1]+P[23]*p->PLG[7][1] +P[27]*p->PLG[2][1]+P[15]*p->PLG[4][1]+P[60]*p->PLG[6][1];
 
     // SYMMETRICAL ANNUAL
-    T[3] = (P[19]+P[48]*p->PLG[3][1]+P[30]*p->PLG[5][1])*CD32;
+    T[3] = (P[19]+P[48]*p->PLG[3][1]+P[30]*p->PLG[5][1])*p->GLOB7S_CD32;
 
     // SYMMETRICAL SEMIANNUAL
-    T[4] = (P[16]+P[17]*p->PLG[3][1]+P[31]*p->PLG[5][1])*CD18;
+    T[4] = (P[16]+P[17]*p->PLG[3][1]+P[31]*p->PLG[5][1])*p->GLOB7S_CD18;
 
     // ASYMMETRICAL ANNUAL
-    T[5] = (P[10]*p->PLG[2][1]+P[11]*p->PLG[4][1]+P[21]*p->PLG[6][1])*CD14;
+    T[5] = (P[10]*p->PLG[2][1]+P[11]*p->PLG[4][1]+P[21]*p->PLG[6][1])*p->GLOB7S_CD14;
 
     // ASYMMETRICAL SEMIANNUAL
-    T[6] = (P[38]*p->PLG[2][1])*CD39;
+    T[6] = (P[38]*p->PLG[2][1])*p->GLOB7S_CD39;
 
     // DIURNAL
     if ( p->SW[7] != 0 ) {
-        T71  = P[12]*p->PLG[3][2]*CD14*p->SWC[5];
-        T72  = P[13]*p->PLG[3][2]*CD14*p->SWC[5];
+        T71  = P[12]*p->PLG[3][2]*p->GLOB7S_CD14*p->SWC[5];
+        T72  = P[13]*p->PLG[3][2]*p->GLOB7S_CD14*p->SWC[5];
         T[7] = ((P[4]*p->PLG[2][2] + P[5]*p->PLG[4][2] + T71)*p->CTLOC + (P[7]*p->PLG[2][2] + P[8]*p->PLG[4][2] + T72)*p->STLOC);
     }
 
     // SEMIDIURNAL
     if ( p->SW[8] != 0 ) {
-        T81  = (P[24]*p->PLG[4][3]+P[36]*p->PLG[6][3])*CD14*p->SWC[5] ;
-        T82  = (P[34]*p->PLG[4][3]+P[37]*p->PLG[6][3])*CD14*p->SWC[5];
+        T81  = (P[24]*p->PLG[4][3]+P[36]*p->PLG[6][3])*p->GLOB7S_CD14*p->SWC[5] ;
+        T82  = (P[34]*p->PLG[4][3]+P[37]*p->PLG[6][3])*p->GLOB7S_CD14*p->SWC[5];
         T[8] = ((P[6]*p->PLG[3][3] + P[42]*p->PLG[5][3] + T81)*p->C2TLOC +(P[9]*p->PLG[3][3] + P[43]*p->PLG[5][3] + T82)*p->S2TLOC);
     }
 
@@ -1627,10 +1660,16 @@ double DENSU( double ALT, double DLB, double TINF, double TLB, double XM, double
 //    double  fDENSU, Z, ZG2, TT, TA, g, g2, DTA, Z1, Z2, T1, T2, ZG, ZGDIF;
 //    double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
 
+/*
 static     int     MN, K;
 static     double  XS[6], YS[6], Y2OUT[6];
 static     double  fDENSU, Z, ZG2, TT, TA, g, g2, DTA, Z1, Z2, T1, T2, ZG, ZGDIF;
 static     double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
+*/
+int     MN, K;
+double  XS[6], YS[6], Y2OUT[6];
+double  fDENSU, Z, ZG2, TT, TA, g, g2, DTA, Z1, Z2, T1, T2, ZG, ZGDIF;
+double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
 
 
     //ZETA(ZZ, ZL) = (ZZ-ZL)*(p->RE+ZL)/(p->RE+ZZ);
@@ -1713,7 +1752,6 @@ static     double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
             GAMM = XM*GLB*ZGDIF/RGAS;
 
             // integrate spline temperatures
-// this routine returns the wrong value of YI!
             SPLINI( XS, YS, Y2OUT, MN, X, &YI );
             EXPL = GAMM*YI;
             if ( (EXPL > 50.0) || (*TZ <= 0.0) ) EXPL = 50.0;
@@ -1725,9 +1763,6 @@ static     double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
 
     }
 
-// why?
-//    free( ZN1 );
-//    free( TN1 );
 
     return( fDENSU );
 
@@ -1943,8 +1978,10 @@ void SPLINT( double *XA, double *YA, double *Y2A, int N, double X, double *Y ) {
  *       YI: OUTPUT VALUE
  */
 void SPLINI( double *XA, double *YA, double *Y2A, int N, double X, double *YI ) {
-    static int     KLO, KHI;
-    static double  XX, H, A, B, A2, B2;
+    //static int     KLO, KHI;
+    //static double  XX, H, A, B, A2, B2;
+    int     KLO, KHI;
+    double  XX, H, A, B, A2, B2;
     *YI  = 0.0; KLO = 1; KHI = 2;
     while ( (X > XA[KLO]) && (KHI <= N) ){
         XX = X;

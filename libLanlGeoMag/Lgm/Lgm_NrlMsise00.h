@@ -65,6 +65,13 @@ typedef struct Lgm_Msis00Info {
     // Some variables in GLOB7S() that need to be saved.
     double  GLOB7S_P14, GLOB7S_P18, GLOB7S_P32, GLOB7S_P39;
 
+    // from GTD7
+    double  DS[10], TS[3];
+
+    // some globals from GLOBE7 and GLOB7S
+    double  GLOBE7_CD14, GLOBE7_CD18, GLOBE7_CD32, GLOBE7_CD39;
+    double  GLOB7S_CD14, GLOB7S_CD18, GLOB7S_CD32, GLOB7S_CD39;
+
 
 } Lgm_Msis00Info;
 

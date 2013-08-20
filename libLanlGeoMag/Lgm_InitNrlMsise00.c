@@ -204,11 +204,21 @@ Lgm_Msis00Info *InitMsis00( ) {
     p->GLOBE7_P32 = -1000.0;
     p->GLOBE7_P39 = -1000.0;
 
+    p->GLOBE7_CD14 = -9e99;
+    p->GLOBE7_CD18 = -9e99;
+    p->GLOBE7_CD32 = -9e99;
+    p->GLOBE7_CD39 = -9e99;
+
 
     p->GLOB7S_P14 = -1000.0;
     p->GLOB7S_P18 = -1000.0;
     p->GLOB7S_P32 = -1000.0;
     p->GLOB7S_P39 = -1000.0;
+
+    p->GLOB7S_CD14 = -9e99;
+    p->GLOB7S_CD18 = -9e99;
+    p->GLOB7S_CD32 = -9e99;
+    p->GLOB7S_CD39 = -9e99;
 
 
 

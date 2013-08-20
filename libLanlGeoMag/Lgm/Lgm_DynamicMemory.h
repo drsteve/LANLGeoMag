@@ -138,7 +138,7 @@
  * Macros for dynamically allocating/freeing 2D arrays of any type
  */
 #define LGM_ARRAY_2D( prow, row, col, type ) {\
-    register type *pdata;\
+    type *pdata;\
     int      mi;\
     pdata = (type *)calloc( (row)*(col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
