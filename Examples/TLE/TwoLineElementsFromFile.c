@@ -55,6 +55,11 @@ int main( int argc, char *argv[] ){
     nTLEs = 0;
     LgmSgp_ReadTlesFromFile( TleFile, &nTLEs, TLEs, 1 );
     printf("Found %d Valid TLEs in file %s\n", nTLEs, TleFile );
+for (i=0; i<nTLEs; i++ ) {
+printf("Line0: |%s|\n", TLEs[i].Line0 );
+printf("Line1: |%s|\n", TLEs[i].Line1 );
+printf("Line2: |%s|\n\n", TLEs[i].Line2 );
+}
 
 
     /*

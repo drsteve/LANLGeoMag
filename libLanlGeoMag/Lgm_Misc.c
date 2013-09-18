@@ -11,8 +11,9 @@ void Lgm_ReplaceSubString( char *NewStr, char *OrigStr, char *SubStr, char *RepS
     Str  = (char *)calloc( nStr+1, sizeof(char) );
     strcpy( Str, OrigStr );
     strcpy( NewStr, OrigStr );
+    if ( strcmp( RepStr, SubStr ) == 0) done = 1;
+    else                                done = 0;
 
-    done = 0;
     while ( !done ) {
 
         if ( !(p = strstr( Str, SubStr )) ) {

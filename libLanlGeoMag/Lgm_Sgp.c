@@ -1,5 +1,6 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Sgp.h"
+#include "Lgm/qsort.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,9 +30,24 @@ int LgmSgp_TleChecksum( char *Line ) {
 
 }
 
+
+/*
+ * Routine to sort the TLEs structure.
+ */
+#define TLE_LESS_THAN(a,b) ((a)->JD < (b)->JD)
+void LgmSgp_SortListOfTLEs( int nTLEs, _SgpTLE *TLEs ) {
+    QSORT( _SgpTLE, TLEs, nTLEs, TLE_LESS_THAN );
+}
+
+
+
+
+
+
 /*
  *  For a given time, search through an array of TLEs and locate the most
  *  recent (i.e. the one that comes right before).
+ *  This assumes a sorted list! It would be simple to sort them with quicksort....
  */
 int LgmSgp_FindTLEforGivenTime( int nTLEs, _SgpTLE *TLEs, int SortOrder, double JD, int Verbosity ) {
 
@@ -218,6 +234,9 @@ int LgmSgp_ReadTlesFromFile( char *Filename, int *nTLEs, _SgpTLE *TLEs, int Verb
         free(Line0);
         free(Line1);
         free(Line2);
+
+        LgmSgp_SortListOfTLEs( *nTLEs, TLEs );
+        
 
     }
 

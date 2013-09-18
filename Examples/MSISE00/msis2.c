@@ -31,19 +31,6 @@ int main() {
         for (i=0; i<9; i++ ) printf( "%15.8g", D[i] );
         printf("\n");
 
-/*
-        GTD7( 99172, SEC, ALT, 60.0, GLONG, 16.0, 150.0, 150.0, AP, 48, D, T, p );
-        printf( "ALT = %lf ", ALT);
-        for (i=0; i<9; i++ ) printf( "%15g", D[i] );
-        printf("\n");
-
-        GTD7( 99172, SEC, ALT, 60.0, GLONG, 16.0, 150.0, 150.0, AP, 48, D, T, p );
-        printf( "ALT = %lf ", ALT);
-        for (i=0; i<9; i++ ) printf( "%15g", D[i] );
-        printf("\n");
-*/
-
-
         fprintf( fp, "%lf %g\n", GLAT, D[6] );
     }
 

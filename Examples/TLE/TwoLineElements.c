@@ -69,7 +69,7 @@ int main( int argc, char *argv[] ){
      * initialized to zero by the user.
      */
     nTLEs = 0;
-    LgmSgp_ReadTlesFromStrings( Line0, Line1, Line2, &nTLEs, TLEs, 1 );
+    LgmSgp_ReadTlesFromStrings( Line0, Line1, Line2, &nTLEs, TLEs, 4 );
 
 
     /*
@@ -84,7 +84,7 @@ int main( int argc, char *argv[] ){
     Lgm_Doy( EndDate, &EndYear, &EndMonth, &EndDay, &EndDoy );
     EndJD = Lgm_JD( EndYear, EndMonth, EndDay, EndUT, LGM_TIME_SYS_UTC, c );
 
-    JDinc = 5.0/1440.0; // 5-min increment
+    JDinc = 60.0/1440.0; // 60-min increment
 
     if ( (fp = fopen( OutputFile, "w" )) == NULL ) {
         printf( "Couldnt open file %s for writing\n", OutputFile );
@@ -128,6 +128,7 @@ printf("*%8ld %.10lf %15.9lf %15.9lf %15.9lf\n", Date, UT, Uteme.x, Uteme.y, Ute
 
         // Example of converting TEME->GSE coords.
         Lgm_Convert_Coords( &Uteme, &Ugse, TEME_TO_WGS84, c );
+        //Lgm_Convert_Coords( &Uteme, &Ugse, TEME_TO_GEO, c );
 
         // Dump result to file
         printf("%8ld %.10lf %15.9lf %15.9lf %15.9lf\n", Date, UT, Ugse.x, Ugse.y, Ugse.z  );
