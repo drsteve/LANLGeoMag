@@ -77,7 +77,7 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromTLE";
-const  char *argp_program_version     = "1.0.0";
+const  char *argp_program_version     = "1.8.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from TLE files.\n\n"
@@ -1425,7 +1425,7 @@ if (file >= 0 ){
                      * Open MagEphem txt file for writing and write header.
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {
@@ -1440,7 +1440,7 @@ if (file >= 0 ){
                      * Create variables.
                      */
                     file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteMagEphemHeaderHdf( file, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
+                    Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
 
 
 

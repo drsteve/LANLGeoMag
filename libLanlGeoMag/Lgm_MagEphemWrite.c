@@ -12,7 +12,7 @@
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, char *ExtModel, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
     char        Str[80], *Str2, *QDpath, QDloc[256];
@@ -1330,6 +1330,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *ExtModel, int SpiceBody,  char *Sp
     }
     fprintf( fp, "#                      \"QinDentonPath\": \"%s\",\n", QDloc );
     fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
+    fprintf( fp, "#                        \"CodeVersion\": \"%s\"\n", CodeVersion );
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#\n");

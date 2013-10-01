@@ -1474,7 +1474,7 @@ int          N0, ii;
                      * Open MagEphem txt file for writing and write header.
                      */
                     fp_MagEphem = fopen( OutFile, "w" );
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
+                    Lgm_WriteMagEphemHeader( fp_MagEphem, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
                     printf("\t      Writing to file: %s\n", OutFile );
 
                     if ( UseEop ) {
@@ -1489,7 +1489,7 @@ int          N0, ii;
                      * Create variables.
                      */
                     file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-                    Lgm_WriteMagEphemHeaderHdf( file, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
+                    Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
 
 
 
