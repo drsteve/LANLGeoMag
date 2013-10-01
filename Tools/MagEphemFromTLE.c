@@ -18,16 +18,9 @@
 #include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
 #include <Lgm_ElapsedTime.h>
-#include "SpiceUsr.h"
 #include <Lgm/qsort.h>
 #include <Lgm_Octree.h>
 
-#define EARTH_ID     399
-#define MOON_ID      301
-#define RBSPA_ID    -362
-#define RBSPB_ID    -363
-#define  MAXIV      1000
-#define  WINSIZ     ( 2 * MAXIV )
 
 #define T89Q_KP  2.0
 #define OP77Q_KP 2.0
@@ -83,11 +76,11 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 #define KP_DEFAULT 0
 
-const  char *ProgramName = "MagEphemFromSpiceKernel";
-const  char *argp_program_version     = "1.8.0";
+const  char *ProgramName = "MagEphemFromTLE";
+const  char *argp_program_version     = "1.0.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
-"Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
+"Computes the magnetic ephemeris of a S/C from trajectories determined from TLE files.\n\n"
 "The input file is a SPICE kernel description file, which is a file describing all of the SPICE kernels that need to be loaded.  A sample kernel description file is written as;\n\n"
 
 "\t\\begindata\n"
@@ -363,7 +356,7 @@ double ApogeeFunc( double T, double val, void *Info ){
 
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
     et = Lgm_TDBSecSinceJ2000( &UTC, c );
-    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+//    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
     U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
     R = Lgm_Magnitude( &U );
 
@@ -396,7 +389,7 @@ double LatitudeFunc( double T, double val, void *Info ){
     Lgm_Set_Coord_Transforms( a->Date, T/3600.0, c );
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
     et = Lgm_TDBSecSinceJ2000( &UTC, c );
-    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+//    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
     U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
     Lgm_Convert_Coords( &U, &V, GEI2000_TO_TOD, c );
     R = Lgm_Magnitude( &V );
@@ -699,17 +692,6 @@ int main( int argc, char *argv[] ){
     double          Bmin_mag, s, cl, Ek, E, pp, p2c2, Beta2, Beta, vel, T, rg;
     int             n, OverRideKp;
     char            *CmdLine, TmpStr[2048];
-    SpiceChar       SpiceKernelFilesLoaded[20480];
-    SpiceChar       SpiceKernelFile[2048];
-    SpiceChar       SpiceKernelType[32];
-    SpiceChar       SpiceKernelSource[2048];
-    SpiceInt        SpiceHandle, kk, KernelCount;
-    SpiceBoolean    SpiceKernelFound;
-    SPICEDOUBLE_CELL ( cover, WINSIZ );
-    SpiceInt        niv, jj;
-    SpiceDouble     begtime, endtime;
-    SpiceChar       timestr1[51], timestr2[51];
-    SpiceChar       sclkch[30];
 
 
     med = Lgm_InitMagEphemData( 2000, 80 );
@@ -825,7 +807,7 @@ int main( int argc, char *argv[] ){
         printf("\n\n");
         printf( "\t               Program/Version: %s\n", argp_program_version );
         printf( "\t                Bug Reports To: %s\n", argp_program_bug_address );
-        printf( "\tInput SPICE Kernel Descr. File: %s\n", InputFilename );
+        printf( "\t                Input TLE File: %s\n", InputFilename );
         printf( "\t                   Output File: %s\n", OutputFilename );
         printf( "\t            Input Coord System: %s\n", CoordSystem );
         printf( "\t        Number of Pitch Angles: %d\n", nAlpha );
@@ -869,8 +851,6 @@ int main( int argc, char *argv[] ){
     Lgm_PrintElapsedTime( &t );
 
 
-    SpiceDouble et;
-    SpiceDouble pos[3], lt;
 
 
     if ( nAlpha > 0 ){
@@ -1066,12 +1046,12 @@ int main( int argc, char *argv[] ){
             strcpy( InFile, InputFilename );
 
             if        ( !strcmp( Bird, "rbspa" ) ){
-                BODY     = RBSPA_ID;
+//                BODY     = RBSPA_ID;
                 IdNumber = 38752;
                 strcpy( IntDesig,   "2012-046A" );
                 strcpy( CommonName, "RBSP A" );
             } else if ( !strcmp( Bird, "rbspb" ) ){
-                BODY     = RBSPB_ID;
+//                BODY     = RBSPB_ID;
                 IdNumber = 38753;
                 strcpy( IntDesig, "2012-046B" );
                 strcpy( CommonName, "RBSP A" );
@@ -1080,7 +1060,7 @@ int main( int argc, char *argv[] ){
                 IdNumber = -999999;
                 sprintf( IntDesig, "SPICE Object: %s", Bird );
                 sprintf( CommonName, "%s", Bird );
-                BODY = atoi( Bird );
+//                BODY = atoi( Bird );
             }
 
             if ( SubstituteVars ) {
@@ -1214,40 +1194,6 @@ if (file >= 0 ){
 
                     fclose( fp_in );
 
-                    /*
-                     * Make kernels known to SPICE
-                     */
-                    furnsh_c( InFile );
-                    printf( "\t    Using SPICE Kernel Description File: %s\n", InFile );
-                    ktotal_c( "all", &KernelCount );
-                    printf( "\t    Kernel Files Loaded:\n" );
-
-
-
-                    SpiceKernelFilesLoaded[0] = '\0';
-                    for (kk=0; kk<KernelCount; kk++){
-                        kdata_c( kk,  "all", 2047, 32, 2047, SpiceKernelFile, SpiceKernelType, SpiceKernelSource, &SpiceHandle,  &SpiceKernelFound );
-                        printf( "\t\t\t\t%s   (Type = %s)\n",  SpiceKernelFile, SpiceKernelType );
-                        strncat( SpiceKernelFilesLoaded, SpiceKernelFile, 2048 );
-                        if (kk<KernelCount-1) strcat( SpiceKernelFilesLoaded, ", " );
-
-                        if ( !strcmp( SpiceKernelType, "SPK" ) ){
-                            scard_c( 0, &cover );
-                            spkcov_c( SpiceKernelFile, BODY, &cover );
-                            niv = wncard_c( &cover );
-                            printf ( "\t\t\t\t========================================\n" );
-                            printf ( "\t\t\t\tCoverage for object %d\n", BODY );
-                            for ( jj = 0;  jj < niv;  jj++  ){
-                                wnfetd_c( &cover, jj, &begtime, &endtime );
-                                timout_c( begtime, "YYYY MON DD HR:MN:SC.### (UTC) ::UTC",  51, timestr1 );
-                                timout_c( endtime, "YYYY MON DD HR:MN:SC.### (UTC) ::UTC",  51, timestr2 );
-                                printf( "\t\t\t\tInterval:  %4d  Start: %s  Stop: %s\n", jj, timestr1, timestr2 );
-                            }
-                            printf ( "\n" );
-                        }
-
-
-                    }
 
 
 
@@ -1258,6 +1204,8 @@ if (file >= 0 ){
                      * Call Lgm_Brent() to get minimum.
                      *
                      */
+                    double et, pos[3];
+
                     afi = (afInfo *)calloc( 1, sizeof(afInfo) );
                     afi->Date = Date;
 
@@ -1280,7 +1228,8 @@ if (file >= 0 ){
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
                                 et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+// get position here...
+//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                                 Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
 
                                 Lgm_Set_Coord_Transforms( Apogee_UTC[nApogee].Date, Apogee_UTC[nApogee].Time, c );
@@ -1326,7 +1275,8 @@ if (file >= 0 ){
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
                                 et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+// get position here...
+//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                                 Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
 
                                 Lgm_Set_Coord_Transforms( Perigee_UTC[nPerigee].Date, Perigee_UTC[nPerigee].Time, c );
@@ -1384,7 +1334,8 @@ if (file >= 0 ){
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Ascend_UTC[nAscend], c );
 
                                 et = Lgm_TDBSecSinceJ2000( &Ascend_UTC[nAscend], c );
-                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+// get position here
+//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
                                 Ascend_U[nAscend].x = pos[0]/WGS84_A; Ascend_U[nAscend].y = pos[1]/WGS84_A; Ascend_U[nAscend].z = pos[2]/WGS84_A;
 
                                 Lgm_Set_Coord_Transforms( Ascend_UTC[nAscend].Date, Ascend_UTC[nAscend].Time, c );
@@ -1412,54 +1363,54 @@ if (file >= 0 ){
                     /*
                      * Compute the orbit number that each apogee resides in.
                      */
-Lgm_DateTime T0_UTC;
-double       T0, Tp, Tapo;
-int          N0, ii;
-                    Tp = (Apogee_UTC[1].JD - Apogee_UTC[0].JD); // orbital period in days
-                    if        ( !strcmp( Bird, "rbspa" ) ){
-
-                        // RBSPA: Start of orbit  3 at Time: 2012-08-31T03:14:50.545
-                        Lgm_Make_UTC( 20120831, 3.0+14.0/60.0+50.545/3600.0, &T0_UTC, c );
-                        T0 = T0_UTC.JD;
-                        N0 = 3;
-
-                    } else if ( !strcmp( Bird, "rbspb" ) ){
-
-                        // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
-                        //Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
-                        //T0 = T0_UTC.JD;
-                        //N0 = 3;
-                          
-                        //Apogee: 2013-04-01T05:34:03.877Z   Tp = 0.376156 Tapo = 2456383.731989   Tapo-T0 = 213.093   (Tapo - T0)/Tp = 566.503   ApogeeOrbitNumber = 569
-                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+32.618/3600.0, &T0_UTC, c );
-                        T0 = T0_UTC.JD;
-                        N0 = 3;
-
-                    } else {
-                        printf("Unknown S/C. Orbit Numbers may be wrong.\n");
-                        T0 = 0.0;
-                        N0 = 0;
-                    }
-
-                    for ( ii=0; ii<nApogee; ++ii ){
-                        Tapo = Apogee_UTC[ii].JD;
-                        ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
-                        printf("Apogee: %s   N0 = %d T0 = %lf Tp = %lf Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], N0, T0, Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
-                    }
-
-
-                    /*
-                     * Compute the orbit number that each perigee starts.
-                     */
-                    if ( Apogee_UTC[0].JD > Perigee_UTC[0].JD ){
-                        // the first perigee is earlier than the first apogee
-                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0];
-                    } else {
-                        // the first apogee is earlier than the first perigee
-                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
-                    }
-                    for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
-                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeeOrbitNumber = %d\n", PerigeeOrbitNumber[ii] );
+//Lgm_DateTime T0_UTC;
+//double       T0, Tp, Tapo;
+//int          N0, ii;
+//                    Tp = (Apogee_UTC[1].JD - Apogee_UTC[0].JD); // orbital period in days
+//                    if        ( !strcmp( Bird, "rbspa" ) ){
+//
+//                        // RBSPA: Start of orbit  3 at Time: 2012-08-31T03:14:50.545
+//                        Lgm_Make_UTC( 20120831, 3.0+14.0/60.0+50.545/3600.0, &T0_UTC, c );
+//                        T0 = T0_UTC.JD;
+//                        N0 = 3;
+//
+//                    } else if ( !strcmp( Bird, "rbspb" ) ){
+//
+//                        // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
+//                        //Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
+//                        //T0 = T0_UTC.JD;
+//                        //N0 = 3;
+//                          
+//                        //Apogee: 2013-04-01T05:34:03.877Z   Tp = 0.376156 Tapo = 2456383.731989   Tapo-T0 = 213.093   (Tapo - T0)/Tp = 566.503   ApogeeOrbitNumber = 569
+//                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+32.618/3600.0, &T0_UTC, c );
+//                        T0 = T0_UTC.JD;
+//                        N0 = 3;
+//
+//                    } else {
+//                        printf("Unknown S/C. Orbit Numbers may be wrong.\n");
+//                        T0 = 0.0;
+//                        N0 = 0;
+//                    }
+//
+//                    for ( ii=0; ii<nApogee; ++ii ){
+//                        Tapo = Apogee_UTC[ii].JD;
+//                        ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
+//                        printf("Apogee: %s   N0 = %d T0 = %lf Tp = %lf Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], N0, T0, Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
+//                    }
+//
+//
+//                    /*
+//                     * Compute the orbit number that each perigee starts.
+//                     */
+//                    if ( Apogee_UTC[0].JD > Perigee_UTC[0].JD ){
+//                        // the first perigee is earlier than the first apogee
+//                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0];
+//                    } else {
+//                        // the first apogee is earlier than the first perigee
+//                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
+//                    }
+//                    for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
+//                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeeOrbitNumber = %d\n", PerigeeOrbitNumber[ii] );
 
 
 
@@ -1507,7 +1458,11 @@ int          N0, ii;
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
-                        spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+// get position here...
+//                        spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+
+
+
 /*
 SpiceDouble  sclkdp;
 sce2c_c( BODY,    et, &sclkdp);
@@ -1557,11 +1512,11 @@ printf("sclkdp = %lf\n", sclkdp);
                         // Set up the trans matrices
                         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
-                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
+//                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
-                        sce2s_c( BODY,    et, 30, sclkch );
+//                        sce2s_c( BODY,    et, 30, sclkch );
 
                         /*
                          * Compute L*s, Is, Bms, Footprints, etc...
@@ -1569,7 +1524,7 @@ printf("sclkdp = %lf\n", sclkdp);
                          */
                         printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
                         printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
+//                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
                         printf("\t--------------------------------------------------------------------------------------------------\n");
                         Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
@@ -1967,7 +1922,7 @@ printf("sclkdp = %lf\n", sclkdp);
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
                     sprintf( Command, "sed -i '/ELAPSED_TIME/s++%s+g' %s", t.ElapsedTimeStr, OutFile); system( Command );
-                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
+//                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
 
 
                     /*
@@ -1984,7 +1939,7 @@ printf("sclkdp = %lf\n", sclkdp);
                     /*
                      * Unload spice kernels
                      */
-                    unload_c( InputFilename );
+//                    unload_c( InputFilename );
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure
