@@ -34,7 +34,9 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_B_FromScatteredData
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c Lgm_KdTree.c\
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c Lgm_MagEphemWriteHdf.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c \
                             Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
-			                Lgm_Metadata.c  Lgm_PriorityQueue.c TraceToYZPlane.c Lgm_InitNrlMsise00.c Lgm_NrlMsise00.c Lgm_Coulomb.c #Lgm_Enkf_1D_RadDiff.c #Lgm_FastPowPoly.c
+			                Lgm_Metadata.c  Lgm_PriorityQueue.c TraceToYZPlane.c Lgm_InitNrlMsise00.c Lgm_NrlMsise00.c Lgm_Coulomb.c\
+			                Lgm_Ellipsoid.c
+
 
 libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@

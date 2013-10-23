@@ -62,3 +62,60 @@ double  Lgm_MottScattering( double Z, double beta, double Theta ) {
     return( d_sigma_d_Omega );
 
 }
+
+
+
+
+//void Lgm_MottInit( Lgm_MottInfo *m ) {
+//
+//    // select random number generator
+//    m->RngType = gsl_rng_default;
+//    
+//    // create rng
+//    m->Rng = gsl_rng_alloc( m->RngType );
+//
+//
+//    return;
+//
+//
+//}
+//
+//
+//void Lgm_MottFree( Lgm_MottInfo *m ) {
+//
+//    // free random number generator
+//    gsl_rng_free( m->rng );
+//
+//
+//    return;
+//
+//}
+//
+//
+//
+//
+//
+//void Lgm_MottGetRandomlySampledAngles( double *Theta, double *Phi ) {
+//
+//    double u1, u2;
+//
+//
+//    /*
+//     *  Get two uniform random variates in [0.0, 1.0)
+//     */
+//    u1 = gsl_rng_uniform( m->Rng );
+//    u2 = gsl_rng_uniform( m->Rng );
+//
+//
+//    *Theta = FunctionOf( u1 );
+//    *Phi   = DifferentFunctionOf( u2 );
+//    
+//    return;
+//
+//}
+//
+
+
+
+
+

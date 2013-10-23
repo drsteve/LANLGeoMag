@@ -1454,7 +1454,8 @@ double Lgm_UTC_to_TDBSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
 /*
  * TDBSecSinceJ2000 is like SPICE's 'ephemeris time'. Probably differs in 7th
- * decimal place or so.
+ * decimal place or so. Convenience rotuine to get TdbSecSinceJ2000 driectly
+ * from UTC rather than from TDB
  */
 double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
 
@@ -1477,6 +1478,60 @@ double Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
     return( Seconds );
 
 }
+
+
+
+double  Lgm_TDB_to_TdbSecSinceJ2000( Lgm_DateTime *TDB ) {
+    double  JDN, Seconds;
+    JDN  = Lgm_JDN( TDB->Year, TDB->Month, TDB->Day );
+    Seconds = ((JDN - LGM_JD_J2000)*86400.0 - 43200.0) + TDB->Time*3600.0;
+    return( Seconds );
+}
+
+void Lgm_TdbSecSinceJ2000_to_TDB( double TdbSeconds, Lgm_DateTime *TDB ) {
+
+    long int dJDN;
+    double   tmp, JDN;
+    dJDN = (long int)((TdbSeconds + 43200.0)/86400.0);
+    TDB->Time = (TdbSeconds - dJDN*86400.0 + 43200.0)/3600.0;
+    JDN = LGM_JD_J2000 + dJDN;
+
+    Lgm_jd_to_ymdh( JDN, &TDB->Date, &TDB->Year, &TDB->Month, &TDB->Day, &tmp);
+    
+    TDB->JD   = JDN + TDB->Time/24.0;
+    TDB->T    = (TDB->JD - 2451545.0)/36525.0;
+    TDB->TimeSystem = LGM_TIME_SYS_TDB;
+
+}
+
+void Lgm_TdbSecSinceJ2000_to_UTC( double TdbSeconds, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    Lgm_DateTime TDB;
+    Lgm_TdbSecSinceJ2000_to_TDB( TdbSeconds, &TDB );
+    Lgm_TDB_to_UTC( &TDB, UTC, c );
+    UTC->TimeSystem = LGM_TIME_SYS_UTC;
+}
+
+double Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    Lgm_DateTime TDB;
+    Lgm_UTC_to_TDB( UTC, &TDB, c );
+    return( Lgm_TDB_to_TdbSecSinceJ2000( &TDB) );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

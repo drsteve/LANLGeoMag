@@ -1984,7 +1984,7 @@ printf("sclkdp = %lf\n", sclkdp);
                     /*
                      * Unload spice kernels
                      */
-                    unload_c( InputFilename );
+                    unload_c( InFile );
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure

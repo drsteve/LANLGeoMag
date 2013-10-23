@@ -166,8 +166,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 50; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 50; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 500; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 500; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -175,8 +175,8 @@ int main(){
     EQ_NY   = 200; EQ_YMIN = -40.0; EQ_YMAX = 40.0;
 
 
-    YZ_NY   = 200; YZ_YMIN = -40.0; YZ_YMAX = 40.0;
-    YZ_NZ   = 200; YZ_ZMIN = -40.0; YZ_ZMAX = 40.0;
+    YZ_NY   = 200; YZ_YMIN = -20.0; YZ_YMAX = 20.0;
+    YZ_NZ   = 200; YZ_ZMIN = -20.0; YZ_ZMAX = 20.0;
 
 
 
@@ -184,10 +184,8 @@ int main(){
 
     GeodHeight = 100.0;  //km
 
-    Date = 20020417;
-    UTC  = 10.0 + 50.0/60.0 + 0.0/3600.0;
-Date = 20080310;
-UTC = 0.0;
+    Date = 20121114;
+    UTC  = 2.0 + 3.0/60.0 + 30.0/3600.0;
     JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
     printf("Tilt = %g\n", mInfo->c->psi*DegPerRad );
@@ -197,7 +195,6 @@ UTC = 0.0;
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T87, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP77, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
@@ -205,7 +202,9 @@ UTC = 0.0;
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP88, mInfo );
 Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
 Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
+
+Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T87, mInfo );
     
     Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
@@ -265,9 +264,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                 }
 
                 /*
-                 *  Trace to X = -15Re
+                 *  Trace to X = -5
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -15.0, -1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -5.0, -1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -276,10 +275,10 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                     }
 
                     /*
-                     *  Trace to X = -15Re for second hit
+                     *  Trace to X = -10Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, -1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -15.0, -1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -5.0, -1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -291,9 +290,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                 } 
 
                 /*
-                 *  Trace to X = -30Re
+                 *  Trace to X = -10Re
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -30.0, -1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -10.0, -1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -302,10 +301,10 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                     }
 
                     /*
-                     *  Trace to X = -30Re for second hit
+                     *  Trace to X = -10Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, -1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -30.0, -1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -10.0, -1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -317,9 +316,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                 } 
 
                 /*
-                 *  Trace to X = -45Re
+                 *  Trace to X = -15Re
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -45.0, -1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -15.0, -1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -331,7 +330,7 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                      *  Trace to X = -45Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, -1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -45.0, -1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -15.0, -1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -377,9 +376,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                 }
 
                 /*
-                 *  Trace to X = -15Re
+                 *  Trace to X = -5Re
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -15.0, 1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -5.0, 1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -388,10 +387,10 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                     }
 
                     /*
-                     *  Trace to X = -15Re for second hit
+                     *  Trace to X = -5Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, 1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -15.0, 1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -5.0, 1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -403,9 +402,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                 } 
 
                 /*
-                 *  Trace to X = -30Re
+                 *  Trace to X = -10Re
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -30.0, 1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -10.0, 1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -414,10 +413,10 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                     }
 
                     /*
-                     *  Trace to X = -30Re for second hit
+                     *  Trace to X = -10Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, 1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -30.0, 1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -10.0, 1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -430,9 +429,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
 
 
                 /*
-                 *  Trace to X = -45Re
+                 *  Trace to X = -15Re
                  */
-                if ( Lgm_TraceToYZPlane( &u, &ww, -45.0, 1.0, 1e-7, mInfo2 ) > 0 ){
+                if ( Lgm_TraceToYZPlane( &u, &ww, -15.0, 1.0, 1e-7, mInfo2 ) > 0 ){
                     //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                     ii = (ww.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                     jj = (ww.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -444,7 +443,7 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
                      *  Trace to X = -45Re for second hit
                      */
                     Lgm_MagStep( &ww, &u_scale, 1e-2, &Hdid, &Hnext, 1.0, &s, &reset, mInfo2->Bfield, mInfo2 );
-                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -45.0, 1.0, 1e-4, mInfo2 ) > 0 ){
+                    if ( Lgm_TraceToYZPlane( &ww, &ww2, -15.0, 1.0, 1e-4, mInfo2 ) > 0 ){
                         //printf( "ww = %g %g %g\n", ww.x, ww.y, ww.z);
                         ii = (ww2.z - YZ_ZMIN)/(YZ_ZMAX-YZ_ZMIN) * (YZ_NZ-1);
                         jj = (ww2.y - YZ_YMIN)/(YZ_YMAX-YZ_YMIN) * (YZ_NY-1);
@@ -481,9 +480,9 @@ Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
     DumpImage( "ImageNorth_TS07", NX, NY, Image );
     DumpImage( "ImageSouth_TS07", NX, NY, ImageSouth );
     DumpImage( "ImageEq_TS07", EQ_NX, EQ_NY, ImageEq );
-    DumpImage( "ImageYZ15_TS07", YZ_NY, YZ_NZ, ImageYZ15 );
-    DumpImage( "ImageYZ30_TS07", YZ_NY, YZ_NZ, ImageYZ30 );
-    DumpImage( "ImageYZ45_TS07", YZ_NY, YZ_NZ, ImageYZ45 );
+    DumpImage( "ImageYZ05_TS07", YZ_NY, YZ_NZ, ImageYZ15 );
+    DumpImage( "ImageYZ10_TS07", YZ_NY, YZ_NZ, ImageYZ30 );
+    DumpImage( "ImageYZ15_TS07", YZ_NY, YZ_NZ, ImageYZ45 );
     LGM_ARRAY_2D_FREE( Image );
     LGM_ARRAY_2D_FREE( ImageSouth );
     LGM_ARRAY_2D_FREE( ImageEq );

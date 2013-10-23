@@ -828,6 +828,12 @@ void          Lgm_TaiSeconds_to_UTC( double TaiSeconds, Lgm_DateTime *UTC, Lgm_C
 double        Lgm_UTC_to_TaiSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 
+double        Lgm_TDB_to_TdbSecSinceJ2000( Lgm_DateTime *TDB );
+void          Lgm_TdbSecSinceJ2000_to_TDB( double TdbSeconds, Lgm_DateTime *TDB );
+void          Lgm_TdbSecSinceJ2000_to_UTC( double TdbSeconds, Lgm_DateTime *UTC, Lgm_CTrans *c );
+double        Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
+
+
 double        TAISecondsSinceJ2000( double UTCDaysSinceJ2000, Lgm_CTrans *c );
 double        UTCDaysSinceJ2000( double TAI, Lgm_CTrans *c );
 
