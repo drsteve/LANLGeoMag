@@ -98,6 +98,9 @@ double SbIntegral( Lgm_MagModelInfo *fInfo ) {
 }
 
 
+
+
+
 double SbIntegral_interped( Lgm_MagModelInfo *fInfo ) {
 
 
@@ -167,6 +170,91 @@ exit(0);
     return( result );
 
 }
+
+
+
+
+
+
+/*
+ *  This computes the Sb integral but with user-supplied limits.  Basically, T
+ *  = (1/v)\int_a^b (Sb_integrand) ds gives the time a particle will spend
+ *  between s=a and s=b. Since The total arc length of the helical orbit in
+ *  [a,b] is given by L = \int_a^b |v| dt, and |v| =constant, we have L = v*T.
+ *  So, L = v*(1/v)*\int_a^b (Sb_integrand) ds.  In other words, this integral
+ *  gives the total path length taken by a particle as it moves from s=a to b.
+ */
+double SbIntegral_interped2( Lgm_MagModelInfo *fInfo, double a, double b ) {
+
+
+//    double	a, b;
+    double	epsabs, epsrel, result, abserr;
+    int		npts, key, neval, ier, leniw, lenw, last, iwork[501];
+    double	work[2002], points[20];
+    _qpInfo	*qpInfo;
+
+
+    /*
+     *  Type-cast our data structure to a generic type.
+     *  The structure holds auzilliary info we need down
+     *  in the function calls.
+     */
+    qpInfo = (_qpInfo *)fInfo;
+
+
+
+    /*
+     *  Limits of integration.
+     */
+//    a = fInfo->Sm_South;
+//    b = fInfo->Sm_North;
+    //printf("\n\n\nSbIntegral_interped: a, b = %g %g\n", a, b);
+
+
+
+    /*
+     *   set tolerances.
+     */
+    //epsabs = fInfo->epsabs;
+    //epsrel = fInfo->epsrel;
+    epsabs = fInfo->Lgm_Sb_Integrator_epsabs;
+    epsrel = fInfo->Lgm_Sb_Integrator_epsrel;
+
+
+    leniw = 500;
+    lenw  = 4*leniw;
+    key   = 6;
+
+    /*
+     *  Perform integrations. The points[] array contains a list of points
+     *  in the integrand where integrable singularities occur. dqagp() uses
+     *  these to break up the integral at these points (dqagp() is an
+     *  extrapolation algorithm so it handles singularities very well.)
+     *  Note: the value of npts2 must be 2+ the number of points added.
+     *  This is because it adds the endpoints internally (so dont add those
+     *  here).
+     */
+/*
+*/
+//    points[1] = a;
+//    points[2] = b;
+    npts = 2;
+    dqagp(Sb_integrand_interped, qpInfo, a, b, npts, points, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work, fInfo->VerbosityLevel );
+/*
+printf("here i am\n");
+double s;
+for(s=a; s<=b; s+=(b-a)/1000.0){
+printf("%g %g\n", s, Sb_integrand_interped(s, qpInfo));
+}
+exit(0);
+    dqags(Sb_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, leniw, lenw, &last, iwork, work);
+*/
+
+    return( result );
+
+}
+
+
 
 
 

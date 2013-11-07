@@ -51,6 +51,7 @@ typedef struct Lgm_FieldIntInfo {
 double 	    Iinv( Lgm_FieldIntInfo *Lgm_FieldIntInfo );
 double 	    I_integrand( double s, _qpInfo *qpInfo );
 double 	    SbIntegral( Lgm_FieldIntInfo *Lgm_FieldIntInfo );
+double 	    SbIntegral2( Lgm_FieldIntInfo *Lgm_FieldIntInfo, double a , double b );
 double 	    Sb_integrand( double s, _qpInfo *qpInfo );
 void        ratint( double *xa, double *ya, int n, double x, double *y, double *dy );
 void        polint(double *xa, double *ya, int n, double x, double *y, double *dy);

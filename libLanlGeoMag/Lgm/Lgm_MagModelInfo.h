@@ -717,6 +717,7 @@ double      I_integrand_interped( double s, _qpInfo *qpInfo );
 double      SbIntegral( Lgm_MagModelInfo *fInfo );
 double      Sb_integrand( double s, _qpInfo *qpInfo );
 double      SbIntegral_interped( Lgm_MagModelInfo *fInfo );
+double      SbIntegral_interped2( Lgm_MagModelInfo *fInfo, double a , double b );
 double      Sb_integrand_interped( double s, _qpInfo *qpInfo );
 void        ratint( double *xa, double *ya, int n, double x, double *y, double *dy );
 void        polint(double *xa, double *ya, int n, double x, double *y, double *dy);
