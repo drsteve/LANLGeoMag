@@ -121,6 +121,7 @@
  */
 #define LGM_ARRAY_1D( prow, col, type ) {\
     register type *pdata;\
+    if ( col < 1 ) { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (col = %d)\n", (col) ); exit(1); }\
     pdata = (type *)calloc( (col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_1D Macro: Could not allocate space for data\n");\
@@ -140,6 +141,8 @@
 #define LGM_ARRAY_2D( prow, row, col, type ) {\
     type *pdata;\
     int      mi;\
+    if ( row < 1 ) { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (row = %d)\n", (row) ); exit(1); }\
+    if ( col < 1 ) { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (col = %d)\n", (col) ); exit(1); }\
     pdata = (type *)calloc( (row)*(col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_2D Macro: Could not allocate space for data\n");\
@@ -169,6 +172,9 @@
 #define LGM_ARRAY_3D( pgrid, grid, row, col, type ) {\
     register type **prow, *pdata;\
     int      i;\
+    if ( row < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (row = %d)\n", (row) ); exit(1); }\
+    if ( col < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (col = %d)\n", (col) ); exit(1); }\
+    if ( grid < 1 ) { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (grid = %d)\n", (grid) ); exit(1); }\
     pdata = (type *)calloc( (grid)*(row)*(col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_3D Macro: Could not allocate space for data\n");\
@@ -210,6 +216,10 @@
 #define LGM_ARRAY_4D( pn4, n4, n3, n2, n1, type ) {\
     long int i;\
     register type ***pn3, **pn2, *pdata;\
+    if ( n1 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n1 = %d)\n", (n1) ); exit(1); }\
+    if ( n2 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n2 = %d)\n", (n2) ); exit(1); }\
+    if ( n3 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n3 = %d)\n", (n3) ); exit(1); }\
+    if ( n4 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n4 = %d)\n", (n4) ); exit(1); }\
     pdata = (type *)calloc( (n4)*(n3)*(n2)*(n1), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_4D Macro: Could not allocate space for data\n");\
@@ -262,6 +272,11 @@
 #define LGM_ARRAY_5D( pn5, n5, n4, n3, n2, n1, type ) {\
     long int i;\
     register type ****pn4, ***pn3, **pn2, *pdata;\
+    if ( n1 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n1 = %d)\n", (n1) ); exit(1); }\
+    if ( n2 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n2 = %d)\n", (n2) ); exit(1); }\
+    if ( n3 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n3 = %d)\n", (n3) ); exit(1); }\
+    if ( n4 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n4 = %d)\n", (n4) ); exit(1); }\
+    if ( n5 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n5 = %d)\n", (n5) ); exit(1); }\
     pdata = (type *)calloc( (n5)*(n4)*(n3)*(n2)*(n1), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_5D Macro: Could not allocate space for data\n");\
