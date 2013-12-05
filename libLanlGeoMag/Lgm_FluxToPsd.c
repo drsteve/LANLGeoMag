@@ -893,7 +893,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
         // determine number of points
         for (n=0, j=0; j<FitData->n; ++j){ 
-            if ( f->E[j] > .1 ) ++n;
+            if ( f->E[j] > 1.0/1000.0 ) {
+                //printf("E[%d] = %g\n", j, f->E[j] );
+                ++n;
+            }
         }
 
         if ( n > 20 ) {
@@ -902,8 +905,9 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             ncoeffs = n/2;
         }
         nbreak  = ncoeffs-2;
+        //printf("ncoeffs, nbreak = %d %d\n", ncoeffs, nbreak );
 
-        if ( (n > 4) && (nbreak>=2) ) {
+        if ( (n >= 4) && (nbreak>=2) ) {
 
             // allocate a cubic bspline workspace (k = 4)
             gsl_bspline_workspace *bs_bw;
@@ -930,7 +934,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             // set up data arrays.
             for ( n=0, j=0; j<FitData->n; j++ ){
 
-                if ( f->E[j] > .1 ) {
+                if ( f->E[j] > 1.0/1000.0 ) {
                     xi = log10( f->E[j] );
                     yi = log10( FitData->g[j] );
 
