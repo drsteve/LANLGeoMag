@@ -456,6 +456,25 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
             f->FLUX_EA[i][j] = J[i][j]; // FLUX_EA is "Flux versus Energy and Pitch Angle".
         }
     }
+
+    /*
+     * Fill in gaps in the array.
+     */
+    // for each energy, find bad points and fill them.
+/*
+    for (i=0; i<f->nE; i++) {
+        for (j=1; j<f->nA-1; j++) {
+            // if there is a value on each side, average it.
+            if ( f->FLUX_EA[i][j] < 0.0 ) {
+                
+            }
+        }
+    }
+*/
+
+
+
+
     if ( f->DumpDiagnostics ) {
         DumpGif( "Lgm_FluxToPsd_FLUX_EA", f->nA, f->nE, f->FLUX_EA );
     }
@@ -570,6 +589,7 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
      */
     if ( Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo ) > 0 ) {
 
+
         f->B = mInfo->Blocal;
 
         { // start parallel
@@ -662,9 +682,9 @@ assumes electrons -- generalize this...
             }
 
             if (DoIt) {
-                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( f->EofMu[m][k], f->AofK[k], f );
+                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( m, k, f->EofMu[m][k], f->AofK[k], f );
             } else {
-                f->PSD_MK[m][k] = 0.0;
+                f->PSD_MK[m][k] = LGM_FILL_VALUE;
             }
 
         }
@@ -749,10 +769,10 @@ if (isnan(sum)) {
  * The f structure should have an initialized PSD[E][a] array in it.
  * This routine computes psd given a value of E and a.
  */
-double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
+double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f ) {
 
     int         FitType;
-    int         j, i, i0, i1;
+    int         j, i, i0, i1, nn;
     double      a0, a1, y0, y1, slp, psd, g;
     _FitData    *FitData;
 
@@ -770,10 +790,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
      */
     if ( a < f->A[0] ) {
         return(-9e99);
-        i0 = 0; i1 = 1;
+        //i0 = 0; i1 = 1;
     } else if ( a > f->A[f->nA - 1] ) {
         return(-9e99);
-        i0 = f->nA - 2; i1 = f->nA - 1;
+        //i0 = f->nA - 2; i1 = f->nA - 1;
     } else {
         for (i=1; i<f->nA; i++) {
             if ( a < f->A[i] ) {
@@ -797,16 +817,18 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
         a1   = f->A[i1];
         y0   = f->PSD_EA[j][i0];
         y1   = f->PSD_EA[j][i1];
+
         if ( (y0>0.0)&&(y1>0.0) ){ // if one of the 'y' vals is zero, dont use this point.
             slp  = (y1-y0)/(a1-a0);
             g = slp*(a-a1) + y1;
             if ( g > 1e-40 ) { // dont use if it looks bogus
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = f->E[j];
-//printf("i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->g[%d] = %g\n", i0, i1, a0, a1, y0, y1, slp, a, j, FitData->g[j]);
+//printf("j=%d a = %g E=%g i0, i1 = %d %d   a0, a1 = %g %g   y0, y1, slp = %g %g %g    a = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", j, a, E, i0, i1, a0, a1, y0, y1, slp, a, FitData->n, FitData->E[ FitData->n ], FitData->n, FitData->g[FitData->n]);
                 ++(FitData->n);
             }
         }
+
 
     }
 
@@ -893,7 +915,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
         // determine number of points
         for (n=0, j=0; j<FitData->n; ++j){ 
-            if ( f->E[j] > 1.0/1000.0 ) {
+            if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
                 //printf("E[%d] = %g\n", j, f->E[j] );
                 ++n;
             }
@@ -901,11 +923,14 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
 
         if ( n > 20 ) {
             ncoeffs = 12;
+        } else if ( n > 5 ) {
+            ncoeffs = 4;
         } else {
             ncoeffs = n/2;
         }
         nbreak  = ncoeffs-2;
-        //printf("ncoeffs, nbreak = %d %d\n", ncoeffs, nbreak );
+        
+//if ((iK==4)&&(iMu==7)) printf("n, ncoeffs, nbreak = %d %d %d\n", n, ncoeffs, nbreak );
 
         if ( (n >= 4) && (nbreak>=2) ) {
 
@@ -932,18 +957,18 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             bs_mw = gsl_multifit_linear_alloc( n, ncoeffs );
 
             // set up data arrays.
-            for ( n=0, j=0; j<FitData->n; j++ ){
+            for ( nn=0, j=0; j<FitData->n; j++ ){
 
-                if ( f->E[j] > 1.0/1000.0 ) {
-                    xi = log10( f->E[j] );
+                if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+                    xi = log10( FitData->E[j] );
                     yi = log10( FitData->g[j] );
 
-                    sigma = 0.5; // FIX -- i.e. need real values...
-                    gsl_vector_set( bs_x, n, xi );
-                    gsl_vector_set( bs_y, n, yi );
-                    gsl_vector_set( bs_w, n, 1.0/(sigma*sigma) );
+                    sigma = 0.2*yi; // FIX -- i.e. need real values...
+                    gsl_vector_set( bs_x, nn, xi );
+                    gsl_vector_set( bs_y, nn, yi );
+                    gsl_vector_set( bs_w, nn, 1.0/(sigma*sigma) );
 
-                    ++n;
+                    ++nn;
                 }
 
             }
@@ -988,13 +1013,14 @@ double  Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f ) {
             */
 
             xi = log10( E );
+
             if ( (xi >= gsl_vector_get( bs_x, 0 )) && (xi <= gsl_vector_get( bs_x, n-1 )) ) {
                 gsl_bspline_eval( xi, bs_B, bs_bw );
                 gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
                 psd = pow( 10.0, yi );
             } else {
                 //psd = -9e99;
-                psd = LGM_FILL_VALUE;
+                psd = 8*LGM_FILL_VALUE;
             }
 
             gsl_bspline_free( bs_bw );

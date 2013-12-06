@@ -243,7 +243,7 @@ void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
 void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f );
-double         Lgm_F2P_GetPsdAtEandAlpha( double E, double a, Lgm_FluxToPsd *f );
+double         Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f );
 
 
 // PSD -> Flux routines

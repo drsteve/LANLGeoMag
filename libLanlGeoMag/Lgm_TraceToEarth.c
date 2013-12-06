@@ -299,6 +299,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         }
 //Info->Bfield( &P, &BBB,  Info );
 //printf("P=%.15lf %.15lf %.15lf  B=%.15lf %.15lf %.15lf   F = %g   Htry = %g   Hnext = %g\n", P.x, P.y, P.z, BBB.x, BBB.y, BBB.z, F, Htry, Hnext );
+//printf("P=%.15lf %.15lf %.15lf  \n", P.x, P.y, P.z );
 //printf("s = %g\n", s);
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );

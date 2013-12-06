@@ -238,6 +238,7 @@ Info->Hmax = 0.10;
     Info->Smin   = LGM_FILL_VALUE;
     
 
+//printf("HERE ************************   flag1 = %d flag2 = %d\n", flag1, flag2);
 
 
     if ( flag1 && flag2 ) {

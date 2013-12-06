@@ -63,6 +63,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      * Trace the field line for the given position. This should be a fast
      * adaptive trace. I.e. -- no points are saved.
      */
+
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, m );
     if ( TraceFlag != LGM_CLOSED ) {
         // problem tracing FL?
