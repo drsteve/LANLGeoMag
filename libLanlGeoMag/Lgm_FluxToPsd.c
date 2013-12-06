@@ -1020,7 +1020,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
                 psd = pow( 10.0, yi );
             } else {
                 //psd = -9e99;
-                psd = 8*LGM_FILL_VALUE;
+                psd = LGM_FILL_VALUE;
             }
 
             gsl_bspline_free( bs_bw );

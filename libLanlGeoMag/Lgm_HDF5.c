@@ -109,8 +109,6 @@ char **Get_StringDataset_1D( hid_t file, char *DataSet, hsize_t *Dims ) {
     char        **buf1;
     char        **buf2;
 
-printf("file:%s\n", file );
-printf("DataSet:%s\n", DataSet );
     dataset   = H5Dopen( file, DataSet, H5P_DEFAULT );
     dataspace = H5Dget_space( dataset );
     rank      = H5Sget_simple_extent_ndims( dataspace );
