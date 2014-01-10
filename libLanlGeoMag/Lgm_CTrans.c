@@ -3,6 +3,59 @@
  *  \brief Collection of numerous routines used for coordinate system transformations and ephemeris calculations.
  *
  */
+
+
+/*
+ *  FAQ on coordinate transformations....
+ *  
+ *
+ *      A general method for constructing transformation matrices from one
+ *      system to another (each with same origin):
+ *
+ *          1) Lets take an example where we want to go from a spacecraft
+ *             coordinate system,"sc" to gsm. 
+ *
+ *          2) Let u_sc be a vector in spacecraft coordinates. I.e. the first
+ *             component is the projection of the vector onto the Xsc axis, and so
+ *             on.  
+ *
+ *          3) Let u_gsm be the same vector in gsm coordinates. I.e. first
+ *             component is projection of the vector onto the GSM X axis, etc...
+ *
+ *          4) Now, if we want to compute the x component of the vector relative to the SC frame,
+ *             this is just the projection of the vector, u onto the SC X-axis. This is just a dot product;
+ *                              x_sc = Xsc-hat dot u
+ *             The right hand side is a dot product between two vectors in
+ *             space. To evaluate, both vectors need to be defined relative to
+ *             the same coord system. Thus, if u is in gsm coords, then Xsc-hat needs to be in gsm coords.
+ *             In other words;
+ *                              x_sc = Xsc-hat_gsm dot u_gsm
+ *             similarly,
+ *                              y_sc = Ysc-hat_gsm dot u_gsm
+ *                              z_sc = Zsc-hat_gsm dot u_gsm
+ *             Or, in matrix notation;
+ *                              [ x ]      [ Xsc-hat_gsm ] [ x ]
+ *                              | y |   =  | Ysc-hat_gsm | | y |
+ *                              [ z ]sc    [ Zsc-hat_gsm ] [ z ]gsm
+ *
+ *             Or,
+ *                              [ x ]      [ Xsc-hat_xgsm  Xsc-hat_ygsm   Xsc-hat_zgsm ] [ x ]
+ *                              | y |   =  | Ysc-hat_gsm   Ysc-hat_ygsm   Ysc-hat_zgsm | | y |
+ *                              [ z ]sc    [ Zsc-hat_gsm   Zsc-hat_ygsm   Zsc-hat_zgsm ] [ z ]gsm
+ *
+ *                                u_sc = A_gsm_to_sc  * u_gsm
+ *
+ *              where, A_gsm_to_sc is a 3x3 trans matrix that is formed by taking as;
+ *
+ *                          a) the first  row is Xsc-hat in gsm coords. I.e. the x-axis of the SC frame in gsm coords.
+ *                          b) the second row is Ysc-hat in gsm coords. I.e. the y-axis of the SC frame in gsm coords.
+ *                          z) the third  row is Zsc-hat in gsm coords. I.e. the z-axis of the SC frame in gsm coords.
+ *
+ *           5) Define the matrix A_gsm_to_sc and use Lgm_MatTimeVec to perform the matrix product.
+ *              Once you are in a frame we know about, its easy to go to any other.
+ *
+ *           6) This schem works in general and is pretty easy to implement on a case-by-case basis....
+ */
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Quat.h"
 #include "config.h"
