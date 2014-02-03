@@ -516,8 +516,8 @@ void GenerateDriftShellLists( Vds_ObjectInfo *ObjInfo ){
         glNewList( ObjInfo->DriftShellList4 + p, GL_COMPILE );
             for (i=0;i<ObjInfo->nFieldPoints[p]-1;i++) {
                 glBegin(GL_QUAD_STRIP);
-                //for (k=0;k<ObjInfo->nShellPoints4;k++) {
-                for (k=0;k<ObjInfo->nShellPoints4*3/4;k++) {
+                for (k=0;k<ObjInfo->nShellPoints4;k++) {
+                //for (k=0;k<ObjInfo->nShellPoints4*3/4;k++) {
                     glNormal3f( ObjInfo->nx4_gsm[p][k][i], ObjInfo->ny4_gsm[p][k][i], ObjInfo->nz4_gsm[p][k][i] );
                     glVertex3f( ObjInfo->x4_gsm[p][k][i], ObjInfo->y4_gsm[p][k][i], ObjInfo->z4_gsm[p][k][i] );
                     glNormal3f( ObjInfo->nx4_gsm[p][k][i+1], ObjInfo->ny4_gsm[p][k][i+1], ObjInfo->nz4_gsm[p][k][i+1] );
@@ -616,8 +616,8 @@ if (0==1){
     for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++){
         glNewList( ObjInfo->DriftShellList3 + i, GL_COMPILE );
 
-        //for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]; ns++){
-        for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]*3/4; ns++){
+        for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]; ns++){
+        //for (ns=0; ns<ObjInfo->MagEphemInfo->nShellPoints[i]*3/4; ns++){
 
                 // North Foot Points
                 glPushMatrix(); 
