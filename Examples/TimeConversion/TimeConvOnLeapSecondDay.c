@@ -41,129 +41,129 @@ int main( ) {
 
     printf("UTC Date/Time 0 seconds into June 29, 1985\n");
     Lgm_Make_UTC( 19850629, 0.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 43200 seconds into June 29, 1985\n");
     Lgm_Make_UTC( 19850629, 43200.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86399.5 seconds into June 29, 1985\n");
     Lgm_Make_UTC( 19850629, 86399.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.0 seconds into June 29, 1985\n");
     Lgm_Make_UTC( 19850629, 86400.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.5 seconds into June 29, 1985\n");
     Lgm_Make_UTC( 19850629, 86400.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("\n\n");
 
     printf("UTC Date/Time 0 seconds into June 30, 1985\n");
     Lgm_Make_UTC( 19850630, 0.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 43200 seconds into June 30, 1985\n");
     Lgm_Make_UTC( 19850630, 43200.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86399.5 seconds into June 30, 1985\n");
     Lgm_Make_UTC( 19850630, 86399.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.0 seconds into June 30, 1985\n");
     Lgm_Make_UTC( 19850630, 86400.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.5 seconds into June 30, 1985\n");
     Lgm_Make_UTC( 19850630, 86400.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
 Lgm_UTC_to_TDB( &UTC, &TDB,c );
-printf("\tTDB: "); Lgm_Print_DateTime( TDB, 4, 8 ); printf("\n\n");
+printf("\tTDB: "); Lgm_Print_DateTime( &TDB, 4, 8 ); printf("\n\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("\n\n");
 
     printf("UTC Date/Time 0 seconds into July 1, 1985\n");
     Lgm_Make_UTC( 19850701, 0.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 43200 seconds into July 1, 1985\n");
     Lgm_Make_UTC( 19850701, 43200.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86399.5 seconds into July 1, 1985\n");
     Lgm_Make_UTC( 19850701, 86399.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.0 seconds into July 1, 1985\n");
     Lgm_Make_UTC( 19850701, 86400.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
     printf("UTC Date/Time 86400.5 seconds into July 1, 1985\n");
     Lgm_Make_UTC( 19850701, 86400.5/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 4, 8 ); printf("\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 4, 8 ); printf("\n");
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n\n");
 
 
 
@@ -175,12 +175,12 @@ printf("\tTDB: "); Lgm_Print_DateTime( TDB, 4, 8 ); printf("\n\n");
     Lgm_Make_UTC( 20040514, 16.0 + 43.0/60.0, &UTC, c );
     UTC.JD = Lgm_JD( TAI.Year, TAI.Month, TAI.Day, TAI.Time, LGM_TIME_SYS_TAI, c );
     Lgm_TAI_to_UTC( &TAI, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( *UTC2, 4, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC2, 4, 8 ); printf("\n\n");
     
 
 
     Lgm_UTC_to_TDB( UTC2, &TDB,c );
-    printf("\tTDB: "); Lgm_Print_DateTime( TDB, 4, 8 ); printf("\n\n");
+    printf("\tTDB: "); Lgm_Print_DateTime( &TDB, 4, 8 ); printf("\n\n");
     
     
 
