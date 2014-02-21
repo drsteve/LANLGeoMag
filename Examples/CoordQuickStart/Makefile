@@ -2,7 +2,7 @@
 
 
 CoordQuickStart: CoordQuickStart.c
-	gcc CoordQuickStart.c `pkg-config --cflags --libs lgm` -o CoordQuickStart
+	gcc CoordQuickStart.c -Wall `pkg-config --cflags --libs lgm` -o CoordQuickStart
 
 clean:
 	rm CoordQuickStart
