@@ -15,9 +15,9 @@ int main(void) {
   printf("Rotate it 90 degrees about y\n");
   Lgm_SetVecElements(&vtmp, 0, 1, 0);
   Lgm_AxisAngleToQuat(&vtmp, 90, q1);
-  Lgm_PrintQuat(&q1);
+  Lgm_PrintQuat((double *)&q1);
   printf("To get:\n");
-  Lgm_QuatRotateVector(&q1, &v1, &v2);
+  Lgm_QuatRotateVector((double *)&q1, &v1, &v2);
   Lgm_PrintVector(&v2);
   printf("\n\n");
 
@@ -27,17 +27,17 @@ int main(void) {
   printf("Rotate it 90 degrees about y\n");
   Lgm_SetVecElements(&vtmp, 0, 1, 0);
   Lgm_AxisAngleToQuat(&vtmp, 90, q1);
-  Lgm_PrintQuat(&q1);
+  Lgm_PrintQuat((double *)&q1);
   printf("Rotate it 90 degrees about x\n");
   Lgm_SetVecElements(&vtmp, 1, 0, 0);
   Lgm_AxisAngleToQuat(&vtmp, 90, q2);
-  Lgm_PrintQuat(&q2);
+  Lgm_PrintQuat((double *)&q2);
   printf("Combine the quaternions\n");
-  Lgm_QuatCombineQuats(&q1, &q2, &q3);
+  Lgm_QuatCombineQuats((double *)&q1, (double *)&q2, (double *)&q3);
   printf("To get the quat:\n");
-  Lgm_PrintQuat(&q3);
+  Lgm_PrintQuat((double *)&q3);
   printf("Which gives the vector:\n");
-  Lgm_QuatRotateVector(&q3, &v1, &v2); 
+  Lgm_QuatRotateVector((double *)&q3, &v1, &v2); 
   Lgm_PrintVector(&v2); 
 
 
