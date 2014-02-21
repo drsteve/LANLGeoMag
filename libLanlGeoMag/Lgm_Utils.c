@@ -6,14 +6,14 @@
  * Fill an array with log spaced numbers from start to stop
  */
 void Lgm_LogSpace( double start, double stop, long num, double *array ){
-  double delta, logmin, accDelta = 0;
-  long i;
-  logmin = log10(start);
-  delta = (log10(stop) - logmin)/(double)num;
-  for (i=0; i<num; i++) {
-    array[i] = pow(10, logmin + accDelta);
-    accDelta += delta;
-  }
+  /* logspace is equivalent to 
+   *   y=linspace(log10(start), log10(stop), num) 
+   *  then pow(10, y)  
+   */
+  unsigned long i;
+  Lgm_LinSpace(log10(start), log10(stop), num, array);
+  for (i=0; i<num; i++)
+    array[i] = pow(10.,array[i]);
 }
 
 /*
