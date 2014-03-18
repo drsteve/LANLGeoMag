@@ -17,11 +17,11 @@ int main( ) {
     printf("------------------------------------------------------\n\n");
     printf("    Starting with 20081231 23:59:40 UTC\n");
     Lgm_Make_UTC( 20081231, 86380.0/3600.0, &UTC, c );
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 0, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 0, 8 ); printf("\n\n");
 
     Lgm_UTC_to_TAI( &UTC, &TAI, c );
     printf("    Results of Lgm_UTC_to_TAI\n");
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI, 0, 8 ); printf("\n\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 0, 8 ); printf("\n\n");
 
     TaiSeconds = Lgm_UTC_to_TaiSeconds( &UTC, c );
     printf("    Results of Lgm_UTC_to_TaiSeconds\n");
@@ -29,11 +29,11 @@ int main( ) {
 
     Lgm_TaiSeconds_to_TAI( TaiSeconds, &TAI2 );
     printf("    Results of Lgm_TaiSeconds_to_TAI\n");
-    printf("\tTAI: "); Lgm_Print_DateTime( TAI2, 0, 8 ); printf("\n\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI2, 0, 8 ); printf("\n\n");
 
     Lgm_TaiSeconds_to_UTC( TaiSeconds, &UTC, c );
     printf("    Results of Lgm_TaiSeconds_to_UTC\n");
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 0, 8 ); printf("\n\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 0, 8 ); printf("\n\n");
 
 
 

@@ -38,7 +38,7 @@ exit(0);
     Lgm_Make_UTC( Date, Time, &UTC, c );
 
     // Print the time...
-    printf("\tUTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 4, 8 ); printf("\n");
 
 
     // free structures

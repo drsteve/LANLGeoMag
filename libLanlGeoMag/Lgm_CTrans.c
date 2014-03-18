@@ -141,7 +141,7 @@ Lgm_CTrans *Lgm_CopyCTrans( Lgm_CTrans *s ) {
 
     if ( s == NULL) {
         printf("Lgm_CopyCTrans: Error, source structure is NULL\n");
-        return;
+        return(NULL);
     }
 
     /*
