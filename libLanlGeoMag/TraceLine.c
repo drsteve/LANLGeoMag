@@ -1288,12 +1288,14 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     Htry = S/(double)N;
     done  = FALSE;
     P = *u;
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g (first point)\n", P.x, P.y, P.z );
     while ( !done ) {
 
         //if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
         R = Lgm_Magnitude( &P );
         ss += Hdid;  
+        if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g    R, s = %g %g\n", P.x, P.y, P.z, R, ss );
 
         /*
          * Save this (new) point only if its different from the previous one)
@@ -1324,7 +1326,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
              */
 	        printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
             return(-1);
-        } else if ( ss >= S ) {
+        } else if ( fabs( S-ss ) < 2.0*tol ) {
             done = TRUE;
         }
 
@@ -1349,7 +1351,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
+    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
