@@ -1295,6 +1295,7 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
     int                 k, m, DoIt, i, iL, iMu, iK, done;
     double              SinAlphaEq, AlphaEq, p2c2, Lstar;
     Lgm_MagModelInfo    *mInfo2;
+    Lgm_Vector          Bvec;
 
 
     /*
@@ -1329,16 +1330,21 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
      * Save the results in the p structure.
      * Also copy the Lstars into p structure.
      */
-    Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
+// If we arent using Lgm_KofAlpha(), why do we need the setup/teardown?
+// This has got to be wasteful....
+//    Lgm_Setup_AlphaOfK( &(p->DateTime), &(p->Position), mInfo );
+    Lgm_Set_Coord_Transforms( p->DateTime.Date, p->DateTime.Time, mInfo->c );
+    mInfo->Bfield( &(p->Position), &Bvec, m );
+    mInfo->Blocal = Lgm_Magnitude( &Bvec );
     p->B = mInfo->Blocal;
-    {   // start parallel
+//    {   // start parallel
 #if USE_OPENMP
         //#pragma omp parallel private(mInfo2,SinAlphaEq,AlphaEq)
         //#pragma omp for schedule(dynamic, 1)
 #endif
         for ( k=0; k<nA; k++ ){
 
-            mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
+//            mInfo2 = Lgm_CopyMagInfo( mInfo );  // make a private (per-thread) copy of mInfo
 
             p->A[k]    = A[k]; // A is local Pitch Angle
             SinAlphaEq = sqrt( mInfo2->Bmin/mInfo2->Blocal ) * sin( RadPerDeg*p->A[k] );
@@ -1359,8 +1365,8 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
             Lgm_FreeMagInfo( mInfo2 ); // free mInfo2
 
         }
-    }   // end parallel
-    Lgm_TearDown_AlphaOfK( mInfo );
+//    }   // end parallel
+//    Lgm_TearDown_AlphaOfK( mInfo );
 
 
 
