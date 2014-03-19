@@ -344,6 +344,7 @@ f->nMaxwellians = 1;
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;
 
+    f->UseModelB = TRUE; // default.
 
     return f;
 
@@ -405,6 +406,28 @@ void Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f
     f->Position = *u;
 
 }
+
+/**
+ *  \brief
+ *      Forces Mu/E conversions to use observed magntitude of B.
+ *  \details
+ *
+ *
+ *      \param[in]      |B|   Magnitude of observed B-field (nT).
+ *      \param[in,out]   f   Lgm_FluxToPsd sturcture.
+ *
+ *      \author         Mike Henderson
+ *      \date           2014
+ *
+ */
+void Lgm_F2P_SetObservedB( double B_obs, Lgm_FluxToPsd *f ) {
+
+    f->B_obs     = B_obs;
+    f->UseModelB = FALSE;
+
+}
+
+
 
 
 /**
@@ -632,8 +655,14 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
     } else {
 
+        // Blocal will have been set in Lgm_Setup_AlphaOfK() even if it returned a value <= 0.
+        f->B = mInfo->Blocal;
         for ( k=0; k<nK; k++ ) f->AofK[k] = -9e99;
 
+    }
+
+    if (  !(f->UseModelB)  ) {
+        printf("Bmodel, Bobs = %g %g\n", f->B, f->B_obs );
     }
 
 
@@ -647,7 +676,11 @@ assumes electrons -- generalize this...
     for ( m=0; m<nMu; m++ ){
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
-            f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
+            if ( f->UseModelB ) {
+                f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
+            } else {
+                f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B_obs, LGM_Ee0 );
+            }
             //printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }

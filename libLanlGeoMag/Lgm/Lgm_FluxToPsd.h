@@ -125,6 +125,7 @@ typedef struct Lgm_FluxToPsd {
 
     double       B;                //!< Magnetic field strength.
 
+    double       B_obs;            //!< Observed magnetic field strength.
 
     /*
      * Params for PSD versus Mu and K
@@ -153,6 +154,7 @@ typedef struct Lgm_FluxToPsd {
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
     int          nMaxwellians;       //!< Number of maxwellians to use in fitting
+    int          UseModelB;          //!< If true, use b-field model to compute |B| for converting between Mu and E, otherwise use the B_obs value.
 
 
 
@@ -242,6 +244,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics );
 void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
+void           Lgm_F2P_SetObservedB( double B_obs, Lgm_FluxToPsd *f );
 void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f );
 double         Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f );
 
