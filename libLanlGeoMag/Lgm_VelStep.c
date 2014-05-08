@@ -1,8 +1,21 @@
-#include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_VelStepInfo.h"
+
+
+
+
+Lgm_VelStepInfo *Lgm_InitVelInfo( ) {
+    Lgm_VelStepInfo  *vInfo = (Lgm_VelStepInfo *) calloc( 1, sizeof(*vInfo) );
+    return( vInfo );
+}
+
+void Lgm_FreeVelInfo(  Lgm_VelStepInfo *vInfo ) {
+    free( vInfo );
+}
+
 
 
 int Lgm_ModMid2( Lgm_Vector *u, Lgm_Vector *Vel0, Lgm_Vector *v, double H, int n, double sgn, 
-         int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ) {
+         int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_VelStepInfo *), Lgm_VelStepInfo *Info ) {
 
     int           m;
     double        h2, h, Speed;
@@ -113,7 +126,7 @@ int Lgm_ModMid2( Lgm_Vector *u, Lgm_Vector *Vel0, Lgm_Vector *v, double H, int n
 int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale, 
           double Htry, double *Hdid, double *Hnext, 
           double eps, double sgn, double *s, int *reset,
-          int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
+          int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_VelStepInfo *), Lgm_VelStepInfo *Info ){
 
 
     Lgm_Vector        u0, Vel0, v, uerr, e;
@@ -230,7 +243,7 @@ int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale,
             h2 = H*H;
             if ( !Lgm_ModMid2( &u0, &Vel0, &v, H, n, sgn, Velocity, Info ) ) return(-1); // bail if Lgm_ModMid2() had issues.
             sss = h2/n2;
-            Lgm_RatFunExt( k-1, sss, &v, u, &uerr, Info );
+            Lgm_VelPolFunExt( k-1, sss, &v, u, &uerr, Info );
             
             if (k !=  1){
 
@@ -320,4 +333,117 @@ int Lgm_VelStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     return(1);
 
 }
+
+void Lgm_VelRatFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vector *dw, Lgm_VelStepInfo *Info ) {
+
+    int      i, j;
+    double   yy, v, ddy=0.0, c, b1, b, fx[LGM_VELSTEP_JMAX];
+    double   y_k[3], y[3], dy[3];
+//    static double   d[LGM_VELSTEP_JMAX][LGM_VELSTEP_JMAX], x[LGM_VELSTEP_JMAX];
+
+    /*
+     *  (x_k, y_k) is the kth "data point" in the sequence.
+     */
+    y_k[0] = u_k->x; y_k[1] = u_k->y; y_k[2] = u_k->z;
+
+    Info->Lgm_VelStep_BS_x[k] = x_k;
+    // next line is not needed -- just debugginh...
+    Info->Lgm_VelStep_BS_u[k] = *u_k;
+    if (k == 0) {
+        for (i=0; i<3; ++i) y[i] = dy[i] = Info->Lgm_VelStep_BS_d[i][0] = y_k[i];
+    } else {
+        for (j=0; j<k; ++j) fx[j+1] = Info->Lgm_VelStep_BS_x[k-j-1] / x_k;
+        for (i=0; i<3; ++i) {
+            v = Info->Lgm_VelStep_BS_d[i][0];
+            c = yy = Info->Lgm_VelStep_BS_d[i][0] = y_k[i];
+            for (j=1; j<=k; ++j) {
+                b1 = fx[j] * v;
+                b  = b1 - c;
+                if (b != 0.0) {
+                    b    = (c - v)/b;
+                    ddy  = c * b;
+                    c    = b1 * b;
+                } else{
+                    ddy = v;
+                }
+                if (j != k) v = Info->Lgm_VelStep_BS_d[i][j];
+                Info->Lgm_VelStep_BS_d[i][j]  = ddy;
+                yy      += ddy;
+            }
+            dy[i] = ddy;
+            y[i]  = yy;
+        }
+    }
+//printf("Lgm_VelRatFunExt:\n");
+//for (j=0; j<=k; j++){
+//printf("k = %d  x,y = %.15lf    %.15lf %.15lf %.15lf\n", k, Info->Lgm_VelStep_BS_x[j], Info->Lgm_VelStep_BS_u[j].x, Info->Lgm_VelStep_BS_u[j].y, Info->Lgm_VelStep_BS_u[j].z);
+//}
+
+    /*
+     *  (x_k, u_k) are the input "data points". The rational function should go through
+     *  all of these points. w is the rational function evaluated at x_k = 0.0 -- i.e.
+     *  an estimate of what the sequence of modified midpoint estimates would converge to
+     *  for infinitely small step sizes. dw is the error in this estimate.
+     *
+     */
+    w->x  = y[0];    w->y  = y[1];    w->z  = y[2];
+    dw->x = dy[0];   dw->y = dy[1];   dw->z = dy[2];
+}
+
+
+void Lgm_VelPolFunExt( int k, double x_k, Lgm_Vector *u_k, Lgm_Vector *w, Lgm_Vector *dw, Lgm_VelStepInfo *Info ) {
+
+    int             k1, j;
+    double          q, f1, f2, c[LGM_VELSTEP_JMAX];
+    double          y_k[3], y[3], dy[3], delta;
+
+    /*
+     *  (x_k, y_k) is the kth "data point" in the sequence.
+     */
+    y_k[0] = u_k->x; y_k[1] = u_k->y; y_k[2] = u_k->z;
+
+    Info->Lgm_VelStep_BS_x[k] = x_k;
+    Info->Lgm_VelStep_BS_u[k] = *u_k; // line not needed -- just debugginh...
+
+    for (j=0; j<3; j++) y[j] = dy[j] = y_k[j];
+
+    if (k == 0) {
+        for (j=0; j<3; j++) Info->Lgm_VelStep_BS_d[j][0] = y_k[j];
+    } else {
+        for (j=0; j<3; j++) c[j] = y_k[j];
+
+        for (k1=1; k1<k; k1++) {
+            delta = 1.0/(Info->Lgm_VelStep_BS_x[k-k1] - x_k);
+//printf("delta = %g\n", delta);
+            f1 = x_k*delta;
+            f2 = Info->Lgm_VelStep_BS_x[k-k1]*delta;
+            for ( j=0; j<3; j++){
+                q = Info->Lgm_VelStep_BS_d[j][k1];
+                Info->Lgm_VelStep_BS_d[j][k1] =  dy[j];
+                delta = c[j]-q;
+                dy[j] = f1*delta;
+                c[j] = f2*delta;
+                y[j] += dy[j];
+            }
+        }
+        for (j=0; j<3; j++) Info->Lgm_VelStep_BS_d[j][k] = dy[j];
+    }
+
+
+//printf("Lgm_VelPolFunExt:\n");
+//for (j=0; j<=k; j++){
+//printf("k = %d  x,y = %.15lf    %.15lf %.15lf %.15lf\n", k, Info->Lgm_VelStep_BS_x[j], Info->Lgm_VelStep_BS_u[j].x, Info->Lgm_VelStep_BS_u[j].y, Info->Lgm_VelStep_BS_u[j].z);
+//}
+    /*
+     *  (x_k, u_k) are the input "data points". The polynomial function should go through
+     *  all of these points. w is the polynomial function evaluated at x_k = 0.0 -- i.e.
+     *  an estimate of what the sequence of modified midpoint estimates would converge to
+     *  for infinitely small step sizes. dw is the error in this estimate.
+     *
+     */
+    w->x  = y[0];    w->y  = y[1];    w->z  = y[2];
+//printf("k = %d  w = %.15lf %.15lf %.15lf\n", w->x, w->y, w->z );
+    dw->x = dy[0];   dw->y = dy[1];   dw->z = dy[2];
+}
+
 

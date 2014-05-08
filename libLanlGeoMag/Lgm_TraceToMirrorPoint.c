@@ -340,10 +340,15 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
     /*
      * We have found a potential bracket, but lets just be sure.
      */
-    if ( (Fa>=0.0)&&(Fb<=0.0) || (Fa<=0.0)&&(Fb>=0.0) ) FoundBracket = TRUE;
-    else FoundBracket = FALSE;
+//printf( "FoundBracket = %d\n", FoundBracket);
+//printf( "Fa, Fb = %g %g\n", Fa, Fb );
+    if ( FoundBracket ) {
+        FoundBracket = ( (Fa>=0.0)&&(Fb<=0.0) || (Fa<=0.0)&&(Fb>=0.0) ) ? TRUE : FALSE ;
+    }
 
-    if ( !FoundBracket && Fmin > 1e-4 ) {
+//printf("FoundBracket = %d\n", FoundBracket);
+//printf("Fmin = %g\n", Fmin);
+    if ( !FoundBracket && ( fabs(Fmin) > 1e-4) ) {
 
         if ( Info->VerbosityLevel > 1 ) {
             printf("    Lgm_TraceToMirrorPoint: Bracket not found.\n");
@@ -356,7 +361,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
         }
         return( -3 ); /* We have gone as far as we could without finding a bracket. Bail out. */
 
-    } else if ( !FoundBracket && Fmin <= 1e-4 ) {
+    } else if ( !FoundBracket && ( fabs(Fmin) <= 1e-4) ) {
 
         Fb = Fmin;
         Sb = Smin;
@@ -381,7 +386,7 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
         while (!done) {
 
             if ( Info->VerbosityLevel > 4 ) {
-                printf("    TraceToMirrorPoint, Finding Root: Starting P: %15g %15g %15g  ...\n", P.x, P.y, P.z );
+                printf("    \tTraceToMirrorPoint, Finding Root: Starting P: %15g %15g %15g  ...\n", P.x, P.y, P.z );
             }
 
             d = Sb - Sa;
@@ -405,9 +410,9 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
 
             if ( Info->VerbosityLevel > 4 ) {
                 printf("                                             Got To: %15g %15g %15g     with Htry of: %g\n", P.x, P.y, P.z, Htry );
-                printf("        Pa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
-                printf("        Pb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
-                printf("        F = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
+                printf("        \tPa, Ra, Fa, Sa = (%15g, %15g, %15g) %15g %15g %15g\n", Pa.x, Pa.y, Pa.z, Ra, Fa, Sa  );
+                printf("        \tPb, Rb, Fb, Sb = (%15g, %15g, %15g) %15g %15g %15g\n", Pb.x, Pb.y, Pb.z, Rb, Fb, Sb  );
+                printf("        \tF = %g, |B| Bm = %g %g FoundBracket = %d  done = %d    Current Height = %g\n\n", F, Lgm_Magnitude( &Bvec ), Bm, FoundBracket, done, Height );
             }
             ++nIts;
 

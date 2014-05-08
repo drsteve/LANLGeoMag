@@ -1326,7 +1326,8 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
              */
 	        printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
             return(-1);
-        } else if ( fabs( S-ss ) < 2.0*tol ) {
+        //} else if ( fabs( S-ss ) < 2.0*tol ) {
+        } else if ( fabs( S-ss ) < tol ) {
             done = TRUE;
         }
 
@@ -1336,6 +1337,44 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     Info->nPnts     = n;                       // set total number of points in the array.
     Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
                                                // when trying to interpolate.
+
+
+    /*
+     * In some pathological circumstances, the s of the final point may be less
+     * than the S that was requested. This can happen (for example) if S is
+     * already very small, and the tolerances arent small enough to get there
+     * precisely enough (maybe related to getting near machine precision +
+     * round off errors etc.).
+     *
+     * At any rate, we must guard against this, because BofS() will abort if
+     * you try to evaluate it outside of the defined range of s's.
+     *
+     * So lets just make sure we are OK. If we arent, lets reset the final point.
+     * 
+     * Warning: Could cause last point could to be off if tol is not small.
+     */
+    if ( fabs(S-Info->s[n-1]) < tol ) {
+        Info->s[n-1] = S;
+    }
+    if ( S-Info->s[n-1] > 0.0 ) {
+        printf("AHA:    S, ss, S-ss = %g %g %g\n", S, ss, S-ss);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /*

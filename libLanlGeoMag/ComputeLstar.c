@@ -514,7 +514,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     LstarInfo->LS = LGM_FILL_VALUE;
 
 
-    if (LstarInfo->VerbosityLevel > 0) {
+    if (LstarInfo->VerbosityLevel > 1) {
         printf("\n\n\t\t%s        Computing L* for, Date: %ld, UT: %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, LstarInfo->mInfo->c->UTC.Time, PostStr );
         printf(    "\t\t%s=========================================================================%s\n", PreStr, PostStr );
         printf(    "\t\t%sDate (yyyymmdd):                         %ld%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, PostStr );
@@ -539,7 +539,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      *  Do Initial field Line to get Bm and I
      */
     u = *vin;
-    if (LstarInfo->VerbosityLevel > 0) {
+    if (LstarInfo->VerbosityLevel > 1) {
         printf("\n\t\t%sInitial Position, U_gsm (Re):            < %g, %g, %g >%s\n", PreStr, u.x, u.y, u.z, PostStr);
 	    LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
 	    B = Lgm_Magnitude( &Bvec );
@@ -551,7 +551,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         LstarInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second derivative of B wrt s at equator.
         LstarInfo->RofC    = LstarInfo->mInfo->d2B_ds2; // radius of curvature at Bmin point.
 
-	    if (LstarInfo->VerbosityLevel > 0) {
+	    if (LstarInfo->VerbosityLevel > 1) {
             printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
 	        LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
 	        B = Lgm_Magnitude( &Bvec );
@@ -580,7 +580,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
          */
         if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_South), &dSa, LstarInfo->mInfo->Bm, -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
 
-	        if (LstarInfo->VerbosityLevel > 0) {
+	        if (LstarInfo->VerbosityLevel > 1) {
                 printf("\n\t\t%sMirror Point Location, Pm_South (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, PostStr);
 	            LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
 	            B = Lgm_Magnitude( &Bvec );
@@ -593,7 +593,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 /*
                  *  We found both mirror points. Dump some diagnostics.
                  */
-                if (LstarInfo->VerbosityLevel > 0) {
+                if (LstarInfo->VerbosityLevel > 1) {
                     printf("\n\t\t%sMirror Point Location, Pm_North (Re):      < %g, %g, %g >%s\n",
                             PreStr, LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y,
                             LstarInfo->mInfo->Pm_North.z, PostStr);
@@ -649,7 +649,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
                         I = Iinv_interped( LstarInfo->mInfo  );
-                        if (LstarInfo->VerbosityLevel > 0) {
+                        if (LstarInfo->VerbosityLevel > 1) {
                             printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
                         }
 //                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
@@ -665,7 +665,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         LstarInfo->SbIntegral0 = LGM_FILL_VALUE;
                         if ( LstarInfo->ComputeSbIntegral ) {
                             LstarInfo->SbIntegral0 = SbIntegral_interped( LstarInfo->mInfo  );
-                            if (LstarInfo->VerbosityLevel > 0) {
+                            if (LstarInfo->VerbosityLevel > 1) {
                                 printf("\t\t  %sSb Integral Equatorially Mirroring:      %g%s\n",  PreStr, LstarInfo->Sb0, PostStr );
                                 printf("\t\t  %sSb Integral, (interped):      %g%s\n",  PreStr, LstarInfo->SbIntegral0, PostStr );
                             }
@@ -690,7 +690,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                      *  (This strategy isnt used very much anymore - 20120524, MGH)
                      */
                     I = Iinv( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 0) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
+                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
 
                 }
                 LstarInfo->I0 = I; // save initial I in LstarInfo structure.
@@ -698,7 +698,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
 
-                if (LstarInfo->VerbosityLevel > 0) {
+                if (LstarInfo->VerbosityLevel > 1) {
                     // sort this out. FIX User should decide what M they want to use.
                     //M = LstarInfo->mInfo->c->M_cd;
                     //M = LstarInfo->mInfo->c->M_cd_McIllwain;
@@ -1342,7 +1342,7 @@ FIX
 
 
 
-    if (LstarInfo->VerbosityLevel > 0) {
+    if (LstarInfo->VerbosityLevel > 1) {
         printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );

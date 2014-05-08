@@ -117,6 +117,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
         SS2 = 0.0;
 //        if ( Lgm_TraceToMirrorPoint( &Pmirror1, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 ) {
         if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  sgn, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 )  {
+//printf("LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol = %g\n", LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol);
 
             SS = SS1 + SS2;
 //printf("SS1, SS2, SS = %g %g %g   sgn = %g\n", SS1, SS2, SS, sgn);
@@ -185,9 +186,40 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
                 // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
                 //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
                 //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
-                if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+//printf("MIKE: SS = %g\n", SS);
+//printf("MIKE: SS/LstarInfo->mInfo->nDivs = %g\n", SS/LstarInfo->mInfo->nDivs);
+
+
+                /*
+                 *  This little section is attempting to solve an annoying
+                 *  precision issue.  If the distance over which we are trying
+                 *  to trace is too small, too many sub-divisions (i.e. total
+                 *  steps) will lead to a step size that is too small.  We can
+                 *  end up with the gridded FL points computed in
+                 *  Lgm_TraceLine3() such that the distance, s of the final
+                 *  point is very slightly less than we expect.  This tries to
+                 *  reduce the number of divisions to avoid this in cases where
+                 *  the total distance to trace is very small.
+                 */
+                int nDivs;
+                if ( SS/LstarInfo->mInfo->nDivs < 1e-6 ) {
+                    nDivs = SS/1e-6;
+                    if (nDivs < 10) nDivs = 10;
+                } else {
+                    nDivs = LstarInfo->mInfo->nDivs;
+                }
+                //printf("nDivs = %d\n", nDivs);
+
+
+
+                //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+                if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
 //printf("P0 = %g %g %g\n", LstarInfo->mInfo->Px[0], LstarInfo->mInfo->Py[0], LstarInfo->mInfo->Pz[0]);
 //printf("Plast = %g %g %g\n", LstarInfo->mInfo->Px[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Py[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Pz[LstarInfo->mInfo->nPnts-1]);
+
+
+
+
 
 
                 /*

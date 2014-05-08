@@ -618,8 +618,8 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
         { // start parallel
 
 #if USE_OPENMP
-//            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
-//            #pragma omp for schedule(dynamic, 1)
+            #pragma omp parallel private(mInfo2,AlphaEq,SinA)
+            #pragma omp for schedule(dynamic, 1)
 #endif
             for ( k=0; k<nK; k++ ){
 
@@ -943,7 +943,8 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
          * Use smoothing spline.
          */
         int n;
-        int ncoeffs = 12;
+        //int ncoeffs = 12;
+        int ncoeffs = 8;
         int nbreak  = ncoeffs - 2;
 
         // determine number of points

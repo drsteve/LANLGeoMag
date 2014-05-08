@@ -712,7 +712,6 @@ int main( int argc, char *argv[] ){
     SpiceChar       sclkch[30];
 
 
-    med = Lgm_InitMagEphemData( 2000, 80 );
 
     t.ColorizeText = TRUE;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
@@ -867,6 +866,19 @@ int main( int argc, char *argv[] ){
         }
     }
     Lgm_PrintElapsedTime( &t );
+
+    Lgm_Doy( StartDate, &sYear, &sMonth, &sDay, &sDoy);
+    sJD = Lgm_JD( sYear, sMonth, sDay, 12.0, LGM_TIME_SYS_UTC, c );
+    Lgm_Doy( EndDate, &eYear, &eMonth, &eDay, &eDoy);
+    eJD = Lgm_JD( eYear, eMonth, eDay, 12.0, LGM_TIME_SYS_UTC, c );
+
+    
+    int NNN = (int)( (eJD-sJD+1)*86400.0/(double)Delta + 1.0);
+    if (NNN > 86401 ) NNN = 86401;
+    med = Lgm_InitMagEphemData( NNN, 80 );
+
+
+
 
 
     SpiceDouble et;
@@ -1538,10 +1550,10 @@ printf("sclkdp = %lf\n", sclkdp);
 
                         // Set mag model parameters
                         if ( FixModelDateTime ) {
-                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, 1 );
+                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         } else {
-                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         }
 
@@ -1567,10 +1579,12 @@ printf("sclkdp = %lf\n", sclkdp);
                          * Compute L*s, Is, Bms, Footprints, etc...
                          * These quantities are stored in the MagEphemInfo Structure
                          */
-                        printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
-                        printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
-                        printf("\t--------------------------------------------------------------------------------------------------\n");
+                        if ( Verbosity > 0 ) {
+                            printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
+                            printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
+                            printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
+                            printf("\t--------------------------------------------------------------------------------------------------\n");
+                        }
                         Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
 
                         MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
@@ -1964,6 +1978,7 @@ printf("sclkdp = %lf\n", sclkdp);
                     fclose(fp_MagEphem);
                     H5Fclose( file );
 
+                    printf("DONE.\n");
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
                     sprintf( Command, "sed -i '/ELAPSED_TIME/s++%s+g' %s", t.ElapsedTimeStr, OutFile); system( Command );

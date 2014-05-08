@@ -543,10 +543,10 @@ void Lgm_PolFunExt( int, double, Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, Lgm_M
 
 
 
-int Lgm_ModMid2( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
-	     int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
-int  Lgm_VelStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
-              int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+//int Lgm_ModMid2( Lgm_Vector *, Lgm_Vector *, Lgm_Vector *, double, int, double,
+//	     int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
+//int  Lgm_VelStep( Lgm_Vector *, Lgm_Vector *, double, double *, double *, double, double, double *, int *,
+//              int (*Velocity)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo * );
 
 
 /*
