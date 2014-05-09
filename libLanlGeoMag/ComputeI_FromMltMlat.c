@@ -23,7 +23,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
          *  Couldnt get a valid Bm. (The bracket is pretty huge,so
          *  we probably ought to believe there really isnt a valid one.)
          */
-        printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
+        if (LstarInfo->VerbosityLevel > 0) printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
         I = 9e99;
 
     } else {
