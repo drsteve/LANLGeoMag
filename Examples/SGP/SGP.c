@@ -1,0 +1,83 @@
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <Lgm_Sgp.h>
+#include <Lgm_CTrans.h>
+#include <Lgm_MagModelInfo.h>
+
+
+int main(void) {
+  char *filename ="iss.tle";
+  int nTle=0; // this is not the number of TLE but the index in the tle array
+  _SgpTLE *tle;
+  Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
+  _SgpInfo        *s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );;
+  double           Lat, Lon, r, minutes, tsince=0, JD, tUT;
+    int              tYear, tMonth, tDay;
+    long int         tDate, i;
+    Lgm_Vector Ugei;
+    Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
+
+  tle = (_SgpTLE *)calloc( 1, sizeof(_SgpTLE) );
+
+  if (!LgmSgp_ReadTlesFromFile( filename, &nTle, tle, 4)){
+    printf("TLE not parsed!\n");
+    return(-1);
+  } else {
+    printf("TLE read and parsed.\n");
+  }
+
+  printf("Line0: %s\n", tle[0].Line0);
+  printf("Line1: %s\n", tle[0].Line1);
+  printf("Line2: %s\n", tle[0].Line2);
+  printf("\n");
+
+    /*
+     * All the TLEs have their own epoch times0 in them. And the propagator (sgp4)
+     * uses the "time since (in minutes)". So for a given time of interest, we need to
+     * compute the tsince needed.
+     */
+  // JD=2454771.014400;
+  JD = Lgm_JD( 2008, 10, 31, 12.3456, LGM_TIME_SYS_UTC, c );
+  minutes =  12.3456;
+  printf("JD( 2008, 10, 31, 12.3456, c  ) = %lf\n",  JD);
+
+  Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+  Lgm_Set_Coord_Transforms( tDate, tUT, c );
+
+  tsince = (JD - tle[0].JD)*1440.0;
+  printf("tsince=%lf (minutes from TLE epoch)\n", tsince);
+  printf("\n");
+  printf("Compute the ground track for 2 hours:\n");
+  // that is 120 minutes / 5 minutes per point
+  
+  mInfo->Bfield = Lgm_B_cdip;
+
+  LgmSgp_SGP4_Init( s, tle );
+  for (i=0; i<120/3; i++) {
+    JD = Lgm_JD( 2008, 10, 31, minutes, LGM_TIME_SYS_UTC, c );
+    Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+    tsince = (JD - tle[0].JD)*1440.0;
+    Lgm_Set_Coord_Transforms( tDate, tUT, c );
+    
+    LgmSgp_SGP4( tsince, s );
+    
+    Ugei.x = s->X/Re; 
+    Ugei.y = s->Y/Re; 
+    Ugei.z = s->Z/Re;
+    Lgm_CartToSphCoords(&Ugei, &Lat, &Lon, &r);
+    printf("\t%lf\tLat:%lf\tLon:%lf\n", tsince, Lat, Lon);
+    
+    minutes += 3./60.;
+  }
+
+  Lgm_free_ctrans( c ); // free the structure
+
+  return(0);
+}
+
+
