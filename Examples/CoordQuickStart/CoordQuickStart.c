@@ -5,9 +5,9 @@
 int main( ) {
 
     Lgm_CTrans  *c = Lgm_init_ctrans( 1 ); 
-    Lgm_Vector  Ugsm, Usm, Ugse1, Ugse2, tmp;
+    Lgm_Vector  Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000;
     long int    Date;
-    double      UTC;
+    double      UTC, Lat, Lon, r;
     
     Date = 20000101;    // Jan 1, 2000
     UTC  = 11.2;         // Universal Time Coordinated (in decimal hours)
@@ -36,6 +36,15 @@ int main( ) {
     Lgm_VecSub(&tmp, &Ugse1, &Ugse2 );
 
     Lgm_PrintVector(&tmp);
+    printf("\n");
+
+
+    // compute the ground track
+    // Do the transformation from SM->J2000
+    Lgm_Convert_Coords( &Usm, &Uj2000, SM_TO_GEI2000, c );
+    printf("The ground track point:\n");
+    Lgm_CartToSphCoords(&Uj2000, &Lat, &Lon, &r);
+    printf("Lat:%lf Lon:%lf\n", Lat, Lon);
 
 
     Lgm_free_ctrans( c ); // free the structure
