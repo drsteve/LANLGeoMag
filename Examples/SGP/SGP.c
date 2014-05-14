@@ -14,24 +14,27 @@ int main(void) {
   char            *filename ="iss.tle";
   int             nTle=0; // this is not the number of TLE but the index in the tle array
   _SgpTLE         *tle;  // pointer to a struct
-  Lgm_CTrans      *c = Lgm_init_ctrans( 0 );
+  Lgm_CTrans      *c;
   // create a place to hold an array of SGP trackers (1 element)
-  _SgpInfo        *s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );;
+  _SgpInfo        *s;
   double           Lat, Lon, r, minutes, tsince=0, JD, tUT;
   int              tYear, tMonth, tDay;
   long int         tDate, i;
   Lgm_Vector       Ugei;
-  Lgm_MagModelInfo *mInfo = Lgm_InitMagInfo();
 
   // create a place to hold an array of TLEs (1 element)
   tle = (_SgpTLE *)calloc( 1, sizeof(_SgpTLE) );
 
   if (!LgmSgp_ReadTlesFromFile( filename, &nTle, tle, 4)){
     printf("TLE not parsed!\n");
+    free(tle);
     return(-1);
   } else {
     printf("TLE read and parsed.\n");
   }
+  
+  s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
+  c = Lgm_init_ctrans( 0 );
 
   printf("Line0: %s\n", tle[0].Line0);
   printf("Line1: %s\n", tle[0].Line1);
@@ -57,8 +60,6 @@ int main(void) {
   printf("Compute the ground track for 2 hours:\n");
   // that is 120 minutes / 5 minutes per point
   
-  mInfo->Bfield = Lgm_B_cdip;
-
   // initialize the propagator
   LgmSgp_SGP4_Init( s, tle );
   for (i=0; i<120/3; i++) {
@@ -81,7 +82,8 @@ int main(void) {
   }
 
   Lgm_free_ctrans( c ); // free the structure
-
+  free(s);
+  free(tle);
   return(0);
 }
 
