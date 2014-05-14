@@ -70,7 +70,7 @@ int main(void) {
     Ugei.y = s->Y/Re; 
     Ugei.z = s->Z/Re;
     Lgm_CartToSphCoords(&Ugei, &Lat, &Lon, &r);
-    printf("\t%lf\tLat:%lf\tLon:%lf\n", tsince, Lat, Lon);
+    printf("\t%ld %lf\tLat:%lf\tLon:%lf\n", tDate, tUT, Lat, Lon);
     
     minutes += 3./60.;
   }
