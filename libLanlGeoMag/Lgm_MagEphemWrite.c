@@ -1280,7 +1280,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
         fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
         fprintf( fp, "#\n");
 
-        fprintf( fp, "#  \"Kappa\":            { \"DESCRIPTION\": \"Kappa parameter for 1MeV electrons -- sqrt( (Minimum Radius of Curvature)/Maximum gyroradius)) (see Büchner, J., and L. M. Zelenyi (1989), Regular and Chaotic Charged Particle Motion in Magnetotaillike Field Reversals, 1. Basic Theory of Trapped Motion, J. Geophys. Res., 94(A9), 11,821–11,842, doi:10.1029/JA094iA09p11821.\",\n");
+        fprintf( fp, "#  \"Kappa\":            { \"DESCRIPTION\": \"Kappa parameter for 1MeV electrons -- sqrt( (Minimum Radius of Curvature)/Maximum gyroradius)) (see Büchner, J., and L. M. Zelenyi (1989), Regular and Chaotic Charged Particle Motion in Magnetotaillike Field Reversals, 1. Basic Theory of Trapped Motion, J. Geophys. Res., 94(A9), 11,821-11,842, doi:10.1029/JA094iA09p11821.\",\n");
         fprintf( fp, "#                               \"NAME\": \"Kappa\",\n");
         fprintf( fp, "#                              \"TITLE\": \"Kappa parameter for 1MeV electrons\",\n");
         fprintf( fp, "#                              \"LABEL\": \"Kappa\",\n");
