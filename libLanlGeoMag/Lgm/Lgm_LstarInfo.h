@@ -20,6 +20,8 @@
 #define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
 
 
+#define LGM_LSTARINFO_MAX_FL        100
+#define LGM_LSTARINFO_MAX_MINIMA    100
 
 
 typedef struct Lgm_LstarInfo {
@@ -53,52 +55,52 @@ typedef struct Lgm_LstarInfo {
      *  Variables to hold info on footprint of Drift Shell
      */
     int                 nPnts;
-    double              MLT[100], mlat[100];
+    double              MLT[ LGM_LSTARINFO_MAX_FL ], mlat[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Spherical_Footprint_Pn[100];
-    double              Spherical_Footprint_Sn[100];
-    double              Spherical_Footprint_Bn[100];
+    Lgm_Vector          Spherical_Footprint_Pn[ LGM_LSTARINFO_MAX_FL ];
+    double              Spherical_Footprint_Sn[ LGM_LSTARINFO_MAX_FL ];
+    double              Spherical_Footprint_Bn[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Spherical_Footprint_Ps[100];
-    double              Spherical_Footprint_Ss[100];
-    double              Spherical_Footprint_Bs[100];
+    Lgm_Vector          Spherical_Footprint_Ps[ LGM_LSTARINFO_MAX_FL ];
+    double              Spherical_Footprint_Ss[ LGM_LSTARINFO_MAX_FL ];
+    double              Spherical_Footprint_Bs[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Ellipsoid_Footprint_Pn[100];
-    double              Ellipsoid_Footprint_Sn[100];
-    double              Ellipsoid_Footprint_Bn[100];
+    Lgm_Vector          Ellipsoid_Footprint_Pn[ LGM_LSTARINFO_MAX_FL ];
+    double              Ellipsoid_Footprint_Sn[ LGM_LSTARINFO_MAX_FL ];
+    double              Ellipsoid_Footprint_Bn[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Ellipsoid_Footprint_Ps[100];
-    double              Ellipsoid_Footprint_Ss[100];
-    double              Ellipsoid_Footprint_Bs[100];
+    Lgm_Vector          Ellipsoid_Footprint_Ps[ LGM_LSTARINFO_MAX_FL ];
+    double              Ellipsoid_Footprint_Ss[ LGM_LSTARINFO_MAX_FL ];
+    double              Ellipsoid_Footprint_Bs[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Mirror_Pn[100];
-    double              Mirror_Sn[100];
+    Lgm_Vector          Mirror_Pn[ LGM_LSTARINFO_MAX_FL ];
+    double              Mirror_Sn[ LGM_LSTARINFO_MAX_FL ];
 
-    Lgm_Vector          Mirror_Ps[100];
-    double              Mirror_Ss[100];
+    Lgm_Vector          Mirror_Ps[ LGM_LSTARINFO_MAX_FL ];
+    double              Mirror_Ss[ LGM_LSTARINFO_MAX_FL ];
 
-    double              PhiVal[100], AngularVelocity[100];
+    double              PhiVal[ LGM_LSTARINFO_MAX_FL ], AngularVelocity[ LGM_LSTARINFO_MAX_FL ];
 
     double              Sb0;        // Equatorial value of Sb Integral.
     double              d2B_ds2;    // second derivative of B wrt s at equator.
     double              RofC;       // radius of curvature at Bmin point.
 
     double              I0;
-    double              I[100];
+    double              I[ LGM_LSTARINFO_MAX_FL ];
 
     int                 ComputeSbIntegral;
     double              SbIntegral0; // Sb Integral on initial FL (i.e. one with Sat through it.)
-    //double              SbIntegral[100]; // havent added code to compute these yet (do we need to?)
+    //double              SbIntegral[ LGM_LSTARINFO_MAX_FL ]; // havent added code to compute these yet (do we need to?)
 
-    Lgm_Vector          Bmin[100];
-    Lgm_Vector          Pmin[100];
-    Lgm_Vector          GradI[100];
-    Lgm_Vector          Vgc[100];
+    Lgm_Vector          Bmin[ LGM_LSTARINFO_MAX_FL ];
+    Lgm_Vector          Pmin[ LGM_LSTARINFO_MAX_FL ];
+    Lgm_Vector          GradI[ LGM_LSTARINFO_MAX_FL ];
+    Lgm_Vector          Vgc[ LGM_LSTARINFO_MAX_FL ];
 
     int                 DriftOrbitType;         // e.g. Open, Closed, Shabansky
     int                 nMinMax;                // Number of valid FLs represented in nMinima[] and nMaxima[] (we may have bailed early)
-    int                 nMinima[100];           // # of minima on FL
-    int                 nMaxima[100];           // # of maxima on FL (not including endpoints
+    int                 nMinima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of minima on FL
+    int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints
 
     int                 nSplnPnts;
     double              xa[500], ya[500], y2[500];

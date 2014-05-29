@@ -1727,7 +1727,8 @@ double AxesScale = 0.5;
         glPushMatrix();
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        //gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
 
         glPopMatrix();
 

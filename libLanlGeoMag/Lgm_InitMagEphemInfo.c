@@ -57,6 +57,7 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
         MagEphemInfo->DriftOrbitType[i] = LGM_DRIFT_ORBIT_OPEN;
     }
 
+// These 100 values should probably be replaced with  LGM_LSTARINFO_MAX_FL -- BUT CHECK FIRST....
     LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Pn, MaxPitchAngles, 100, Lgm_Vector );
     LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Sn, MaxPitchAngles, 100, double );
     LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Bn, MaxPitchAngles, 100, double );

@@ -32,9 +32,9 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     int     i, iMin, Type, iMax, done, Verbosity;
     double  Min, Max, Curr, Prev;
 
-    double  Diff, OldDiff, Minima[100], Maxima[100];
-    int     nMinima, iMinima[100];
-    int     nMaxima, iMaxima[100];
+    double  Diff, OldDiff, Minima[ LGM_LSTARINFO_MAX_MINIMA ], Maxima[ LGM_LSTARINFO_MAX_MINIMA ];
+    int     nMinima, iMinima[ LGM_LSTARINFO_MAX_MINIMA ];
+    int     nMaxima, iMaxima[ LGM_LSTARINFO_MAX_MINIMA ];
 
     Verbosity = LstarInfo->VerbosityLevel;
     m = LstarInfo->mInfo;
@@ -67,13 +67,13 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         OldDiff = Diff;
         Diff    = m->Bmag[i] - m->Bmag[i-1];
 
-        if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima < 100)  ) {
+        if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima <  LGM_LSTARINFO_MAX_MINIMA )  ) {
             iMinima[nMinima] = i-1;
             Minima[nMinima] = m->Bmag[i-1];
             ++nMinima;
         }
 
-        if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima < 100) ) {
+        if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima <  LGM_LSTARINFO_MAX_MINIMA ) ) {
             iMaxima[nMaxima] = i-1;
             Maxima[nMaxima] = m->Bmag[i-1];
             ++nMaxima;
@@ -83,7 +83,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     if ( Verbosity > 1 ) {
 
         if ( nMinima > 1 ) {
-            if ( nMinima >= 99 ) {
+            if ( nMinima >=  LGM_LSTARINFO_MAX_MINIMA-1 ) {
                 printf("\t\tThis Field line has multiple minima (at least %d minima detected). Probably on a bizzare field line (TS04 model?)\n", nMinima );
             } else {
                 printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
@@ -97,7 +97,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         }
 
         if ( nMaxima > 1 ) {
-            if ( nMinima >= 99 ) {
+            if ( nMinima >= LGM_LSTARINFO_MAX_MINIMA-1 ) {
                 printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizzare field line (TS04 model?)\n", nMaxima );
             } else {
                 printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
@@ -127,7 +127,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
 
     // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
-    if ( nMinima > 90 ) Type = -1;
+    if ( nMinima > LGM_LSTARINFO_MAX_MINIMA-5 ) Type = -1;
 
     
     return( Type );
@@ -528,7 +528,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     if ((LstarInfo->PitchAngle < 0.0)||(LstarInfo->PitchAngle>90.0)) return(-1);
 
-    for (k=0; k<200; k++){
+    for (k=0; k<LGM_LSTARINFO_MAX_FL; k++){
         LstarInfo->I[k] = LGM_FILL_VALUE;
     }
 
@@ -747,7 +747,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     // initialize DriftOrbitType as open
-    for ( i=0; i<k; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+    for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
 
 
 
@@ -760,7 +760,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     if (LstarInfo->VerbosityLevel > 2) printf("\t\t%smlat = %g%s\n", PreStr, mlat, PostStr );
     LstarInfo->nPnts = 0;
     pred_delta_mlat  = 0.0;
-    for (k=0; k<200; ++k){
+    for (k=0; k<LGM_LSTARINFO_MAX_FL; ++k){
 	    MirrorMLT[k]  = 0.0;
 	    MirrorMlat[k] = 0.0;
     }
@@ -1268,7 +1268,7 @@ M = ELECTRON_MASS; // kg
     /*
      *  Save drift shell -- it will help us predict the next one.
      */
-    for (i=0; i<k; ++i){
+    for (i=0; i<LstarInfo->nPnts; ++i){
 	    MirrorMLT_Old[i]  = MirrorMLT[i];
 	    MirrorMlat_Old[i] = MirrorMlat[i];
     }
@@ -1296,16 +1296,16 @@ FIX
      */
 /*
     j = 0;
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]-24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]     ; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]+24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]-24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]     ; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]+24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
     spline( LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts, 0.0, 0.0, LstarInfo->y2 );
 */
 
     j = 0;
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]-24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]     ; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
-    for (i=0; i<k; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]+24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]-24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]     ; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
+    for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]+24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
     LstarInfo->nSplnPnts = j;
 
     /*
@@ -1335,7 +1335,7 @@ FIX
      *  cant be determined here ... 
      */
     LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
-    for ( i=0; i<k; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
+    for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
     if ( LstarInfo->LS < 0.0 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
 
 

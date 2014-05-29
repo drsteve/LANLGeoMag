@@ -3,6 +3,7 @@
 
 #define GL_GLEXT_PROTOTYPES 1
 
+#include <gdk/gdkgl.h>
 #include <gtk/gtkgl.h>
 
 #include <GL/glew.h>
