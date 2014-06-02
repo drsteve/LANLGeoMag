@@ -1324,7 +1324,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
             /*
              *  Guard against cramming too many points into interpolation arrays
              */
-	        printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
+	    if ( Info->VerbosityLevel > 0 ) printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
             return(-1);
         //} else if ( fabs( S-ss ) < 2.0*tol ) {
         } else if ( fabs( S-ss ) < tol ) {
