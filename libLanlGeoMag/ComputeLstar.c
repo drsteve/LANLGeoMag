@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_MagModelInfo.h"
@@ -8,7 +10,7 @@
 #include <string.h>
 
 #define DeltaMLT 1.0
-
+#define TRACE_TOL   1e-7
 
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
@@ -980,12 +982,12 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
 
             Type = ClassifyFL( k, LstarInfo );
             if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%sClassifying FL: Type = %d.\n", PreStr, Type, PostStr );
+                printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
             }
 
             if ( Type > 1 ){
                 if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g)\n", PreStr, I/2.0, I, PostStr );
+                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
                 }
                 FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
 
@@ -1798,6 +1800,163 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
 
 
 }
+
+
+
+
+/*
+ *      Input Variables:
+ *
+ *                      Date: 
+ *                       UTC: 
+ *                     brac1:  Radial distance for inner edge of search bracket
+ *                     brac2:  Radial distance for outer edge of search bracket
+ *                     Alpha:  Equatorial pitch angle to compute 
+ *                   Quality:  Quality factor (0-8)
+ *
+ *      Input/OutPut Variables:
+ *                         K:  K value for LCDS at given alpha
+ *                 LstarInfo:  LstarInfo structure to specify B-field model, store last valid Lstar, etc.
+ *  
+ */
+int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
+    Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
+    Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
+    double          Blocal, Xtest, sa, sa2, LCDS;
+    double          nTtoG = 1.0e-5;
+    int             LS_Flag, nn, k;
+    int             maxIter = 20;
+
+    //Start by creating necessary structures... need an Lstar info for each bracket, plus test point.
+    LstarInfo_brac1 = Lgm_CopyLstarInfo( LstarInfo );
+    LstarInfo_brac2 = Lgm_CopyLstarInfo( LstarInfo );
+    LstarInfo_test = Lgm_CopyLstarInfo( LstarInfo );
+
+    // Set Tolerances
+    SetLstarTolerances( Quality, LstarInfo_brac1 );
+    SetLstarTolerances( Quality, LstarInfo_brac2 );
+    SetLstarTolerances( Quality, LstarInfo_test );
+
+    // set coord transformation 
+    Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_brac1->mInfo->c );
+    Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_brac2->mInfo->c );
+    Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
+
+    //Check for closed drift shell at brackets
+    Pinner.x = brac1;
+    Pinner.y = 0.0; Pinner.z = 0.0;
+    /*
+     *  Test inner bracket location.
+     */
+    LstarInfo_brac1->mInfo->Bfield( &Pinner, &Bvec, LstarInfo_brac1->mInfo );
+    Blocal = Lgm_Magnitude( &Bvec );
+    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+    LstarInfo_brac1->mInfo->Bm = Blocal/sa2;
+
+    //Trace to minimum-B
+    if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
+        //Only continue if bracket 1 is closed FL
+        //Get L*
+        LS_Flag = Lstar( &v3, LstarInfo_brac1);
+        LCDS = LstarInfo_brac1->LS;
+        *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
+        if (LstarInfo->VerbosityLevel > 0) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
+    } else {
+        FreeLstarInfo( LstarInfo_brac1 );
+        FreeLstarInfo( LstarInfo_brac2 );
+        FreeLstarInfo( LstarInfo_test );
+        return(-8); //Inner bracket is bad - bail
+    }
+
+
+    /*
+     *  Test outer bracket location.
+     */
+    Pouter.x = brac2;
+    Pouter.y = 0.0; Pouter.z = 0.0;
+
+    LstarInfo_brac2->mInfo->Bfield( &Pouter, &Bvec, LstarInfo_brac2->mInfo );
+    Blocal = Lgm_Magnitude( &Bvec );
+    LstarInfo_brac2->mInfo->Bm = Blocal/sa2;
+
+    //Trace to minimum-B
+    if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
+        //If bracket 2 is closed FL then check for undefined L*. If L* is defined, we have a problem
+        //Get L*
+        LS_Flag = Lstar( &v3, LstarInfo_brac2);
+        if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
+            //move outer bracket out and try again
+            Pouter.x *= 1.7;
+            if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
+                LS_Flag = Lstar( &v3, LstarInfo_brac2);
+                if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
+                    FreeLstarInfo( LstarInfo_brac1 );
+                    FreeLstarInfo( LstarInfo_brac2 );
+                    FreeLstarInfo( LstarInfo_test );
+                    return(-9); //Outer bracket is bad - bail
+                }
+            }
+        }
+        if (LstarInfo->VerbosityLevel > 0) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
+    }
+
+    //if brackets are okay, we've moved on without changing anything except setting initial LCDS value as L* at inner bracket
+    nn = 0;
+    while (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner) > tol){
+        if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS iteration, bracket width = %d, %g\n", nn, Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner));
+        if (nn > maxIter) {
+            printf("********* EXCEEDED MAXITER\n");
+            //free structures before returning
+            FreeLstarInfo( LstarInfo_brac1 );
+            FreeLstarInfo( LstarInfo_brac2 );
+            FreeLstarInfo( LstarInfo_test );
+            return(-2); //reached max iterations without achieving tolerance - bail
+        }
+        Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
+        Ptest.x = Xtest;
+
+        LstarInfo_test->mInfo->Bfield( &Ptest, &Bvec, LstarInfo_test->mInfo );
+        Blocal = Lgm_Magnitude( &Bvec );
+        LstarInfo_test->mInfo->Bm = Blocal/sa2;
+        //Trace to minimum-B
+        if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
+            //If test point is closed FL then check for undefined L*.
+            //Get L*
+            LS_Flag = Lstar( &v3, LstarInfo_test);
+            if ( (LS_Flag > 0) || (LstarInfo_test->LS != LGM_FILL_VALUE) ){
+                //Drift shell defined
+                Pinner = Ptest;
+                LCDS = LstarInfo_test->LS;
+                *K = (LstarInfo_test->I0)*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
+
+                //Determine the type of the orbit
+                LstarInfo_test->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
+                for ( k=0; k<LstarInfo_test->nMinMax; ++k ) {
+                    if ( LstarInfo_test->nMinima[k] > 1 ) LstarInfo_test->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
+                    if ( LstarInfo_test->nMinima[k] < 1 ) {printf("Less than one minimum defined on field line: Exit due to impossibility."); exit(-1); }
+                }
+
+                if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS, K is %g, %g\n", LCDS, *K);
+                LstarInfo->mInfo->Bm = LstarInfo_test->mInfo->Bm;
+                LstarInfo->DriftOrbitType = LstarInfo_test->DriftOrbitType;
+            } else {
+                Pouter = Ptest;
+            }
+        } else {
+            //FL open -> drift shell open
+            Pouter = Ptest;
+        }
+
+    nn++;
+    }
+
+    LstarInfo->LS = LCDS;
+    //free structures
+    FreeLstarInfo( LstarInfo_brac1 );
+    FreeLstarInfo( LstarInfo_brac2 );
+    FreeLstarInfo( LstarInfo_test );
+    return(0);
+    }
 
 
 
