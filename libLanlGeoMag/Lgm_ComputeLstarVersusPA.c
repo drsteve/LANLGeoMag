@@ -1,8 +1,8 @@
 /*! \file  Lgm_ComputeLstarVersusPA.c
  *
- *  \brief Parallel routine for computing L* for multiple pitch angles at once. Uses OpenMP for parallelization.
+ *  \brief Parallel routine for computing L* for multiple pitch angles (these are local pitch angles, not equatorial PA) at once. Uses OpenMP for parallelization.
  *
- *
+ *  
  */
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
@@ -189,7 +189,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
 
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
-                        printf("\n\n\t\t%sComputing L* for: UTC = %g PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
+                        printf("\n\n\t\t%sComputing L* for: UTC = %g  (Local) PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
                         //printf("    \t\t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
                     }
 //////////////////////////////NOTE
