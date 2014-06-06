@@ -1318,13 +1318,13 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
              *  Guard against tracing into the Earth. Can happen if we
              *  overshoot the target radius.
              */
-            printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+            if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
             return(-1);
         } else if ( n > LGM_MAX_INTERP_PNTS-1  ) {
             /*
              *  Guard against cramming too many points into interpolation arrays
              */
-	        printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
+	    if ( Info->VerbosityLevel > 0 ) printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
             return(-1);
         //} else if ( fabs( S-ss ) < 2.0*tol ) {
         } else if ( fabs( S-ss ) < tol ) {
