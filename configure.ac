@@ -160,6 +160,17 @@ AC_ARG_ENABLE([doxygen-pdf-links],
 )
 DX_ENV_APPEND(PDF_LINKS, $DX_ENABLE_PDF_HYPERLINKS)
 
+
+# Check for check
+AM_PATH_CHECK(,[have_check="yes"],
+  AC_MSG_WARN([Check not found; cannot run unit tests!])
+  [have_check="no"])
+AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
+
+
+
+
+
 # Check for python and SpacePy
 build_py='no'
 AC_ARG_WITH([python],

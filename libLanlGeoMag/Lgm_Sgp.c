@@ -5,6 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+ *    Changes:
+ *
+ *
+ *
+ *
+ */
+
 static char *MonStr1[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 //static char *MonStr2[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
@@ -560,7 +568,7 @@ double LgmSgp_gstime( double jdut1) {
 *     mp    - mean anomaly
 *
 ----------------------------------------------------------------------------*/
-void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *nodep, double *argpp, double *mp, _SgpInfo *s ){
+void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *nodep, double *argpp, double *mp, char opsmode, _SgpInfo *s ){
 
 
     /* --------------------- local variables ------------------------ */
@@ -612,11 +620,6 @@ void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *n
 
     if (s->init == 'n') {
 
-        // 0.2 rad = 11.45916 deg
-        // sgp4fix for lyddane choice
-        // add next three lines to set up use of original inclination per strn3 ver
-        ildm = 'y';
-        if (inclo >= 0.2) ildm = 'n';
         pe    -= s->peo;
         pinc  -= s->pinco;
         pl    -= s->plo;
@@ -626,14 +629,16 @@ void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *n
         *ep    += pe;
         sinip = sin(*inclp);
         cosip = cos(*inclp);
+
         /* ----------------- apply periodics directly ------------ */
-        // sgp4fix for lyddane choice
-        // strn3 used original inclination - this is technically feasible
-        // gsfc used perturbed inclination - also technically feasible
-        // probably best to readjust the 0.2 limit value and limit discontinuity
-        // use next line for original strn3 approach and original inclination
-        // if (inclo >= 0.2)
-        // use next line for gsfc version and perturbed inclination
+        //  sgp4fix for lyddane choice
+        //  strn3 used original inclination - this is technically feasible
+        //  gsfc used perturbed inclination - also technically feasible
+        //  probably best to readjust the 0.2 limit value and limit discontinuity
+        //  0.2 rad = 11.45916 deg
+        //  use next line for original strn3 approach and original inclination
+        //  if (inclo >= 0.2)
+        //  use next line for gsfc version and perturbed inclination
         if (*inclp >= 0.2) {
 
             ph    /= sinip;
@@ -651,20 +656,27 @@ void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *n
             betdp = sinip*cosop;
             dalf  =  ph*cosop + pinc*cosip*sinop;
             dbet  = -ph*sinop + pinc*cosip*cosop;
-
             alfdp += dalf;
             betdp += dbet;
             *nodep = fmod(*nodep, M_2PI);
+
+            //  sgp4fix for afspc written intrinsic functions
+            // nodep used without a trigonometric function ahead
+            if ((*nodep < 0.0) && (opsmode == 'a')) *nodep += M_2PI;
+
             xls   = *mp + *argpp + cosip* (*nodep);
             dls   = pl + pgh - pinc*( *nodep)*sinip;
             xls   += dls;
             xnoh  = *nodep;
             *nodep = atan2(alfdp, betdp);
+
+            //  sgp4fix for afspc written intrinsic functions
+            // nodep used without a trigonometric function ahead
+            if ((*nodep < 0.0) && (opsmode == 'a')) *nodep += M_2PI;
+
             if (fabs(xnoh - *nodep) > M_PI) {
-                if ( *nodep < xnoh )
-                    *nodep = *nodep + M_2PI;
-                else
-                    *nodep = *nodep - M_2PI;
+                if ( *nodep < xnoh ) *nodep = *nodep + M_2PI;
+                else                 *nodep = *nodep - M_2PI;
             }
             *mp   += pl;
             *argpp = xls - *mp - cosip * *nodep;
@@ -677,6 +689,7 @@ void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, double *n
 
 
 } // end LgmSgp_dpper
+
 
 
 
@@ -827,7 +840,9 @@ void LgmSgp_dscom( double epoch, double ep, double argpp, double tc, double incl
     zsinh = *snodm;
     cc = c1ss;
     xnoi = 1.0/(*nm);
+
     for (lsflg = 1; lsflg <= 2; lsflg++) {
+
         a1  = zcosg*zcosh + zsing*zcosi*zsinh;
         a3  = -zsing*zcosh + zcosg*zcosi*zsinh;
         a7  = -zcosg*zsinh + zsing*zcosi*zcosh;
@@ -1050,7 +1065,7 @@ void LgmSgp_dsinit( int whichconst, double cosim, double emsq, double argpo,
 
     /* -------------------- deep space initialization ------------ */
     *irez = 0;
-    if ((*nm < 0.0052359877) && (*nm > 0.0034906585))        *irez = 1;
+    if ((*nm < 0.0052359877) && (*nm > 0.0034906585))         *irez = 1;
     if ((*nm >= 8.26e-3) && (*nm <= 9.24e-3) && (*em >= 0.5)) *irez = 2;
 
 
@@ -1085,8 +1100,8 @@ void LgmSgp_dsinit( int whichconst, double cosim, double emsq, double argpo,
 
 
     /* ----------- calculate deep space resonance effects -------- */
-    *dndt  = 0.0;
-    theta = fmod(gsto + tc*rptim, M_2PI);
+    *dndt   = 0.0;
+    theta   = fmod(gsto + tc*rptim, M_2PI);
     *em    += *dedt*t;
     *inclm += *didt*t;
     *argpm += *domdt*t;
@@ -1286,7 +1301,6 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
     double  g22, g32, g44, g52, g54, fasx2, fasx4, fasx6, rptim, step2, stepn, stepp;
 
 
-    ft    = 0.0;
     fasx2 = 0.13130908;
     fasx4 = 2.8843198;
     fasx6 = 0.37448087;
@@ -1296,8 +1310,8 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
     g52   = 1.0508330;
     g54   = 4.4108898;
     rptim = 4.37526908801129966e-3; // this equates to 7.29211514668855e-5 rad/sec
-    stepp = 720.0;
-    stepn = -720.0;
+    stepp =    720.0;
+    stepn =   -720.0;
     step2 = 259200.0;
 
 
@@ -1308,6 +1322,7 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
     *dndt   = 0.0;
     theta  = fmod(s->gsto + tc * rptim, M_2PI);
     *em    += s->dedt*t;
+
     *inclm += s->didt*t;
     *argpm += s->domdt*t;
     *nodem += s->dnodt*t;
@@ -1327,41 +1342,25 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
     // sgp4fix for propagator problems
     // the following integration works for negative time steps and periods
     // the specific changes are unknown because the original code was so convoluted
+    
+    // sgp4fix take out atime = 0.0 and fix for faster operation
     ft = 0.0;
-    *atime = 0.0;
     if ( s->irez != 0 ) {
 
-        if ((*atime == 0.0) || ((t >= 0.0) && (*atime < 0.0)) || ((t < 0.0) && (*atime >= 0.0))) {
-            if (t >= 0.0) delt = stepp;
-            else          delt = stepn;
+        // sgp4fix streamline check
+        if ((*atime == 0.0) || (t * *atime <= 0.0) || (fabs(t) < fabs(*atime)) ) {
             *atime = 0.0;
             s->xni   = s->no;
             s->xli   = s->xlamo;
         }
 
+        // sgp4fix move check outside loop
+        if (t > 0.0) delt = stepp;
+        else         delt = stepn;
+
         iretn = 381; // added for do loop
-        iret  = 0; // added for loop
-
+        iret  =   0; // added for loop
         while ( iretn == 381 ) {
-
-            if ((fabs(t) < fabs(*atime)) || (iret == 351)) {
-                if (t >= 0.0) delt = stepn;
-                else          delt = stepp;
-                iret  = 351;
-                iretn = 381;
-            } else {
-                if (t > 0.0) delt = stepp; // error if prev if has *atime:=0.0 and t:=0.0 (ge)
-                else         delt = stepn;
-                if (fabs(t - *atime) >= stepp) {
-                    iret  = 0;
-                    iretn = 381;
-                } else {
-                    ft    = t - *atime;
-                    iretn = 0;
-                }
-            }
-
-
 
             /* ------------------- dot terms calculated ------------- */
             /* ----------- near - synchronous resonance terms ------- */
@@ -1388,12 +1387,24 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
                 xnddt = xnddt*xldot;
             }
 
+
             /* ----------------------- integrator ------------------- */
+            // sgp4fix move end checks to end of routine
+            if (fabs(t - *atime) >= stepp) {
+                 iret  = 0;
+                 iretn = 381;
+            } else { 
+                // exit here
+                ft    = t - *atime;
+                iretn = 0;
+            }
+
             if (iretn == 381) {
                 s->xli   += xldot*delt + xndt*step2;
                 s->xni   += xndt*delt + xnddt*step2;
                 *atime += delt;
             }
+
 
         } // while iretn = 381
 
@@ -1466,10 +1477,15 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm,
 void LgmSgp_initl( int satn, int whichconst, double ecco, double epoch, double inclo, 
                     double *no, char *method, double *ainv, double *ao, double *con41, double *con42, 
                     double *cosio, double *cosio2, double *eccsq, double *omeosq, double *posq, 
-                    double *rp, double *rteosq, double *sinio, double *gsto) {
+                    double *rp, double *rteosq, double *sinio, double *gsto, char opsmode ) {
 
     /* --------------------- local variables ------------------------ */
     double  ak, d1, del, adel, po, x2o3, j2, xke, tumin, radiusearthkm, j3, j4, j3oj2;
+
+    
+    // sgp4fix use old way of finding gst
+    double ds70;
+    double ts70, tfrac, c1, thgr70, fk5r, c1p2p;
 
 
     /* ----------------------- earth constants ---------------------- */
@@ -1502,7 +1518,24 @@ void LgmSgp_initl( int satn, int whichconst, double ecco, double epoch, double i
     *posq    = po*po;
     *rp      = *ao*(1.0 - ecco);
     *method = 'n';
-    *gsto    = LgmSgp_gstime(epoch + 2433281.5);
+
+    // sgp4fix modern approach to finding sidereal time
+    if ( opsmode == 'a' ) {
+        // sgp4fix use old way of finding gst
+        // count integer number of days from 0 jan 1970
+        ts70  = epoch - 7305.0;
+        ds70 = floor(ts70 + 1.0e-8);
+        tfrac = ts70 - ds70;
+        // find greenwich location at epoch
+        c1    = 1.72027916940703639e-2;
+        thgr70= 1.7321343856509374;
+        fk5r  = 5.07551419432269442e-15;
+        c1p2p = c1 + M_2PI;
+        *gsto  = fmod( thgr70 + c1*ds70 + c1p2p*tfrac + ts70*ts70*fk5r, M_2PI );
+        if ( *gsto < 0.0 ) *gsto += M_2PI;
+    } else {
+        *gsto    = LgmSgp_gstime( epoch + 2433281.5 );
+    }
 
     //#include "debug5.cpp"
 
@@ -1576,6 +1609,9 @@ int LgmSgp_SGP4_Init( _SgpInfo *s, _SgpTLE *t ) {
     double  epoch, xbstar, xecco, xargpo, xinclo, xmo, xno, xnodeo;
 
 
+    s->error = 0;
+
+
     // mgh - transfer vars here.
     whichconst = s->GravConst;
 whichconst = SGP_wgs72;
@@ -1613,37 +1649,37 @@ xno     = xno/xpdotp;
 
 
     /* ----------- set all near earth variables to zero ------------ */
-    s->isimp = 0;       s->method = 'n';    s->aycof = 0.0;
-    s->con41 = 0.0;     s->cc1 = 0.0;       s->cc4 = 0.0;
-    s->cc5 = 0.0;       s->d2 = 0.0;        s->d3 = 0.0;
-    s->d4 = 0.0;        s->delmo = 0.0;     s->eta = 0.0;
-    s->argpdot = 0.0;   s->omgcof = 0.0;    s->sinmao = 0.0;
-    s->t = 0.0;         s->t2cof = 0.0;     s->t3cof = 0.0;
-    s->t4cof = 0.0;     s->t5cof = 0.0;     s->x1mth2 = 0.0;
-    s->x7thm1 = 0.0;    s->mdot = 0.0;      s->nodedot = 0.0;
-    s->xlcof = 0.0;     s->xmcof = 0.0;     s->nodecf = 0.0;
+    s->isimp   = 0;    s->method = 'n';  s->aycof   = 0.0;
+    s->con41   = 0.0;  s->cc1    = 0.0;  s->cc4     = 0.0;
+    s->cc5     = 0.0;  s->d2     = 0.0;  s->d3      = 0.0;
+    s->d4      = 0.0;  s->delmo  = 0.0;  s->eta     = 0.0;
+    s->argpdot = 0.0;  s->omgcof = 0.0;  s->sinmao  = 0.0;
+    s->t       = 0.0;  s->t2cof  = 0.0;  s->t3cof   = 0.0;
+    s->t4cof   = 0.0;  s->t5cof  = 0.0;  s->x1mth2  = 0.0;
+    s->x7thm1  = 0.0;  s->mdot   = 0.0;  s->nodedot = 0.0;
+    s->xlcof   = 0.0;  s->xmcof  = 0.0;  s->nodecf  = 0.0;
 
 
     /* ----------- set all deep space variables to zero ------------ */
-    s->irez = 0;        s->d2201 = 0.0;     s->d2211 = 0.0;
-    s->d3210 = 0.0;     s->d3222 = 0.0;     s->d4410 = 0.0;
-    s->d4422 = 0.0;     s->d5220 = 0.0;     s->d5232 = 0.0;
-    s->d5421 = 0.0;     s->d5433 = 0.0;     s->dedt = 0.0;
-    s->del1 = 0.0;      s->del2 = 0.0;      s->del3 = 0.0;
-    s->didt = 0.0;      s->dmdt = 0.0;      s->dnodt = 0.0;
-    s->domdt = 0.0;     s->e3 = 0.0;        s->ee2 = 0.0;
-    s->peo = 0.0;       s->pgho = 0.0;      s->pho = 0.0;
-    s->pinco = 0.0;     s->plo = 0.0;       s->se2 = 0.0;
-    s->se3 = 0.0;       s->sgh2 = 0.0;      s->sgh3 = 0.0;
-    s->sgh4 = 0.0;      s->sh2 = 0.0;       s->sh3 = 0.0;
-    s->si2 = 0.0;       s->si3 = 0.0;       s->sl2 = 0.0;
-    s->sl3 = 0.0;       s->sl4 = 0.0;       s->gsto = 0.0;
-    s->xfact = 0.0;     s->xgh2 = 0.0;      s->xgh3 = 0.0;
-    s->xgh4 = 0.0;      s->xh2 = 0.0;       s->xh3 = 0.0;
-    s->xi2 = 0.0;       s->xi3 = 0.0;       s->xl2 = 0.0;
-    s->xl3 = 0.0;       s->xl4 = 0.0;       s->xlamo = 0.0;
-    s->zmol = 0.0;      s->zmos = 0.0;      s->atime = 0.0;
-    s->xli = 0.0;       s->xni = 0.0;
+    s->irez  = 0;    s->d2201 = 0.0;  s->d2211 = 0.0;
+    s->d3210 = 0.0;  s->d3222 = 0.0;  s->d4410 = 0.0;
+    s->d4422 = 0.0;  s->d5220 = 0.0;  s->d5232 = 0.0;
+    s->d5421 = 0.0;  s->d5433 = 0.0;  s->dedt  = 0.0;
+    s->del1  = 0.0;  s->del2  = 0.0;  s->del3  = 0.0;
+    s->didt  = 0.0;  s->dmdt  = 0.0;  s->dnodt = 0.0;
+    s->domdt = 0.0;  s->e3    = 0.0;  s->ee2   = 0.0;
+    s->peo   = 0.0;  s->pgho  = 0.0;  s->pho   = 0.0;
+    s->pinco = 0.0;  s->plo   = 0.0;  s->se2   = 0.0;
+    s->se3   = 0.0;  s->sgh2  = 0.0;  s->sgh3  = 0.0;
+    s->sgh4  = 0.0;  s->sh2   = 0.0;  s->sh3   = 0.0;
+    s->si2   = 0.0;  s->si3   = 0.0;  s->sl2   = 0.0;
+    s->sl3   = 0.0;  s->sl4   = 0.0;  s->gsto  = 0.0;
+    s->xfact = 0.0;  s->xgh2  = 0.0;  s->xgh3  = 0.0;
+    s->xgh4  = 0.0;  s->xh2   = 0.0;  s->xh3   = 0.0;
+    s->xi2   = 0.0;  s->xi3   = 0.0;  s->xl2   = 0.0;
+    s->xl3   = 0.0;  s->xl4   = 0.0;  s->xlamo = 0.0;
+    s->zmol  = 0.0;  s->zmos  = 0.0;  s->atime = 0.0;
+    s->xli   = 0.0;  s->xni   = 0.0;
 
 
     // sgp4fix - note the following variables are also passed directly via s->
@@ -1658,25 +1694,38 @@ xno     = xno/xpdotp;
     s->no    = xno;
     s->nodeo = xnodeo;
 
+    // sgp4fix add opsmode
+    //opsmode = 'a' best understanding of how afspc code works
+    //opsmode = 'i' imporved sgp4 resulting in smoother behavior
+    char opsmode = 'i';
+    s->operationmode = opsmode;
+
     /* ------------------------ earth constants ----------------------- */
     // sgp4fix identify constants and allow alternate values
     LgmSgp_GetGravConst( whichconst, &tumin, &radiusearthkm, &xke, &j2, &j3, &j4, &j3oj2 );
     ss     = 78.0 / radiusearthkm + 1.0;
-    qzms2t = pow(((120.0 - 78.0) / radiusearthkm), 4);
+    // sgp4fix use multiply for speed instead of pow
+    tmp = (120.0 - 78.0) / radiusearthkm;
+    qzms2t = tmp * tmp * tmp * tmp;
     x2o3   = 2.0 / 3.0;
+
     s->init = 'y';
-    s->t = 0.0;
+    s->t    = 0.0;
 
 
     LgmSgp_initl( satn, whichconst, s->ecco, epoch, s->inclo, 
             &(s->no), &(s->method), &ainv, &ao, &(s->con41), &con42, 
             &cosio, &cosio2, &eccsq, &omeosq, &posq, 
-            &rp, &rteosq, &sinio, &(s->gsto));
+            &rp, &rteosq, &sinio, &(s->gsto), opsmode );
     s->error = 0;
-    if (rp < 1.0) {
-        // printf("# *** satn%d epoch elts sub-orbital ***\n", satn);
-        s->error = 5;
-    }
+
+    // sgp4fix remove this check as it is unnecessary
+    // the mrt check in sgp4 handles decaying satellite cases even if the starting
+    // condition is below the surface of te earth
+//    if (rp < 1.0) {
+//        // printf("# *** satn%d epoch elts sub-orbital ***\n", satn);
+//        s->error = 5;
+//    }
 
 
 
@@ -1691,21 +1740,23 @@ xno     = xno/xpdotp;
         if (perige < 156.0) {
             sfour  = perige - 78.0;
             if (perige < 98.0) sfour = 20.0;
-            qzms24 = pow(((120.0 - sfour) / radiusearthkm), 4.0);
+            // sgp4fix use multiply for speed instead of pow
+            tmp =  (120.0 - sfour) / radiusearthkm;
+            qzms24 = tmp * tmp * tmp * tmp;
             sfour  = sfour / radiusearthkm + 1.0;
         }
 
         pinvsq = 1.0 / posq;
         tsi    = 1.0 / (ao - sfour);
         s->eta = ao * s->ecco * tsi;
-        etasq = s->eta * s->eta;
-        eeta  = s->ecco * s->eta;
-        psisq = fabs(1.0 - etasq);
-        tmp2  = tsi*tsi; tmp4=tmp2*tmp2;
-        coef  = qzms24 * tmp4;
-        coef1 = coef / pow(psisq, 3.5);
-        cc2   = coef1*s->no*(ao*(1.0 + 1.5*etasq + eeta*(4.0 + etasq)) + 0.375*j2
-                *tsi/psisq*s->con41*(8.0 + 3.0*etasq*(8.0 + etasq)));
+        etasq  = s->eta * s->eta;
+        eeta   = s->ecco * s->eta;
+        psisq  = fabs(1.0 - etasq);
+        tmp2   = tsi*tsi; tmp4=tmp2*tmp2;
+        coef   = qzms24 * tmp4;
+        coef1  = coef / pow(psisq, 3.5);
+        cc2    = coef1*s->no*(ao*(1.0 + 1.5*etasq + eeta*(4.0 + etasq)) + 0.375*j2
+                 *tsi/psisq*s->con41*(8.0 + 3.0*etasq*(8.0 + etasq)));
         s->cc1 = s->bstar * cc2;
         cc3 = 0.0;
         if (s->ecco > 1.0e-4) cc3 = -2.0*coef*tsi*j3oj2*s->no*sinio/s->ecco;
@@ -1736,8 +1787,9 @@ xno     = xno/xpdotp;
         else                           s->xlcof = -0.25*j3oj2*sinio*(3.0 + 5.0*cosio)/temp4;
 
         s->aycof  = -0.5*j3oj2*sinio;
-        tmp       = 1.0 + s->eta*cos(s->mo);
-        s->delmo  = tmp*tmp*tmp;
+        // sgp4fix use multiply for speed instead of pow
+        tmp = 1.0 + s->eta * cos(s->mo);
+        s->delmo  = tmp * tmp * tmp;
         s->sinmao = sin(s->mo);
         s->x7thm1 = 7.0*cosio2 - 1.0;
 
@@ -1747,7 +1799,6 @@ xno     = xno/xpdotp;
             s->isimp  = 1;
             tc        = 0.0;
             inclm     = s->inclo;
-            // mgh - this is the stupidest coding Ive seen in a long time...
             LgmSgp_dscom( epoch, s->ecco, s->argpo, tc, s->inclo, s->nodeo, s->no, 
                             &snodm, &cnodm, &sinim, &cosim, &sinomm, &cosomm, &day, &(s->e3), &(s->ee2), &em, &emsq, &gam, &(s->peo), 
                             &(s->pgho), &(s->pho), &(s->pinco), &(s->plo), &rtemsq, &(s->se2), &(s->se3), &(s->sgh2), &(s->sgh3), 
@@ -1757,7 +1808,7 @@ xno     = xno/xpdotp;
                             &(s->xi2), &(s->xi3), &(s->xl2), &(s->xl3), &(s->xl4), &nm, &z1, &z2, &z3, &z11, &z12, &z13, &z21, 
                             &z22, &z23, &z31, &z32, &z33, &(s->zmol), &(s->zmos) );
 
-            LgmSgp_dpper( inclm, s->init, &(s->ecco), &(s->inclo), &(s->nodeo), &(s->argpo), &(s->mo), s );
+            LgmSgp_dpper( inclm, s->init, &(s->ecco), &(s->inclo), &(s->nodeo), &(s->argpo), &(s->mo), opsmode, s );
 
             argpm = 0.0;
             nodem = 0.0;
@@ -1793,13 +1844,16 @@ xno     = xno/xpdotp;
 
 
     /* finally propogate to zero epoch to initialise all others. */
-//FIX ME
-s->GravConst = whichconst;
-if (s->error == 0) LgmSgp_SGP4( 0.0, s );
+    // sgp4fix take out check to let satellites process until they are actually below earth surface
+    s->GravConst = whichconst;
+    //if (s->error == 0) 
+    LgmSgp_SGP4( 0.0, s );
+
     s->init = 'n';
 
     //#include "debug6.cpp"
-    return( s->error );
+    //sgp4fix return boolean. s->error contains any error codes
+    return( 1 );
 
 
 
@@ -1848,34 +1902,35 @@ void LgmSgp_GetGravConst( int whichconst, double *tumin, double *radiusearthkm,
 
             // -- wgs-72 low precision str#3 constants --
             case SGP_wgs72old:
-                *radiusearthkm = 6378.135; // km
-                *xke = 0.0743669161;
+                mu     = 398600.79964;      // in km3 / s2
+                *radiusearthkm = 6378.135;  // km
+                *xke   = 0.0743669161;
                 *tumin = 1.0 / *xke;
-                *j2 = 0.001082616;
-                *j3 = -0.00000253881;
-                *j4 = -0.00000165597;
+                *j2    =  0.001082616;
+                *j3    = -0.00000253881;
+                *j4    = -0.00000165597;
                 *j3oj2 = *j3 / *j2;
                 break;
             // ------------ wgs-72 constants ------------
             case SGP_wgs72:
-                mu = 398600.8; // in km3 / s2
-                *radiusearthkm = 6378.135; // km
-                *xke = 60.0 / sqrt( (*radiusearthkm) * (*radiusearthkm) * (*radiusearthkm)/mu);
+                mu     = 398600.8;          // in km3 / s2
+                *radiusearthkm = 6378.135;  // km
+                *xke   = 60.0 / sqrt( (*radiusearthkm) * (*radiusearthkm) * (*radiusearthkm)/mu);
                 *tumin = 1.0 / *xke;
-                *j2 = 0.001082616;
-                *j3 = -0.00000253881;
-                *j4 = -0.00000165597;
+                *j2    =  0.001082616;
+                *j3    = -0.00000253881;
+                *j4    = -0.00000165597;
                 *j3oj2 = *j3 / *j2;
                 break;
             case SGP_wgs84:
                 // ------------ wgs-84 constants ------------
-                mu = 398600.5; // in km3 / s2
-                *radiusearthkm = 6378.137; // km
-                *xke = 60.0 / sqrt( (*radiusearthkm) * (*radiusearthkm) * (*radiusearthkm)/mu);
+                mu     = 398600.5;          // in km3 / s2
+                *radiusearthkm = 6378.137;  // km
+                *xke   = 60.0 / sqrt( (*radiusearthkm) * (*radiusearthkm) * (*radiusearthkm)/mu);
                 *tumin = 1.0 / *xke;
-                *j2 = 0.00108262998905;
-                *j3 = -0.00000253215306;
-                *j4 = -0.00000161098761;
+                *j2    =  0.00108262998905;
+                *j3    = -0.00000253215306;
+                *j4    = -0.00000161098761;
                 *j3oj2 = *j3 / *j2;
                 break;
             default:
@@ -1954,7 +2009,9 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
 
     /* ------------------ set mathematical constants --------------- */
     // sgp4fix divisor for divide by zero check on inclination
-    const double temp4 = 1.0 + cos(M_PI-1.0e-9);
+    // the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
+    // 1.5 e-12, so the threshold was changed to 1.5e-12 for consistency
+    const double temp4 =   1.5e-12;
     x2o3 = 2.0 / 3.0;
     // sgp4fix identify constants and allow alternate values
     LgmSgp_GetGravConst( s->GravConst, &tumin, &radiusearthkm, &xke, &j2, &j3, &j4, &j3oj2 );
@@ -1966,6 +2023,10 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
     s->t     = tsince;
     s->error = 0;
 
+    //opsmode = 'a' best understanding of how afspc code works
+    //opsmode = 'i' imporved sgp4 resulting in smoother behavior
+    char opsmode = s->operationmode;
+    
 
 
     /* ------- update for secular gravity and atmospheric drag ----- */
@@ -1982,6 +2043,7 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
 
     if ( s->isimp != 1 ) {
         delomg = s->omgcof*s->t;
+        // sgp4fix use mutliply for speed instead of pow
         tmp    = 1.0 + s->eta*cos(xmdf);
         delm   = s->xmcof*(tmp*tmp*tmp - s->delmo);
         temp   = delomg + delm;
@@ -2008,26 +2070,38 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
     if (nm <= 0.0) {
         // printf("# error nm %f\n", nm);
         s->error = 2;
+        s->X = s->Y = s->Z = s->VX = s->VY = s->VZ = LGM_FILL_VALUE;
+        // sgp4fix add return
+        return( 0 );
     }
 
     am = pow((xke/nm), x2o3)*tempa*tempa;
-    nm = xke/pow(am, 1.5);
+    //nm = xke/pow(am, 1.5); MGH - dont use pow() - use sqrt( am^3 )
+    nm = xke/sqrt(am*am*am);
     em = em - tempe;
+
     // fix tolerance for error recognition
-    if ((em >= 1.0) || (em < -0.001) || (am < 0.95)) {
+    // sgp4fix am is fixed from the previous nm check
+    if ((em >= 1.0) || (em < -0.001)) { //  || (am < 0.95)) {
         // printf("# error em %f\n", em);
         s->error = 1;
+        // sgp4fix to return if there is an error in eccentricity
+        s->X = s->Y = s->Z = s->VX = s->VY = s->VZ = LGM_FILL_VALUE;
+        return( 0 );
     }
 
-    if (em < 0.0) em = 1.0e-6;
+    // sgp4fix fix tolerance to avoid a divide by zero
+    if (em < 1.0e-6) em = 1.0e-6;
+
     mm   += s->no * templ;
     xlm   = mm + argpm + nodem;
     emsq  = em * em;
     temp  = 1.0 - emsq;
-    nodem = fmod(nodem, M_2PI);
-    argpm = fmod(argpm, M_2PI);
-    xlm   = fmod(xlm, M_2PI);
-    mm    = fmod(xlm - argpm - nodem, M_2PI);
+
+    nodem = fmod( nodem, M_2PI );
+    argpm = fmod( argpm, M_2PI );
+    xlm   = fmod( xlm, M_2PI );
+    mm    = fmod( xlm - argpm - nodem, M_2PI );
 
 
     /* ----------------- compute extra mean quantities ------------- */
@@ -2047,7 +2121,7 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
 
     if ( s->method == 'd' ) {
 
-        LgmSgp_dpper( s->inclo, 'n', &ep, &xincp, &nodep, &argpp, &mp, s);
+        LgmSgp_dpper( s->inclo, 'n', &ep, &xincp, &nodep, &argpp, &mp, opsmode, s);
 
         if (xincp < 0.0) {
             xincp = -xincp;
@@ -2057,6 +2131,9 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
         if ( (ep < 0.0) || (ep > 1.0) ) {
             // printf("# error ep %f\n", ep);
             s->error = 3;
+            // sgp4fix add return
+            s->X = s->Y = s->Z = s->VX = s->VY = s->VZ = LGM_FILL_VALUE;
+            return( 0 );
         }
 
     } // if method = d
@@ -2106,6 +2183,9 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
 
         // printf("# error pl %f\n", pl);
         s->error = 4;
+        // sgp4fix add return
+        s->X = s->Y = s->Z = s->VX = s->VY = s->VZ = LGM_FILL_VALUE;
+        return( 0 );
 
     } else {
 
@@ -2176,10 +2256,12 @@ int LgmSgp_SGP4( double tsince, _SgpInfo *s ) {
     if (mrt < 1.0) {
         // printf("# decay condition %11.6f \n",mrt);
         s->error = 6;
+        s->X = s->Y = s->Z = s->VX = s->VY = s->VZ = LGM_FILL_VALUE;
+        return( 0 );
     }
 
     //#include "debug7.cpp"
-    return( s->error );
+    return( 1 );
 
 
 } // end sgp4

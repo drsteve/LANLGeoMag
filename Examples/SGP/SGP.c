@@ -11,16 +11,18 @@
 
 
 int main(void) {
-  char            *filename ="iss.tle";
-  int             nTle=0; // this is not the number of TLE but the index in the tle array
-  _SgpTLE         *tle;  // pointer to a struct
-  Lgm_CTrans      *c;
-  // create a place to hold an array of SGP trackers (1 element)
-  _SgpInfo        *s;
-  double           Lat, Lon, r, minutes, tsince=0, JD, tUT;
-  int              tYear, tMonth, tDay;
-  long int         tDate, i;
-  Lgm_Vector       Ugei;
+    //char            *filename ="iss.tle";
+    char            *filename ="test.tle";
+    int             nTle=0; // this is not the number of TLE but the index in the tle array
+    _SgpTLE         *tle;  // pointer to a struct
+    Lgm_CTrans      *c;
+    // create a place to hold an array of SGP trackers (1 element)
+    _SgpInfo        *s;
+    double           Lat, Lon, r, Hours, tsince=0, JD, tUT;
+    int              tYear, tMonth, tDay;
+    long int         tDate, i;
+    Lgm_Vector       Uteme, Ugei;
+    Lgm_DateTime UTC;
 
   // create a place to hold an array of TLEs (1 element)
   tle = (_SgpTLE *)calloc( 1, sizeof(_SgpTLE) );
@@ -47,14 +49,16 @@ int main(void) {
      * compute the tsince needed.
      */
   // JD=2454771.014400;
-  JD = Lgm_JD( 2008, 10, 31, 12.3456, LGM_TIME_SYS_UTC, c );
-  minutes =  12.3456;
-  printf("JD( 2008, 10, 31, 12.3456, c  ) = %lf\n",  JD);
+  Hours =  12.0;
+  JD = Lgm_JD( 2008, 10, 31, Hours, LGM_TIME_SYS_UTC, c );
+  printf("JD( 2008, 10, 31, %g, c  ) = %lf\n",  Hours, JD);
 
   Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
   Lgm_Set_Coord_Transforms( tDate, tUT, c );
 
   tsince = (JD - tle[0].JD)*1440.0;
+//tsince = 0.0;
+tsince =  -4896.0;
   printf("tsince=%lf (minutes from TLE epoch)\n", tsince);
   printf("\n");
   printf("Compute the ground track for 2 hours:\n");
@@ -62,10 +66,13 @@ int main(void) {
   
   // initialize the propagator
   LgmSgp_SGP4_Init( s, tle );
-  for (i=0; i<120/3; i++) {
-    JD = Lgm_JD( 2008, 10, 31, minutes, LGM_TIME_SYS_UTC, c );
+  for (i=0; i<4; i++) {
+    JD = Lgm_JD( 2008, 10, 31, Hours, LGM_TIME_SYS_UTC, c );
     Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
     tsince = (JD - tle[0].JD)*1440.0;
+//tsince = 0.0;
+//tsince = 4320.0;
+tsince =  -4896.0;
     // coord transform as time depend to much be resetup
     Lgm_Set_Coord_Transforms( tDate, tUT, c );
     // do the propagation
@@ -76,9 +83,15 @@ int main(void) {
     Ugei.z = s->Z/Re;
     // get lat and lon
     Lgm_CartToSphCoords(&Ugei, &Lat, &Lon, &r);
-    printf("\t%ld %lf\tLat:%lf\tLon:%lf\n", tDate, tUT, Lat, Lon);
+
+    Lgm_Make_UTC( 20081031, Hours, &UTC, c );
+    Lgm_Print_DateTime( &UTC, 0, 8 );
+    printf( "  \t(X,Y,Z) = %15.8lf %15.8lf %15.8lf \t (VX,VY,VZ) = %15.9lf %15.9lf %15.9lf \tLat:%lf\tLon:%lf\n",  s->X,  s->Y,  s->Z, s->VX,  s->VY,  s->VZ, Lat, Lon);
+    Uteme.x = s->X; Uteme.y = s->Y; Uteme.z = s->Z;
+    Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, c );
+    printf("Ugei =  %15.8lf %15.8lf %15.8lf \n", Ugei.x, Ugei.y, Ugei.z);
     
-    minutes += 3./60.; // add three minutes
+    Hours += 3.0; // add an hour
   }
 
   Lgm_free_ctrans( c ); // free the structure

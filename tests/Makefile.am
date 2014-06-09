@@ -1,8 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
 lgm_includes=$(top_srcdir)/libLanlGeoMag/Lgm/
-check_PROGRAMS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots
-TESTS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots
+#check_PROGRAMS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots check_Sgp4
+#TESTS = check_libLanlGeoMag check_IsoTimeStringToDateTime check_McIlwain_L check_PolyRoots check_Sgp4
+check_PROGRAMS = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4
+TESTS          = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4
 
 check_libLanlGeoMag_SOURCES = check_libLanlGeoMag.c $(lgm_includes)/Lgm_CTrans.h
 check_libLanlGeoMag_CFLAGS = @CHECK_CFLAGS@
@@ -20,4 +22,8 @@ check_PolyRoots_SOURCES = check_PolyRoots.c $(lgm_includes)/Lgm_CTrans.h
 check_PolyRoots_CFLAGS = @CHECK_CFLAGS@
 check_PolyRoots_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
 
-EXTRA_DIST = check_McIlwain_L_01.expected check_McIlwain_L_02.expected check_McIlwain_L_03.expected check_McIlwain_L_04.expected check_PolyRoots_01.expected check_PolyRoots_02.expected check_PolyRoots_03.expected check_PolyRoots_04.expected
+check_Sgp4_SOURCES = check_Sgp4.c $(lgm_includes)/Lgm_CTrans.h
+check_Sgp4_CFLAGS = @CHECK_CFLAGS@
+check_Sgp4_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
+
+EXTRA_DIST = check_McIlwain_L_01.expected check_McIlwain_L_02.expected check_McIlwain_L_03.expected check_McIlwain_L_04.expected check_PolyRoots_01.expected check_PolyRoots_02.expected check_PolyRoots_03.expected check_PolyRoots_04.expected check_Sgp4_01.expected

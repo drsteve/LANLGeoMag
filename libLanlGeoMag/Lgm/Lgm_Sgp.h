@@ -104,6 +104,11 @@ typedef struct _SgpTLE {
 
 typedef struct {
 
+    //opsmode = 'a' best understanding of how afspc code works
+    //opsmode = 'i' imporved sgp4 resulting in smoother behavior
+    char    operationmode; // the opsmode stuff 
+                
+
     /*
      * THESE WERE FOR THGE STR3 codes
      */
@@ -131,7 +136,7 @@ typedef struct {
      */
     double  argpdot, argpo, atime, aycof, bstar, cc1, cc4, cc5, con41, d2, d2201, d2211;
     double  d3, d3210, d3222, d4, d4410, d4422, d5220, d5232, d5421, d5433, dedt, del1;
-    double  del2, del3, delmo, didt, dmdt, dnodt, domdt, e3, ecco, ee2, error, eta, gsto;
+    double  del2, del3, delmo, didt, dmdt, dnodt, domdt, e3, ecco, ee2, eta, gsto;
     double  inclo, mdot, mo, no, nodecf, nodedot, nodeo, omgcof, peo;
     double  pgho, pho, pinco, plo, se2, se3, sgh2, sgh3, sgh4, sh2, sh3, si2, si3, sinmao;
     double  sl2, sl3, sl4, t, t2cof, t3cof, t4cof, t5cof, x1mth2, x7thm1, xfact, xgh2;
@@ -141,7 +146,7 @@ typedef struct {
 //    double  a, altp, alta, epochdays, jdsatepoch, nddot, ndot, bstar, rcse, inclo, nodeo; 
 //    double  ecco, argpo, mo, no;
     
-    int     GravConst, irez;
+    int     GravConst, irez, error;
     char    init, method, isimp;
 
     double  X;
@@ -235,7 +240,7 @@ void LgmSgp_GetGravConst( int whichconst, double *tumin, double *radiusearthkm,
                     double *xke, double *j2, double *j3, double *j4, double *j3oj2 );
 
 void LgmSgp_dpper( double inclo, char init, double *ep, double *inclp, 
-                    double *nodep, double *argpp, double *mp, _SgpInfo *s );
+                    double *nodep, double *argpp, double *mp, char opsmode, _SgpInfo *s );
 
 void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm, double *inclm, double *xli, 
                     double *mm, double *xni, double *nodem, double *dndt, double *nm, _SgpInfo *s );
@@ -243,7 +248,7 @@ void LgmSgp_dspace( double tc, double *atime, double *em, double *argpm, double 
 void LgmSgp_initl( int satn, int whichconst, double ecco, double epoch, double inclo,
                     double *no, char *method, double *ainv, double *ao, double *con41, double *con42,
                     double *cosio, double *cosio2, double *eccsq, double *omeosq, double *posq,
-                    double *rp, double *rteosq, double *sinio, double *gsto);
+                    double *rp, double *rteosq, double *sinio, double *gsto, char opsmode );
 
 void LgmSgp_dscom( double epoch, double ep, double argpp, double tc, double inclp, double nodep, double np,
                     double *snodm, double *cnodm, double *sinim, double *cosim, double *sinomm,
