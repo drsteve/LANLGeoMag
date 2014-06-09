@@ -218,8 +218,7 @@ int main( int argc, char *argv[] ){
 
     // Settings for Lstar calcs
     LstarInfo->VerbosityLevel = arguments.verbose;
-    LstarInfo->mInfo->VerbosityLevel = 0;
-    LstarInfo->VerbosityLevel       = 0;
+    LstarInfo->mInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
     if ( !strcmp( ExtModel, "T87" ) ){
