@@ -951,7 +951,7 @@ mlat0 =0.0;
 
             if (LstarInfo->VerbosityLevel > 1) {
                 printf("\n\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                printf("\t\t%s             Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d          %s\n", PreStr, k, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
+                printf("\t\t%s             Field Line %02d of %02d   MLT: %g  (Predicted mlat: %g %g %g  delta: %g)   Count: %d          %s\n", PreStr, k+1, nLines, MLT, mlat0, pred_mlat, mlat1, delta, Count, PostStr );
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n", PreStr, PostStr );
             }
 
