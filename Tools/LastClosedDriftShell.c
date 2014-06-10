@@ -290,7 +290,7 @@ int main( int argc, char *argv[] ){
     
         fprintf( fp, "# {\n");
         if ( nK > 0 ) {
-            fprintf( fp, "#  \"Kin\":            { \"DESCRIPTION\": \"Kin\",\n");
+            fprintf( fp, "#  \"K\":            { \"DESCRIPTION\": \"Kin\",\n");
             fprintf( fp, "#                               \"NAME\": \"Kin\",\n");
             fprintf( fp, "#                              \"TITLE\": \"Kin\",\n");
             fprintf( fp, "#                              \"LABEL\": \"Kin\",\n");
