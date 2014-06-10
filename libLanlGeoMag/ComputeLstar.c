@@ -1949,19 +1949,19 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
         Ptest.x = Xtest; Ptest.y = Ptest.z = 0.0;
 
-        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
-            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
-            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
-        }
-        else {
-            //printf("*****BRAAAAP");
-            Alpha = LGM_FILL_VALUE;
-        }
-        LstarInfo_test->PitchAngle = Alpha;
-        sa = sin( LstarInfo_test->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-
         //Trace to minimum-B
         if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
+            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+                Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+                Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+            }
+            else {
+                //printf("*****BRAAAAP");
+                Alpha = LGM_FILL_VALUE;
+            }
+            LstarInfo_test->PitchAngle = Alpha;
+            sa = sin( LstarInfo_test->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+
             //If test point is closed FL then check for undefined L*.
             //Get L*
             LstarInfo_test->mInfo->Bm = LstarInfo_test->mInfo->Bmin/sa2;
