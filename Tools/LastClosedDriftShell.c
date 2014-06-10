@@ -69,9 +69,9 @@ struct Arguments {
     int         silent;
     int         verbose;
 
-    double      StartPA;
-    double      EndPA;
-    int         nPA;
+    double      StartK;
+    double      EndK;
+    int         nK;
 
     int         Quality;
     int         Force;
@@ -107,7 +107,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             strcpy( arguments->IntModel, arg );
             break;
         case 'p':
-            sscanf( arg, "%lf, %lf, %d", &arguments->StartPA, &arguments->EndPA, &arguments->nPA );
+            sscanf( arg, "%lf, %lf, %d", &arguments->StartK, &arguments->EndK, &arguments->nK );
             break;
         case 'F':
             arguments->Force = 1;
@@ -153,11 +153,11 @@ int main( int argc, char *argv[] ){
 
     struct Arguments arguments;
     double           UTC, brac1, brac2, tol, sJD, eJD, JD, jDate, t_cadence;
-    double           K[500], LS[500], Alpha[500];
+    double           K[500], LS[500], Kin[500];
     double           Inc, FootpointHeight;
     int              Force, UseEop;
     long int         StartDate, EndDate, Date, currDate;
-    int              nAlpha, i, Quality, ans, aa, Year, Month, Day;
+    int              nK, i, Quality, ans, aa, Year, Month, Day;
     char             Str[128], NewStr[2048];
     char             IntModel[20], ExtModel[20];
     char             Filename[1024];
@@ -173,9 +173,9 @@ int main( int argc, char *argv[] ){
    /*
      * Default option values.
      */
-    arguments.StartPA         = 90;     // start at 90.0 Deg.
-    arguments.EndPA           = 5.0;    // stop at 2.5 Deg.
-    arguments.nPA             = 18;     // 18 pitch angles
+    arguments.StartK         = 0.001;     // start at 90.0 Deg.
+    arguments.EndK           = 3.0;    // stop at 2.5 Deg.
+    arguments.nK             = 18;     // 18 pitch angles
     arguments.silent          = 0;
     arguments.verbose         = 0;
     arguments.Quality         = 2;
@@ -199,9 +199,10 @@ int main( int argc, char *argv[] ){
     /*
      * Define pitch angles to use.
      */
-    nAlpha = arguments.nPA;
-    Inc    = ( nAlpha > 1 ) ? (arguments.EndPA - arguments.StartPA)/(double)(nAlpha-1) : 0.0;
-    for (i=0; i<nAlpha; i++ ) Alpha[i] = arguments.StartPA + i*Inc;
+    nK = arguments.nK;
+    Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
+    //Inc    = ( nAlpha > 1 ) ? (arguments.EndPA - arguments.StartPA)/(double)(nAlpha-1) : 0.0;
+    //for (i=0; i<nAlpha; i++ ) Alpha[i] = arguments.StartPA + i*Inc;
 
     /*
      *  Set other options
@@ -288,26 +289,26 @@ int main( int argc, char *argv[] ){
         int nCol = 0;
     
         fprintf( fp, "# {\n");
-        if ( nAlpha > 0 ) {
-            fprintf( fp, "#  \"Alpha\":            { \"DESCRIPTION\": \"Pitch Angles.\",\n");
-            fprintf( fp, "#                               \"NAME\": \"Pitch Angle\",\n");
-            fprintf( fp, "#                              \"TITLE\": \"Pitch Angle\",\n");
-            fprintf( fp, "#                              \"LABEL\": \"Pitch Angle\",\n");
-            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nAlpha );
+        if ( nK > 0 ) {
+            fprintf( fp, "#  \"Kin\":            { \"DESCRIPTION\": \"Kin\",\n");
+            fprintf( fp, "#                               \"NAME\": \"Kin\",\n");
+            fprintf( fp, "#                              \"TITLE\": \"Kin\",\n");
+            fprintf( fp, "#                              \"LABEL\": \"Kin\",\n");
+            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nK );
             fprintf( fp, "#                             \"VALUES\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "%g, ", Alpha[i] );
-            fprintf(fp, "%g ],\n", Alpha[i] ); 
+            for (i=0; i<nK-1; i++) fprintf(fp, "%g, ", Kin[i] );
+            fprintf(fp, "%g ],\n", Kin[i] ); 
     
             fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"PA%d\", ", i );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"PA%d\", ", i );
             fprintf(fp, "\"PA%d\" ],\n", i ); 
     
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"%g Deg.\", ", Alpha[i] );
-            fprintf(fp, "\"%g Deg.\" ],\n", Alpha[i] ); 
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"%g Deg.\", ", Kin[i] );
+            fprintf(fp, "\"%g Deg.\" ],\n", Kin[i] ); 
             fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
             fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
-            fprintf( fp, "#                          \"VALID_MAX\": 90.0,\n");
+            fprintf( fp, "#                          \"VALID_MAX\": 20.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
             fprintf( fp, "#\n");
         }
@@ -320,41 +321,41 @@ int main( int argc, char *argv[] ){
         fprintf( fp, "#                       \"START_COLUMN\": %d },\n", nCol++);
         fprintf( fp, "#\n");
     
-        if ( nAlpha > 0 ) {
+        if ( nK > 0 ) {
             fprintf( fp, "#  \"LCDS\":            { \"DESCRIPTION\": \"Last closed generalized Roederer L-shell value (also known as L*).\",\n");
             fprintf( fp, "#                               \"NAME\": \"LCDS\",\n");
             fprintf( fp, "#                              \"TITLE\": \"LCDS\",\n");
             fprintf( fp, "#                              \"LABEL\": \"LCDS, Dimensionless\",\n");
             fprintf( fp, "#                              \"UNITS\": \"Dimensionless\",\n");
-            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nAlpha );
-            fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nAlpha;
+            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nK );
+            fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nK;
             fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"LCDS_%g\", ", Alpha[i] );
-            fprintf(fp, "\"LCDS_%g\" ],\n", Alpha[i] ); 
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS_%g\", ", Kin[i] );
+            fprintf(fp, "\"LCDS_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"LCDS %g!Eo!N\", ", Alpha[i] );
-            fprintf(fp, "\"LCDS %g!Eo!N\" ],\n", Alpha[i] ); 
-            fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS %g!Eo!N\", ", Kin[i] );
+            fprintf(fp, "\"LCDS %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
             fprintf( fp, "#\n");
         }
-        if ( nAlpha > 0 ) {
-            fprintf( fp, "#  \"K\":              { \"DESCRIPTION\": \"Modified second adiabatic invariant, K\",\n");
+        if ( nK > 0 ) {
+            fprintf( fp, "#  \"Kest\":              { \"DESCRIPTION\": \"Modified second adiabatic invariant, K\",\n");
             fprintf( fp, "#                               \"NAME\": \"K\",\n");
             fprintf( fp, "#                              \"TITLE\": \"K\",\n");
             fprintf( fp, "#                              \"LABEL\": \"K, [R!IE!N G!U1/2!N]\",\n");
             fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!U1/2!N\",\n");
-            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nAlpha );
-            fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nAlpha;
+            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nK );
+            fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nK;
             fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"K_%g\", ", Alpha[i] );
-            fprintf(fp, "\"K_%g\" ],\n", Alpha[i] ); 
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"K_%g\", ", Kin[i] );
+            fprintf(fp, "\"K_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nAlpha-1; i++) fprintf(fp, "\"K %g!Eo!N\", ", Alpha[i] );
-            fprintf(fp, "\"K %g!Eo!N\" ],\n", Alpha[i] ); 
-            fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"K %g!Eo!N\", ", Kin[i] );
+            fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
@@ -364,9 +365,9 @@ int main( int argc, char *argv[] ){
         fprintf( fp, "#\n");
         // column header
         fprintf( fp, "# %24s", "Time" );
-        for (i=0; i<nAlpha; i++) { sprintf( Str, "L*%d", i ); fprintf(fp, " %8s", Str ); }
+        for (i=0; i<nK; i++) { sprintf( Str, "L*%d", i ); fprintf(fp, " %8s", Str ); }
         fprintf(fp, "    ");
-        for (i=0; i<nAlpha; i++) { sprintf( Str, "K%d", i ); fprintf(fp, " %8s", Str ); }
+        for (i=0; i<nK; i++) { sprintf( Str, "K%d", i ); fprintf(fp, " %8s", Str ); }
         fprintf(fp, "    ");
         fprintf(fp, "%s", " \n");
     
@@ -399,20 +400,20 @@ int main( int argc, char *argv[] ){
                 #pragma omp parallel private(LstarInfo3,ans)
                 #pragma omp for schedule(dynamic, 1)
         
-                for (aa=0; aa<nAlpha; ++aa) {
+                for (aa=0; aa<nK; ++aa) {
                     // make a local copy of LstarInfo structure -- needed for multi-threading
                     LstarInfo3 = Lgm_CopyLstarInfo( LstarInfo );
-                    LstarInfo3->PitchAngle = Alpha[aa];
+                    //LstarInfo3->PitchAngle = Alpha[aa];
                     //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
         
-                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Alpha[aa], tol, Quality, &K[aa], LstarInfo3 );
+                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], tol, Quality, &K[aa], LstarInfo3 );
                     if (ans==0) LS[aa] = LstarInfo3->LS;
-                    if (LstarInfo3->DriftOrbitType == 1) printf("Alpha: %g; Drift Orbit Type: Closed; L* = %g \n", Alpha[aa], LstarInfo3->LS);
+                    if (LstarInfo3->DriftOrbitType == 1) printf("K: %g; Drift Orbit Type: Closed; L* = %g \n", Kin[aa], LstarInfo3->LS);
                     if (LstarInfo3->DriftOrbitType == 2) printf("Drift Orbit Type: Shebansky; L* = %g\n", LstarInfo3->LS);
                     if (ans!=0) {
                         K[aa] = LGM_FILL_VALUE;
                         LS[aa] = LGM_FILL_VALUE;
-                        printf("**==**==**==** (PA = %g) Return value: %d\n", Alpha[aa], ans);
+                        printf("**==**==**==** (K = %g) Return value: %d\n", Kin[aa], ans);
                     }
         
                     FreeLstarInfo( LstarInfo3 );
@@ -423,13 +424,14 @@ int main( int argc, char *argv[] ){
             Lgm_Make_UTC( Date, UTC, &DT_UTC, LstarInfo->mInfo->c );
             Lgm_DateTimeToString( Str, &DT_UTC, 0, 3);
             fprintf(fp, "%24s",     Str );
-            for ( i=0; i<nAlpha; ++i ) {
+            for ( i=0; i<nK; ++i ) {
                 fprintf( fp, "     %13g", LS[i]);
             }
-            for ( i=0; i<nAlpha; ++i ) {
+            for ( i=0; i<nK; ++i ) {
                 fprintf( fp, "     %13g", K[i] );
             }
             fprintf(fp, "%s", " \n");
+            fflush(fp);
         
         }
         fclose(fp);
