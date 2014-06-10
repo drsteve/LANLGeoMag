@@ -1819,15 +1819,17 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  *                 LstarInfo:  LstarInfo structure to specify B-field model, store last valid Lstar, etc.
  *  
  */
-int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
+int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
     Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
-    double          Blocal, Xtest, sa, sa2, LCDS;
+    Lgm_DateTime    DT_UTC;
+    double          Blocal, Xtest, sa, sa2, LCDS, Alpha;
     double          nTtoG = 1.0e-5;
     int             LS_Flag, nn, k;
     int             maxIter = 20;
 
     //Start by creating necessary structures... need an Lstar info for each bracket, plus test point.
+    Lgm_Make_UTC( Date, UTC, &DT_UTC, LstarInfo->mInfo->c );
     LstarInfo_brac1 = Lgm_CopyLstarInfo( LstarInfo );
     LstarInfo_brac2 = Lgm_CopyLstarInfo( LstarInfo );
     LstarInfo_test = Lgm_CopyLstarInfo( LstarInfo );
@@ -1848,20 +1850,34 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alph
     /*
      *  Test inner bracket location.
      */
-    LstarInfo_brac1->mInfo->Bfield( &Pinner, &Bvec, LstarInfo_brac1->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bm/sa2;
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
+        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+            LstarInfo_brac1->PitchAngle = Alpha;
+            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+        } else {
+            return(-99);
+        }
+        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
+        sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+        LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
+        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
         //Only continue if bracket 1 is closed FL
         //Get L*
-        LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
+
+        if (LstarInfo_brac1->LS <= 0) {
+            FreeLstarInfo( LstarInfo_brac1 );
+            FreeLstarInfo( LstarInfo_brac2 );
+            FreeLstarInfo( LstarInfo_test );
+            return(-8); //Inner bracket is bad - bail
+        }
         LCDS = LstarInfo_brac1->LS;
         *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
         if (LstarInfo->VerbosityLevel > 0) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
+        if (LstarInfo->VerbosityLevel > 0) printf("Lstar = %g\n", LstarInfo_brac1->LS);
     } else {
         FreeLstarInfo( LstarInfo_brac1 );
         FreeLstarInfo( LstarInfo_brac2 );
@@ -1876,19 +1892,34 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alph
     Pouter.x = brac2;
     Pouter.y = 0.0; Pouter.z = 0.0;
 
-    LstarInfo_brac2->mInfo->Bfield( &Pouter, &Bvec, LstarInfo_brac2->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    LstarInfo_brac2->mInfo->Bm = Blocal/sa2;
-
     //Trace to minimum-B
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
         //If bracket 2 is closed FL then check for undefined L*. If L* is defined, we have a problem
         //Get L*
+        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+        }
+        else {
+            Alpha = LGM_FILL_VALUE;
+        }
+        LstarInfo_brac2->PitchAngle = Alpha;
+        sa = sin( LstarInfo_brac2->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+
         LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
             Pouter.x *= 1.7;
+            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+                Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+                Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+            }
+            else {
+                Alpha = LGM_FILL_VALUE;
+            }
+            LstarInfo_brac2->PitchAngle = Alpha;
+            sa = sin( LstarInfo_brac2->PitchAngle*RadPerDeg ); sa2 = sa*sa;
             if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
                 LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
                 LS_Flag = Lstar( &v3, LstarInfo_brac2);
@@ -1918,9 +1949,17 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alph
         Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
         Ptest.x = Xtest; Ptest.y = Ptest.z = 0.0;
 
-        LstarInfo_test->mInfo->Bfield( &Ptest, &Bvec, LstarInfo_test->mInfo );
-        Blocal = Lgm_Magnitude( &Bvec );
-        LstarInfo_test->mInfo->Bm = Blocal/sa2;
+        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+        }
+        else {
+            //printf("*****BRAAAAP");
+            Alpha = LGM_FILL_VALUE;
+        }
+        LstarInfo_test->PitchAngle = Alpha;
+        sa = sin( LstarInfo_test->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+
         //Trace to minimum-B
         if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
             //If test point is closed FL then check for undefined L*.
@@ -1953,8 +1992,8 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alph
 
     nn++;
     }
-
     LstarInfo->LS = LCDS;
+
     //free structures
     FreeLstarInfo( LstarInfo_brac1 );
     FreeLstarInfo( LstarInfo_brac2 );
