@@ -84,7 +84,7 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromSpiceKernel";
-const  char *argp_program_version     = "2.3.0";
+const  char *argp_program_version     = "2.4.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
@@ -901,6 +901,10 @@ int main( int argc, char *argv[] ){
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
+    // The default model is Lgm_B_T89c
+    MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
+
+    // Now override the default if user tells us to.
     OverRideKp = FALSE;
     if ( !strcmp( ExtModel, "T87" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T87;
@@ -915,11 +919,11 @@ int main( int argc, char *argv[] ){
         ForceKp    = OP77Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89Q" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
         ForceKp    = T89Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89D" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
     } else if ( !strcmp( ExtModel, "T96" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T96;
     } else if ( !strcmp( ExtModel, "T01S" ) ){

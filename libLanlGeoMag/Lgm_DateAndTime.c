@@ -213,7 +213,7 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         /*
          * Provides a fallback in case the Lgm_LeapSecondDates.dat was not present.
          */
-        N = 25;
+        N = 26;
         l->nLeapSecondDates = N;
         l->LeapSecondDates  = (long int *) malloc( N*sizeof(long int) );
         l->LeapSecondJDs    = (double *)   malloc( N*sizeof(double) );
@@ -243,6 +243,7 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         l->LeapSecondDates[22] = 19990101, l->LeapSecondJDs[22] = 2451179.5, l->LeapSeconds[22] = 32.0;
         l->LeapSecondDates[23] = 20060101, l->LeapSecondJDs[23] = 2453736.5, l->LeapSeconds[23] = 33.0;
         l->LeapSecondDates[24] = 20090101, l->LeapSecondJDs[24] = 2454832.5, l->LeapSeconds[24] = 34.0;
+        l->LeapSecondDates[25] = 20120701, l->LeapSecondJDs[25] = 2456109.5, l->LeapSeconds[25] = 35.0;
         printf("Lgm_LoadLeapSeconds: Could not open Lgm_LeapSecondDates.dat file!\n");
         printf("                     Setting the leap second values that I know about\n");
         printf("                     (latest leap second I know about was introduced on\n");

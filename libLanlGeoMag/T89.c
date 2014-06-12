@@ -111,13 +111,10 @@ int Lgm_BT_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double	   p26_2, p29_2, p31_2, cc, cc2, pp;
     double	   zz, ss, ss12, ss32, tt, tt12, tt32, uu, uu12, uu32, nn, oonn, ooS_T, ooP, ooS_T_2, qtzr;
     double    *p;
-    int        indx;
 
-
-    indx = Info->Kp;
+    int indx = Info->Kp;
     if (indx < 0) indx = 0;
     if (indx > 5) indx = 5;
-    
     p = Lgm_T89_a[indx];
 
 
@@ -240,8 +237,11 @@ int Lgm_BRC_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ){
     double	   x_sm_2, ee, ss, ss12, ss32, tt, tt12, tt32, p30_2, qrczr;
     double    *p;
 
+    int indx = Info->Kp;
+    if (indx < 0) indx = 0;
+    if (indx > 5) indx = 5;
+    p = Lgm_T89_a[indx];
 
-    p = Lgm_T89_a[Info->Kp];
 
 
     x = v->x; y = v->y; z = v->z;
@@ -338,8 +338,11 @@ int Lgm_BM_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double	   x, y, y2, z, z2, exod_x;
     double    *p;
 
+    int indx = Info->Kp;
+    if (indx < 0) indx = 0;
+    if (indx > 5) indx = 5;
+    p = Lgm_T89_a[indx];
 
-    p = Lgm_T89_a[Info->Kp];
 
     sin_psi = Info->c->sin_psi;
     cos_psi = Info->c->cos_psi;
@@ -368,8 +371,10 @@ int Lgm_BC_T89( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double	   psp, ss, ss12, ss32, ee, oop38_2;
     double    *p;
 
-
-    p = Lgm_T89_a[Info->Kp];
+    int indx = Info->Kp;
+    if (indx < 0) indx = 0;
+    if (indx > 5) indx = 5;
+    p = Lgm_T89_a[indx];
 
 
     x = v->x;
