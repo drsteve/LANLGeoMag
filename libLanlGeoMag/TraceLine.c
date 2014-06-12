@@ -147,13 +147,13 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
                  *  Guard against tracing into the Earth. Can happen if we
                  *  overshoot the target radius.
                  */
-                printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height  -- bailing.\n", __FILE__, __LINE__); 
+                if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height  -- bailing.\n", __FILE__, __LINE__); 
                 return(-1);
             } else if ( Count > 100 ) {
                 /*
                  *  Guard against too many iterations.
                  */
-                printf("In File %s, Line %d: Too many iterations to get above target height -- bailing.\n", __FILE__, __LINE__); 
+                if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Too many iterations to get above target height -- bailing.\n", __FILE__, __LINE__); 
                 return(-1);
             } else if ( F > 0.0 ){
                 /*
@@ -530,13 +530,13 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
                  *  Guard against tracing into the Earth. Can happen if we
                  *  overshoot the target radius.
                  */
-                printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+                if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
                 return(-1);
             } else if ( Count >= 100 ) {
                 /*
                  *  For some reason, we cannot make the step work in 100 tries.
                  */
-                printf("In File %s, Line %d: Too many interations to achieve step (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+                if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Too many interations to achieve step (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
                 return(-1);
             }
 
@@ -555,7 +555,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
              *  Guard against tracing into the Earth. Can happen if we
              *  overshoot the target radius.
              */
-            printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
+            if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
             return(-1);
 
 	    } else if ( m > 5000 ) {

@@ -716,21 +716,21 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
             } else {
 
-	            printf("\t\t%sMirror point below %g km in Northern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
+	            if (LstarInfo->VerbosityLevel > 0) printf("\t\t%sMirror point below %g km in Northern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
 	            return(-1);
 
 	        }
 
         } else {
 
-	        printf("\t\t%sMirror point below %g km in Southern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
+	        if (LstarInfo->VerbosityLevel > 0) printf("\t\t%sMirror point below %g km in Southern Hemisphere%s\n", PreStr, LstarInfo->mInfo->Lgm_LossConeHeight, PostStr );
 	        return(-2);
 
         }
 
     } else {
 
-	        printf("\t\t%sOpen Field Line%s\n", PreStr, PostStr );
+	        if (LstarInfo->VerbosityLevel > 0) printf("\t\t%sOpen Field Line%s\n", PreStr, PostStr );
 	        return(-5);
 
     }
