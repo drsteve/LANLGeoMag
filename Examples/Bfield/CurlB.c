@@ -1,4 +1,5 @@
 #include <Lgm_MagModelInfo.h>
+#include <math.h>
 
 /* BAL 04-Jan-2011 modified for more cases */
 
@@ -80,6 +81,26 @@ int main(){
 
 
 
+    {
+      Lgm_Vector v;
+
+      mInfo->Lgm_VelStep_T = 100e-3; // 100keV
+      mInfo->Lgm_VelStep_q = -LGM_e; // electron change
+      mInfo->Lgm_VelStep_E0 = LGM_Ee0; // electron mass
+      mInfo->Lgm_VelStep_Bm = sqrt(B.x*B.x + B.y*B.y + B.z*B.z);  // b mirror [nT]
+      mInfo->Lgm_VelStep_h = 1e-3;  // step size in Re
+      mInfo->Lgm_VelStep_DerivScheme = LGM_DERIV_FOUR_POINT;
+
+      printf("\nT=%lf q=%lf E0=%lf Bm=%lf h=%lf DerivScheme=%d\n", 
+	     mInfo->Lgm_VelStep_T, 
+	     mInfo->Lgm_VelStep_q, mInfo->Lgm_VelStep_E0, mInfo->Lgm_VelStep_Bm, mInfo->Lgm_VelStep_h, 
+	     mInfo->Lgm_VelStep_DerivScheme );
+
+
+      Lgm_GradAndCurvDriftVel(&u, &v, mInfo);
+      printf("\nThe drift velocity [km/s in GSM] for a locally mirroring 100 keV electron is:\n");
+      Lgm_PrintVector(&v);
+    }
 
 
     Lgm_FreeMagInfo( mInfo );

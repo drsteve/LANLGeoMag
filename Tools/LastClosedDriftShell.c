@@ -22,14 +22,14 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 const  char *ProgramName = "LastClosedDriftShell";
 const  char *argp_program_version     = "LastClosedDriftShell_0.1";
 const  char *argp_program_bug_address = "<smorley@lanl.gov>";
-static char doc[] = "\nComputes last closed drift shell for given times, pitch angles and magnetic field model."
+static char doc[] = "\nComputes last closed drift shell for given times, Ks and magnetic field model."
                     " \n\n OutFile is a path to the output file(s) that may contain"
                     " variables that will be substituted if a time range is given.  The"
                     " available time variables are '%YYYY', '%MM', and '%DD' which correspond"
                     " repectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of"
                     " month.\n"
                     " Here is an example using time variables,\n\n \t./LastClosedDriftShell -S 20020901 -E 20020930\n"
-                    " \t\t/home/jsmith/MagEphemData/%YYYY/%YYYY%MM%DD_%EE_MagEphem.txt.\n\n Directories"
+                    " \t\t/home/jsmith/MagEphemData/%YYYY/%YYYY%MM%DD_LCDS_%EE.txt.\n\n Directories"
                     " in the output file will be created if they don't already exist.\n\n";
 
 
@@ -51,7 +51,7 @@ static char ArgsDoc[] = "OutFile";
 static struct argp_option Options[] = {
     {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
     {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Default is T89."    },
-    {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,                                      "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
+    {"K",               'K',    "\"start_K, end_K, nK\"",     0,                                      "K values to compute. Default is \"0.001, 3, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
     {"Delta",           'd',    "delta",                      0,                                      "Cadence of LCDS calculation [minutes]. Default is 30."      },
@@ -106,7 +106,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'i': // inbternal model
             strcpy( arguments->IntModel, arg );
             break;
-        case 'p':
+        case 'K':
             sscanf( arg, "%lf, %lf, %d", &arguments->StartK, &arguments->EndK, &arguments->nK );
             break;
         case 'F':
@@ -153,7 +153,7 @@ int main( int argc, char *argv[] ){
 
     struct Arguments arguments;
     double           UTC, brac1, brac2, tol, sJD, eJD, JD, jDate, t_cadence;
-    double           K[500], LS[500], Kin[500];
+    double           K[500], LS[500], Kin[500], Bm[500];
     double           Inc, FootpointHeight;
     int              Force, UseEop;
     long int         StartDate, EndDate, Date, currDate;
@@ -290,7 +290,7 @@ int main( int argc, char *argv[] ){
     
         fprintf( fp, "# {\n");
         if ( nK > 0 ) {
-            fprintf( fp, "#  \"K\":            { \"DESCRIPTION\": \"Kin\",\n");
+            fprintf( fp, "#  \"K\":            { \"DESCRIPTION\": \"Modified second adiabatic invariant, K (as specified)\",\n");
             fprintf( fp, "#                               \"NAME\": \"Kin\",\n");
             fprintf( fp, "#                              \"TITLE\": \"Kin\",\n");
             fprintf( fp, "#                              \"LABEL\": \"Kin\",\n");
@@ -304,9 +304,9 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"PA%d\" ],\n", i ); 
     
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nK-1; i++) fprintf(fp, "\"%g Deg.\", ", Kin[i] );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"%g R!IE!N G!U1/2!N\", ", Kin[i] );
             fprintf(fp, "\"%g Deg.\" ],\n", Kin[i] ); 
-            fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+            fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!U1/2!N\",\n");
             fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 20.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -342,7 +342,7 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#\n");
         }
         if ( nK > 0 ) {
-            fprintf( fp, "#  \"Kest\":              { \"DESCRIPTION\": \"Modified second adiabatic invariant, K\",\n");
+            fprintf( fp, "#  \"Kcalc\":          { \"DESCRIPTION\": \"Modified second adiabatic invariant, K, calculated during drift shell trace\",\n");
             fprintf( fp, "#                               \"NAME\": \"K\",\n");
             fprintf( fp, "#                              \"TITLE\": \"K\",\n");
             fprintf( fp, "#                              \"LABEL\": \"K, [R!IE!N G!U1/2!N]\",\n");
@@ -358,6 +358,26 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+            fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+            fprintf( fp, "#\n");
+        }
+        if ( nK > 0 ) {
+            fprintf( fp, "#  \"Bmirror\":        { \"DESCRIPTION\": \"Mirror magnetic field strength\",\n");
+            fprintf( fp, "#                               \"NAME\": \"Bm\",\n");
+            fprintf( fp, "#                              \"TITLE\": \"Bm\",\n");
+            fprintf( fp, "#                              \"LABEL\": \"Bm, [nT]\",\n");
+            fprintf( fp, "#                              \"UNITS\": \"nT\",\n");
+            fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nK );
+            fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nK;
+            fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"K_%g\", ", Kin[i] );
+            fprintf(fp, "\"Bm_%g\" ],\n", Kin[i] ); 
+            fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"Bm %g!Eo!N\", ", Kin[i] );
+            fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
+            fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+            fprintf( fp, "#                          \"VALID_MAX\": 10000.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
             fprintf( fp, "#\n");
         }
@@ -379,11 +399,8 @@ int main( int argc, char *argv[] ){
         
             Lgm_get_QinDenton_at_JD( JD, &qd, 1 );
             Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
+
         
-            if ( !strcmp( ExtModel, "T89c" )) { //truncate Kp at 5 for T89
-                if ( LstarInfo->mInfo->Kp > 5 ) LstarInfo->mInfo->Kp = 5;
-                }
-    
             /*
              * Compute L*s, Is, Bms, etc...
              */
@@ -407,13 +424,18 @@ int main( int argc, char *argv[] ){
                     //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
         
                     ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], tol, Quality, &K[aa], LstarInfo3 );
-                    if (ans==0) LS[aa] = LstarInfo3->LS;
                     if (LstarInfo3->DriftOrbitType == 1) printf("K: %g; Drift Orbit Type: Closed; L* = %g \n", Kin[aa], LstarInfo3->LS);
                     if (LstarInfo3->DriftOrbitType == 2) printf("Drift Orbit Type: Shebansky; L* = %g\n", LstarInfo3->LS);
-                    if (ans!=0) {
+                    if (ans==0) {
+                        LS[aa] = LstarInfo3->LS;
+                        Bm[aa] = LstarInfo3->mInfo->Bm;
+                    }
+                    else {
                         K[aa] = LGM_FILL_VALUE;
                         LS[aa] = LGM_FILL_VALUE;
+                        Bm[aa] = LGM_FILL_VALUE;
                         printf("**==**==**==** (K = %g) Return value: %d\n", Kin[aa], ans);
+ 
                     }
         
                     FreeLstarInfo( LstarInfo3 );
@@ -429,6 +451,9 @@ int main( int argc, char *argv[] ){
             }
             for ( i=0; i<nK; ++i ) {
                 fprintf( fp, "     %13g", K[i] );
+            }
+            for ( i=0; i<nK; ++i ) {
+                fprintf( fp, "     %13g", Bm[i] );
             }
             fprintf(fp, "%s", " \n");
             fflush(fp);

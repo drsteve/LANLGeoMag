@@ -4,6 +4,7 @@
 #include <math.h>
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_LstarInfo.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
@@ -1845,8 +1846,14 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
 
     //Check for closed drift shell at brackets
-    Pinner.x = brac1;
-    Pinner.y = 0.0; Pinner.z = 0.0;
+    double MLT = 0.5; 
+    MLT *= 15;
+    MLT *= RadPerDeg;
+    //Pinner.x = brac1;
+    //Pinner.y = 0.0; Pinner.z = 0.0;
+    Pinner.x = brac1*cos(MLT); Pinner.y = brac1*sin(MLT); Pinner.z = 0.0;
+
+
     /*
      *  Test inner bracket location.
      */
@@ -1858,7 +1865,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             LstarInfo_brac1->PitchAngle = Alpha;
             Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
         } else {
-            return(-99);
+            return(-8);
         }
         if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
         sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
@@ -1889,8 +1896,10 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     /*
      *  Test outer bracket location.
      */
-    Pouter.x = brac2;
-    Pouter.y = 0.0; Pouter.z = 0.0;
+    /*Pouter.x = brac2;
+     *Pouter.y = 0.0; Pouter.z = 0.0;
+     */
+    Pouter.x = brac2*cos(MLT); Pouter.y = brac2*sin(MLT); Pouter.z = 0.0;
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
@@ -1910,7 +1919,11 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
-            Pouter.x *= 1.7;
+            //Pouter.x *= 1.7;
+            
+            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(MLT);
+            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(MLT); Pouter.z = 0.0;
+
             if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
                 Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
                 Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
@@ -1946,8 +1959,15 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             FreeLstarInfo( LstarInfo_test );
             return(-2); //reached max iterations without achieving tolerance - bail
         }
-        Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
-        Ptest.x = Xtest; Ptest.y = Ptest.z = 0.0;
+
+        if (1==1) {
+            Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
+            Ptest.x = -1.0*Xtest*cos(MLT); Ptest.y = -1.0*Xtest*sin(MLT); Ptest.z = 0.0;
+        }
+        else {
+            Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
+            Ptest.x = Xtest; Ptest.y = Ptest.z = 0.0;
+        }
 
         //Trace to minimum-B
         if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
@@ -1970,7 +1990,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 //Drift shell defined
                 Pinner = Ptest;
                 LCDS = LstarInfo_test->LS;
-                *K = (LstarInfo_test->I0)*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
+                *K = (LstarInfo_test->I[0])*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
 
                 //Determine the type of the orbit
                 LstarInfo_test->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;

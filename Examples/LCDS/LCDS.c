@@ -63,12 +63,12 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
     LstarInfo_brac1->mInfo->Bfield( &Pinner, &Bvec, LstarInfo_brac1->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo_brac1->mInfo->Bm = Blocal/sa2;
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
         //Only continue if bracket 1 is closed FL
         //Get L*
+        LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
         LCDS = LstarInfo_brac1->LS;
         *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
@@ -89,12 +89,12 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
 
     LstarInfo_brac2->mInfo->Bfield( &Pouter, &Bvec, LstarInfo_brac2->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
-    LstarInfo_brac2->mInfo->Bm = Blocal/sa2;
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
         //If bracket 2 is closed FL then check for undefined L*. If L* is defined, we have a problem
         //Get L*
+        LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
@@ -125,15 +125,15 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
             return(-2); //reached max iterations without achieving tolerance - bail
         }
         Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
-        Ptest.x = Xtest;
+        Ptest.x = Xtest; Ptest.y = 0.0; Ptest.z = 0.0;
 
         LstarInfo_test->mInfo->Bfield( &Ptest, &Bvec, LstarInfo_test->mInfo );
         Blocal = Lgm_Magnitude( &Bvec );
-        LstarInfo_test->mInfo->Bm = Blocal/sa2;
         //Trace to minimum-B
         if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
             //If test point is closed FL then check for undefined L*.
             //Get L*
+            LstarInfo_test->mInfo->Bm = LstarInfo_test->mInfo->Bmin/sa2;
             LS_Flag = Lstar( &v3, LstarInfo_test);
             if ( (LS_Flag > 0) || (LstarInfo_test->LS != LGM_FILL_VALUE) ){
                 //Drift shell defined
@@ -195,8 +195,8 @@ int main( int argc, char *argv[] ){
     }
 
     // Date and UTC
-    StartDate       = 19990416;
-    EndDate         = 19990416;
+    StartDate       = 20010101;
+    EndDate         = 20010101;
     Lgm_Doy( StartDate, &Year, &Month, &Day, &Doy);
     NewStr[0]       = '\0';
     strcpy(Filename, "%YYYY%MM%DD_LCDS_TS04.txt");
@@ -314,13 +314,13 @@ int main( int argc, char *argv[] ){
         Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
     
         //LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
-        //if ( LstarInfo->mInfo->Kp > 5 ) LstarInfo->mInfo->Kp = 5;
     //LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
     //LstarInfo->mInfo->InternalModel = LGM_CDIP;
-    //brac2 = -32.0;
         LstarInfo->mInfo->Bfield        = Lgm_B_TS04;
+        LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
         LstarInfo->mInfo->InternalModel = LGM_IGRF;
-        LstarInfo->VerbosityLevel       = 0;
+        LstarInfo->VerbosityLevel       = 1;
+        //LstarInfo->mInfo->Kp = 0.3;
     
         /*
          * Compute L*s, Is, Bms, etc...
@@ -373,6 +373,7 @@ int main( int argc, char *argv[] ){
     
     }
     fclose(fp);
+    fflush(fp);
 
     FreeLstarInfo( LstarInfo );
 
