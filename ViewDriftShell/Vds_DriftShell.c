@@ -87,6 +87,87 @@ void Vds_FreeObjectInfo( Vds_ObjectInfo *ObjInfo ) {
 
 
 
+
+
+// These routines used to be part of gtkglext, but are not included anymore.
+
+/*
+ * Quadrics
+ */
+
+
+static GLUquadricObj *lgm_quadObj = NULL;
+#define LGM_QUAD_OBJ_INIT() { if(!lgm_quadObj) Lgm_initQuadObj(); }
+static void Lgm_initQuadObj( void ) {
+  lgm_quadObj = gluNewQuadric();
+  if (!lgm_quadObj) g_error("out of memory.");
+}
+
+/**
+ * Lgm_gl_draw_sphere:
+ * @solid: TRUE if the sphere should be solid.
+ * @radius: the radius of the sphere.
+ * @slices: the number of subdivisions around the Z axis (similar to lines of
+ *          longitude).
+ * @stacks: the number of subdivisions along the Z axis (similar to lines of
+ *          latitude).
+ *
+ * Renders a sphere centered at the modeling coordinates origin of
+ * the specified @radius. The sphere is subdivided around the Z axis into
+ * @slices and along the Z axis into @stacks. 
+ *
+ **/
+void Lgm_gl_draw_sphere( gboolean solid, double radius, int slices, int stacks ) {
+
+  LGM_QUAD_OBJ_INIT();
+
+  if (solid) gluQuadricDrawStyle( lgm_quadObj, GLU_FILL );
+  else       gluQuadricDrawStyle( lgm_quadObj, GLU_LINE );
+
+  gluQuadricNormals( lgm_quadObj, GLU_SMOOTH );
+
+  /* If we ever changed/used the texture or orientation state
+     of quadObj, we'd need to change it to the defaults here
+     with gluQuadricTexture and/or gluQuadricOrientation. */
+  gluSphere( lgm_quadObj, radius, slices, stacks );
+
+}
+
+
+/**
+ * gdk_gl_draw_cone:
+ * @solid: TRUE if the cone should be solid.
+ * @base: the radius of the base of the cone.
+ * @height: the height of the cone.
+ * @slices: the number of subdivisions around the Z axis.
+ * @stacks: the number of subdivisions along the Z axis.
+ *
+ * Renders a cone oriented along the Z axis.
+ * The @base of the cone is placed at Z = 0, and the top at Z = @height.
+ * The cone is subdivided around the Z axis into @slices, and along
+ * the Z axis into @stacks. 
+ *
+ **/
+void Lgm_gl_draw_cone( gboolean solid, double base, double height, int slices, int stacks ) {
+
+  LGM_QUAD_OBJ_INIT();
+
+  if (solid) gluQuadricDrawStyle( lgm_quadObj, GLU_FILL );
+  else       gluQuadricDrawStyle( lgm_quadObj, GLU_LINE );
+
+  gluQuadricNormals( lgm_quadObj, GLU_SMOOTH );
+
+  /* If we ever changed/used the texture or orientation state
+     of quadObj, we'd need to change it to the defaults here
+     with gluQuadricTexture and/or gluQuadricOrientation. */
+  gluCylinder( lgm_quadObj, base, 0.0, height, slices, stacks );
+
+}
+
+
+
+
+
 /**
  *  \brief
  *      Create the field line and drift shell objects (surfaces) from the given
@@ -562,7 +643,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
                 glPopMatrix();
 
                 // South Foot Points
@@ -570,7 +651,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
                 glPopMatrix();
 
 
@@ -584,7 +665,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
                 glPopMatrix();
 
                 // South Mirror Points
@@ -592,7 +673,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
                 glPopMatrix();
 
             }
@@ -624,7 +705,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Pn[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
                 glPopMatrix();
 
 
@@ -632,7 +713,7 @@ if (0==1){
                 glPushMatrix(); glTranslatef(ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellSphericalFootprint_Ps[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.01, 30, 30 ); 
                 glPopMatrix();
 
 
@@ -647,7 +728,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellMirror_Pn[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
                 glPopMatrix();
 
 
@@ -656,7 +737,7 @@ if (0==1){
                 glTranslatef(ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].x, 
                              ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].y, 
                              ObjInfo->MagEphemInfo->ShellMirror_Ps[i][ns].z ); 
-                gdk_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
+                Lgm_gl_draw_sphere( TRUE, 0.10/4.0, 30, 30 ); 
                 glPopMatrix();
 
             }

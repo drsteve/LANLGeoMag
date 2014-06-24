@@ -79,6 +79,10 @@ void GenerateFieldLineLists( Vds_ObjectInfo *ObjInfo );
 void ReGenerateFieldLineLists( Vds_ObjectInfo *ObjInfo );
 
 
+#define LGM_QUAD_OBJ_INIT() { if(!lgm_quadObj) Lgm_initQuadObj(); }
+static void Lgm_initQuadObj( void );
+void        Lgm_gl_draw_sphere( gboolean solid, double radius, int slices, int stacks );
+void        Lgm_gl_draw_cone( gboolean solid, double base, double height, int slices, int stacks );
 
 
 #endif

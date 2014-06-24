@@ -1673,7 +1673,7 @@ printf("height, base, RotAng = %g %g %g\n", height, base, RotAng);
 //        glPushMatrix();
 //        gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
 //        glTranslatef( 0.0, 0.0, 2.0 );
-//        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+//        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
 
 //        glPopMatrix();
 
@@ -1727,8 +1727,8 @@ double AxesScale = 0.5;
         glPushMatrix();
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        //gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
-        gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        //Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
 
         glPopMatrix();
 
@@ -1742,7 +1742,7 @@ double AxesScale = 0.5;
         glRotatef( 90.0, 0.0, 1.0, 0.0);
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
         glPopMatrix();
 
 
@@ -1755,7 +1755,7 @@ double AxesScale = 0.5;
         glRotatef( -90.0, 1.0, 0.0, 0.0);
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
         glPopMatrix();
     }
     glEndList( );
@@ -1789,7 +1789,7 @@ double AxesScale = 0.5;
         glPushMatrix();
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
 
         glPopMatrix();
 
@@ -1803,7 +1803,7 @@ double AxesScale = 0.5;
         glRotatef( 90.0, 0.0, 1.0, 0.0);
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
         glPopMatrix();
 
 
@@ -1816,7 +1816,7 @@ double AxesScale = 0.5;
         glRotatef( -90.0, 1.0, 0.0, 0.0);
         gluCylinder(qobj, 0.08*AxesScale, 0.08*AxesScale, 2.0, 15, 5);
         glTranslatef( 0.0, 0.0, 2.0 );
-        gdk_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.14*AxesScale, 0.5*AxesScale, 15, 5 );
         glPopMatrix();
     }
     glEndList( );
@@ -1878,7 +1878,7 @@ void CreateEarth( ){
         glTranslatef( 0.0, 0.0, -1.7 );
         gluCylinder(qobj, 0.041, 0.041, 3.2, 15, 5);
         glTranslatef( 0.0, 0.0, 3.2 );
-        gdk_gl_draw_cone( TRUE, 0.07, 0.4, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.07, 0.4, 15, 5 );
 
         glPopMatrix();
     }
@@ -1901,7 +1901,7 @@ void CreateEarth( ){
         glTranslatef( 0.0, 0.0, -1.7 );
         gluCylinder(qobj, 0.041, 0.041, 3.2, 15, 5);
         glTranslatef( 0.0, 0.0, 3.2 );
-        gdk_gl_draw_cone( TRUE, 0.07, 0.4, 15, 5 );
+        Lgm_gl_draw_cone( TRUE, 0.07, 0.4, 15, 5 );
         glPopMatrix();
     }
     glEndList( );
@@ -2332,7 +2332,7 @@ void CreateSCPos( ) {
 
         glPushMatrix();
         glColor4f( 0.5, 0.5, 0.2, 0.5 );
-        glTranslatef(ObjInfo->MagEphemInfo->P.x, ObjInfo->MagEphemInfo->P.y, ObjInfo->MagEphemInfo->P.z );  gdk_gl_draw_sphere( TRUE, 0.11, 20, 20 );
+        glTranslatef(ObjInfo->MagEphemInfo->P.x, ObjInfo->MagEphemInfo->P.y, ObjInfo->MagEphemInfo->P.z );  Lgm_gl_draw_sphere( TRUE, 0.11, 20, 20 );
         glPopMatrix();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
