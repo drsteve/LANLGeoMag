@@ -17,7 +17,8 @@ git pull
 
 Committing your work:
 
-git commit [files]
+git add [files]
+git commit 
 git pull
 git push
 
