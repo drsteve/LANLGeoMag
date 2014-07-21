@@ -5,18 +5,20 @@ GIT repository
 ==============
 
 Initial checkout:
+git clone https://github.com/drsteve/LANLGeoMag.git
 
-git clone ssh://YOUR_SCHEME_LOGIN@sueno.lanl.gov/n/projects/lanl/LanlGeoMag.git
+Further information can be found in the github help.
+Then:
 
 cd LanlGeoMag
 
 Later updates:
-
 git pull
 
 Committing your work:
 
-git commit -a
+git add [files]
+git commit 
 git pull
 git push
 
