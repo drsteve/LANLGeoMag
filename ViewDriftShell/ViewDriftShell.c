@@ -72,8 +72,8 @@ static GtkItemFactoryEntry MenuItems[] = {
 GLfloat LightPosition[]        = {0.0, 3.0, 3.0, 0.0};
 
 GtkFileFilter *PngFilter;
-GtkObject   *StartDaySpinbutton_adj;
-GtkWidget   *StartDaySpinbutton;
+GtkObject   *StartYearSpinbutton_adj, *StartMonthSpinbutton_adj, *StartDaySpinbutton_adj;
+GtkWidget   *StartYearSpinbutton, *StartMonthSpinbutton, *StartDaySpinbutton;
 GtkWidget   *StartTimeLabel;
 long int    StartDate;
 int         StartYear, StartMonth, StartDay;
@@ -1085,16 +1085,17 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 
 
 
-int         nInterpPoints, nFieldPoints[90], nShellPoints;
+int         nInterpPoints, nFieldPoints[30], nShellPoints;
 
 
-int         nPnts[90][24], nPnts2[90][24], gap[1000];
-double      s_gsm[90][24][1000], x_gsm[90][24][1000], y_gsm[90][24][1000], z_gsm[90][24][1000];
-double      s2_gsm[90][24][1000], x2_gsm[90][24][1000], y2_gsm[90][24][1000], z2_gsm[90][24][1000];
-double      x3_gsm[90][24][200], y3_gsm[90][24][200], z3_gsm[90][24][200];
-double      nx3_gsm[90][24][200], ny3_gsm[90][24][200], nz3_gsm[90][24][200];
-double      x4_gsm[90][500][200], y4_gsm[90][500][200], z4_gsm[90][500][200];
-double      nx4_gsm[90][500][200], ny4_gsm[90][500][200], nz4_gsm[90][500][200];
+int         nPnts[30][LGM_LSTARINFO_MAX_FL], nPnts2[30][LGM_LSTARINFO_MAX_FL], gap[1000];
+double      s_gsm[30][LGM_LSTARINFO_MAX_FL][1000], x_gsm[30][LGM_LSTARINFO_MAX_FL][1000], y_gsm[30][LGM_LSTARINFO_MAX_FL][1000], z_gsm[30][LGM_LSTARINFO_MAX_FL][1000];
+double      s2_gsm[30][LGM_LSTARINFO_MAX_FL][1000], x2_gsm[30][LGM_LSTARINFO_MAX_FL][1000], y2_gsm[30][LGM_LSTARINFO_MAX_FL][1000], z2_gsm[30][LGM_LSTARINFO_MAX_FL][1000];
+double      x3_gsm[30][LGM_LSTARINFO_MAX_FL][200], y3_gsm[30][LGM_LSTARINFO_MAX_FL][200], z3_gsm[30][LGM_LSTARINFO_MAX_FL][200];
+double      nx3_gsm[30][LGM_LSTARINFO_MAX_FL][200], ny3_gsm[30][LGM_LSTARINFO_MAX_FL][200], nz3_gsm[30][LGM_LSTARINFO_MAX_FL][200];
+double      x4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200], y4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200], z4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];
+double      nx4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200], ny4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200], nz4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];
+
 gulong      PitchAngleAllHandler;
 gulong      PitchAngleHandler[90];
 GtkWidget   *PitchAngleCheckMenuItem[91];
@@ -3776,6 +3777,8 @@ if (LightingStyle == 2){
         /*
          * We want to show all of the PAs
          */
+
+ShowFullFieldLine = 1;
         if ( ShowFullFieldLine ){
             for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
@@ -4732,6 +4735,21 @@ static void ToggleDumpFrames( GtkWidget  *widget, gpointer data ) {
     DumpFrames = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( DumpFramesCheckbutton ) );
 }
 
+
+
+
+void SetStartDate( Lgm_DateTime *dt ) {
+
+
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(StartYearSpinbutton),  dt->Year  );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(StartMonthSpinbutton), dt->Month );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(StartDaySpinbutton),   dt->Day   );
+
+
+}
+
+
+
 static void ChangeStartOrEndDate( GtkWidget  *widget, gpointer data ) {
 
     char        Str[256];
@@ -4873,7 +4891,7 @@ printf("%s\n", Str);
 }
 
 
-static void TimeAction( GtkWidget *widget, gpointer data ) {
+void TimeAction( GtkWidget *widget, gpointer data ) {
 
     char    Str[256];
     int     k;
@@ -5167,7 +5185,11 @@ static void SelectPitchAngles( GtkMenuItem  *menuitem, gpointer data ) {
 
 
     }
+
+
     printf("17.\n"); expose_event( drawing_area, NULL, NULL );
+
+
 
 }
 
@@ -6106,6 +6128,19 @@ static void SelectPitchAngles2( GtkWidget  *widget, gpointer data ) {
 
         }
     }
+Lgm_CTrans      *c = Lgm_init_ctrans(0);
+Lgm_DateTime    dt;
+int doy;
+StartDate = ObjInfo->MagEphemInfo->Date;
+Lgm_Doy( StartDate, &StartYear, &StartMonth, &StartDay, &doy);
+StartUT = ObjInfo->MagEphemInfo->UTC;
+Lgm_UT_to_hmsms( StartUT, &StartHour, &StartMin, &StartSec, &StartMilliSec );
+StartJD    = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
+Lgm_Make_UTC( StartDate, StartUT, &dt, c );
+SetStartDate( &dt );
+TimeAction( (GtkWidget *)NULL, GINT_TO_POINTER( TIME_RESET_BACKWARD_TO_START ) );
+TimeAction( (GtkWidget *)NULL, GINT_TO_POINTER( TIME_RESET_BACKWARD_TO_START ) );
+Lgm_free_ctrans( c );
     printf("28.\n"); expose_event( drawing_area, NULL, NULL );
 
 }
@@ -6310,18 +6345,18 @@ GtkWidget *PitchAngleDisplayProperties(){
     label = gtk_label_new (_("day")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table3), label, 2, 3, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
 
-    spinbutton1_adj = gtk_adjustment_new (StartYear, 1950, 2050, 1, 5, 0); // year
-    spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0); gtk_widget_show (spinbutton);
-    gtk_table_attach (GTK_TABLE (table3), spinbutton, 0, 1, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
-    g_signal_connect( G_OBJECT( spinbutton ), "value_changed", G_CALLBACK( ChangeStartOrEndDate ), GINT_TO_POINTER(1) );
+    StartYearSpinbutton_adj = gtk_adjustment_new (StartYear, 1950, 2050, 1, 5, 0); // year
+    StartYearSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (StartYearSpinbutton_adj), 1, 0); gtk_widget_show (StartYearSpinbutton);
+    gtk_table_attach (GTK_TABLE (table3), StartYearSpinbutton, 0, 1, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (StartYearSpinbutton), TRUE);
+    g_signal_connect( G_OBJECT( StartYearSpinbutton ), "value_changed", G_CALLBACK( ChangeStartOrEndDate ), GINT_TO_POINTER(1) );
 
-    spinbutton1_adj = gtk_adjustment_new (StartMonth, 1, 12, 1, 6, 0); // month
-    spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0); gtk_widget_show (spinbutton);
-    gtk_table_attach (GTK_TABLE (table3), spinbutton, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
-    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinbutton), TRUE);
-    g_signal_connect( G_OBJECT( spinbutton ), "value_changed", G_CALLBACK( ChangeStartOrEndDate ), GINT_TO_POINTER(2) );
+    StartMonthSpinbutton_adj = gtk_adjustment_new (StartMonth, 1, 12, 1, 6, 0); // month
+    StartMonthSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (StartMonthSpinbutton_adj), 1, 0); gtk_widget_show (StartMonthSpinbutton);
+    gtk_table_attach (GTK_TABLE (table3), StartMonthSpinbutton, 1, 2, 0, 1, (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (StartMonthSpinbutton), TRUE);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (StartMonthSpinbutton), TRUE);
+    g_signal_connect( G_OBJECT( StartMonthSpinbutton ), "value_changed", G_CALLBACK( ChangeStartOrEndDate ), GINT_TO_POINTER(2) );
 
     MaxDay = MonthDays[StartMonth-1] + ( (StartMonth == 2) ? Lgm_LeapYear(StartYear) : 0 );
     StartDaySpinbutton_adj = gtk_adjustment_new (StartDay, 1, MaxDay, 1, 7, 0); // day

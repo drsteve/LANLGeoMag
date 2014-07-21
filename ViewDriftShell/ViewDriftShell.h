@@ -80,6 +80,7 @@ GtkWidget *CreateOpenMagEphemFileDialog( void );
 GtkWidget *CreateSaveRasterFileDialog( void );
 void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCirclePoints, double TubeRadius );
 
+void SetStartDate( Lgm_DateTime *dt );
 
 
 

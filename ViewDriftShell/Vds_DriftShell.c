@@ -186,7 +186,7 @@ void Lgm_gl_draw_cone( gboolean solid, double base, double height, int slices, i
  */
 void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
 
-    int     i, tn, ns;
+    int          i, tn, ns;
 
 
     /*
@@ -202,6 +202,7 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
     ReadMagEphemInfoStruct( Filename, &ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo );
     printf( "\t     Date/Time: %ld/%g\n", ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC );
     printf( "\t# Pitch Angles: %d\n", ObjInfo->MagEphemInfo->nAlpha );
+
 
 
     for ( i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) { // Loop over Pitch Angles
@@ -226,7 +227,8 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
              *  Create arrays that include only portion of field between mirror points.
              *  Add the mirror points explicitly later.
              */
-/*
+///*
+int kk;
             for (kk=0, tn=0; tn<ObjInfo->MagEphemInfo->nFieldPnts[i][ns]; tn++ ){
                 if ( ( ObjInfo->MagEphemInfo->Bmag[i][ns][tn] < ObjInfo->MagEphemInfo->Bm[i]-1e-6 ) && ( ObjInfo->MagEphemInfo->Bmag[i][ns][tn] > 0.0 ) ) {
                     ObjInfo->s2_gsm[i][ns][kk] = ObjInfo->MagEphemInfo->s_gsm[i][ns][tn];
@@ -237,7 +239,7 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
                 }
             }
             ObjInfo->nPnts2[i][ns] = kk;
-*/
+//*/
 
         }   // Field Line Loop
 
@@ -306,7 +308,11 @@ void MakeFieldLines( int nNewPnts, Vds_ObjectInfo *ObjInfo ) {
 
         }   // Field Line Loop
 
-        ObjInfo->nFieldPoints[i] = nNewPnts;
+        if ( ObjInfo->MagEphemInfo->nShellPoints[i] > 0 ) {
+            ObjInfo->nFieldPoints[i] = nNewPnts;
+        } else {
+            ObjInfo->nFieldPoints[i] = 0;
+        }
 
     }   // Pitch Angle Loop
 
@@ -406,8 +412,8 @@ void MakeDriftShellMesh( Vds_ObjectInfo *ObjInfo ){
     int                 p, nShellPoints, nAddShellPoints;
     int                 i, j, ns, q, nsp1;
     double              DeltaPhi, PhiInc, Phi, d;
-    double              PhiArray[50], xArray[50], yArray[50], zArray[50];
-    double              PhiArray2[50], xArray2[50], yArray2[50], zArray2[50];
+    double              PhiArray[ 2*LGM_LSTARINFO_MAX_FL ], xArray[ 2*LGM_LSTARINFO_MAX_FL ], yArray[ 2*LGM_LSTARINFO_MAX_FL ], zArray[ 2*LGM_LSTARINFO_MAX_FL ];
+    double              PhiArray2[ 2*LGM_LSTARINFO_MAX_FL ], xArray2[ 2*LGM_LSTARINFO_MAX_FL ], yArray2[ 2*LGM_LSTARINFO_MAX_FL ], zArray2[ 2*LGM_LSTARINFO_MAX_FL ];
     int                 im1, ip1, k, km1, kp1, MonoTonic;
     Lgm_Vector          u, v, n;
     gsl_interp_accel    *acc_x, *acc_y, *acc_z;
@@ -426,10 +432,13 @@ void MakeDriftShellMesh( Vds_ObjectInfo *ObjInfo ){
      *  curves that we can interpolate on to get a more smooth overall surface.
      */
 //why is this hard-coded?
-nShellPoints = 24;
+//nShellPoints = 24;
 //why is this hard-coded?
 nAddShellPoints = 10; // number of points to add in between each given Shell point
     for (p=0; p<ObjInfo->MagEphemInfo->nAlpha; p++) { // Loop over pitch angle
+
+        nShellPoints = ObjInfo->MagEphemInfo->nShellPoints[p];
+
         for (i=0; i<ObjInfo->nFieldPoints[p]; i++ ){
 
             // create interpolation arrays
@@ -621,7 +630,7 @@ void GenerateFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 
     int i, ns;
 
-if (0==1){
+if (1==1){
 // dont think we get these anymore...
     /*
      *  Create List for the Full Field Lines
@@ -656,7 +665,13 @@ if (0==1){
 
 
                 // Field Lines -- What is the diff between these two lines here?
-                MakeTube( ObjInfo->x2_gsm[i][ns], ObjInfo->y2_gsm[i][ns], ObjInfo->z2_gsm[i][ns], ObjInfo->nPnts2[i][ns], 12, 0.0375/2.0 );
+MakeTube( ObjInfo->x_gsm[i][ns], ObjInfo->y_gsm[i][ns], ObjInfo->z_gsm[i][ns], ObjInfo->nPnts[i][ns], 12, 0.0375/4.0 );
+//int ppp;
+//for ( ppp=0; ppp<ObjInfo->nPnts[i][ns]; ++ppp){
+//printf("ObjInfo->x_gsm[i][ns][ppp], ObjInfo->z_gsm[i][ns][ppp] = %g %g\n", ObjInfo->x_gsm[i][ns][ppp], ObjInfo->z_gsm[i][ns][ppp]);
+//}
+//exit(0);
+//                MakeTube( ObjInfo->x2_gsm[i][ns], ObjInfo->y2_gsm[i][ns], ObjInfo->z2_gsm[i][ns], ObjInfo->nPnts2[i][ns], 12, 0.0375/2.0 );
 //                MakeTube( ObjInfo->x3_gsm[i][ns], ObjInfo->y3_gsm[i][ns], ObjInfo->z3_gsm[i][ns], ObjInfo->nFieldPoints[i], 12, 0.0375/2.0 );
 
 

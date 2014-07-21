@@ -52,7 +52,7 @@ int main( int argc, char *argv[] ){
 
 
 //USER INPUT STUFF
-    MagEphemInfo->LstarQuality   = 8;
+    Lgm_SetMagEphemLstarQuality( 8, 24, MagEphemInfo );
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
@@ -72,7 +72,7 @@ int main( int argc, char *argv[] ){
      * These quantities are stored in the MagEphemInfo Structure
      */
     Colorize = TRUE;
-    Lgm_ComputeLstarVersusPA( Date, UTC, &P, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+    Lgm_ComputeLstarVersusPA( Date, UTC, &P, nAlpha, Alpha, Colorize, MagEphemInfo );
 
     /*
      * Dump results

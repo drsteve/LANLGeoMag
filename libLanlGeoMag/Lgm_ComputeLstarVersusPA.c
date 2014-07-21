@@ -38,14 +38,13 @@ int Colors[9] = { 224, 209, 21, 46, 55, 104, 22, 185, 23 };
  *                         u:  Input position vector in GSM
  *                    nAlpha:  Number of Pitch Angles to compute
  *                     Alpha:  Pitch Angles to compute
- *                   Quality:  Quality factor (0-8)
  *
  *      Input/OutPut Variables:
  *
  *              MagEphemInfo:  Structure used to input and output parameters/settings/results to/from routine.
  *
  */
-void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
+void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
     Lgm_LstarInfo 	*LstarInfo, *LstarInfo2, *LstarInfo3;
     Lgm_Vector      v1, v2, v3, vv1, Bvec;
@@ -70,7 +69,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     for (i=0; i<MagEphemInfo->nAlpha; i++) MagEphemInfo->Alpha[i] = Alpha[i];
 
     // Set Tolerances
-    SetLstarTolerances( Quality, LstarInfo );
+    Lgm_SetLstarTolerances( MagEphemInfo->LstarQuality, MagEphemInfo->nFLsInDriftShell, LstarInfo );
 
 
     // set coord transformation
@@ -83,10 +82,12 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     LstarInfo->mInfo->Bfield( u, &Bvec, LstarInfo->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
     MagEphemInfo->B = Blocal;
+//printf("Blocal = %g\n", Blocal);
 
     for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
         sa = sin( MagEphemInfo->Alpha[i]*RadPerDeg ); sa2 = sa*sa;
         MagEphemInfo->Bm[i] = Blocal/sa2;
+//printf("Bm[%d] = %g\n", i, MagEphemInfo->Bm[i] );
     }
 
 
@@ -198,6 +199,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
 //////////////////////////////NOTE
 //////////////////////////////NOTE
 
+//printf("LstarInfo2->mInfo->Bm = %g\n", LstarInfo2->mInfo->Bm);
                     LS_Flag = Lstar( &v3, LstarInfo2);
 
                     if (LstarInfo3->VerbosityLevel >= 2 ) {

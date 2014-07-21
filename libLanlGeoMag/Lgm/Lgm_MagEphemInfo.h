@@ -24,7 +24,10 @@
 typedef struct Lgm_MagEphemInfo {
 
     Lgm_LstarInfo   *LstarInfo;
-    int             LstarQuality;
+
+    int             nFLsInDriftShell; //!< Number of Field Lines to use when constructing Drift Shell.
+    int             LstarQuality;     //!< Quality factor to use [0,8] -- higher gives more precise results.
+
     int             SaveShellLines;
 
     long int        Date;           //!< Date in YYYYMMDD format
@@ -281,17 +284,18 @@ typedef struct Lgm_MagEphemData {
 /*
  * Function Prototypes
  */
+void    Lgm_SetMagEphemLstarQuality( int Quality, int nFLsInDriftShell, Lgm_MagEphemInfo *MagEphemInfo );
 Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles );
-void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity);
-void Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
-void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo );
+void    Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity);
+void    Lgm_FreeMagEphemInfo( Lgm_MagEphemInfo  *Info );
+void    Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo );
 
 double  j_to_fp_1( double j, double Ek );
 double  j_to_fp_2( double j, double Ek0, double Ek1 );
 double  k_to_mu_1( double Ek, double alpha, double B );
 double  k_to_mu_2( double Ek0, double Ek1, double alpha, double B );
 double  Ek_to_v( double Ek, int Species );
-void    Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo );
+void    Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Colorize, Lgm_MagEphemInfo *MagEphemInfo );
 
 void    ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );
 void    WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo *MagEphemInfo );

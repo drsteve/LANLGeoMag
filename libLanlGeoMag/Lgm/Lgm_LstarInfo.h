@@ -20,35 +20,35 @@
 #define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
 
 
-#define LGM_LSTARINFO_MAX_FL        100
-#define LGM_LSTARINFO_MAX_MINIMA    100
+#define LGM_LSTARINFO_MAX_FL        300
+#define LGM_LSTARINFO_MAX_MINIMA    300
 
 
 typedef struct Lgm_LstarInfo {
 
+    int         nFLsInDriftShell;   //!< Number of Field Lines to use when constructing Drift Shell.
+    int         LstarQuality;       //!< Quality factor to use [0,8] -- higher gives more precise results.
 
+    double      KineticEnergy;      //!< Particle kinetic energy (only for energy dep. quantities.)
+    double      Mass;               //!< Particle mass
+    double      PitchAngle;         //!< Particle Pitch Angle
+    double      LSimpleMax;         //!< Threshold for doing drift-shell calculation.
 
-
-    double              KineticEnergy;  // Particle kinetic energy
-    double              Mass;           // Particle mass
-    double              PitchAngle;     // Particle Pitch Angle
-    double              LSimpleMax;     // Threshold for doing
-                                        // drift-shell calculation.
 
     Lgm_MagModelInfo	*mInfo;
 
     /*
      *  Variables to hold info on field lines defining the Drift Shell
      */
-    int         FindShellPmin;      // Find the Bmin location on each FL
-    int         ComputeVgc;         // Compute the gradient of I and Vgc
-    int         SaveShellLines;     // only save them if this is true
-    int         nFieldPnts[100];    // number of points in each FL.
-    double      s_gsm[100][1000];   // distance along FL.
-    double      Bmag[100][1000];    // Field magnitude
-    double      x_gsm[100][1000];
-    double      y_gsm[100][1000];
-    double      z_gsm[100][1000];
+    int         FindShellPmin;      //!< Find the Bmin location on each FL
+    int         ComputeVgc;         //!< Compute the gradient of I and Vgc
+    int         SaveShellLines;     //!< only save them if this is true
+    int         nFieldPnts[ LGM_LSTARINFO_MAX_FL ];    //!< number of points in each FL.
+    double      s_gsm[ LGM_LSTARINFO_MAX_FL ][1000];   //!< distance along FL.
+    double      Bmag[ LGM_LSTARINFO_MAX_FL ][1000];    //!< Field magnitude
+    double      x_gsm[ LGM_LSTARINFO_MAX_FL ][1000];
+    double      y_gsm[ LGM_LSTARINFO_MAX_FL ][1000];
+    double      z_gsm[ LGM_LSTARINFO_MAX_FL ][1000];
 
 
     /*
@@ -103,7 +103,7 @@ typedef struct Lgm_LstarInfo {
     int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints
 
     int                 nSplnPnts;
-    double              xa[500], ya[500], y2[500];
+    double              xa [ 3*LGM_LSTARINFO_MAX_FL ], ya[ 3*LGM_LSTARINFO_MAX_FL ], y2[ 3*LGM_LSTARINFO_MAX_FL ];
 
     double	            Phi;
 
@@ -123,7 +123,7 @@ typedef struct Lgm_LstarInfo {
     double	            LS_McIlwain_M;
 
     int                 m;
-    double              xma[500], yma[500], ym2[500];
+    double              xma[ 3*LGM_LSTARINFO_MAX_FL ], yma[ 3*LGM_LSTARINFO_MAX_FL ], ym2[ 3*LGM_LSTARINFO_MAX_FL ];
 
 
     /*
@@ -131,9 +131,9 @@ typedef struct Lgm_LstarInfo {
      * in search attempts in FindShellLine(). These vars are used in Lstar() to
      * help figure out ranges of mlat to search over.
      */
-    double  MLATarr[500]; // mlat's
-    double  ImI0arr[500]; // I-I0's
-    double  Earr[500];    // nominally the error on I-I0 (typically set to const).
+    double  MLATarr[ 3*LGM_LSTARINFO_MAX_FL ]; // mlat's
+    double  ImI0arr[ 3*LGM_LSTARINFO_MAX_FL ]; // I-I0's
+    double  Earr[ 3*LGM_LSTARINFO_MAX_FL ];    // nominally the error on I-I0 (typically set to const).
     int     nImI0;        // number of vals stored.
 
 
@@ -148,7 +148,7 @@ typedef struct Lgm_LstarInfo {
 } Lgm_LstarInfo;
 
 
-void        SetLstarTolerances( int Quality, Lgm_LstarInfo *LstarInfo );
+void        Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *LstarInfo );
 Lgm_LstarInfo  *InitLstarInfo( int VerbosityLevel );
 //void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  * );
 void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo   *LstarInfo );
@@ -161,6 +161,7 @@ int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarIn
 int 	    FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo );
 int 	    FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo );
 double      ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
+double      ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
 void 	    spline( double *x, double *y, int n, double yp1, double ypn, double *y2);
 void 	    splint( double *xa, double *ya, double *y2a, int n, double x, double *y);
 void 	    quicksort( unsigned long n, double *arr );
@@ -176,7 +177,7 @@ double      MagFluxIntegrand2( double Phi, _qpInfo *qpInfo ) ;
 double      LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) ;
 double      LambdaIntegral( Lgm_LstarInfo *LstarInfo ) ;
 double      AngVelInv( double Phi );
-int         Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo );
+int         Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo );
  
 
 #endif

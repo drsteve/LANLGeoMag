@@ -49,17 +49,18 @@ static char ArgsDoc[] = "OutFile";
  *             or OPTION_NO_USAGE
  */
 static struct argp_option Options[] = {
-    {"IntModel",        'i',    "internal_model",             0,                                      "Internal Magnetic Field Model to use. Default is IGRF."    },
-    {"ExtModel",        'e',    "external_model",             0,                                      "External Magnetic Field Model to use. Default is T89."    },
-    {"K",               'K',    "\"start_K, end_K, nK\"",     0,                                      "K values to compute. Default is \"0.001, 3, 18\"." },
-    {"FootPointHeight", 'f',    "height",                     0,                                      "Footpoint height in km. Default is 100km."                  },
-    {"Quality",         'q',    "quality",                    0,                                      "Quality to use for L* calculations. Default is 3."      },
-    {"Delta",           'd',    "delta",                      0,                                      "Cadence of LCDS calculation [minutes]. Default is 30."      },
-    {"StartDate",       'S',    "yyyymmdd",                   0,                                      "StartDate "                              },
-    {"EndDate",         'E',    "yyyymmdd",                   0,                                      "EndDate "                                },
-    {"UseEop",          'e',    0,                            0,                                      "Use Earth Orientation Parameters whn comoputing ephemerii" },
-    {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
-    {"verbose",         'v',    "verbosity",                  0,                                      "Produce verbose output"                  },
+    {"IntModel",        'i',    "internal_model",             0,        "Internal Magnetic Field Model to use. Default is IGRF."    },
+    {"ExtModel",        'e',    "external_model",             0,        "External Magnetic Field Model to use. Default is T89."    },
+    {"K",               'K',    "\"start_K, end_K, nK\"",     0,        "K values to compute. Default is \"0.001, 3, 18\"." },
+    {"FootPointHeight", 'f',    "height",                     0,        "Footpoint height in km. Default is 100km."                  },
+    {"Quality",         'q',    "quality",                    0,        "Quality to use for L* calculations. Default is 3."      },
+    {"nFLsInDriftShell",'n',    "nFLsInDriftShell",           0,        "Number of Field Lines to use in construction of drift shell. Use values in the range [6,240]. Default is 24." },
+    {"Delta",           'd',    "delta",                      0,        "Cadence of LCDS calculation [minutes]. Default is 30."      },
+    {"StartDate",       'S',    "yyyymmdd",                   0,        "StartDate "                              },
+    {"EndDate",         'E',    "yyyymmdd",                   0,        "EndDate "                                },
+    {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters whn comoputing ephemerii" },
+    {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
+    {"verbose",         'v',    "verbosity",                  0,        "Produce verbose output"                  },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
     { 0 }
 };
@@ -74,6 +75,7 @@ struct Arguments {
     int         nK;
 
     int         Quality;
+    int         nFLsInDriftShell;
     int         Force;
     double      FootPointHeight;
     double      Delta;
@@ -118,6 +120,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'd':
             sscanf( arg, "%lf", &arguments->Delta );
             break;
+        case 'n':
+            arguments->nFLsInDriftShell = atoi( arg );
+            break;
         case 'q':
             arguments->Quality = atoi( arg );
             break;
@@ -157,7 +162,7 @@ int main( int argc, char *argv[] ){
     double           Inc, FootpointHeight;
     int              Force, UseEop;
     long int         StartDate, EndDate, Date, currDate;
-    int              nK, i, Quality, ans, aa, Year, Month, Day;
+    int              nK, i, Quality, nFLsInDriftShell, ans, aa, Year, Month, Day;
     char             Str[128], NewStr[2048];
     char             IntModel[20], ExtModel[20];
     char             Filename[1024];
@@ -173,18 +178,19 @@ int main( int argc, char *argv[] ){
    /*
      * Default option values.
      */
-    arguments.StartK         = 0.001;     // start at 90.0 Deg.
-    arguments.EndK           = 3.0;    // stop at 2.5 Deg.
-    arguments.nK             = 18;     // 18 pitch angles
-    arguments.silent          = 0;
-    arguments.verbose         = 0;
-    arguments.Quality         = 2;
-    arguments.Delta           = 30;
-    arguments.Force           = 0;
-    arguments.UseEop          = 0;
-    arguments.StartDate       = -1;
-    arguments.EndDate         = -1;
-    arguments.FootPointHeight = 100.0; // km
+    arguments.StartK           = 0.001;  // start at 90.0 Deg.
+    arguments.EndK             = 3.0;    // stop at 2.5 Deg.
+    arguments.nK               = 18;     // 18 pitch angles
+    arguments.silent           = 0;
+    arguments.verbose          = 0;
+    arguments.Quality          = 2;
+    arguments.nFLsInDriftShell = 24;
+    arguments.Delta            = 30;
+    arguments.Force            = 0;
+    arguments.UseEop           = 0;
+    arguments.StartDate        = -1;
+    arguments.EndDate          = -1;
+    arguments.FootPointHeight  = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
     strcpy( arguments.ExtModel, "T89" );
 
@@ -207,13 +213,14 @@ int main( int argc, char *argv[] ){
     /*
      *  Set other options
      */
-    FootpointHeight = arguments.FootPointHeight;
-    Quality         = arguments.Quality;
-    t_cadence       = arguments.Delta/1440.0; //needs to be in days
-    Force           = arguments.Force;
-    UseEop          = arguments.UseEop;
-    StartDate       = arguments.StartDate;
-    EndDate         = arguments.EndDate;
+    FootpointHeight  = arguments.FootPointHeight;
+    Quality          = arguments.Quality;
+    nFLsInDriftShell = arguments.nFLsInDriftShell;
+    t_cadence        = arguments.Delta/1440.0; //needs to be in days
+    Force            = arguments.Force;
+    UseEop           = arguments.UseEop;
+    StartDate        = arguments.StartDate;
+    EndDate          = arguments.EndDate;
     strcpy( IntModel,  arguments.IntModel );
     strcpy( ExtModel,  arguments.ExtModel );
 
@@ -390,6 +397,8 @@ int main( int argc, char *argv[] ){
         for (i=0; i<nK; i++) { sprintf( Str, "K%d", i ); fprintf(fp, " %8s", Str ); }
         fprintf(fp, "    ");
         fprintf(fp, "%s", " \n");
+
+        Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo );
     
         //loop over date/time at given cadence
         for ( JD = jDate; JD < jDate+1.0; JD += t_cadence ) {
@@ -423,7 +432,7 @@ int main( int argc, char *argv[] ){
                     //LstarInfo3->PitchAngle = Alpha[aa];
                     //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
         
-                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], tol, Quality, &K[aa], LstarInfo3 );
+                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], tol, Quality, nFLsInDriftShell, &K[aa], LstarInfo3 );
                     if (LstarInfo3->DriftOrbitType == 1) printf("K: %g; Drift Orbit Type: Closed; L* = %g \n", Kin[aa], LstarInfo3->LS);
                     if (LstarInfo3->DriftOrbitType == 2) printf("Drift Orbit Type: Shebansky; L* = %g\n", LstarInfo3->LS);
                     if (ans==0) {

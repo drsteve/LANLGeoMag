@@ -13,7 +13,28 @@ Lgm_MagEphemInfo *Lgm_InitMagEphemInfo( int Verbosity, int MaxPitchAngles ) {
     return MagEphemInfo;
 }
 
-void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity) {
+
+void Lgm_SetMagEphemLstarQuality( int Quality, int nFLsInDriftShell, Lgm_MagEphemInfo *MagEphemInfo ) {
+
+    if ( (Quality >= 0) && (Quality <=8) ){
+        MagEphemInfo->LstarQuality = Quality;
+    } else {
+        printf( "Lgm_MagEphemSetLstarQuality: Quality not in range [0,8] (Got %d). Setting to 3).\n", Quality );
+        MagEphemInfo->LstarQuality = 3;
+    }
+
+    if ( (nFLsInDriftShell >= 6) && (Quality <= 240) ){
+        MagEphemInfo->nFLsInDriftShell = nFLsInDriftShell;
+    } else {
+        printf( "Lgm_MagEphemSetLstarQuality: nFLsInDriftShell not in range [0,240] (Got %d). Setting to 24).\n", nFLsInDriftShell );
+        MagEphemInfo->nFLsInDriftShell = 24;
+    }
+
+}
+
+
+
+void Lgm_InitMagEphemInfoDefaults( Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAngles, int Verbosity ) {
 
     int i;
 
@@ -21,6 +42,8 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
 
     MagEphemInfo->LstarInfo->SaveShellLines = TRUE;
     MagEphemInfo->SaveShellLines = TRUE;
+
+    Lgm_SetMagEphemLstarQuality( 3, 24, MagEphemInfo ); // quality 3, with 24 field lines in a drift shell.
 
 
     /*
@@ -58,36 +81,36 @@ void Lgm_InitMagEphemInfoDefaults(Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchAn
     }
 
 // These 100 values should probably be replaced with  LGM_LSTARINFO_MAX_FL -- BUT CHECK FIRST....
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Pn, MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Sn, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Bn, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Ps, MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Ss, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Bs, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Ps, MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Ss, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Bs, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Pn, MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Sn, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Bn, MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Pn,             MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Sn,             MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ps,             MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ss,             MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->ShellI,                     MaxPitchAngles, 100, double );
-    LGM_ARRAY_2D( MagEphemInfo->Shell_Bmin,                 MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->Shell_Pmin,                 MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->Shell_GradI,                MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->Shell_Vgc,                  MaxPitchAngles, 100, Lgm_Vector );
-    LGM_ARRAY_2D( MagEphemInfo->nMinima,                    MaxPitchAngles, 100, int );
-    LGM_ARRAY_2D( MagEphemInfo->nMaxima,                    MaxPitchAngles, 100, int );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Pn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Sn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Bn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Ps, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Ss, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellSphericalFootprint_Bs, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Ps, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Ss, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Bs, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Pn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Sn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellEllipsoidFootprint_Bn, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Pn,             MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Sn,             MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ps,             MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->ShellMirror_Ss,             MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->ShellI,                     MaxPitchAngles, LGM_LSTARINFO_MAX_FL, double );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Bmin,                 MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Pmin,                 MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_GradI,                MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->Shell_Vgc,                  MaxPitchAngles, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
+    LGM_ARRAY_2D( MagEphemInfo->nMinima,                    MaxPitchAngles, LGM_LSTARINFO_MAX_FL, int );
+    LGM_ARRAY_2D( MagEphemInfo->nMaxima,                    MaxPitchAngles, LGM_LSTARINFO_MAX_FL, int );
 
-    LGM_ARRAY_2D( MagEphemInfo->nFieldPnts, MaxPitchAngles, 48, int );
-    LGM_ARRAY_3D( MagEphemInfo->s_gsm,      MaxPitchAngles, 48, 1000, double );
-    LGM_ARRAY_3D( MagEphemInfo->Bmag,       MaxPitchAngles, 48, 1000, double );
-    LGM_ARRAY_3D( MagEphemInfo->x_gsm,      MaxPitchAngles, 48, 1000, double );
-    LGM_ARRAY_3D( MagEphemInfo->y_gsm,      MaxPitchAngles, 48, 1000, double );
-    LGM_ARRAY_3D( MagEphemInfo->z_gsm,      MaxPitchAngles, 48, 1000, double );
+    LGM_ARRAY_2D( MagEphemInfo->nFieldPnts, MaxPitchAngles, LGM_LSTARINFO_MAX_FL, int );
+    LGM_ARRAY_3D( MagEphemInfo->s_gsm,      MaxPitchAngles, LGM_LSTARINFO_MAX_FL, 1000, double );
+    LGM_ARRAY_3D( MagEphemInfo->Bmag,       MaxPitchAngles, LGM_LSTARINFO_MAX_FL, 1000, double );
+    LGM_ARRAY_3D( MagEphemInfo->x_gsm,      MaxPitchAngles, LGM_LSTARINFO_MAX_FL, 1000, double );
+    LGM_ARRAY_3D( MagEphemInfo->y_gsm,      MaxPitchAngles, LGM_LSTARINFO_MAX_FL, 1000, double );
+    LGM_ARRAY_3D( MagEphemInfo->z_gsm,      MaxPitchAngles, LGM_LSTARINFO_MAX_FL, 1000, double );
 
 
 }
@@ -173,32 +196,32 @@ void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo
     write( fd, MagEphemInfo->K,            nPitchAngles*sizeof( double ) );
     write( fd, MagEphemInfo->nShellPoints, nPitchAngles*sizeof( int ) );
 
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Pn[0][0], nPitchAngles*100*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Pn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
 
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Sn[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Bn[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Ps[0][0], nPitchAngles*100*sizeof( Lgm_Vector ) );
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Ss[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellSphericalFootprint_Bs[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Ps[0][0], nPitchAngles*100*sizeof( Lgm_Vector ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Ss[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Bs[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Pn[0][0], nPitchAngles*100*sizeof( Lgm_Vector ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Sn[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Bn[0][0], nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellMirror_Pn[0][0],             nPitchAngles*100*sizeof( Lgm_Vector ) );
-    write( fd, &MagEphemInfo->ShellMirror_Sn[0][0],             nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellMirror_Ps[0][0],             nPitchAngles*100*sizeof( Lgm_Vector ) );
-    write( fd, &MagEphemInfo->ShellMirror_Ss[0][0],             nPitchAngles*100*sizeof( double ) );
-    write( fd, &MagEphemInfo->ShellI[0][0],                     nPitchAngles*100*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Sn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Bn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Ps[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Ss[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellSphericalFootprint_Bs[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Ps[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Ss[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Bs[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Pn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Sn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellEllipsoidFootprint_Bn[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellMirror_Pn[0][0],             nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellMirror_Sn[0][0],             nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellMirror_Ps[0][0],             nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    write( fd, &MagEphemInfo->ShellMirror_Ss[0][0],             nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    write( fd, &MagEphemInfo->ShellI[0][0],                     nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
 
 
-    write( fd, &MagEphemInfo->nFieldPnts[0][0], nPitchAngles*48*sizeof( int ) );
-    write( fd, &MagEphemInfo->s_gsm[0][0][0],      nPitchAngles*48*1000*sizeof( double ) );
-    write( fd, &MagEphemInfo->Bmag[0][0][0],       nPitchAngles*48*1000*sizeof( double ) );
-    write( fd, &MagEphemInfo->x_gsm[0][0][0],      nPitchAngles*48*1000*sizeof( double ) );
-    write( fd, &MagEphemInfo->y_gsm[0][0][0],      nPitchAngles*48*1000*sizeof( double ) );
-    write( fd, &MagEphemInfo->z_gsm[0][0][0],      nPitchAngles*48*1000*sizeof( double ) );
+    write( fd, &MagEphemInfo->nFieldPnts[0][0], nPitchAngles*LGM_LSTARINFO_MAX_FL*sizeof( int ) );
+    write( fd, &MagEphemInfo->s_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    write( fd, &MagEphemInfo->Bmag[0][0][0],       nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    write( fd, &MagEphemInfo->x_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    write( fd, &MagEphemInfo->y_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    write( fd, &MagEphemInfo->z_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
 
     write( fd, &MagEphemInfo->LHilton[0],   nPitchAngles*sizeof( double ) );
     write( fd, &MagEphemInfo->LMcIlwain[0], nPitchAngles*sizeof( double ) );
@@ -261,99 +284,99 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
     LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->nShellPoints, idata, n, int );
 
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Pn, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Pn, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Sn, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Sn, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Bn, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Bn, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Ps, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Ps, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Ss, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Ss, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Bs, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellSphericalFootprint_Bs, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Ps, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Ps, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Ss, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Ss, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Bs, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Bs, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Pn, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Pn, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Sn, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Sn, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Bn, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellEllipsoidFootprint_Bn, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Pn, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Pn, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Sn, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Sn, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    vdata = (Lgm_Vector *)calloc( n*100, sizeof(Lgm_Vector) );
-    read( fd, vdata, n*100*sizeof( Lgm_Vector ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Ps, vdata, n, 100, Lgm_Vector );
+    vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
+    read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Ps, vdata, n, LGM_LSTARINFO_MAX_FL, Lgm_Vector );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Ss, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellMirror_Ss, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (double *)calloc( n*100, sizeof(double) );
-    read( fd, ddata, n*100*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellI, ddata, n, 100, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellI, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
 
 
-    idata = (int *)calloc( n*48, sizeof(int) );
-    read( fd, idata, n*48*sizeof( int ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->nFieldPnts, idata, n, 48, int );
+    idata = (int *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(int) );
+    read( fd, idata, n*LGM_LSTARINFO_MAX_FL*sizeof( int ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->nFieldPnts, idata, n, LGM_LSTARINFO_MAX_FL, int );
 
-    ddata = (double *)calloc( n*48*1000, sizeof(double) );
-    read( fd, ddata, n*48*1000*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->s_gsm, ddata, n, 48, 1000, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL*1000, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->s_gsm, ddata, n, LGM_LSTARINFO_MAX_FL, 1000, double );
 
-    ddata = (double *)calloc( n*48*1000, sizeof(double) );
-    read( fd, ddata, n*48*1000*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->Bmag, ddata, n, 48, 1000, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL*1000, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->Bmag, ddata, n, LGM_LSTARINFO_MAX_FL, 1000, double );
 
-    ddata = (double *)calloc( n*48*1000, sizeof(double) );
-    read( fd, ddata, n*48*1000*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->x_gsm, ddata, n, 48, 1000, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL*1000, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->x_gsm, ddata, n, LGM_LSTARINFO_MAX_FL, 1000, double );
 
-    ddata = (double *)calloc( n*48*1000, sizeof(double) );
-    read( fd, ddata, n*48*1000*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->y_gsm, ddata, n, 48, 1000, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL*1000, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->y_gsm, ddata, n, LGM_LSTARINFO_MAX_FL, 1000, double );
 
-    ddata = (double *)calloc( n*48*1000, sizeof(double) );
-    read( fd, ddata, n*48*1000*sizeof( double ) );
-    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->z_gsm, ddata, n, 48, 1000, double );
+    ddata = (double *)calloc( n*LGM_LSTARINFO_MAX_FL*1000, sizeof(double) );
+    read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_3D( MagEphemInfo->z_gsm, ddata, n, LGM_LSTARINFO_MAX_FL, 1000, double );
 
 
 

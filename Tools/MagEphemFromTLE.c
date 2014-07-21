@@ -165,6 +165,7 @@ static struct argp_option Options[] = {
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
     {"FootPointHeight", 'f',    "height",                     0,        "Footpoint height in km. Default is 100km."                  },
     {"Quality",         'q',    "quality",                    0,        "Quality to use for L* calculations. Default is 3."      },
+    {"nFLsInDriftShell",'n',    "nFLsInDriftShell",           0,        "Number of Field Lines to use in construction of drift shell. Use values in the range [6,240]. Default is 24." },
     {"UseEop",          'z',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Coords",          'C',    "coord_system",               0,        "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
 
@@ -188,6 +189,7 @@ struct Arguments {
     int         nPA;
 
     int         Quality;
+    int         nFLsInDriftShell;
     double      Kp;
     int         Colorize;
     int         Force;
@@ -288,6 +290,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'f':
             sscanf( arg, "%lf", &arguments->FootPointHeight );
+            break;
+        case 'n':
+            arguments->nFLsInDriftShell = atoi( arg );
             break;
         case 'q':
             arguments->Quality = atoi( arg );
@@ -650,7 +655,7 @@ int main( int argc, char *argv[] ){
     int              nBirds, iBird;
     char             **Birds, Bird[80];
     double           Inc, Alpha[1000], FootpointHeight;
-    int              nAlpha, Quality, Verbosity;
+    int              nAlpha, Quality, nFLsInDriftShell, Verbosity;
     long int         StartDate, EndDate, Date, Delta;
     int              sYear, sMonth, sDay, sDoy, eYear, eMonth, eDay, eDoy, Year, Month, Day;
     double           sJD, eJD, JD, Time, StartSeconds, EndSeconds;
@@ -719,6 +724,7 @@ int main( int argc, char *argv[] ){
     arguments.silent           = 0;
     arguments.Verbosity        = 0;
     arguments.Quality          = 3;
+    arguments.nFLsInDriftShell = 24;
     arguments.Kp               = -999.9;
     arguments.Delta            = 60;     // 60s default cadence
     arguments.Colorize         = 0;
@@ -774,6 +780,7 @@ int main( int argc, char *argv[] ){
      */
     FootpointHeight  = arguments.FootPointHeight;
     Quality          = arguments.Quality;
+    nFLsInDriftShell = arguments.nFLsInDriftShell;
     ForceKp          = arguments.Kp;
     Verbosity        = arguments.Verbosity;
     Colorize         = arguments.Colorize;
@@ -824,6 +831,7 @@ int main( int argc, char *argv[] ){
         }
         printf( "\t          FootpointHeight [km]: %g\n", FootpointHeight );
         printf( "\t                    L* Quality: %d\n", Quality );
+        printf( "\t       Num. FLs in drift shell: %d\n", nFLsInDriftShell );
         printf( "\t                  Force output: %s\n", Force ? "yes" : "no" );
         printf( "\t                       Use Eop: %s\n", UseEop ? "yes" : "no" );
         printf( "\t         Dump Full Shell Files: %s\n", DumpShellFiles ? "yes" : "no" );
@@ -862,7 +870,7 @@ int main( int argc, char *argv[] ){
 
 
     // Settings for Lstar calcs
-    MagEphemInfo->LstarQuality = Quality;
+    Lgm_SetMagEphemLstarQuality( Quality, nFLsInDriftShell, MagEphemInfo );
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->LSimpleMax = 12.0;
     MagEphemInfo->LstarInfo->VerbosityLevel = Verbosity;
@@ -1526,7 +1534,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
 //                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
                         printf("\t--------------------------------------------------------------------------------------------------\n");
-                        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, MagEphemInfo->LstarQuality, Colorize, MagEphemInfo );
+                        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, Colorize, MagEphemInfo );
 
                         MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
 

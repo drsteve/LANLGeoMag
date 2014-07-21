@@ -800,4 +800,11 @@ int     Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, Lgm_MagModelIn
 void quicksort_uli( unsigned long n, unsigned long *arr );
 
 
+/*
+ * Misc Routines
+ */
+double  Lgm_Bradial( double MLT, double mlat, Lgm_MagModelInfo *m );
+int     Lgm_FindDipEquator( double MLT, double *mlat, Lgm_MagModelInfo *m );
+
+
 #endif

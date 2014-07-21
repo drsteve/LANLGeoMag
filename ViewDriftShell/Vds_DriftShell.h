@@ -16,36 +16,36 @@ typedef struct Vds_ObjectInfo {
     int                  nPitchAngles;          //!< Number of pitch angles defined in MagEphemInfo structure.
 
 
-    int                  nPnts[90][24];         //!< Number of points in the full (foot-to-foot) field line arrays.
-    double               s_gsm[90][24][1000];   //!< Distance along FL for full (foot-to-foot) field line arrays.
-    double               x_gsm[90][24][1000];   //!< X-position along FL for full (foot-to-foot) field line arrays.
-    double               y_gsm[90][24][1000];   //!< Y-Position along FL for full (foot-to-foot) field line arrays.
-    double               z_gsm[90][24][1000];   //!< Z-Position along FL for full (foot-to-foot) field line arrays.
+    int                  nPnts[30][LGM_LSTARINFO_MAX_FL];         //!< Number of points in the full (foot-to-foot) field line arrays.
+    double               s_gsm[30][LGM_LSTARINFO_MAX_FL][1000];   //!< Distance along FL for full (foot-to-foot) field line arrays.
+    double               x_gsm[30][LGM_LSTARINFO_MAX_FL][1000];   //!< X-position along FL for full (foot-to-foot) field line arrays.
+    double               y_gsm[30][LGM_LSTARINFO_MAX_FL][1000];   //!< Y-Position along FL for full (foot-to-foot) field line arrays.
+    double               z_gsm[30][LGM_LSTARINFO_MAX_FL][1000];   //!< Z-Position along FL for full (foot-to-foot) field line arrays.
 
 
 
-    int                  nPnts2[90][24];        //!< Number of points in the partial (mirror-to-mirror) field line arrays.
-    double               s2_gsm[90][24][1000];  //!< Distance along FL for full (mirror-to-mirror) field line arrays.
-    double               x2_gsm[90][24][1000];  //!< X-position along FL for full (mirror-to-mirror) field line arrays.
-    double               y2_gsm[90][24][1000];  //!< Y-Position along FL for full (mirror-to-mirror) field line arrays.
-    double               z2_gsm[90][24][1000];  //!< Z-Position along FL for full (mirror-to-mirror) field line arrays.
+    int                  nPnts2[30][LGM_LSTARINFO_MAX_FL];        //!< Number of points in the partial (mirror-to-mirror) field line arrays.
+    double               s2_gsm[30][LGM_LSTARINFO_MAX_FL][1000];  //!< Distance along FL for full (mirror-to-mirror) field line arrays.
+    double               x2_gsm[30][LGM_LSTARINFO_MAX_FL][1000];  //!< X-position along FL for full (mirror-to-mirror) field line arrays.
+    double               y2_gsm[30][LGM_LSTARINFO_MAX_FL][1000];  //!< Y-Position along FL for full (mirror-to-mirror) field line arrays.
+    double               z2_gsm[30][LGM_LSTARINFO_MAX_FL][1000];  //!< Z-Position along FL for full (mirror-to-mirror) field line arrays.
 
 
-    int                  nFieldPoints[90];
-    double               x3_gsm[90][24][200];   //!< ???? Vertices?
-    double               y3_gsm[90][24][200];   //!< ???? Vertices?
-    double               z3_gsm[90][24][200];   //!< ???? Vertices?
-    double               nx3_gsm[90][24][200];  //!< ???? Normals?
-    double               ny3_gsm[90][24][200];  //!< ???? Normals?
-    double               nz3_gsm[90][24][200];  //!< ???? Normals?
+    int                  nFieldPoints[30];
+    double               x3_gsm[30][LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               y3_gsm[30][LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               z3_gsm[30][LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               nx3_gsm[30][LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
+    double               ny3_gsm[30][LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
+    double               nz3_gsm[30][LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
 
     int                  nShellPoints4;
-    double               x4_gsm[90][500][200];   //!< ???? Vertices?
-    double               y4_gsm[90][500][200];   //!< ???? Vertices?
-    double               z4_gsm[90][500][200];   //!< ???? Vertices?
-    double               nx4_gsm[90][500][200];  //!< ???? Normals?
-    double               ny4_gsm[90][500][200];  //!< ???? Normals?
-    double               nz4_gsm[90][500][200];  //!< ???? Normals?
+    double               x4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               y4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               z4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];   //!< ???? Vertices?
+    double               nx4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
+    double               ny4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
+    double               nz4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
 
     int                 nFLs;
     int                 nPnts5[10];

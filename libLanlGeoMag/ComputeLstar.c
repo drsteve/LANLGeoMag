@@ -10,7 +10,6 @@
 #include <gsl/gsl_spline.h>
 #include <string.h>
 
-#define DeltaMLT 1.0
 #define TRACE_TOL   1e-7
 
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
@@ -32,12 +31,12 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
     Lgm_MagModelInfo    *m;
     
-    int     i, iMin, Type, iMax, done, Verbosity;
+    int     i, iMin, Type, iMax, done, Verbosity, nBounceRegions;
     double  Min, Max, Curr, Prev;
 
-    double  Diff, OldDiff, Minima[ LGM_LSTARINFO_MAX_MINIMA ], Maxima[ LGM_LSTARINFO_MAX_MINIMA ];
-    int     nMinima, iMinima[ LGM_LSTARINFO_MAX_MINIMA ];
-    int     nMaxima, iMaxima[ LGM_LSTARINFO_MAX_MINIMA ];
+    double  Diff, OldDiff, Minima[ LGM_LSTARINFO_MAX_FL ], Maxima[ LGM_LSTARINFO_MAX_FL ];
+    int     nMinima, iMinima[ LGM_LSTARINFO_MAX_FL ];
+    int     nMaxima, iMaxima[ LGM_LSTARINFO_MAX_FL ];
 
     Verbosity = LstarInfo->VerbosityLevel;
     m = LstarInfo->mInfo;
@@ -79,10 +78,12 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima <  LGM_LSTARINFO_MAX_MINIMA ) ) {
             iMaxima[nMaxima] = i-1;
             Maxima[nMaxima] = m->Bmag[i-1];
+printf("m->Bmag[i-1], m->Bmag[i] = %g %g\n", m->Bmag[i-1], m->Bmag[i]);
             ++nMaxima;
         }
 
     }
+//Verbosity = 3;
     if ( Verbosity > 1 ) {
 
         if ( nMinima > 1 ) {
@@ -93,7 +94,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
             }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMinima; i++ ){
-                    printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g\n", i, iMinima[i], Minima[i] );
+                    printf( "\t\t\tLocal Minima %02d: Bmag[%d] = %g     (Bmirror = %g)\n", i, iMinima[i], Minima[i], m->Bm );
                 }
             }
 
@@ -107,12 +108,13 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
             }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMaxima; i++ ){
-                    printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g\n", i, iMaxima[i], Maxima[i] );
+                    printf( "\t\t\tLocal Maxima %02d: Bmag[%d] = %g     (Bmirror = %g)\n", i, iMaxima[i], Maxima[i], m->Bm );
                 }
             }
         }
 
     }
+
     
 
     /*
@@ -122,17 +124,72 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     LstarInfo->nMinima[k] = nMinima;
     LstarInfo->nMaxima[k] = nMaxima;
 
-    Type = ( nMaxima > 0 ) ? 1 : 0;
+    if ( nMinima == 0 ) { // can this ever happen???
 
-    for ( i=0; i<nMaxima; i++ ){
-        if ( Maxima[i] > m->Bm ) Type = 2;
+        Type = -9;
+
+    } else if ( nMinima == 1 ) {
+
+        Type = 0;
+
+    } else if ( (nMinima == 2) && (nMaxima == 1) && (iMinima[0] < iMaxima[0]) && (iMinima[1] > iMaxima[0]) ) { // typical expected case for Shab.
+
+        nBounceRegions = 0;
+        if ( Maxima[0] < m->Bm ) {
+
+            // can only bounce in 1 region.
+            nBounceRegions = 1;
+
+        } else {
+
+            // can potentially bounce in 2 regions.
+            if ( Minima[0] <= m->Bm ) ++nBounceRegions;
+            if ( Minima[1] <= m->Bm ) ++nBounceRegions;
+
+        }
+
+        Type = ( nBounceRegions > 0 ) ?  nBounceRegions : -8;
+
+    } else if ( nMinima > LGM_LSTARINFO_MAX_MINIMA-5 ) { // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
+
+        Type = -1;
+
+    } else { // there are perhaps multiple minima/maxima. We dont expect this, but....
+
+        /*
+         *  OK, there are more than 2 minima.  Loop over them and determine how
+         *  many separate regions on the FL we can mirror on.  If there is only
+         *  one, then we should be a Type 1 Shabansky orbit (i.e. no
+         *  biffurcation, but still have multiple minima).
+         *  Count up how many cases we have where;
+         *     1) a maxima exceeds the Bm values.
+         *     2) minima that drop below Bm on either side.
+         *  The number of mirroring regions should be this number plus one.
+         */
+        nBounceRegions = 1; // there should be at least one region....
+        for ( i=0; i<nMaxima; i++ ) {
+            if ( (Minima[i] <= m->Bm) && (Maxima[i] > m->Bm) && (Minima[i+1] <= m->Bm) ) {
+                ++nBounceRegions;
+            }
+        }
+
+Type = nBounceRegions;
+
     }
 
 
-    // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
-    if ( nMinima > LGM_LSTARINFO_MAX_MINIMA-5 ) Type = -1;
+
+if ( Type == -8 ) {
+    FILE *fp=fopen("TwoMinima.txt", "a");
+    for ( i=0; i<m->nPnts; i++ ){
+        fprintf(fp, "%g %g\n", m->s[i], m->Bmag[i] );
+    }
+    fclose(fp);
+}
 
     
+//if (Type > 0 ) printf("Type = %d\n", Type);
+
     return( Type );
 
 }
@@ -154,11 +211,20 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
  * There are many tolerances involved in an Lstar calculation.  Here we try and
  * set them qualitatively given a single "quality" value.
  */
-void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
+void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s ) {
 
     if ( ( Quality < 0 ) || ( Quality > 8 ) ) {
-        printf("%sSetLstarTolerances: Quality value (of %d) not in range [0, 8]. Setting to 3.%s\n", s->PreStr, Quality, s->PostStr );
-        Quality = 3;
+        printf("%sLgm_SetLstarTolerances: Quality value (of %d) not in range [0, 8]. Setting to 3.%s\n", s->PreStr, Quality, s->PostStr );
+        s->LstarQuality = 3;
+    } else {
+        s->LstarQuality = Quality;
+    }
+
+    if ( ( nFLsInDriftShell < 0 ) || ( nFLsInDriftShell > 240 ) ) {
+        printf("%sLgm_SetLstarTolerances: nFLsInDriftShell value (of %d) not in range [0, 240]. Setting to 24.%s\n", s->PreStr, nFLsInDriftShell, s->PostStr );
+        s->nFLsInDriftShell = 24;
+    } else {
+        s->nFLsInDriftShell = nFLsInDriftShell;
     }
 
     // These tend to be critical to keep things working smoothly.
@@ -168,7 +234,7 @@ void SetLstarTolerances( int Quality, Lgm_LstarInfo *s ) {
     s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
 
 
-    switch ( Quality ) {
+    switch ( s->LstarQuality ) {
 
         case 8: // Highest Quality -- (although 7 may be better?)
 
@@ -500,9 +566,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn;
     int		done2, Count, FoundShellLine, nIts, Type;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
-    double	I=-999.9, Ifound, M, MLT0, MLT, mlat, r;
-    double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[500], MirrorMlat[500], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
-    double	MirrorMLT_Old[500], MirrorMlat_Old[500], PredMinusActualMlat, res;
+    double	I=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r;
+    double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[3*LGM_LSTARINFO_MAX_FL], MirrorMlat[3*LGM_LSTARINFO_MAX_FL], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
+    double	MirrorMLT_Old[500], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], PredMinusActualMlat, res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
@@ -563,16 +629,20 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
         /*
          *  If we are here, we know the field line is closed.  
-
-         *  Now, lets classify what type of FL it is. This call determines
-         *  whether or not there are multiple minima on the FL. 
-         *
-         *  If there are multiple minima, then we need to figure out if, for
-         *  the current pitch angle, we can mirror in multiple regions (i.e.
-         *  Shabansky drift orbit type bifurcations.)
-         *
          */
-        Type = ClassifyFL( 0, LstarInfo );
+
+/*  Now, lets classify what type of FL it is. This call determines
+*  whether or not there are multiple minima on the FL. 
+*
+*  If there are multiple minima, then we need to figure out if, for
+*  the current pitch angle, we can mirror in multiple regions (i.e.
+*  Shabansky drift orbit type bifurcations.)
+*
+*/
+//// DAMN!!!!!!!!!!!!!!!!!!!1
+//This wont work!
+//you need to trace the FL with TraceLine for ClassifyFL() to work!!!!!!!!!!!!!
+//        Type = ClassifyFL( 0, LstarInfo );
 
 
         /*
@@ -750,7 +820,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     // initialize DriftOrbitType as open
-    for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+    //for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+    //for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
 
 
 
@@ -770,10 +841,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
 
-    nLines = (int)(24.0/DeltaMLT + 0.5);
+    nLines = LstarInfo->nFLsInDriftShell;
+    DeltaMLT = 24.0/((double)nLines);
+
     delta = 3.0; // default
     for ( k=0, MLT=MLT0; MLT<(MLT0+24.0-1e-10); MLT += DeltaMLT){
-
 
 	    /*
 	     *  Try to predict what the next mlat should be so we can really
@@ -828,13 +900,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         LstarInfo->nImI0 = 0;
 	    while ( !done2 && (k > 0) ) {
 
-
-//FILE *fppp;
-//fppp = fopen("FL.txt", "a");
-//for(i=0; i<LstarInfo->mInfo->nPnts; i++){
-//    fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
-//}
-//fclose(fppp);
 	        if ( Count == 0 ) {
 
                 /*
@@ -842,9 +907,10 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  */
                 //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
                 if (delta > 20.0) delta = 20.0;
+
+                mlat0 = pred_mlat-delta;
                 mlat_try = pred_mlat;
-                mlat0 = ((pred_mlat-delta) <  -10.0) ?  -10.0 : (pred_mlat-delta);
-                mlat1 = ((pred_mlat+delta) > 90.0) ? 90.0 : (pred_mlat+delta);
+                mlat1 = pred_mlat+delta;
 
     	    } else if ( Count == 1 ) {
 
@@ -854,24 +920,17 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  */
                 delta *= 2;
                 if (delta < 1.0) delta = 1.0;
+                mlat0 = pred_mlat-delta;
                 mlat_try = pred_mlat;
-                mlat0 = ((mlat-delta) <  -10.0) ?  -10.0 : (mlat-delta);
-                mlat1 = ((mlat+delta) > 90.0) ? 90.0 : (mlat+delta);
-mlat0 =0.0;
+                mlat1 = pred_mlat+delta;
 
-
-
-//printf("LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
-//for (i=0; i<LstarInfo->nImI0; i++){
-//printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i]);
-//}
                 if ( LstarInfo->nImI0 > 2 ) {
                     for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
                     //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
                     //FitLineAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                     FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                     if (LstarInfo->VerbosityLevel > 1){
-                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                        printf("\t\t\t1> Fitting to available values. Predicted mlat: %g\n", res );
                     }
                     if ( fabs(res) < 90.0 ){
                         mlat_try = res;
@@ -888,25 +947,23 @@ mlat0 =0.0;
 	            * Try +1/-5 around the returned mlat
 	            */
 
-                if ( FoundShellLine == -3 ) {
-                    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
-                    mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
-                } else {
-                    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
-                    mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
-                }
+                //if ( FoundShellLine == -3 ) {
+                //    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
+                //    mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
+                //} else {
+                //    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
+                //    mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
+               //// }
                 mlat_try = pred_mlat;
+                mlat0 = mlat_try-5.0;
+                mlat1 = mlat_try+1.0;
 
-//printf("?? LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
-//for (i=0; i<LstarInfo->nImI0; i++){
-//printf("%g %g\n", LstarInfo->MLATarr[i], LstarInfo->ImI0arr[i]);
-//}
                 if ( LstarInfo->nImI0 > 3 ) {
                     for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
                     //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
                     FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                     if (LstarInfo->VerbosityLevel > 1){ 
-                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res ); 
+                        printf("\t\t\t2> Fitting to available values. Predicted mlat: %g\n", res ); 
                     }
                     if ( fabs(res) < 90.0 ){
                         mlat_try = res;
@@ -914,6 +971,7 @@ mlat0 =0.0;
                         mlat1 = res+5.0;
                     }
                 }
+
 
     	    } else {
 
@@ -923,7 +981,7 @@ mlat0 =0.0;
                  */
                 //mlat0 = 0.0;
                 mlat_try = pred_mlat;
-                mlat0 = -30.0;
+                mlat0 = -60.0;
 //mlat0 = 0.0;
                 mlat1 = 90.0;
 //mlat1 = 45.0;
@@ -937,7 +995,7 @@ mlat0 =0.0;
                     //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
                     FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                     if (LstarInfo->VerbosityLevel > 1){
-                        printf("\t\t\t> Fitting to available values. Predicted mlat: %g\n", res );
+                        printf("\t\t\t3> Fitting to available values. Predicted mlat: %g\n", res );
                     }
                     if ( fabs(res) < 90.0 ){
                         mlat_try = res;
@@ -986,10 +1044,13 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                 printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
             }
 
-            if ( Type > 1 ){
+// CRAP
+//for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 2 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+            if ( (Type > 1) && (1==1) ){
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
                 }
+
                 FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
 
                 PredMinusActualMlat = pred_mlat - mlat;
@@ -1124,6 +1185,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
          * footpoint, we start there and trace to south. So lets pack them in
          * the saved arrays backwards so that they go from south to north.
          */
+LstarInfo->FindShellPmin = TRUE;
         if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
             //Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
@@ -1190,9 +1252,12 @@ M = ELECTRON_MASS; // kg
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
 //FILE *fppp;
+//double AlphaEq;
 //fppp = fopen("FL.txt","a");
+//AlphaEq = asin( sqrt( Lgm_Magnitude( &LstarInfo->Bmin[k]) /LstarInfo->mInfo->Bm ) );
 //for (i=0; i<LstarInfo->mInfo->nPnts; i++){
-//fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+////fprintf(fppp, "%g %g\n", LstarInfo->mInfo->s[i], LstarInfo->mInfo->Bmag[i]);
+//fprintf(fppp, "%g:     %g %g %g %g\n", LstarInfo->MLT[k], LstarInfo->mInfo->Px[i], LstarInfo->mInfo->Py[i], LstarInfo->mInfo->Pz[i], AlphaEq*DegPerRad );
 //}
 //fclose(fppp);
 
@@ -1820,7 +1885,7 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  *                 LstarInfo:  LstarInfo structure to specify B-field model, store last valid Lstar, etc.
  *  
  */
-int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
+int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
     Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
     Lgm_DateTime    DT_UTC;
@@ -1836,9 +1901,9 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     LstarInfo_test = Lgm_CopyLstarInfo( LstarInfo );
 
     // Set Tolerances
-    SetLstarTolerances( Quality, LstarInfo_brac1 );
-    SetLstarTolerances( Quality, LstarInfo_brac2 );
-    SetLstarTolerances( Quality, LstarInfo_test );
+    Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo_brac1 );
+    Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo_brac2 );
+    Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo_test );
 
     // set coord transformation 
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_brac1->mInfo->c );

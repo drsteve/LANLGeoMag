@@ -22,6 +22,8 @@ static void elt_qsort( struct FitVals *arr, unsigned n ) {
 }
 
 
+
+
 int FitLineAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
 int FitQuadAndFindZero2( double *x, double *y, double *dy, int n, int nmax, double *res );
@@ -57,7 +59,6 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     double          BRACKET_EPS;
 
     *Iterations = 0;
-
 
     /*
      *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
@@ -109,6 +110,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     Bracket.Dmin = 9e99;
     Flag = BracketZero( I0, Ifound, Bm, MLT, mlat, rad, mlat0, mlat1, mlat2, &Bracket, LstarInfo );
     if ( Flag < 0 )  {
+        // should we be bailing here?
         return( -11 );   // An evaluation in BracketZero() hit on a value
     }
                                      //  of I that was undefined -- bail.
@@ -135,10 +137,6 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      * accumulated so far in order to make a quadtratic fit to the "data". Then
      * use the fit to estimate where the zero point is.
      */
-
-
-
-
 a = Bracket.a;
 b = Bracket.b;
 c = Bracket.c;
@@ -159,6 +157,9 @@ mlatbest = mlat_min;
 
     if ( !FoundZeroBracket ) {
 
+        /*
+         * We were unsuccesful in finding a zero bracket. Attempt to fit to available values.
+         */
         if ( LstarInfo->nImI0>2 ){
 
             for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
@@ -208,6 +209,8 @@ mlatbest = mlat_min;
 
                 }
 
+
+            
 
                 if ( !FoundZeroBracket ) {
 
@@ -303,6 +306,10 @@ mlatbest = mlat_min;
     }
 
 
+
+
+
+
     if ( LstarInfo->mInfo->Lgm_FindShellLine_I_Tol > 1e-4 ) {
         BRACKET_EPS = 1e-6;
     } else {
@@ -310,17 +317,17 @@ mlatbest = mlat_min;
     }
 
 
+
     /*
-     *  Use bisecction to zoom-in on the solution (i.e. get the mlat that make
-     *  I-I0 = 0 within tolerance.)
+     *  Use minimization to try and get to the requested tolerance, or get a negatibe i-I0
      */
     if ( !FoundZeroBracket ){
 
-//printf("1. HERE\n");
         /*
          * We did not find a Zero bracket. We will have to try the minimization
          * strategy to obtain a value of D that is negative.
          */
+         if (LstarInfo->VerbosityLevel > 1){ printf( "\t\t\t> No zero bracket found. Attempting a minimization strategy to get a value of I-I0 < 0 ...\n"); }
 
 
         /*
@@ -333,7 +340,6 @@ mlatbest = mlat_min;
             return(-5);
         }
 
-//printf("2. HERE\n");
 
         F0 = 0.5; F1 = 0.5;
         done = FALSE; FoundValidI = FALSE; nIts = 0;
@@ -377,7 +383,7 @@ mlatbest = mlat_min;
                 /*
                  * Converged with requested tolerance.
                  */
-                //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
+                if (LstarInfo->VerbosityLevel > 1){ printf("\t\t\t> Converged with requested tol. during minimization phase. Requested tol. on I-I0 is: %g  Value of I-I0 achieved: %g\n", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol, De ); }
                 done = TRUE;
                 FoundValidI = TRUE;
                 *mlat = mlat_min;
@@ -462,14 +468,29 @@ mlatbest = mlat_min;
 
         }
 
+    } 
+
+
+
+
+
+
+    /*
+     *  If we still do not have a good value, and we managed to get a bracket
+     *  out of the minimization step, then Use bisecction to zoom-in on the
+     *  solution (i.e. get the mlat that make I-I0 = 0 within tolerance.)
+     */
+    if ( FoundValidI > 0 ) {
+        /*
+         * We probably converged in minimization phase above.
+         */
+
     } else if ( FoundZeroBracket ){
 
         /*
          * We have a bracket on a zero value. Go in for the kill using bisection.
          */
-        if (LstarInfo->VerbosityLevel > 1){
-            printf("\t\t\t> Using bisection. Requested tolerance on I-I0 is: %g\n", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
-        }
+        if (LstarInfo->VerbosityLevel > 1){ printf("\t\t\t> Using bisection. Requested tolerance on I-I0 is: %g\n", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ); }
         F = 0.5;
         done = FALSE; FoundValidI = FALSE; nIts = 0;
         nbFits = 0;
@@ -623,6 +644,12 @@ mlatbest = mlat_min;
         I = 9e99;
         printf( "\t\t\t> Bisection failed to find a root.\n");
     }
+
+
+
+
+
+
 
 
 

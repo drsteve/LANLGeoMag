@@ -124,7 +124,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                  *  Compute L* 
                  */
                 LstarInfo2 = Lgm_CopyLstarInfo( LstarInfo3 );
-                if ( LSimple < 10.0 ){
+                if ( LSimple < 20.0 ){
 // USER SHOULD DECIDE THRESHOLD HERE
 
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
@@ -169,7 +169,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
                     }
 
                 } else {
-                    printf(" Lsimple >= 10.0  ( Not doing L* calculation )\n" );
+                    printf(" Lsimple >= 20.0  ( Not doing L* calculation )\n" );
                 }
 
                 FreeLstarInfo( LstarInfo2 );
