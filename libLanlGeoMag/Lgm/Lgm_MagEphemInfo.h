@@ -14,6 +14,10 @@
 
 #define MAX_PITCH_ANGLES 90
 
+// Propagator Types
+#define SPICE   1
+#define SGP4    2
+
 
 
 /*! \struct Lgm_MagEphemInfo
@@ -25,6 +29,7 @@ typedef struct Lgm_MagEphemInfo {
 
     Lgm_LstarInfo   *LstarInfo;
 
+    int             PropagatorType;   //!< Orbit Propagator: Either SPICE or SGP4. This just keeps track of what we are using - it doesnt force one or the other.
     int             nFLsInDriftShell; //!< Number of Field Lines to use when constructing Drift Shell.
     int             LstarQuality;     //!< Quality factor to use [0,8] -- higher gives more precise results.
 

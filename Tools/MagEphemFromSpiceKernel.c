@@ -716,6 +716,7 @@ int main( int argc, char *argv[] ){
     SpiceChar       timestr1[51], timestr2[51];
     SpiceChar       sclkch[30];
 
+    
 
 
     t.ColorizeText = TRUE;
@@ -889,6 +890,7 @@ int main( int argc, char *argv[] ){
 
 
 
+
     SpiceDouble et;
     SpiceDouble pos[3], lt;
 
@@ -899,6 +901,7 @@ int main( int argc, char *argv[] ){
         // doesn't seem to like allocating zero size...
         MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
     }
+    MagEphemInfo->PropagatorType = SPICE;
 
 
     // Settings for Lstar calcs

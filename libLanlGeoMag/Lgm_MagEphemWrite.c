@@ -9,10 +9,12 @@
 #define LGM_INDEX_DATA_DIR    /usr/local/share/LanlGeoMag/Data
 #endif
 
+
+
 const char *sMonth[] = { "", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 
-void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int SpiceBody,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
+void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int SatelliteNumber,  char *Spacecraft, int IdNumber, char *IntDesig, char *CmdLine, int nAscend, Lgm_DateTime *Ascend_UTC, Lgm_Vector *Ascend_U, int nPerigee, Lgm_DateTime *Perigee_UTC, Lgm_Vector *Perigee_U, int nApogee, Lgm_DateTime *Apogee_UTC, Lgm_Vector *Apogee_U, Lgm_MagEphemInfo *m ){
 
     int         i, Year, Month, Day, HH, MM, SS, n, tsl, n2;
     char        Str[80], *Str2, *QDpath, QDloc[256];
@@ -1312,8 +1314,15 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
     fprintf( fp, "#                        \"COMMON_NAME\": \"%s\",\n", Spacecraft);
     fprintf( fp, "#                          \"ID_NUMBER\": \"%d\",\n", IdNumber);
     fprintf( fp, "#                          \"INT_DESIG\": \"%s\",\n", IntDesig);
-    fprintf( fp, "#                      \"SPICE_BODY_ID\": \"%d\"\n",  SpiceBody);
-    fprintf( fp, "#               \"SPICE_KERNELS_LOADED\": \"%s\"\n", "SPICE_KERNEL_FILES_LOADED" );
+
+
+    if ( m->PropagatorType == SPICE ) {
+        fprintf( fp, "#                      \"SPICE_BODY_ID\": \"%d\",\n",  SatelliteNumber);
+        fprintf( fp, "#               \"SPICE_KERNELS_LOADED\": \"%s\"\n", "SPICE_KERNEL_FILES_LOADED" );
+    } else if ( m->PropagatorType == SGP4 ) {
+        fprintf( fp, "#                   \"SATELLITE_NUMBER\": \"%d\"\n",  SatelliteNumber);
+    }
+
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#  \"File\":              { \"DESCRIPTION\": \"Description of file contents. The format for ElapsedTime is DDD:HH:MM:SS.\",\n");
@@ -1331,6 +1340,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
     fprintf( fp, "#                      \"QinDentonPath\": \"%s\",\n", QDloc );
     fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
     fprintf( fp, "#                        \"CodeVersion\": \"%s\"\n", CodeVersion );
+    fprintf( fp, "#                       \"LstarQuality\": \"%d\"\n", m->LstarQuality );
+    fprintf( fp, "#                   \"nFLsInDriftShell\": \"%d\"\n", m->nFLsInDriftShell );
     fprintf( fp, "#  },\n");
 
     fprintf( fp, "#\n");

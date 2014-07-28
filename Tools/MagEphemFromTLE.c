@@ -21,6 +21,12 @@
 #include <Lgm/qsort.h>
 #include <Lgm_Octree.h>
 
+#define EARTH_ID     399
+#define MOON_ID      301
+#define RBSPA_ID    -362
+#define RBSPB_ID    -363
+#define  MAXIV      1000
+#define  WINSIZ     ( 2 * MAXIV )
 
 #define T89Q_KP  2.0
 #define OP77Q_KP 2.0
@@ -77,23 +83,17 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromTLE";
-const  char *argp_program_version     = "1.8.0";
+const  char *argp_program_version     = "2.4.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
-"Computes the magnetic ephemeris of a S/C from trajectories determined from TLE files.\n\n"
-"The input file is a SPICE kernel description file, which is a file describing all of the SPICE kernels that need to be loaded.  A sample kernel description file is written as;\n\n"
-
-"\t\\begindata\n"
-"\tKERNELS_TO_LOAD = ( 'RBSPA_2012_139_2014_213_01_deph.bsp', 'RBSPB_2012_139_2014_213_01_deph.bsp', 'naif0009.tls' )\n"
-"\t\\begintext\n\n\n"
-
-"Where 'RBSPA_2012_139_2014_213_01_deph.bsp' is a \"binary SPK\" SPICE kernel, and 'naif0009.tls' is a \"text leap second kernel (LSK)\" file.  In SPICE, SPK kernel files contain information that is used to compute the ephemeris (trajectory) of an object.\n\n"
+"Computes the magnetic ephemeris of a S/C from trajectories determined from Two-Line Element sets.\n\n"
+"The input file is an ASCII TLE-set with epochs spanning the time interval of interest.\n\n"
 
 "The output is written into daily files with filename given by the specified template. OutFile may contain time variables that will be substituted.  The available time variables are '%YYYY', '%MM', and '%DD' which correspond respectively to 4-digit year, 2-digit month (Jan is 01), and 2-digit day of month. \n\n"
 
 "The %B variable will also get substituted by the list of birds given in the -b option.  Here is an example using time-variables.\n\n"
 
-"\t./MagEphemFromSpiceKernelFile -S 20020901 -E 20020930 setup.ker \n"
+"\t./MagEphemFromTLE -S 20020901 -E 20020930 setup.ker \n"
 "\t\t/home/jsmith/MagEphemStuff/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt.  \n"
 "\n"
 
@@ -130,36 +130,6 @@ static struct argp_option Options[] = {
     { 0, 0, 0, 0,   "External Model Options:", 3},
     {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T96, T02, T01S, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
-
-/*
-    { 0, 0, 0, 0,
-"OP77Q\n"
-"\tOlsen-Pfitser 1977 Quiet model. Does not depend\n"
-"\ton any input parameters.\n"
-"T87Q\n"
-"\tTsyganenko 1987 model with a fixed Kp\n"
-"\t(default is 2.) The Kp level can be over-\n"
-"\t-ridden with the --Kp option.\n"
-"T89Q\n"
-"\tTsyganenko 1989 (T89c version) model\n"
-"\t(default is 2.) The Kp level can be over-\n"
-"\t-ridden with the --Kp option.\n"
-"T87D\n"
-"\tTsyganenko 1987 model with Qin-Denton input\n"
-"\tparameters.\n"
-"T02D, T89D\n"
-"\tTsyganenko 1989 model with Qin-Denton input\n"
-"\tparameters.\n"
-"T01S\n"
-"\tTsyganenko 2001 storm model with Qin-Denton input\n"
-"\tparameters.\n"
-"TS04D\n"
-"\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
-"\tinput parameters.\n"
-"TS07D\n"
-"\tTsyganenko-Sitnov 2007 model.\n\n", 0 },
-*/
-
     { 0, 0, 0, 0,   "Other Options:", 4},
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,        "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\".", 0   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
@@ -346,6 +316,8 @@ typedef struct afInfo {
     long int        Date;
     int             Sgn;
     int             BODY;
+    _SgpInfo        *sgp;
+    _SgpTLE         tle;
     Lgm_CTrans      *c;
 } afInfo;
 double ApogeeFunc( double T, double val, void *Info ){
@@ -353,16 +325,23 @@ double ApogeeFunc( double T, double val, void *Info ){
     afInfo          *a;
     Lgm_CTrans      *c;
     Lgm_DateTime    UTC;
-    Lgm_Vector      U;
-    double          R, et, pos[3], lt;
+    Lgm_Vector      U, Uteme;
+    double          R, tsince;
 
-    a = (afInfo *)Info;
-    c = a->c;
+    a   = (afInfo *)Info;
+    c   = a->c;
 
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
-    et = Lgm_TDBSecSinceJ2000( &UTC, c );
-//    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-    U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
+
+
+    // do the propagation
+    tsince = (UTC.JD - a->tle.JD)*1440.0;
+    LgmSgp_SGP4( tsince, a->sgp );
+
+    // Convert from TEME -> GEI2000
+    Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+    Uteme.x = a->sgp->X/WGS84_A; Uteme.y = a->sgp->Y/WGS84_A; Uteme.z = a->sgp->Z/WGS84_A;
+    Lgm_Convert_Coords( &Uteme, &U, TEME_TO_GEI2000, c );
     R = Lgm_Magnitude( &U );
 
     return( R*a->Sgn );
@@ -378,6 +357,8 @@ typedef struct lfInfo {
     long int        Date;
     int             Sgn;
     int             BODY;
+    _SgpInfo        *sgp;
+    _SgpTLE         tle;
     Lgm_CTrans      *c;
 } lfInfo;
 double LatitudeFunc( double T, double val, void *Info ){
@@ -385,18 +366,23 @@ double LatitudeFunc( double T, double val, void *Info ){
     lfInfo          *a;
     Lgm_CTrans      *c;
     Lgm_DateTime    UTC;
-    Lgm_Vector      U, V;
-    double          R, et, pos[3], lt;
+    Lgm_Vector      U, V, Uteme;
+    double          R, tsince;
 
-    a = (lfInfo *)Info;
-    c = a->c;
+    a   = (lfInfo *)Info;
+    c   = a->c;
 
     Lgm_Set_Coord_Transforms( a->Date, T/3600.0, c );
     Lgm_Make_UTC( a->Date, T/3600.0, &UTC, c );
-    et = Lgm_TDBSecSinceJ2000( &UTC, c );
-//    spkezp_c( a->BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-    U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
-    Lgm_Convert_Coords( &U, &V, GEI2000_TO_TOD, c );
+
+    // do the propagation
+    tsince = (UTC.JD - a->tle.JD)*1440.0;
+    LgmSgp_SGP4( tsince, a->sgp );
+
+    // Convert from TEME -> GEI2000
+    Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+    Uteme.x = a->sgp->X/WGS84_A; Uteme.y = a->sgp->Y/WGS84_A; Uteme.z = a->sgp->Z/WGS84_A;
+    Lgm_Convert_Coords( &Uteme, &V, TEME_TO_GEI2000, c );
     R = Lgm_Magnitude( &V );
     return( asin( V.z/R )*DegPerRad );
 
@@ -405,27 +391,9 @@ double LatitudeFunc( double T, double val, void *Info ){
 
 int GetOrbitNumber( Lgm_DateTime *UTC, int nPerigee, Lgm_DateTime *Perigee_UTC, int *PerigeeOrbitNumber ){
 
-    int i, N;
-
-    N = 0;
-    if ( UTC->JD >= Perigee_UTC[nPerigee-1].JD ) {
-
-        N = PerigeeOrbitNumber[nPerigee-1];
-
-    } else {
-
-        for ( i=0; i<nPerigee; ++i ){
-            if ( UTC->JD < Perigee_UTC[i].JD  ) {
-                N = PerigeeOrbitNumber[i] - 1;
-                break;
-            }
-        }
-
-    }
-
-
-    return( N );
-
+    // this will not work in general....
+    // just return -999
+    return( -999 );
 
 }
 
@@ -630,13 +598,14 @@ void Lgm_WriteMagEphemDataKML( FILE *fp, int i, Lgm_MagEphemData *med ) {
 
 
 /*
- *  Compute magnetic ephemerii of S/C from input file that contains S/C position in GEO LAt/Lon/Rad
+ *  Compute magnetic ephemerii of S/C.
  */
 int main( int argc, char *argv[] ){
 
     Lgm_ElapsedTimeInfo t;
     long int         IdNumber;
     char             IntDesig[10], CommonName[80];
+    double           et, pos[3];
 
     struct Arguments arguments;
     Lgm_CTrans       *c = Lgm_init_ctrans( 0 );
@@ -698,8 +667,14 @@ int main( int argc, char *argv[] ){
     int             n, OverRideKp;
     char            *CmdLine, TmpStr[2048];
 
+    double          tsince;
+    Lgm_Vector      Uteme, Ugei;
+    int             nTle=0; // this is not the number of TLE but the index in the tle array
+    _SgpTLE         *tle;  // pointer to a struct
+    _SgpInfo        *sgp;
 
-    med = Lgm_InitMagEphemData( 2000, 80 );
+
+
 
     t.ColorizeText = TRUE;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
@@ -775,6 +750,7 @@ int main( int argc, char *argv[] ){
     strcpy( InputFilename,  arguments.args[0] );
     strcpy( OutputFilename, arguments.args[1] );
 
+
     /*
      *  Set other options
      */
@@ -844,6 +820,7 @@ int main( int argc, char *argv[] ){
             printf( "\t      Time Increment [Seconds]: %ld\n", Delta);
         }
 
+// PROBLEM AREA?
         if ( nBirds > 1  ){
             printf( "\t                         Birds:" );
             for (iBird=0; iBird<nBirds-1; iBird++) printf(" %s,", Birds[iBird]);
@@ -858,7 +835,15 @@ int main( int argc, char *argv[] ){
     }
     Lgm_PrintElapsedTime( &t );
 
+    Lgm_Doy( StartDate, &sYear, &sMonth, &sDay, &sDoy);
+    sJD = Lgm_JD( sYear, sMonth, sDay, 12.0, LGM_TIME_SYS_UTC, c );
+    Lgm_Doy( EndDate, &eYear, &eMonth, &eDay, &eDoy);
+    eJD = Lgm_JD( eYear, eMonth, eDay, 12.0, LGM_TIME_SYS_UTC, c );
 
+    
+    int NNN = (int)( (eJD-sJD+1)*86400.0/(double)Delta + 1.0);
+    if (NNN > 86401 ) NNN = 86401;
+    med = Lgm_InitMagEphemData( NNN, 80 );
 
 
     if ( nAlpha > 0 ){
@@ -867,6 +852,7 @@ int main( int argc, char *argv[] ){
         // doesn't seem to like allocating zero size...
         MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
     }
+    MagEphemInfo->PropagatorType = SGP4;
 
 
     // Settings for Lstar calcs
@@ -877,6 +863,10 @@ int main( int argc, char *argv[] ){
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = Verbosity;
     MagEphemInfo->LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
+    // The default model is Lgm_B_T89c
+    MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
+
+    // Now override the default if user tells us to.
     OverRideKp = FALSE;
     if ( !strcmp( ExtModel, "T87" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T87;
@@ -891,11 +881,11 @@ int main( int argc, char *argv[] ){
         ForceKp    = OP77Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89Q" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
         ForceKp    = T89Q_KP;
         OverRideKp = TRUE;
     } else if ( !strcmp( ExtModel, "T89D" ) ){
-        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89;
+        MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
     } else if ( !strcmp( ExtModel, "T96" ) ){
         MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T96;
     } else if ( !strcmp( ExtModel, "T01S" ) ){
@@ -959,80 +949,11 @@ int main( int argc, char *argv[] ){
     char *InFile     = (char *)calloc( 2056, sizeof( char ) );
     char *ShellFile  = (char *)calloc( 2056, sizeof( char ) );
 
-///*
-// * Read in a BATS-R-US mesh
-// */
-//FILE *fp;
-//double              x, y, z, Bx, By, Bz, B1x, B1y, B1z;
-//long int     rmin_n;
-//double r,rmin;
-//Lgm_Vector          *u, *B, *B1;
-//Lgm_Octree          *Octree;
-//LGM_ARRAY_1D( u, 2000000 , Lgm_Vector );
-//    LGM_ARRAY_1D( B, 2000000 , Lgm_Vector );
-//    LGM_ARRAY_1D( B1, 2000000 , Lgm_Vector );
-//n = 0;
-//Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-//double theta, phi;
-//rmin = 100.0;
-//rmin_n = -1;
-//if (0==1){
-//for (r=1.0; r<1.5; r += 0.1){
-//    for (i=0; i<10000; i++){
-//        theta = -M_PI/2.0 + M_PI*rand()/(double)RAND_MAX;
-//        phi =  2.0*M_PI*rand()/(double)RAND_MAX;
-//        u[n].x = r*sin(theta)*cos(phi);
-//        u[n].y = r*sin(theta)*sin(phi);
-//        u[n].z = r*cos(theta);
-//        B1[n].x = 0.0; B1[n].y = 0.0; B1[n].z = 0.0;
-//
-//        ++n;
-//    }
-//}
-//}
-//fp = fopen( "bats_r_us.txt", "r" );
-//long int rmin_line_num, linenum = 0;
-//while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &x, &y, &z, &Bx, &By, &Bz, &B1x, &B1y, &B1z ) != EOF ) {
-//    if ( ( fabs(B1x) > 1e-9 ) && ( fabs(B1y) >  1e-9 ) && ( fabs(B1y) > 1e-9 ) ) {
-//            u[n].x  = x; u[n].y  = y; u[n].z  = z;
-//            B[n].x  = Bx; B[n].y  = By; B[n].z  = Bz;
-//            B1[n].x = B1x; B1[n].y = B1y; B1[n].z = B1z;
-//r = Lgm_Magnitude(&u[n]);
-//if (r<rmin){
-//rmin = r;
-//rmin_n = n;
-//rmin_line_num = linenum;
-//}
-//            ++n;
-//    }
-//    ++linenum;
-//}
-//fclose(fp);
-//printf("Number of points in Mesh: %ld\n", n);
-//Lgm_PrintElapsedTime( &t );
-//printf("rmin = %g rmin_n = %ld rmin_line_num = %ld\n", rmin, rmin_line_num, rmin_n);
-////exit(0);
-///*
-//* Create Octree
-//*/
-//printf("Creating Octree\n");
-//Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-//Octree = Lgm_InitOctree( u, B1, n );
-//printf("Min, Max, Diff = %g %g %g\n", Octree->Min, Octree->Max, Octree->Diff);
-//Lgm_PrintElapsedTime( &t );
-//
-//Lgm_MagModelInfo_Set_Octree( Octree, 8, MagEphemInfo->LstarInfo->mInfo );
-//
-//
-//Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA2, MagEphemInfo->LstarInfo->mInfo );
-////MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
-//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-1;
-//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_RK5_Eps = 1e-4;
-//MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_Eps  = 1e-4;
-//MagEphemInfo->LstarInfo->mInfo->Lgm_TraceLine_Tol   = 1e-6;
-//Lgm_B_FromScatteredData_SetUp( MagEphemInfo->LstarInfo->mInfo );
 
+    // create a place to hold an array of TLEs (1 element)
+    tle = (_SgpTLE *)calloc( 1000, sizeof(_SgpTLE) );
 
+    sgp = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
 
 
 
@@ -1051,25 +972,40 @@ int main( int argc, char *argv[] ){
             strcpy( InFile, InputFilename );
             strcpy( OutFile, OutputFilename );
             strcpy( Bird, Birds[ iBird ] );
-            strcpy( InFile, InputFilename );
 
-            if        ( !strcmp( Bird, "rbspa" ) ){
-//                BODY     = RBSPA_ID;
-                IdNumber = 38752;
-                strcpy( IntDesig,   "2012-046A" );
-                strcpy( CommonName, "RBSP A" );
-            } else if ( !strcmp( Bird, "rbspb" ) ){
-//                BODY     = RBSPB_ID;
-                IdNumber = 38753;
-                strcpy( IntDesig, "2012-046B" );
-                strcpy( CommonName, "RBSP A" );
-            } else {
-                // maybe user just has a SPICE BODY number?
-                IdNumber = -999999;
-                sprintf( IntDesig, "SPICE Object: %s", Bird );
-                sprintf( CommonName, "%s", Bird );
-//                BODY = atoi( Bird );
-            }
+// PROBLEM AREA?
+if        ( !strcmp( Bird, "rbspa" ) ){
+    BODY     = RBSPA_ID;
+    IdNumber = 38752;
+    strcpy( IntDesig,   "2012-046A" );
+    strcpy( CommonName, "RBSP A" );
+} else if ( !strcmp( Bird, "rbspb" ) ){
+    BODY     = RBSPB_ID;
+    IdNumber = 38753;
+    strcpy( IntDesig, "2012-046B" );
+    strcpy( CommonName, "RBSP A" );
+} else {
+    // maybe user just has a SPICE BODY number?
+    IdNumber = -999999;
+    sprintf( IntDesig, "SPICE Object: %s", Bird );
+    sprintf( CommonName, "%s", Bird );
+    BODY = atoi( Bird );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             if ( SubstituteVars ) {
 
@@ -1126,38 +1062,6 @@ int main( int argc, char *argv[] ){
 
                 FileExists = TRUE;
 
-
-
-
-if (0==1){
-hsize_t nFileTimes;
-// attempt to open in read-write mode.
-file    = H5Fopen( HdfOutFile,  H5F_ACC_RDONLY, H5P_DEFAULT );
-if (file >= 0 ){
-    char **HdfFileTimes = Get_StringDataset_1D( file, "IsoTime", &nFileTimes );
-    H5Fclose( file );
-
-    printf("File: %s contains the following times;\n", HdfOutFile );
-    for (i=0; i<nFileTimes; i++){
-        IsoTimeStringToDateTime( HdfFileTimes[i], &UTC, c );
-        printf("HdfFileTimes[%d] = %s   Date = %ld\n", i, HdfFileTimes[i], UTC.Date );
-    }
-
-    printf("\nYou requested it to have the following times;\n");
-    ss = (Date == StartDate) ? StartSeconds :     0;
-    es = (Date == EndDate)   ?   EndSeconds : 86400;
-    for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
-        Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
-        Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
-        printf("IsoTimeString   = %s   Date = %ld\n", IsoTimeString, Date );
-    }
-    LGM_ARRAY_2D_FREE( HdfFileTimes );
-}
-}
-
-
-
-
                 if ( !Force ) {
                     printf("\n\n\tHdfOutfile already exists (use -F option to force processing): %s\n", HdfOutFile );
                 } else {
@@ -1196,11 +1100,41 @@ if (file >= 0 ){
                  */
                 if ( (fp_in = fopen( InFile, "r" ) ) == NULL ){
 
-                    printf("\tCould not open SPICE Kernel Description File ( %s ) for reading\n", InFile );
+                    printf("\tCould not open TLE File ( %s ) for reading\n", InFile );
 
                 } else {
 
                     fclose( fp_in );
+
+
+
+
+
+// WE NEED TO free this list each time
+                    /*
+                     * Read TLEs from file
+                     */
+                    if (!LgmSgp_ReadTlesFromFile( InFile, &nTle, tle, 4)){
+                        printf("TLE not parsed!\n");
+                        free(tle);
+                        return(-1);
+                    } else {
+                        printf("TLE read and parsed.\n");
+                    }
+                    LgmSgp_SortListOfTLEs( nTle, tle );
+
+
+                    printf("Line0: %s\n", tle[10].Line0);
+                    printf("Line1: %s\n", tle[10].Line1);
+                    printf("Line2: %s\n", tle[10].Line2);
+                    printf("\n");
+
+
+
+                    LgmSgp_SGP4_Init( sgp, &tle[10] );
+
+
+
 
 
 
@@ -1212,12 +1146,19 @@ if (file >= 0 ){
                      * Call Lgm_Brent() to get minimum.
                      *
                      */
-                    double et, pos[3];
-
                     afi = (afInfo *)calloc( 1, sizeof(afInfo) );
                     afi->Date = Date;
 
-                    afi->BODY = BODY;
+
+
+// PROBLEM AREA?
+afi->BODY = BODY;
+                    // initialize the propagator
+                    afi->sgp = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
+                    afi->tle = tle[10];
+                    LgmSgp_SGP4_Init( afi->sgp, &(afi->tle) );
+                    
+
                     afi->Sgn  = -1; // +1 => find min (perigee)   -1 => find max (apogee)
                     afi->c    = c;
                     bInfo.Val  = 0.0;
@@ -1235,17 +1176,22 @@ if (file >= 0 ){
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Apogee_UTC[nApogee], c );
-                                et = Lgm_TDBSecSinceJ2000( &Apogee_UTC[nApogee], c );
-// get position here...
-//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                                Apogee_U[nApogee].x = pos[0]/WGS84_A; Apogee_U[nApogee].y = pos[1]/WGS84_A; Apogee_U[nApogee].z = pos[2]/WGS84_A;
 
+
+                                // do the propagation
+                                tsince = (Apogee_UTC[nApogee].JD - tle[10].JD)*1440.0;
+                                LgmSgp_SGP4( tsince, afi->sgp );
+
+                                // Convert from TEME -> GEI2000
+                                Uteme.x = afi->sgp->X/WGS84_A; Uteme.y = afi->sgp->Y/WGS84_A; Uteme.z = afi->sgp->Z/WGS84_A; 
                                 Lgm_Set_Coord_Transforms( Apogee_UTC[nApogee].Date, Apogee_UTC[nApogee].Time, c );
+                                Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, c );
+                                Apogee_U[nApogee].x = Ugei.x; Apogee_U[nApogee].y = Ugei.y; Apogee_U[nApogee].z = Ugei.z;
                                 Lgm_Convert_Coords( &Apogee_U[nApogee], &w, GEI2000_TO_WGS84, c );
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Apogee_Geod[nApogee][0], &med->H5_Apogee_Geod[nApogee][1], &med->H5_Apogee_Geod[nApogee][2] );
 
                                 Lgm_DateTimeToString( med->H5_Apogee_IsoTimes[nApogee], &Apogee_UTC[nApogee], 0, 3 );
-                                printf("nApogee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
+                                printf("nApogee: %d Bracket: T = %8ld %8ld %8ld    R = %g %g %g    Tapogee, Rapogee = %s %g\n", nApogee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Apogee_IsoTimes[nApogee], fabs(Rmin) );
                                 ApoPeriTimeList[nApoPeriTimeList].key = Apogee_UTC[nApogee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 1; // because its apogee
                                 ++nApoPeriTimeList;
@@ -1263,6 +1209,7 @@ if (file >= 0 ){
                     med->H5_nApogee  = nApogee;
 
 
+                    
 
 
                     /*
@@ -1282,17 +1229,19 @@ if (file >= 0 ){
 
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
-                                et = Lgm_TDBSecSinceJ2000( &Perigee_UTC[nPerigee], c );
-// get position here...
-//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                                Perigee_U[nPerigee].x = pos[0]/WGS84_A; Perigee_U[nPerigee].y = pos[1]/WGS84_A; Perigee_U[nPerigee].z = pos[2]/WGS84_A;
 
+                                // do the propagation
+                                tsince = (Perigee_UTC[nApogee].JD - tle[10].JD)*1440.0;
+                                LgmSgp_SGP4( tsince, afi->sgp );
+
+                                // Convert from TEME -> GEI2000
+                                Uteme.x = afi->sgp->X/WGS84_A; Uteme.y = afi->sgp->Y/WGS84_A; Uteme.z = afi->sgp->Z/WGS84_A; 
                                 Lgm_Set_Coord_Transforms( Perigee_UTC[nPerigee].Date, Perigee_UTC[nPerigee].Time, c );
-                                Lgm_Convert_Coords( &Perigee_U[nPerigee], &w, GEI2000_TO_WGS84, c );
-                                Lgm_WGS84_to_GEOD( &w, &med->H5_Perigee_Geod[nPerigee][0], &med->H5_Perigee_Geod[nPerigee][1], &med->H5_Perigee_Geod[nPerigee][2] );
+                                Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, c );
+                                Perigee_U[nPerigee].x = Ugei.x; Perigee_U[nPerigee].y = Ugei.y; Perigee_U[nPerigee].z = Ugei.z;
 
                                 Lgm_DateTimeToString( med->H5_Perigee_IsoTimes[nPerigee], &Perigee_UTC[nPerigee], 0, 3 );
-                                printf("nPerigee: %d Bracket: T = %ld %ld %ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
+                                printf("nPerigee: %d Bracket: T = %8ld %8ld %8ld    R = %g %g %g    Tperigee, Rperigee = %s %g\n", nPerigee, Ta, Tb, Tc, Ra, Rb, Rc, med->H5_Perigee_IsoTimes[nPerigee], fabs(Rmin) );
 
                                 ApoPeriTimeList[nApoPeriTimeList].key = Perigee_UTC[nPerigee].JD;
                                 ApoPeriTimeList[nApoPeriTimeList].val = 0; // because its perigee
@@ -1307,6 +1256,7 @@ if (file >= 0 ){
                         Tc += 900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
                         if (Tc > 86400+900) done = TRUE;
                     }
+                    free( afi->sgp );
                     free( afi );
                     med->H5_nPerigee = nPerigee;
                     printf("\n");
@@ -1324,6 +1274,11 @@ if (file >= 0 ){
                      */
 
                     lfi = (lfInfo *)calloc( 1, sizeof(lfInfo) );
+
+                    lfi->sgp = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
+                    lfi->tle = tle[10];
+                    LgmSgp_SGP4_Init( lfi->sgp, &(lfi->tle) );
+
                     lfi->Date = Date;
                     lfi->BODY = BODY;
                     lfi->c    = c;
@@ -1341,12 +1296,15 @@ if (file >= 0 ){
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Ascend_UTC[nAscend], c );
 
-                                et = Lgm_TDBSecSinceJ2000( &Ascend_UTC[nAscend], c );
-// get position here
-//                                spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
-                                Ascend_U[nAscend].x = pos[0]/WGS84_A; Ascend_U[nAscend].y = pos[1]/WGS84_A; Ascend_U[nAscend].z = pos[2]/WGS84_A;
+                                // do the propagation
+                                tsince = (Ascend_UTC[nAscend].JD - tle[10].JD)*1440.0;
+                                LgmSgp_SGP4( tsince, lfi->sgp );
 
+                                // Convert from TEME -> GEI2000
+                                Uteme.x = lfi->sgp->X/WGS84_A; Uteme.y = lfi->sgp->Y/WGS84_A; Uteme.z = lfi->sgp->Z/WGS84_A; 
                                 Lgm_Set_Coord_Transforms( Ascend_UTC[nAscend].Date, Ascend_UTC[nAscend].Time, c );
+                                Lgm_Convert_Coords( &Uteme, &Ugei, TEME_TO_GEI2000, c );
+                                Ascend_U[nAscend].x = Ugei.x; Ascend_U[nAscend].y = Ugei.y; Ascend_U[nAscend].z = Ugei.z;
                                 Lgm_Convert_Coords( &Ascend_U[nAscend], &w, GEI2000_TO_WGS84, c );
                                 Lgm_WGS84_to_GEOD( &w, &med->H5_Ascend_Geod[nAscend][0], &med->H5_Ascend_Geod[nAscend][1], &med->H5_Ascend_Geod[nAscend][2] );
 
@@ -1361,73 +1319,14 @@ if (file >= 0 ){
                         Tb += 900; Lb = bInfo.func( (double)Tb, 0.0, (void *)lfi );
                         if (Tb > 86400+900) done = TRUE;
                     }
+                    free( lfi->sgp );
                     free( lfi );
                     med->H5_nAscend = nAscend;
 
 
 
-
-
-                    /*
-                     * Compute the orbit number that each apogee resides in.
-                     */
-//Lgm_DateTime T0_UTC;
-//double       T0, Tp, Tapo;
-//int          N0, ii;
-//                    Tp = (Apogee_UTC[1].JD - Apogee_UTC[0].JD); // orbital period in days
-//                    if        ( !strcmp( Bird, "rbspa" ) ){
-//
-//                        // RBSPA: Start of orbit  3 at Time: 2012-08-31T03:14:50.545
-//                        Lgm_Make_UTC( 20120831, 3.0+14.0/60.0+50.545/3600.0, &T0_UTC, c );
-//                        T0 = T0_UTC.JD;
-//                        N0 = 3;
-//
-//                    } else if ( !strcmp( Bird, "rbspb" ) ){
-//
-//                        // RBSPB: Start of orbit  3 at Time: 2012-08-31T03:19:31.477
-//                        //Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+31.477/3600.0, &T0_UTC, c );
-//                        //T0 = T0_UTC.JD;
-//                        //N0 = 3;
-//                          
-//                        //Apogee: 2013-04-01T05:34:03.877Z   Tp = 0.376156 Tapo = 2456383.731989   Tapo-T0 = 213.093   (Tapo - T0)/Tp = 566.503   ApogeeOrbitNumber = 569
-//                        Lgm_Make_UTC( 20120831, 3.0+19.0/60.0+32.618/3600.0, &T0_UTC, c );
-//                        T0 = T0_UTC.JD;
-//                        N0 = 3;
-//
-//                    } else {
-//                        printf("Unknown S/C. Orbit Numbers may be wrong.\n");
-//                        T0 = 0.0;
-//                        N0 = 0;
-//                    }
-//
-//                    for ( ii=0; ii<nApogee; ++ii ){
-//                        Tapo = Apogee_UTC[ii].JD;
-//                        ApogeeOrbitNumber[ii] = (int)( (Tapo - T0)/Tp ) + N0;
-//                        printf("Apogee: %s   N0 = %d T0 = %lf Tp = %lf Tapo = %lf   Tapo-T0 = %g   (Tapo - T0)/Tp = %g   ApogeeOrbitNumber = %d\n", med->H5_Apogee_IsoTimes[ii], N0, T0, Tp, Tapo, Tapo-T0, (Tapo - T0)/Tp, ApogeeOrbitNumber[ii] );
-//                    }
-//
-//
-//                    /*
-//                     * Compute the orbit number that each perigee starts.
-//                     */
-//                    if ( Apogee_UTC[0].JD > Perigee_UTC[0].JD ){
-//                        // the first perigee is earlier than the first apogee
-//                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0];
-//                    } else {
-//                        // the first apogee is earlier than the first perigee
-//                        PerigeeOrbitNumber[0] = ApogeeOrbitNumber[0]+1;
-//                    }
-//                    for ( ii=1; ii<nPerigee; ++ii ) PerigeeOrbitNumber[ii] = PerigeeOrbitNumber[ii-1] + 1;
-//                    for ( ii=0; ii<nPerigee; ++ii ) printf("PerigeeOrbitNumber = %d\n", PerigeeOrbitNumber[ii] );
-
-
-
-
-
-
-
-
-
+//PROBLEM AREA...
+//BODY?
 
                     /*
                      * Open MagEphem txt file for writing and write header.
@@ -1448,6 +1347,8 @@ if (file >= 0 ){
                      * Create variables.
                      */
                     file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+//PROBLEM AREA...
+//BODY?
                     Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
 
 
@@ -1466,29 +1367,25 @@ if (file >= 0 ){
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
-// get position here...
-//                        spkezp_c( BODY,    et,   "J2000",  "NONE", EARTH_ID,  pos,  &lt );
+
+                        // do the propagation
+                        tsince = (UTC.JD - tle[10].JD)*1440.0;
+                        LgmSgp_SGP4( tsince, sgp );
 
 
-
-/*
-SpiceDouble  sclkdp;
-sce2c_c( BODY,    et, &sclkdp);
-printf("sclkdp = %lf\n", sclkdp);
-
-sce2t_c( BODY,    et, &sclkdp);
-printf("sclkdp = %lf\n", sclkdp);
-*/
-
+// Lets just see what TLE we actually would get by searching...
+int tiii = LgmSgp_FindTLEforGivenTime( nTle, tle, 1, UTC.JD, 1 );
+if (tiii < 0 ) tiii = 0;
+printf("tle index to use: %d  tsince = %g    (prev, next = %g %g)\n", tiii, (UTC.JD - tle[tiii].JD)*1440.0, (UTC.JD - tle[tiii-1].JD)*1440.0, (UTC.JD - tle[tiii+1].JD)*1440.0);
 
 
 
 
 
-
-
-                        //printf("pos = %.8lf %.8lf %.8lf\n", pos[0], pos[1], pos[2]);
-                        U.x = pos[0]/WGS84_A; U.y = pos[1]/WGS84_A; U.z = pos[2]/WGS84_A;
+                        // Convert from TEME -> GEI2000
+                        Uteme.x = sgp->X/WGS84_A; Uteme.y = sgp->Y/WGS84_A; Uteme.z = sgp->Z/WGS84_A; 
+                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+                        Lgm_Convert_Coords( &Uteme, &U, TEME_TO_GEI2000, c );
 
 
                         if ( UseEop ) {
@@ -1501,10 +1398,10 @@ printf("sclkdp = %lf\n", sclkdp);
 
                         // Set mag model parameters
                         if ( FixModelDateTime ) {
-                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, 1 );
+                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         } else {
-                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1 );
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         }
 
@@ -1520,20 +1417,22 @@ printf("sclkdp = %lf\n", sclkdp);
                         // Set up the trans matrices
                         Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
 
-//                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
+                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
                         Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
-//                        sce2s_c( BODY,    et, 30, sclkch );
+//PROBLEM AREA...
+//sce2s_c( BODY,    et, 30, sclkch );
 
                         /*
                          * Compute L*s, Is, Bms, Footprints, etc...
                          * These quantities are stored in the MagEphemInfo Structure
                          */
-                        printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
-                        printf("\n\n\t[ %s ]: %s  Bird: %s Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, Rgsm.x, Rgsm.y, Rgsm.z );
-//                        printf("\t\tMET: %s   OrbitNumber: %d   Kp: %g\n", sclkch, MagEphemInfo->OrbitNumber, MagEphemInfo->LstarInfo->mInfo->fKp );
-                        printf("\t--------------------------------------------------------------------------------------------------\n");
+                        if ( Verbosity > 0 ) {
+                            printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
+                            printf("\n\n\t[ %s ]: %s  Bird: %s Kp: %g    Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, MagEphemInfo->LstarInfo->mInfo->fKp, Rgsm.x, Rgsm.y, Rgsm.z );
+                            printf("\t-------------------------------------------------------------------------------------------------------------------\n");
+                        }
                         Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, Colorize, MagEphemInfo );
 
                         MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
@@ -1927,10 +1826,13 @@ printf("sclkdp = %lf\n", sclkdp);
                     fclose(fp_MagEphem);
                     H5Fclose( file );
 
+                    printf("DONE.\n");
                     Lgm_PrintElapsedTime( &t );
                     Lgm_SetElapsedTimeStr( &t );
                     sprintf( Command, "sed -i '/ELAPSED_TIME/s++%s+g' %s", t.ElapsedTimeStr, OutFile); system( Command );
-//                    sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
+
+// PROBLEM AREA?
+//sprintf( Command, "sed -i '/SPICE_KERNEL_FILES_LOADED/s++%s+' %s", SpiceKernelFilesLoaded, OutFile); system( Command );
 
 
                     /*
@@ -1944,10 +1846,16 @@ printf("sclkdp = %lf\n", sclkdp);
 
 
 
-                    /*
-                     * Unload spice kernels
-                     */
-//                    unload_c( InputFilename );
+// PROBLEM AREA?
+/*
+* Unload spice kernels
+*/
+//unload_c( InFile );
+
+
+
+
+
 
                 } //end else
             } // end "if ( !FileExists || Force )" control structure
@@ -1956,6 +1864,9 @@ printf("sclkdp = %lf\n", sclkdp);
         } // end birds loop
     } // end JD loop
 
+
+    free( tle );
+    free( sgp );
 
     free( ShellFile );
     free( OutFile );
