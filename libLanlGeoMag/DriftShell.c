@@ -642,7 +642,9 @@ mlatbest = mlat_min;
          */
         FoundValidI = -7;
         I = 9e99;
-        printf( "\t\t\t> Bisection failed to find a root.\n");
+        if (LstarInfo->VerbosityLevel > 1) {
+            printf( "\t\t\t> Bisection failed to find a root.\n");
+        }
     }
 
 
