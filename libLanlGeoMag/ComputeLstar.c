@@ -686,7 +686,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 //LstarInfo->mInfo->Sm_North = LstarInfo->mInfo->Sm_South + dSb;
                 //SS = dSb;
                 SS = dSa+dSb;
-printf("SS = %g\n", SS);
+
                 //LstarInfo->mInfo->Hmax = SS/200.0;
                 LstarInfo->mInfo->Hmax = SS/(double)LstarInfo->mInfo->nDivs;
                 r  = Lgm_Magnitude( &LstarInfo->mInfo->Pm_North );
