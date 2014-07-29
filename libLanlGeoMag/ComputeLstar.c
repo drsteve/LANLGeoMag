@@ -78,7 +78,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima <  LGM_LSTARINFO_MAX_MINIMA ) ) {
             iMaxima[nMaxima] = i-1;
             Maxima[nMaxima] = m->Bmag[i-1];
-printf("m->Bmag[i-1], m->Bmag[i] = %g %g\n", m->Bmag[i-1], m->Bmag[i]);
+//printf("m->Bmag[i-1], m->Bmag[i] = %g %g\n", m->Bmag[i-1], m->Bmag[i]);
             ++nMaxima;
         }
 
