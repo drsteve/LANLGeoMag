@@ -37,3 +37,5 @@ stamp-h1
 libtool
 INSTALL
 Python/Makefile
+*.dSYM
+.DS_Store
