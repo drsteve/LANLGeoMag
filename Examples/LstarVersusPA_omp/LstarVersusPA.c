@@ -35,7 +35,7 @@ int main( int argc, char *argv[] ){
 
 MagEphemInfo->LstarInfo->LSimpleMax = 20.0;
 
-P.x = -12.13;
+P.x = -14.63;
 P.y = 0.0;
 P.z = 0.0;
 double xxx;
@@ -66,7 +66,7 @@ Alpha[3] = 2.0;
 
 
 //USER INPUT STUFF
-    MagEphemInfo->LstarQuality   = 5;
+    MagEphemInfo->LstarQuality   = 7;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 1;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;

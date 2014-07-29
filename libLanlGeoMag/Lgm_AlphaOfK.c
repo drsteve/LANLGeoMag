@@ -44,7 +44,7 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m );
 int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
 
     double      s;
-    int         TraceFlag;
+    int         TraceFlag, nDivs;
     Lgm_Vector  v1, v2, v3, v4, Bvec;
 
 
@@ -67,6 +67,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
     TraceFlag = Lgm_Trace( u, &v1, &v2, &v3, m->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, m );
     if ( TraceFlag != LGM_CLOSED ) {
         // problem tracing FL?
+        if (m->VerbosityLevel >= 2) printf("Lgm_Setup_AlphaOfK(): Field line not closed?\n");
         return(-5);
     }
     s = m->Trace_s;
@@ -81,12 +82,21 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
         /*
          * Start at Southern Footpoint and trace to Northern Footpoint.
          */
-        m->Hmax = s/200.0;
-        Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
-        //Lgm_TraceLine2( &v1, &v4, 0.0, s/200.0, 1.0, TRACE_TOL, FALSE, m );
+        nDivs = s/0.1;
+        if ( nDivs < 200 ) nDivs = 200;
+        if ( nDivs > LGM_MAX_INTERP_PNTS ) nDivs = LGM_MAX_INTERP_PNTS-1;
+        m->Hmax = s/((double)(nDivs));
+        
+        
+        
+        Lgm_TraceLine3( &v1, s, nDivs, 1.0, TRACE_TOL, FALSE, m );
+        //Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
 
 
-        if ( !InitSpline( m ) ) return(-5);
+        if ( !InitSpline( m ) ) {
+            if (m->VerbosityLevel >= 2) {}printf("Lgm_Setup_AlphaOfK(): Could not initialize spline curve\n");
+            return(-5);
+        }
 
     } 
     
@@ -154,7 +164,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
 //klude. Adding 0.5 to make it find stuff.
     a0 = 0.5 + DegPerRad*asin( sqrt( m->Bmin/B ) );
     f0 = Lgm_AlphaOfK_Func( K, a0, m );
-//printf("a0 = %g   f0 = %g    (B=%g)\n", a0, f0, B);
+    //printf("a0 = %g   f0 = %g    (B=%g)\n", a0, f0, B);
     if ( fabs(f0) < 1e-4 ) return( a0 );
 
 
@@ -237,6 +247,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
         /*
          * Assume value is no good...
          */
+printf("no value found!!!!!!!!!!!!!!!!!\n");
         a = -9e99;
 
     }
