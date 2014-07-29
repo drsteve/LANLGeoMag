@@ -56,6 +56,7 @@ static struct argp_option Options[] = {
     {"Quality",         'q',    "quality",                    0,        "Quality to use for L* calculations. Default is 3."      },
     {"nFLsInDriftShell",'n',    "nFLsInDriftShell",           0,        "Number of Field Lines to use in construction of drift shell. Use values in the range [6,240]. Default is 24." },
     {"Delta",           'd',    "delta",                      0,        "Cadence of LCDS calculation [minutes]. Default is 30."      },
+    {"LT",              'L',    "LT",                         0,        "Local time for LCDS search plane. Default is 0 (midnight)."      },
     {"StartDate",       'S',    "yyyymmdd",                   0,        "StartDate "                              },
     {"EndDate",         'E',    "yyyymmdd",                   0,        "EndDate "                                },
     {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters whn comoputing ephemerii" },
@@ -77,6 +78,7 @@ struct Arguments {
     int         Quality;
     int         nFLsInDriftShell;
     int         Force;
+    double      LT;
     double      FootPointHeight;
     double      Delta;
 
@@ -120,6 +122,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
         case 'd':
             sscanf( arg, "%lf", &arguments->Delta );
             break;
+        case 'L':
+            sscanf( arg, "%lf", &arguments->LT );
+            break;
         case 'n':
             arguments->nFLsInDriftShell = atoi( arg );
             break;
@@ -159,7 +164,7 @@ int main( int argc, char *argv[] ){
     struct Arguments arguments;
     double           UTC, brac1, brac2, tol, sJD, eJD, JD, jDate, t_cadence;
     double           K[500], LS[500], Kin[500], Bm[500];
-    double           Inc, FootpointHeight;
+    double           Inc, FootpointHeight, LT;
     int              Force, UseEop;
     long int         StartDate, EndDate, Date, currDate;
     int              nK, i, Quality, nFLsInDriftShell, ans, aa, Year, Month, Day;
@@ -187,6 +192,7 @@ int main( int argc, char *argv[] ){
     arguments.nFLsInDriftShell = 24;
     arguments.Delta            = 30;
     arguments.Force            = 0;
+    arguments.LT               = 0.0;
     arguments.UseEop           = 0;
     arguments.StartDate        = -1;
     arguments.EndDate          = -1;
@@ -218,6 +224,7 @@ int main( int argc, char *argv[] ){
     nFLsInDriftShell = arguments.nFLsInDriftShell;
     t_cadence        = arguments.Delta/1440.0; //needs to be in days
     Force            = arguments.Force;
+    LT               = arguments.LT;
     UseEop           = arguments.UseEop;
     StartDate        = arguments.StartDate;
     EndDate          = arguments.EndDate;
@@ -432,7 +439,7 @@ int main( int argc, char *argv[] ){
                     //LstarInfo3->PitchAngle = Alpha[aa];
                     //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
         
-                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], tol, Quality, nFLsInDriftShell, &K[aa], LstarInfo3 );
+                    ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], LT, tol, Quality, nFLsInDriftShell, &K[aa], LstarInfo3 );
                     if (LstarInfo3->DriftOrbitType == 1) printf("K: %g; Drift Orbit Type: Closed; L* = %g \n", Kin[aa], LstarInfo3->LS);
                     if (LstarInfo3->DriftOrbitType == 2) printf("Drift Orbit Type: Shebansky; L* = %g\n", LstarInfo3->LS);
                     if (ans==0) {

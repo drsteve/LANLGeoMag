@@ -1886,7 +1886,7 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  *                 LstarInfo:  LstarInfo structure to specify B-field model, store last valid Lstar, etc.
  *  
  */
-int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo ) {
+int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double LT, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
     Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
     Lgm_DateTime    DT_UTC;
@@ -1912,12 +1912,9 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
 
     //Check for closed drift shell at brackets
-    double MLT = 0.5; 
-    MLT *= 15;
-    MLT *= RadPerDeg;
-    //Pinner.x = brac1;
-    //Pinner.y = 0.0; Pinner.z = 0.0;
-    Pinner.x = brac1*cos(MLT); Pinner.y = brac1*sin(MLT); Pinner.z = 0.0;
+    LT *= 15;
+    LT *= RadPerDeg;
+    Pinner.x = brac1*cos(LT); Pinner.y = brac1*sin(LT); Pinner.z = 0.0;
 
 
     /*
@@ -1962,10 +1959,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     /*
      *  Test outer bracket location.
      */
-    /*Pouter.x = brac2;
-     *Pouter.y = 0.0; Pouter.z = 0.0;
-     */
-    Pouter.x = brac2*cos(MLT); Pouter.y = brac2*sin(MLT); Pouter.z = 0.0;
+    Pouter.x = brac2*cos(LT); Pouter.y = brac2*sin(LT); Pouter.z = 0.0;
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
@@ -1985,10 +1979,8 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
-            //Pouter.x *= 1.7;
-            
-            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(MLT);
-            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(MLT); Pouter.z = 0.0;
+            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(LT);
+            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(LT); Pouter.z = 0.0;
 
             if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
                 Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
@@ -2028,7 +2020,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
 
         if (1==1) {
             Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
-            Ptest.x = -1.0*Xtest*cos(MLT); Ptest.y = -1.0*Xtest*sin(MLT); Ptest.z = 0.0;
+            Ptest.x = -1.0*Xtest*cos(LT); Ptest.y = -1.0*Xtest*sin(LT); Ptest.z = 0.0;
         }
         else {
             Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
