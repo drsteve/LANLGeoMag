@@ -177,7 +177,7 @@ double      MagFluxIntegrand2( double Phi, _qpInfo *qpInfo ) ;
 double      LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) ;
 double      LambdaIntegral( Lgm_LstarInfo *LstarInfo ) ;
 double      AngVelInv( double Phi );
-int         Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo );
+int         Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double LT, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo );
  
 
 #endif
