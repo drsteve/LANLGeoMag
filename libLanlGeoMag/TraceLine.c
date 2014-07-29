@@ -1236,12 +1236,12 @@ int  SofBm( double Bm, double *ss, double *sn, Lgm_MagModelInfo *Info ) {
 int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int AddBminPoint, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;
-    double	    Htry, Hdid, Hnext, Hmin, Hmax, s, ss;
+    double	    Htry0, Htry, Hsum, Hdid, Hnext, Hmin, Hmax, s, ss;
     double	    Sa=0.0, Sc=0.0, d;
     double	    R0, R, Fa, Fb, Fc, F;
     double	    Ra, Rb, Rc;
     Lgm_Vector	Pa, Pc, P, Bvec, Bcdip;
-    int		    done, reset, n, SavePnt;
+    int		    done, reset, n, SavePnt, DoneStep, nSubSteps;
 
     reset = TRUE;
 
@@ -1259,7 +1259,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
 
 
 
-    Htry = Info->Hmax;  // we want to step with constant increments.
+    Htry0 = Info->Hmax;  // we want to step with constant increments.
     Hmin = 1e-7;        // This may be necessary to find the endpoint.
     Hmax = Info->Hmax;  // Dont use step bigger than this.
     u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
@@ -1285,16 +1285,53 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     }
 
 
-    Htry = S/(double)N;
+    Htry0 = S/(double)N;
     done  = FALSE;
     P = *u;
     if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g (first point)\n", P.x, P.y, P.z );
     while ( !done ) {
 
-        //if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0e-7, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
-        if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { printf("BAILING 1\n"); return(-1);}
-        R = Lgm_Magnitude( &P );
-        ss += Hdid;  
+
+        /*
+         * Attempt to make a step of Htry0. Note that Lgm_MagStep() is adaptive,
+         * so we arent guaranteed to actually get Htry0.  We need to examine
+         * Hdid to see if we got the full step. If Hdid == Htry0, then we got
+         * the full step. Otherwise we need to step across the remainder.
+         */
+        DoneStep = FALSE; 
+        Hsum = 0.0; 
+        Htry = Htry0;
+        nSubSteps = 0;
+
+        while ( !DoneStep ) {
+
+            if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { 
+                printf("Problem in Lgm_MagStep(). File: %s, Line %d. BAILING 1\n", __FILE__, __LINE__ ); 
+                return(-1);
+            }
+
+            Hsum += Hdid;
+            if ( fabs(Hdid-Htry) < 1e-7 ) {
+                // we got what we asked for.
+                DoneStep = TRUE;
+            } else if ( nSubSteps > 100 ) {
+                DoneStep = TRUE;
+                printf("Problem in TraceLine3(). File: %s, Line %d. Too many substeps.\n", __FILE__, __LINE__ ); 
+                return(-1);
+            } else {
+                // we did not get what we asked for. Try to step the remainder.
+                Htry = Htry0 - Hsum;
+            }
+
+            ++nSubSteps;
+
+        }
+
+        ss += Hsum;  
+        R  = Lgm_Magnitude( &P );
+
+
+
         if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g    R, s = %g %g\n", P.x, P.y, P.z, R, ss );
 
         /*

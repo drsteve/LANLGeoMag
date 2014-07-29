@@ -24,9 +24,9 @@ int main( int argc, char *argv[] ){
 
 
     // Date and UTC
-    Date       = 20010425;
     Date       = 20000701;
-    UTC        = 0.0 + 0.0/60.0 + 0.0/3600.0;
+    Date       = 20020901;
+    UTC        = 4.0 + 0.0/60.0 + 0.0/3600.0;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     // Position in SM
@@ -35,11 +35,11 @@ int main( int argc, char *argv[] ){
 
 MagEphemInfo->LstarInfo->LSimpleMax = 20.0;
 
-P.x = -5.05;
+P.x = -12.13;
 P.y = 0.0;
 P.z = 0.0;
 double xxx;
-//for (xxx=0.0; xxx<3.0; xxx += 0.001 ){
+for (xxx=0.0; xxx<3.0; xxx += 0.001 ){
 
 
 
@@ -66,12 +66,12 @@ Alpha[3] = 2.0;
 
 
 //USER INPUT STUFF
-    MagEphemInfo->LstarQuality   = 3;
+    MagEphemInfo->LstarQuality   = 5;
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 1;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
 
-    Kp = 0;
+    Kp = 2;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
@@ -94,14 +94,43 @@ printf("ZZZZZZZZZ: MagEphemInfo->LstarInfo->mInfo->Bm = %g\n", MagEphemInfo->Lst
      * Compute L*s, Is, Bms, Footprints, etc...
      * These quantities are stored in the MagEphemInfo Structure
      */
-P.x = -6.6; P.y = P.z = 0.0;
+//P.x = -6.6; P.y = P.z = 0.0;
 printf("P = %g %g %g\n", P.x, P.y, P.z);
 //    ComputeLstarVersusPA( Date, UTC, &P, nAlpha, Alpha, MagEphemInfo->LstarQuality, MagEphemInfo );
 Lgm_Convert_Coords( &P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
-    Lgm_ComputeLstarVersusPA( Date, UTC, &v3, nAlpha, Alpha, MagEphemInfo->LstarQuality, TRUE, MagEphemInfo );                           
 
-//P.x -= 0.01;
-//}
+
+
+
+    double Kin = 1.8732;
+    Lgm_DateTime DT_UTC;
+    Lgm_Make_UTC( Date, UTC, &DT_UTC, c );
+    if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, MagEphemInfo->LstarInfo->mInfo ) > 0 ) {
+        Alpha[0] = Lgm_AlphaOfK( Kin, MagEphemInfo->LstarInfo->mInfo );
+        Lgm_TearDown_AlphaOfK( MagEphemInfo->LstarInfo->mInfo );
+    } else {
+        Alpha[0] = LGM_FILL_VALUE;
+    }
+
+
+
+
+
+
+
+
+
+
+    Lgm_ComputeLstarVersusPA( Date, UTC, &v3, nAlpha, Alpha, TRUE, MagEphemInfo );                           
+//for (i=0; i<24; i++)printf("%g ", MagEphemInfo->I[i] - MagEphemInfo->I[0]);
+//printf("\n");
+
+
+
+
+
+P.x -= 0.1;
+}
 WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
 
     fp = fopen("Lstar.dat", "w");

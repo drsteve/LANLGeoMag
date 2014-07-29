@@ -252,7 +252,7 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
 
             s->mInfo->nDivs = 500;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
@@ -273,28 +273,28 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
 
             s->mInfo->nDivs = 400;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
 
         case 6:
 
-            s->mInfo->Lgm_MagFlux_Integrator_epsabs = 1e-9;
-            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-9;
+            s->mInfo->Lgm_MagFlux_Integrator_epsabs = 1e-8;
+            s->mInfo->Lgm_MagFlux_Integrator_epsrel = 1e-8;
 
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 1e-9;
-            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-9;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsabs = 1e-8;
+            s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-8;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
-            s->mInfo->Lgm_I_Integrator_epsrel = 1e-8;
-            s->mInfo->Lgm_I_Integrator_epsabs = 1e-8;
+            s->mInfo->Lgm_I_Integrator_epsrel = 1e-7;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-7;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-8;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-6;
 
             s->mInfo->nDivs = 300;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-9;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
@@ -315,7 +315,7 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
 
             s->mInfo->nDivs = 200;
 
-            s->mInfo->Lgm_MagStep_BS_atol       = 1e-8;
+            s->mInfo->Lgm_MagStep_BS_atol       = 1e-7;
             s->mInfo->Lgm_MagStep_BS_rtol       = 0.0;
 
             break;
@@ -657,7 +657,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 printf("\n\t\t%sMirror Point Location, Pm_South (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z, PostStr);
 	            LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_South, &Bvec, LstarInfo->mInfo );
 	            B = Lgm_Magnitude( &Bvec );
-                printf("\t\t%sMag. Field Strength, Bm at Pm_South (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, PostStr);
+                printf("\t\t%sMag. Field Strength, Bm at Pm_South (nT):  %g     (LstarInfo->mInfo->Bm = %g    dSa = %g)%s\n", PreStr, B, LstarInfo->mInfo->Bm, dSa, PostStr);
             }
 
             if ( Lgm_TraceToMirrorPoint( &(LstarInfo->mInfo->Pmin), &(LstarInfo->mInfo->Pm_North), &dSb, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) >= 0 ) {
@@ -672,8 +672,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                             LstarInfo->mInfo->Pm_North.z, PostStr);
                     LstarInfo->mInfo->Bfield( &LstarInfo->mInfo->Pm_North, &Bvec, LstarInfo->mInfo );
                     B = Lgm_Magnitude( &Bvec );
-                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g)%s\n",
-                            PreStr, B, LstarInfo->mInfo->Bm, PostStr);
+                    printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g    dSb = %g)%s\n",
+                            PreStr, B, LstarInfo->mInfo->Bm, dSb, PostStr);
                 }
 
 
@@ -686,6 +686,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 //LstarInfo->mInfo->Sm_North = LstarInfo->mInfo->Sm_South + dSb;
                 //SS = dSb;
                 SS = dSa+dSb;
+printf("SS = %g\n", SS);
                 //LstarInfo->mInfo->Hmax = SS/200.0;
                 LstarInfo->mInfo->Hmax = SS/(double)LstarInfo->mInfo->nDivs;
                 r  = Lgm_Magnitude( &LstarInfo->mInfo->Pm_North );
