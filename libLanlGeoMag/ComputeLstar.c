@@ -179,13 +179,13 @@ Type = nBounceRegions;
 
 
 
-if ( Type == -8 ) {
-    FILE *fp=fopen("TwoMinima.txt", "a");
-    for ( i=0; i<m->nPnts; i++ ){
-        fprintf(fp, "%g %g\n", m->s[i], m->Bmag[i] );
-    }
-    fclose(fp);
-}
+//if ( Type == -8 ) {
+//    FILE *fp=fopen("TwoMinima.txt", "a");
+//    for ( i=0; i<m->nPnts; i++ ){
+//        fprintf(fp, "%g %g\n", m->s[i], m->Bmag[i] );
+//    }
+//    fclose(fp);
+//}
 
     
 //if (Type > 0 ) printf("Type = %d\n", Type);
