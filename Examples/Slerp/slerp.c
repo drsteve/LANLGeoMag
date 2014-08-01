@@ -5,7 +5,7 @@
 int main(){
 
 
-    Lgm_Vector      a, b, z;
+  Lgm_Vector      a, b, z1, z2;
     Lgm_SlerpInfo   s;
     double          alpha;
 
@@ -19,25 +19,26 @@ int main(){
     
 
     alpha = 0.1;
-    Lgm_Slerp( &a, &b, &z, alpha, &s );
+    Lgm_Slerp( &a, &b, &z1, alpha, &s );
 
     printf("Results of slerping:\n");
-    printf("a = %g %g %g\n", a.x, a.y, a.z);
-    printf("b = %g %g %g\n", b.x, b.y, b.z);
-    printf("z = %g %g %g\n", z.x, z.y, z.z);
+    Lgm_PrintVector(&a);
+    Lgm_PrintVector(&b);
+    Lgm_PrintVector(&z1);
 
-
-
-
-    z.x = (1.0-alpha)*a.x + alpha*b.x;
-    z.y = (1.0-alpha)*a.y + alpha*b.y;
-    z.z = (1.0-alpha)*a.z + alpha*b.z;
-    Lgm_NormalizeVector( &z );
+    z2.x = (1.0-alpha)*a.x + alpha*b.x;
+    z2.y = (1.0-alpha)*a.y + alpha*b.y;
+    z2.z = (1.0-alpha)*a.z + alpha*b.z;
+    Lgm_NormalizeVector( &z2 );
 
     printf("Results of interpolating components (and re-normalizing):\n");
-    printf("a = %g %g %g\n", a.x, a.y, a.z);
-    printf("b = %g %g %g\n", b.x, b.y, b.z);
-    printf("z = %g %g %g\n", z.x, z.y, z.z);
+    Lgm_PrintVector(&a);
+    Lgm_PrintVector(&b);
+    Lgm_PrintVector(&z2);
+
+    Lgm_VecSub(&a, &z1, &z2); 
+    printf("\nThey are different by:\n");
+    Lgm_PrintVector(&a);
 
     return(0);
 

@@ -84,7 +84,7 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromSpiceKernel";
-const  char *argp_program_version     = "2.4.0";
+const  char *argp_program_version     = "2.4.1";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from SPICE kernel files.\n\n"
@@ -137,36 +137,6 @@ static struct argp_option Options[] = {
     { 0, 0, 0, 0,   "External Model Options:", 3},
     {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T96, T02, T01S, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
-
-/*
-    { 0, 0, 0, 0,
-"OP77Q\n"
-"\tOlsen-Pfitser 1977 Quiet model. Does not depend\n"
-"\ton any input parameters.\n"
-"T87Q\n"
-"\tTsyganenko 1987 model with a fixed Kp\n"
-"\t(default is 2.) The Kp level can be over-\n"
-"\t-ridden with the --Kp option.\n"
-"T89Q\n"
-"\tTsyganenko 1989 (T89c version) model\n"
-"\t(default is 2.) The Kp level can be over-\n"
-"\t-ridden with the --Kp option.\n"
-"T87D\n"
-"\tTsyganenko 1987 model with Qin-Denton input\n"
-"\tparameters.\n"
-"T02D, T89D\n"
-"\tTsyganenko 1989 model with Qin-Denton input\n"
-"\tparameters.\n"
-"T01S\n"
-"\tTsyganenko 2001 storm model with Qin-Denton input\n"
-"\tparameters.\n"
-"TS04D\n"
-"\tTsyganenko-Sitnov 2004 model with Qin-Denton\n"
-"\tinput parameters.\n"
-"TS07D\n"
-"\tTsyganenko-Sitnov 2007 model.\n\n", 0 },
-*/
-
     { 0, 0, 0, 0,   "Other Options:", 4},
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,        "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\".", 0   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
@@ -2003,9 +1973,9 @@ printf("sclkdp = %lf\n", sclkdp);
                     /*
                      * Write KML file -- testing....
                      */
-                    FILE *KmlFile = fopen( "Puke.kml", "w" );
-                    Lgm_WriteMagEphemDataKML( KmlFile, med->H5_nT, med );
-                    fclose( KmlFile );
+                    //FILE *KmlFile = fopen( "Puke.kml", "w" );
+                    //Lgm_WriteMagEphemDataKML( KmlFile, med->H5_nT, med );
+                    //fclose( KmlFile );
 
 
 
