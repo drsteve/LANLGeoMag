@@ -27,4 +27,4 @@ DivB: DivB.c
 
 
 clean:
-	rm *~ *.o B GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+	rm *~ *.o B B2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB

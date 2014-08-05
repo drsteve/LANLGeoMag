@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
-EOPDATAdir   = @datadir@/LanlGeoMag/EopData
+EOPDATAdir   = $(datadir)/LanlGeoMag/EopData
 EOPDATA_DATA = GetEopFiles LgmEop.dat eopc04.62-now finals.daily \
                finals2000A.all finals.all finals2000A.daily tai-utc.dat \
                eopc04_IAU2000.62-now GetEopFiles.in Lgm_LeapSecondDates.dat

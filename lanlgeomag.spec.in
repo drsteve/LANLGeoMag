@@ -13,6 +13,9 @@ Version: 		%{version}
 Release: 		%{release}%{?dist}
 Provides:               lanlgeomag
 Requires:               perl
+Requires:               check
+Requires:               gsl
+Requires:               hdf5
 Source: 		%{name}-%{version}.tar.gz
 Prefix: 		/usr
 Group: 			Applications/Science
@@ -21,7 +24,8 @@ Buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 
 %description
-The GNU wget program downloads files from the Internet using the command-line.
+LANLGeoMag is a C-based library of magnetic-field models and tools for computing quantities relevant to geophysical and geospace research that rely on these models. 
+More generally, the library provides functionality to perform high precision transforms between time standards and coordinate systems.
 
 %prep
 mkdir -p %{_topdir}/BUILD %{_topdir}/BUILDROOT
@@ -35,8 +39,8 @@ echo "__isa_bits is" "%{__isa_bits}"
 
 %build
 #./configure --prefix=/usr --disable-doxygen-html --disable-doxygen-pdf
-./configure --prefix=/usr
-make
+%configure --libdir=${RPM_BUILD_ROOT}%{_libdir} --prefix=${RPM_BUILD_ROOT}/usr --enable-doxygen-doc --enable-doxygen-pdf
+make -j
 
 %install
 #export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
@@ -47,7 +51,7 @@ echo buildroot is %{buildroot}
 echo _builddir is %{_builddir}
 #make prefix=${RPM_BUILD_ROOT}/usr install
 %makeinstall
-make prefix=${RPM_BUILD_ROOT}/usr install-html
+#make install 
 #make install-man
 #make doxygen-doc
 #mkdir -p %{buildroot}/share/doc/%{name}
@@ -59,6 +63,9 @@ make prefix=${RPM_BUILD_ROOT}/usr install-html
 %files
 %defattr(-,root,root)
 #%doc README HACKING NEWS COPYING
-#/home/markgalassi/rpmbuild/BUILDROOT/usr/*
-/usr/*
-#/usr/share/doc/lanlgeomag*
+/usr/include/Lgm/*
+/usr/lib64/libLanlGeoMag*
+/usr/lib64/pkgconfig/lgm.pc
+/usr/lib/python2.6/site-packages/lgmpy/*
+/usr/share/LanlGeoMag/*
+/usr/share/doc/lanlgeomag/*
