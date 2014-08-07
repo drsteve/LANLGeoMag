@@ -218,7 +218,7 @@ def GSMtoMLT(gsm, dt):
     return ans
 
 
-def getDipoleTilt(date):
+def getDipoleTilt(date, degrees=False):
     """
     returns the dipole tile angle in radians
 
@@ -247,6 +247,6 @@ def getDipoleTilt(date):
         utc = dateToFPHours(d)
         ans[i] = Lgm_Dipole_Tilt(datelong, utc)
     if len(ans) == 1:
-        return ans[0]
-    else:
-        return ans
+        ans = ans[0]
+    if degrees: ans = numpy.rad2deg(ans)
+    return ans
