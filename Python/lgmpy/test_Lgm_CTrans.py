@@ -138,19 +138,18 @@ class Lgm_CTransTests(unittest.TestCase):
         self.assertEqual(tst.yp, 0.0)
         self.assertEqual(tst.ddPsi, 0.0)
         self.assertEqual(tst.ddEps, 0.0)
-#
-#TODO: FIX THIS -- core dump on execution (Aug. 2014)
-#    def test_GSMtoMLT(self):
-#        """GSMtoMLT should give known output"""
-#        mlt = Lgm_CTrans.GSMtoMLT([1,0,0], datetime.datetime(2000, 1, 1))
-#        self.assertEqual(mlt, 12.0)
-#        mlt = Lgm_CTrans.GSMtoMLT([0,1,0], datetime.datetime(2000, 1, 1))
-#        self.assertAlmostEqual(mlt, 17.953729579055036)
-#        mlt = Lgm_CTrans.GSMtoMLT([0,1], datetime.datetime(2000, 1, 1))
-#        self.assertAlmostEqual(mlt, 17.953729579055036)
-#        mlt = Lgm_CTrans.GSMtoMLT([0], datetime.datetime(2000, 1, 1))
-#        self.assertAlmostEqual(mlt, 20.80272832231037)
-#
+
+    def test_GSMtoMLT(self):
+        """GSMtoMLT should give known output"""
+        mlt = Lgm_CTrans.GSMtoMLT([1,0,0], datetime.datetime(2000, 1, 1))
+        self.assertEqual(mlt, 12.0)
+        mlt = Lgm_CTrans.GSMtoMLT([0,1,0], datetime.datetime(2000, 1, 1))
+        self.assertAlmostEqual(mlt, 17.953729579055036)
+        mlt = Lgm_CTrans.GSMtoMLT([0,1], datetime.datetime(2000, 1, 1))
+        self.assertAlmostEqual(mlt, 17.953729579055036)
+        mlt = Lgm_CTrans.GSMtoMLT([0], datetime.datetime(2000, 1, 1))
+        self.assertAlmostEqual(mlt, 20.80272832231037)
+
     def test_getDipoleTilt(self):
         """getDipoleTilt should give known results"""
         dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2000, 1, 1))
