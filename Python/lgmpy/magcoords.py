@@ -18,7 +18,9 @@ from spacepy import datamodel
 
 
 from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-from Lgm_Wrap import TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE, MOD_TO_GSE, MOD_TO_WGS84, GEO_TO_GSM, GSE_TO_GEI2000, GEI2000_TO_GSM, GSM_TO_GEI2000, GEI2000_TO_GSE, GEO_TO_GSE, GSE_TO_GEO
+from Lgm_Wrap import SM_TO_GEI2000, SM_TO_TEME, SM_TO_TOD, SM_TO_MOD, TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE, MOD_TO_GSE, MOD_TO_WGS84, GEO_TO_GSM, GSE_TO_GEI2000, GEI2000_TO_GSM, GSM_TO_GEI2000, GEI2000_TO_GSE, GEO_TO_GSE, GSE_TO_GEO
+from Lgm_Wrap import GEO_TO_TEME, GEO_TO_TOD, GEO_TO_MOD, GEO_TO_GEI2000
+from Lgm_Wrap import GEI2000_TO_TOD, GEI2000_TO_MOD, GEI2000_TO_GEO, TOD_TO_GEO
 from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
 from lgmpy.Lstar import Lstar_Data
 
@@ -28,6 +30,7 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'GSM_SM': GSM_TO_SM,
                  'SM_GSE': SM_TO_GSE,
                  'GSE_SM': GSE_TO_SM,
+                 'TOD_GEO': TOD_TO_GEO,
                  'WGS84_GSM': WGS84_TO_GSM,
                  'GSM_WGS84': GSM_TO_WGS84,
                  'WGS84_GSE': WGS84_TO_GSE,
@@ -37,11 +40,22 @@ conv_dict = {'SM_GSM': SM_TO_GSM,
                  'TEME_WGS84': TEME_TO_WGS84,
                  'MOD_GSM' : MOD_TO_GSM,
                  'SM_GSE' : SM_TO_GSE,
+                 'SM_GEI2000' : SM_TO_GEI2000,
+                 'SM_TEME' : SM_TO_TEME,
+                 'SM_TOD' : SM_TO_TOD,
+                 'SM_MOD' : SM_TO_MOD,
                  'MOD_GSE' : MOD_TO_GSE,
                  'MOD_WGS84' : MOD_TO_WGS84,
                  'GEO_GSM' : GEO_TO_GSM,
+                 'GEO_MOD' : GEO_TO_MOD,
+                 'GEO_TOD' : GEO_TO_TOD,
+                 'GEO_TEME' : GEO_TO_TEME,
+                 'GEO_GEI2000' : GEO_TO_GEI2000,
                  'GSE_GEI2000' : GSE_TO_GEI2000,
                  'GEI2000_GSE' : GEI2000_TO_GSE,
+                 'GEI2000_GEO' : GEI2000_TO_GEO,
+                 'GEI2000_TOD' : GEI2000_TO_TOD,
+                 'GEI2000_MOD' : GEI2000_TO_MOD,
                  'GEI2000_GSM' : GEI2000_TO_GSM,
                  'GSM_GEI2000' : GSM_TO_GEI2000,
                  'GEO_GSE'     : GEO_TO_GSE,
