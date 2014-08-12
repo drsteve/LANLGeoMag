@@ -189,15 +189,14 @@ def GSMtoMLT(gsm, dt):
         Pgsm = Lgm_Vector.Lgm_Vector(*gsm)
         Pwgs = Lgm_Vector.Lgm_Vector()
         Pmlt = Lgm_Vector.Lgm_Vector()
-        # can use a smaller structure here
-        mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-        Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), mmi.c) # dont need pointer as it is one
+        cT = pointer(Lgm_CTrans())
+        Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), cT)
 
-        Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, mmi.c )
-        Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, mmi.c )
+        Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, cT )
+        Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, cT )
         R, MLat, MLon, MLT = c_double(), c_double(), c_double(), c_double(),
         Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon),
-            pointer(MLT), mmi.c)
+            pointer(MLT), cT)
         return MLT.value
 
     gsm_ = numpy.asanyarray(gsm)
