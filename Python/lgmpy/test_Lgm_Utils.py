@@ -20,9 +20,9 @@ class Lgm_Utils_Tests(unittest.TestCase):
         start = 1.
         stop = 100.
         Lgm_LogSpace(start, stop, len(a), a.ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
-        expected = [  1.        ,   1.58489319,   2.51188643,   3.98107171,
-         6.30957344,  10.        ,  15.84893192,  25.11886432,
-        39.81071706,  63.09573445]
+        expected = [   1.        ,    1.66810054,    2.7825594 ,    4.64158883,
+                       7.74263683,   12.91549665,   21.5443469 ,   35.93813664,
+                       59.94842503,  100.        ]
         np.testing.assert_array_almost_equal(expected, a)
 
     def test_Lgm_Bisect(self):
