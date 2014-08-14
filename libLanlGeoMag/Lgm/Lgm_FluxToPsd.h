@@ -84,9 +84,6 @@ static unsigned char Rainbow3_Blu[] = {
 ,0,0,0,0,0,0,0,0,0,0};
 
 
-#define LGM_Ee0     0.510998910  // Electron rest energy in MeV
-#define LGM_Ep0   938.27201323   // Proton rest energy in MeV
-
 typedef unsigned char byte; // needed for gif writer
 
 typedef struct Lgm_FluxToPsd {
