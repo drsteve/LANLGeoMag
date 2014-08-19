@@ -18,4 +18,8 @@
 #define WGS84_1mE2      0.993305619995739       // 1 - WGS84_E2
 
 
+#define WGS84_Re        6371.00                 // Volumetic mean? Radius that gives same spherical volume as in 
+                                                // the WGS84 ellipsoid. I.e. 4/3 pi WGS84_Re^3 = 4/3 pi WGS84_A * WGS84_B^2
+
+
 #endif
