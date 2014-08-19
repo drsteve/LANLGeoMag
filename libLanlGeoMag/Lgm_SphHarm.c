@@ -103,7 +103,7 @@ void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
     double          st, ct, sp, cp, t;
-    double          val, val2, Cmp[13], Smp[13], f2[13], rinv, Pnn[13], dPnn[13];
+    double          val, val2, Cmp[14], Smp[14], f2[14], rinv, Pnn[14], dPnn[14];
     int             N;
     register double P_n_m, P_nm1_m, P_nm1_mm1, P_nm2_m;
     register double dP_n_m, dP_nm1_m, dP_nm1_mm1, dP_nm2_m;
@@ -247,7 +247,7 @@ void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 }
 
 
-void Lgm_InitSphHarm( int Model, double g[13][13], double h[13][13], int N, int Flag, Lgm_CTrans *c ){
+void Lgm_InitSphHarm( int Model, double g[14][14], double h[14][14], int N, int Flag, Lgm_CTrans *c ){
 
     double          Year;
     double          g0, g1, h0, h1, gs, hs, y0, y1;
