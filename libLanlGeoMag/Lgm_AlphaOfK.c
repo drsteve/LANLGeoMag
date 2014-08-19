@@ -94,7 +94,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
 
 
         if ( !InitSpline( m ) ) {
-            if (m->VerbosityLevel >= 2) {}printf("Lgm_Setup_AlphaOfK(): Could not initialize spline curve\n");
+            if (m->VerbosityLevel >= 2) {printf("Lgm_Setup_AlphaOfK(): Could not initialize spline curve\n");}
             return(-5);
         }
 

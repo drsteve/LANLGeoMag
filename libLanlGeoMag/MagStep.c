@@ -614,24 +614,24 @@ int Lgm_MagStep_RK5( Lgm_Vector *u, Lgm_Vector *u_scale,
      */
     h  = Htry;
     u0 = *u;
-//printf("u = %g %g %g\n", u->x, u->y, u->z);
+//printf("RK5: u = %g %g %g;   u_scale = %g %g %g\n", u->x, u->y, u->z, u_scale->x, u_scale->y, u_scale->z);
     yerr[0] = yerr[1] = yerr[2] = 0.0;
     yscal[0] = u_scale->x; yscal[1] = u_scale->y; yscal[2] = u_scale->z;
-yscal[0] = 100.0;
-yscal[1] = 100.0;
-yscal[2] = 100.0;
+//yscal[0] = 100.0;
+//yscal[1] = 100.0;
+//yscal[2] = 100.0;
 
     // get b0
     if ( (*Mag)(&u0, &b0, Info) == 0 ) {
         // bail if B-field eval had issues.
-        printf("Lgm_RK5(): B-field evaluation during cash-karp step (u = %g %g %g) returned with errors (returning with 0)\n", u0.x, u0.y, u0.z );
+        printf("Lgm_RK5(): B-field evaluation (u = %g %g %g) returned with errors (returning with 0)\n", u0.x, u0.y, u0.z );
         return(0);
     }
     ++(Info->Lgm_nMagEvals);
     Bmag = Lgm_NormalizeVector(&b0);
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
-        printf("Lgm_RK5(): Bmag too small during cash-karp phase (u = %g %g %g Bmag = %g) is too small (returning with 0).\n", u0.x, u0.y, u0.z, Bmag );
+        printf("Lgm_RK5(): Bmag too small (u = %g %g %g Bmag = %g) is too small (returning with 0).\n", u0.x, u0.y, u0.z, Bmag );
         return(0);
     }
 
@@ -642,7 +642,7 @@ yscal[2] = 100.0;
         /*
          * Take a Cash-Karp Runge-Kutta step (take point from u0->v )
          */
-//printf("h = %g\n", h);
+//printf("RK5 C-K: h = %g\n", h);
         Lgm_RKCK( &u0, &b0, &v, h, sgn, yerr, Mag, Info );
 
 
@@ -729,7 +729,7 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
 
     //double  dc1 = c1-2825.0/27648.0, dc3 = c3-18575.0/48384.0, dc4 = c4-13525.0/55296.0, dc5 = -277.00/14336.0, dc6 = c6-0.25;
     double  dc1 = -0.00429377480158730159;
-    double  dc3 =  0.01866858609385783299; // unused?????????
+    double  dc3 =  0.01866858609385783299; 
     double  dc4 = -0.03415502683080808080;
     double  dc5 = -0.01932198660714285714;
     double  dc6 =  0.03910220214568040654;
@@ -885,7 +885,7 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
 
     // compute yerr
     for ( i=0; i<3; i++ ) {
-        yerr[i] = H*(dc1*ak1[i] + c3*ak3[i] + dc4*ak4[i] + dc5*ak5[i] + dc6*ak6[i]);
+        yerr[i] = H*(dc1*ak1[i] + dc3*ak3[i] + dc4*ak4[i] + dc5*ak5[i] + dc6*ak6[i]);
     }
 
 

@@ -31,7 +31,7 @@ from test_Bfield_dict import *
 from test_Lgm_DateAndTime import *
 from test_quicksort import *
 from test_Lgm_Utils import *
-from test_IsoTimeStringToDateTime.py import *
+from test_IsoTimeStringToDateTime import *
 # add others here as they exist
 
 if __name__ == '__main__':

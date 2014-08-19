@@ -3,11 +3,6 @@
 """
 Test suite for the Lgm_CTrans file <<This is an important one>>
 
-@author: Brian Larsen
-@organization: LANL
-@contact: balarsen@lanl.gov
-
-@version: V1: 20-Dec-2010 (BAL)
 """
 
 import ctypes
@@ -21,11 +16,6 @@ from Lgm_Wrap import size_MagModelInfo, TRUE, LGM_ABSOLUTE_JUMP_METHOD, DQAGS, \
 class Lgm_MagModelInfoTests(unittest.TestCase):
     """
     Tests related to Lgm_MagModelInfo
-    @author: Brian Larsen
-    @organization: LANL
-    @contact: balarsen@lanl.gov
-
-    @version: V1: 10-Jan-2011 (BAL)
     """
 
     def setUp(self):

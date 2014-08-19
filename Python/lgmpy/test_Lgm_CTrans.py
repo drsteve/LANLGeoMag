@@ -99,6 +99,7 @@ class Lgm_CTransTests(unittest.TestCase):
         """dateToDateLong should give known results for known input"""
         d1 = datetime.datetime(2000, 12, 12)
         self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1))
+        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong([d1]))
         self.assertEqual([20001212L, 20001212L], Lgm_CTrans.dateToDateLong([d1, d1]))
         self.assertEqual([20001212L, 20001212L],
             Lgm_CTrans.dateToDateLong(numpy.array([d1, d1])).tolist())
@@ -107,6 +108,7 @@ class Lgm_CTransTests(unittest.TestCase):
     def test_dateLongToDate(self):
         """dateLongToDate should give known output"""
         self.assertEqual(Lgm_CTrans.dateLongToDate(20001223), datetime.datetime(2000, 12, 23, 0, 0))
+        self.assertEqual(Lgm_CTrans.dateLongToDate([20001223]), datetime.datetime(2000, 12, 23, 0, 0))
         self.assertEqual(Lgm_CTrans.dateLongToDate([20001223]*2),
                          [datetime.datetime(2000, 12, 23, 0, 0), datetime.datetime(2000, 12, 23, 0, 0)])
         numpy.testing.assert_array_equal(Lgm_CTrans.dateLongToDate(numpy.array([20001223]*2)),
@@ -119,16 +121,13 @@ class Lgm_CTransTests(unittest.TestCase):
         for val in range(24):
             self.assertEqual(val,
                 Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, val)))
-        self.assertEqual(12.5,
-            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 30)))
-        self.assertEqual(12.25,
-            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 15)))
-        self.assertEqual(12.75,
-            Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 45)))
+        self.assertEqual(12.5,  Lgm_CTrans.dateToFPHours([datetime.datetime(2000, 12, 12, 12, 30)]))
+        self.assertEqual(12.5,  Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 30)))
+        self.assertEqual(12.25, Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 15)))
+        self.assertEqual(12.75, Lgm_CTrans.dateToFPHours(datetime.datetime(2000, 12, 12, 12, 45)))
         d1 = datetime.datetime(2000, 12, 12, 12, 30)
         self.assertEqual([12.5, 12.5], Lgm_CTrans.dateToFPHours([d1, d1]))
-        self.assertEqual([12.5, 12.5],
-            Lgm_CTrans.dateToFPHours(numpy.array([d1, d1])).tolist())
+        self.assertEqual([12.5, 12.5], Lgm_CTrans.dateToFPHours(numpy.array([d1, d1])).tolist())
 
     def test_init_vals(self):
         """__init__ sets upa few valiues (regression)"""

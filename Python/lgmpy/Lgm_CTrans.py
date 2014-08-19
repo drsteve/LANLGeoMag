@@ -4,9 +4,6 @@ Overview
 Lgm_CTrans module, this contains the necessary code for coordinate
 transformations in Lgm
 
-    Authors
-    -------
-    Brian Larsen - LANL
 """
 
 from __future__ import division
@@ -78,8 +75,7 @@ class Lgm_CTrans(Lgm_CTrans):
 
 def dateToDateLong(inval):
     """
-    convert a python date or datetime object to a Date (long) object that
-    LanlGeoMag Likes to use
+    convert a python date or datetime object to a LanlGeoMag's (long int) date format
 
     Parameters
     ----------
@@ -99,25 +95,23 @@ def dateToDateLong(inval):
     20001213L
     """
     try:
-        if len(inval) > 1:
-            if isinstance(inval, numpy.ndarray):
-                return numpy.array([long(val.strftime('%Y%m%d')) for val in inval])
-            else:
-                return [long(val.strftime('%Y%m%d')) for val in inval]
-    except:
         if isinstance(inval, numpy.ndarray):
-            inval = inval.item()
-        return long(inval.strftime('%Y%m%d'))
+            retval = numpy.array([long(val.strftime('%Y%m%d')) for val in inval])
+        else:
+            retval = [long(val.strftime('%Y%m%d')) for val in inval]
+        if len(retval)==1: retval=retval[0]
+    except: #not iterable
+        retval = long(inval.strftime('%Y%m%d'))
+    return retval
 
 def dateLongToDate(inval):
     """
-    convert a python date or datetime object to a Date (long) object that
-    LanlGeoMag Likes to use
+    convert a python date or datetime object from a Date (long) object
 
     Parameters
     ----------
     inval : dateLong, int
-        int to change to a datetime object
+        int/long to change to a datetime object
 
     Returns
     -------
@@ -125,13 +119,14 @@ def dateLongToDate(inval):
         datetime or list of datetime corresponding to the dateLongs
     """
     try:
-        if len(inval) > 1:
-            if isinstance(inval, numpy.ndarray):
-                return numpy.array([datetime.datetime.strptime(str(val), '%Y%m%d') for val in inval])
-            else:
-                return [datetime.datetime.strptime(str(val), '%Y%m%d') for val in inval]
-    except:
-        return datetime.datetime.strptime(str(inval), '%Y%m%d')
+        if isinstance(inval, numpy.ndarray):
+            retval = numpy.array([datetime.datetime.strptime('{0}'.format(val), '%Y%m%d') for val in inval])
+        else:
+            retval = [datetime.datetime.strptime('{0}'.format(val), '%Y%m%d') for val in inval]
+        if len(retval)==1: retval=retval[0]
+    except: #not iterable
+        retval = datetime.datetime.strptime('{0}'.format(inval), '%Y%m%d')
+    return retval
 
 def dateToFPHours(inval):
     """
@@ -161,20 +156,17 @@ def dateToFPHours(inval):
     12.5
     """
     try:
-        if len(inval) > 1:
-            lst = [val.hour + val.minute/60 +
-                                    val.second/60/60 +
-                                    val.microsecond/60/60/1000000 for val in inval]
-            if isinstance(inval, numpy.ndarray):
-                return numpy.array(lst)
-            else:
-                return lst
-    except TypeError:
+        lst = [val.hour + val.minute/60 +
+                                val.second/60/60 +
+                                val.microsecond/60/60/1000000 for val in inval]
         if isinstance(inval, numpy.ndarray):
-            inval = inval.item()
-        return inval.hour + inval.minute/60 + \
-                                    inval.second/60/60 + \
-                                    inval.microsecond/60/60/1000000
+            retval = numpy.array(lst)
+        else:
+            retval = lst
+        if len(retval)==1: retval=retval[0]
+    except TypeError:
+        retval = inval.hour + inval.minute/60 + inval.second/60/60 + inval.microsecond/60/60/1000000
+    return retval
 
 
 def GSMtoMLT(gsm, dt):
@@ -197,19 +189,21 @@ def GSMtoMLT(gsm, dt):
         Pgsm = Lgm_Vector.Lgm_Vector(*gsm)
         Pwgs = Lgm_Vector.Lgm_Vector()
         Pmlt = Lgm_Vector.Lgm_Vector()
-        # can use a smaller structure here
-        mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
-        Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), mmi.c) # dont need pointer as it is one
+        cT = pointer(Lgm_CTrans())
+        Lgm_Set_Coord_Transforms( dateToDateLong(dt), dateToFPHours(dt), cT)
 
-        Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, mmi.c )
-        Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, mmi.c )
+        Lgm_Convert_Coords( pointer(Pgsm), pointer(Pwgs), GSM_TO_WGS84, cT )
+        Lgm_Convert_Coords( pointer(Pwgs), pointer(Pmlt), WGS84_TO_EDMAG, cT )
         R, MLat, MLon, MLT = c_double(), c_double(), c_double(), c_double(),
         Lgm_EDMAG_to_R_MLAT_MLON_MLT( pointer(Pmlt),  pointer(R), pointer(MLat), pointer(MLon),
-            pointer(MLT), mmi.c)
+            pointer(MLT), cT)
         return MLT.value
 
     gsm_ = numpy.asanyarray(gsm)
-    dt_ = numpy.asanyarray(dt)
+    if isinstance(dt, datetime.datetime):
+        dt_ = numpy.asanyarray([dt])
+    else:
+        dt_ = numpy.asanyarray(dt)
     if gsm_.ndim == 2:
         if gsm_.shape[1] != 3:
             raise(ValueError("Invalid vector shape"))
@@ -222,11 +216,14 @@ def GSMtoMLT(gsm, dt):
         for ii, (gsm_val, dt_val) in enumerate(itertools.izip(gsm_, dt_)):
             ans[ii] = doConv(gsm_val, dt_val)
     else:
-        ans = dm.dmarray(doConv(gsm_, dt_), attrs={'coord_system': 'EDMAG'})
+        if dt_.size==1:
+            ans = dm.dmarray([doConv(gsm_, dt_)], attrs={'coord_system': 'EDMAG'})
+        else:
+            ans = dm.dmarray(doConv(gsm_, dt_), attrs={'coord_system': 'EDMAG'})
     return ans
 
 
-def getDipoleTilt(date):
+def getDipoleTilt(date, degrees=False):
     """
     returns the dipole tile angle in radians
 
@@ -255,6 +252,6 @@ def getDipoleTilt(date):
         utc = dateToFPHours(d)
         ans[i] = Lgm_Dipole_Tilt(datelong, utc)
     if len(ans) == 1:
-        return ans[0]
-    else:
-        return ans
+        ans = ans[0]
+    if degrees: ans = numpy.rad2deg(ans)
+    return ans

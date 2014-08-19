@@ -27,7 +27,7 @@ import spacepy.toolbox as tb
 
 import Lgm_Wrap
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
-    SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
+    Lgm_SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
     LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children, \
     Lgm_ComputeLstarVersusPA, Lgm_B_TS04, Lgm_B_T96, Lgm_QinDentonOne, Lgm_set_QinDenton, Lgm_get_QinDenton_at_JD
 from Lgm_Wrap import Lstar as Lgm_Lstar
@@ -341,7 +341,7 @@ def get_Lstar(pos, date, alpha = 90.,
         MagEphemInfo.Alpha[i] = Alpha[i]
 
     # Set Tolerances
-    SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
+    Lgm_SetLstarTolerances(LstarQuality, 24, MagEphemInfo.LstarInfo )
     # *  Blocal at sat location
     MagEphemInfo.P = Pgsm
 
@@ -770,7 +770,7 @@ def get_Lstar_General(pos, date, alpha = 90.,
         MagEphemInfo.Alpha[i] = Alpha[i]
 
     # Set Tolerances
-    SetLstarTolerances(LstarQuality, MagEphemInfo.LstarInfo )
+    Lgm_SetLstarTolerances(LstarQuality, 24, MagEphemInfo.LstarInfo )
     # *  Blocal at sat location
     MagEphemInfo.P = Pgsm
 
