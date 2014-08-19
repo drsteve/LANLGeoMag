@@ -1368,17 +1368,22 @@ afi->BODY = BODY;
 
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
 
-                        // do the propagation
-                        tsince = (UTC.JD - tle[10].JD)*1440.0;
-                        LgmSgp_SGP4( tsince, sgp );
 
 
 // Lets just see what TLE we actually would get by searching...
 int tiii = LgmSgp_FindTLEforGivenTime( nTle, tle, 1, UTC.JD, 1 );
 if (tiii < 0 ) tiii = 0;
 printf("tle index to use: %d  tsince = %g    (prev, next = %g %g)\n", tiii, (UTC.JD - tle[tiii].JD)*1440.0, (UTC.JD - tle[tiii-1].JD)*1440.0, (UTC.JD - tle[tiii+1].JD)*1440.0);
+printf("Line0: %s\n", tle[tiii].Line0 );
+printf("Line1: %s\n", tle[tiii].Line1 );
+printf("Line2: %s\n", tle[tiii].Line2 );
+
+                        LgmSgp_SGP4_Init( sgp, &tle[tiii] );
 
 
+                        // do the propagation
+                        tsince = (UTC.JD - tle[tiii].JD)*1440.0;
+                        LgmSgp_SGP4( tsince, sgp );
 
 
 

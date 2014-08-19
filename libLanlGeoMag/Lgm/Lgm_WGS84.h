@@ -20,6 +20,7 @@
 
 #define WGS84_Re        6371.00                 // Volumetic mean? Radius that gives same spherical volume as in 
                                                 // the WGS84 ellipsoid. I.e. 4/3 pi WGS84_Re^3 = 4/3 pi WGS84_A * WGS84_B^2
+                                                // Note: IGRF uses a "magnetic reference spherical radius of 6371.2 km".
 
 
 #endif

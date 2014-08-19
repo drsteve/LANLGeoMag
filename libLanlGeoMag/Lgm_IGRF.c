@@ -47,11 +47,34 @@
 
 
 
-void Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
+void Lgm_IGRF( Lgm_Vector *vin, Lgm_Vector *B, Lgm_CTrans *c ) {
 
-    double    x[7], y[7], z[7], t[7], e;
-    int       i, n;
-    Lgm_Vector    w;
+    double      x[7], y[7], z[7], t[7], e;
+    int         i, n;
+    Lgm_Vector  v, w;
+
+
+    /*
+     * For various reasons, LGM adopted a definition of an Earth radius as the
+     * WGS84_A value (the equatorial radius). However, in the mathematical
+     * formulation of the IGRF model, the value of "a, the magnetic reference
+     * spherical radius" in the scalar potential equation is taken as 6371.2
+     * km.  Therefore, to get the proper r value into the IGRF equations, we
+     * need to rescale the input r value. See Finlay et al., International
+     * Geomagnetic Reference Field: the eleventh generation, Geophys. J. Int.
+     * (2010) 183, 1216–1230, doi: 10.1111/j.1365-246X.2010.04804.x 
+     */
+    v = *vin;
+    v.x *= Re;     // convert r back to km
+    v.x /= 6371.2; // convert r to have units of IGRF_A
+
+
+
+
+
+
+
+
 
     /*
      *  Since there is a singularity at the pole, we should
@@ -60,24 +83,24 @@ void Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
      *  away from the pole.
      *
      */
-    if ( fabs( v->y*RadPerDeg ) < 1e-4 ) {
+    if ( fabs( v.y*RadPerDeg ) < 1e-4 ) {
         for (n=0, i=-3; i<=3; ++i){
             if (i != 0) {
                 t[n] = 1e-4*(double)i;
                 //t[n] = 5.0*RadPerDeg*(double)i;
-                w.x = v->x; w.y = t[n]; w.z = v->z;
+                w.x = v.x; w.y = t[n]; w.z = v.z;
                 _Lgm_IGRF4( &w, B, c );
                 x[n] = B->x; y[n] = B->y; z[n] = B->z;
                 ++n;
             }
         }
-        Lgm_PolFunInt( t, x, 6, v->y, &(B->x), &e);
-        Lgm_PolFunInt( t, y, 6, v->y, &(B->y), &e);
-        Lgm_PolFunInt( t, z, 6, v->y, &(B->z), &e);
+        Lgm_PolFunInt( t, x, 6, v.y, &(B->x), &e);
+        Lgm_PolFunInt( t, y, 6, v.y, &(B->y), &e);
+        Lgm_PolFunInt( t, z, 6, v.y, &(B->z), &e);
 
     } else {
 
-        _Lgm_IGRF4( v, B, c );
+        _Lgm_IGRF4( &v, B, c );
 
     }
 
