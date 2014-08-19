@@ -92,6 +92,8 @@ int main(){
     printf( "       Bx,By,Bz in GSM: %20.14lf  %20.14lf  %20.14lf\n", B.x, B.y, B.z );
     printf( "                   |B|: %20.14lf\n", Lgm_Magnitude( &B ) );
 
+    printf( "   http://www.ngdc.noaa.gov/geomag-web/#igrfwmm value for |B|: %20.14lf\n",  50371.8 );
+
 
 
 
