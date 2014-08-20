@@ -47,11 +47,34 @@
 
 
 
-void Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
+void Lgm_IGRF( Lgm_Vector *vin, Lgm_Vector *B, Lgm_CTrans *c ) {
 
-    double    x[7], y[7], z[7], t[7], e;
-    int       i, n;
-    Lgm_Vector    w;
+    double      x[7], y[7], z[7], t[7], e;
+    int         i, n;
+    Lgm_Vector  v, w;
+
+
+    /*
+     * For various reasons, LGM adopted a definition of an Earth radius as the
+     * WGS84_A value (the equatorial radius). However, in the mathematical
+     * formulation of the IGRF model, the value of "a, the magnetic reference
+     * spherical radius" in the scalar potential equation is taken as 6371.2
+     * km.  Therefore, to get the proper r value into the IGRF equations, we
+     * need to rescale the input r value. See Finlay et al., International
+     * Geomagnetic Reference Field: the eleventh generation, Geophys. J. Int.
+     * (2010) 183, 1216–1230, doi: 10.1111/j.1365-246X.2010.04804.x 
+     */
+    v = *vin;
+    v.x *= Re;     // convert r back to km
+    v.x /= 6371.2; // convert r to have units of IGRF_A
+
+
+
+
+
+
+
+
 
     /*
      *  Since there is a singularity at the pole, we should
@@ -60,24 +83,24 @@ void Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
      *  away from the pole.
      *
      */
-    if ( fabs( v->y*RadPerDeg ) < 1e-4 ) {
+    if ( fabs( v.y*RadPerDeg ) < 1e-4 ) {
         for (n=0, i=-3; i<=3; ++i){
             if (i != 0) {
                 t[n] = 1e-4*(double)i;
                 //t[n] = 5.0*RadPerDeg*(double)i;
-                w.x = v->x; w.y = t[n]; w.z = v->z;
+                w.x = v.x; w.y = t[n]; w.z = v.z;
                 _Lgm_IGRF4( &w, B, c );
                 x[n] = B->x; y[n] = B->y; z[n] = B->z;
                 ++n;
             }
         }
-        Lgm_PolFunInt( t, x, 6, v->y, &(B->x), &e);
-        Lgm_PolFunInt( t, y, 6, v->y, &(B->y), &e);
-        Lgm_PolFunInt( t, z, 6, v->y, &(B->z), &e);
+        Lgm_PolFunInt( t, x, 6, v.y, &(B->x), &e);
+        Lgm_PolFunInt( t, y, 6, v.y, &(B->y), &e);
+        Lgm_PolFunInt( t, z, 6, v.y, &(B->z), &e);
 
     } else {
 
-        _Lgm_IGRF4( v, B, c );
+        _Lgm_IGRF4( &v, B, c );
 
     }
 
@@ -89,7 +112,7 @@ void    _Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
     double          st, ct, sp, cp, t;
-    double          P[13][13], dP[13][13], Cmp[13], Smp[13], f1[13][13], f2[13], rinv;
+    double          P[14][14], dP[14][14], Cmp[14], Smp[14], f1[14][14], f2[14], rinv;
     int             N;
     register double nsum, msum;
     register int    n, m;
@@ -121,7 +144,7 @@ void    _Lgm_IGRF( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
     /*
      *  IGRF 2005 goes up to N=13, but 10 ought to be good enough for our purposes?
      */
-    N = 10;
+    N = 13;
     Lgm_InitIGRF(c->Lgm_IGRF_g, c->Lgm_IGRF_h, N, c->Lgm_IGRF_FirstCall, c);
 
 
@@ -218,7 +241,7 @@ void    _Lgm_IGRF2( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
     double          st, ct, sp, cp, t;
-    double          val, val2, Cmp[13], Smp[13], f2[13], rinv;
+    double          val, val2, Cmp[14], Smp[14], f2[14], rinv;
     int             N;
     register double P_n_m, P_nm1_m, P_nm1_mm1, P_nm2_m;
     register double dP_n_m, dP_nm1_m, dP_nm1_mm1, dP_nm2_m;
@@ -227,7 +250,7 @@ void    _Lgm_IGRF2( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
     /*
      *  IGRF 2005 goes up to N=13, but 10 ought to be good enough for our purposes?
      */
-    N = 10;
+    N = 13;
     Lgm_InitIGRF( c->Lgm_IGRF_g, c->Lgm_IGRF_h, N, c->Lgm_IGRF_FirstCall, c);
 
 
@@ -361,7 +384,7 @@ void    _Lgm_IGRF3( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
     double          st, ct, sp, cp, t;
-    double          val, val2, Cmp[13], Smp[13], f2[13], rinv, Pnn[13], dPnn[13], g, h;
+    double          val, val2, Cmp[14], Smp[14], f2[14], rinv, Pnn[14], dPnn[14], g, h;
     int             N, nmin;
     //register double P_n_m, P_nm1_m, P_nm1_mm1, P_nm2_m;
     //register double dP_n_m, dP_nm1_m, dP_nm1_mm1, dP_nm2_m;
@@ -373,7 +396,7 @@ void    _Lgm_IGRF3( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
     /*
      *  IGRF 2005 goes up to N=13, but 10 ought to be good enough for our purposes?
      */
-    N = 10;
+    N = 13;
     Lgm_InitIGRF( c->Lgm_IGRF_g, c->Lgm_IGRF_h, N, c->Lgm_IGRF_FirstCall, c);
 
 
@@ -536,7 +559,7 @@ void    _Lgm_IGRF4( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     double          r, Theta, Phi, B_r, B_theta, B_phi;
     double          st, ct, sp, cp, t, gnm, hnm, Knm;
-    double          val, val2, val3, Cmp_m, Smp_m, Cmp[13], Smp[13], f2[13], rinv, Pnn[13], dPnn[13];
+    double          val, val2, val3, Cmp_m, Smp_m, Cmp[14], Smp[14], f2[14], rinv, Pnn[14], dPnn[14];
     int             N;
     register double P_n_m, P_nm1_m, P_nm1_mm1, P_nm2_m;
     register double dP_n_m, dP_nm1_m, dP_nm1_mm1, dP_nm2_m;
@@ -545,7 +568,7 @@ void    _Lgm_IGRF4( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
     /*
      *  IGRF 2005 goes up to N=13, but 10 ought to be good enough for our purposes?
      */
-    N = 10;
+    N = 13;
     Lgm_InitIGRF( c->Lgm_IGRF_g, c->Lgm_IGRF_h, N, c->Lgm_IGRF_FirstCall, c);
 
 
@@ -688,7 +711,7 @@ void    _Lgm_IGRF4( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
 
 
-void Lgm_InitPnm( double ct, double st, double R[13][13], double P[13][13], double dP[13][13], int N, Lgm_CTrans *c ) {
+void Lgm_InitPnm( double ct, double st, double R[14][14], double P[14][14], double dP[14][14], int N, Lgm_CTrans *c ) {
 
     double         Pmm, Pmp1m, Pnm, Pnm1m, Pnm2m, a, b, f, x, x2;
     int            NmM, Nm1, Mp1;
@@ -819,7 +842,7 @@ we dont really need this if we set everything below
 
 
 
-void Lgm_InitdPnm( double P[13][13], double dP[13][13], int N, Lgm_CTrans *c ) {
+void Lgm_InitdPnm( double P[14][14], double dP[14][14], int N, Lgm_CTrans *c ) {
 
     int             n, m;
 //    static double   SqrtNM1[13][13], SqrtNM2[13][13];
@@ -859,7 +882,7 @@ void Lgm_InitdPnm( double P[13][13], double dP[13][13], int N, Lgm_CTrans *c ) {
 
 
 
-void Lgm_InitSqrtFuncs( double SqrtNM1[13][13], double SqrtNM2[13][13], int N ) {
+void Lgm_InitSqrtFuncs( double SqrtNM1[14][14], double SqrtNM2[14][14], int N ) {
 
     int    n, m, q, NmM, NpM;
 
@@ -936,7 +959,7 @@ void Lgm_InitTrigmp( double cp, double sp, double *Cmp, double *Smp, int N ) {
     
 
 }
-void Lgm_InitS( double S[13][13], int N ) {
+void Lgm_InitS( double S[14][14], int N ) {
 
     register int n, m;
     int          nm1, nm1_2;
@@ -971,7 +994,7 @@ void Lgm_InitS( double S[13][13], int N ) {
 
 }
 
-void Lgm_InitK( double K[13][13], int N ) {
+void Lgm_InitK( double K[14][14], int N ) {
 
     register int n, m;
     int          nm1, nm1_2;
@@ -993,7 +1016,7 @@ void Lgm_InitK( double K[13][13], int N ) {
 }
 
 
-void Lgm_InitIGRF( double g[13][13], double h[13][13], int N, int Flag, Lgm_CTrans *c ){
+void Lgm_InitIGRF( double g[14][14], double h[14][14], int N, int Flag, Lgm_CTrans *c ){
 
     double          Year;
     double          g0, g1, h0, h1, gs, hs, y0, y1;

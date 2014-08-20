@@ -712,15 +712,15 @@ typedef struct Lgm_CTrans {
      */
     int         Lgm_IGRF_FirstCall;
     double      Lgm_IGRF_OldYear;
-    double      Lgm_IGRF_g[13][13];
-    double      Lgm_IGRF_h[13][13];
-    double      Lgm_IGRF_R[13][13];
-    double      Lgm_IGRF_K[13][13];
-    double      Lgm_IGRF_S[13][13];
-    double      Lgm_IGRF_TwoNm1_Over_NmM[13][13];
-    double      Lgm_IGRF_NpMm1_Over_NmM[13][13];
-    double      Lgm_IGRF_SqrtNM1[13][13];
-    double      Lgm_IGRF_SqrtNM2[13][13];
+    double      Lgm_IGRF_g[14][14];
+    double      Lgm_IGRF_h[14][14];
+    double      Lgm_IGRF_R[14][14];
+    double      Lgm_IGRF_K[14][14];
+    double      Lgm_IGRF_S[14][14];
+    double      Lgm_IGRF_TwoNm1_Over_NmM[14][14];
+    double      Lgm_IGRF_NpMm1_Over_NmM[14][14];
+    double      Lgm_IGRF_SqrtNM1[14][14];
+    double      Lgm_IGRF_SqrtNM2[14][14];
 
 
 
@@ -871,8 +871,8 @@ void    Lgm_B_JensenCain1960_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c)
  *  IGRF prototypes
  */
 double  Lgm_Factorial( int );
-void    Lgm_InitIGRF( double g[13][13], double h[13][13], int N, int Flag, Lgm_CTrans *c );
-void    Lgm_InitPnm( double ct, double st, double R[13][13], double P[13][13], double dP[13][13], int N, Lgm_CTrans *c );
+void    Lgm_InitIGRF( double g[14][14], double h[14][14], int N, int Flag, Lgm_CTrans *c );
+void    Lgm_InitPnm( double ct, double st, double R[14][14], double P[14][14], double dP[14][14], int N, Lgm_CTrans *c );
 void    Lgm_InitTrigmp( double , double , double *, double *, int );
 void    Lgm_PolFunInt( double *, double *, int, double, double *, double * );
 void    Lgm_RatFunInt( double *, double *, int, double, double *, double * );
@@ -882,16 +882,16 @@ void    _Lgm_IGRF2( Lgm_Vector *, Lgm_Vector *, Lgm_CTrans * );
 void    _Lgm_IGRF3( Lgm_Vector *, Lgm_Vector *, Lgm_CTrans * );
 void    _Lgm_IGRF4( Lgm_Vector *, Lgm_Vector *, Lgm_CTrans * );
 
-void   Lgm_InitdPnm( double P[13][13], double dP[13][13], int N, Lgm_CTrans *c );
-void   Lgm_InitSqrtFuncs( double SqrtNM1[13][13], double SqrtNM2[13][13], int N );
-void   Lgm_InitK( double K[13][13], int N );
-void   Lgm_InitS( double S[13][13], int N );
+void   Lgm_InitdPnm( double P[14][14], double dP[14][14], int N, Lgm_CTrans *c );
+void   Lgm_InitSqrtFuncs( double SqrtNM1[14][14], double SqrtNM2[14][14], int N );
+void   Lgm_InitK( double K[14][14], int N );
+void   Lgm_InitS( double S[14][14], int N );
 
 
 /*
  *  Additional Sph Harmonic models
  */
-void    Lgm_InitSphHarm( int Model, double g[13][13], double h[13][13], int N, int Flag, Lgm_CTrans *c );
+void    Lgm_InitSphHarm( int Model, double g[14][14], double h[14][14], int N, int Flag, Lgm_CTrans *c );
 void    Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 

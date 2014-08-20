@@ -375,7 +375,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     double 	    Lmoon_0, P0, N0, Imoon, Lmoon, Mmoon_m, Nmoon, Cmoon;
     double 	    Emoon_nu, Amoon_e, Amoon_3, Mmoon_mp, Emoon_c, amoon, emoon;
     double 	    Amoon_4, Lmoon_p, Vmoon, Lmoon_pp, Nmoon_p, LambdaMoon, BetaMoon;
-    double	    g[13][13], h[13][13], Tmp[3][3];
+    double	    g[14][14], h[14][14], Tmp[3][3];
     double  	l, r, b;
     double  	varep90, varpi90;
     double  	Zeta, Theta, Zee;
@@ -1525,6 +1525,9 @@ void Lgm_B_igrf_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     /*
      *  compute GEO (WGS84) geocentric speherical coords. (r, theta, phi)  theta is colat
      */
+//    w.x *= Re; w.x /= 6371.2;
+//    w.y *= Re; w.y /= 6371.2;
+//    w.z *= Re; w.z /= 6371.2;
     r     = sqrt(w.x*w.x + w.y*w.y + w.z*w.z );
     theta = acos( w.z / r );
     phi   = atan2(w.y, w.x);

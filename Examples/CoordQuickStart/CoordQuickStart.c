@@ -9,8 +9,8 @@ int main( ) {
     long int    Date;
     double      UTC, Lat, Lon, r;
     
-    Date = 20000101;    // Jan 1, 2000
-    UTC  = 11.2;         // Universal Time Coordinated (in decimal hours)
+    Date = 20130101;    // Jan 1, 2000
+    UTC  = 22.0+10.0/60.0;         // Universal Time Coordinated (in decimal hours)
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     // Set up all the necessary variables to do transformations for this Date and UTC

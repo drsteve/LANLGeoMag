@@ -22,6 +22,7 @@ int main( int argc, char *argv[] ){
     Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 20);
     FILE             *fp;
 
+    mmi->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 
     // Date and UTC
     Date       = 20000701;
@@ -34,8 +35,10 @@ int main( int argc, char *argv[] ){
 //    Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, c );
 
 MagEphemInfo->LstarInfo->LSimpleMax = 20.0;
+MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 
 P.x = -18.53;
+P.x = 10.815;
 P.y = 0.0;
 P.z = 0.0;
 double xxx;
@@ -129,7 +132,7 @@ Lgm_Convert_Coords( &P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
 
 
 
-P.x -= 0.1;
+P.x += 0.0001;
 }
 WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
 
