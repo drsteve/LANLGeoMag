@@ -31,7 +31,7 @@
  *                 LstarInfo:  LstarInfo structure to specify B-field model, store last valid Lstar, etc.
  *  
  */
-int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
+int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
     Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
     double          Blocal, Xtest, sa, sa2, LCDS;
@@ -45,9 +45,9 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
     LstarInfo_test = Lgm_CopyLstarInfo( LstarInfo );
 
     // Set Tolerances
-    SetLstarTolerances( Quality, LstarInfo_brac1 );
-    SetLstarTolerances( Quality, LstarInfo_brac2 );
-    SetLstarTolerances( Quality, LstarInfo_test );
+    Lgm_SetLstarTolerances( Quality, 24, LstarInfo_brac1 );
+    Lgm_SetLstarTolerances( Quality, 24, LstarInfo_brac2 );
+    Lgm_SetLstarTolerances( Quality, 24, LstarInfo_test );
 
     // set coord transformation 
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_brac1->mInfo->c );
@@ -55,8 +55,8 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
 
     //Check for closed drift shell at brackets
-    Pinner.x = brac1;
-    Pinner.y = 0.0; Pinner.z = 0.0;
+    Pinner.x = brac1*cos(MLT); Pinner.y = brac1*sin(MLT); Pinner.z = 0.0;
+
     /*
      *  Test inner bracket location.
      */
@@ -84,8 +84,7 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
     /*
      *  Test outer bracket location.
      */
-    Pouter.x = brac2;
-    Pouter.y = 0.0; Pouter.z = 0.0;
+    Pouter.x = brac2*cos(MLT); Pouter.y = brac2*sin(MLT); Pouter.z = 0.0;
 
     LstarInfo_brac2->mInfo->Bfield( &Pouter, &Bvec, LstarInfo_brac2->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
@@ -98,7 +97,8 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
-            Pouter.x *= 1.7;
+            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(MLT);
+            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(MLT); Pouter.z = 0.0;
             if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
                 LS_Flag = Lstar( &v3, LstarInfo_brac2);
                 if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
@@ -124,8 +124,8 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
             FreeLstarInfo( LstarInfo_test );
             return(-2); //reached max iterations without achieving tolerance - bail
         }
-        Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
-        Ptest.x = Xtest; Ptest.y = 0.0; Ptest.z = 0.0;
+        Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
+        Ptest.x = -1.0*Xtest*cos(MLT); Ptest.y = -1.0*Xtest*sin(MLT); Ptest.z = 0.0;
 
         LstarInfo_test->mInfo->Bfield( &Ptest, &Bvec, LstarInfo_test->mInfo );
         Blocal = Lgm_Magnitude( &Bvec );
@@ -175,7 +175,7 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double Alpha, d
 
 int main( int argc, char *argv[] ){
 
-    double           UTC, brac1, brac2, tol, sJD, eJD, JD, t_cadence;
+    double           UTC, brac1, brac2, tol, sJD, eJD, JD, t_cadence, MLT;
     double           K[500], LS[500], Alpha[500];
     long int         StartDate, EndDate, Date;
     int              nAlpha, i, Quality, ans, aa, Year, Month, Day, Doy;
@@ -189,23 +189,30 @@ int main( int argc, char *argv[] ){
 
     tol = 0.001;
 
-    nAlpha=18;
-    for (i=0; i<nAlpha; i++) {
-        Alpha[i] = 5.0+i*5.0;
-    }
+    nAlpha=5;
+    //nAlpha=18;
+    //for (i=0; i<nAlpha; i++) {
+    //#    Alpha[i] = 5.0+i*5.0;
+    //}
+    Alpha[0] = 20;
+    Alpha[1] = 35;
+    Alpha[2] = 50;
+    Alpha[3] = 65;
+    Alpha[4] = 90;
 
     // Date and UTC
     StartDate       = 20010101;
-    EndDate         = 20010101;
+    EndDate         = 20010103;
+    MLT = 6.0;
     Lgm_Doy( StartDate, &Year, &Month, &Day, &Doy);
     NewStr[0]       = '\0';
-    strcpy(Filename, "%YYYY%MM%DD_LCDS_TS04.txt");
+    strcpy(Filename, "%YYYY%MM%DD_LCDS_T89c_6MLT.txt");
     sprintf( Str, "%4d", Year );   Lgm_ReplaceSubString( NewStr, Filename, "%YYYY", Str );  strcpy( Filename, NewStr );
     sprintf( Str, "%02d", Month ); Lgm_ReplaceSubString( NewStr, Filename, "%MM", Str );   strcpy( Filename, NewStr );
     sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, Filename, "%DD", Str );   strcpy( Filename, NewStr );
     fp = fopen(Filename, "w");
 
-    t_cadence       = 0.5/24.0; //cadence in days
+    t_cadence       = 2.0/24.0; //cadence in days
     sJD = Lgm_Date_to_JD( StartDate, 0.0, LstarInfo->mInfo->c);
     eJD = Lgm_Date_to_JD( EndDate, 23.9999, LstarInfo->mInfo->c);
 
@@ -213,7 +220,7 @@ int main( int argc, char *argv[] ){
     brac1 = -3.0;
     brac2 = -13.0;
 
-    Quality = 2;
+    Quality = 3;
 
 
     /*
@@ -319,7 +326,7 @@ int main( int argc, char *argv[] ){
         LstarInfo->mInfo->Bfield        = Lgm_B_TS04;
         LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
         LstarInfo->mInfo->InternalModel = LGM_IGRF;
-        LstarInfo->VerbosityLevel       = 1;
+        LstarInfo->VerbosityLevel       = 0;
         //LstarInfo->mInfo->Kp = 0.3;
     
         /*
@@ -344,7 +351,7 @@ int main( int argc, char *argv[] ){
                 LstarInfo3->PitchAngle = Alpha[aa];
                 //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
     
-                ans = LCDS( Date, UTC, brac1, brac2, Alpha[aa], tol, Quality, &K[aa], LstarInfo3 );
+                ans = LCDS( Date, UTC, brac1, brac2, MLT, Alpha[aa], tol, Quality, &K[aa], LstarInfo3 );
                 if (ans==0) LS[aa] = LstarInfo3->LS;
                 if (LstarInfo3->DriftOrbitType == 1) printf("Alpha: %g; Drift Orbit Type: Closed; L* = %g \n", Alpha[aa], LstarInfo3->LS);
                 if (LstarInfo3->DriftOrbitType == 2) printf("Drift Orbit Type: Shebansky; L* = %g\n", LstarInfo3->LS);
