@@ -372,7 +372,7 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
-            fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
+            fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
             fprintf( fp, "#\n");
         }
         if ( nK > 0 ) {
