@@ -339,7 +339,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
 
     f->Extrapolate = TRUE;
     f->nMaxwellians = 2;
-f->nMaxwellians = 1;
+    f->FitType = LGM_F2P_SPLINE;
 
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;
@@ -685,7 +685,6 @@ assumes electrons -- generalize this...
         }
     }
 
-
     /*
      * Now, from the PSD[E][a] array, get PSD at the E's and Alpha's we just computed.
      * The result will be the same as PSD at the given Mu's and K's
@@ -694,7 +693,7 @@ assumes electrons -- generalize this...
     for ( m=0; m<nMu; m++ ){
         for ( k=0; k<nK; k++ ){
             DoIt = FALSE;
-
+//printf("f->EofMu[m][k] %g, f->E[0] %g \n", f->EofMu[m][k], f->E[0]);
             if ( f->Extrapolate > 2 ){ // extrapolate above and below
 
                 DoIt = TRUE;
@@ -804,7 +803,6 @@ if (isnan(sum)) {
  */
 double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f ) {
 
-    int         FitType;
     int         j, i, i0, i1, nn;
     double      a0, a1, y0, y1, slp, psd, g;
     _FitData    *FitData;
@@ -814,7 +812,6 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
     FitData->nMaxwellians = f->nMaxwellians;
-
 
     /*
      * Since pitch angle, a is bounded (here its constrained to be between 0
@@ -868,76 +865,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
 
 
-
-
-
-    //if ( FitType == MAXWELLIAN ) {
-    if ( 0 == 1 ) {
-
-        if ( FitData->n > 2 ) {
-
-
-            // interpolate/fit E
-            // for now just do a linear interp.
-            // no lets try a fit...
-            double  in[10], out[7], x[10];
-            in[0] = 1e-8;
-            in[1] = in[2] = 1e-9; //Info->Praxis_Tolerance;
-            in[5] = 30000.0; //(double)Info->Praxis_Max_Function_Evals;
-            in[6] = 10.0; //Info->Praxis_Maximum_Step_Size;
-            in[7] = 10.0; //Info->Praxis_Bad_Scale_Paramater;
-            in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
-            in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
-            x[0] = 0.0;
-            x[1] = -1.0;
-            x[2] = 25.0;
-            x[3] = -2.0;
-            x[4] = 200.0;
-            praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
-            /*
-            printf("out[0] = %g\n", out[0]);
-            printf("out[1] = %g\n", out[1]);
-            printf("out[2] = %g\n", out[2]);
-            printf("out[3] = %g\n", out[3]);
-            printf("out[4] = %g\n", out[4]);
-            printf("out[5] = %g\n", out[5]);
-            printf("out[6] = %g\n", out[6]);
-            */
-            //printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
-            FILE *fp;
-            printf("E = %g\n", E);
-            fp = fopen("data.txt", "w");
-            for (j=0; j<FitData->n; ++j){
-                fprintf(fp, "%g %g\n", log10(f->E[j]), log10(FitData->g[j]));
-            }
-            fclose(fp);
-
-            fp = fopen("fit.txt", "w");
-            for (j=0; j<FitData->n; ++j){
-                psd = Model( x,  FitData->nMaxwellians, f->E[j] );
-                fprintf(fp, "%g %g\n", log10(f->E[j]), log10( psd ) );
-            }
-            fclose(fp);
-
-            exit(0);
-            /*
-            */
-
-
-            //x[2] = 200.0;
-            //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
-            psd = Model( x,  FitData->nMaxwellians, E );
-            //psd = (double)a;
-
-            //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
-        } else {
-
-            //psd = -9e99;
-            psd = LGM_FILL_VALUE;
-
-        }
-
-    } else {
+    if ( f->FitType == LGM_F2P_SPLINE ) {
 
         /*
          * Use smoothing spline.
@@ -1071,11 +999,77 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
         } else {
 
+            psd = LGM_FILL_VALUE;
+
+        }
+
+    } else if ( f->FitType == LGM_F2P_MAXWELLIAN ) {
+        if ( FitData->n > 2 ) {
+
+
+            // interpolate/fit E
+            // for now just do a linear interp.
+            // no lets try a fit...
+            double  in[10], out[7], x[10];
+            in[0] = 1e-8;
+            in[1] = in[2] = 1e-9; //Info->Praxis_Tolerance;
+            in[5] = 30000.0; //(double)Info->Praxis_Max_Function_Evals;
+            in[6] = 10.0; //Info->Praxis_Maximum_Step_Size;
+            in[7] = 10.0; //Info->Praxis_Bad_Scale_Paramater;
+            in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
+            in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
+            x[0] = 0.0;
+            x[1] = -1.0;
+            x[2] = 25.0;
+            x[3] = -2.0;
+            x[4] = 200.0;
+            praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
+            /*
+            printf("out[0] = %g\n", out[0]);
+            printf("out[1] = %g\n", out[1]);
+            printf("out[2] = %g\n", out[2]);
+            printf("out[3] = %g\n", out[3]);
+            printf("out[4] = %g\n", out[4]);
+            printf("out[5] = %g\n", out[5]);
+            printf("out[6] = %g\n", out[6]);
+            */
+            //printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
+ //           FILE *fp;
+ //           printf("E = %g\n", E);
+ //           fp = fopen("data.txt", "w");
+ //           for (j=0; j<FitData->n; ++j){
+ //               fprintf(fp, "%g %g\n", log10(f->E[j]), log10(FitData->g[j]));
+ //           }
+ //           fclose(fp);
+
+ //           fp = fopen("fit.txt", "w");
+ //           for (j=0; j<FitData->n; ++j){
+ //               psd = Model( x,  FitData->nMaxwellians, f->E[j] );
+ //               fprintf(fp, "%g %g\n", log10(f->E[j]), log10( psd ) );
+ //           }
+ //           fclose(fp);
+
+//            exit(0);
+            /*
+            */
+
+
+            //x[2] = 200.0;
+            //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
+            psd = Model( x,  FitData->nMaxwellians, E );
+            //psd = (double)a;
+
+            //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+        } else {
+
             //psd = -9e99;
             psd = LGM_FILL_VALUE;
 
         }
 
+    } else {
+        //FitType not valid...
+        psd = LGM_FILL_VALUE;
     }
 
     LGM_ARRAY_1D_FREE( FitData->E );

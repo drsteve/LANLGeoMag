@@ -247,7 +247,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
         /*
          * Assume value is no good...
          */
-printf("no value found!!!!!!!!!!!!!!!!!\n");
+printf("%s: no alpha value found for K=%g!\n", __func__, K);
         a = -9e99;
 
     }

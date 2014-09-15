@@ -86,6 +86,14 @@ static unsigned char Rainbow3_Blu[] = {
 
 typedef unsigned char byte; // needed for gif writer
 
+
+/*
+ * Definitions for F2P stuff
+ */
+
+#define         LGM_F2P_SPLINE                           0
+#define         LGM_F2P_MAXWELLIAN                       1
+
 typedef struct Lgm_FluxToPsd {
 
 
@@ -151,6 +159,7 @@ typedef struct Lgm_FluxToPsd {
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
     int          nMaxwellians;       //!< Number of maxwellians to use in fitting
+    int          FitType;            //!< Approach to use in fitting (e.g. Maxwellians, spline)
     int          UseModelB;          //!< If true, use b-field model to compute |B| for converting between Mu and E, otherwise use the B_obs value.
 
 
@@ -229,6 +238,7 @@ typedef struct Lgm_PsdToFlux {
     int          DumpDiagnostics;    //!< If true, some diagnostics (images, etc) may get dumped out.
     int          Extrapolate;        //!< If true, attempt to extrapolate beyond measured data
     int          nMaxwellians;       //!< Number of maxwellians to use in fitting
+    int          FitType;            //!< Approach to use in fitting (e.g. Maxwellians, spline)
 
 
 
