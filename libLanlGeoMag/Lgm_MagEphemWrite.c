@@ -3,6 +3,7 @@
 #endif
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagEphemInfo.h"
+#include "Lgm/Lgm_IGRF.h"
 
 #ifndef LGM_INDEX_DATA_DIR
 #warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"
@@ -1095,7 +1096,7 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
     fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
     fprintf( fp, "#\n");
 
-    fprintf( fp, "#  \"M_ref\":            { \"DESCRIPTION\": \"The fixed reference magnetic dipole moment for converting magnetic flux to L*. In units of nT.\",\n");
+    fprintf( fp, "#  \"M_ref\":            { \"DESCRIPTION\": \"The fixed reference magnetic dipole moment (computed from IGRF11 at OUT Jan 1, 2010) for converting magnetic flux to L*. In units of nT. \",\n");
     fprintf( fp, "#                               \"NAME\": \"M_ref\",\n");
     fprintf( fp, "#                              \"TITLE\": \"M_ref\",\n");
     fprintf( fp, "#                              \"LABEL\": \"M_ref (nT)\",\n");
@@ -1338,11 +1339,22 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
         strcpy(QDloc, QDpath);    
     }
     fprintf( fp, "#                      \"QinDentonPath\": \"%s\",\n", QDloc );
-    fprintf( fp, "#                        \"CommandLine\": \"%s\"\n", CmdLine );
-    fprintf( fp, "#                        \"CodeVersion\": \"%s\"\n", CodeVersion );
-    fprintf( fp, "#                       \"LstarQuality\": \"%d\"\n", m->LstarQuality );
+    fprintf( fp, "#                        \"CommandLine\": \"%s\",\n", CmdLine );
+    fprintf( fp, "#                        \"CodeVersion\": \"%s\",\n", CodeVersion );
+    fprintf( fp, "#                       \"LstarQuality\": \"%d\",\n", m->LstarQuality );
     fprintf( fp, "#                   \"nFLsInDriftShell\": \"%d\"\n", m->nFLsInDriftShell );
     fprintf( fp, "#  },\n");
+
+
+    fprintf( fp, "#  \"Misc\":              { \"DESCRIPTION\": \"Various parameters used in the calculations.\",\n");
+    fprintf( fp, "#                           \"EarthRadius\": \"%.3f km\",\n", Re );
+    fprintf( fp, "#                 \"EquatorialEarthRadius\": \"%.3f km\",\n", WGS84_A );
+    fprintf( fp, "#                      \"PolarEarthRadius\": \"%.3f km\",\n", WGS84_B );
+    fprintf( fp, "#       \"IGRF_MagneticRefSphericalRadius\": \"%.1f km\",\n", IGRF_Re );
+    fprintf( fp, "#                            \"IGRF_Model\": \"%s\",\n",   IGRF_Model );
+    fprintf( fp, "#                \"IGRF_Model_Description\": \"%s\",\n",   IGRF_Model_Description );
+    fprintf( fp, "#                  \"IGRF_Model_Reference\": \"%s\"\n",    IGRF_Model_Reference );
+    fprintf( fp, "#  }\n");
 
     fprintf( fp, "#\n");
     fprintf( fp, "#\n");

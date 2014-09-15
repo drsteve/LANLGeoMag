@@ -83,7 +83,7 @@ void StringSplit( char *Str, char *StrArray[], int len, int *n );
 #define KP_DEFAULT 0
 
 const  char *ProgramName = "MagEphemFromTLE";
-const  char *argp_program_version     = "2.4.0";
+const  char *argp_program_version     = "2.5.0";
 const  char *argp_program_bug_address = "<mghenderson@lanl.gov>";
 static char doc[] =
 "Computes the magnetic ephemeris of a S/C from trajectories determined from Two-Line Element sets.\n\n"
