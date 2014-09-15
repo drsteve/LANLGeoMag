@@ -31,6 +31,11 @@ static double IGRF_epoch[24] = { 1900.0, 1905.0, 1910.0, 1915.0, 1920.0, 1925.0,
 
 static int   IGRF_MaxN[24]  = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 13, 13, 13 };
 
+static double  IGRF_Re                    = 6371.2; // km This is the so-called "magnetic reference spherical radius" that is adopted in IGRF modeling
+static char    IGRF_Model[]               = "IGRF11"; 
+static char    IGRF_Model_Description[]   = "11th Generation International Geomagnetic Reference Field"; 
+static char    IGRF_Model_Reference[]     = "International Association of Geomagnetism and Aeronomy, Working Group V-MOD. Participating members, Finlay, C. C., Maus, S., Beggan, C. D., Bondar, T. N., Chambodut, A., Chernova, T. A., Chulliat, A., Golovkov, V. P., Hamilton, B., Hamoudi, M., Holme, R., Hulot, G., Kuang, W., Langlais, B., Lesur, V., Lowes, F. J., Lühr, H., Macmillan, S., Mandea, M., McLean, S., Manoj, C., Menvielle, M., Michaelis, I., Olsen, N., Rauberg, J., Rother, M., Sabaka, T. J., Tangborn, A., Tøffner-Clausen, L., Thébault, E., Thomson, A. W. P., Wardinski, I., Wei, Z. and Zvereva, T. I. (2010), International Geomagnetic Reference Field: the eleventh generation. Geophysical Journal International, 183: 1216–1230. doi: 10.1111/j.1365-246X.2010.04804.x";
+
 static double IGRF_g[24][14][14] = {
   { {          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0 },
     {     -31543,      -2298,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0 },

@@ -66,7 +66,7 @@ void Lgm_IGRF( Lgm_Vector *vin, Lgm_Vector *B, Lgm_CTrans *c ) {
      */
     v = *vin;
     v.x *= Re;     // convert r back to km
-    v.x /= 6371.2; // convert r to have units of IGRF_A
+    v.x /= IGRF_Re; // convert r to have units of IGRF_Re
 
 
 

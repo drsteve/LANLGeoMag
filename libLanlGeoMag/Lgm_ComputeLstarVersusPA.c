@@ -112,9 +112,10 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         MagEphemInfo->Smin          = LstarInfo->mInfo->Smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
 //printf("P = %g %g %g   Blocal = %lf Bmin = %lf \n",  u->x, u->y, u->z, Blocal, MagEphemInfo->Bmin );
-        MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
+        //MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
+        MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_2010;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
-        MagEphemInfo->Mused         = MagEphemInfo->Mcurr;
+        MagEphemInfo->Mused         = MagEphemInfo->Mref;
     }
     if ( TraceFlag != 1 ) {
         /*

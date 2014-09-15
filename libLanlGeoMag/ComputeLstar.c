@@ -1391,9 +1391,9 @@ FIX
 
 
     Phi1 = MagFlux( LstarInfo );
-    LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi1;
+    LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_2010 /Phi1;
     Phi2 = MagFlux2( LstarInfo );
-    LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd /Phi2;
+    LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_2010 /Phi2;
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
 
 
@@ -1513,7 +1513,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 
     r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
 
-    return( -result*LstarInfo->mInfo->c->M_cd/r );
+    return( -result*LstarInfo->mInfo->c->M_cd_2010/r );
 
 }
 
