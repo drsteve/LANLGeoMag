@@ -945,7 +945,7 @@ void Lgm_InitTrigmp( double cp, double sp, double *Cmp, double *Smp, int N ) {
     Cmm2 = Cmp[0]; Cmm1 = Cmp[1];
     Smp[0] = 0.0;  Smp[1] = sp;
     Smm2 = Smp[0]; Smm1 = Smp[1];
-    for (m=2; m<=(N+1); ++m){
+    for (m=2; m<=N; ++m){
         Cm = b*Cmm1 - Cmm2;
         Cmp[m] = Cm;
         Cmm2 = Cmm1;
