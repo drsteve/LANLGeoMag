@@ -427,6 +427,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
         if (p->Persistence) {
             printf("No Qin Denton data in range -- using persistence. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
+            p->Dst   =    q->Dst[q->nPnts-1];  // km/s
+            p->fKp   =    q->fKp[q->nPnts-1];  // km/s
             p->V_SW  =    q->V_SW[q->nPnts-1];  // km/s
             p->Den_P =    q->Den_P[q->nPnts-1];  // #/cm^-3
             p->Pdyn  =    q->Pdyn[q->nPnts-1];   // nPa
