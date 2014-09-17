@@ -20,6 +20,7 @@ typedef struct Lgm_QinDenton {
 
     int         nPnts;
     int         Verbosity;
+    int         Persistence;
     long int    *Date;
     double      *MJD;
     char        **IsoTimeStr;
@@ -37,6 +38,7 @@ typedef struct Lgm_QinDenton {
 
 typedef struct Lgm_QinDentonOne {
 
+    int         Persistence;
     long int    Date;
     double      JD;
     double      MJD;

@@ -423,14 +423,58 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
         p->Bz5   =    0.0; // nT
         p->Bz6   =    0.0; // nT
 
-
-        
-
     } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
 
-        printf("No Qin Denton data in range -- would require extrapolation. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
-        p->Dst = -5.0;
-        p->fKp = 2.0;
+        if (p->Persistence) {
+            printf("No Qin Denton data in range -- using persistence. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
+            p->V_SW  =    q->V_SW[q->nPnts-1];  // km/s
+            p->Den_P =    q->Den_P[q->nPnts-1];  // #/cm^-3
+            p->Pdyn  =    q->Pdyn[q->nPnts-1];   // nPa
+            p->ByIMF =    q->ByIMF[q->nPnts-1]; // nT 
+            p->BzIMF =    q->BzIMF[q->nPnts-1]; // nT 
+            p->G1    =    q->G1[q->nPnts-1]; // units? what's a good nominal value here?
+            p->G2    =    q->G2[q->nPnts-1]; // units? what's a good nominal value here?
+            p->G3    =    q->G2[q->nPnts-1]; // units? what's a good nominal value here?
+            p->akp3  =    q->akp3[q->nPnts-1]; // unitless
+            p->W1    =    q->W1[q->nPnts-1]; // units? what's a good nominal value here?
+            p->W2    =    q->W2[q->nPnts-1]; // units? what's a good nominal value here?
+            p->W3    =    q->W3[q->nPnts-1]; // units? what's a good nominal value here?
+            p->W4    =    q->W4[q->nPnts-1]; // units? what's a good nominal value here?
+            p->W5    =    q->W5[q->nPnts-1]; // units? what's a good nominal value here?
+            p->W6    =    q->W6[q->nPnts-1]; // units? what's a good nominal value here?
+            p->Bz1   =    q->Bz1[q->nPnts-1]; // nT
+            p->Bz2   =    q->Bz2[q->nPnts-1]; // nT
+            p->Bz3   =    q->Bz3[q->nPnts-1]; // nT
+            p->Bz4   =    q->Bz4[q->nPnts-1]; // nT
+            p->Bz5   =    q->Bz5[q->nPnts-1]; // nT
+            p->Bz6   =    q->Bz6[q->nPnts-1]; // nT
+
+        } else {
+            printf("No Qin Denton data in range -- would require extrapolation. Setting defaults. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
+            p->Dst = -5.0;
+            p->fKp = 2.0;
+            p->V_SW  =  400.0;  // km/s
+            p->Den_P =    5.0;  // #/cm^-3
+            p->Pdyn  =    p->Den_P * 1e6 * LGM_PROTON_MASS * p->V_SW*p->V_SW*1e6 * 1e9;   // nPa
+            p->ByIMF =    2.0; // nT 
+            p->BzIMF =   -2.0; // nT 
+            p->G1    =    0.0; // units? what's a good nominal value here?
+            p->G2    =    0.0; // units? what's a good nominal value here?
+            p->G3    =    0.0; // units? what's a good nominal value here?
+            p->akp3  =    2.0; // unitless
+            p->W1    =    0.0; // units? what's a good nominal value here?
+            p->W2    =    0.0; // units? what's a good nominal value here?
+            p->W3    =    0.0; // units? what's a good nominal value here?
+            p->W4    =    0.0; // units? what's a good nominal value here?
+            p->W5    =    0.0; // units? what's a good nominal value here?
+            p->W6    =    0.0; // units? what's a good nominal value here?
+            p->Bz1   =    0.0; // nT
+            p->Bz2   =    0.0; // nT
+            p->Bz3   =    0.0; // nT
+            p->Bz4   =    0.0; // nT
+            p->Bz5   =    0.0; // nT
+            p->Bz6   =    0.0; // nT
+        }
 
     } else {
 
@@ -870,8 +914,13 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
     if ( q->Verbosity > 0 ) {
         printf("\n");
-        printf("\t\t         QinDenton Parameters\n");
-        printf("\t\t    --------------------------------\n");
+        if (p->Persistence) {
+            printf("\t\t         QinDenton Parameters\n");
+            printf("\t\t    --------------------------------\n");
+        } else {
+            printf("\t\t         QinDenton Parameters (Persistence)\n");
+            printf("\t\t    --------------------------------------------\n");
+        }
         printf("\t\t        Date = %8ld\n", p->Date );
         printf("\t\t          JD = %11.7lf\n", p->JD );
         printf("\t\t         MJD = %11.7lf\n", p->MJD );
