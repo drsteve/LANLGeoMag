@@ -916,7 +916,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
     if ( q->Verbosity > 0 ) {
         printf("\n");
-        if (p->Persistence) {
+        if (!p->Persistence) {
             printf("\t\t         QinDenton Parameters\n");
             printf("\t\t    --------------------------------\n");
         } else {
