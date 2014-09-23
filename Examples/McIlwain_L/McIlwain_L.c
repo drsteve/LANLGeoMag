@@ -39,7 +39,8 @@ int main(){
 
 
     Lgm_PrintElapsedTime( &tInfo );
-
+    Lgm_FreeMagInfo(mInfo);
+    Lgm_free_ctrans(c);
     return(0);
 }
 
