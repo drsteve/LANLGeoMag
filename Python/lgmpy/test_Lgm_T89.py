@@ -19,7 +19,7 @@ import numpy
 from lgmpy import Lgm_T89
 from lgmpy import Lgm_Vector
 
-class Lgm_T89_T89(unittest.TestCase):
+class Lgm_T89_T89_tests(unittest.TestCase):
     """
     Tests related to Lgm_T89.T89 wrapper
     @author: Brian Larsen
@@ -29,12 +29,12 @@ class Lgm_T89_T89(unittest.TestCase):
     @version: V1: 11-Jan-2011 (BAL)
     """
     def setUp(self):
-        super(Lgm_T89_T89, self).setUp()
+        super(Lgm_T89_T89_tests, self).setUp()
         self.pos = [-6.6, 0, 0]
         self.kp = 0
         self.dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
     def tearDown(self):
-        super(Lgm_T89_T89, self).tearDown()
+        super(Lgm_T89_T89_tests, self).tearDown()
 
     def test_T89(self):
         """the T89 simple static wrapper should work (regression)"""

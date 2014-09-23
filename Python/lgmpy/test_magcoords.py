@@ -16,8 +16,8 @@ import datetime
 
 import numpy
 
-import lgmpy.magcoords
-import lgmpy.Lgm_Vector
+from lgmpy import magcoords
+from lgmpy import Lgm_Vector
 
 class magcoords_Tests(unittest.TestCase):
     def setUp(self):
@@ -47,22 +47,22 @@ class magcoords_Tests(unittest.TestCase):
 
     def test_Lvalue(self):
         """Lvalue should have known output"""
-        ans = {'I': 10.8986603, 'L': 7.9507705}
+        ans = {'I': 10.9298583451352, 'L': 7.966548339}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
         for key in vals:
             self.assertAlmostEqual(vals[key], ans[key], places=4)
-        ans = {'I': 0.69107899, 'L': 4.5099985}
+        ans = {'I': 0.6915739190021, 'L': 4.51510833989}
         vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1), coord_system='SM')
         for key in vals:
             self.assertAlmostEqual(vals[key], ans[key], places=4)
 
     def test_Lvalue_extended_out(self):
         """Lvalue has an extended out (regression)"""
-        ans = {'Blocal': 630.0509017184838,
-         'Bmin': 22.036688,
-         'Bmirr': 630.0509017184838,
-         'I': 10.8986603,
-         'L': 7.9507705,
+        ans = {'Blocal': 628.0753565024,
+         'Bmin': 21.686322939,
+         'Bmirr': 628.0753565024,
+         'I': 10.929858345135273,
+         'L': 7.9665483393055,
          'M': 29966.895576135077,
          'MLon': 180.0,
          'MLT': 0.0,
