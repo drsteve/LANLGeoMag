@@ -4,7 +4,7 @@ import unittest
 import ctypes
 import numpy as np
 
-import _Bfield_dict
+from lgmpy import _Bfield_dict
 
 class Bfield_dictTests(unittest.TestCase):
     """

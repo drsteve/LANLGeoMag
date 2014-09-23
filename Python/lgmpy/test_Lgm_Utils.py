@@ -11,7 +11,7 @@ import unittest
 import ctypes
 import numpy as np
 
-from Lgm_Wrap import Lgm_LogSpace, Lgm_Bisect
+from lgmpy.Lgm_Wrap import Lgm_LogSpace, Lgm_Bisect
 
 class Lgm_Utils_Tests(unittest.TestCase):
     def test_Lgm_LogSpace(self):

@@ -11,7 +11,7 @@ import unittest
 import ctypes
 import numpy as np
 
-from Lgm_Wrap import quicksort, bubbleSort, quicksort_uli
+from lgmpy.Lgm_Wrap import quicksort, bubbleSort, quicksort_uli
 
 class quicksort_Tests(unittest.TestCase):
     def test_quicksort(self):

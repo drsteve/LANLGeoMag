@@ -8,8 +8,8 @@ Test suite for the Lgm_CTrans file <<This is an important one>>
 import ctypes
 import unittest
 
-import Lgm_MagModelInfo
-from Lgm_Wrap import size_MagModelInfo, TRUE, LGM_ABSOLUTE_JUMP_METHOD, DQAGS, \
+from lgmpy import Lgm_MagModelInfo
+from lgmpy.Lgm_Wrap import size_MagModelInfo, TRUE, LGM_ABSOLUTE_JUMP_METHOD, DQAGS, \
     DQAGP
 
 

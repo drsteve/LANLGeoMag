@@ -21,7 +21,7 @@ import lgmpy
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
-
+from utils import pos2Lgm_Vector
 
 class Lgm_TS04_QD(MagData.MagData):
     #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
@@ -32,7 +32,7 @@ class Lgm_TS04_QD(MagData.MagData):
 
         if not isinstance(pos, (Lgm_Vector.Lgm_Vector, list, np.ndarray)):
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
-        self._Vpos = self._pos2Lgm_Vector(pos)
+        self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, (datetime.datetime, list)):
@@ -88,34 +88,6 @@ class Lgm_TS04_QD(MagData.MagData):
             raise(RuntimeWarning('Odd return from Lgm_TS04') )
         ans.append(B)
         return ans
-
-    def _pos2Lgm_Vector(self, pos):
-        if isinstance(pos, Lgm_Vector.Lgm_Vector):
-            return pos
-        if isinstance(pos, list):
-            Vpos = []
-            for val in pos:
-                if not isinstance(val, list):
-                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
-                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
-            return Vpos
-        if isinstance(pos, np.ndarray):
-            return(self._pos2Lgm_Vector(pos.tolist())) 
-
-
-    def _pos2Lgm_Vector(self, pos):
-        if isinstance(pos, Lgm_Vector.Lgm_Vector):
-            return pos
-        if isinstance(pos, list):
-            Vpos = []
-            for val in pos:
-                if not isinstance(val, list):
-                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
-                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
-            return Vpos
-        if isinstance(pos, np.ndarray):
-            return(self._pos2Lgm_Vector(pos.tolist())) 
-                        
             
 
 class Lgm_TS04(MagData.MagData):
@@ -165,7 +137,7 @@ class Lgm_TS04(MagData.MagData):
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
             not isinstance(pos, list):
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
-        self._Vpos = self._pos2Lgm_Vector(pos)
+        self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
@@ -218,19 +190,6 @@ class Lgm_TS04(MagData.MagData):
             raise(RuntimeWarning('Odd return from Lgm_T89') )
         ans.append(B)
         return ans
-
-    def _pos2Lgm_Vector(self, pos):
-        if isinstance(pos, Lgm_Vector.Lgm_Vector):
-            return pos
-        if isinstance(pos, list):
-            Vpos = []
-            for val in pos:
-                if not isinstance(val, list):
-                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
-                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
-            return Vpos
-        if isinstance(pos, np.ndarray):
-            raise(NotImplementedError('Only lists can be input for position now') )
 
 def TS04(pos, time, P, Dst, By, Bz, W, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """

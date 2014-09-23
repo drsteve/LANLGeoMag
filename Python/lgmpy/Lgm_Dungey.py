@@ -20,6 +20,7 @@ import MagData
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+from utils import pos2Lgm_Vector
 
 class Lgm_Dungey(MagData.MagData):
     """
@@ -57,7 +58,7 @@ class Lgm_Dungey(MagData.MagData):
                 #raise(NotImplementedError('Different coord systems are not yet ready to use') )
             else:
                 pass
-            self._Vpos = self._pos2Lgm_Vector(pos)
+            self._Vpos = pos2Lgm_Vector(pos)
             assert self._Vpos
         except AssertionError:
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
@@ -117,18 +118,6 @@ class Lgm_Dungey(MagData.MagData):
                 raise(RuntimeWarning('Odd return from Lgm_B_Dungey.c') )
             return B
 
-    def _pos2Lgm_Vector(self, pos):
-        if isinstance(pos, Lgm_Vector.Lgm_Vector):
-            return pos
-        if isinstance(pos, np.ndarray):
-            pos = pos.tolist()
-        if isinstance(pos, list):
-            Vpos = []
-            for val in pos:
-                if not isinstance(val, list):
-                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
-                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
-            return Vpos
 
 def Dungey(pos, time, coord_system = 'GSM', INTERNAL_MODEL='LGM_CDIP',):
     """

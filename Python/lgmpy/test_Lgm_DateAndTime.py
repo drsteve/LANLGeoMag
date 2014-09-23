@@ -22,9 +22,9 @@ import datetime
 
 import numpy
 
-import Lgm_CTrans
-import Lgm_Vector
-from Lgm_Wrap import Lgm_LeapYear, Lgm_GetLeapSeconds, Lgm_IsLeapSecondDay,  Lgm_LoadLeapSeconds, Lgm_GPS_to_GpsSeconds, Lgm_DateTime, Lgm_GpsSeconds_to_GPS, IsoTimeStringToDateTime
+from lgmpy import Lgm_CTrans
+from lgmpy import Lgm_Vector
+from lgmpy.Lgm_Wrap import Lgm_LeapYear, Lgm_GetLeapSeconds, Lgm_IsLeapSecondDay,  Lgm_LoadLeapSeconds, Lgm_GPS_to_GpsSeconds, Lgm_DateTime, Lgm_GpsSeconds_to_GPS, IsoTimeStringToDateTime
 
 
 class Lgm_DateAndTime_tests(unittest.TestCase):

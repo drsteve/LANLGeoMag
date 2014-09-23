@@ -14,8 +14,8 @@ import itertools
 
 import numpy
 
-import Lgm_TS04
-import Lgm_Vector
+from lgmpy import Lgm_TS04
+from lgmpy import Lgm_Vector
 
 class Lgm_TS04_TS04(unittest.TestCase):
     """

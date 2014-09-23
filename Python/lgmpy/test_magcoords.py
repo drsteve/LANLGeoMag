@@ -16,8 +16,8 @@ import datetime
 
 import numpy
 
-import magcoords
-import Lgm_Vector
+import lgmpy.magcoords
+import lgmpy.Lgm_Vector
 
 class magcoords_Tests(unittest.TestCase):
     def setUp(self):

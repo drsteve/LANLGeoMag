@@ -16,11 +16,11 @@ import datetime
 
 import numpy
 
-import Lgm_CTrans
-import Lgm_Vector
-from Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans
-from Lgm_Wrap import Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms
-from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, SM_TO_GSM
+from lgmpy import Lgm_CTrans
+from lgmpy import Lgm_Vector
+from lgmpy.Lgm_Wrap import Lgm_LeapSeconds, size_Lgm_LeapSeconds, size_CTrans
+from lgmpy.Lgm_Wrap import Lgm_DateTime, size_DateTime, Lgm_Set_Coord_Transforms
+from lgmpy.Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, SM_TO_GSM
 
 class Lgm_CoordsTests(unittest.TestCase):
     """

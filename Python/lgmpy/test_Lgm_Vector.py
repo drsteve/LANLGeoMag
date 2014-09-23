@@ -4,7 +4,7 @@ import unittest
 import ctypes
 import numpy as np
 
-import Lgm_Vector
+from lgmpy import Lgm_Vector
 
 class Lgm_VecClassMethodTests(unittest.TestCase):
     """
@@ -66,7 +66,7 @@ class Lgm_VecTests(unittest.TestCase):
 
     def test_Vectorsize(self):
         """Make sure that the Lgm c and python are the same size"""
-        lib = __import__('Lgm_Wrap', fromlist=['size_Vector'])
+        lib = __import__('lgmpy.Lgm_Wrap', fromlist=['size_Vector'])
         self.assertEqual(ctypes.sizeof(Lgm_Vector.Lgm_Vector), lib.size_Vector())
         del lib
 
