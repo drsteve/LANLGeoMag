@@ -210,7 +210,7 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
 
     if ( s == NULL) {
         printf("Lgm_CopyMagInfo: Error, source structure is NULL\n");
-        return(NULL);
+        return((Lgm_MagModelInfo *) NULL);
     }
 
     t = (Lgm_MagModelInfo *)calloc( 1, sizeof(Lgm_MagModelInfo) );
