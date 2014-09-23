@@ -14,7 +14,7 @@ static double  alt[] = { 100.0, 150.0, 200.0, 400.0, 1000.0 };
 int main(){
     int                 i, j;
     long int            Date;
-    double              L, I, Bm, M, a, UTC, Ltarget, r;
+    double              L, I, Bm, M, a, UTC;
     Lgm_Vector          u, v;
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );

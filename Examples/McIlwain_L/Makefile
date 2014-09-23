@@ -1,7 +1,7 @@
 #CFLAGS    = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
 FFLAGS    =  -fno-automatic 
 LIBS      = `pkg-config --libs lgm`
-CFLAGS    = `pkg-config --cflags lgm`
+CFLAGS    = `pkg-config --cflags lgm` -Wall
 CC        = gcc
 
 FILES1    =  McIlwain_L.c
@@ -33,4 +33,4 @@ McIlwain_L_CDIP : Makefile $(FILES6) McIlwain_L_CDIP.o
 
 
 clean :
-	rm McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test McIlwain_L_CDIP *.o
+	rm -f McIlwain_L McIlwain_L_2 McIlwain_L_3 McIlwain_L_4 McIlwain_L_Test McIlwain_L_CDIP *.o
