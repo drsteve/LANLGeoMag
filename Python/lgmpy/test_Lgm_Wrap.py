@@ -2,7 +2,7 @@
 
 import unittest
 
-import Lgm_Wrap
+from lgmpy import Lgm_Wrap
 
 class Lgm_WrapTests(unittest.TestCase):
     """

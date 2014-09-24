@@ -14,15 +14,15 @@ import itertools
 
 import numpy
 
-import Lgm_TS04
-import Lgm_Vector
+from lgmpy import Lgm_TS04
+from lgmpy import Lgm_Vector
 
-class Lgm_TS04_TS04(unittest.TestCase):
+class Lgm_TS04_TS04_Tests(unittest.TestCase):
     """
     Tests related to Lgm_TS04.TS04 wrapper
     """
     def setUp(self):
-        super(Lgm_TS04_TS04, self).setUp()
+        super(Lgm_TS04_TS04_Tests, self).setUp()
         self.pos = [-6.6, 0, 0]
         self.P = 40
         self.Dst = 0
@@ -31,7 +31,7 @@ class Lgm_TS04_TS04(unittest.TestCase):
         self.Bz = -10.
         self.W = [0., 0., 0., 0., 0., 0.]
     def tearDown(self):
-        super(Lgm_TS04_TS04, self).tearDown()
+        super(Lgm_TS04_TS04_Tests, self).tearDown()
 
     def NO_test_TS04_1val(self):
         """the TS04 simple static wrapper should work (regression)"""

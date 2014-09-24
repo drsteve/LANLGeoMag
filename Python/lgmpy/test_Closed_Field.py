@@ -51,12 +51,12 @@ class Closed_FieldTests(unittest.TestCase):
         data = Closed_Field([1,2,2], self.date, extended_out = True)
         self.assertEqual(data[0], 'LGM_CLOSED')
         numpy.testing.assert_allclose(data[1],
-                [-0.06208,  0.39459,  0.93068], rtol=1e-4)
+                [-0.062054,  0.394555,  0.930685], rtol=1e-4)
         numpy.testing.assert_allclose(data[2],
                 [ 0.76665,  0.33534, -0.57132], rtol=1e-4)
         numpy.testing.assert_allclose(data[3],
                 [ 2.27943481,  2.80962393,  1.12454726], rtol=1e-4)
-        self.assertAlmostEqual(data[4], 3.73736445, places=5)
+        self.assertAlmostEqual(data[4], 3.737398946245622, places=5)
 
 
 if __name__ == '__main__':

@@ -11,8 +11,10 @@ import unittest
 import ctypes
 import numpy as np
 
-from Lgm_Wrap import IsoTimeStringToDateTime, Lgm_DateTime
-import Lgm_CTrans
+from lgmpy.Lgm_Wrap import IsoTimeStringToDateTime, Lgm_DateTime
+from lgmpy import Lgm_CTrans
+
+all = ['IsoTimeStringToDateTime_Tests']
 
 class IsoTimeStringToDateTime_Tests(unittest.TestCase):
     def test_Lgm_IsoTimeStringToDateTime(self):

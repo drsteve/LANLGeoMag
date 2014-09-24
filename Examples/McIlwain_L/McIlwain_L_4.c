@@ -55,6 +55,8 @@ int main(){
         }
     }
     //printf("n = %ld\n", n);
+    Lgm_FreeMagInfo(mInfo);
+    Lgm_free_ctrans(c);
 
     return(0);
 }

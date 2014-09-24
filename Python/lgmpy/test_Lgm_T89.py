@@ -16,10 +16,10 @@ import itertools
 
 import numpy
 
-import Lgm_T89
-import Lgm_Vector
+from lgmpy import Lgm_T89
+from lgmpy import Lgm_Vector
 
-class Lgm_T89_T89(unittest.TestCase):
+class Lgm_T89_T89_tests(unittest.TestCase):
     """
     Tests related to Lgm_T89.T89 wrapper
     @author: Brian Larsen
@@ -29,21 +29,22 @@ class Lgm_T89_T89(unittest.TestCase):
     @version: V1: 11-Jan-2011 (BAL)
     """
     def setUp(self):
-        super(Lgm_T89_T89, self).setUp()
+        super(Lgm_T89_T89_tests, self).setUp()
         self.pos = [-6.6, 0, 0]
         self.kp = 0
         self.dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
     def tearDown(self):
-        super(Lgm_T89_T89, self).tearDown()
+        super(Lgm_T89_T89_tests, self).tearDown()
 
     def test_T89(self):
         """the T89 simple static wrapper should work (regression)"""
+        ans = [-18.926081,  -1.857515,  80.052116]
         numpy.testing.assert_allclose( Lgm_T89.T89(self.pos, self.dt, self.kp),
-            [-18.976439213243122, -1.8653978086481349, 80.39310505873112])
-        ans = numpy.array([[-18.976439213243122, -1.8653978086481349, 80.39310505873112]*2])
+            [-18.926081,  -1.857515,  80.052116], rtol=1e-3, atol=0)
+        ans = numpy.array([ans*2])
         numpy.testing.assert_allclose(Lgm_T89.T89([self.pos]*2,
                                     [self.dt]*2,
-                                    [self.kp]*2) , ans.reshape(2,3))
+                                    [self.kp]*2) , ans.reshape(2,3), rtol=1e-3, atol=0)
 
 class Lgm_T89Tests(unittest.TestCase):
     """
@@ -62,25 +63,12 @@ class Lgm_T89Tests(unittest.TestCase):
     def tearDown(self):
         super(Lgm_T89Tests, self).tearDown()
 
-    def test_pos2Lgm_Vector(self):
-        """pos2Lgm_Vector should have known output"""
-        a = Lgm_T89.Lgm_T89(self.pos, self.dt, self.kp)
-        self.assertEqual(list(a['Position']), a._Vpos.tolist())
-        self.assertTrue(isinstance(a._Vpos, Lgm_Vector.Lgm_Vector))
-        b = Lgm_T89.Lgm_T89(a._Vpos, self.dt, self.kp)
-        self.assertEqual(a._Vpos, b._Vpos)
-        # above tested thought __init__ below is raw
-        self.assertEqual(a._pos2Lgm_Vector([1, 2, 3]),
-                         Lgm_Vector.Lgm_Vector(1, 2, 3) )
-        self.assertRaises(NotImplementedError, a._pos2Lgm_Vector,
-                          numpy.array([1, 2, 3]))
-
     def test_T89_1(self):
         """First simple in/out tests of T89 (regression)"""
-        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
-            [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
-            [-22.562973770829664, -1.8653978086481349, 70.52430794391046],
-            [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
+        ans = [[-18.92608102838227, -1.8575154402941223, 80.05211611259763],
+            [-20.783024662565946, -1.8575154402941223, 74.2809609414084 ],
+            [-22.512615841596073, -1.8575154402941223, 70.18331903086782],
+            [-26.36648155861654, -1.8575154402941223,  64.30381088411946 ], ]
         for i, kp in enumerate(range(4)):
             B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
             self.assertAlmostEqual(ans[i][0], B['B'].x, 5)
@@ -97,10 +85,10 @@ class Lgm_T89Tests(unittest.TestCase):
 
     def test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""
-        ans = [[-18.976439213243122, -1.8653978086481349, 80.39310505873112],
-            [-20.833382716404937, -1.8653978086481349, 74.62194986821649 ],
-            [-22.562973770829664, -1.8653978086481349, 70.52430794391046],
-            [-26.416839227182663, -1.8653978086481349, 64.64479976507458], ]
+        ans = [[-18.92608102838227, -1.8575154402941223, 80.05211611259763],
+            [-20.783024662565946, -1.8575154402941223, 74.2809609414084 ],
+            [-22.512615841596073, -1.8575154402941223, 70.18331903086782],
+            [-26.36648155861654, -1.8575154402941223, 64.30381088411946 ], ]
         for i, kp in enumerate(range(4)):
             a = Lgm_T89.Lgm_T89([self.pos]*2, [self.dt]*2, [kp]*2)
             B = a.calc_B()
@@ -143,7 +131,7 @@ class Lgm_T89Tests(unittest.TestCase):
         #        CDIP: -123.6039064198, -75.2663431204, 77.7392286024
         #        EDIP: -123.5566489251, -72.5155639973, 79.1393833267
         ans = {}
-        ans['IGRF'] = [-124.3951334579, -73.9980630146, 78.2480922689]
+        ans['IGRF'] = [-123.99486 ,  -73.758075,   77.98547 ]
         ans['CDIP'] = [-123.6039064198, -75.2663431204, 77.7392286024]
         ans['EDIP'] = [-123.5566489251, -72.5155639973, 79.1393833267]
         pos = [3.0, 4.0, 3.0]

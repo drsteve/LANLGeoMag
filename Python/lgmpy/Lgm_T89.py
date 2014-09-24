@@ -17,6 +17,7 @@ from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
 import Lgm_Vector
 import Lgm_CTrans
 import Lgm_MagModelInfo
+from utils import pos2Lgm_Vector
 
 class Lgm_T89(MagData.MagData):
     """
@@ -53,7 +54,7 @@ class Lgm_T89(MagData.MagData):
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
             not isinstance(pos, list):
             raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
-        self._Vpos = self._pos2Lgm_Vector(pos)
+        self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
@@ -133,18 +134,6 @@ class Lgm_T89(MagData.MagData):
                 raise(RuntimeWarning('Odd return from Lgm_T89') )
             return B
 
-    def _pos2Lgm_Vector(self, pos):
-        if isinstance(pos, Lgm_Vector.Lgm_Vector):
-            return pos
-        if isinstance(pos, list):
-            Vpos = []
-            for val in pos:
-                if not isinstance(val, list):
-                    return Lgm_Vector.Lgm_Vector(pos[0], pos[1], pos[2])
-                Vpos.append(Lgm_Vector.Lgm_Vector(val[0], val[1], val[2]))
-            return Vpos
-        if isinstance(pos, np.ndarray):
-            raise(NotImplementedError('Only lists can be input for position now') )
 
 def T89(pos, time, Kp, coord_system = 'GSM', INTERNAL_MODEL='LGM_IGRF',):
     """
