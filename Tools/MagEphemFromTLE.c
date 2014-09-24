@@ -44,6 +44,24 @@ static void elt_qsort( struct TimeList *arr, unsigned n ) {
     QSORT( struct TimeList, arr, n, elt_lt );
 }
 
+int WeDontAlreadyHaveThisTime( char *IsoTime, int nIsoTimeArray, char **IsoTimeArray ) {
+
+    int i;
+
+    for ( i=0; i<nIsoTimeArray; i++ ) {
+        if ( strcmp( IsoTime, IsoTimeArray[i] ) == 0 )  { 
+            // then we have this exact time
+            printf("************************************************ We have time: %s already\n", IsoTime);
+            return( 0 );
+        }
+    }
+
+    // we didnt find this exact time in the existing array
+    printf("************************************************ We dont have time: %s yet\n", IsoTime);
+    return(1);
+
+}
+
 /*
  * This routine is for figuring out whether we are inbound or outbound at any given time...
  * Takers:
@@ -130,6 +148,7 @@ static struct argp_option Options[] = {
     { 0, 0, 0, 0,   "External Model Options:", 3},
     {"ExtModel",        'e',    "model",                        0,        "External Magnetic Field Model to use. Can be OP77Q, T87Q, T89Q, T87D, T89D, T96, T02, T01S, TS04D, TS07D. Here, Q stands for Quiet, D for Dynamic.\n", 0},
     {"Kp",              'K',    "Kp",                           0,        "If set, force Kp to be this value. Use values like 0.7, 1.0, 1.3 for 1-, 1, 1+" },
+
     { 0, 0, 0, 0,   "Other Options:", 4},
     {"Birds",           'b',    "\"bird1, bird2, etc\"",      0,        "Birds (sats) to use. E.g., \"LANL-02A, 1989-046, POLAR\".", 0   },
     {"PitchAngles",     'p',    "\"start_pa, end_pa, npa\"",  0,        "Pitch angles to compute. Default is \"5.0, 90, 18\"." },
@@ -139,7 +158,11 @@ static struct argp_option Options[] = {
     {"UseEop",          'z',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Coords",          'C',    "coord_system",               0,        "Coordinate system used in the input file. Can be: LATLONRAD, SM, GSM, GEI2000 or GSE. Default is LATLONRAD." },
 
-    { 0, 0, 0, 0,   "Output Options:", 5},
+    { 0, 0, 0, 0,   "Update Options:", 5},
+    {"Update",          'U',    0,                            0,        "Update an existing file by adding missing lines. Can also force reprocessing of times using the -A option. (Experimental.)" },
+    {"UpdateAfterDateTime",  'A',    "yyyymmdd[Thh:mm:ss]",        0,        "Redo times that occur after this time. This allows user to force reprocessing of recent times that may now have updated mag model inputs (e.g. Kp may be changed, etc.) Seconds will be truncated to integers.", 0 },
+
+    { 0, 0, 0, 0,   "Output Options:", 6},
     {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
     {"Verbosity",       'v',    "verbosity",                  0,        "Verbosity level to use. (0-4)"      },
     {"DumpShellFiles",  'd',    0,                            0,        "Dump full binary shell files (for use in visualizing drift shells)." },
@@ -163,6 +186,7 @@ struct Arguments {
     double      Kp;
     int         Colorize;
     int         Force;
+    int         Update;
     double      FootPointHeight;
 
     char        IntModel[80];
@@ -178,15 +202,19 @@ struct Arguments {
 
     char        StartDateTime[80];
     char        EndDateTime[80];
+    char        UpdateAfterDateTime[80];
 
     int         FixModelDateTime;
     char        ModelDateTimeStr[80];
 
     long int    StartDate;          // Start date (e.g. 20130201)
     long int    EndDate;            // End date (e.g. 20130228)
+    long int    UpdateAfterDate;    // End date (e.g. 20130228)
 
     long int    StartSeconds;       // Start time in seconds for the first date.
     long int    EndSeconds;         // End time in seconds for the last date.
+
+    double      UpdateAfter_et;     // Ephemeris time for the UpdateAfter DateTime
 };
 
 
@@ -236,6 +264,13 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             }
             Lgm_DateTimeToString( arguments->EndDateTime, &d, 0, 0 );
             break;
+        case 'A': // update "After" date
+            strncpy( TimeString, arg, 39 );
+            IsoTimeStringToDateTime( TimeString, &d, c );
+            arguments->UpdateAfterDate  = d.Date;
+            Lgm_DateTimeToString( arguments->UpdateAfterDateTime, &d, 0, 0 );
+            arguments->UpdateAfter_et = Lgm_TDBSecSinceJ2000( &d, c );
+            break;
         case 'T': // end date
             strncpy( arguments->ModelDateTimeStr, arg, 80 );
             arguments->FixModelDateTime = 1;
@@ -248,6 +283,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'p':
             sscanf( arg, "%lf, %lf, %d", &arguments->StartPA, &arguments->EndPA, &arguments->nPA );
+            break;
+        case 'U':
+            arguments->Update = 1;
             break;
         case 'F':
             arguments->Force = 1;
@@ -602,6 +640,8 @@ void Lgm_WriteMagEphemDataKML( FILE *fp, int i, Lgm_MagEphemData *med ) {
  */
 int main( int argc, char *argv[] ){
 
+    int              nExisting_H5_IsoTimes;
+    char             **Existing_H5_IsoTimes;
     Lgm_ElapsedTimeInfo t;
     long int         IdNumber;
     char             IntDesig[10], CommonName[80];
@@ -619,7 +659,7 @@ int main( int argc, char *argv[] ){
     char             InputFilename[1024];
     char             OutputFilename[1024];
     char             IntModel[20], ExtModel[20], CoordSystem[80];
-    int              DumpShellFiles, UseEop, Colorize, Force;
+    int              DumpShellFiles, UseEop, Colorize, Force, Update;
     FILE             *fp_in, *fp_MagEphem;
     int              nBirds, iBird;
     char             **Birds, Bird[80];
@@ -627,7 +667,7 @@ int main( int argc, char *argv[] ){
     int              nAlpha, Quality, nFLsInDriftShell, Verbosity;
     long int         StartDate, EndDate, Date, Delta;
     int              sYear, sMonth, sDay, sDoy, eYear, eMonth, eDay, eDoy, Year, Month, Day;
-    double           sJD, eJD, JD, Time, StartSeconds, EndSeconds;
+    double           sJD, eJD, JD, Time, StartSeconds, EndSeconds, UpdateAfter_et;
     Lgm_MagEphemInfo *MagEphemInfo;
     Lgm_QinDentonOne p;
 
@@ -637,7 +677,7 @@ int main( int argc, char *argv[] ){
     hid_t           DataSet, MemSpace;
     herr_t          status;
     hsize_t         Dims[4], Offset[4], SlabSize[4];
-    int             iT;
+    int             iT, nOffset;
     double          ForceKp;
     double          GeodLat, GeodLong, GeodHeight, MLAT, MLON, MLT;
     Lgm_MagEphemData *med;
@@ -693,6 +733,7 @@ int main( int argc, char *argv[] ){
     /*
      * Default option values.
      */
+    arguments.UpdateAfter_et   = 9e99;
     arguments.StartPA          = 90;     // start at 90.0 Deg.
     arguments.EndPA            = 5.0;    // stop at 2.5 Deg.
     arguments.nPA              = 18;     // 18 pitch angles
@@ -704,6 +745,7 @@ int main( int argc, char *argv[] ){
     arguments.Delta            = 60;     // 60s default cadence
     arguments.Colorize         = 0;
     arguments.Force            = 0;
+    arguments.Update           = 0;
     arguments.UseEop           = 0;
     arguments.DumpShellFiles   = 0;
     arguments.FixModelDateTime =  0;
@@ -736,6 +778,9 @@ int main( int argc, char *argv[] ){
 
 
 
+
+
+
     /*
      * Define pitch angles to use.
      */
@@ -754,21 +799,23 @@ int main( int argc, char *argv[] ){
     /*
      *  Set other options
      */
-    FootpointHeight  = arguments.FootPointHeight;
-    Quality          = arguments.Quality;
-    nFLsInDriftShell = arguments.nFLsInDriftShell;
-    ForceKp          = arguments.Kp;
-    Verbosity        = arguments.Verbosity;
-    Colorize         = arguments.Colorize;
-    Force            = arguments.Force;
-    UseEop           = arguments.UseEop;
-    DumpShellFiles   = arguments.DumpShellFiles;
-    Delta            = arguments.Delta;
-    StartDate        = arguments.StartDate;
-    EndDate          = arguments.EndDate;
-    StartSeconds     = arguments.StartSeconds;
-    EndSeconds       = arguments.EndSeconds;
-    FixModelDateTime = arguments.FixModelDateTime;
+    FootpointHeight    = arguments.FootPointHeight;
+    Quality            = arguments.Quality;
+    nFLsInDriftShell   = arguments.nFLsInDriftShell;
+    ForceKp            = arguments.Kp;
+    Verbosity          = arguments.Verbosity;
+    Colorize           = arguments.Colorize;
+    Force              = arguments.Force;
+    Update             = arguments.Update;
+    UseEop             = arguments.UseEop;
+    DumpShellFiles     = arguments.DumpShellFiles;
+    Delta              = arguments.Delta;
+    StartDate          = arguments.StartDate;
+    EndDate            = arguments.EndDate;
+    StartSeconds       = arguments.StartSeconds;
+    EndSeconds         = arguments.EndSeconds;
+    UpdateAfter_et     = arguments.UpdateAfter_et;
+    FixModelDateTime   = arguments.FixModelDateTime;
     strcpy( IntModel,  arguments.IntModel );
     strcpy( ExtModel,  arguments.ExtModel );
     strcpy( CoordSystem,  arguments.CoordSystem );
@@ -809,6 +856,7 @@ int main( int argc, char *argv[] ){
         printf( "\t                    L* Quality: %d\n", Quality );
         printf( "\t       Num. FLs in drift shell: %d\n", nFLsInDriftShell );
         printf( "\t                  Force output: %s\n", Force ? "yes" : "no" );
+        printf( "\t       Update to existing file: %s\n", Update ? "yes" : "no" );
         printf( "\t                       Use Eop: %s\n", UseEop ? "yes" : "no" );
         printf( "\t         Dump Full Shell Files: %s\n", DumpShellFiles ? "yes" : "no" );
         printf( "\t        Colorize Thread Output: %d\n", Colorize );
@@ -957,6 +1005,9 @@ int main( int argc, char *argv[] ){
 
 
 
+    /*
+     * loop over all dates
+     */
     for ( JD = sJD; JD <= eJD; JD += 1.0 ) {
 
         Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
@@ -1043,6 +1094,15 @@ if        ( !strcmp( Bird, "rbspa" ) ){
             printf( "     HDF5 Output File: %s\n\n", HdfOutFile);
 
 
+
+
+
+
+
+
+
+
+
             // Create Base directory if it hasn't been created yet.
             char *dirc = strdup( OutFile );
             BaseDir    = dirname(dirc);
@@ -1082,15 +1142,45 @@ if        ( !strcmp( Bird, "rbspa" ) ){
                 printf("\t\tLast file modification:  %s", ctime(&StatBuf.st_mtime));
                 printf("\n");
 
+
                 /*
                  *   If HdfOutFile exists, check to see if it is readable.
                  */
                 if ( !H5Fis_hdf5( HdfOutFile ) ) {
                     printf("\t  Outfile Not Readable: %s. Forcing regeneration of file.\n\n\n", HdfOutFile );
                     FileExists = FALSE;
+                } else if ( Update ){
+                    file = H5Fopen( HdfOutFile,  H5F_ACC_RDWR, H5P_DEFAULT );
+                    Existing_H5_IsoTimes  = Get_StringDataset_1D( file, "/IsoTime", Dims );
+                    nExisting_H5_IsoTimes = Dims[0];
+                    H5Fclose( file );
+printf("nExisting_H5_IsoTimes = %d\n", nExisting_H5_IsoTimes);
+for (i=0; i<nExisting_H5_IsoTimes; i++){
+    printf("Time: %s\n", Existing_H5_IsoTimes[i]);
+}
+//exit(0);
                 }
 
             }
+
+
+
+
+
+/*
+ * 
+ */
+if ( Update ) {
+    printf("Updating...\n");
+    printf("\tRetrieving CommandLine that was used to create file...\n");
+    printf("\tOutFile: %s\n", OutFile);
+    sprintf(Command, "grep -i CommandLine %s", OutFile); system(Command);
+//exit(0);
+}
+
+
+
+
 
             if ( !FileExists || Force ) {
 
@@ -1106,10 +1196,6 @@ if        ( !strcmp( Bird, "rbspa" ) ){
 
                     fclose( fp_in );
 
-
-
-
-
 // WE NEED TO free this list each time
                     /*
                      * Read TLEs from file
@@ -1122,21 +1208,10 @@ if        ( !strcmp( Bird, "rbspa" ) ){
                         printf("TLE read and parsed.\n");
                     }
                     LgmSgp_SortListOfTLEs( nTle, tle );
-
-
                     printf("Line0: %s\n", tle[10].Line0);
                     printf("Line1: %s\n", tle[10].Line1);
-                    printf("Line2: %s\n", tle[10].Line2);
-                    printf("\n");
-
-
-
+                    printf("Line2: %s\n\n", tle[10].Line2);
                     LgmSgp_SGP4_Init( sgp, &tle[10] );
-
-
-
-
-
 
 
                     /*
@@ -1148,9 +1223,6 @@ if        ( !strcmp( Bird, "rbspa" ) ){
                      */
                     afi = (afInfo *)calloc( 1, sizeof(afInfo) );
                     afi->Date = Date;
-
-
-
 // PROBLEM AREA?
 afi->BODY = BODY;
                     // initialize the propagator
@@ -1331,9 +1403,12 @@ afi->BODY = BODY;
                     /*
                      * Open MagEphem txt file for writing and write header.
                      */
-                    fp_MagEphem = fopen( OutFile, "w" );
-                    Lgm_WriteMagEphemHeader( fp_MagEphem, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
-                    printf("\t      Writing to file: %s\n", OutFile );
+                    if ( !Update ) {
+                        printf("\t      Writing Header to file: %s\n", OutFile );
+                        fp_MagEphem = fopen( OutFile, "w" );
+                        Lgm_WriteMagEphemHeader( fp_MagEphem, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo );
+                        fclose(fp_MagEphem);
+                    }
 
                     if ( UseEop ) {
                         // Read in the EOP vals
@@ -1343,14 +1418,28 @@ afi->BODY = BODY;
 
 
                     /*
-                     * Open MagEphem hdf5 file for writing and
+                     * Create MagEphem hdf5 file.
                      * Create variables.
+                     * Write global/header type info.
+                     * Close it it.
                      */
-                    file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 //PROBLEM AREA...
 //BODY?
-                    Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, nAscend, Ascend_UTC, Ascend_U, nPerigee, Perigee_UTC, Perigee_U, nApogee, &Apogee_UTC[0], &Apogee_U[0], MagEphemInfo, med );
+                    if ( !Update ) {
+                        file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+                        Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, 
+                                                nAscend, Ascend_UTC, Ascend_U, 
+                                                nPerigee, Perigee_UTC, Perigee_U, 
+                                                nApogee, &Apogee_UTC[0], &Apogee_U[0], 
+                                                MagEphemInfo, med );
+                        H5Fclose( file );
+                    }
 
+
+
+
+            
+                    
 
 
 
@@ -1359,14 +1448,23 @@ afi->BODY = BODY;
                      */
                     ss = (Date == StartDate) ? StartSeconds : 0;
                     es = (Date == EndDate) ? EndSeconds : 86400;
+
                     med->H5_nT = 0;
                     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
                     for ( Seconds=ss; Seconds<=es; Seconds += Delta ) {
 
                         Lgm_Make_UTC( Date, Seconds/3600.0, &UTC, c );
                         Lgm_DateTimeToString( IsoTimeString, &UTC, 0, 0 );
-
+            
+                        /*
+                         * If we are running in append mode, we need to check
+                         * to see if we already have this time in the file.
+                         */
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
+printf("et, UpdateAfter_et = %g %g\n", et, UpdateAfter_et);
+                        if ( !Update || WeDontAlreadyHaveThisTime( IsoTimeString, nExisting_H5_IsoTimes, Existing_H5_IsoTimes )  || ( et >= UpdateAfter_et ) ) {
+
+
 
 
 
@@ -1378,458 +1476,464 @@ printf("Line0: %s\n", tle[tiii].Line0 );
 printf("Line1: %s\n", tle[tiii].Line1 );
 printf("Line2: %s\n", tle[tiii].Line2 );
 
-                        LgmSgp_SGP4_Init( sgp, &tle[tiii] );
+                            LgmSgp_SGP4_Init( sgp, &tle[tiii] );
 
 
-                        // do the propagation
-                        tsince = (UTC.JD - tle[tiii].JD)*1440.0;
-                        LgmSgp_SGP4( tsince, sgp );
+                            // do the propagation
+                            tsince = (UTC.JD - tle[tiii].JD)*1440.0;
+                            LgmSgp_SGP4( tsince, sgp );
 
 
 
-                        // Convert from TEME -> GEI2000
-                        Uteme.x = sgp->X/WGS84_A; Uteme.y = sgp->Y/WGS84_A; Uteme.z = sgp->Z/WGS84_A; 
-                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-                        Lgm_Convert_Coords( &Uteme, &U, TEME_TO_GEI2000, c );
+                            // Convert from TEME -> GEI2000
+                            Uteme.x = sgp->X/WGS84_A; Uteme.y = sgp->Y/WGS84_A; Uteme.z = sgp->Z/WGS84_A; 
+                            Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+                            Lgm_Convert_Coords( &Uteme, &U, TEME_TO_GEI2000, c );
 
 
-                        if ( UseEop ) {
-                            // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
-                            Lgm_get_eop_at_JD( UTC.JD, &eop, e );
+                            if ( UseEop ) {
+                                // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+                                Lgm_get_eop_at_JD( UTC.JD, &eop, e );
 
-                            // Set the EOP vals in the CTrans structure.
-                            Lgm_set_eop( &eop, c );
-                        }
+                                // Set the EOP vals in the CTrans structure.
+                                Lgm_set_eop( &eop, c );
+                            }
 
-                        // Set mag model parameters
-                        if ( FixModelDateTime ) {
-                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
-                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
-                        } else {
-                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
-                            Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
-                        }
-
-
-                        if ( ForceKp >= 0.0 ) {
-                            MagEphemInfo->LstarInfo->mInfo->fKp = ForceKp;
-                            MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(ForceKp+0.5);
-                            if (MagEphemInfo->LstarInfo->mInfo->Kp > 6) MagEphemInfo->LstarInfo->mInfo->Kp = 6;
-                            if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
-                        }
+                            // Set mag model parameters
+                            if ( FixModelDateTime ) {
+                                Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
+                                Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                            } else {
+                                Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
+                                Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
+                            }
 
 
-                        // Set up the trans matrices
-                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+                            if ( ForceKp >= 0.0 ) {
+                                MagEphemInfo->LstarInfo->mInfo->fKp = ForceKp;
+                                MagEphemInfo->LstarInfo->mInfo->Kp  = (int)(ForceKp+0.5);
+                                if (MagEphemInfo->LstarInfo->mInfo->Kp > 6) MagEphemInfo->LstarInfo->mInfo->Kp = 6;
+                                if (MagEphemInfo->LstarInfo->mInfo->Kp < 0 ) MagEphemInfo->LstarInfo->mInfo->Kp = 0;
+                            }
 
-                        MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
 
-                        Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
+                            // Set up the trans matrices
+                            Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+
+                            MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
+
+                            Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
 //PROBLEM AREA...
 //sce2s_c( BODY,    et, 30, sclkch );
 
-                        /*
-                         * Compute L*s, Is, Bms, Footprints, etc...
-                         * These quantities are stored in the MagEphemInfo Structure
-                         */
-                        if ( Verbosity > 0 ) {
-                            printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
-                            printf("\n\n\t[ %s ]: %s  Bird: %s Kp: %g    Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, MagEphemInfo->LstarInfo->mInfo->fKp, Rgsm.x, Rgsm.y, Rgsm.z );
-                            printf("\t-------------------------------------------------------------------------------------------------------------------\n");
-                        }
-                        Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, Colorize, MagEphemInfo );
-
-                        MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
-
-                        /*
-                         * Write a row of data into the txt file
-                         */
-                        Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
-
-
-
-
-                        if ( DumpShellFiles && (nAlpha > 0) ){
-
-                            sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
-                            printf( "Writing Full Shell File: %s\n", ShellFile );
-                            WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
-                        }
-
-
-
-
-                        // Fill arrays for dumping out as HDF5 files
-                        strcpy( med->H5_IsoTimes[ med->H5_nT ], IsoTimeString );
-                        strcpy( med->H5_IntModel[ med->H5_nT ], IntModel );
-                        strcpy( med->H5_ExtModel[ med->H5_nT ], ExtModel );
-                        switch ( MagEphemInfo->FieldLineType ) {
-                            case LGM_OPEN_IMF:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_IMF" ); // FL Type
-                                                break;
-                            case LGM_CLOSED:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_CLOSED" ); // FL Type
-                                                break;
-                            case LGM_OPEN_N_LOBE:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_N_LOBE" ); // FL Type
-                                                break;
-                            case LGM_OPEN_S_LOBE:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_S_LOBE" ); // FL Type
-                                                break;
-                            case LGM_INSIDE_EARTH:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_INSIDE_EARTH" ); // FL Type
-                                                break;
-                            case LGM_TARGET_HEIGHT_UNREACHABLE:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_TARGET_HEIGHT_UNREACHABLE" ); // FL Type
-                                                break;
-                            default:
-                                                sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "UNKNOWN FIELD TYPE" ); // FL Type
-                                                break;
-                        }
-                        med->H5_Date[ med->H5_nT ]           = UTC.Date;
-                        med->H5_Doy[ med->H5_nT ]            = UTC.Doy;
-                        med->H5_UTC[ med->H5_nT ]            = UTC.Time;
-                        med->H5_JD[ med->H5_nT ]             = UTC.JD;
-                        med->H5_InOut[ med->H5_nT ]          = MagEphemInfo->InOut;
-                        med->H5_OrbitNumber[ med->H5_nT ]    = MagEphemInfo->OrbitNumber;
-                        med->H5_GpsTime[ med->H5_nT ]        = Lgm_UTC_to_GpsSeconds( &UTC, c );
-                        med->H5_TiltAngle[ med->H5_nT ]      = c->psi*DegPerRad;
-
-                        med->H5_Rgsm[ med->H5_nT ][0]        = Rgsm.x;
-                        med->H5_Rgsm[ med->H5_nT ][1]        = Rgsm.y;
-                        med->H5_Rgsm[ med->H5_nT ][2]        = Rgsm.z;
-
-                        Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-                        Lgm_Convert_Coords( &Rgsm, &Rgeo, GSM_TO_GEO, c );      Lgm_VecToArr( &Rgeo, &med->H5_Rgeo[ med->H5_nT ][0] );
-                        Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_SM, c );       Lgm_VecToArr( &W,    &med->H5_Rsm[ med->H5_nT ][0] );
-                        Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GEI2000, c );  Lgm_VecToArr( &W,    &med->H5_Rgei[ med->H5_nT ][0] );
-                        Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GSE, c );      Lgm_VecToArr( &W,    &med->H5_Rgse[ med->H5_nT ][0] );
-
-                        Lgm_WGS84_to_GEOD( &Rgeo, &GeodLat, &GeodLong, &GeodHeight );
-                        Lgm_SetArrElements3( &med->H5_Rgeod[ med->H5_nT ][0],        GeodLat, GeodLong, GeodHeight );
-                        Lgm_SetArrElements2( &med->H5_Rgeod_LatLon[ med->H5_nT ][0], GeodLat, GeodLong );
-                        med->H5_Rgeod_Height[ med->H5_nT ] = GeodHeight;
-
-                        Lgm_Convert_Coords( &Rgsm, &W, GSM_TO_CDMAG, c );
-                        Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                        med->H5_CDMAG_MLAT[ med->H5_nT ] = MLAT;
-                        med->H5_CDMAG_MLON[ med->H5_nT ] = MLON;
-                        med->H5_CDMAG_MLT[ med->H5_nT ]  = MLT;
-                        med->H5_CDMAG_R[ med->H5_nT ]    = R;
-
-                        Lgm_Convert_Coords( &Rgsm, &W, GSM_TO_EDMAG, c );
-                        Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                        med->H5_EDMAG_MLAT[ med->H5_nT ] = MLAT;
-                        med->H5_EDMAG_MLON[ med->H5_nT ] = MLON;
-                        med->H5_EDMAG_MLT[ med->H5_nT ]  = MLT;
-                        med->H5_EDMAG_R[ med->H5_nT ]    = R;
-
-                        med->H5_Kp[ med->H5_nT ]             = MagEphemInfo->LstarInfo->mInfo->fKp;
-                        med->H5_Dst[ med->H5_nT ]            = MagEphemInfo->LstarInfo->mInfo->Dst;
-
-                        med->H5_S_sc_to_pfn[ med->H5_nT ]    = (MagEphemInfo->Snorth > 0.0) ? MagEphemInfo->Snorth : LGM_FILL_VALUE;
-                        med->H5_S_sc_to_pfs[ med->H5_nT ]    = (MagEphemInfo->Ssouth > 0.0) ? MagEphemInfo->Ssouth : LGM_FILL_VALUE;
-                        med->H5_S_pfs_to_Bmin[ med->H5_nT ]  = (MagEphemInfo->Smin > 0.0) ? MagEphemInfo->Smin : LGM_FILL_VALUE;
-                        med->H5_S_Bmin_to_sc[ med->H5_nT ]   = ((MagEphemInfo->Ssouth>0.0)&&(MagEphemInfo->Smin > 0.0)) ? MagEphemInfo->Ssouth-MagEphemInfo->Smin : LGM_FILL_VALUE;
-                        med->H5_S_total[ med->H5_nT ]        = ((MagEphemInfo->Snorth > 0.0)&&(MagEphemInfo->Ssouth > 0.0)) ? MagEphemInfo->Snorth + MagEphemInfo->Ssouth : LGM_FILL_VALUE;
-
-                        med->H5_d2B_ds2[ med->H5_nT ]        = MagEphemInfo->d2B_ds2;
-                        med->H5_Sb0[ med->H5_nT ]            = MagEphemInfo->Sb0;
-                        med->H5_RadiusOfCurv[ med->H5_nT ]   = MagEphemInfo->RofC;
-
-
-                        MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &Bsc_gsm, MagEphemInfo->LstarInfo->mInfo );
-                        med->H5_Bsc_gsm[ med->H5_nT ][0] = Bsc_gsm.x;
-                        med->H5_Bsc_gsm[ med->H5_nT ][1] = Bsc_gsm.y;
-                        med->H5_Bsc_gsm[ med->H5_nT ][2] = Bsc_gsm.z;
-                        med->H5_Bsc_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bsc_gsm );
-
-                        if ( MagEphemInfo->FieldLineType == LGM_CLOSED ) {
-                            med->H5_Pmin_gsm[ med->H5_nT ][0] = MagEphemInfo->Pmin.x;
-                            med->H5_Pmin_gsm[ med->H5_nT ][1] = MagEphemInfo->Pmin.y;
-                            med->H5_Pmin_gsm[ med->H5_nT ][2] = MagEphemInfo->Pmin.z;
-
-                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Pmin, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                            Bmin_mag = Lgm_Magnitude( &Bvec );
-                            med->H5_Bmin_gsm[ med->H5_nT ][0] = Bvec.x;
-                            med->H5_Bmin_gsm[ med->H5_nT ][1] = Bvec.y;
-                            med->H5_Bmin_gsm[ med->H5_nT ][2] = Bvec.z;
-                            med->H5_Bmin_gsm[ med->H5_nT ][3] = Bmin_mag;
-
-                        } else {
-                            med->H5_Pmin_gsm[ med->H5_nT ][0] = LGM_FILL_VALUE ;
-                            med->H5_Pmin_gsm[ med->H5_nT ][1] = LGM_FILL_VALUE ;
-                            med->H5_Pmin_gsm[ med->H5_nT ][2] = LGM_FILL_VALUE ;
-
-                            med->H5_Bmin_gsm[ med->H5_nT ][0] = LGM_FILL_VALUE ;
-                            med->H5_Bmin_gsm[ med->H5_nT ][1] = LGM_FILL_VALUE ;
-                            med->H5_Bmin_gsm[ med->H5_nT ][2] = LGM_FILL_VALUE ;
-                            med->H5_Bmin_gsm[ med->H5_nT ][3] = LGM_FILL_VALUE ;
-                            Bmin_mag = LGM_FILL_VALUE;
-                        }
-
-
-                        for (i=0; i<nAlpha; i++){
-                            med->H5_Lstar[ med->H5_nT ][i]          = MagEphemInfo->Lstar[i];
-                            med->H5_DriftShellType[ med->H5_nT ][i] = MagEphemInfo->DriftOrbitType[i];
-                            med->H5_Sb[ med->H5_nT ][i]             = MagEphemInfo->Sb[i];
-                            med->H5_I[ med->H5_nT ][i]              = MagEphemInfo->I[i];
-                            med->H5_Bm[ med->H5_nT ][i]             = MagEphemInfo->Bm[i];
-
-                            Ek    = 1.0; // MeV
-                            E     = Ek + LGM_Ee0; // total energy, MeV
-                            p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
-                            Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
-                            Beta  = sqrt( Beta2 );
-                            vel   = Beta*LGM_c;  // velocity in m/s
-                            vel  /= (Re*1000.0); // Re/s
-                            T     = ( MagEphemInfo->Sb[i] > 0.0 ) ? 2.0*MagEphemInfo->Sb[i]/vel : LGM_FILL_VALUE;
-
-                            pp    = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
-                            rg    = sin(MagEphemInfo->Alpha[i]*RadPerDeg)*pp/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
-
-                            med->H5_Tb[ med->H5_nT ][i]             = T;
-                            med->H5_Kappa[ med->H5_nT ][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
-
-
-                            if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
-                                med->H5_K[ med->H5_nT ][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
-                            } else {
-                                med->H5_K[ med->H5_nT ][i] = LGM_FILL_VALUE;
+                            /*
+                             * Compute L*s, Is, Bms, Footprints, etc...
+                             * These quantities are stored in the MagEphemInfo Structure
+                             */
+                            if ( Verbosity > 0 ) {
+                                printf("\t\t"); Lgm_PrintElapsedTime( &t ); printf("\n");
+                                printf("\n\n\t[ %s ]: %s  Bird: %s Kp: %g    Rgsm: %g %g %g Re\n", ProgramName, IsoTimeString, Bird, MagEphemInfo->LstarInfo->mInfo->fKp, Rgsm.x, Rgsm.y, Rgsm.z );
+                                printf("\t-------------------------------------------------------------------------------------------------------------------\n");
                             }
-                            if (MagEphemInfo->I[i]>=0.0) {
-                                med->H5_L[ med->H5_nT ][i] = LFromIBmM_McIlwain(MagEphemInfo->I[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
-                            } else {
-                                med->H5_L[ med->H5_nT ][i] = LGM_FILL_VALUE;
+                            Lgm_ComputeLstarVersusPA( UTC.Date, UTC.Time, &Rgsm, nAlpha, Alpha, Colorize, MagEphemInfo );
+
+                            MagEphemInfo->InOut = InOutBound( ApoPeriTimeList, nApoPeriTimeList, UTC.JD );
+
+                            /*
+                             * Open file in append mode.
+                             * Write a row of data into the txt file.
+                             */
+                            fp_MagEphem = fopen( OutFile, "a" );
+                            Lgm_WriteMagEphemData( fp_MagEphem, IntModel, ExtModel, MagEphemInfo->LstarInfo->mInfo->fKp, MagEphemInfo->LstarInfo->mInfo->Dst, MagEphemInfo );
+                            fclose(fp_MagEphem);
+
+
+
+
+                            if ( DumpShellFiles && (nAlpha > 0) ){
+
+                                sprintf( ShellFile, "%s_%ld.dat", OutFile, Seconds );
+                                printf( "Writing Full Shell File: %s\n", ShellFile );
+                                WriteMagEphemInfoStruct( ShellFile, nAlpha, MagEphemInfo );
                             }
-                        }
 
-                        /*
-                         * Compute Lsimple
-                         */
-                        med->H5_Lsimple[ med->H5_nT ] = ( Bmin_mag > 0.0) ? Lgm_Magnitude( &MagEphemInfo->Pmin ) : LGM_FILL_VALUE;
 
-                        /*
-                         * Compute InvLat
-                         */
-                        if (med->H5_Lsimple[ med->H5_nT ] > 0.0) {
-                            med->H5_InvLat[ med->H5_nT ] = DegPerRad*acos(sqrt(1.0/med->H5_Lsimple[ med->H5_nT ]));
-                        } else {
-                            med->H5_InvLat[ med->H5_nT ] = LGM_FILL_VALUE;
-                        }
 
-                        /*
-                         * Compute Lm_eq
-                         */
-                        med->H5_Lm_eq[ med->H5_nT ] = (Bmin_mag > 0.0) ? LFromIBmM_McIlwain( 0.0, Bmin_mag, MagEphemInfo->Mcurr ) : LGM_FILL_VALUE;
 
-                        /*
-                         * Compute InvLat_eq
-                         */
-                        if (med->H5_Lm_eq[ med->H5_nT ] > 0.0) {
-                            med->H5_InvLat_eq[ med->H5_nT ] = DegPerRad*acos(sqrt(1.0/med->H5_Lm_eq[ med->H5_nT ]));
-                        } else {
-                            med->H5_InvLat_eq[ med->H5_nT ] = LGM_FILL_VALUE;
-                        }
+                            // Fill arrays for dumping out as HDF5 files
+                            strcpy( med->H5_IsoTimes[ med->H5_nT ], IsoTimeString );
+                            strcpy( med->H5_IntModel[ med->H5_nT ], IntModel );
+                            strcpy( med->H5_ExtModel[ med->H5_nT ], ExtModel );
+                            switch ( MagEphemInfo->FieldLineType ) {
+                                case LGM_OPEN_IMF:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_IMF" ); // FL Type
+                                                    break;
+                                case LGM_CLOSED:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_CLOSED" ); // FL Type
+                                                    break;
+                                case LGM_OPEN_N_LOBE:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_N_LOBE" ); // FL Type
+                                                    break;
+                                case LGM_OPEN_S_LOBE:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_OPEN_S_LOBE" ); // FL Type
+                                                    break;
+                                case LGM_INSIDE_EARTH:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_INSIDE_EARTH" ); // FL Type
+                                                    break;
+                                case LGM_TARGET_HEIGHT_UNREACHABLE:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "LGM_TARGET_HEIGHT_UNREACHABLE" ); // FL Type
+                                                    break;
+                                default:
+                                                    sprintf( med->H5_FieldLineType[ med->H5_nT ], "%s",  "UNKNOWN FIELD TYPE" ); // FL Type
+                                                    break;
+                            }
+                            med->H5_Date[ med->H5_nT ]           = UTC.Date;
+                            med->H5_Doy[ med->H5_nT ]            = UTC.Doy;
+                            med->H5_UTC[ med->H5_nT ]            = UTC.Time;
+                            med->H5_JD[ med->H5_nT ]             = UTC.JD;
+                            med->H5_InOut[ med->H5_nT ]          = MagEphemInfo->InOut;
+                            med->H5_OrbitNumber[ med->H5_nT ]    = MagEphemInfo->OrbitNumber;
+                            med->H5_GpsTime[ med->H5_nT ]        = Lgm_UTC_to_GpsSeconds( &UTC, c );
+                            med->H5_TiltAngle[ med->H5_nT ]      = c->psi*DegPerRad;
 
-                        /*
-                         * Compute BoverBeq
-                         */
-                        Bsc_mag = Lgm_Magnitude( &Bsc_gsm );
-                        med->H5_BoverBeq[ med->H5_nT ] = ( Bmin_mag > 0.0) ? Bsc_mag / Bmin_mag : LGM_FILL_VALUE;
+                            med->H5_Rgsm[ med->H5_nT ][0]        = Rgsm.x;
+                            med->H5_Rgsm[ med->H5_nT ][1]        = Rgsm.y;
+                            med->H5_Rgsm[ med->H5_nT ][2]        = Rgsm.z;
 
-                        /*
-                         * Compute MlatFromBoverBeq
-                         */
-                        if ( med->H5_BoverBeq[ med->H5_nT ] > 0.0 ) {
-                            s = sqrt( 1.0/med->H5_BoverBeq[ med->H5_nT ] );
-                            cl = Lgm_CdipMirrorLat( s );
-                            if ( fabs(cl) <= 1.0 ){
-                                med->H5_MlatFromBoverBeq[ med->H5_nT ] = DegPerRad*acos( cl );
-                                if (med->H5_S_Bmin_to_sc[ med->H5_nT ]<0.0) med->H5_MlatFromBoverBeq[ med->H5_nT ] *= -1.0;
+                            Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
+                            Lgm_Convert_Coords( &Rgsm, &Rgeo, GSM_TO_GEO, c );      Lgm_VecToArr( &Rgeo, &med->H5_Rgeo[ med->H5_nT ][0] );
+                            Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_SM, c );       Lgm_VecToArr( &W,    &med->H5_Rsm[ med->H5_nT ][0] );
+                            Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GEI2000, c );  Lgm_VecToArr( &W,    &med->H5_Rgei[ med->H5_nT ][0] );
+                            Lgm_Convert_Coords( &Rgsm, &W,    GSM_TO_GSE, c );      Lgm_VecToArr( &W,    &med->H5_Rgse[ med->H5_nT ][0] );
+
+                            Lgm_WGS84_to_GEOD( &Rgeo, &GeodLat, &GeodLong, &GeodHeight );
+                            Lgm_SetArrElements3( &med->H5_Rgeod[ med->H5_nT ][0],        GeodLat, GeodLong, GeodHeight );
+                            Lgm_SetArrElements2( &med->H5_Rgeod_LatLon[ med->H5_nT ][0], GeodLat, GeodLong );
+                            med->H5_Rgeod_Height[ med->H5_nT ] = GeodHeight;
+
+                            Lgm_Convert_Coords( &Rgsm, &W, GSM_TO_CDMAG, c );
+                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            med->H5_CDMAG_MLAT[ med->H5_nT ] = MLAT;
+                            med->H5_CDMAG_MLON[ med->H5_nT ] = MLON;
+                            med->H5_CDMAG_MLT[ med->H5_nT ]  = MLT;
+                            med->H5_CDMAG_R[ med->H5_nT ]    = R;
+
+                            Lgm_Convert_Coords( &Rgsm, &W, GSM_TO_EDMAG, c );
+                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                            med->H5_EDMAG_MLAT[ med->H5_nT ] = MLAT;
+                            med->H5_EDMAG_MLON[ med->H5_nT ] = MLON;
+                            med->H5_EDMAG_MLT[ med->H5_nT ]  = MLT;
+                            med->H5_EDMAG_R[ med->H5_nT ]    = R;
+
+                            med->H5_Kp[ med->H5_nT ]             = MagEphemInfo->LstarInfo->mInfo->fKp;
+                            med->H5_Dst[ med->H5_nT ]            = MagEphemInfo->LstarInfo->mInfo->Dst;
+
+                            med->H5_S_sc_to_pfn[ med->H5_nT ]    = (MagEphemInfo->Snorth > 0.0) ? MagEphemInfo->Snorth : LGM_FILL_VALUE;
+                            med->H5_S_sc_to_pfs[ med->H5_nT ]    = (MagEphemInfo->Ssouth > 0.0) ? MagEphemInfo->Ssouth : LGM_FILL_VALUE;
+                            med->H5_S_pfs_to_Bmin[ med->H5_nT ]  = (MagEphemInfo->Smin > 0.0) ? MagEphemInfo->Smin : LGM_FILL_VALUE;
+                            med->H5_S_Bmin_to_sc[ med->H5_nT ]   = ((MagEphemInfo->Ssouth>0.0)&&(MagEphemInfo->Smin > 0.0)) ? MagEphemInfo->Ssouth-MagEphemInfo->Smin : LGM_FILL_VALUE;
+                            med->H5_S_total[ med->H5_nT ]        = ((MagEphemInfo->Snorth > 0.0)&&(MagEphemInfo->Ssouth > 0.0)) ? MagEphemInfo->Snorth + MagEphemInfo->Ssouth : LGM_FILL_VALUE;
+
+                            med->H5_d2B_ds2[ med->H5_nT ]        = MagEphemInfo->d2B_ds2;
+                            med->H5_Sb0[ med->H5_nT ]            = MagEphemInfo->Sb0;
+                            med->H5_RadiusOfCurv[ med->H5_nT ]   = MagEphemInfo->RofC;
+
+
+                            MagEphemInfo->LstarInfo->mInfo->Bfield( &Rgsm, &Bsc_gsm, MagEphemInfo->LstarInfo->mInfo );
+                            med->H5_Bsc_gsm[ med->H5_nT ][0] = Bsc_gsm.x;
+                            med->H5_Bsc_gsm[ med->H5_nT ][1] = Bsc_gsm.y;
+                            med->H5_Bsc_gsm[ med->H5_nT ][2] = Bsc_gsm.z;
+                            med->H5_Bsc_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bsc_gsm );
+
+                            if ( MagEphemInfo->FieldLineType == LGM_CLOSED ) {
+                                med->H5_Pmin_gsm[ med->H5_nT ][0] = MagEphemInfo->Pmin.x;
+                                med->H5_Pmin_gsm[ med->H5_nT ][1] = MagEphemInfo->Pmin.y;
+                                med->H5_Pmin_gsm[ med->H5_nT ][2] = MagEphemInfo->Pmin.z;
+
+                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Pmin, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                                Bmin_mag = Lgm_Magnitude( &Bvec );
+                                med->H5_Bmin_gsm[ med->H5_nT ][0] = Bvec.x;
+                                med->H5_Bmin_gsm[ med->H5_nT ][1] = Bvec.y;
+                                med->H5_Bmin_gsm[ med->H5_nT ][2] = Bvec.z;
+                                med->H5_Bmin_gsm[ med->H5_nT ][3] = Bmin_mag;
+
+                            } else {
+                                med->H5_Pmin_gsm[ med->H5_nT ][0] = LGM_FILL_VALUE ;
+                                med->H5_Pmin_gsm[ med->H5_nT ][1] = LGM_FILL_VALUE ;
+                                med->H5_Pmin_gsm[ med->H5_nT ][2] = LGM_FILL_VALUE ;
+
+                                med->H5_Bmin_gsm[ med->H5_nT ][0] = LGM_FILL_VALUE ;
+                                med->H5_Bmin_gsm[ med->H5_nT ][1] = LGM_FILL_VALUE ;
+                                med->H5_Bmin_gsm[ med->H5_nT ][2] = LGM_FILL_VALUE ;
+                                med->H5_Bmin_gsm[ med->H5_nT ][3] = LGM_FILL_VALUE ;
+                                Bmin_mag = LGM_FILL_VALUE;
+                            }
+
+
+                            for (i=0; i<nAlpha; i++){
+                                med->H5_Lstar[ med->H5_nT ][i]          = MagEphemInfo->Lstar[i];
+                                med->H5_DriftShellType[ med->H5_nT ][i] = MagEphemInfo->DriftOrbitType[i];
+                                med->H5_Sb[ med->H5_nT ][i]             = MagEphemInfo->Sb[i];
+                                med->H5_I[ med->H5_nT ][i]              = MagEphemInfo->I[i];
+                                med->H5_Bm[ med->H5_nT ][i]             = MagEphemInfo->Bm[i];
+
+                                Ek    = 1.0; // MeV
+                                E     = Ek + LGM_Ee0; // total energy, MeV
+                                p2c2  = Ek*(Ek+2.0*LGM_Ee0); // p^2c^2,  MeV^2
+                                Beta2 = p2c2/(E*E); // beta^2 = v^2/c^2   (dimensionless)
+                                Beta  = sqrt( Beta2 );
+                                vel   = Beta*LGM_c;  // velocity in m/s
+                                vel  /= (Re*1000.0); // Re/s
+                                T     = ( MagEphemInfo->Sb[i] > 0.0 ) ? 2.0*MagEphemInfo->Sb[i]/vel : LGM_FILL_VALUE;
+
+                                pp    = sqrt(p2c2)*1.60217646e-13/LGM_c;  // mks
+                                rg    = sin(MagEphemInfo->Alpha[i]*RadPerDeg)*pp/(LGM_e*Bmin_mag*1e-9); // m. Bmin_mag calced above
+
+                                med->H5_Tb[ med->H5_nT ][i]             = T;
+                                med->H5_Kappa[ med->H5_nT ][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
+
+
+                                if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
+                                    med->H5_K[ med->H5_nT ][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
+                                } else {
+                                    med->H5_K[ med->H5_nT ][i] = LGM_FILL_VALUE;
+                                }
+                                if (MagEphemInfo->I[i]>=0.0) {
+                                    med->H5_L[ med->H5_nT ][i] = LFromIBmM_McIlwain(MagEphemInfo->I[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
+                                } else {
+                                    med->H5_L[ med->H5_nT ][i] = LGM_FILL_VALUE;
+                                }
+                            }
+
+                            /*
+                             * Compute Lsimple
+                             */
+                            med->H5_Lsimple[ med->H5_nT ] = ( Bmin_mag > 0.0) ? Lgm_Magnitude( &MagEphemInfo->Pmin ) : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute InvLat
+                             */
+                            if (med->H5_Lsimple[ med->H5_nT ] > 0.0) {
+                                med->H5_InvLat[ med->H5_nT ] = DegPerRad*acos(sqrt(1.0/med->H5_Lsimple[ med->H5_nT ]));
+                            } else {
+                                med->H5_InvLat[ med->H5_nT ] = LGM_FILL_VALUE;
+                            }
+
+                            /*
+                             * Compute Lm_eq
+                             */
+                            med->H5_Lm_eq[ med->H5_nT ] = (Bmin_mag > 0.0) ? LFromIBmM_McIlwain( 0.0, Bmin_mag, MagEphemInfo->Mcurr ) : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute InvLat_eq
+                             */
+                            if (med->H5_Lm_eq[ med->H5_nT ] > 0.0) {
+                                med->H5_InvLat_eq[ med->H5_nT ] = DegPerRad*acos(sqrt(1.0/med->H5_Lm_eq[ med->H5_nT ]));
+                            } else {
+                                med->H5_InvLat_eq[ med->H5_nT ] = LGM_FILL_VALUE;
+                            }
+
+                            /*
+                             * Compute BoverBeq
+                             */
+                            Bsc_mag = Lgm_Magnitude( &Bsc_gsm );
+                            med->H5_BoverBeq[ med->H5_nT ] = ( Bmin_mag > 0.0) ? Bsc_mag / Bmin_mag : LGM_FILL_VALUE;
+
+                            /*
+                             * Compute MlatFromBoverBeq
+                             */
+                            if ( med->H5_BoverBeq[ med->H5_nT ] > 0.0 ) {
+                                s = sqrt( 1.0/med->H5_BoverBeq[ med->H5_nT ] );
+                                cl = Lgm_CdipMirrorLat( s );
+                                if ( fabs(cl) <= 1.0 ){
+                                    med->H5_MlatFromBoverBeq[ med->H5_nT ] = DegPerRad*acos( cl );
+                                    if (med->H5_S_Bmin_to_sc[ med->H5_nT ]<0.0) med->H5_MlatFromBoverBeq[ med->H5_nT ] *= -1.0;
+                                } else {
+                                    med->H5_MlatFromBoverBeq[ med->H5_nT ] = LGM_FILL_VALUE;
+                                }
                             } else {
                                 med->H5_MlatFromBoverBeq[ med->H5_nT ] = LGM_FILL_VALUE;
                             }
-                        } else {
-                            med->H5_MlatFromBoverBeq[ med->H5_nT ] = LGM_FILL_VALUE;
-                        }
-
-                        /*
-                         * Save M values
-                         */
-                        med->H5_M_used[ med->H5_nT ] = MagEphemInfo->Mused;
-                        med->H5_M_ref[ med->H5_nT ]  = MagEphemInfo->Mref;
-                        med->H5_M_igrf[ med->H5_nT ] = MagEphemInfo->Mcurr;
-
-
-
-
-
-
-                        if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_N_LOBE) ) {
 
                             /*
-                             * Save northern Footpoint position in different coord systems.
+                             * Save M values
                              */
-                            Lgm_VecToArr( &MagEphemInfo->Ellipsoid_Footprint_Pn, med->H5_Pfn_gsm[ med->H5_nT ] );
+                            med->H5_M_used[ med->H5_nT ] = MagEphemInfo->Mused;
+                            med->H5_M_ref[ med->H5_nT ]  = MagEphemInfo->Mref;
+                            med->H5_M_igrf[ med->H5_nT ] = MagEphemInfo->Mcurr;
 
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_GEO, c );
-                            Lgm_VecToArr( &W, med->H5_Pfn_geo[ med->H5_nT ] );
 
-                            Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
-                            Lgm_SetArrElements3( med->H5_Pfn_geod[ med->H5_nT ],        GeodLat, GeodLong, GeodHeight );
-                            Lgm_SetArrElements2( med->H5_Pfn_geod_LatLon[ med->H5_nT ], GeodLat, GeodLong );
-                            med->H5_Pfn_geod_Height[ med->H5_nT ]    = GeodHeight;
 
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_CDMAG, c );
-                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                            Lgm_SetArrElements3( med->H5_Pfn_cdmag[ med->H5_nT ], MLAT, MLON, MLT );
-                            med->H5_Pfn_CD_MLAT[ med->H5_nT ] = MLAT;
-                            med->H5_Pfn_CD_MLON[ med->H5_nT ] = MLON;
-                            med->H5_Pfn_CD_MLT[ med->H5_nT ]  = MLT;
 
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_EDMAG, c );
-                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                            Lgm_SetArrElements3( med->H5_Pfn_edmag[ med->H5_nT ], MLAT, MLON, MLT );
-                            med->H5_Pfn_ED_MLAT[ med->H5_nT ] = MLAT;
-                            med->H5_Pfn_ED_MLON[ med->H5_nT ] = MLON;
-                            med->H5_Pfn_ED_MLT[ med->H5_nT ]  = MLT;
+
+
+                            if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_N_LOBE) ) {
+
+                                /*
+                                 * Save northern Footpoint position in different coord systems.
+                                 */
+                                Lgm_VecToArr( &MagEphemInfo->Ellipsoid_Footprint_Pn, med->H5_Pfn_gsm[ med->H5_nT ] );
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_GEO, c );
+                                Lgm_VecToArr( &W, med->H5_Pfn_geo[ med->H5_nT ] );
+
+                                Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
+                                Lgm_SetArrElements3( med->H5_Pfn_geod[ med->H5_nT ],        GeodLat, GeodLong, GeodHeight );
+                                Lgm_SetArrElements2( med->H5_Pfn_geod_LatLon[ med->H5_nT ], GeodLat, GeodLong );
+                                med->H5_Pfn_geod_Height[ med->H5_nT ]    = GeodHeight;
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_CDMAG, c );
+                                Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                                Lgm_SetArrElements3( med->H5_Pfn_cdmag[ med->H5_nT ], MLAT, MLON, MLT );
+                                med->H5_Pfn_CD_MLAT[ med->H5_nT ] = MLAT;
+                                med->H5_Pfn_CD_MLON[ med->H5_nT ] = MLON;
+                                med->H5_Pfn_CD_MLT[ med->H5_nT ]  = MLT;
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Pn, &W, GSM_TO_EDMAG, c );
+                                Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                                Lgm_SetArrElements3( med->H5_Pfn_edmag[ med->H5_nT ], MLAT, MLON, MLT );
+                                med->H5_Pfn_ED_MLAT[ med->H5_nT ] = MLAT;
+                                med->H5_Pfn_ED_MLON[ med->H5_nT ] = MLON;
+                                med->H5_Pfn_ED_MLT[ med->H5_nT ]  = MLT;
+
+
+
+                                /*
+                                 * Save northern Footpoint B-field values in different coord systems.
+                                 */
+                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Pn, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                                Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
+                                Lgm_VecToArr( &Bvec,  &med->H5_Bfn_gsm[ med->H5_nT ][0] ); med->H5_Bfn_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
+                                Lgm_VecToArr( &Bvec2, &med->H5_Bfn_geo[ med->H5_nT ][0] ); med->H5_Bfn_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
+
+
+                                /*
+                                 * Save northern loss cone.
+                                 */
+                                Bfn_mag = Lgm_Magnitude( &Bvec );
+                                med->H5_LossConeAngleN[ med->H5_nT ] = asin( sqrt( Bsc_mag/Bfn_mag ) )*DegPerRad;
+
+
+
+                            } else {
+
+                                Lgm_SetArrVal3( med->H5_Pfn_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfn_geo[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfn_geod[ med->H5_nT ],         LGM_FILL_VALUE );
+                                Lgm_SetArrVal2( med->H5_Pfn_geod_LatLon[ med->H5_nT ],   LGM_FILL_VALUE );
+
+                                med->H5_Pfn_geod_Height[ med->H5_nT ]  = LGM_FILL_VALUE;
+                                med->H5_Pfn_CD_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfn_CD_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfn_CD_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
+                                med->H5_Pfn_ED_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfn_ED_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfn_ED_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
+
+                                Lgm_SetArrVal3( med->H5_Pfn_cdmag[ med->H5_nT ],        LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfn_edmag[ med->H5_nT ],        LGM_FILL_VALUE );
+
+                                Lgm_SetArrVal4( med->H5_Bfn_geo[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal4( med->H5_Bfn_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
+
+                                med->H5_LossConeAngleN[ med->H5_nT ] = LGM_FILL_VALUE;
+
+                            }
+
+                            if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_S_LOBE) ) {
+
+                                /*
+                                 * Save southern Footpoint position in different coord systems.
+                                 */
+                                Lgm_VecToArr( &MagEphemInfo->Ellipsoid_Footprint_Ps, med->H5_Pfs_gsm[ med->H5_nT ] );
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_GEO, c );
+                                Lgm_VecToArr( &W, med->H5_Pfs_geo[ med->H5_nT ] );
+
+                                Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
+                                Lgm_SetArrElements3( med->H5_Pfs_geod[ med->H5_nT ],        GeodLat, GeodLong, GeodHeight );
+                                Lgm_SetArrElements2( med->H5_Pfs_geod_LatLon[ med->H5_nT ], GeodLat, GeodLong );
+                                med->H5_Pfs_geod_Height[ med->H5_nT ]    = GeodHeight;
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_CDMAG, c );
+                                Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                                Lgm_SetArrElements3( med->H5_Pfs_cdmag[ med->H5_nT ], MLAT, MLON, MLT );
+                                med->H5_Pfs_CD_MLAT[ med->H5_nT ] = MLAT;
+                                med->H5_Pfs_CD_MLON[ med->H5_nT ] = MLON;
+                                med->H5_Pfs_CD_MLT[ med->H5_nT ]  = MLT;
+
+                                Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_EDMAG, c );
+                                Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
+                                Lgm_SetArrElements3( med->H5_Pfs_edmag[ med->H5_nT ], MLAT, MLON, MLT );
+                                med->H5_Pfs_ED_MLAT[ med->H5_nT ] = MLAT;
+                                med->H5_Pfs_ED_MLON[ med->H5_nT ] = MLON;
+                                med->H5_Pfs_ED_MLT[ med->H5_nT ]  = MLT;
+
+
+
+                                /*
+                                 * Save southern Footpoint B-field values in different coord systems.
+                                 */
+                                MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
+                                Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
+                                Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfs_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
+                                Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfs_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
+
+
+                                /*
+                                 * Save southern loss cone.
+                                 */
+                                Bfs_mag = Lgm_Magnitude( &Bvec );
+                                med->H5_LossConeAngleS[ med->H5_nT ] = asin( sqrt( Bsc_mag/Bfs_mag ) )*DegPerRad;
+
+
+
+                            } else {
+
+                                Lgm_SetArrVal3( med->H5_Pfs_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfs_geo[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfs_geod[ med->H5_nT ],         LGM_FILL_VALUE );
+                                Lgm_SetArrVal2( med->H5_Pfs_geod_LatLon[ med->H5_nT ],   LGM_FILL_VALUE );
+
+                                med->H5_Pfs_geod_Height[ med->H5_nT ]  = LGM_FILL_VALUE;
+                                med->H5_Pfs_CD_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfs_CD_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfs_CD_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
+                                med->H5_Pfs_ED_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfs_ED_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
+                                med->H5_Pfs_ED_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
+
+                                Lgm_SetArrVal3( med->H5_Pfs_cdmag[ med->H5_nT ],        LGM_FILL_VALUE );
+                                Lgm_SetArrVal3( med->H5_Pfs_edmag[ med->H5_nT ],        LGM_FILL_VALUE );
+
+                                Lgm_SetArrVal4( med->H5_Bfs_geo[ med->H5_nT ],          LGM_FILL_VALUE );
+                                Lgm_SetArrVal4( med->H5_Bfs_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
+
+                                med->H5_LossConeAngleS[ med->H5_nT ] = LGM_FILL_VALUE;
+
+                            }
 
 
 
                             /*
-                             * Save northern Footpoint B-field values in different coord systems.
+                             * Open existing HDF5 file in read/write mode.
+                             * Write a row of data into the hdf5 file
                              */
-                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Pn, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                            Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                            Lgm_VecToArr( &Bvec,  &med->H5_Bfn_gsm[ med->H5_nT ][0] ); med->H5_Bfn_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
-                            Lgm_VecToArr( &Bvec2, &med->H5_Bfn_geo[ med->H5_nT ][0] ); med->H5_Bfn_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
+// The nOff
+                            file = H5Fopen( HdfOutFile,  H5F_ACC_RDWR, H5P_DEFAULT );
+                            nOffset = ( Update ) ? nExisting_H5_IsoTimes : 0;
+                            Lgm_WriteMagEphemDataHdf( file, med->H5_nT + nOffset, med->H5_nT, med );
+                            H5Fclose( file );
+                            ++(med->H5_nT);
 
+                            // end if Update loop
 
-                            /*
-                             * Save northern loss cone.
-                             */
-                            Bfn_mag = Lgm_Magnitude( &Bvec );
-                            med->H5_LossConeAngleN[ med->H5_nT ] = asin( sqrt( Bsc_mag/Bfn_mag ) )*DegPerRad;
-
-
-
-                        } else {
-
-                            Lgm_SetArrVal3( med->H5_Pfn_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfn_geo[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfn_geod[ med->H5_nT ],         LGM_FILL_VALUE );
-                            Lgm_SetArrVal2( med->H5_Pfn_geod_LatLon[ med->H5_nT ],   LGM_FILL_VALUE );
-
-                            med->H5_Pfn_geod_Height[ med->H5_nT ]  = LGM_FILL_VALUE;
-                            med->H5_Pfn_CD_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfn_CD_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfn_CD_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
-                            med->H5_Pfn_ED_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfn_ED_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfn_ED_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
-
-                            Lgm_SetArrVal3( med->H5_Pfn_cdmag[ med->H5_nT ],        LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfn_edmag[ med->H5_nT ],        LGM_FILL_VALUE );
-
-                            Lgm_SetArrVal4( med->H5_Bfn_geo[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal4( med->H5_Bfn_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
-
-                            med->H5_LossConeAngleN[ med->H5_nT ] = LGM_FILL_VALUE;
-
-                        }
-
-                        if ( (MagEphemInfo->FieldLineType == LGM_CLOSED) || (MagEphemInfo->FieldLineType == LGM_OPEN_S_LOBE) ) {
-
-                            /*
-                             * Save southern Footpoint position in different coord systems.
-                             */
-                            Lgm_VecToArr( &MagEphemInfo->Ellipsoid_Footprint_Ps, med->H5_Pfs_gsm[ med->H5_nT ] );
-
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_GEO, c );
-                            Lgm_VecToArr( &W, med->H5_Pfs_geo[ med->H5_nT ] );
-
-                            Lgm_WGS84_to_GEOD( &W, &GeodLat, &GeodLong, &GeodHeight );
-                            Lgm_SetArrElements3( med->H5_Pfs_geod[ med->H5_nT ],        GeodLat, GeodLong, GeodHeight );
-                            Lgm_SetArrElements2( med->H5_Pfs_geod_LatLon[ med->H5_nT ], GeodLat, GeodLong );
-                            med->H5_Pfs_geod_Height[ med->H5_nT ]    = GeodHeight;
-
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_CDMAG, c );
-                            Lgm_CDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                            Lgm_SetArrElements3( med->H5_Pfs_cdmag[ med->H5_nT ], MLAT, MLON, MLT );
-                            med->H5_Pfs_CD_MLAT[ med->H5_nT ] = MLAT;
-                            med->H5_Pfs_CD_MLON[ med->H5_nT ] = MLON;
-                            med->H5_Pfs_CD_MLT[ med->H5_nT ]  = MLT;
-
-                            Lgm_Convert_Coords( &MagEphemInfo->Ellipsoid_Footprint_Ps, &W, GSM_TO_EDMAG, c );
-                            Lgm_EDMAG_to_R_MLAT_MLON_MLT( &W, &R, &MLAT, &MLON, &MLT, c );
-                            Lgm_SetArrElements3( med->H5_Pfs_edmag[ med->H5_nT ], MLAT, MLON, MLT );
-                            med->H5_Pfs_ED_MLAT[ med->H5_nT ] = MLAT;
-                            med->H5_Pfs_ED_MLON[ med->H5_nT ] = MLON;
-                            med->H5_Pfs_ED_MLT[ med->H5_nT ]  = MLT;
-
-
-
-                            /*
-                             * Save southern Footpoint B-field values in different coord systems.
-                             */
-                            MagEphemInfo->LstarInfo->mInfo->Bfield( &MagEphemInfo->Ellipsoid_Footprint_Ps, &Bvec, MagEphemInfo->LstarInfo->mInfo );
-                            Lgm_Convert_Coords( &Bvec, &Bvec2, GSM_TO_WGS84, c );
-                            Lgm_VecToArr( &Bvec,  &med->H5_Bfs_gsm[ med->H5_nT ][0] ); med->H5_Bfs_gsm[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec  );
-                            Lgm_VecToArr( &Bvec2, &med->H5_Bfs_geo[ med->H5_nT ][0] ); med->H5_Bfs_geo[ med->H5_nT ][3] = Lgm_Magnitude( &Bvec2 );
-
-
-                            /*
-                             * Save southern loss cone.
-                             */
-                            Bfs_mag = Lgm_Magnitude( &Bvec );
-                            med->H5_LossConeAngleS[ med->H5_nT ] = asin( sqrt( Bsc_mag/Bfs_mag ) )*DegPerRad;
-
-
-
-                        } else {
-
-                            Lgm_SetArrVal3( med->H5_Pfs_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfs_geo[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfs_geod[ med->H5_nT ],         LGM_FILL_VALUE );
-                            Lgm_SetArrVal2( med->H5_Pfs_geod_LatLon[ med->H5_nT ],   LGM_FILL_VALUE );
-
-                            med->H5_Pfs_geod_Height[ med->H5_nT ]  = LGM_FILL_VALUE;
-                            med->H5_Pfs_CD_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfs_CD_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfs_CD_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
-                            med->H5_Pfs_ED_MLAT[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfs_ED_MLON[ med->H5_nT ]      = LGM_FILL_VALUE;
-                            med->H5_Pfs_ED_MLT[ med->H5_nT ]       = LGM_FILL_VALUE;
-
-                            Lgm_SetArrVal3( med->H5_Pfs_cdmag[ med->H5_nT ],        LGM_FILL_VALUE );
-                            Lgm_SetArrVal3( med->H5_Pfs_edmag[ med->H5_nT ],        LGM_FILL_VALUE );
-
-                            Lgm_SetArrVal4( med->H5_Bfs_geo[ med->H5_nT ],          LGM_FILL_VALUE );
-                            Lgm_SetArrVal4( med->H5_Bfs_gsm[ med->H5_nT ],          LGM_FILL_VALUE );
-
-                            med->H5_LossConeAngleS[ med->H5_nT ] = LGM_FILL_VALUE;
-
-                        }
-
-
-
-
-
-
-
-                        /*
-                         * Write a row of data into the hdf5 file
-                         */
-                        Lgm_WriteMagEphemDataHdf( file, med->H5_nT, med );
-                        ++(med->H5_nT);
+                        } 
 
 
                     }
 
-                    fclose(fp_MagEphem);
-                    H5Fclose( file );
 
                     printf("DONE.\n");
                     Lgm_PrintElapsedTime( &t );
@@ -1843,9 +1947,9 @@ printf("Line2: %s\n", tle[tiii].Line2 );
                     /*
                      * Write KML file -- testing....
                      */
-                    FILE *KmlFile = fopen( "Puke.kml", "w" );
-                    Lgm_WriteMagEphemDataKML( KmlFile, med->H5_nT, med );
-                    fclose( KmlFile );
+//                    FILE *KmlFile = fopen( "Puke.kml", "w" );
+//                    Lgm_WriteMagEphemDataKML( KmlFile, med->H5_nT, med );
+//                    fclose( KmlFile );
 
 
 

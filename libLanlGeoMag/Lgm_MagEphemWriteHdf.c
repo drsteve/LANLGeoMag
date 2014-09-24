@@ -1100,7 +1100,7 @@ void Lgm_WriteMagEphemHeaderHdf( hid_t file, char *CodeVersion, char *ExtModel, 
 }
 
 
-void Lgm_WriteMagEphemDataHdf( hid_t file, int i, Lgm_MagEphemData *med ) {
+void Lgm_WriteMagEphemDataHdf( hid_t file, int iRow, int i, Lgm_MagEphemData *med ) {
 
     hid_t   atype;
     herr_t  status;
@@ -1111,93 +1111,93 @@ void Lgm_WriteMagEphemDataHdf( hid_t file, int i, Lgm_MagEphemData *med ) {
 
     // Write String variables
     atype = CreateStrType( 32 );
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "IsoTime",           i,                  atype,             &med->H5_IsoTimes[i][0] );         // Write IsoTime
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "FieldLineType",     i,                  atype,             &med->H5_FieldLineType[i][0] );    // Write H5_FieldLineType
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "IntModel",          i,                  atype,             &med->H5_IntModel[i][0] );         // Write IntModel
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "ExtModel",          i,                  atype,             &med->H5_ExtModel[i][0] );         // Write ExtModel
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "IsoTime",           iRow,                  atype,             &med->H5_IsoTimes[i][0] );         // Write IsoTime
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "FieldLineType",     iRow,                  atype,             &med->H5_FieldLineType[i][0] );    // Write H5_FieldLineType
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "IntModel",          iRow,                  atype,             &med->H5_IntModel[i][0] );         // Write IntModel
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "ExtModel",          iRow,                  atype,             &med->H5_ExtModel[i][0] );         // Write ExtModel
     status  = H5Tclose( atype );
 
     // Write Non-String variables
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Date",              i,                  H5T_NATIVE_LONG,   &med->H5_Date[i] );                // Write Date
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Doy",               i,                  H5T_NATIVE_INT,    &med->H5_Doy[i] );                 // Write Doy
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "UTC",               i,                  H5T_NATIVE_DOUBLE, &med->H5_UTC[i] );                 // Write UTC (hours)
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "JulianDate",        i,                  H5T_NATIVE_DOUBLE, &med->H5_JD[i] );                  // Write JD
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "GpsTime",           i,                  H5T_NATIVE_DOUBLE, &med->H5_GpsTime[i] );             // Write GpsTime
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "DipoleTiltAngle",   i,                  H5T_NATIVE_DOUBLE, &med->H5_TiltAngle[i] );           // Write DipoleTiltAngle
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InOut",             i,                  H5T_NATIVE_INT,    &med->H5_InOut[i] );               // Write InOut
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "OrbitNumber",       i,                  H5T_NATIVE_INT,    &med->H5_OrbitNumber[i] );         // Write OrbitNumber
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgsm",              i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgsm[i][0] );             // Write Rgsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgeo",              i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgeo[i][0] );             // Write Rgeo
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rsm",               i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rsm[i][0] );              // Write Rsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgei",              i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgei[i][0] );             // Write Rgei
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgse",              i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgse[i][0] );             // Write Rgse
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgeod_LatLon",      i, 2,               H5T_NATIVE_DOUBLE, &med->H5_Rgeod_LatLon[i][0] );     // Write Rgeod_LatLon
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Rgeod_Height",      i,                  H5T_NATIVE_DOUBLE, &med->H5_Rgeod_Height[i] );        // Write Rgeod_Height
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLAT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLAT[i] );          // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLON",        i,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLON[i] );          // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLT",         i,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLT[i] );           // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_R",           i,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_R[i] );             // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLAT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLAT[i] );          // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLON",        i,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLON[i] );          // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLT",         i,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLT[i] );           // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_R",           i,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_R[i] );             // Write CDMAG_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Kp",                i,                  H5T_NATIVE_DOUBLE, &med->H5_Kp[i] );                  // Write Kp
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Dst",               i,                  H5T_NATIVE_DOUBLE, &med->H5_Dst[i] );                 // Write Dst
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bsc_gsm",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bsc_gsm[i][0] );          // Write Bsc_gsm
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_sc_to_pfn",       i,                  H5T_NATIVE_DOUBLE, &med->H5_S_sc_to_pfn[i] );         // Write S_sc_to_pfn
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_sc_to_pfs",       i,                  H5T_NATIVE_DOUBLE, &med->H5_S_sc_to_pfs[i] );         // Write S_sc_to_pfs
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_pfs_to_Bmin",     i,                  H5T_NATIVE_DOUBLE, &med->H5_S_pfs_to_Bmin[i] );       // Write S_pfs_to_Bmin
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_Bmin_to_sc",      i,                  H5T_NATIVE_DOUBLE, &med->H5_S_Bmin_to_sc[i] );        // Write S_Bmin_to_sc
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_total",           i,                  H5T_NATIVE_DOUBLE, &med->H5_S_total[i] );             // Write S_total
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "d2B_ds2",           i,                  H5T_NATIVE_DOUBLE, &med->H5_d2B_ds2[i] );             // Write d2B_ds2
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Sb0",               i,                  H5T_NATIVE_DOUBLE, &med->H5_Sb0[i] );                 // Write Sb0
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "RadiusOfCurv",      i,                  H5T_NATIVE_DOUBLE, &med->H5_RadiusOfCurv[i] );        // Write RadiusOfCurv
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_geo",           i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_geo[i][0] );          // Write Pfn_geo
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_gsm",           i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_gsm[i][0] );          // Write Pfn_gsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_geod_LatLon",   i, 2,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_geod_LatLon[i][0] );  // Write Pfn_geod_LatLon
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_geod_Height",   i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_geod_Height[i] );     // Write Pfn_geod_Height
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLAT",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLAT[i] );         // Write Pfn_CD_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLON",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLON[i] );         // Write Pfn_CD_MLON
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLT[i] );          // Write Pfn_CD_MLT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLAT",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLAT[i] );         // Write Pfn_ED_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLON",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLON[i] );         // Write Pfn_ED_MLON
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLT[i] );          // Write Pfn_ED_MLT
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfn_geo",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfn_geo[i][0] );          // Write Bfn_geo
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfn_gsm",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfn_gsm[i][0] );          // Write Bfn_gsm
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_n", i,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleN[i] );      // Write Loss_Cone_Alpha_n
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_geo",           i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_geo[i][0] );          // Write Pfs_geo
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_gsm",           i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_gsm[i][0] );          // Write Pfs_gsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_geod_LatLon",   i, 2,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_geod_LatLon[i][0] );  // Write Pfs_geod_LatLon
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_geod_Height",   i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_geod_Height[i] );     // Write Pfs_geod_Height
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLAT",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLAT[i] );         // Write Pfs_CD_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLON",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLON[i] );         // Write Pfs_CD_MLON
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLT[i] );          // Write Pfs_CD_MLT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLAT",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLAT[i] );         // Write Pfs_ED_MLAT
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLON",       i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLON[i] );         // Write Pfs_ED_MLON
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLT",        i,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLT[i] );          // Write Pfs_ED_MLT
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_geo",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_geo[i][0] );          // Write Bfs_geo
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_gsm",           i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_gsm[i][0] );          // Write Bfs_gsm
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_s", i,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleS[i] );      // Write Loss_Cone_Alpha_s
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          i, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i][0] );         // Write Pmin_gsm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          i, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i][0] );         // Write Bmin_gsm
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lsimple",           i,                  H5T_NATIVE_DOUBLE, &med->H5_Lsimple[i] );             // Write Lsimple
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat",            i,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat[i] );              // Write InvLat
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lm_eq",             i,                  H5T_NATIVE_DOUBLE, &med->H5_Lm_eq[i] );               // Write Lm_eq
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat_eq",         i,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat_eq[i] );           // Write InvLat_eq
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "BoverBeq",          i,                  H5T_NATIVE_DOUBLE, &med->H5_BoverBeq[i] );            // Write BoverBeq
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "MlatFromBoverBeq",  i,                  H5T_NATIVE_DOUBLE, &med->H5_MlatFromBoverBeq[i] );    // Write MlatFromBoverBeq
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_used",            i,                  H5T_NATIVE_DOUBLE, &med->H5_M_used[i] );              // Write M_used
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_ref",             i,                  H5T_NATIVE_DOUBLE, &med->H5_M_ref[i] );               // Write M_ref
-    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_igrf",            i,                  H5T_NATIVE_DOUBLE, &med->H5_M_igrf[i] );              // Write M_igrf
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Lstar",             i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Lstar[i][0] );            // Write Lstar
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Sb",                i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Sb[i][0] );               // Write Sb
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Tb",                i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Tb[i][0] );               // Write Tb
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Kappa",             i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Kappa[i][0] );            // Write Kappa
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "DriftShellType",    i, med->H5_nAlpha,  H5T_NATIVE_INT,    &med->H5_DriftShellType[i][0] );   // Write DriftShellType
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "L",                 i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_L[i][0] );                // Write L
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bm",                i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Bm[i][0] );               // Write Bm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "I",                 i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_I[i][0] );                // Write I
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "K",                 i, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_K[i][0] );                // Write K
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Date",              iRow,                  H5T_NATIVE_LONG,   &med->H5_Date[i] );                // Write Date
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Doy",               iRow,                  H5T_NATIVE_INT,    &med->H5_Doy[i] );                 // Write Doy
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "UTC",               iRow,                  H5T_NATIVE_DOUBLE, &med->H5_UTC[i] );                 // Write UTC (hours)
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "JulianDate",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_JD[i] );                  // Write JD
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "GpsTime",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_GpsTime[i] );             // Write GpsTime
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "DipoleTiltAngle",   iRow,                  H5T_NATIVE_DOUBLE, &med->H5_TiltAngle[i] );           // Write DipoleTiltAngle
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InOut",             iRow,                  H5T_NATIVE_INT,    &med->H5_InOut[i] );               // Write InOut
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "OrbitNumber",       iRow,                  H5T_NATIVE_INT,    &med->H5_OrbitNumber[i] );         // Write OrbitNumber
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgsm",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgsm[i][0] );             // Write Rgsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgeo",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgeo[i][0] );             // Write Rgeo
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rsm",               iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rsm[i][0] );              // Write Rsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgei",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgei[i][0] );             // Write Rgei
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgse",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgse[i][0] );             // Write Rgse
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgeod_LatLon",      iRow, 2,               H5T_NATIVE_DOUBLE, &med->H5_Rgeod_LatLon[i][0] );     // Write Rgeod_LatLon
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Rgeod_Height",      iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Rgeod_Height[i] );        // Write Rgeod_Height
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLAT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLAT[i] );          // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLON",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLON[i] );          // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_MLT",         iRow,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_MLT[i] );           // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "CDMAG_R",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_CDMAG_R[i] );             // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLAT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLAT[i] );          // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLON",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLON[i] );          // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_MLT",         iRow,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_MLT[i] );           // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "EDMAG_R",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_EDMAG_R[i] );             // Write CDMAG_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Kp",                iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Kp[i] );                  // Write Kp
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Dst",               iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Dst[i] );                 // Write Dst
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bsc_gsm",           iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bsc_gsm[i][0] );          // Write Bsc_gsm
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_sc_to_pfn",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_S_sc_to_pfn[i] );         // Write S_sc_to_pfn
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_sc_to_pfs",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_S_sc_to_pfs[i] );         // Write S_sc_to_pfs
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_pfs_to_Bmin",     iRow,                  H5T_NATIVE_DOUBLE, &med->H5_S_pfs_to_Bmin[i] );       // Write S_pfs_to_Bmin
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_Bmin_to_sc",      iRow,                  H5T_NATIVE_DOUBLE, &med->H5_S_Bmin_to_sc[i] );        // Write S_Bmin_to_sc
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "S_total",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_S_total[i] );             // Write S_total
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "d2B_ds2",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_d2B_ds2[i] );             // Write d2B_ds2
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Sb0",               iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Sb0[i] );                 // Write Sb0
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "RadiusOfCurv",      iRow,                  H5T_NATIVE_DOUBLE, &med->H5_RadiusOfCurv[i] );        // Write RadiusOfCurv
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_geo",           iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_geo[i][0] );          // Write Pfn_geo
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_gsm",           iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_gsm[i][0] );          // Write Pfn_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfn_geod_LatLon",   iRow, 2,               H5T_NATIVE_DOUBLE, &med->H5_Pfn_geod_LatLon[i][0] );  // Write Pfn_geod_LatLon
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_geod_Height",   iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_geod_Height[i] );     // Write Pfn_geod_Height
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLAT",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLAT[i] );         // Write Pfn_CD_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLON",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLON[i] );         // Write Pfn_CD_MLON
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_CD_MLT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_CD_MLT[i] );          // Write Pfn_CD_MLT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLAT",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLAT[i] );         // Write Pfn_ED_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLON",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLON[i] );         // Write Pfn_ED_MLON
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfn_ED_MLT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfn_ED_MLT[i] );          // Write Pfn_ED_MLT
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfn_geo",           iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfn_geo[i][0] );          // Write Bfn_geo
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfn_gsm",           iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfn_gsm[i][0] );          // Write Bfn_gsm
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_n", iRow,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleN[i] );      // Write Loss_Cone_Alpha_n
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_geo",           iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_geo[i][0] );          // Write Pfs_geo
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_gsm",           iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_gsm[i][0] );          // Write Pfs_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pfs_geod_LatLon",   iRow, 2,               H5T_NATIVE_DOUBLE, &med->H5_Pfs_geod_LatLon[i][0] );  // Write Pfs_geod_LatLon
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_geod_Height",   iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_geod_Height[i] );     // Write Pfs_geod_Height
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLAT",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLAT[i] );         // Write Pfs_CD_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLON",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLON[i] );         // Write Pfs_CD_MLON
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_CD_MLT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_CD_MLT[i] );          // Write Pfs_CD_MLT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLAT",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLAT[i] );         // Write Pfs_ED_MLAT
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLON",       iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLON[i] );         // Write Pfs_ED_MLON
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Pfs_ED_MLT",        iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Pfs_ED_MLT[i] );          // Write Pfs_ED_MLT
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_geo",           iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_geo[i][0] );          // Write Bfs_geo
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bfs_gsm",           iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bfs_gsm[i][0] );          // Write Bfs_gsm
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Loss_Cone_Alpha_s", iRow,                  H5T_NATIVE_DOUBLE, &med->H5_LossConeAngleS[i] );      // Write Loss_Cone_Alpha_s
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Pmin_gsm",          iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Pmin_gsm[i][0] );         // Write Pmin_gsm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bmin_gsm",          iRow, 4,               H5T_NATIVE_DOUBLE, &med->H5_Bmin_gsm[i][0] );         // Write Bmin_gsm
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lsimple",           iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Lsimple[i] );             // Write Lsimple
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat",            iRow,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat[i] );              // Write InvLat
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Lm_eq",             iRow,                  H5T_NATIVE_DOUBLE, &med->H5_Lm_eq[i] );               // Write Lm_eq
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "InvLat_eq",         iRow,                  H5T_NATIVE_DOUBLE, &med->H5_InvLat_eq[i] );           // Write InvLat_eq
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "BoverBeq",          iRow,                  H5T_NATIVE_DOUBLE, &med->H5_BoverBeq[i] );            // Write BoverBeq
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "MlatFromBoverBeq",  iRow,                  H5T_NATIVE_DOUBLE, &med->H5_MlatFromBoverBeq[i] );    // Write MlatFromBoverBeq
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_used",            iRow,                  H5T_NATIVE_DOUBLE, &med->H5_M_used[i] );              // Write M_used
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_ref",             iRow,                  H5T_NATIVE_DOUBLE, &med->H5_M_ref[i] );               // Write M_ref
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "M_igrf",            iRow,                  H5T_NATIVE_DOUBLE, &med->H5_M_igrf[i] );              // Write M_igrf
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Lstar",             iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Lstar[i][0] );            // Write Lstar
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Sb",                iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Sb[i][0] );               // Write Sb
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Tb",                iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Tb[i][0] );               // Write Tb
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Kappa",             iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Kappa[i][0] );            // Write Kappa
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "DriftShellType",    iRow, med->H5_nAlpha,  H5T_NATIVE_INT,    &med->H5_DriftShellType[i][0] );   // Write DriftShellType
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "L",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_L[i][0] );                // Write L
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bm",                iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Bm[i][0] );               // Write Bm
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "I",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_I[i][0] );                // Write I
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "K",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_K[i][0] );                // Write K
 
 
 

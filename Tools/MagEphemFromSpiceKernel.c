@@ -1954,7 +1954,7 @@ printf("sclkdp = %lf\n", sclkdp);
                         /*
                          * Write a row of data into the hdf5 file
                          */
-                        Lgm_WriteMagEphemDataHdf( file, med->H5_nT, med );
+                        Lgm_WriteMagEphemDataHdf( file, med->H5_nT, med->H5_nT, med );
                         ++(med->H5_nT);
 
 

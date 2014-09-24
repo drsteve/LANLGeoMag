@@ -16,11 +16,12 @@ int main(){
 //    MagInfo->c->Verbose = 1;
     Lgm_Set_Coord_Transforms( Date, UTC, MagInfo->c );
 
-    MagInfo->Bfield = Lgm_B_igrf;
     MagInfo->Bfield = Lgm_B_T01S;
     MagInfo->Bfield = Lgm_B_TS04;
     MagInfo->Bfield = Lgm_B_T89;
     MagInfo->Bfield = Lgm_B_OP77;
+    MagInfo->Bfield = Lgm_B_cdip;
+    MagInfo->Bfield = Lgm_B_igrf;
     MagInfo->Kp     = 5;
 
     MagInfo->VerbosityLevel = 5;
