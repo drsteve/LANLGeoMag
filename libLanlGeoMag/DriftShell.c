@@ -745,7 +745,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     while ( !done ) {
 
         // Increment c0 and recompute Dc0.
-        c0 += 1.0;
+        c0 += 0.10;
         u.x = c0*f; u.y = c0*g; u.z = c0*sl;
         Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
         LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
@@ -769,7 +769,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
 
 
 
-    if (LstarInfo->VerbosityLevel > 5) {
+    if (LstarInfo->VerbosityLevel > 4) {
         printf( "%sFindBmRadius: a0, c0 = %g %g   Da0, Dc0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, Da0, Dc0, LstarInfo->PostStr  );
     }
 
