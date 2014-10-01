@@ -1888,11 +1888,11 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
  */
 int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin, double LT, double tol, int Quality, int nFLsInDriftShell, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
-    Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
+    Lgm_Vector      v1, v2, v3, LCDSv3, Bvec, Ptest, PtestSM, Pinner, PinnerSM, Pouter, PouterSM;
     Lgm_DateTime    DT_UTC;
     double          Blocal, Xtest, sa, sa2, LCDS, Alpha;
     double          nTtoG = 1.0e-5;
-    int             LS_Flag, nn, k;
+    int             LS_Flag, TFlag, nn, k;
     int             maxIter = 20;
 
     //Start by creating necessary structures... need an Lstar info for each bracket, plus test point.
@@ -1914,8 +1914,8 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     //Check for closed drift shell at brackets
     LT *= 15;
     LT *= RadPerDeg;
-    Pinner.x = brac1*cos(LT); Pinner.y = brac1*sin(LT); Pinner.z = 0.0;
-
+    PinnerSM.x = brac1*cos(LT); PinnerSM.y = brac1*sin(LT); PinnerSM.z = 0.0;
+    Lgm_Convert_Coords( &PinnerSM, &Pinner, SM_TO_GSM, LstarInfo_brac1->mInfo->c );
 
     /*
      *  Test inner bracket location.
@@ -1923,17 +1923,17 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
-        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
-            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
+        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac1->mInfo ) > 0 ) {
+            Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac1->mInfo );
             LstarInfo_brac1->PitchAngle = Alpha;
             Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
         } else {
             return(-8);
         }
-        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
+        if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
         sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
         LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
-        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
+        if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
         //Only continue if bracket 1 is closed FL
         //Get L*
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
@@ -1944,10 +1944,11 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             FreeLstarInfo( LstarInfo_test );
             return(-8); //Inner bracket is bad - bail
         }
+        LCDSv3 = v3;
         LCDS = LstarInfo_brac1->LS;
         *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
-        if (LstarInfo->VerbosityLevel > 0) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
-        if (LstarInfo->VerbosityLevel > 0) printf("Lstar = %g\n", LstarInfo_brac1->LS);
+        if (LstarInfo->VerbosityLevel > 1) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
+        if (LstarInfo->VerbosityLevel > 1) printf("Lstar = %g\n", LstarInfo_brac1->LS);
     } else {
         FreeLstarInfo( LstarInfo_brac1 );
         FreeLstarInfo( LstarInfo_brac2 );
@@ -1959,15 +1960,16 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     /*
      *  Test outer bracket location.
      */
-    Pouter.x = brac2*cos(LT); Pouter.y = brac2*sin(LT); Pouter.z = 0.0;
+    PouterSM.x = brac2*cos(LT); PouterSM.y = brac2*sin(LT); PouterSM.z = 0.0;
+    Lgm_Convert_Coords( &PouterSM, &Pouter, SM_TO_GSM, LstarInfo_brac2->mInfo->c );
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
         //If bracket 2 is closed FL then check for undefined L*. If L* is defined, we have a problem
         //Get L*
         if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
-            Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
-            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+            Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac2->mInfo );
+            Lgm_TearDown_AlphaOfK(LstarInfo_brac2->mInfo);
         }
         else {
             Alpha = LGM_FILL_VALUE;
@@ -1979,12 +1981,14 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
-            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(LT);
-            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(LT); Pouter.z = 0.0;
+            PouterSM.x = 1.7*Lgm_Magnitude(&Pouter)*cos(LT);
+            PouterSM.y = 1.7*Lgm_Magnitude(&Pouter)*sin(LT); PouterSM.z = 0.0;
+            Lgm_Convert_Coords( &PouterSM, &Pouter, SM_TO_GSM, LstarInfo_brac2->mInfo->c );
 
-            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
-                Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
-                Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+
+            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac2->mInfo ) > 0 ) {
+                Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac2->mInfo );
+                Lgm_TearDown_AlphaOfK(LstarInfo_brac2->mInfo);
             }
             else {
                 Alpha = LGM_FILL_VALUE;
@@ -2002,13 +2006,13 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 }
             }
         }
-        if (LstarInfo->VerbosityLevel > 0) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
+        if (LstarInfo->VerbosityLevel > 1) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
     }
 
     //if brackets are okay, we've moved on without changing anything except setting initial LCDS value as L* at inner bracket
     nn = 0;
     while (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner) > tol){
-        if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS iteration, bracket width = %d, %g\n", nn, Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner));
+        if (LstarInfo->VerbosityLevel > 2) printf("Current LCDS iteration, bracket width = %d, %g\n", nn, Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner));
         if (nn > maxIter) {
             printf("********* EXCEEDED MAXITER\n");
             //free structures before returning
@@ -2018,23 +2022,18 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             return(-2); //reached max iterations without achieving tolerance - bail
         }
 
-        if (1==1) {
-            Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
-            Ptest.x = -1.0*Xtest*cos(LT); Ptest.y = -1.0*Xtest*sin(LT); Ptest.z = 0.0;
-        }
-        else {
-            Xtest = Pinner.x + (Pouter.x - Pinner.x)/2.0;
-            Ptest.x = Xtest; Ptest.y = Ptest.z = 0.0;
-        }
+        Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
+        PtestSM.x = -1.0*Xtest*cos(LT); PtestSM.y = -1.0*Xtest*sin(LT); PtestSM.z = 0.0;
+        Lgm_Convert_Coords( &PtestSM, &Ptest, SM_TO_GSM, LstarInfo_test->mInfo->c );
 
         //Trace to minimum-B
-        if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
-            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
-                Alpha = Lgm_AlphaOfK( Kin, LstarInfo->mInfo );
-                Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+        TFlag = Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo );
+        if ( TFlag == LGM_CLOSED ) {
+            if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_test->mInfo ) > 0 ) {
+                Alpha = Lgm_AlphaOfK( Kin, LstarInfo_test->mInfo );
+                Lgm_TearDown_AlphaOfK(LstarInfo_test->mInfo);
             }
             else {
-                //printf("*****BRAAAAP");
                 Alpha = LGM_FILL_VALUE;
             }
             LstarInfo_test->PitchAngle = Alpha;
@@ -2047,6 +2046,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             if ( (LS_Flag > 0) || (LstarInfo_test->LS != LGM_FILL_VALUE) ){
                 //Drift shell defined
                 Pinner = Ptest;
+                LCDSv3 = v3;
                 LCDS = LstarInfo_test->LS;
                 *K = (LstarInfo_test->I[0])*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
 
@@ -2057,11 +2057,14 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                     if ( LstarInfo_test->nMinima[k] < 1 ) {printf("Less than one minimum defined on field line: Exit due to impossibility."); exit(-1); }
                 }
 
-                if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS, K is %g, %g\n", LCDS, *K);
+                if (LstarInfo->VerbosityLevel > 1) printf("Current LCDS, K, PtestSM is %g, %g, (%g, %g, %g)\n", LCDS, *K, PtestSM.x, PtestSM.y, PtestSM.z);
                 LstarInfo->mInfo->Bm = LstarInfo_test->mInfo->Bm;
                 LstarInfo->DriftOrbitType = LstarInfo_test->DriftOrbitType;
             } else {
                 Pouter = Ptest;
+                Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
+                printf("Failed DS trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
             }
         } else {
             //FL open -> drift shell open
@@ -2070,6 +2073,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
 
     nn++;
     }
+    if (LstarInfo->VerbosityLevel > 0) printf("Final LCDS, K is %g, %g. Eq. radius = %g \n", LCDS, *K, Lgm_Magnitude( &LCDSv3 ));
     LstarInfo->LS = LCDS;
 
     //free structures
