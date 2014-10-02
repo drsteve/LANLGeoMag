@@ -1926,7 +1926,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac1->mInfo ) > 0 ) {
             Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac1->mInfo );
             LstarInfo_brac1->PitchAngle = Alpha;
-            Lgm_TearDown_AlphaOfK(LstarInfo->mInfo);
+            Lgm_TearDown_AlphaOfK(LstarInfo_brac1->mInfo);
         } else {
             return(-8);
         }
@@ -1939,6 +1939,8 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
 
         if (LstarInfo_brac1->LS <= 0) {
+            if (LstarInfo->VerbosityLevel > 0) printf("Undefined DS at inner bracket. L* = %g (Flag = %d); P = %g, %g, %g\n",
+                                                       LstarInfo_brac1->LS, LS_Flag, Pinner.x, Pinner.y, Pinner.z);
             FreeLstarInfo( LstarInfo_brac1 );
             FreeLstarInfo( LstarInfo_brac2 );
             FreeLstarInfo( LstarInfo_test );
@@ -1967,7 +1969,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
         //If bracket 2 is closed FL then check for undefined L*. If L* is defined, we have a problem
         //Get L*
-        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo->mInfo ) > 0 ) {
+        if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac2->mInfo ) > 0 ) {
             Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac2->mInfo );
             Lgm_TearDown_AlphaOfK(LstarInfo_brac2->mInfo);
         }
@@ -2063,12 +2065,14 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             } else {
                 Pouter = Ptest;
                 Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
-                printf("Failed DS trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
-                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+                printf("Failed DS trace for alpha = %g at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                   LstarInfo_test->PitchAngle, Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
             }
         } else {
             //FL open -> drift shell open
             Pouter = Ptest;
+            printf("Failed FL trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
         }
 
     nn++;
