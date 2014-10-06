@@ -113,3 +113,9 @@ svn checkout http://ctypesgen.googlecode.com/svn/trunk/ ctypesgen-read-only
 Copy entire contents to Python/ctypesgen in the lanlgeomag directory, and
 check them in. We should refer to this license (3-clause BSD) in the
 lanlgeomag docs.
+
+
+
+make dist
+===========
+It seems you need to make with --enable-doxygen-doc on the ./configure cmd line....

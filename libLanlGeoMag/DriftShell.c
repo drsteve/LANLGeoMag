@@ -707,12 +707,17 @@ double RadBmFunc( double r, double Bm, void *data ) {
  *            \return 0 - no Bm value found.
  *
  */
+typedef struct MinBracketType {
+    double a, b, c;
+    double Da, Db, Dc;
+} MinBracketType;
 int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo ) {
 
     Lgm_Vector  u, v, Bvec;
-    int         done, FoundValidBm, Flag;
-    double      Phi, D, a0, c0, Da0, Dc0;
+    int         i, done, FoundValidBm, Flag, FoundZeroBracket, nMinima;
+    double      Phi, D, a0, b0, c0, Da0, Db0, Dc0;
     double      a, b, c, d, B, cl, sl, cp, sp, lat, f, g;
+    MinBracketType MinBracket[50];
 
     LstarInfo->mInfo->nFunc = 0;
 
@@ -728,51 +733,180 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  without actually do a search.  But it would appear that this is not the
      *  case. Lets search for it in 0.5 Re increments. Assume a0, but lets step
      *  out to find c0.
+     *
+     *  Note: What we are hoping to find in this first search is the radial
+     *  distance at which B-Bm reverses sign -- then we know there must be a
+     *  solution (i.e. a point where B == Bm) somewhere in between.
+     *
+     *  We have to be careful though! It is possible to have a situation where
+     *  B decreases and then increases again. For example, the Dungey field is
+     *  a dipole + uniform southward IMF. This field has an axi-symmetric
+     *  x-line in it where B==0 (between 8-9 Re or so I think). AS you go
+     *  farther out, B increases to the uniform magnitude in the IMF. In this
+     *  case, and probably in many other field models, just stepping out in
+     *  0.5 Re increments can "skip" over the real solution -- i.e. the
+     *  "negative values" of B-Bm (if there are any) *could* be lost between
+     *  steps. This is *known* to cause issues here, so to avoid this issue, we
+     *  will maintain a triple bracket so that we can also bracket potential
+     *  minima along the way. With a triple bracket, if we dont find a bracket
+     *  around zero, but we do find a bracket around a minima, we can then
+     *  further explore the minima to see if our solution lies within.
+     *
      */
-    a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // 110 km altitude
-//a0 = 1.0;
-
+    a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // Atm. losscone altitude (e.g. 100km or whatever Lgm_LossConeHeight is set to
     u.x = a0*f; u.y = a0*g; u.z = a0*sl;
     Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
     LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
     B = Lgm_Magnitude( &Bvec );
     Da0 = B - Bm;
 
-    //c0 = 20.0;                // this ought to be big enough!?
-    //c0 = 15.0;                // this ought to be big enough!?
-    c0 = a0;
+    b0 = a0 + 0.5;
+    u.x = b0*f; u.y = b0*g; u.z = b0*sl;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+    LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+    B = Lgm_Magnitude( &Bvec );
+    Db0 = B - Bm;
+
+    c0 = b0 + 0.5;
+    u.x = c0*f; u.y = c0*g; u.z = c0*sl;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+    LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+    B = Lgm_Magnitude( &Bvec );
+    Dc0 = B - Bm;
+
+
+    FoundZeroBracket = FALSE;
+    nMinima = 0;
     done = FALSE;
     while ( !done ) {
 
-        // Increment c0 and recompute Dc0.
-        c0 += 1.0;
-        u.x = c0*f; u.y = c0*g; u.z = c0*sl;
-        Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
-        LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
-        B = Lgm_Magnitude( &Bvec );
-        Dc0 = B - Bm;
 
-        // Check to see if we went beyond Bm
-        if ( Dc0 < 0.0 ) {
-            done = TRUE;
-        } else {
-            a0  = c0;
-            Da0 = Dc0;
+        /*
+         * Test triple for a minima bracket.
+         */
+        if ( (Db0<Da0) && (Db0 < Dc0) && (nMinima < 50) ){
+            /*
+             * Minima-Bracket. A minima lies in [a,c] -- save it for possible exploration later.
+             */
+            MinBracket[nMinima].a = a0; MinBracket[nMinima].Da = Da0;
+            MinBracket[nMinima].b = b0; MinBracket[nMinima].Db = Db0;
+            MinBracket[nMinima].c = c0; MinBracket[nMinima].Dc = Dc0;
+            ++nMinima;
         }
 
 
-        //printf("c0 = %g     B = %g    Bm = %g\n", c0, B, Bm);
-        // We may never be able to get a B value low enough...
-        if (c0>20.0) return(FALSE);
+
+        /*
+         * Test triple for a zero-bracket.
+         */
+        if ( Da0*Db0 <= 0.0 ) {
+            /*
+             * Zero-Bracket. A zero lies in [a,b] - we are done.
+             */
+            done = TRUE;
+            FoundZeroBracket = TRUE;
+            c0 = b0; Dc0 = Db0; 
+            
+        } else if ( Db0*Dc0 <= 0.0 ) {
+            /*
+             * Zero-Bracket. A zero lies in [b,c] - we are done.
+             */
+            done = TRUE;
+            FoundZeroBracket = TRUE;
+            a0 = b0; Da0 = Db0; 
+            
+        } else if ( c0 > 20.0 ) {
+            /*
+             * We have gone as far as we want to try and we have not yet found a Zero-Bracket.
+             * Stop this search and explore any minima we may have detected.
+             */
+            done = TRUE;
+            FoundZeroBracket = FALSE;
+
+        } else {
+
+            /*
+             * Keep stepping.
+             * Shift a and b up
+             */
+            a0 = b0; Da0 = Db0;
+            b0 = c0; Db0 = Dc0;
+
+            /*
+             * Increment c0 and recompute Dc0.
+             */
+            c0 += 0.5;
+            u.x = c0*f; u.y = c0*g; u.z = c0*sl;
+            Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+            LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+            B = Lgm_Magnitude( &Bvec );
+            Dc0 = B - Bm;
+
+        }
+
+
     }
 
 
 
 
-    if (LstarInfo->VerbosityLevel > 5) {
-        printf( "%sFindBmRadius: a0, c0 = %g %g   Da0, Dc0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, Da0, Dc0, LstarInfo->PostStr  );
+    if ( !FoundZeroBracket && (nMinima > 0) ) {
+
+        /*
+         * At least one minima was found -- need to check them.
+         */
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No Zero-Bracket bracket found, but %d minima were detected.\n", LstarInfo->PreStr, nMinima, LstarInfo->PostStr  ); }
+
+        /*
+         * We have a minima bracket. Use brent's method to find the minimum.
+         * Then check to see if its negative.
+         */
+        for (i=0; i<nMinima; i++ ) {
+
+            LstarInfo->mInfo->Ptmp.x = f;
+            LstarInfo->mInfo->Ptmp.y = g;
+            LstarInfo->mInfo->Ptmp.z = sl;
+            BrentFuncInfo bfi;
+            bfi.Info    = (void *)LstarInfo->mInfo;
+            bfi.func    = &RadBmFunc;
+            bfi.Val     = Bm;
+            Flag = Lgm_Brent( MinBracket[i].a, MinBracket[i].b, MinBracket[i].c, &bfi, tol, r, &D );
+            if (LstarInfo->VerbosityLevel > 0) { printf( "%sFindBmRadius: Minima found at r = %g   D = %g %s\n", LstarInfo->PreStr, *r, D, LstarInfo->PostStr  ); }
+            if ( Flag ) {
+                if ( fabs(D) < tol ) {
+                    // value found.
+                    return( TRUE );
+                } else if ( D < 0.0 ) {
+                    // bracket found.
+                    a0 = MinBracket[i].a; Da0 = MinBracket[i].Da;
+                    c0 = *r; Dc0 = D;
+                    FoundZeroBracket = TRUE;
+                    break;
+                }
+            }
+        }
+
     }
 
+
+
+    if ( !FoundZeroBracket ) {
+
+        /*
+         * No zero-bracket or minima were detected.
+         */
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
+        return( FALSE );
+
+    }
+
+
+
+
+    /*
+     * If we get this far, a zero bracket was found.
+     */
+    if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: Zero Bracket found, a0, c0 = %g %g   Da0, Dc0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, Da0, Dc0, LstarInfo->PostStr  ); }
 
     /*
      *  For the search to work, Da0 (B-Bm at a0) must be positive to start with.
@@ -782,8 +916,6 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  initial c0.
      */
     if ( ( Da0 < 0.0 ) || ( Dc0 > 0.0 ) ) return( FALSE ); // bracket not found
-
-
 
     /*
      * We have a bracket. Use brent's method to find root.
@@ -796,15 +928,13 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     bfi.func    = &RadBmFunc;
     bfi.Val     = Bm;
     Flag = Lgm_zBrent( a0, c0, Da0, Dc0, &bfi, tol, r, &D );
-//printf("tol = %g\n", tol);
-    FoundValidBm = (Flag) ? TRUE : FALSE;
+    FoundValidBm = ( Flag ) ? TRUE : FALSE;
 
-//printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG     D = %g\n", D);
-    if (LstarInfo->VerbosityLevel > 5) {
-      printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr );
-    }
+    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
 
     return( FoundValidBm );
+
+
 
 }
 

@@ -26,8 +26,8 @@ int main( int argc, char *argv[] ){
 
     // Date and UTC
     Date       = 20000701;
-    Date       = 20020901;
-    UTC        = 4.0 + 0.0/60.0 + 0.0/3600.0;
+    Date       = 20130327;
+    UTC        = 0.0 + 0.0/60.0 + 0.0/3600.0;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     // Position in SM
@@ -37,33 +37,40 @@ int main( int argc, char *argv[] ){
 MagEphemInfo->LstarInfo->LSimpleMax = 20.0;
 MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 
-P.x = -18.53;
-P.x = 10.815;
-P.y = 0.0;
-P.z = 0.0;
-double xxx;
-for (xxx=0.0; xxx<3.0; xxx += 0.001 ){
+
+FILE *fpjunk;
+char fname[1024];
+int  Gap;
+double xxx, r, Phi, Lat, MLT;
+
+sprintf(fname, "junk_K_v2.txt" );
+fpjunk = fopen(fname, "w");
+for (MLT=0.0; MLT<24.0; MLT+=0.25){
+
+    //sprintf(fname, "junk_%02d.txt", (int)(MLT+0.001));
+
+    Gap = 3;
+    for ( r = 8.0; r<=15.0; r += 0.05 ){
+
+        Phi = (MLT*15.0 - 180.0)*RadPerDeg;
+        Lat = 0.0*RadPerDeg;
+        P.x = r*cos( Phi )*cos(Lat);
+        P.y = r*sin( Phi )*cos(Lat);
+        P.z = r*sin(Lat);
 
 
 
+            // Create array of Pitch Angles to compute
+            for (nAlpha=0,a=50.0; a<=90.0; a+=10.0,++nAlpha) {
+                Alpha[nAlpha] = a ;
+                //printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
+            }
+        nAlpha = 1;
+        Alpha[0] = 90.0;
+        Alpha[1] = 68.0;
+        Alpha[2] = 15.0;
+        Alpha[3] = 2.0;
 
-
-    // Create array of Pitch Angles to compute
-    for (nAlpha=0,a=50.0; a<=90.0; a+=10.0,++nAlpha) {
-        Alpha[nAlpha] = a ;
-        //printf("Alpha[%d] = %g\n", nAlpha, Alpha[nAlpha]);
-    }
-nAlpha = 1;
-Alpha[0] = 90.0;
-Alpha[1] = 68.0;
-Alpha[2] = 15.0;
-Alpha[3] = 2.0;
-
-
-//P.x =  2.55278;
-//P.y = -4.77644;
-//P.z =  3.4731;
-//Alpha[0] =  81.7844;
 
 
 
@@ -105,7 +112,7 @@ Lgm_Convert_Coords( &P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
 
 
 
-    double Kin = 1.8732;
+    double Kin = 0.2;
     Lgm_DateTime DT_UTC;
     Lgm_Make_UTC( Date, UTC, &DT_UTC, c );
     if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, MagEphemInfo->LstarInfo->mInfo ) > 0 ) {
@@ -121,6 +128,7 @@ Lgm_Convert_Coords( &P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
 
 
 
+//Alpha[0] = 30.0;
 
 
 
@@ -128,12 +136,23 @@ Lgm_Convert_Coords( &P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
 //for (i=0; i<24; i++)printf("%g ", MagEphemInfo->I[i] - MagEphemInfo->I[0]);
 //printf("\n");
 
+//if ( MagEphemInfo->Lstar[0] > 0.0 ) {
+fprintf( fpjunk, "%g %g %d\n", r, MagEphemInfo->Lstar[0], Gap);
+Gap = 2;
+//}
+fflush(fpjunk);
 
 
 
 
-P.x += 0.0001;
+//P.x -= 0.1;
 }
+}
+
+fclose(fpjunk);
+
+
+
 WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
 
     fp = fopen("Lstar.dat", "w");

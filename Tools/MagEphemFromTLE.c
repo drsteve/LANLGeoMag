@@ -961,6 +961,7 @@ int main( int argc, char *argv[] ){
     }
 
 
+MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_Dungey;
 
 
     /*

@@ -1047,7 +1047,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
 
 // CRAP
 //for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 2 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
-            if ( (Type > 1) && (1==1) ){
+            if ( (Type > 1) && (0==1) ){
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
                 }
