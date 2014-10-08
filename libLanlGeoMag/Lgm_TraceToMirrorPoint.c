@@ -484,7 +484,7 @@ tol = 1e-10;
         printf("    |    Total Bfield evaluations find root: %4ld                                                                 |\n", Info->Lgm_nMagEvals );
         printf("    |    TraceToMirrorPoint, Final Result: %15g %15g %15g     Sm = %g    |\n", v->x, v->y, v->z, *Sm );
         printf("    |                                                                                                           |\n" );
-        printf("    =============================================================================================================\n", v->x, v->y, v->z, *Sm );
+        printf("    =============================================================================================================\n" );
         printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
     }
 
