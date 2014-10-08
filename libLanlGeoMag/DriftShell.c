@@ -862,7 +862,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
         /*
          * At least one minima was found -- need to check them.
          */
-        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No Zero-Bracket bracket found, but %d minima were detected.\n", LstarInfo->PreStr, nMinima, LstarInfo->PostStr  ); }
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No Zero-Bracket bracket found, but %d minima were detected.%s\n", LstarInfo->PreStr, nMinima, LstarInfo->PostStr  ); }
 
         /*
          * We have a minima bracket. Use brent's method to find the minimum.

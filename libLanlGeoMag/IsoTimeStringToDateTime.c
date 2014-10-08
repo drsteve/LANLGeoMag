@@ -742,15 +742,15 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
         }
     }
     if ( ( d->wYear < 0 ) || ( d->wYear > 9999 ) ) {
-        printf( "Year Out of Range!\n", d->wYear );
+        printf( "Year (%d) Out of Range!\n", d->wYear );
         InvalidDate = TRUE;
     }
     if ( ( d->Week < 1 ) || ( d->Week > 53 ) ) {
-        printf( "Week Out of Range!\n", d->Week );
+        printf( "Week (%d) Out of Range!\n", d->Week );
         InvalidDate = TRUE;
     }
     if ( ( d->Dow < 1 ) || ( d->Dow > 7 ) ) {
-        printf( "DayOfWeek Out of Range!\n", d->Dow );
+        printf( "DayOfWeek (%d) Out of Range!\n", d->Dow );
         InvalidDate = TRUE;
     }
 
