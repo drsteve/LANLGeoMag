@@ -33,11 +33,11 @@
  */
 int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, double Alpha, double tol, int Quality, double *K, Lgm_LstarInfo *LstarInfo ) {
     Lgm_LstarInfo   *LstarInfo_brac1, *LstarInfo_brac2, *LstarInfo_test;
-    Lgm_Vector      v1, v2, v3, Bvec, Ptest, Pinner, Pouter;
+    Lgm_Vector      v1, v2, v3, LCDSv3, Bvec, Ptest, PtestSM, Pinner, PinnerSM, Pouter, PouterSM;
     double          Blocal, Xtest, sa, sa2, LCDS;
     double          nTtoG = 1.0e-5;
-    int             LS_Flag, nn, k;
-    int             maxIter = 20;
+    int             LS_Flag, nn, k, TFlag;
+    int             maxIter = 50;
 
     //Start by creating necessary structures... need an Lstar info for each bracket, plus test point.
     LstarInfo_brac1 = Lgm_CopyLstarInfo( LstarInfo );
@@ -55,7 +55,8 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
 
     //Check for closed drift shell at brackets
-    Pinner.x = brac1*cos(MLT); Pinner.y = brac1*sin(MLT); Pinner.z = 0.0;
+    PinnerSM.x = brac1*cos(MLT); PinnerSM.y = brac1*sin(MLT); PinnerSM.z = 0.0;
+    Lgm_Convert_Coords( &PinnerSM, &Pinner, SM_TO_GSM, LstarInfo_test->mInfo->c );
 
     /*
      *  Test inner bracket location.
@@ -72,7 +73,7 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
         LCDS = LstarInfo_brac1->LS;
         *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
-        if (LstarInfo->VerbosityLevel > 0) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
+        if (LstarInfo->VerbosityLevel > 1) printf("Found valid inner bracket. Pinner_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
     } else {
         FreeLstarInfo( LstarInfo_brac1 );
         FreeLstarInfo( LstarInfo_brac2 );
@@ -84,7 +85,8 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
     /*
      *  Test outer bracket location.
      */
-    Pouter.x = brac2*cos(MLT); Pouter.y = brac2*sin(MLT); Pouter.z = 0.0;
+    PouterSM.x = brac2*cos(MLT); PouterSM.y = brac2*sin(MLT); PouterSM.z = 0.0;
+    Lgm_Convert_Coords( &PouterSM, &Pouter, SM_TO_GSM, LstarInfo_test->mInfo->c );
 
     LstarInfo_brac2->mInfo->Bfield( &Pouter, &Bvec, LstarInfo_brac2->mInfo );
     Blocal = Lgm_Magnitude( &Bvec );
@@ -97,8 +99,9 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
-            Pouter.x = 1.7*Lgm_Magnitude(&Pouter)*cos(MLT);
-            Pouter.y = 1.7*Lgm_Magnitude(&Pouter)*sin(MLT); Pouter.z = 0.0;
+            PouterSM.x = 1.7*Lgm_Magnitude(&Pouter)*cos(MLT);
+            PouterSM.y = 1.7*Lgm_Magnitude(&Pouter)*sin(MLT); PouterSM.z = 0.0;
+            Lgm_Convert_Coords( &PouterSM, &Pouter, SM_TO_GSM, LstarInfo_test->mInfo->c );
             if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
                 LS_Flag = Lstar( &v3, LstarInfo_brac2);
                 if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
@@ -109,13 +112,15 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
                 }
             }
         }
-        if (LstarInfo->VerbosityLevel > 0) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
+    }
+    if (LstarInfo->VerbosityLevel > 1) {
+        printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
     }
 
     //if brackets are okay, we've moved on without changing anything except setting initial LCDS value as L* at inner bracket
     nn = 0;
     while (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner) > tol){
-        if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS iteration, bracket width = %d, %g\n", nn, Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner));
+        if (LstarInfo->VerbosityLevel > 1) printf("Current LCDS iteration, bracket width = %d, %g\n", nn, Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner));
         if (nn > maxIter) {
             printf("********* EXCEEDED MAXITER\n");
             //free structures before returning
@@ -125,12 +130,14 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
             return(-2); //reached max iterations without achieving tolerance - bail
         }
         Xtest = (Lgm_Magnitude(&Pinner) + (Lgm_Magnitude(&Pouter)-Lgm_Magnitude(&Pinner))/2.0);
-        Ptest.x = -1.0*Xtest*cos(MLT); Ptest.y = -1.0*Xtest*sin(MLT); Ptest.z = 0.0;
+        PtestSM.x = -1.0*Xtest*cos(MLT); PtestSM.y = -1.0*Xtest*sin(MLT); PtestSM.z = 0.0;
+        Lgm_Convert_Coords( &PtestSM, &Ptest, SM_TO_GSM, LstarInfo_test->mInfo->c );
 
         LstarInfo_test->mInfo->Bfield( &Ptest, &Bvec, LstarInfo_test->mInfo );
         Blocal = Lgm_Magnitude( &Bvec );
         //Trace to minimum-B
-        if ( Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo ) == LGM_CLOSED ) {
+        TFlag = Lgm_Trace( &Ptest, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_test->mInfo );
+        if ( TFlag == LGM_CLOSED ) {
             //If test point is closed FL then check for undefined L*.
             //Get L*
             LstarInfo_test->mInfo->Bm = LstarInfo_test->mInfo->Bmin/sa2;
@@ -138,6 +145,7 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
             if ( (LS_Flag > 0) || (LstarInfo_test->LS != LGM_FILL_VALUE) ){
                 //Drift shell defined
                 Pinner = Ptest;
+                LCDSv3 = v3;
                 LCDS = LstarInfo_test->LS;
                 *K = (LstarInfo_test->I0)*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
 
@@ -148,20 +156,26 @@ int LCDS( long int Date, double UTC, double brac1, double brac2, double MLT, dou
                     if ( LstarInfo_test->nMinima[k] < 1 ) {printf("Less than one minimum defined on field line: Exit due to impossibility."); exit(-1); }
                 }
 
-                if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS, K is %g, %g\n", LCDS, *K);
+                if (LstarInfo->VerbosityLevel > 1) printf("Current LCDS, K, PtestSM is %g, %g, (%g, %g, %g)\n", LCDS, *K, PtestSM.x, PtestSM.y, PtestSM.z);
                 LstarInfo->mInfo->Bm = LstarInfo_test->mInfo->Bm;
                 LstarInfo->DriftOrbitType = LstarInfo_test->DriftOrbitType;
             } else {
                 Pouter = Ptest;
+                Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
+                printf("Failed DS trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n", 
+                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
             }
         } else {
             //FL open -> drift shell open
+            Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
+            printf("Failed FL trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n", 
+                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
             Pouter = Ptest;
         }
 
     nn++;
     }
-
+if (LstarInfo->VerbosityLevel > 0) printf("Final LCDS, K is %g, %g. Eq. radius = %g \n", LCDS, *K, Lgm_Magnitude( &LCDSv3 ));
     LstarInfo->LS = LCDS;
     //free structures
     FreeLstarInfo( LstarInfo_brac1 );
@@ -194,16 +208,18 @@ int main( int argc, char *argv[] ){
     //for (i=0; i<nAlpha; i++) {
     //#    Alpha[i] = 5.0+i*5.0;
     //}
-    Alpha[0] = 20;
-    Alpha[1] = 35;
-    Alpha[2] = 50;
+    Alpha[0] = 10;
+    Alpha[1] = 25;
+    Alpha[2] = 40;
     Alpha[3] = 65;
     Alpha[4] = 90;
 
     // Date and UTC
     StartDate       = 20010101;
-    EndDate         = 20010103;
-    MLT = 6.0;
+    EndDate         = 20010101;
+    StartDate       = 20130314;
+    EndDate         = 20130314;
+    MLT = 0.0;
     Lgm_Doy( StartDate, &Year, &Month, &Day, &Doy);
     NewStr[0]       = '\0';
     strcpy(Filename, "%YYYY%MM%DD_LCDS_T89c_6MLT.txt");
@@ -212,7 +228,7 @@ int main( int argc, char *argv[] ){
     sprintf( Str, "%02d", Day );   Lgm_ReplaceSubString( NewStr, Filename, "%DD", Str );   strcpy( Filename, NewStr );
     fp = fopen(Filename, "w");
 
-    t_cadence       = 2.0/24.0; //cadence in days
+    t_cadence       = 22.0/24.0 + 10.0/1440.0; //cadence in days
     sJD = Lgm_Date_to_JD( StartDate, 0.0, LstarInfo->mInfo->c);
     eJD = Lgm_Date_to_JD( EndDate, 23.9999, LstarInfo->mInfo->c);
 
@@ -316,19 +332,22 @@ int main( int argc, char *argv[] ){
         //set date specific stuff
         Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &UTC );
         Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c);
-    
+printf("LstarInfo->mInfo->c->psi = %g", LstarInfo->mInfo->c->psi*DegPerRad); 
         Lgm_get_QinDenton_at_JD( JD, &qd, 1 );
         Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
     
         //LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
-    //LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
-    //LstarInfo->mInfo->InternalModel = LGM_CDIP;
-        LstarInfo->mInfo->Bfield        = Lgm_B_TS04;
-        LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
-        LstarInfo->mInfo->InternalModel = LGM_IGRF;
-        LstarInfo->VerbosityLevel       = 0;
+        //LstarInfo->mInfo->InternalModel = LGM_CDIP;
+        //LstarInfo->mInfo->Bfield        = Lgm_B_TS04;
+        //LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
+        //LstarInfo->mInfo->InternalModel = LGM_IGRF;
+        LstarInfo->VerbosityLevel       = 1;
+LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
+LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
+LstarInfo->mInfo->InternalModel = LGM_DUNGEY;
+LstarInfo->mInfo->InternalModel = LGM_CDIP;
         //LstarInfo->mInfo->Kp = 0.3;
-    
+
         /*
          * Compute L*s, Is, Bms, etc...
          */
@@ -377,7 +396,6 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "     %8.6e", K[i] );
         }
         fprintf(fp, "%s", " \n");
-    
     }
     fclose(fp);
     fflush(fp);
