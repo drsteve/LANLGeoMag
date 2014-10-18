@@ -59,7 +59,7 @@ static struct argp_option Options[] = {
     {"LT",              'L',    "LT",                         0,        "Local time for LCDS search plane. Default is 0 (midnight)."      },
     {"StartDate",       'S',    "yyyymmdd",                   0,        "StartDate "                              },
     {"EndDate",         'E',    "yyyymmdd",                   0,        "EndDate "                                },
-    {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters whn comoputing ephemerii" },
+    {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
     {"verbose",         'v',    "verbosity",                  0,        "Produce verbose output"                  },
     {"silent",          's',    0,                            OPTION_ARG_OPTIONAL | OPTION_ALIAS                                                },
@@ -188,7 +188,7 @@ int main( int argc, char *argv[] ){
     arguments.nK               = 18;     // 18 pitch angles
     arguments.silent           = 0;
     arguments.verbose          = 0;
-    arguments.Quality          = 2;
+    arguments.Quality          = 3;
     arguments.nFLsInDriftShell = 24;
     arguments.Delta            = 30;
     arguments.Force            = 0;
@@ -213,8 +213,11 @@ int main( int argc, char *argv[] ){
      */
     nK = arguments.nK;
     Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
-    //Inc    = ( nAlpha > 1 ) ? (arguments.EndPA - arguments.StartPA)/(double)(nAlpha-1) : 0.0;
-    //for (i=0; i<nAlpha; i++ ) Alpha[i] = arguments.StartPA + i*Inc;
+    if (nK == 1) {
+        Kin[0] = arguments.StartK;
+    } else {
+        Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
+    }
 
     /*
      *  Set other options
@@ -236,6 +239,7 @@ int main( int argc, char *argv[] ){
     LstarInfo->mInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
 
+
     if ( !strcmp( ExtModel, "T87" ) ){
         LstarInfo->mInfo->Bfield = Lgm_B_T87;
     } else if ( !strcmp( ExtModel, "CDIP" ) ){
@@ -244,7 +248,6 @@ int main( int argc, char *argv[] ){
         LstarInfo->mInfo->Bfield = Lgm_B_edip;
     } else if ( !strcmp( ExtModel, "DUNGEY" ) ){
         LstarInfo->mInfo->Bfield = Lgm_B_Dungey;
-        LstarInfo->mInfo->InternalModel = LGM_DUNGEY;
         strcpy(IntModel, "DUNGEY");
     } else if ( !strcmp( ExtModel, "IGRF" ) ){
         LstarInfo->mInfo->Bfield = Lgm_B_igrf;
@@ -265,6 +268,8 @@ int main( int argc, char *argv[] ){
         LstarInfo->mInfo->InternalModel = LGM_CDIP;
     } else if ( !strcmp( IntModel, "EDIP" ) ){
         LstarInfo->mInfo->InternalModel = LGM_EDIP;
+    } else if ( !strcmp( IntModel, "DUNGEY") ) {
+        LstarInfo->mInfo->InternalModel = LGM_DUNGEY;
     } else {
         // default
         LstarInfo->mInfo->InternalModel = LGM_IGRF;
@@ -293,7 +298,7 @@ int main( int argc, char *argv[] ){
         fp = fopen(Filename, "w");
     
         // Bracket Position in GSM
-        brac1 = -3.0;
+        brac1 = -6.0;
         brac2 = -13.0;
     
     
@@ -458,7 +463,7 @@ int main( int argc, char *argv[] ){
                 }
         
             } // ***** END PARALLEL EXECUTION *****
-            
+exit(0);
             Lgm_Make_UTC( Date, UTC, &DT_UTC, LstarInfo->mInfo->c );
             Lgm_DateTimeToString( Str, &DT_UTC, 0, 3);
             fprintf(fp, "%24s",     Str );
