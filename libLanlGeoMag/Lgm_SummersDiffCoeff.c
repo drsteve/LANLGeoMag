@@ -6,12 +6,13 @@
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_errno.h>
 
-struct normalizerForWavePowerSpectrumFunctionParams {double w; double wce; double wpe; double wmean; double wmin; double wmax; double dw; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double xmin; double xmax;};
+struct inequalityParameters {double D; double E1; double E2; double F1; double F2;};
+struct normalizerForWavePowerSpectrumFunctionParams {double x; double aStar; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double xmin; double xmax;};
 struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams {int tensorFlag; int s; double KE; double aStar; double wce; double xmin; double xmax; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double wm; double dw; double wlc; double wuc; double Bw; double alpha; int nCyclotronLow; int nCyclotronHigh; double *Nw; int nNw; int Dir;};
 double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p);
 int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double alpha, int s, int nCyclotron, double aStar, double xlc, double xuc, double *resonantRoots, int *nRoots);
 double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNumber, double x, double y, double P, double R, double L, double S, double theta);
-double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta2, double x, double y);
+double electronColdPlasmaGroupVelocity(double aStar, double tanTheta2, double x, double y);
 double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
 double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
 //old calling style double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(int tensorFlag, int s, double KE, double aStar, double wce, double xm, double xmin, double xmax, double dx, double wm, double dw, double wlc, double wuc, double Bw, double alpha, double tanTheta, int nCyclotronLow, int nCyclotronHigh, double *Nw, int nNw, int Directions);
@@ -269,7 +270,9 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
      *  Set integration limits
      */
     a = 0.0;                                            // radians
-    B = acos( Lgm_CdipMirrorLat( si.SinAlpha0 ) );     // radians
+    double tempb;
+    tempb = acos(Lgm_CdipMirrorLat( si.SinAlpha0 ));     // radians
+    if (acos(sqrt(1.0/L)) < tempb) {B=acos(sqrt(1.0/L));} else {B=tempb;} // Modified by Greg Cunningham on 10/14/2014 so that integral doesn't extend to inside earth for low L
     b = ( B < si.MaxWaveLat ) ? B : si.MaxWaveLat;
     if ( fabs(a-b) < 1e-9 ) {
 
@@ -419,14 +422,25 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
  *   	 						spread in wave normal angles for that component
  */
  
-int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int WaveMode, int Species, double MaxWaveLat, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nw, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+
 
     double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
     double           epsabs, epsrel, abserr, work[2002], points[10];
     double           ySing, a_new, b_new, B;
     int              npts2=4, limit=500, lenw=4*limit, iwork[502], last, ier, neval;
     int              VerbosityLevel = 1;
+
     Lgm_SummersInfo  si;
+printf("I'm really in Lgm_GlauertAndHorneDxxBounceAvg\n");
+
+/*  Added by Greg Cunningham to enable precomputation of the normalizing function N(w) that integrates over tan(theta) interval [xmin,xmax] and depends only on aStar */
+    si.aStarMin = aStarMin;
+    si.aStarMax = aStarMax;
+    si.nNw = nNw;
+    si.nPlasmaParameters= nPlasmaParameters;
+    si.Nw = (double *) Nw;
+
     si.Version = Version;
     si.n1 = n1;
     si.n2 = n2;
@@ -471,7 +485,6 @@ int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  do
      */
     epsabs = 0.0;
     epsrel = 1e-5;
-
 
     /*
      *  Pack integrand parameters into structure
@@ -534,7 +547,9 @@ int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  do
      *  Set integration limits
      */
     a = 0.0;                                            // radians
-    B = acos( Lgm_CdipMirrorLat( si.SinAlpha0 ) );     // radians
+    double tempb;
+    tempb = acos(Lgm_CdipMirrorLat( si.SinAlpha0 ));     // radians
+    if (acos(sqrt(1.0/L)) < tempb) {B=acos(sqrt(1.0/L));} else {B=tempb;}  // Modified by Greg Cunningham on 10/14/2014 so that integral doesn't extend to inside earth for low L
     b = ( B < si.MaxWaveLat ) ? B : si.MaxWaveLat;
     if ( fabs(a-b) < 1e-9 ) {
 
@@ -544,7 +559,6 @@ int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  do
         return( 0 );
 
     } else {
-
 
         /*
          *  Perform integrations. The points[] array contains a list of points
@@ -618,9 +632,7 @@ printf("done finding integral\n");
         *Daa_ba /= T;
         *Dap_ba /= T;
         *Dpp_ba /= T;
-
     }
-
 
     return(1);
 }
@@ -886,8 +898,8 @@ double  SummersIntegrand_Gaa( double Lat, _qpInfo *qpInfo ) {
 
 	    Daa = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
 		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
-            (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, 
-            si->Lambda, si->s, aStar, si->Directions, (int) 0);
+            	    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, 
+            	    si->Lambda, si->s, aStar, si->Directions, (int) 0, si->nNw, si->nPlasmaParameters, si->aStarMin, si->aStarMax, si->Nw);
 
     } else {
 
@@ -1024,7 +1036,7 @@ double  SummersIntegrand_Gap( double Lat, _qpInfo *qpInfo ) {
 	    Dap = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
 		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
 		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, 
-            si->Lambda, si->s, aStar, si->Directions, (int) 1);
+                    si->Lambda, si->s, aStar, si->Directions, (int) 1, si->nNw, si->nPlasmaParameters, si->aStarMin, si->aStarMax, si->Nw);
 
     } else {
 
@@ -1142,7 +1154,8 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
 
 	Dpp = Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local(SinAlpha2, si->E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, 
 		    si->Rho, si->Sig, x1, x2, xm, dx, si->x1, si->x2, si->numberOfWaveNormalAngleDistributions, 
-		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 2);
+		    (double *) si->xm, (double *) si->dx, (double *) si->weightsOnWaveNormalAngleDistributions, si->Lambda, si->s, aStar, si->Directions, (int) 2,
+		    si->nNw, si->nPlasmaParameters, si->aStarMin, si->aStarMax, si->Nw);
 
     } else {
 
@@ -1156,8 +1169,9 @@ double  SummersIntegrand_Gpp( double Lat, _qpInfo *qpInfo ) {
      * Finally the integrand.
      */
     f = Dpp * CosLat*v/sqrt(1.0-BoverBm);
-
-//printf("%g %g\n", Lat*DegPerRad, f);
+//double localAlpha;
+//localAlpha = asin(sqrt(SinAlpha2));
+//printf("Lat=%g Dpp=%g, localAlpha=%g\n", Lat, f, localAlpha);
     return( f );
 
 }
@@ -1343,6 +1357,7 @@ double Lgm_SummersDaaLocal( double SinAlpha2, double E, double dBoverB2, double 
  *      \param[in]      Lambda      Particle species. Can be LGM_ELECTRONS or LGM_PROTONS.
  *      \param[in]      s           Mode of the wave. Can be LGM_R_MODE_WAVE ( s = -1 ) or LGM_L_MODE_WAVE ( s = +1 ).
  *      \param[in]      aStar       Local value of the aStar parameter ( \f$ \alpha^* \f$ ) in the Summer's papers.
+ *
  *
  *      \return         Local value of Daa
  *
@@ -2760,13 +2775,17 @@ int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, 
 double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAlpha2, double E, double dBoverB2, double BoverBeq, 
         double Omega_e, double Omega_Sig, double Rho, double Sig, double wxl, double wxh, double wxm, double wdx, double xmin, double xmax, 
         int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, 
-        double Lambda, int sIn, double aStar, int Directions, int tensorFlag ) {
+        double Lambda, int sIn, double aStar, int Directions, int tensorFlag, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nwglobal) {
 
-	double 	alpha, KE, wce, wlc, wuc, wm, dw, Bw, B;
-	int	    gsl_err, iTheta, nTheta, i, s;
-	double	theta, dTheta, wpe, totalDaa, dTanTheta, tanTheta, localDaa, Daa;
+	double 				alpha, KE, wce, wlc, wuc, wm, dw, Bw, B;
+	int	    			gsl_err, iTheta, i, s;
+	double				theta, wpe, totalDaa, dTanTheta, tanTheta, localDaa, Daa, tempDaa, tempxmin, tempxmax;
+	struct inequalityParameters 	inequalityParamsLC, inequalityParamsUC;
+	double				gamma, wn, vpar, thetaStart[4], thetaEnd[4];
+	int				indexIntoNormalizer,j,nIntervals;
+	double				*Nw;
 
-//printf("In Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local: SinAlpha2=%g, E=%g, dBoverB2=%g, BoverBeq=%g, Omega_e=%g, Omega_Sig=%g, Rho=%g, Sig=%g, wxl=%g, wxh=%g, wxm=%g, wdx=%g, xmin=%g, xmax=%g, Lambda=%g, s=%d, aStar=%g, Directions=%d, tensorFlag=%d\n", SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, wxl, wxh, wxm, wdx, xmin, xmax, xm, dx, Lambda, sIn, aStar, Directions, tensorFlag);
+//printf("In Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local: SinAlpha2=%g, E=%g, dBoverB2=%g, BoverBeq=%g, Omega_e=%g, Omega_Sig=%g, Rho=%g, Sig=%g, wxl=%g, wxh=%g, wxm=%g, wdx=%g, xmin=%g, xmax=%g, Lambda=%g, s=%d, aStar=%g, Directions=%d, tensorFlag=%d\n", SinAlpha2, E, dBoverB2, BoverBeq, Omega_e, Omega_Sig, Rho, Sig, wxl, wxh, wxm, wdx, xmin, xmax, Lambda, sIn, aStar, Directions, tensorFlag);
 //printf("                       :number of wave normal angle distributions to sum together is %d, with the following parameters (xm, dx, weight)\n", numberOfWaveNormalAngleDistributions);
 //for (i=0; i<numberOfWaveNormalAngleDistributions; i++) {printf("                      %g %g %g\n", xmArray[i], dxArray[i], weightsOnWaveNormalAngleDistributions[i]);}
 
@@ -2780,40 +2799,13 @@ double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAl
 	wm=wxm*wce;								  // wxm is the mean frequency normalized by local electron gyrofrequency; wm is the mean frequency in Hz
 	dw=wdx*wce;								  // wdx is the frequency range normalized by local electron gyrofrequency; dw is the frequency range in Hz
 	Bw = sqrt(dBoverB2*pow(Omega_e*LGM_ELECTRON_MASS*1e12/LGM_e, 2.0));	  // Bw is wave amplitude in pT, so we need to multiply dBoverB2 by B^2, where B is the field in pT
-		
-/*	General parameters */
-	nTheta=90;
-	dTheta = ((double) M_PI)*90.0/180.0/((double) nTheta);   			//integrate only over [0,pi/2]: what about anti-parallel propagation?
-/*	
- *	Set up the function that is integrated over tan(theta) to produce the normalizer N(w); this normalizer is only valid for the local plasma environment, 
- *	so it must be re-evaluated at each point along a field line, e.g. 
- */
-	double result, error;
-    	struct	normalizerForWavePowerSpectrumFunctionParams p;
-	int	nNw=1000;
-	double 	Nw[nNw]; //precomputed normalizer as a function of frequency
-	wpe=sqrt(1.0/aStar)*wce;
-	p.wce=wce; p.wpe=wpe; p.wmean=wm; p.wmin=wlc; p.wmax=wuc; p.dw=dw; p.xmin=xmin; p.xmax=xmax; 
-	p.numberOfWaveNormalAngleDistributions=numberOfWaveNormalAngleDistributions; 
-	p.xmArray=(double *) xmArray; p.dxArray=(double *) dxArray; p.weightsOnWaveNormalAngleDistributions=(double *) weightsOnWaveNormalAngleDistributions;
-	gsl_integration_workspace * work=gsl_integration_workspace_alloc(1000);
-	gsl_function F;
-	gsl_set_error_handler_off(); // so that we don't core dump if the integration routine can't converge on an answer
-	F.function = &normalizerForWavePowerSpectrumFunction;
-	F.params=&p;
-	for (i=0; i<nNw; i++)
-		{
-		p.w = wlc+((wuc-wlc)*(i+0.5)/((double) nNw));
-		result = 0.0;
-		gsl_err = (int) gsl_integration_qags(&F, xmin, xmax, 0, 1e-4, 1000, work, &result, &error);  		
-    		if (gsl_err != GSL_SUCCESS ) 
-			{
-			printf("gsl_integration_qags failed to produce N(w) for w=%g, i=%d of %d with errno=%d, result=%g, error=%g; returning without computing any diffusion coefficients\n", p.w, i, nNw, gsl_err, result, error);
-			return(0.0);
-			}	
-		Nw[i] = result;
-		}
-	gsl_integration_workspace_free(work);
+
+	indexIntoNormalizer = (int) trunc(nPlasmaParameters*log(aStar/aStarMin)/log(aStarMax/aStarMin));
+if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax=%g, nPlasmaParameters=%d, indexIntoNormalizer=%d\n", aStar, aStarMin, aStarMax, nPlasmaParameters, indexIntoNormalizer);}
+	if (indexIntoNormalizer<0) {indexIntoNormalizer =0;}
+	if (indexIntoNormalizer>nPlasmaParameters-1) {indexIntoNormalizer=nPlasmaParameters-1;}
+	Nw=Nwglobal+(nNw*indexIntoNormalizer);
+ 
 /*	Need to insert Jay's test here and expand it to include the other ranges of wn (not just wn<wlc, which is what I have now).  May need to change how integration is done. */
 /*	Perform the integration over theta: currently done naively, need to port to GSL? */
 	struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams p2;
@@ -2821,9 +2813,48 @@ double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAl
 	p2.wm=(double) wm; p2.dw=(double) dw; p2.wlc=(double) wlc; p2.wuc=(double) wuc; p2.xmin=(double) xmin; p2.xmax=(double) xmax; 
 	p2.xmArray=(double *) xmArray; p2.dxArray=(double *) dxArray; p2.weightsOnWaveNormalAngleDistributions=(double *) weightsOnWaveNormalAngleDistributions; 
 	p2.numberOfWaveNormalAngleDistributions=(int) numberOfWaveNormalAngleDistributions; 
-	p2.Bw=(double) Bw; p2.alpha=(double) alpha; p2.nCyclotronLow=(int) -5; p2.nCyclotronHigh=(int) 5; p2.Nw=(double *) &Nw[0]; p2.nNw=(int) nNw; p2.Dir=(int) Directions;
+	p2.Bw=(double) Bw; p2.alpha=(double) alpha; p2.Nw=(double *) Nw; p2.nNw=(int) nNw; p2.Dir=(int) Directions;
 	totalDaa = (double) 0.0;
-	Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) xmin,(double) xmax, &totalDaa, (int) 0);
+	gamma = 1.0+((p2.KE)/LGM_Ee0);
+	vpar = cos(alpha)*sqrt(1-(1.0/(gamma*gamma)));
+	j = computeInequalityParameters(wxl, p2.aStar, vpar, &inequalityParamsLC);
+	j = computeInequalityParameters(wxh, p2.aStar, vpar, &inequalityParamsUC);
+	for (i=-5; i<=5; i++)
+		{
+ 		p2.nCyclotronLow=(int) i; p2.nCyclotronHigh=(int) i; 
+//printf("iCyclotron number=%d\n", i);
+/*		
+ *		wn	doppler shift, s*n*wce/gamma, normalized by the gyrofrequency, wce, to give s*n/gamma
+ *		wlc	lower cutoff frequency normalized by the gyrofrequency
+ *		wuc	uppper cutoff frequency normalized by the gyrofrequency
+ *		aStar	the squared ratio of the electron gyrofrequency to the plasma frequency, wpe
+ *		mode	FIXME: should be =1 for R-mode, =-1 for L-mode but p2.x is -1, which is opposite what it should be. need to iron this out.
+ *		vpar	the parallel velocity divided by the speed of light
+ */
+		double wn;
+		wn = (p2.s)*i/gamma;
+		j = computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(wn, wxl, wxh, &inequalityParamsLC, &inequalityParamsUC, (int) 1, &nIntervals, thetaStart, thetaEnd);
+		tempDaa=0.0;
+		if (nIntervals !=0) 
+			{
+			if (nIntervals == 1) 
+				{
+				tempxmin = tan(thetaStart[0]);
+				if (tempxmin < xmin) {tempxmin=xmin;}
+				tempxmax = tan(thetaEnd[0]);
+				if (tempxmax > xmax) {tempxmax=xmax;}
+				if (tempxmax>tempxmin)
+					{
+					j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, &tempDaa, (int) 0);
+					}
+				}
+			else
+				{
+				j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) xmin,(double) xmax, &tempDaa, (int) 0);
+				}
+			totalDaa += tempDaa;
+			}
+		}
 	return(totalDaa);
 }
 
@@ -2867,14 +2898,16 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 	tensorFlag=(int) p->tensorFlag; s=(int) p->s; KE=(double) p->KE; aStar=(double) p->aStar; wce=(double) p->wce; 
 	wm=(double) p->wm; dw=(double) p->dw; wlc=(double) p->wlc; wuc=(double) p->wuc; xmin=(double) p->xmin; xmax=(double) p->xmax; 
 	Bw=(double) p->Bw; alpha=(double) p->alpha; nCyclotronLow=(int) p->nCyclotronLow; nCyclotronHigh=(int) p->nCyclotronHigh; Nw=(double *) p->Nw; nNw=(int) p->nNw; Dir=(int) p->Dir;
-
+	//printf("tanTheta=%g, tensorFlag=%d, s=%d, KE=%g, aStar=%g, wce=%g, wm=%g, dw=%g, wlc=%g, wuc=%g, xmin=%g, xmax=%g, Bw=%g, alpha=%g, nCyclotronLow=%d, nCyclotronHigh=%d, nNw=%d, Dir=%d\n", tanTheta, tensorFlag, s, KE, aStar, wce, wm, dw, wlc, wuc, xmin, xmax, Bw, alpha, nCyclotronLow, nCyclotronHigh, nNw, Dir); 
+	if (fabs(alpha) < 1e-3) {alpha = 1e-3;} //FIXME: alpha=0 causes a divide by zero besselFunctionNormalizer; need to fix this special case at some point
+	if (fabs(alpha-(M_PI/2.0)) < 1e-3) {alpha = M_PI/2.0-1e-3;} //FIXME: alpha=M_PI/2 causes a divide by zero in term2 and computeResonantRoots; need to fix this special case at some point
+	if (fabs(tanTheta) < 1e-3) {tanTheta=1e-3;} //FIXME: tanTheta=0 is the special case of parallel propagation; should use simpler resonant root finder here; may get degenerate roots?
 	if ((tensorFlag!=0)&&(tensorFlag!=1)&&(tensorFlag!=2)) 
 		{
 		printf("Warning: in localDaaAtSpecificThetaGlauertAndHorne, tensorFlag does not have a value of 0, 1 or 2\n");
 		return(0.0); // no valid specification of tensorFlag
 		}
 	if ((tanTheta<xmin)||(tanTheta>xmax)) return(0.0); 		// no need to perform the calculation since the input wave normal angle is outside the limited range of applicability
-	wpe=sqrt(1.0/aStar)*wce;
 
 /*	Define constants that are needed */
 	theta = atan(tanTheta); 					//FIXME: this means that the function is only valid for wave normal angles between -pi/2 and pi/2
@@ -2898,7 +2931,7 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 
 /* 		Solve for resonant roots. Only the non-evanescent roots with specified polarization in the specified frequency passband are retained. */
 		i=(int) computeResonantRootsUsingColdElectronPlasma(KE, theta, alpha, s, nCyclotron, aStar, wlc/wce, wuc/wce, &z[0], &nRoots);  
-//		printf("For nCyclotron=%d, number of resonant roots is %d\n", nCyclotron, nRoots);
+//printf("For nCyclotron=%d, number of resonant roots is %d\n", nCyclotron, nRoots);
 
 /*		Sum over the resonant roots, weighting each one */
     		for ( i=0; i<nRoots; i++ ) 
@@ -2920,12 +2953,12 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 				{
 /*			  	Evaluate the terms needed to weight this particular resonance */
 			  	wi=x*wce;										//resonant frequency in Hz
-			  	indexIntoNw = (int) (nNw*(wi-wlc)/(wuc-wlc));
+			  	indexIntoNw = (int) (nNw*x);								// modified on 6/6/2014 to assume that the normalized frequency interval [0,1] is spanned
 			  	if (indexIntoNw < 0) {indexIntoNw=0;}
 			  	if (indexIntoNw > (nNw-1)) {indexIntoNw=nNw-1;}
-			  	result=Nw[indexIntoNw];
+			  	result=Nw[indexIntoNw]*wce*wce;								//wce*wce added on 6/6/2014 to compensate for fact that Nw[] doesn't include the wce^2 term
 			  	phink2=(double) besselFunctionNormalizer(s, momentum, alpha, nCyclotron, x, y, P, R, L, S, theta);  	
-			  	dwdk=(double) electronColdPlasmaGroupVelocity(wce*wce, wpe*wpe, tanTheta2, x, y);	//the group velocity
+			  	dwdk=(double) electronColdPlasmaGroupVelocity(aStar, tanTheta2, x, y);	//the group velocity
 			  	vpar = (double) (momentum*1e6*Joules_Per_eV*cosAlpha)/(Gamma*LGM_c*LGM_ELECTRON_MASS);  //vpar in m/s; note that momentum is in MeV/c, so need to convert to kg*m/s
 			  	g=0.0;
 			  	for (j=0; j<p->numberOfWaveNormalAngleDistributions; j++)
@@ -2942,7 +2975,7 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 			  	term3b = 1.0/fabs(vpar-(dwdk/cosTheta));						//FIXME: don't I need to check to make sure vpar is ne to dwdk/cosTheta?  
 			  	//if (term3b > 3e-5) {term3b = 3e-5;}                                                   //regularize the singularity
 			  	term4 = SinAlpha*cosAlpha/((s*nCyclotron*wce/(Gamma*wi))-SinAlpha2); 			//FIXME: using wce assumes resonance condition for electrons; check for protons
-//			  	printf("cyclotron number=%d resonant root number=%d root=%g Term1=%g term2=%g Bsquared=%g g=%g phink2=%g term3b=%g term4=%g\n", nCyclotron, i, wi, term1, term2, Bsquared, g, phink2, term3b, term4);
+//printf("cyclotron number=%d resonant root number=%d root=%g Term1=%g term2=%g Bsquared=%g g=%g phink2=%g term3b=%g term4=%g\n", nCyclotron, i, wi, term1, term2, Bsquared, g, phink2, term3b, term4);
 			  	if (tensorFlag == 0) { localDaa += term1*term2*term3a*term3b;}				// compute Daa
 			  	if (tensorFlag == 1) { localDaa += term1*term2*term3a*term3b*term4;}			// compute Dap
 			  	if (tensorFlag == 2) { localDaa += term1*term2*term3a*term3b*term4*term4;}		// compute Dpp
@@ -2951,8 +2984,139 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 			}
 		}
 	localDaa /= pow(momentum*1e6*Joules_Per_eV/LGM_c, 2.0);  							//divide Glauert/Horne Daa by momentum^2 in (kg*m/s)^2 to get Summers
+//printf("localDaa=%g\n", localDaa);
 	if (fpclassify(localDaa) != FP_NORMAL) {localDaa = 0.0;}							//eliminate the possible of returning a number that is not a number
 	return(localDaa);
+}
+
+/*
+ *	The following routine computes all 3 components of the diffusion tensor (Daa, Dap and Dpp) at a specific value of the tangent of the wave normal angle using the derivation in Glauert 
+ *	and Horne 2005.  Note that the frequencies in Glauert and Horne use units of radians/second, whereas I use units of cycles/second (Hz).  The difference is mostly irrelevant since the 
+ *	solution to the dispersion relation is done using normalized frequencies (frequency divided by gyrofrequency).  The appearance of w^2 in the weighting coefficient, where
+ *	w_i is a resonant frequency, is effectively divided out by the k^2 in the N(w) term, so the units here also cancel out.  All of the terms dw/dk similarly cancel out in 
+ *	terms of whether or not one uses frequency in Hz or radians/second.  The only place it remains, then, is in the term dw in the denominator of Asquared.  The term dw in Hz
+ *	must be multiplied by 2*pi in order to match Glauert and Horne 2005.
+ *
+ *	Modified by Greg Cunningham on 6-1-2013 to eliminate resonant roots for which the wave normal angle is larger than the resonance cone angle.  This change was made at the same
+ *	time as the change above to the normalizer routine, normalizerForWavePowerSpectrumFunction, that computes N(w).
+ */
+
+int localDiffusionCoefficientAtSpecificThetaGlauertAndHorneReturnTensorInPlace(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p, double *Daa, double *Dap, double *Dpp)
+{
+    	int    	nRoots, i, j, nCyclotron, indexIntoNw, test;
+    	double 	Gamma, Gamma2, Beta, Beta2, Mu2;
+    	double 	a, a2;
+    	double 	cosAlpha, SinAlpha, SinAlpha2,theta,cosTheta,cosTheta2,tanTheta2;
+    	double 	z[9];
+    	double 	x,y,nSquared,R,L,S,D,P;
+    	double 	momentum;
+	double 	term1, term2, term3a, term3b, term4, localDaa, Bsquared, Asquared, thisg, g, vpar, dwdk, phink2;
+	double 	wpe, wi, E, result;
+	int 	s, nCyclotronLow, nCyclotronHigh, nNw, Dir;
+	double 	KE, aStar, wce, xm, xmin, xmax, dx, weight, wm, dw, wlc, wuc, Bw, alpha, *Nw;
+	double 	term0, commonFactor;
+
+	s=(int) p->s; KE=(double) p->KE; aStar=(double) p->aStar; wce=(double) p->wce; 
+	wm=(double) p->wm; dw=(double) p->dw; wlc=(double) p->wlc; wuc=(double) p->wuc; xmin=(double) p->xmin; xmax=(double) p->xmax; 
+	Bw=(double) p->Bw; alpha=(double) p->alpha; nCyclotronLow=(int) p->nCyclotronLow; nCyclotronHigh=(int) p->nCyclotronHigh; Nw=(double *) p->Nw; nNw=(int) p->nNw; Dir=(int) p->Dir;
+	//printf("tanTheta=%g, s=%d, KE=%g, aStar=%g, wce=%g, wm=%g, dw=%g, wlc=%g, wuc=%g, xmin=%g, xmax=%g, Bw=%g, alpha=%g, nCyclotronLow=%d, nCyclotronHigh=%d, nNw=%d, Dir=%d\n", tanTheta, s, KE, aStar, wce, wm, dw, wlc, wuc, xmin, xmax, Bw, alpha, nCyclotronLow, nCyclotronHigh, nNw, Dir); 
+	if (fabs(alpha) < 1e-3) {alpha = 1e-3;} //FIXME: alpha=0 causes a divide by zero besselFunctionNormalizer; need to fix this special case at some point
+	if (fabs(alpha-(M_PI/2.0)) < 1e-3) {alpha = M_PI/2.0-1e-3;} //FIXME: alpha=M_PI/2 causes a divide by zero in term2 and computeResonantRoots; need to fix this special case at some point
+	if (fabs(tanTheta) < 1e-3) {tanTheta=1e-3;} //FIXME: tanTheta=0 is the special case of parallel propagation; should use simpler resonant root finder here; may get degenerate roots?
+	if ((tanTheta<xmin)||(tanTheta>xmax)) {*Daa = 0.0; *Dap=0.0; *Dpp=0.0; return(-1);} 		// no need to perform the calculation since the input wave normal angle is outside the limited range of applicability
+
+/*	Define constants that are needed */
+	theta = atan(tanTheta); 					//FIXME: this means that the function is only valid for wave normal angles between -pi/2 and pi/2
+    	SinAlpha=sin(alpha);             
+    	SinAlpha2=SinAlpha*SinAlpha;             
+    	cosAlpha=cos(alpha);             
+    	Mu2=1.0-SinAlpha2;
+    	E=KE/0.511;               					//input normalized energy (KE/m0c2)
+    	Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    	momentum=sqrt((KE+LGM_Ee0)*(KE+LGM_Ee0)-(LGM_Ee0*LGM_Ee0));	//momentum in MeV/c
+    	tanTheta2=tanTheta*tanTheta;
+    	cosTheta=cos(theta);
+    	cosTheta2=cosTheta*cosTheta;					
+    	Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  // square of (v_par/c)*cos(theta)
+	Beta=sqrt(Beta2);
+	*Daa=0.0;
+	*Dap=0.0;
+	*Dpp=0.0;
+    	for (nCyclotron=nCyclotronLow; nCyclotron<=nCyclotronHigh; nCyclotron++)   		//input cyclotron mode
+		{
+/*		resonance condition depends on nCyclotron */
+    		a  = s*nCyclotron/Gamma; a2 = a*a; 			//assume electrons so lambda absorbed in basic formula; s is 1 for R-mode, -1 for L-mode; FIXME: is this right?
+
+/* 		Solve for resonant roots. Only the non-evanescent roots with specified polarization in the specified frequency passband are retained. */
+		i=(int) computeResonantRootsUsingColdElectronPlasma(KE, theta, alpha, s, nCyclotron, aStar, wlc/wce, wuc/wce, &z[0], &nRoots);  
+//printf("For nCyclotron=%d, number of resonant roots is %d\n", nCyclotron, nRoots);
+
+/*		Sum over the resonant roots, weighting each one */
+    		for ( i=0; i<nRoots; i++ ) 
+			{
+			x=z[i];
+			y=(x-a)/Beta;											
+			if (((y<0)&&((Dir == LGM_BKWD)||(Dir== LGM_FRWD_BKWD)))||((y>0)&&((Dir == LGM_FRWD)||(Dir == LGM_FRWD_BKWD))))// to make consistent with Summers
+			  {
+			  nSquared=(y/x)*(y/x);
+			  R=1.0-((1.0/(aStar*x*x))*(x/(x-1.0)));
+			  L=1.0-((1.0/(aStar*x*x))*(x/(x+1.0)));
+			  S=0.5*(R+L);
+			  D=0.5*(R-L);
+			  P=1.0-(1.0/(aStar*x*x));
+
+/*			  Modification by Greg Cunningham on 6-1-2013: test to see if the resonant root has a resonance cone angle that is less than the given wave normal angle */ 
+			  test = ((-1.0*P/S*0.99)<(tanTheta2))&&(-1.0*P/S > 0.0);
+			  if (test == 0) 
+				{
+/*			  	Evaluate the terms needed to weight this particular resonance */
+			  	wi=x*wce;										//resonant frequency in Hz
+			  	indexIntoNw = (int) (nNw*x);								// modified on 6/6/2014 to assume that the normalized frequency interval [0,1] is spanned
+			  	if (indexIntoNw < 0) {indexIntoNw=0;}
+			  	if (indexIntoNw > (nNw-1)) {indexIntoNw=nNw-1;}
+			  	result=Nw[indexIntoNw]*wce*wce;								//wce*wce added on 6/6/2014 to compensate for fact that Nw[] doesn't include the wce^2 term
+			  	phink2=(double) besselFunctionNormalizer(s, momentum, alpha, nCyclotron, x, y, P, R, L, S, theta);  	
+			  	dwdk=(double) electronColdPlasmaGroupVelocity(aStar, tanTheta2, x, y);	//the group velocity
+			  	vpar = (double) (momentum*1e6*Joules_Per_eV*cosAlpha)/(Gamma*LGM_c*LGM_ELECTRON_MASS);  //vpar in m/s; note that momentum is in MeV/c, so need to convert to kg*m/s
+			  	g=0.0;
+			  	for (j=0; j<p->numberOfWaveNormalAngleDistributions; j++)
+					{
+					xm=(double) p->xmArray[j]; dx=(double) p->dxArray[j]; weight = (double) p->weightsOnWaveNormalAngleDistributions[j];
+			  		thisg=weight*exp(-1.0*(tanTheta-xm)*(tanTheta-xm)/(dx*dx));				//g(tanTheta)
+					g += thisg;
+					}	
+			  	Asquared = (pow(Bw*1e-12, 2.0)/(2.0*M_PI*dw))*(2/sqrt(M_PI))/(gsl_sf_erf((wm-wlc)/dw)+gsl_sf_erf((wuc-wm)/dw));	//wave spectral intensity in T^2/Hz (actually, these units are somewhat of a misnomer since dw (which is in Hz) has to be multiplied by 2*pi in order to get it in units of radians/second instead of cycles/sec
+			  	Bsquared=Asquared*exp(-1.0*(wi-wm)*(wi-wm)/(dw*dw));
+				term0 = cosAlpha/((s*nCyclotron*wce/(Gamma*wi))-SinAlpha2); 				//FIXME: using wce assumes resonance condition for electrons; check for protons
+			  	term1 = (LGM_e*LGM_e*wi*wi/(4.0*M_PI*(1.0+tanTheta2)*result));
+			  	term2 = pow(1.0/term0, 2.0);								//FIXME: using wce assumes resonance condition for electrons; check for protons
+			  	term3a = Bsquared*g*phink2;
+			  	term3b = 1.0/fabs(vpar-(dwdk/cosTheta));						//FIXME: don't I need to check to make sure vpar is ne to dwdk/cosTheta?  
+			  	//if (term3b > 3e-5) {term3b = 3e-5;}                                                   //regularize the singularity
+			  	//term4 = SinAlpha*term0; 								//FIXME: using wce assumes resonance condition for electrons; check for protons
+				commonFactor = term1*term2*term3a*term3b;
+if (commonFactor < 0.0) {printf("commonFactor<0.0: x=%g, indexIntoNw=%d, result=%g, term1=%g, term2=%g, term3a=%g, term3b=%g, term4=%g\n", x,indexIntoNw, result, term1, term2, term3a, term3b, term4);}
+//printf("cyclotron number=%d resonant root number=%d root=%g Term1=%g term2=%g Bsquared=%g g=%g phink2=%g term3b=%g term4=%g\n", nCyclotron, i, wi, term1, term2, Bsquared, g, phink2, term3b, term4);
+			  	*Daa += term1*term2*term3a*term3b;				// compute Daa
+			  	*Dap += term1*term3a*term3b*SinAlpha/term0;			// used to be term1*term3a*term3b*term4 compute Dap
+			  	*Dpp += term1*term3a*term3b*SinAlpha*SinAlpha;			// used to be term1*term3a*term3b*term4*term4 compute Dpp
+//printf("x=%g, indexIntoNw=%d, result=%g, term1=%g, term2=%g, term3a=%g, term3b=%g, term4=%g\n", x,indexIntoNw, result, term1, term2, term3a, term3b, term4);
+				}
+			  }
+			}
+		}
+	*Daa /= pow(momentum*1e6*Joules_Per_eV/LGM_c, 2.0);  							//divide Glauert/Horne Daa by momentum^2 in (kg*m/s)^2 to get Summers
+	*Dap /= pow(momentum*1e6*Joules_Per_eV/LGM_c, 2.0);  							//divide Glauert/Horne Daa by momentum^2 in (kg*m/s)^2 to get Summers
+	*Dpp /= pow(momentum*1e6*Joules_Per_eV/LGM_c, 2.0);  							//divide Glauert/Horne Daa by momentum^2 in (kg*m/s)^2 to get Summers
+//printf("localDaa=%g, localDap=%g, localDpp=%g\n", *Daa, *Dap, *Dpp);
+/*	eliminate the possible of returning a number that is not a number, or a tensor that has negative determinant */
+	if ((fpclassify(*Daa) != FP_NORMAL)||(fpclassify(*Dap) != FP_NORMAL)||(fpclassify(*Dpp) != FP_NORMAL)) 
+		{
+		*Daa = 0.0;
+		*Dap = 0.0; 
+		*Dpp = 0.0;
+		}							
+	return(0);
 }
 
 /*
@@ -2974,7 +3138,7 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
  */
 int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double alpha, int s, int nCyclotron, double aStar, double xlc, double xuc, double *resonantRoots, int *nRoots)
 {
-	double		E, Gamma, Gamma2, Beta, Beta2, Beta4, tanTheta, tanTheta2, cosTheta, cosTheta2, sinAlpha, sinAlpha2, Mu2, a, a2, a3, a4, Coeff[9];
+	double		E, Gamma, Gamma2, Beta, Beta2, Beta4, tanTheta, tanTheta2, cosTheta, cosTheta2, cosAlpha, sinAlpha, sinAlpha2, Mu2, a, a2, a3, a4, Coeff[9];
     	double complex  zz[9];
     	double          gsl_z[30];
 	int		i,gsl_err;
@@ -2986,6 +3150,7 @@ int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double 
     	tanTheta=tan(theta); tanTheta2=tanTheta*tanTheta;
     	cosTheta=cos(theta); cosTheta2=cosTheta*cosTheta;
     	sinAlpha=sin(alpha); sinAlpha2=sinAlpha*sinAlpha;             
+	cosAlpha=sqrt(1.0-sinAlpha2);
     	Mu2=1.0-sinAlpha2;
     	Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  	// square of (v_par/c)*cos(theta)
     	Beta4 = Beta2*Beta2;
@@ -3001,8 +3166,10 @@ int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double 
  *
  *	Expand[(((x^2*(x^2-1)-(x^2/aStar))*((x-a)/beta)^2-(x^2*(x+1)-(x/aStar))*(x^2*(x-1)-(x/aStar)))*(((x-a)/beta)^2-(x^2-(1/aStar)))*tanTheta^2) 
  *	+ ((x^2-(1/aStar))*(((x-a)/beta)^2*(x -1)-(x^2*(x-1)-(x/aStar)))*(((x-a)/beta)^2*(x+1)-(x^2*(x+1)-(x/aStar))))]
- *	
- */
+ *
+ * 	Modified by Greg Cunningham on 6-12-2014 to get rid of the cos(alpha) terms in the denominator by multiplying through by Beta4.  The divide by zero terms, which
+ * 	occur when Alpha=90, are in the original version below:
+ *
     	Coeff[0] = a4/(Beta4*aStar); 		// x^0 term
     	Coeff[1] = -4.0*a3/(Beta4*aStar); 		// x^1 term
     	Coeff[2] = -1.0/pow(aStar,3.0)-(a4/Beta4)+(6.0*a2/(aStar*Beta4))-(a4/(aStar*Beta4))-(2.0*a2/(aStar*aStar*Beta2))-(2.0*a2/(aStar*Beta2))-(tanTheta2/(aStar*aStar*aStar))-(a4*tanTheta2/Beta4)-(a4*tanTheta2/(aStar*Beta4))-(2.0*a2*tanTheta2/(aStar*aStar*Beta2))-(a2*tanTheta2/(aStar*Beta2));
@@ -3012,18 +3179,72 @@ int computeResonantRootsUsingColdElectronPlasma(double KE, double theta, double 
     	Coeff[6] = -1.0-(3.0/aStar)-(1.0/Beta4)+(6.0*a2/Beta4)-(1.0/(aStar*Beta4))+(2.0/Beta2)-(2.0*a2/Beta2)+(4.0/(aStar*Beta2))-(tanTheta2)+(3.0*tanTheta2/aStar)-(tanTheta2/Beta4)+(6.0*a2*tanTheta2/Beta4)-(tanTheta2/(aStar*Beta4))+(2.0*tanTheta2/Beta2)-(2.0*a2*tanTheta2/Beta2)+(4.0*tanTheta2/(aStar*Beta2));
     	Coeff[7] = (-4.0*a/Beta4)+(4.0*a/Beta2)-(4.0*a*tanTheta2/Beta4)+(4.0*a*tanTheta2/Beta2);
     	Coeff[8] = 1.0+(1.0/Beta4)-(2/Beta2)+tanTheta2+(tanTheta2/Beta4)-(2.0*tanTheta2/Beta2);
-
-/* 	Solve for resonant roots and put into a complex array for further processing.  */
-    	gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 9 );
-    	gsl_err = gsl_poly_complex_solve( Coeff, 9, w, gsl_z );
-    	gsl_poly_complex_workspace_free( w );
-    	(*nRoots) = 0;
-    	if (gsl_err != GSL_SUCCESS ) 
+ */
+/*	
+ *	For the special case nCyclotron=0, the coefficients of all of the odd terms in x are zero, and so we have something like c2*x^2+c4*x^4+c6*x^6+c8*x^8=0, which, 
+ *	if we divide by x^2 and then substitute y=x^2, we have a cubic equation c2+c4*y+c6*y^2+c8*y^3 that has a closed form root-finding solution. Since we are only 
+ *	interested in positive x (is that right?), we can ignore the negative roots, but put them in there anyways and then fill out the vector by putting zero as a root
+ *	in the list of roots, twice. 
+ */
+	if (nCyclotron == 0)
 		{
-		//printf("Problem with finding resonant roots!  Returning with nRoots=0\n");
-		return((int) (-1));
-		}	
-    	for (i=0; i<8; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
+    		Coeff[0] = -1.0*Beta4/pow(aStar,3.0)-(tanTheta2*Beta4/(aStar*aStar*aStar));  	   // the coefficient on the x^2 term in the original expansion, which will now be the constant offset
+    		Coeff[1] = (3.0*Beta4/(aStar*aStar))+(1.0*Beta4/aStar)+(1.0/(aStar))-(2.0*Beta2/(aStar*aStar))-(2.0*Beta2/(aStar))+(3.0*tanTheta2*Beta4/(aStar*aStar))+(tanTheta2*Beta4/aStar)-(2.0*tanTheta2*Beta2/(aStar*aStar))-(tanTheta2*Beta2/(aStar));										// the coefficient on the x^4 term in the original expansion, which will now be the coefficient on the y term
+    		Coeff[2] =-1.0*Beta4-(3.0*Beta4/aStar)-(1.0)-(1.0/(aStar))+(2.0*Beta2)+(4.0*Beta2/(aStar))-(tanTheta2*Beta4)+(3.0*tanTheta2*Beta4/aStar)-(tanTheta2)-(tanTheta2/(aStar))+(2.0*tanTheta2*Beta2)+(4.0*tanTheta2*Beta2/(aStar));												// the coefficient on the x^6 term in the original expansion, which will now be the y^2 term
+    		Coeff[3] = 1.0*Beta4+(1.0)-(2.0*Beta2)+(tanTheta2*Beta4)+(tanTheta2)-(2.0*tanTheta2*Beta2); // the coefficient on the x^8 term in the original expansion, which will now be the y^3 term
+/* 		Solve for resonant roots and put into a complex array for further processing.  */
+    		gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 4 );
+    		gsl_err = gsl_poly_complex_solve( Coeff, 4, w, gsl_z );
+    		gsl_poly_complex_workspace_free( w );
+    		(*nRoots) = 0;
+    		if (gsl_err != GSL_SUCCESS ) 
+			{
+			//printf("Problem with finding resonant roots!  Returning with nRoots=0\n");
+			return((int) (-1));
+			}	
+    		for (i=0; i<3; i++) 
+			{
+			if (gsl_z[2*i] > 0.0) 
+				{
+				zz[i] = sqrt(gsl_z[2*i]) + gsl_z[2*i+1]*I;  // need to factor x=sqrt(y) into the root; don't care about imaginary part because we only count this root if it is real
+				}
+			else
+				{
+				zz[i] = 0.0+0.0*I;  			// the square root of a negative number has a complex component that is significant and so the root will be discarded as evanescent anyway, so just set to 0
+				}
+			zz[i+3] = 0.0+0.0*I;                             // there is a negative root, but it won't count toward anything so don't need this anymore: -1.0*gsl_z[2*i] - gsl_z[2*i+1]*I;
+			}
+		zz[7] = 0.0+0.0*I; zz[8] = 0.0+0.0*I;
+
+		/* quick lookup from Ripoll 
+		zz[0] = ((1.0/aStar)*(Gamma*Gamma-1.0)*cosAlpha*cosAlpha/(Gamma*Gamma))+(0.0*I); 
+    		for (i=1; i<9; i++) {zz[i]=0.0+0.0*I;}
+ 		*/
+		}
+	else
+		{
+    		Coeff[0] = a4/aStar; 		// x^0 term
+    		Coeff[1] = -4.0*a3/aStar; 		// x^1 term
+    		Coeff[2] = -1.0*Beta4/pow(aStar,3.0)-(a4)+(6.0*a2/(aStar))-(a4/(aStar))-(2.0*a2*Beta2/(aStar*aStar))-(2.0*a2*Beta2/(aStar))-(tanTheta2*Beta4/(aStar*aStar*aStar))-(a4*tanTheta2)-(a4*tanTheta2/(aStar))-(2.0*a2*tanTheta2*Beta2/(aStar*aStar))-(a2*tanTheta2*Beta2/(aStar));
+    		Coeff[3] = 4.0*a3- (4.0*a/(aStar)) + (4.0*a3/(aStar)) + (4.0*a*Beta2/(aStar*aStar)) + (4.0*a*Beta2/(aStar))+(4.0*a3*tanTheta2)+(4.0*a3*tanTheta2/(aStar))+(4.0*a*tanTheta2*Beta2/(aStar*aStar))+(2.0*a*tanTheta2*Beta2/(aStar));
+    		Coeff[4] = (3.0*Beta4/(aStar*aStar))+(1.0*Beta4/aStar)-(6.0*a2)+(a4)+(1.0/(aStar))-(6.0*a2/(aStar))+(2.0*a2*Beta2)- (2.0*Beta2/(aStar*aStar))-(2.0*Beta2/(aStar))+(4.0*a2*Beta2/(aStar))+(3.0*tanTheta2*Beta4/(aStar*aStar))+(tanTheta2*Beta4/aStar)-(6.0*a2*tanTheta2)+(a4*tanTheta2)-(6.0*a2*tanTheta2/(aStar))+(2.0*a2*tanTheta2*Beta2)-(2.0*tanTheta2*Beta2/(aStar*aStar))-(tanTheta2*Beta2/(aStar))+(4.0*a2*tanTheta2*Beta2/(aStar));
+    		Coeff[5] = (4.0*a)-(4.0*a3)+(4.0*a/(aStar))-(4.0*a*Beta2)-(8.0*a*Beta2/(aStar))+(4.0*a*tanTheta2)-(4.0*a3*tanTheta2)+(4.0*a*tanTheta2/(aStar))-(4.0*a*tanTheta2*Beta2)-(8.0*a*tanTheta2*Beta2/(aStar));
+    		Coeff[6] = -1.0*Beta4-(3.0*Beta4/aStar)-(1.0)+(6.0*a2)-(1.0/(aStar))+(2.0*Beta2)-(2.0*a2*Beta2)+(4.0*Beta2/(aStar))-(tanTheta2*Beta4)+(3.0*tanTheta2*Beta4/aStar)-(tanTheta2)+(6.0*a2*tanTheta2)-(tanTheta2/(aStar))+(2.0*tanTheta2*Beta2)-(2.0*a2*tanTheta2*Beta2)+(4.0*tanTheta2*Beta2/(aStar));
+    		Coeff[7] = (-4.0*a)+(4.0*a*Beta2)-(4.0*a*tanTheta2)+(4.0*a*tanTheta2*Beta2);
+    		Coeff[8] = 1.0*Beta4+(1.0)-(2.0*Beta2)+(tanTheta2*Beta4)+(tanTheta2)-(2.0*tanTheta2*Beta2);
+
+/* 		Solve for resonant roots and put into a complex array for further processing.  */
+    		gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc( 9 );
+    		gsl_err = gsl_poly_complex_solve( Coeff, 9, w, gsl_z );
+    		gsl_poly_complex_workspace_free( w );
+    		(*nRoots) = 0;
+    		if (gsl_err != GSL_SUCCESS ) 
+			{
+			//printf("Problem with finding resonant roots!  Returning with nRoots=0\n");
+			return((int) (-1));
+			}	
+    		for (i=0; i<8; i++) zz[i] = gsl_z[2*i] + gsl_z[2*i+1]*I;
+		}
 
 /* 	Gather applicable roots together into the resonantRoot array. */
     	Beta=sqrt(Beta2);
@@ -3075,19 +3296,18 @@ return(0);
  *		Simplify[-1.0*D[A[x, y]*tanTheta2 - B[x, y], x]/D[A[x, y]*tanTheta2 - B[x, y], y]]	
  *
  *	where 
- *		wce=electron gyrofrequency 
- *		wpe=electron plasmafrequency
+ *		aStar=wce^2/wpe^2, where wce=electron gyrofrequency and wpe=electron plasmafrequency
  *		x=normalized wave frequency (w/wce)
  *		y=normalized wave number (ck/wce)
  *		tanTheta2=tangent squared of the wave normal angle
  *	
  *	returns the group velocity in m/s.
  */
-double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta2, double x, double y)
+double electronColdPlasmaGroupVelocity(double aStar, double tanTheta2, double x, double y)
 {
-	double 	x2, x4, x6, y2, y4, wce4, wce6, wpe4, wpe6, dkdwnumerator, dkdwdenominator, dkdwTimesC, groupVelocity, aStar, aStar2, aStar3;
+	double 	x2, x4, x6, y2, y4, dkdwnumerator, dkdwdenominator, dkdwTimesC, groupVelocity, aStar2, aStar3;
 
-	x2 = x*x; x4=x2*x2; x6=x4*x2; y2 = y*y; y4=y2*y2; wce4=wce2*wce2; wce6=wce4*wce2; wpe4=wpe2*wpe2; wpe6=wpe4*wpe2;
+	x2 = x*x; x4=x2*x2; x6=x4*x2; y2 = y*y; y4=y2*y2;
 
 /*	This version is not numerically stable
 	dkdwnumerator = (2.0+(2.0*tanTheta2))*wpe6*x+(wce2*wpe4*x*((-12.0-(12.0*tanTheta2))*x2+((4.0+(4.0*tanTheta2))*y2)))+ 
@@ -3098,7 +3318,7 @@ double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta
    		(wce6*x2*y*((-4.0-(4.0*tanTheta2))*x4+((-4.0-(4.0*tanTheta2))*y2)+(x2*(4.0+(4.0*tanTheta2)+(4.0*y2)+(4.0*tanTheta2*y2)))));
 */
 /* 	In the following version, divide both numerator and denominator by wpe^6 in order to make it more numerically stable */
-	aStar=wce2/wpe2; aStar2=aStar*aStar; aStar3=aStar2*aStar;
+	aStar2=aStar*aStar; aStar3=aStar2*aStar;
 	dkdwnumerator = (2.0+(2.0*tanTheta2))*x+(aStar*x*((-12.0-(12.0*tanTheta2))*x2+((4.0+(4.0*tanTheta2))*y2)))+ 
    		(aStar2*x*(((18.0 + (18.0*tanTheta2))*x4)+(x2*(-4.0-(4.0*tanTheta2)-(16.0*y2)-(16.0*tanTheta2*y2)))+(y2*(4.0+(2.0*tanTheta2)+(2.0*y2)+(2.0*tanTheta2*y2)))))+ 
    		(aStar3*x*((-8.0-(8.0*tanTheta2))*x6+((2.0+(2.0*tanTheta2))*y4)+(x2*y2*((-8.0-8.0*tanTheta2)-4.0*y2-(4.0*tanTheta2*y2)))+(x4*(6.0+(6.0*tanTheta2)+(12.0*y2)+(12.0*tanTheta2*y2)))));
@@ -3111,6 +3331,49 @@ double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta
 	return(groupVelocity);
 }
 
+/*	
+ *	Set up the function that is integrated over tan(theta) to produce the normalizer N(w) and evaluate it for a range of aStar's; the normalizer is 
+ *	only valid for the local plasma environment, so it must be re-evaluated at each point along a field line, e.g., althoug the local environment
+ *	is specified solely by aStar. 
+ *
+ *	Outputs		Nw[]	contains the normalizers for nNw values of normalized frequencies (w/wce) in the range [wxl,wxh] for a set of 
+ *				plasma parameters of size numberOfPlasmaParameters that span the range [aStarMin,aStarMax] and are sampled geometrically.
+ *				Must be pre-allocated to be of size nNw*numberOfPlasmaParameters.
+ */
+int computeNormalizerForWavePowerSpectrumFunctionForRangeOfPlasmaParameters(double wxl, double wxh, double xmin, double xmax, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int nNw, int numberOfPlasmaParameters, double aStarMin, double aStarMax, double *Nw) 
+{
+	double 	result, error, aStar, gsl_err;
+    	struct	normalizerForWavePowerSpectrumFunctionParams p;
+	int	i, iPlasma;
+
+	p.xmin=xmin; p.xmax=xmax; p.numberOfWaveNormalAngleDistributions=numberOfWaveNormalAngleDistributions; 
+	p.xmArray=(double *) xmArray; p.dxArray=(double *) dxArray; p.weightsOnWaveNormalAngleDistributions=(double *) weightsOnWaveNormalAngleDistributions;
+	gsl_integration_workspace * work=gsl_integration_workspace_alloc(nNw);
+	gsl_function F;
+	gsl_set_error_handler_off(); // so that we don't core dump if the integration routine can't converge on an answer
+	F.function = &normalizerForWavePowerSpectrumFunction;
+	F.params=&p;
+	for (iPlasma=0; iPlasma<numberOfPlasmaParameters; iPlasma++)
+		{
+		aStar = aStarMin*pow(aStarMax/aStarMin, (iPlasma+0.5)/((double) numberOfPlasmaParameters));
+		p.aStar=aStar; 
+		for (i=0; i<nNw; i++)
+			{
+			p.x = wxl+((wxh-wxl)*(i+0.5)/((double) nNw));
+			result = 0.0;
+			gsl_err = (int) gsl_integration_qags(&F, xmin, xmax, 0, 1e-4, nNw, work, &result, &error);  		
+    			if (gsl_err != GSL_SUCCESS ) 
+				{
+				//printf("gsl_integration_qags failed to produce N(w) for aStar=%g, w/wce=%g, i=%d of %d with errno=%d, result=%g, error=%g; setting to 1.0\n", aStar, p.x, i, nNw, gsl_err, result, error);
+				Nw[i+(iPlasma*nNw)] = 1.0;
+				}	
+			Nw[i+(iPlasma*nNw)] = result;
+			}
+		}
+	gsl_integration_workspace_free(work);
+	return(0);
+}
+
 /*
  *	Compute N(w), a normalization that ensures that the energy per unit frequency is given by B^2(w) for any wave normal angle distribution consistent with the dispersion relation.
  *	I believe that the idea here is that the wave power is partitioned into wave normal angles as well as frequency; however, for a specified wave normal angle and frequency, there
@@ -3121,28 +3384,31 @@ double electronColdPlasmaGroupVelocity(double wce2, double wpe2, double tanTheta
  *	Modified by Greg Cunningham on 6-1-2013 to account for the fact that, for each frequency w (which is contained in the struct element p.w), there is potentially a resonance cone angle, 
  *	theta, in the interval 0<=theta<=pi/2 that limits the range of theta over which resonant roots should be accepted to [0,theta].  If the input argument, tanTheta, is not within this
  *	range then the routine should return zero since we will not be accepting resonant roots for values of theta outside this range.
+ *
+ *	Modified by Greg Cunningham on 6-6-2014 to use only normalized frequencies and aStar=wce^2/wpe^2 instead of wce, wpe, w, etc. Unfortunately, this means that the result that is returned
+ *	is 1/wce^2 times the old result and so callers of this routine have to multiply the result by wce^2.  This change was made so that the array Nw[i] that is used to normalize the spectrum
+ *	at each frequency can be precomputed for a range of aStar's and then the column that corresponds to the correct aStar can be selected.
  */
 
 double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p) 
 {
-	double	w,w2,wce,wce2,wpe,wpe2,tanTheta2,sinTheta2,sinTheta4,cosTheta2;
+	double	aStar,x2,tanTheta2,sinTheta2,sinTheta4,cosTheta2;
 	double 	P,R,L,S,D,P2,D2,A,B,F,F2,n2_1,n2_2,n2,polarization1,polarization2,k,k2,c2,x,y,h,thisg,g,dwdk,dkdw;
 	double	xmean, xmin, xmax, dx, weight, test;
 	int	j;
 
 	struct 	normalizerForWavePowerSpectrumFunctionParams *params;
 	params =(struct normalizerForWavePowerSpectrumFunctionParams *) p;
-	w = (double) params->w; w2=w*w;
-	wce = (double) params->wce; wce2=wce*wce; 
-	wpe = (double) params->wpe; wpe2=wpe*wpe; 
+	aStar = (double) params->aStar;
+	x = (double) params->x; x2=x*x;
 	xmin = (double) params->xmin;
 	xmax = (double) params->xmax;
 	tanTheta2=tanTheta*tanTheta;
 	sinTheta2 = tanTheta2/(1.0+tanTheta2); sinTheta4=sinTheta2*sinTheta2;
 	cosTheta2 = 1.0/(1.0+tanTheta2);
-	P = 1.0-(wpe2/w2); P2=P*P;
-	L = 1.0-((wpe2/w2)*(w/(w+wce)));  
-	R = 1.0-((wpe2/w2)*(w/(w-wce)));  
+	P = 1.0-(1.0/(aStar*x2)); P2=P*P;
+	L = 1.0-((1.0/(aStar*x2))*(x/(x+1.0)));  
+	R = 1.0-((1.0/(aStar*x2))*(x/(x-1.0)));  
 	S = 0.5*(R+L);
 	D = 0.5*(R-L); D2=D*D;
 	A = S*sinTheta2+(P*cosTheta2);
@@ -3151,7 +3417,7 @@ double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p)
 	test = ((-1.0*P/S*0.99)<(tanTheta2))&&(-1.0*P/S > 0.0);
 	if (test) 
 		{
-		//FIXME: may want to print this warning out printf("In normalizerForWavePowerSpectrumFunction, resonance cone angle is less than the input theta: tanTheta=%g w=%g, wce=%g, wpe=%g, P=%g, L=%g, R=%g, S=%g, D=%g, A=%g, B=%g, F2=%g\n", tanTheta, w, wce, wpe, P, L, R, S, D, A, B, F2);
+		//FIXME: may want to print this warning out printf("In normalizerForWavePowerSpectrumFunction, resonance cone angle is less than the input theta: tanTheta=%g x=%g, aStar=%g, P=%g, L=%g, R=%g, S=%g, D=%g, A=%g, B=%g, F2=%g\n", tanTheta, x, aStar, P, L, R, S, D, A, B, F2);
 		return(0.0);
 		}
 	if (F2 < 0.0) 
@@ -3190,10 +3456,10 @@ double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p)
  *	Compute k2 from w2 and n2=(ck)^2/w^2
  */
 	c2 = (LGM_c*LGM_c);  // squared speed of light in m^2/s^2
-	k2 = n2*w2/c2; k=sqrt(k2);
+	k2 = n2*x2/c2; k=sqrt(k2);  //k is actually k/wce since x=w/wce
 /*	Compute the group velocity */
-	x = w/wce; y=LGM_c*k/wce;
-	dwdk = (double) electronColdPlasmaGroupVelocity(wce2, wpe2, tanTheta2, x, y);
+	y=LGM_c*k;
+	dwdk = (double) electronColdPlasmaGroupVelocity(aStar, tanTheta2, x, y);
 	dkdw = (1.0/dwdk);
 /*	Evaluate the function at this w */
 	if ((tanTheta>=xmin)&&(tanTheta<=xmax))
@@ -3207,7 +3473,7 @@ double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p)
 			thisg = weight*exp(-1.0*(tanTheta-xmean)*(tanTheta-xmean)/(dx*dx));
 			g += thisg;
 			}
- 		h=(1.0/(2.0*M_PI*M_PI))*(g*k2/pow(1.0+tanTheta2,1.5))*dkdw*tanTheta;
+ 		h=(1.0/(2.0*M_PI*M_PI))*(g*k2/pow(1.0+tanTheta2,1.5))*dkdw*tanTheta;		// h will have to be multiplied outside this subroutine by wce^2 to get correct answer
 		}
 	else {h=0.0;}  // tanTheta is outside range of valid wave normal angles, so integrand is zero
 //printf(" for tanTheta=%g, x=%g, y=%g, dwdk=%g, h=%g\n", tanTheta, x, y, dwdk, h);
@@ -3289,11 +3555,12 @@ double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNum
  *		mode	=1 for R-mode, =-1 for L-mode
  *		vpar	the parallel velocity divided by the speed of light
  *
- *	The code determines the intervals in theta for which one of two conditions is met (either the minimum of one monotonic function is less than the maximum of 
- *	the other, or vice versa).  A list of theta intervals is returned by the code.
+ *	The code determines the intervals in theta for which both of two inequality conditions is met (the minimum of one monotonic function is less than the maximum of 
+ *	the other, and vice versa).  A list of intervals in theta that satisfy each of the two conditions is returned by the code and then the intersection of these intervals
+ *	is computed and returned. The process may result in 0, 1 or as many as 4 intervals being returned.
  *
  */
-int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, double aStar, int mode, double vpar, int *nIntervals, double *thetaStart, double *thetaEnd) 
+int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, struct inequalityParameters *inequalityParamsLC, struct inequalityParameters *inequalityParamsUC, int mode, int *nIntervals, double *thetaStart, double *thetaEnd) 
 {
 	double	x, dw, thisThetaStart[2], thisThetaEnd[2];
 	int	thisN, i;
@@ -3304,36 +3571,35 @@ int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double 
 	if (wn < wlc) 
 		{
 		/* condition (i) from Jay Albert's 2007 paper: if either condition is satisfied, there can be a root */
-		x = wuc;
 		dw = wlc-wn;
-		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) mode, nIntervals, thetaStart, thetaEnd);
+		i = findSingleIntervalInTheta(inequalityParamsUC, dw, (int) mode, nIntervals, thetaStart, thetaEnd);
 
 		/* condition (ii) from Jay Albert's 2007 paper */
-		x = wlc;
 		dw = wuc-wn;
-		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
+		i = findSingleIntervalInTheta(inequalityParamsLC, dw, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
 		}
 	if (wn > wuc)
 		{
 		/* condition (i) from Jay Albert's 2007 paper: if either condition is satisfied, there can be a root */
-		x = wuc;
 		dw = wuc-wn;
-		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) mode, nIntervals, thetaStart, thetaEnd);
+		i = findSingleIntervalInTheta(inequalityParamsUC, dw, (int) mode, nIntervals, thetaStart, thetaEnd);
 
 		/* condition (ii) from Jay Albert's 2007 paper */
-		x = wlc;
 		dw = wlc-wn;
-		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
+		i = findSingleIntervalInTheta(inequalityParamsLC, dw, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
 		}
 	if ((wn <= wuc) && (wn >= wlc))
 		{
 		/* condition (i) from Jay Albert's 2007 paper automatically satisifed */
+		*nIntervals = 1;
+		thetaStart[0] = 0.0;
+		thetaEnd[0] = M_PI/2.0;
 		/* condition (ii) from Jay Albert's 2007 paper */
-		x = wlc;
 		if (wn-wlc > (wuc-wn)) {dw = wlc-wn;} else {dw=wuc-wn;}
-		i = findSingleIntervalInTheta(x, dw, aStar, vpar, (int) -1*mode, nIntervals, thetaStart, thetaEnd);
+		i = findSingleIntervalInTheta(inequalityParamsLC, dw, (int) -1*mode, &thisN, thisThetaStart, thisThetaEnd);
 		}
-/*printf("In computeWaveNormalAngleIntervalsWhereResonantRootsMayExist: \n");
+/*
+printf("In computeWaveNormalAngleIntervalsWhereResonantRootsMayExist: \n");
 printf("	from condition (i), have nIntervals=%d\n", *nIntervals);
 for (i=0; i<*nIntervals; i++)
 	{
@@ -3354,13 +3620,11 @@ for (i=0; i<thisN; i++)
 			{
 			i = mergeOneIntervalWithOneInterval(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
 			*nIntervals = i;
-			return(i);
 			}
 		if (thisN == 2)
 			{
 			i = mergeTwoIntervalsWithOneInterval(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
 			*nIntervals = i;
-			return(i);
 			}
 		}
 	if ((*nIntervals) == 2)
@@ -3369,16 +3633,18 @@ for (i=0; i<thisN; i++)
 			{
 			i = mergeOneIntervalWithTwoIntervals(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
 			*nIntervals = i;
-			return(i);
 			}
 		if (thisN == 2)
 			{
 			i = mergeTwoIntervalsWithTwoIntervals(thisThetaStart, thisThetaEnd, thetaStart, thetaEnd);
 			*nIntervals = i;
-			return(i);
 			}
 		
 		}
+/*
+printf("	number of combined intervals is %d\n", *nIntervals); 
+for (i=0; i<*nIntervals; i++) {printf("		combined interval %d is [%g,%g]\n", i, thetaStart[i], thetaEnd[i]); }
+*/
 	return(0);
 }
 
@@ -3527,27 +3793,50 @@ int mergeTwoIntervalsWithOneInterval(double *thisThetaStart, double *thisThetaEn
 	return(i);
 }
 
-int findSingleIntervalInTheta(double x, double dw, double aStar, double vpar, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd)
+/*
+ * 	Following routine computes the parameters that are re-usable for all harmonic numbers in order to minimize the cost of doing the inequality test.
+ */
+
+int computeInequalityParameters(double x, double aStar, double vpar, struct inequalityParameters *params)
 {
-	double	R,L,S,P,D,E,F,arg,root1,root2;
+	double	R, L, S, P;
 
 	R = 1.0-(x/(aStar*x*x*(x-1)));
 	L = 1.0-(x/(aStar*x*x*(x+1)));
 	S = (R+L)/2.0;
 	P = 1.0-(1.0/(aStar*x*x));
-	D = S*pow(dw, 4.0);
-	E = -1.0*(R*L+(P*S))*pow(dw, 2.0)*pow(vpar, 2.0)*pow(x, 2.0)+((P-S)*pow(dw, 4.0));
-	F = -1.0*((P*S-(R*L))*pow(dw, 2.0)*pow(vpar, 2.0)*x*x)+(P*R*L*pow(vpar, 4.0)*pow(x, 4.0));
+	params->D = S;
+	params->E1 = -1.0*(R*L+(P*S))*pow(vpar, 2.0)*pow(x, 2.0);
+	params->E2 = P-S;
+	params->F1 = -1.0*((P*S-(R*L))*pow(vpar, 2.0)*pow(x, 2.0));
+	params->F2 = P*R*L*pow(vpar, 4.0)*pow(x, 4.0);
+
+	return(0);
+}
+
+int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd)
+{
+	double	dw2,dw4,D,E,F,arg,root1,root2;
+
+	dw2 = dw*dw;
+	dw4 = dw2*dw2;
+	D = (params->D)*dw4;
+	E = (params->E1)*dw2+((params->E2)*dw4);
+	F = (params->F1)*dw2+(params->F2);
+//printf(" D=%g, E=%g, F=%g\n", D, E, F);
 	arg = E*E-(4.0*D*F);
-//printf("In findSingleIntervalInTheta: inequalitySign=%d x=%g dw=%g aStar=%g vpar=%g R=%g L=%g S=%g P=%g D=%g E=%g F=%g E^2-4DF=%g\n", inequalitySign,x,dw,aStar,vpar,R,L,S,P,D,E,F,arg);
 	if (arg < 0.0) 	
 		{ 					/* then entire interval is either satisfied or not */
-		if ((inequalitySign*(D+E+F)) < 0.0)  	/* entire interval does satisify the inequality, so can return whole interval, otherwise go on to condition (ii) */
+		if ((inequalitySign*(D+E+F)) > 0.0)  	/* entire interval does satisify the inequality, so can return whole interval, otherwise go on to condition (ii) */
 			{
 			*nIntervals = (int) 1;
 			thetaStart[0] = (double) 0.0;
 			thetaEnd[0] = (double) (M_PI/2.0);
 			return(0); 
+			}
+		else
+			{
+			*nIntervals = (int) 0;		/* Added on 5-29-2014; if the inequality is not satisfied at theta=0, then there is no interval that satisfies the inequality */
 			}
 		}
 	else 			
@@ -3569,13 +3858,15 @@ int findSingleIntervalInTheta(double x, double dw, double aStar, double vpar, in
 //printf("		root1=%g root2=%g\n", root1, root2);
 		if ((root1-root2) > 1e-8) 
 			{
-			if ((inequalitySign*F) > 0.0) 	/* then the quadratic is concave up/down and the interval in cos^2(theta) that can have roots is [root1, root2] */
+			if ((inequalitySign*F) < 0.0) 	/* 	Either the quadratic is concave up and the inequality is < or the quadratic is concave down and the inequality is >. 
+								In either case, the interval in cos^2(theta) that can have roots is [root1, root2] */
 				{
 				*nIntervals = (int) 1;
 				thetaStart[0] = (double) acos(sqrt(root1)); 
 				thetaEnd[0] = (double) acos(sqrt(root2));
 				}
-			else 		/* then the quadratic is concave down/up and the intervals in cos^2(theta) that can have roots are [0,root1] and [root2,1]; get rid of degenerate intervals */
+			else 		/* 	Either the quadratic is concave down and the inequality is < or the quadratic is concave up and the inequality is >.
+						In either case, the intervals in cos^2(theta) that can have roots are [0,root1] and [root2,1]; get rid of degenerate intervals */
 				{
 				if (root1 == 1)
 					{
@@ -3609,7 +3900,7 @@ int findSingleIntervalInTheta(double x, double dw, double aStar, double vpar, in
 			}
 		else			/* this is the case when the quadratic effectively touches zero and so the whole interval can have roots or not */
 			{
-			if ((inequalitySign*(D+E+F)) < 0.0)  	/* entire interval satisifies the inequality, so return whole interval */
+			if ((inequalitySign*(D+E+F)) > 0.0)  	/* entire interval satisifies the inequality, so return whole interval */
 				{
 				*nIntervals = (int) 1;
 				thetaStart[0] = (double) 0.0;
@@ -3655,14 +3946,15 @@ int Lgm_SimpleRiemannSum(double (*f)(double, _qpInfo *), _qpInfo *args, double x
 */
 
 /* 	Approach #3: use GSL's implementation of more complicated quadpack routine qag (adaptive quadrature with no singularities) to do the integral */
-	nSubIntervals = 20;
+	nSubIntervals = 20;  
 	gsl_integration_workspace * w =gsl_integration_workspace_alloc( nSubIntervals );
 	gsl_function F;
 	F.function = f;
 	F.params = args;
+	*result=0.0;
 	gsl_integration_qag(&F, xleft, xright, epsabs, epsrel, (size_t) nSubIntervals, GSL_INTEG_GAUSS21, w, result, &abserr);
 //	printf("Number of evaluations needed by adaptive Gauss-Kronrod 21-point quadrature to achieve %g relative accuracy is %d, abserr is %g and integral is %g\n", epsrel, w->size, abserr, *result);
 	gsl_integration_workspace_free(w);
 
-	return(0);
+	return(w->size);
 }
