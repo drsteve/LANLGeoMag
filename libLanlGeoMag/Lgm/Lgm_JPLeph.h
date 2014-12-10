@@ -392,10 +392,10 @@ Lgm_JPLeph *Lgm_InitJPLeph( int DEnum, int getBodies, int Verbosity );
 void        Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLeph *jpl );
 void        Lgm_FreeJPLeph( Lgm_JPLeph  *jpl );
 
-void        Lgm_ReadJPLeph( Lgm_JPLeph *jpl );
+void        Lgm_ReadJPLephem( Lgm_JPLeph *jpl );
 Lgm_JPLeph_bundle *Lgm_InitJPLeph_bundle( double tdb );
 void        Lgm_JPLephem_bundle( int objName, Lgm_JPLeph *jpl, Lgm_JPLeph_bundle *bundle );
-Lgm_Vector  Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl);
+void        Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl, Lgm_Vector *position);
 double      ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLeph *jpl);
 int         Lgm_JPL_getNCoeffs( int objName, Lgm_JPLeph *jpl);
 int         Lgm_JPL_getNAxes( int objName, Lgm_JPLeph *jpl);

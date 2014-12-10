@@ -65,7 +65,7 @@ void Lgm_ReadJPLephem(Lgm_JPLeph *jpl) {
 
     double      *JDparams;
     char        *Path, JPLephemPath[2048];
-    char        eph_num[3], JPLephemFile[2048];
+    char        eph_num[13], JPLephemFile[2048];
     int         StatError, InFileExists;
     struct stat StatBuf;
     herr_t      status;
@@ -108,8 +108,12 @@ void Lgm_ReadJPLephem(Lgm_JPLeph *jpl) {
             }
         // get DEXXX Chebyshev polynomial coefficients for requested objects read into variables
         if (jpl->getSun) {
+            printf("*********************\n");
             jpl->sun = Get_DoubleDataset_3D( file, "/Sun", dims);
+            jpl->sun_nvals = dims[0]; jpl->sun_naxes = dims[1]; jpl->sun_ncoeffs = dims[2];
             jpl->SunAlloced = TRUE;
+            printf("dims = %d %d %d\n", dims[0], dims[1], dims[2]);
+            printf("nvals, naxes, ncoeffs = %d %d %d\n", jpl->sun_nvals, jpl->sun_naxes, jpl->sun_ncoeffs);
             }
         if (jpl->getEarth) { //gets Earth-Moon barycenter (heliocentric) and Moon (geocentric)
             jpl->earthmoon = Get_DoubleDataset_3D( file, "/EarthMoon", dims);
@@ -175,15 +179,18 @@ void Lgm_JPLephem_bundle( int objName, Lgm_JPLeph *jpl, Lgm_JPLeph_bundle *bundl
     double *T, ***cheby, **coefficients;
 
     tdb = bundle->tdb;
-    if ((tdb < jpl->jalpha) || (tdb > jpl->jomega)) { return; }
+    if ((tdb < jpl->jalpha) || (tdb > jpl->jomega)) { exit(-1); }
 
     /* get DEXXX specific info */
     number_of_sets = Lgm_JPL_getNSets( objName, jpl);
     number_of_axes = Lgm_JPL_getNAxes( objName, jpl);
     coefficient_count = Lgm_JPL_getNCoeffs( objName, jpl);
 
+//printf("objName, objSet??? = %d, %d\n", objName, jpl->SunAlloced);
+//printf("nSets, nAxes, nC = %d, %d, %d\n", number_of_sets, number_of_axes, coefficient_count);
+//printf("nvals, naxes, ncoeffs = %d %d %d\n", jpl->sun_nvals, jpl->sun_naxes, jpl->sun_ncoeffs);
     if ((number_of_sets == -1) || (number_of_axes == -1) || (coefficient_count == -1)) {
-        return;
+        exit(-1);
         }
     days_per_set = (jpl->jomega - jpl->jalpha) / number_of_sets;
     cheby = Lgm_JPL_getCoeffSet(objName, jpl);
@@ -272,10 +279,9 @@ void *Lgm_FreeJPLeph_bundle( Lgm_JPLeph_bundle *bundle ) {
     }
 
 
-Lgm_Vector Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl) {
+void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl, Lgm_Vector *position) {
     int i, j;
     double dum;
-    Lgm_Vector *position;
     Lgm_JPLeph_bundle *bundle = Lgm_InitJPLeph_bundle( tdb );
 
     //calls bundle
@@ -285,6 +291,7 @@ Lgm_Vector Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl) {
     dum = 0;
     for (i=0; i<bundle->coefficient_count; i++) {
         dum += bundle->T[i] * bundle->coeffs[0][i];
+//        printf("Position->X calculation: T[i] = %g, C[0][i] = %g\n",  bundle->T[i] , bundle->coeffs[0][i]);
         }
     position->x = dum;
 
@@ -300,9 +307,7 @@ Lgm_Vector Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl) {
         }
     position->z = dum;
 
-    Lgm_FreeJPLeph_bundle( bundle );
-
-    return *position;
+    //Lgm_FreeJPLeph_bundle( bundle );
     }
 
 
@@ -310,31 +315,42 @@ int Lgm_JPL_getNSets( int objName, Lgm_JPLeph *jpl) {
     int nvals;
     switch (objName) {
         case LGM_DE_SUN:
+//            printf("** getSun is %d **\n", jpl->getSun);
             nvals = (jpl->getSun) ? jpl->sun_nvals: -1;
+            break;
         case LGM_DE_EARTHMOON:
             nvals = (jpl->getEarth) ? jpl->earthmoon_nvals: -1;
+            break;
         case LGM_DE_MOON:
             nvals = (jpl->getEarth) ? jpl->moon_wrt_earth_nvals: -1;
+            break;
         case LGM_DE_MERCURY:
             nvals = (jpl->getInnerPlanets) ? jpl->mercury_nvals: -1;
+            break;
         case LGM_DE_VENUS:
             nvals = (jpl->getInnerPlanets) ? jpl->venus_nvals: -1;
+            break;
         case LGM_DE_MARS:
             nvals = (jpl->getInnerPlanets) ? jpl->mars_nvals: -1;
+            break;
         case LGM_DE_JUPITER:
             nvals = (jpl->getOuterPlanets) ? jpl->jupiter_nvals: -1;
+            break;
         case LGM_DE_URANUS:
             nvals = (jpl->getOuterPlanets) ? jpl->uranus_nvals: -1;
+            break;
         case LGM_DE_NEPTUNE:
             nvals = (jpl->getOuterPlanets) ? jpl->neptune_nvals: -1;
+            break;
         case LGM_DE_PLUTO:
             nvals = (jpl->getOuterPlanets) ? jpl->pluto_nvals: -1;
+            break;
         case LGM_DE_LIBRATION:
             nvals = (jpl->getLibrationNutation) ? jpl->libration_nvals: -1;
+            break;
         case LGM_DE_NUTATION:
             nvals = (jpl->getLibrationNutation) ? jpl->nutation_nvals: -1;
-        default:
-            nvals = -1 ;
+            break;
         }
     return nvals;
     }
@@ -344,30 +360,43 @@ int Lgm_JPL_getNAxes( int objName, Lgm_JPLeph *jpl) {
     switch (objName) {
         case LGM_DE_SUN:
             naxes = (jpl->getSun) ? jpl->sun_naxes: -1;
+            break;
         case LGM_DE_EARTHMOON:
             naxes = (jpl->getEarth) ? jpl->earthmoon_naxes: -1;
+            break;
         case LGM_DE_MOON:
             naxes = (jpl->getEarth) ? jpl->moon_wrt_earth_naxes: -1;
+            break;
         case LGM_DE_MERCURY:
             naxes = (jpl->getInnerPlanets) ? jpl->mercury_naxes: -1;
+            break;
         case LGM_DE_VENUS:
             naxes = (jpl->getInnerPlanets) ? jpl->venus_naxes: -1;
+            break;
         case LGM_DE_MARS:
             naxes = (jpl->getInnerPlanets) ? jpl->mars_naxes: -1;
+            break;
         case LGM_DE_JUPITER:
             naxes = (jpl->getOuterPlanets) ? jpl->jupiter_naxes: -1;
+            break;
         case LGM_DE_URANUS:
             naxes = (jpl->getOuterPlanets) ? jpl->uranus_naxes: -1;
+            break;
         case LGM_DE_NEPTUNE:
             naxes = (jpl->getOuterPlanets) ? jpl->neptune_naxes: -1;
+            break;
         case LGM_DE_PLUTO:
             naxes = (jpl->getOuterPlanets) ? jpl->pluto_naxes: -1;
+            break;
         case LGM_DE_LIBRATION:
             naxes = (jpl->getLibrationNutation) ? jpl->libration_naxes: -1;
+            break;
         case LGM_DE_NUTATION:
             naxes = (jpl->getLibrationNutation) ? jpl->nutation_naxes: -1;
+            break;
         default:
             naxes = -1 ;
+            break;
         }
     return naxes;
     }
@@ -378,30 +407,43 @@ int Lgm_JPL_getNCoeffs( int objName, Lgm_JPLeph *jpl) {
     switch (objName) {
         case LGM_DE_SUN:
             ncoeffs = (jpl->getSun) ? jpl->sun_ncoeffs: -1;
+            break;
         case LGM_DE_EARTHMOON:
             ncoeffs = (jpl->getEarth) ? jpl->earthmoon_ncoeffs: -1;
+            break;
         case LGM_DE_MOON:
             ncoeffs = (jpl->getEarth) ? jpl->moon_wrt_earth_ncoeffs: -1;
+            break;
         case LGM_DE_MERCURY:
             ncoeffs = (jpl->getInnerPlanets) ? jpl->mercury_ncoeffs: -1;
+            break;
         case LGM_DE_VENUS:
             ncoeffs = (jpl->getInnerPlanets) ? jpl->venus_ncoeffs: -1;
+            break;
         case LGM_DE_MARS:
             ncoeffs = (jpl->getInnerPlanets) ? jpl->mars_ncoeffs: -1;
+            break;
         case LGM_DE_JUPITER:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->jupiter_ncoeffs: -1;
+            break;
         case LGM_DE_URANUS:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->uranus_ncoeffs: -1;
+            break;
         case LGM_DE_NEPTUNE:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->neptune_ncoeffs: -1;
+            break;
         case LGM_DE_PLUTO:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->pluto_ncoeffs: -1;
+            break;
         case LGM_DE_LIBRATION:
             ncoeffs = (jpl->getLibrationNutation) ? jpl->libration_ncoeffs: -1;
+            break;
         case LGM_DE_NUTATION:
             ncoeffs = (jpl->getLibrationNutation) ? jpl->nutation_ncoeffs: -1;
+            break;
         default:
             ncoeffs = -1 ;
+            break;
         }
     return ncoeffs;
     }
@@ -411,30 +453,43 @@ double ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLeph *jpl){
     switch (objName) {
         case LGM_DE_SUN:
             coeffset = (jpl->getSun) ? jpl->sun: NULL;
+            break;
         case LGM_DE_EARTHMOON:
             coeffset = (jpl->getEarth) ? jpl->earthmoon: NULL;
+            break;
         case LGM_DE_MOON:
             coeffset = (jpl->getEarth) ? jpl->moon_wrt_earth: NULL;
+            break;
         case LGM_DE_MERCURY:
             coeffset = (jpl->getInnerPlanets) ? jpl->mercury: NULL;
+            break;
         case LGM_DE_VENUS:
             coeffset = (jpl->getInnerPlanets) ? jpl->venus: NULL;
+            break;
         case LGM_DE_MARS:
             coeffset = (jpl->getInnerPlanets) ? jpl->mars: NULL;
+            break;
         case LGM_DE_JUPITER:
             coeffset = (jpl->getOuterPlanets) ? jpl->jupiter: NULL;
+            break;
         case LGM_DE_URANUS:
             coeffset = (jpl->getOuterPlanets) ? jpl->uranus: NULL;
+            break;
         case LGM_DE_NEPTUNE:
             coeffset = (jpl->getOuterPlanets) ? jpl->neptune: NULL;
+            break;
         case LGM_DE_PLUTO:
             coeffset = (jpl->getOuterPlanets) ? jpl->pluto: NULL;
+            break;
         case LGM_DE_LIBRATION:
             coeffset = (jpl->getLibrationNutation) ? jpl->libration: NULL;
+            break;
         case LGM_DE_NUTATION:
             coeffset = (jpl->getLibrationNutation) ? jpl->nutation: NULL;
+            break;
         default:
             coeffset = NULL ;
+            break;
         }
     return coeffset;
     }
