@@ -394,7 +394,7 @@ void        Lgm_FreeJPLephemInfo( Lgm_JPLephemInfo  *jpl );
 void        Lgm_ReadJPLephem( Lgm_JPLephemInfo *jpl );
 
 Lgm_JPLephemBundle *Lgm_InitJPLephemBundle( double tdb );
-void        *Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle );
+void        Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle );
 void        Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephemBundle *bundle );
 double      ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLephemInfo *jpl);
 int         Lgm_JPL_getNCoeffs( int objName, Lgm_JPLephemInfo *jpl);

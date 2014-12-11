@@ -253,7 +253,7 @@ void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephem
     bundle->T = T;
     bundle->twot1 = twot1;
     bundle->TAlloced = TRUE;
-    bundle->coeffsAlloced;
+    bundle->coeffsAlloced = TRUE;
 
     return;
     }
@@ -262,13 +262,15 @@ void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephem
 Lgm_JPLephemBundle *Lgm_InitJPLephemBundle( double tdb ) {
     Lgm_JPLephemBundle  *bundle = (Lgm_JPLephemBundle *) calloc (1, sizeof(Lgm_JPLephemBundle));
     bundle->tdb = tdb;
+    bundle->TAlloced = FALSE;
+    bundle->coeffsAlloced = FALSE;
     return bundle;
     }
 
 
-void *Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle ) {
-    if (bundle->coeffsAlloced) { LGM_ARRAY_3D_FREE( &bundle->coeffs ); }
-    //if (bundle->TAlloced) { LGM_ARRAY_1D_FREE( &bundle->T ); }
+void Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle ) {
+    if (bundle->coeffsAlloced) { LGM_ARRAY_2D_FREE( bundle->coeffs ); }
+    if (bundle->TAlloced) { LGM_ARRAY_1D_FREE( bundle->T ); }
     free( bundle );
     }
 
