@@ -844,7 +844,6 @@ Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
 
 
     nLines = LstarInfo->nFLsInDriftShell;
-printf("nLines = %d\n", nLines);
     DeltaMLT = 24.0/((double)nLines);
 
     delta = 3.0; // default
