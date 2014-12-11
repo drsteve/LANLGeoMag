@@ -16,13 +16,13 @@
 #endif
 
 
-Lgm_JPLeph *Lgm_InitJPLeph( int DEnum, int getBodies, int verbosity ) {
-    Lgm_JPLeph  *jpl = (Lgm_JPLeph *) calloc (1, sizeof(Lgm_JPLeph));
+Lgm_JPLephemInfo *Lgm_InitJPLephemInfo( int DEnum, int getBodies, int verbosity ) {
+    Lgm_JPLephemInfo  *jpl = (Lgm_JPLephemInfo *) calloc (1, sizeof(Lgm_JPLephemInfo));
     Lgm_InitJPLephDefaults(DEnum, getBodies, verbosity, jpl );
     return jpl;
     }
 
-void Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLeph *jpl ) {
+void Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLephemInfo *jpl ) {
     //getBodies is (logical OR) sum of variable numbers
     //Sun=1; EarthMoon=2; InnerPlanets=4; OuterPlanets=8; LibrationNutation=16;
     jpl->DEnum = DEnum;
@@ -35,7 +35,7 @@ void Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLeph
     if (LGM_DE_LIBR_NUT & getBodies) { jpl->getLibrationNutation=TRUE; }
     }
 
-void Lgm_FreeJPLeph (Lgm_JPLeph *jpl) {
+void Lgm_FreeJPLephemInfo (Lgm_JPLephemInfo *jpl) {
     if (jpl->SunAlloced) { LGM_ARRAY_3D_FREE( jpl->sun ); }
     if (jpl->EarthMoonAlloced) {
         LGM_ARRAY_3D_FREE( jpl->earthmoon );
@@ -61,7 +61,7 @@ void Lgm_FreeJPLeph (Lgm_JPLeph *jpl) {
     }
 
 
-void Lgm_ReadJPLephem(Lgm_JPLeph *jpl) {
+void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
 
     double      *JDparams;
     char        *Path, JPLephemPath[2048];
@@ -108,12 +108,9 @@ void Lgm_ReadJPLephem(Lgm_JPLeph *jpl) {
             }
         // get DEXXX Chebyshev polynomial coefficients for requested objects read into variables
         if (jpl->getSun) {
-            printf("*********************\n");
             jpl->sun = Get_DoubleDataset_3D( file, "/Sun", dims);
             jpl->sun_nvals = dims[0]; jpl->sun_naxes = dims[1]; jpl->sun_ncoeffs = dims[2];
             jpl->SunAlloced = TRUE;
-            printf("dims = %d %d %d\n", dims[0], dims[1], dims[2]);
-            printf("nvals, naxes, ncoeffs = %d %d %d\n", jpl->sun_nvals, jpl->sun_naxes, jpl->sun_ncoeffs);
             }
         if (jpl->getEarth) { //gets Earth-Moon barycenter (heliocentric) and Moon (geocentric)
             jpl->earthmoon = Get_DoubleDataset_3D( file, "/EarthMoon", dims);
@@ -170,7 +167,7 @@ void Lgm_ReadJPLephem(Lgm_JPLeph *jpl) {
     }
 
 
-void Lgm_JPLephem_bundle( int objName, Lgm_JPLeph *jpl, Lgm_JPLeph_bundle *bundle ) {
+void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephemBundle *bundle ) {
     
     double days_per_set, offset, tdb;
     int    index, number_of_sets, number_of_axes, coefficient_count;
@@ -186,9 +183,6 @@ void Lgm_JPLephem_bundle( int objName, Lgm_JPLeph *jpl, Lgm_JPLeph_bundle *bundl
     number_of_axes = Lgm_JPL_getNAxes( objName, jpl);
     coefficient_count = Lgm_JPL_getNCoeffs( objName, jpl);
 
-//printf("objName, objSet??? = %d, %d\n", objName, jpl->SunAlloced);
-//printf("nSets, nAxes, nC = %d, %d, %d\n", number_of_sets, number_of_axes, coefficient_count);
-//printf("nvals, naxes, ncoeffs = %d %d %d\n", jpl->sun_nvals, jpl->sun_naxes, jpl->sun_ncoeffs);
     if ((number_of_sets == -1) || (number_of_axes == -1) || (coefficient_count == -1)) {
         exit(-1);
         }
@@ -265,33 +259,32 @@ void Lgm_JPLephem_bundle( int objName, Lgm_JPLeph *jpl, Lgm_JPLeph_bundle *bundl
     }
 
 
-Lgm_JPLeph_bundle *Lgm_InitJPLeph_bundle( double tdb ) {
-    Lgm_JPLeph_bundle  *bundle = (Lgm_JPLeph_bundle *) calloc (1, sizeof(Lgm_JPLeph_bundle));
+Lgm_JPLephemBundle *Lgm_InitJPLephemBundle( double tdb ) {
+    Lgm_JPLephemBundle  *bundle = (Lgm_JPLephemBundle *) calloc (1, sizeof(Lgm_JPLephemBundle));
     bundle->tdb = tdb;
     return bundle;
     }
 
 
-void *Lgm_FreeJPLeph_bundle( Lgm_JPLeph_bundle *bundle ) {
+void *Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle ) {
     if (bundle->coeffsAlloced) { LGM_ARRAY_3D_FREE( &bundle->coeffs ); }
-    if (bundle->TAlloced) { LGM_ARRAY_1D_FREE( &bundle->T ); }
+    //if (bundle->TAlloced) { LGM_ARRAY_1D_FREE( &bundle->T ); }
     free( bundle );
     }
 
 
-void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl, Lgm_Vector *position) {
+void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *position) {
     int i, j;
     double dum;
-    Lgm_JPLeph_bundle *bundle = Lgm_InitJPLeph_bundle( tdb );
+    Lgm_JPLephemBundle *bundle = Lgm_InitJPLephemBundle( tdb );
 
-    //calls bundle
-    Lgm_JPLephem_bundle( objName, jpl, bundle );
+    //precalculate
+    Lgm_JPLephem_setup_object( objName, jpl, bundle );
 
     //calculate positions
     dum = 0;
     for (i=0; i<bundle->coefficient_count; i++) {
         dum += bundle->T[i] * bundle->coeffs[0][i];
-//        printf("Position->X calculation: T[i] = %g, C[0][i] = %g\n",  bundle->T[i] , bundle->coeffs[0][i]);
         }
     position->x = dum;
 
@@ -307,15 +300,14 @@ void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLeph *jpl, Lgm_Vector
         }
     position->z = dum;
 
-    //Lgm_FreeJPLeph_bundle( bundle );
+    Lgm_FreeJPLephemBundle( bundle );
     }
 
 
-int Lgm_JPL_getNSets( int objName, Lgm_JPLeph *jpl) {
+int Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl) {
     int nvals;
     switch (objName) {
         case LGM_DE_SUN:
-//            printf("** getSun is %d **\n", jpl->getSun);
             nvals = (jpl->getSun) ? jpl->sun_nvals: -1;
             break;
         case LGM_DE_EARTHMOON:
@@ -355,7 +347,7 @@ int Lgm_JPL_getNSets( int objName, Lgm_JPLeph *jpl) {
     return nvals;
     }
 
-int Lgm_JPL_getNAxes( int objName, Lgm_JPLeph *jpl) {
+int Lgm_JPL_getNAxes( int objName, Lgm_JPLephemInfo *jpl) {
     int naxes;
     switch (objName) {
         case LGM_DE_SUN:
@@ -402,7 +394,7 @@ int Lgm_JPL_getNAxes( int objName, Lgm_JPLeph *jpl) {
     }
 
 
-int Lgm_JPL_getNCoeffs( int objName, Lgm_JPLeph *jpl) {
+int Lgm_JPL_getNCoeffs( int objName, Lgm_JPLephemInfo *jpl) {
     int ncoeffs;
     switch (objName) {
         case LGM_DE_SUN:
@@ -448,7 +440,7 @@ int Lgm_JPL_getNCoeffs( int objName, Lgm_JPLeph *jpl) {
     return ncoeffs;
     }
 
-double ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLeph *jpl){
+double ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLephemInfo *jpl){
     double ***coeffset;
     switch (objName) {
         case LGM_DE_SUN:
