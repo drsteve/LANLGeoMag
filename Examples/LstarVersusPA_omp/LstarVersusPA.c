@@ -11,19 +11,24 @@
 void LstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, double *Alpha, int Quality, Lgm_MagEphemInfo *MagEphemInfo );
 
 
-double LS( long int Date, double Time, double Kin, Lgm_Vector *P, Lgm_MagEphemInfo *MagEphemInfo  ) {
+double LS( long int Date, double Time, double Kin, Lgm_Vector *Pgsm, Lgm_MagEphemInfo *MagEphemInfo  ) {
 
-    int             nAlpha = 1;
+    int             nAlpha = 1, Flag;
     double          Alpha[1];
     Lgm_Vector      v1, v2, v3;
     Lgm_DateTime    DT_UTC;
+printf("1. Pgsm = %g %g %g \n", Pgsm->x, Pgsm->y, Pgsm->z);
 
     Lgm_Set_Coord_Transforms( Date, Time, MagEphemInfo->LstarInfo->mInfo->c );
     Lgm_Make_UTC( Date, Time, &DT_UTC, MagEphemInfo->LstarInfo->mInfo->c );
 
-    Lgm_Trace( P, &v1, &v2, &v3, 120.0, 0.001, 1e-8, MagEphemInfo->LstarInfo->mInfo );
+    Flag = Lgm_Trace( Pgsm, &v1, &v2, &v3, 120.0, 1e-4, 1e-8, MagEphemInfo->LstarInfo->mInfo );
     MagEphemInfo->LstarInfo->mInfo->Bm = MagEphemInfo->LstarInfo->mInfo->Bmin;
-    Lgm_Convert_Coords( P, &v3, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
+printf("2. Pgsm = %g %g %g Flag, Alpha[0] = %d\n", Pgsm->x, Pgsm->y, Pgsm->z, Flag );
+printf("3. v1 = %g %g %g\n", v1.x, v1.y, v1.z );
+printf("4. v2 = %g %g %g\n", v2.x, v2.y, v2.z );
+printf("5. v3 = %g %g %g\n", v3.x, v3.y, v3.z );
+    if ( Flag != LGM_CLOSED ) return( LGM_FILL_VALUE );
 
     if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, MagEphemInfo->LstarInfo->mInfo ) > 0 ) {
         Alpha[0] = Lgm_AlphaOfK( Kin, MagEphemInfo->LstarInfo->mInfo );
@@ -32,8 +37,10 @@ double LS( long int Date, double Time, double Kin, Lgm_Vector *P, Lgm_MagEphemIn
         Alpha[0] = LGM_FILL_VALUE;
     }
 
+printf("6. Pgsm = %g %g %g Flag, Alpha[0] = %d %g\n", Pgsm->x, Pgsm->y, Pgsm->z, Flag, Alpha[0]);
     Lgm_ComputeLstarVersusPA( Date, Time, &v3, nAlpha, Alpha, TRUE, MagEphemInfo );                           
 
+printf("\n\n");
     return( MagEphemInfo->Lstar[0] );
 
 }
@@ -43,7 +50,7 @@ int main( int argc, char *argv[] ){
     double           UTC, Alpha[1000], a;
     long int         Date;
     int              nAlpha, Kp, i;
-    Lgm_Vector       P;
+    Lgm_Vector       P, Pgsm;
     Lgm_CTrans       *c = Lgm_init_ctrans(0);
     Lgm_MagModelInfo *mmi = Lgm_InitMagInfo();
     Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(0, 20);
@@ -52,17 +59,19 @@ int main( int argc, char *argv[] ){
     mmi->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 
     // Date and UTC
-    Date       = 20000701;
     Date       = 20130327;
-    Date       = 20130727;
+    Date       = 20000701;
+    Date       = 20130101;
     UTC        = 0.0 + 0.0/60.0 + 0.0/3600.0;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
-    MagEphemInfo->LstarInfo->LSimpleMax = 25.0;
+    MagEphemInfo->LstarInfo->LSimpleMax = 35.0;
     MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
-    MagEphemInfo->LstarInfo->nFLsInDriftShell = 24;
+    MagEphemInfo->LstarInfo->nFLsInDriftShell = 96;
+    MagEphemInfo->nFLsInDriftShell = 96;
 
     //USER INPUT STUFF
     MagEphemInfo->LstarQuality   = 3;
+Lgm_SetLstarTolerances( 3, 96, MagEphemInfo->LstarInfo );
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 1;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
@@ -77,8 +86,8 @@ int main( int argc, char *argv[] ){
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
-    MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
+    MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
 
 
     FILE         *fpjunk;
@@ -94,20 +103,24 @@ int main( int argc, char *argv[] ){
 
 
 
-    for (MLT=0.00; MLT<=24.0; MLT+=0.05){
+    for (MLT=0.0; MLT<=24.0; MLT+=0.05){
 
 
         done = FALSE;
 
-        Ra  = 6.0;   
+        Ra  = 5.0;   
         Phi = (MLT*15.0 - 180.0)*RadPerDeg; Lat = 0.0*RadPerDeg;
         P.x = Ra*cos( Phi )*cos(Lat); P.y = Ra*sin( Phi )*cos(Lat); P.z = Ra*sin(Lat);
-        Fa  =  LS(  Date, UTC, Kin, &P, MagEphemInfo  );
+        Lgm_Convert_Coords( &P, &Pgsm, SM_TO_GSM, c );
+        Fa  =  LS(  Date, UTC, Kin, &Pgsm, MagEphemInfo  );
+//    WriteMagEphemInfoStruct( "test.dat", 1, MagEphemInfo );
+//exit(0);
 
-        Rc  = 20.0;   
+        Rc  = 30.0;   
         Phi = (MLT*15.0 - 180.0)*RadPerDeg; Lat = 0.0*RadPerDeg;
         P.x = Rc*cos( Phi )*cos(Lat); P.y = Rc*sin( Phi )*cos(Lat); P.z = Rc*sin(Lat);
-        Fc  =  LS(  Date, UTC, Kin, &P, MagEphemInfo  );
+        Lgm_Convert_Coords( &P, &Pgsm, SM_TO_GSM, c );
+        Fc  =  LS(  Date, UTC, Kin, &Pgsm, MagEphemInfo  );
 
         Fmax = -1.0;
 
@@ -116,9 +129,11 @@ int main( int argc, char *argv[] ){
             while (!done ) {
 
                 R   = (Ra+Rc)/2.0;
+printf("R = %g\n", R);
                 Phi = (MLT*15.0 - 180.0)*RadPerDeg; Lat = 0.0*RadPerDeg;
                 P.x = R*cos( Phi )*cos(Lat); P.y = R*sin( Phi )*cos(Lat); P.z = R*sin(Lat);
-                F  =  LS(  Date, UTC, Kin, &P, MagEphemInfo  );
+                Lgm_Convert_Coords( &P, &Pgsm, SM_TO_GSM, c );
+                F  =  LS(  Date, UTC, Kin, &Pgsm, MagEphemInfo  );
 
                 if ( F < 0.0 ) {
                     Rc = R;
@@ -148,7 +163,12 @@ if (Fmax > Fa) printf("************************* Fmax, Fa = %g %g\n", Fmax, Fa);
 
 
 
-    //WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
+    MLT = 3.00;
+    Phi = (MLT*15.0 - 180.0)*RadPerDeg; Lat = 0.0*RadPerDeg;
+    P.x = Ra*cos( Phi )*cos(Lat); P.y = Ra*sin( Phi )*cos(Lat); P.z = Ra*sin(Lat);
+    Lgm_Convert_Coords( &P, &Pgsm, SM_TO_GSM, c );
+    F  =  LS(  Date, UTC, Kin, &Pgsm, MagEphemInfo  );
+    WriteMagEphemInfoStruct( "test.dat", 1, MagEphemInfo );
 
     fp = fopen("Lstar.dat", "w");
     for ( i=0; i<nAlpha; ++i ) {

@@ -568,7 +568,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[3*LGM_LSTARINFO_MAX_FL], MirrorMlat[3*LGM_LSTARINFO_MAX_FL], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
-    double	MirrorMLT_Old[500], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], PredMinusActualMlat, res;
+    double	MirrorMLT_Old[3*LGM_LSTARINFO_MAX_FL], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], PredMinusActualMlat, res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
@@ -830,12 +830,13 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      *  Construct drift shell. Get a good initial estimate for mlat
      */
     Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
     mlat = DegPerRad*asin(u.z/Lgm_Magnitude( &u ));
     MLT0 = atan2( u.y, u.x )*DegPerRad/15.0 + 12.0;
     if (LstarInfo->VerbosityLevel > 2) printf("\t\t%smlat = %g%s\n", PreStr, mlat, PostStr );
     LstarInfo->nPnts = 0;
     pred_delta_mlat  = 0.0;
-    for (k=0; k<LGM_LSTARINFO_MAX_FL; ++k){
+    for (k=0; k<3*LGM_LSTARINFO_MAX_FL; ++k){
 	    MirrorMLT[k]  = 0.0;
 	    MirrorMlat[k] = 0.0;
     }
@@ -843,6 +844,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     nLines = LstarInfo->nFLsInDriftShell;
+printf("nLines = %d\n", nLines);
     DeltaMLT = 24.0/((double)nLines);
 
     delta = 3.0; // default
@@ -1017,9 +1019,15 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
 
+
+
+
+
+
+
 v = LstarInfo->mInfo->Pm_North;
 LstarInfo->mInfo->Hmax = 0.1;
-if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-11, LstarInfo->mInfo ) ){ return(-4); }
+if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-9, LstarInfo->mInfo ) ){ return(-4); }
 LstarInfo->Spherical_Footprint_Pn[k] = w;
 LstarInfo->mInfo->Hmax = 0.05;
 //Lgm_Vector puke;
@@ -1092,7 +1100,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                 done2 = TRUE;
             } else if ( Count > 2 ) {
                 done2 =  TRUE;
-                if (LstarInfo->VerbosityLevel >1) printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout);
+                if (LstarInfo->VerbosityLevel >1) { printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
                 FoundShellLine = 0;
                 return(-3);
             } else {
@@ -1101,7 +1109,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
 	    }
 
 
-        if (LstarInfo->VerbosityLevel > 2) printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout);
+        if (LstarInfo->VerbosityLevel > 2) { printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout); }
 
 
 
@@ -1177,7 +1185,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
         Phi = atan2( v.y, v.x );
         LstarInfo->MLT[k]  = Phi*DegPerRad/15.0 + 12.0;
         LstarInfo->mlat[k] = asin( v.z/Lgm_Magnitude(&v) )*DegPerRad;
-        if (LstarInfo->VerbosityLevel > 2)  printf(" \t\t\t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout);
+        if (LstarInfo->VerbosityLevel > 2)  { printf(" \t\t\t%sMLT_foot, mlat_foot = %g %g%s\n\n", PreStr, LstarInfo->MLT[k], LstarInfo->mlat[k], PostStr); fflush(stdout); }
 
 
         /*
@@ -1346,6 +1354,13 @@ M = ELECTRON_MASS; // kg
      *  To get Lstar all we need to do now is one final integral.
      *  See roederer's eq 3.6 It should be trivial at this point!
      */
+//printf("LstarInfo->nPnts = %d\n", LstarInfo->nPnts);
+//for(i=0; i<LstarInfo->nPnts; i++){
+//printf("HERE 1a: LstarInfo->MLT[%d] = %g  LstarInfo->mlat[%d] = %g    \n", i, LstarInfo->MLT[i], i, LstarInfo->mlat[i] );
+//}
+//for(i=0; i<LstarInfo->nPnts; i++){
+//printf("HERE 1b: MirrorMLT[%d] = %g  MirrorMlat[%d] = %g    \n", i, MirrorMLT[i], i, MirrorMlat[i] );
+//}
 
 
     /*
@@ -1377,6 +1392,7 @@ FIX
     for (i=0; i<LstarInfo->nPnts; ++i){ LstarInfo->xa[j] = LstarInfo->MLT[i]+24.0; LstarInfo->ya[j] = LstarInfo->mlat[i]; ++j; }
     LstarInfo->nSplnPnts = j;
 
+
     /*
      *  Use GSL periodic spline (can also try others if needed....)
      */
@@ -1388,6 +1404,9 @@ FIX
     //printf ("spline uses '%s' interpolation.\n", gsl_interp_name( LstarInfo->pspline ));
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
 
+//for(i=0; i<LstarInfo->m; i++){
+//printf("HERE 2: LstarInfo->xa[%d] = %g  LstarInfo->ya[%d] = %g    \n", i, LstarInfo->xa[i], i, LstarInfo->ya[i] );
+//}
 
 
     Phi1 = MagFlux( LstarInfo );
@@ -1588,6 +1607,10 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
      */
     MLT = LstarInfo->Phi*DegPerRad/15.0;
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
+//int i;
+//for(i=0; i<LstarInfo->m; i++){
+//printf("LstarInfo->xa[%d] = %g  LstarInfo->ya[%d] = %g \n", i, LstarInfo->xa[i], i, LstarInfo->ya[i] );
+//}
     mlat = gsl_interp_eval( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, MLT, LstarInfo->acc );
     //splint( LstarInfo->xa, LstarInfo->ya, LstarInfo->y2, LstarInfo->nSplnPnts, MLT, &mlat);
     mlat *= RadPerDeg;
@@ -1613,6 +1636,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     iwork  = (int *) calloc( limit+1, sizeof(int) );
     work   = (double *) calloc( lenw+1, sizeof(double) );
 */
+//printf("a, b = %g %g\n", a, b);
     dqags(LambdaIntegrand, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, LstarInfo->mInfo->VerbosityLevel );
 /*
     free( iwork );
@@ -1668,6 +1692,10 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
     b = 2.0*M_PI;
 
 
+//int i;
+//for(i=0; i<LstarInfo->m; i++){
+//printf("MagFlux2: LstarInfo->xa[%d] = %g  LstarInfo->ya[%d] = %g \n", i, LstarInfo->xa[i], i, LstarInfo->ya[i] );
+//}
 
     /*
      *   set tolerances.
@@ -1841,6 +1869,9 @@ void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, dou
         for (i=0; i<k; ++i){ LstarInfo->xma[j] = MirrorMLT[i]+24.0; LstarInfo->yma[j] = MirrorMlat[i]; ++j; }
 	    LstarInfo->m = j;
 
+//for (i=0; i<j; ++i){
+//    printf("%g %g\n", LstarInfo->xma[i], LstarInfo->yma[i] );
+//}
 
         gsl_set_error_handler_off(); // Turn off gsl default error handler
 	    gsl_interp_accel *acc = gsl_interp_accel_alloc( );
@@ -2085,7 +2116,9 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     FreeLstarInfo( LstarInfo_brac2 );
     FreeLstarInfo( LstarInfo_test );
     return(0);
-    }
+
+
+}
 
 
 

@@ -47,7 +47,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
     Lgm_Vector      v1, v2, v3, Bvec, Bvectmp, Ptmp, u_scale;
     double          rat, B, sa, sa2, Blocal, dSa, dSb, r, SS, L, stmp, Hdid, Hnext, Btmp;
 
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
 
     *I  = -9e99;
     *Bm = -9e99;

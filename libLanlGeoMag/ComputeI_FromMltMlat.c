@@ -43,6 +43,13 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             printf("\t%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
         }
 
+        /*
+         * Check to see if FL is opne/closed/etc.
+         */
+        Lgm_Vector Foot_n, Foot_s;
+        if ( !Lgm_TraceToSphericalEarth( &u, &Foot_n, 120.0, -1.0, 0.01, LstarInfo->mInfo ) ) return( -1 );
+        if ( !Lgm_TraceToSphericalEarth( &u, &Foot_s, 120.0,  1.0, 0.01, LstarInfo->mInfo ) ) return( -1 );
+
 
         Pmirror1 = u;
         /*

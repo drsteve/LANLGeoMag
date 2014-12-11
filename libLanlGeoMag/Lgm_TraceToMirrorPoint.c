@@ -105,7 +105,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
 
     Hmax = Info->Hmax;
     Hmin = 1e-10;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
     R = Ra = Rb = 0.0;
     F = Fa = Fb = 0.0;
 

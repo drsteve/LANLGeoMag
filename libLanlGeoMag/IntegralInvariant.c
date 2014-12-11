@@ -297,7 +297,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
      */
     mInfo = (Lgm_MagModelInfo *)qpInfo;
 
-	mInfo->Lgm_I_integrand_u_scale.x =  10.0;  mInfo->Lgm_I_integrand_u_scale.y = 1.0; mInfo->Lgm_I_integrand_u_scale.z = 10.0;
+	mInfo->Lgm_I_integrand_u_scale.x = mInfo->Lgm_I_integrand_u_scale.y = mInfo->Lgm_I_integrand_u_scale.z = 1.0;
 
 
 

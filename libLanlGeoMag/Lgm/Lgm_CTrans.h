@@ -848,6 +848,14 @@ double        Lgm_CdipMirrorLat( double Alpha0 );
 
 
 
+double  Lgm_UTC_to_TTSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c );
+double  Lgm_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
+double  Lgm_TT_to_TTSecSinceJ2000( Lgm_DateTime *TT ) ;
+void    Lgm_TTSecSinceJ2000_to_TT( double TTSeconds, Lgm_DateTime *TT ) ;
+void    Lgm_TTSecSinceJ2000_to_UTC( double TTSeconds, Lgm_DateTime *UTC, Lgm_CTrans *c ) ;
+double  Lgm_UTC_to_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) ;
+
+
 
 //double      Lgm_UTC_to_TT( double
 //double      Lgm_TT_to_UTC( double JD, double TT, Lgm_LeapSeconds *l );
