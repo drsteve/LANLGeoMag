@@ -280,29 +280,55 @@ void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_
     double dum;
     Lgm_JPLephemBundle *bundle = Lgm_InitJPLephemBundle( tdb );
 
-    //precalculate
-    Lgm_JPLephem_setup_object( objName, jpl, bundle );
-
-    //calculate positions
-    dum = 0;
-    for (i=0; i<bundle->coefficient_count; i++) {
-        dum += bundle->T[i] * bundle->coeffs[0][i];
+    //if Earth (recursive)
+    if (objName==LGM_DE_EARTH) {
+        Lgm_Vector EMbary, MoonGCRF;
+        double earth_fac;
+        Lgm_JPLephem_position( tdb, LGM_DE_EARTHMOON, jpl, &EMbary);
+        Lgm_JPLephem_position( tdb, LGM_DE_MOON, jpl, &MoonGCRF);
+        
+        earth_fac = 1.0/(1.0+LGM_DE421_EMRAT); //TODO: fix hardcoding so that this is generic to any DEXXX loaded
+        position->x = EMbary.x - MoonGCRF.x * earth_fac;
+        position->y = EMbary.y - MoonGCRF.y * earth_fac;
+        position->z = EMbary.z - MoonGCRF.z * earth_fac;
         }
-    position->x = dum;
+    else {
+        //precalculate
+        Lgm_JPLephem_setup_object( objName, jpl, bundle );
 
-    dum = 0;
-    for (i=0; i<bundle->coefficient_count; i++) {
-        dum += bundle->T[i] * bundle->coeffs[1][i];
+        //calculate positions
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += bundle->T[i] * bundle->coeffs[0][i];
+            }
+        position->x = dum;
+
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += bundle->T[i] * bundle->coeffs[1][i];
+            }
+        position->y = dum;
+
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += bundle->T[i] * bundle->coeffs[2][i];
+            }
+        position->z = dum;
+
         }
-    position->y = dum;
-
-    dum = 0;
-    for (i=0; i<bundle->coefficient_count; i++) {
-        dum += bundle->T[i] * bundle->coeffs[2][i];
-        }
-    position->z = dum;
-
     Lgm_FreeJPLephemBundle( bundle );
+    }
+
+void Lgm_JPL_getSunVector ( double tdb, Lgm_JPLephemInfo *jpl, Lgm_Vector *position ) {
+    Lgm_Vector EarthICRF, SunICRF;
+    // get positions of Sun & Earth
+    Lgm_JPLephem_position( tdb, LGM_DE_EARTH, jpl, &EarthICRF);
+    Lgm_JPLephem_position( tdb, LGM_DE_SUN, jpl, &SunICRF);
+
+    // Calculate Earth-Sun vector 
+    position->x = SunICRF.x - EarthICRF.x;
+    position->y = SunICRF.y - EarthICRF.y;
+    position->z = SunICRF.z - EarthICRF.z;
     }
 
 

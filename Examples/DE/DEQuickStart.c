@@ -40,6 +40,10 @@ int main( ) {
     printf("Earth-Moon Barycenter Position (ICRF): ");
     Lgm_PrintVector(&Uicrf);
     printf("Difference from expected result = %g %g %g\n\n", Uicrf.x-pyResult2.x, Uicrf.y-pyResult2.y, Uicrf.z-pyResult2.z);
+//    Lgm_JPL_getSunVector( JD, jpl, &Uicrf);
+//    printf("Earth-Sun Vector: ");
+//    Lgm_PrintVector(&Uicrf);
+
 
     Lgm_JPLephem_position( JD, LGM_DE_PLUTO, jpl, &Uicrf);
     printf("Pluto Position (ICRF): ");

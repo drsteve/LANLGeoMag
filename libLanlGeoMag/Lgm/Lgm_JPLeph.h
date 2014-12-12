@@ -402,3 +402,4 @@ int         Lgm_JPL_getNAxes( int objName, Lgm_JPLephemInfo *jpl);
 int         Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl);
 
 void        Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *position);
+void        Lgm_JPL_getSunVector ( double tdb, Lgm_JPLephemInfo *jpl, Lgm_Vector *position );
