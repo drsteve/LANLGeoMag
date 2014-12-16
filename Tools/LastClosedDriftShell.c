@@ -463,7 +463,6 @@ int main( int argc, char *argv[] ){
                 }
         
             } // ***** END PARALLEL EXECUTION *****
-exit(0);
             Lgm_Make_UTC( Date, UTC, &DT_UTC, LstarInfo->mInfo->c );
             Lgm_DateTimeToString( Str, &DT_UTC, 0, 3);
             fprintf(fp, "%24s",     Str );
