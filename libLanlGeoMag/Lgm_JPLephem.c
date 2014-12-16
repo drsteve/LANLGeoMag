@@ -184,6 +184,7 @@ void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephem
     coefficient_count = Lgm_JPL_getNCoeffs( objName, jpl);
 
     if ((number_of_sets == -1) || (number_of_axes == -1) || (coefficient_count == -1)) {
+        printf("Invalid number of sets (%d), axes (%d) or coeffs (%d) for object %d\n", number_of_sets, number_of_axes, coefficient_count, objName);
         exit(-1);
         }
     days_per_set = (jpl->jomega - jpl->jalpha) / number_of_sets;
@@ -292,6 +293,17 @@ void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_
         position->y = EMbary.y - MoonGCRF.y * earth_fac;
         position->z = EMbary.z - MoonGCRF.z * earth_fac;
         }
+    else if (objName==LGM_DE_MOON_ICRF) {
+        Lgm_Vector EMbary, MoonGCRF;
+        double moon_fac;
+        Lgm_JPLephem_position( tdb, LGM_DE_EARTHMOON, jpl, &EMbary);
+        Lgm_JPLephem_position( tdb, LGM_DE_MOON, jpl, &MoonGCRF);
+        
+        moon_fac = LGM_DE421_EMRAT/(1.0+LGM_DE421_EMRAT); //TODO: fix hardcoding so that this is generic to any DEXXX loaded
+        position->x = EMbary.x + MoonGCRF.x * moon_fac;
+        position->y = EMbary.y + MoonGCRF.y * moon_fac;
+        position->z = EMbary.z + MoonGCRF.z * moon_fac;
+        }
     else {
         //precalculate
         Lgm_JPLephem_setup_object( objName, jpl, bundle );
@@ -356,6 +368,9 @@ int Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl) {
         case LGM_DE_JUPITER:
             nvals = (jpl->getOuterPlanets) ? jpl->jupiter_nvals: -1;
             break;
+        case LGM_DE_SATURN:
+            nvals = (jpl->getOuterPlanets) ? jpl->saturn_nvals: -1;
+            break;
         case LGM_DE_URANUS:
             nvals = (jpl->getOuterPlanets) ? jpl->uranus_nvals: -1;
             break;
@@ -398,6 +413,9 @@ int Lgm_JPL_getNAxes( int objName, Lgm_JPLephemInfo *jpl) {
             break;
         case LGM_DE_JUPITER:
             naxes = (jpl->getOuterPlanets) ? jpl->jupiter_naxes: -1;
+            break;
+        case LGM_DE_SATURN:
+            naxes = (jpl->getOuterPlanets) ? jpl->saturn_naxes: -1;
             break;
         case LGM_DE_URANUS:
             naxes = (jpl->getOuterPlanets) ? jpl->uranus_naxes: -1;
@@ -446,6 +464,9 @@ int Lgm_JPL_getNCoeffs( int objName, Lgm_JPLephemInfo *jpl) {
         case LGM_DE_JUPITER:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->jupiter_ncoeffs: -1;
             break;
+        case LGM_DE_SATURN:
+            ncoeffs = (jpl->getOuterPlanets) ? jpl->saturn_ncoeffs: -1;
+            break;
         case LGM_DE_URANUS:
             ncoeffs = (jpl->getOuterPlanets) ? jpl->uranus_ncoeffs: -1;
             break;
@@ -491,6 +512,9 @@ double ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLephemInfo *jpl){
             break;
         case LGM_DE_JUPITER:
             coeffset = (jpl->getOuterPlanets) ? jpl->jupiter: NULL;
+            break;
+        case LGM_DE_SATURN:
+            coeffset = (jpl->getOuterPlanets) ? jpl->saturn: NULL;
             break;
         case LGM_DE_URANUS:
             coeffset = (jpl->getOuterPlanets) ? jpl->uranus: NULL;

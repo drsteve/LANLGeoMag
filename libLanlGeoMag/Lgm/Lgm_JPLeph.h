@@ -47,6 +47,7 @@
 #define LGM_DE_PLUTO          110
 #define LGM_DE_LIBRATION      111
 #define LGM_DE_NUTATION       112
+#define LGM_DE_MOON_ICRF      113
 
 
 /*
