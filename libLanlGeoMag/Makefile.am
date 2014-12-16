@@ -10,6 +10,9 @@ LGM_TS07_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 # Directory where Index-related stuff will be installed
 LGM_INDEX_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 
+# Directory where JPL DE-related stuff will be installed
+LGM_DE_DATA_DIR = $(datarootdir)/LanlGeoMag/Data/
+
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
 
@@ -43,7 +46,7 @@ libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32
 
-EXTRA_DIST = TS07D_FILES
+EXTRA_DIST = TS07D_FILES DE_FILES
 
 install-data-hook:
 if ENABLE_INDICES
@@ -51,11 +54,15 @@ if ENABLE_INDICES
 	$(RSYNC_CMD) -a $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
 	$(MKDIR_P) $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	@echo Qin-Denton index files should be placed in $(DESTDIR)$(LGM_INDEX_DATA_DIR)
+	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
+	$(RSYNC_CMD) -a $(srcdir)/DE_FILES $(DESTDIR)$(LGM_DE_DATA_DIR)/.
+	@echo Additional DE files should be placed in $(DESTDIR)$(LGM_DE_DATA_DIR)
 endif
 
 uninstall-hook:
 if ENABLE_INDICES
 	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
 	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_DE_DATA_DIR)
 endif
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag

@@ -65,7 +65,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
 
     double      *JDparams;
     char        *Path, JPLephemPath[2048];
-    char        eph_num[13], JPLephemFile[2048];
+    char        eph_num[14], JPLephemFile[2048];
     int         StatError, InFileExists;
     struct stat StatBuf;
     herr_t      status;
@@ -78,7 +78,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
     Path = getenv( "JPL_EPHEM_PATH" );
     if ( Path == NULL ) {
         strcpy( JPLephemPath, LGM_INDEX_DATA_DIR );
-        strcat( JPLephemPath, "/JPLephem" );
+        strcat( JPLephemPath, "/DE_FILES" );
     } else {
         /*
          * Test for existence
@@ -86,7 +86,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
         struct stat sts;
         if ( ( stat( Path, &sts ) ) == -1 ) {
             strcpy( JPLephemPath, LGM_INDEX_DATA_DIR );
-            strcat( JPLephemPath, "/JPLephem" );
+            strcat( JPLephemPath, "/DE_FILES" );
             printf("Environment variable JPL_EPHEM_PATH points to a non-existent directory: %s. Setting JPLephemPath to: %s \n", Path, JPLephemPath );
         } else {
             strcpy( JPLephemPath, Path );
@@ -94,7 +94,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
     }
 
     // jpl structure has member DEnum that should be cast to a string
-    sprintf( eph_num, "jpl_de%d.h5", jpl->DEnum );
+    sprintf( eph_num, "/jpl_de%d.h5", jpl->DEnum );
     strcpy( JPLephemFile, JPLephemPath );
     strcat( JPLephemFile, eph_num );
 
