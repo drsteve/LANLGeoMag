@@ -500,12 +500,14 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 
     /*
      *  Compute the Obliquity of the Ecliptic at epoch TU
+     *  w.r.t. mean equator of date
      *  The TU in this formula is the number of Julian
      *  centuries since epoch 2000 January 1.5
      */
-    //epsilon    = (84381.448 - 46.8150*T_TT - 0.00059*T2_TT + 0.001813*T3_TT)*RadPerDeg/3600.0; // IAU-76/FK5 value
-    c->epsilon    = 84381.448 - 46.8150*T_TT - 0.00059*T2_TT + 0.001813*T3_TT; // IAU-76/FK5 value (arcsec)
+    c->epsilon    = 84381.448 - 46.8150*T_TT - 0.00059*T2_TT + 0.001813*T3_TT; // IAU-76/FK5 value (arcsec) IAU 1980 model, fit to DE200
 
+    //c->epsilon = 84381.406 - 46.836769*T_TT - 0.0001831*T2_TT + 0.00200340*T3_TT - 0.0000576*T4_TT - 4.34e-8*T5_TT; // IAU 2006 model
+    //Ref: Petit, G., and B. Luzum, IERS Conventions (2010), IERS Technical Note No. 36, International Earth Rotation and Reference Systems Service (IERS), ISSN: 1019-4568, 2010.
 
     /*
      * Compute:
