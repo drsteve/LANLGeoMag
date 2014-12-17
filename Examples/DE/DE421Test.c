@@ -17,6 +17,7 @@ int main( ) {
     FILE              *testfile;
 
     Lgm_ReadJPLephem( jpl );
+
     /* read test file */
     testfile = fopen("testpo.421","r");
 
@@ -37,14 +38,18 @@ int main( ) {
         sscanf(buff+15," %lf %d %d %d %lf",&JD,&ntarg,&nctr,&ncoord,&xi);
         line++;
 
-        if (ncoord>3) continue; //skip velocities for now
         if (ntarg<=13) { //exclude nutations/librations for now
             // Set up all the necessary variables to do transformations for this Date and UTC
             Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &UTC );
             Lgm_Set_Coord_Transforms( Date, UTC, c );
             targObj = target(ntarg);
             if (targObj > 0) {
-                Lgm_JPLephem_position( JD, targObj, jpl, &Utarg);
+                if (ncoord<=3) {
+                    Lgm_JPLephem_position( JD, targObj, jpl, &Utarg);
+                    }
+                else {
+                    Lgm_JPLephem_velocity( JD, targObj, jpl, &Utarg);
+                    }
                 }
             else {
                 Utarg.x = 0.0;
@@ -57,7 +62,12 @@ int main( ) {
         if (nctr<=13) {
             targObj = target(nctr);
             if (targObj > 0) {
-                Lgm_JPLephem_position( JD, targObj, jpl, &Ucent);
+                if (ncoord<=3) {
+                    Lgm_JPLephem_position( JD, targObj, jpl, &Ucent);
+                    }
+                else {
+                    Lgm_JPLephem_velocity( JD, targObj, jpl, &Ucent);
+                    }
                 }
             else {
                 Ucent.x = 0.0;
@@ -82,10 +92,18 @@ int main( ) {
             case 3:
                 rval = Utest.z;
                 break;
+            case 4:
+                rval = Utest.x;
+                break;
+            case 5:
+                rval = Utest.y;
+                break;
+            case 6:
+                rval = Utest.z;
+                break;
             }
 
-        // rval /= LGM_DE421_AU;
-        xi *= LGM_DE421_AU;
+        xi  = xi*LGM_DE421_AU; //pos are AU, vel are AU/day (??)
         del = rval - xi;
         nTests++;
         if (fabs(del) <= 2.0e-5) {
@@ -102,8 +120,8 @@ int main( ) {
 
         }
     fclose(testfile);
-    printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 m)\n", nPass, nFail);
-    printf("Caveat: No tests on velocity, libration or nutation\n\n");
+    printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 km [=1cm])\n", nPass, nFail);
+    printf("Caveat: No tests on libration or nutation\n\n");
     Lgm_free_ctrans( c ); // free the structure
     Lgm_FreeJPLephemInfo( jpl ); // free the structure
 

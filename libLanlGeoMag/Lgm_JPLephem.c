@@ -344,6 +344,75 @@ void Lgm_JPL_getSunVector ( double tdb, Lgm_JPLephemInfo *jpl, Lgm_Vector *posit
     }
 
 
+void Lgm_JPLephem_velocity( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *velocity) {
+    int i, j, ii;
+    double *dT;
+    double dum;
+    Lgm_JPLephemBundle *bundle = Lgm_InitJPLephemBundle( tdb );
+
+    //if Earth (recursive)
+    if (objName==LGM_DE_EARTH) {
+        Lgm_Vector EMbary, MoonGCRF;
+        double earth_fac;
+        Lgm_JPLephem_velocity( tdb, LGM_DE_EARTHMOON, jpl, &EMbary);
+        Lgm_JPLephem_velocity( tdb, LGM_DE_MOON, jpl, &MoonGCRF);
+        
+        earth_fac = 1.0/(1.0+LGM_DE421_EMRAT); //TODO: fix hardcoding so that this is generic to any DEXXX loaded
+        velocity->x = EMbary.x - MoonGCRF.x * earth_fac;
+        velocity->y = EMbary.y - MoonGCRF.y * earth_fac;
+        velocity->z = EMbary.z - MoonGCRF.z * earth_fac;
+        }
+    else if (objName==LGM_DE_MOON_ICRF) {
+        Lgm_Vector EMbary, MoonGCRF;
+        double moon_fac;
+        Lgm_JPLephem_velocity( tdb, LGM_DE_EARTHMOON, jpl, &EMbary);
+        Lgm_JPLephem_velocity( tdb, LGM_DE_MOON, jpl, &MoonGCRF);
+        
+        moon_fac = LGM_DE421_EMRAT/(1.0+LGM_DE421_EMRAT); //TODO: fix hardcoding so that this is generic to any DEXXX loaded
+        velocity->x = EMbary.x + MoonGCRF.x * moon_fac;
+        velocity->y = EMbary.y + MoonGCRF.y * moon_fac;
+        velocity->z = EMbary.z + MoonGCRF.z * moon_fac;
+        }
+    else {
+        //precalculate
+        Lgm_JPLephem_setup_object( objName, jpl, bundle );
+
+        /* Chebyshev derivative */
+        LGM_ARRAY_1D( dT, bundle->coefficient_count, double );
+        dT[0] = 0.0;
+        dT[1] = 1.0;
+        dT[2] = bundle->twot1 + bundle->twot1;
+        for (ii=3; ii<bundle->coefficient_count; ii++) {
+            dT[ii] = bundle->twot1 * dT[ii-1] - dT[ii-2] + bundle->T[ii-1] + bundle->T[ii-1];
+            }
+        for (ii=0; ii<bundle->coefficient_count; ii++) {
+            dT[ii] *= 2.0;
+            dT[ii] /= bundle->days_per_set; //puts units to km/day
+            }
+
+        //calculate velocities
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += dT[i] * bundle->coeffs[0][i];
+            }
+        velocity->x = dum;
+
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += dT[i] * bundle->coeffs[1][i];
+            }
+        velocity->y = dum;
+
+        dum = 0;
+        for (i=0; i<bundle->coefficient_count; i++) {
+            dum += dT[i] * bundle->coeffs[2][i];
+            }
+        velocity->z = dum;
+
+        }
+    Lgm_FreeJPLephemBundle( bundle );
+    }
+
 int Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl) {
     int nvals;
     switch (objName) {
