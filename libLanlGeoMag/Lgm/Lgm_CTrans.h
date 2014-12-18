@@ -11,6 +11,7 @@
 #include <math.h>
 #include "Lgm_Vec.h"
 #include "Lgm_WGS84.h"
+#include "Lgm_JPLeph.h"
 
 #define DegPerRad       57.295779513082320876798154814105
 #define RadPerDeg        0.017453292519943295769236907568
@@ -612,6 +613,7 @@ typedef struct Lgm_CTrans {
                                      */
 
     double      eccentricity;       /**< Eccentricity of Earth-Sun orbit */
+    double      mean_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
 
     double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
     double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
@@ -630,7 +632,7 @@ typedef struct Lgm_CTrans {
     double      sin_psi;            /**< \f$\sin(\psi)\f$ */
     double      cos_psi;            /**< \f$\cos(\psi)\f$ */
     double      tan_psi;            /**< \f$\tan(\psi)\f$ */
-    double      RA_moon;            /**< Right Ascention of Moon (in degrees) */
+    double      RA_moon;            /**< Right Ascension of Moon (in degrees) */
     double      DEC_moon;           /**< Declination of Moon (in degrees) */
     double      MoonPhase;          /**< The Phase of the Moon (in days) */
     double      EarthMoonDistance;  /**< Distance between the Earth and Moon (in earth-radii) */
@@ -756,6 +758,7 @@ double      Lgm_hour24( double );
 double      Lgm_kepler( double, double );
 double      Lgm_Dipole_Tilt(long int date, double UTC);
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
+void        Lgm_ComputeMoon( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
 int         Lgm_Doy( long int, int *, int *, int *, int * );

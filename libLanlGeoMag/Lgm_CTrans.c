@@ -335,6 +335,10 @@ double Lgm_Dipole_Tilt(long int date, double UTC) {
   return c->psi;
 }
 
+//void Lgm_Set_CTrans_Options( int ephModel, int pnModel, Lgm_CTrans *c ) {
+//    c->ephModel = ephModel; //ephemerides model for Sun and Moon : LGM_EPH_LA, LGM_EPH_HA, LGM_DE_421, USE_HIGH_ACCURACY_SUN
+//    c->pnModel = pnModel; //precession and nutation model : LGM_PN_IAU76, LGM_PN_IAU2006
+//}
 
 /** 
  *   \brief
@@ -524,7 +528,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     E       = Lgm_kepler(M, eccen);
     nu      = 2.0*atan( sqrt((1.0+eccen)/(1.0-eccen))*tan(E/2.0) );
     lambnew = Lgm_angle2pi(nu + varpi90);
-
+    c->mean_anomaly = M;
     c->lambda_sun = lambnew;
 
 
@@ -708,59 +712,6 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 //    c->Awgs84_to_pef[0][2] =  c->xp; c->Awgs84_to_pef[1][2] =  -c->yp; c->Awgs84_to_pef[2][2] =    1.0;
 
 
-
-
-
-
-    /*
-     * Compute Right Ascension and Declination of the Moon
-     */
-    Lmoon_0 = 318.351648;
-    P0 = 36.340410;
-    N0 = 318.510107;
-    Imoon = 5.145396;
-    days  = Lgm_JD( c->TT.Year,  c->TT.Month,  c->TT.Day, c->TT.Time, LGM_TIME_SYS_TT, c) - 2447891.5;
-    Lmoon = 13.1763966*days + Lmoon_0;
-    Mmoon_m = Lmoon - 0.1114041*days - P0;
-    Nmoon = N0 - 0.0529539*days;
-    Cmoon = Lmoon*RadPerDeg - lambnew;
-    Emoon_nu = 1.2739*sin(2.0*Cmoon - Mmoon_m*RadPerDeg);
-    Amoon_e = 0.1858*sin(M);
-    Amoon_3 = 0.37*sin(M);
-    Mmoon_mp = Mmoon_m + Emoon_nu - Amoon_e - Amoon_3;
-    Emoon_c = 6.2886*sin(Mmoon_mp*RadPerDeg);
-    Amoon_4 = 0.214*sin(2.0*Mmoon_mp*RadPerDeg);
-    Lmoon_p = Lmoon + Emoon_nu + Emoon_c - Amoon_e + Amoon_4;
-    Vmoon = 0.6583*sin(2.0*(Lmoon_p*RadPerDeg - lambnew));
-    Lmoon_pp = Lmoon_p + Vmoon;
-    Nmoon_p = Nmoon - 0.16*sin(M);
-    LambdaMoon = atan2( sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*cos(Imoon*RadPerDeg),
-			cos((Lmoon_pp - Nmoon_p)*RadPerDeg) ) + Nmoon_p*RadPerDeg;
-    BetaMoon = asin(sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*sin(Imoon*RadPerDeg));
-    RA_Moon  = Lgm_angle360(atan2(sin(LambdaMoon)*cos(epsilon)-tan(BetaMoon)*sin(epsilon),
-		cos(LambdaMoon))*DegPerRad);
-    DEC_Moon = asin( sin(BetaMoon)*cos(epsilon) + cos(BetaMoon)*sin(epsilon)*sin(LambdaMoon))*DegPerRad;
-    c->RA_moon = RA_Moon;
-    c->DEC_moon = DEC_Moon;
-
-
-    /*
-     * Compute Phase of the Moon
-     */
-    c->MoonPhase = 0.5*(1.0 - cos(Lmoon_pp*RadPerDeg - lambnew));
-
-
-    /*
-     * Compute Earth-Moon distance
-     */
-    amoon = 384401.0;
-    emoon = 0.054900;
-    c->EarthMoonDistance = amoon*(1.0 - emoon*emoon)/(1.0 + emoon*cos((Mmoon_mp + Emoon_c)*RadPerDeg));
-    c->EarthMoonDistance /= Re;
-
-
-
-
     /*
      *  Define MOD <--> GSE Transformation
      */
@@ -791,13 +742,6 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     c->Agse_to_mod[0][2] = S.z, c->Agse_to_mod[1][2] = Y.z, c->Agse_to_mod[2][2] = K.z;
 
 
-
-
-
-
-
-
-
     /*
      *  Initialize IGRF to get (among other things) the dipole moment.
      *  We really should do this more carefully. Make sure the lat/lons
@@ -809,10 +753,6 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     Lgm_InitIGRF( g, h, N, 1, c );
     gclat = c->CD_gcolat;
     glon  = c->CD_glon;
-
-
-
-
 
 
     /*
@@ -850,12 +790,6 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     c->Agsm_to_mod[0][0] = S.x, c->Agsm_to_mod[1][0] = Y.x, c->Agsm_to_mod[2][0] = Z.x;
     c->Agsm_to_mod[0][1] = S.y, c->Agsm_to_mod[1][1] = Y.y, c->Agsm_to_mod[2][1] = Z.y;
     c->Agsm_to_mod[0][2] = S.z, c->Agsm_to_mod[1][2] = Y.z, c->Agsm_to_mod[2][2] = Z.z;
-
-
-
-
-
-
 
 
     /*
@@ -905,27 +839,11 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     c->Acdmag_to_wgs84[0][2] = X.z, c->Acdmag_to_wgs84[1][2] = Y.z, c->Acdmag_to_wgs84[2][2] =  D.z;
 
 
-
-
-
-
     /*  Construct transformation matrix from GSM to GSE and vice versa ;
      * 	Agsm_to_gse = Amod_to_gse * Agsm_to_mod
      */
     Lgm_MatTimesMat( c->Amod_to_gse, c->Agsm_to_mod, c->Agsm_to_gse );
     Lgm_Transpose( c->Agsm_to_gse, c->Agse_to_gsm);
-/*
-    for (j=0; j<3; ++j){
-        for (i=0; i<3; ++i){
-            c->Agsm_to_gse[i][j] = c->Amod_to_gse[0][j]*c->Amod_to_gsm[0][i]
-                                    + c->Amod_to_gse[1][j]*c->Amod_to_gsm[1][i]
-                                    + c->Amod_to_gse[2][j]*c->Amod_to_gsm[2][i];
-            c->Agse_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Amod_to_gse[0][i]
-                                    + c->Amod_to_gsm[1][j]*c->Amod_to_gse[1][i]
-                                    + c->Amod_to_gsm[2][j]*c->Amod_to_gse[2][i];
-        }
-    }
-*/
 
 
     /*  Construct transformation matrix from GSM to WGS84 and vice versa ;
@@ -934,19 +852,6 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
      */
     Lgm_MatTimesMat( c->Amod_to_wgs84, c->Agsm_to_mod, c->Agsm_to_wgs84 );
     Lgm_Transpose( c->Agsm_to_wgs84, c->Awgs84_to_gsm );
-/*
-    for (j=0; j<3; ++j){
-        for (i=0; i<3; ++i){
-            c->Agsm_to_wgs84[i][j] = c->Amod_to_wgs84[0][j]*c->Agsm_to_mod[i][0]
-                                    + c->Amod_to_wgs84[1][j]*c->Agsm_to_mod[i][1]
-                                    + c->Amod_to_wgs84[2][j]*c->Agsm_to_mod[i][2];
-            c->Awgs84_to_gsm[i][j] = c->Amod_to_gsm[0][j]*c->Awgs84_to_mod[i][0]
-                                    + c->Amod_to_gsm[1][j]*c->Awgs84_to_mod[i][1]
-                                    + c->Amod_to_gsm[2][j]*c->Awgs84_to_mod[i][2];
-        }
-    }
-*/
-
 
 
     /*
@@ -960,9 +865,11 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     Lgm_Transpose( c->Awgs84_to_gei, c->Agei_to_wgs84 );
 
 
-
-
-
+    /* Compute Moon RA, Dec, distance and phase */
+//    Lgm_JPLephemInfo  *jpl = Lgm_InitJPLephemInfo( 421, LGM_DE_SUN|LGM_DE_EARTHMOON, 0);
+//    Lgm_ReadJPLephem( jpl );
+//    Lgm_ComputeMoon( c, jpl);
+    Lgm_ComputeMoon( c, NULL ); //TODO: this preserves orig behaviour; set switches for DE
 
 
     if ( c->Verbose ) {
@@ -1172,6 +1079,80 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
         printf("                        [ %15.8e  %15.8e  %15.8e ]\n",   c->Apef_to_wgs84[0][0], c->Apef_to_wgs84[1][0], c->Apef_to_wgs84[2][0]);
         printf("    Apef_to_wgs84     = [ %15.8e  %15.8e  %15.8e ]\n",   c->Apef_to_wgs84[0][1], c->Apef_to_wgs84[1][1], c->Apef_to_wgs84[2][1]);
         printf("                        [ %15.8e  %15.8e  %15.8e ]\n\n", c->Apef_to_wgs84[0][2], c->Apef_to_wgs84[1][2], c->Apef_to_wgs84[2][2]);
+    }
+
+}
+
+
+void Lgm_ComputeMoon( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl ) {
+
+    double 	    RA_Moon, DEC_Moon;
+    double 	    Lmoon_0, P0, N0, Imoon, Lmoon, Mmoon_m, Nmoon, Cmoon;
+    double 	    Emoon_nu, Amoon_e, Amoon_3, Mmoon_mp, Emoon_c, amoon, emoon;
+    double 	    Amoon_4, Lmoon_p, Vmoon, Lmoon_pp, Nmoon_p, LambdaMoon, BetaMoon;
+    double          JD, RA, Dec, r;
+    double          days, M, lambnew, epsilon;
+    Lgm_Vector      MoonGCRF, Moonmod;
+    double          **ecl_to_equ;
+
+    /*
+     * Compute Right Ascension and Declination of the Moon in MOD
+     */
+    JD    = Lgm_JD( c->TT.Year,  c->TT.Month,  c->TT.Day, c->TT.Time, LGM_TIME_SYS_TT, c);
+    epsilon = c->epsilon*RadPerArcSec;
+    M = c->mean_anomaly;
+    if (jpl==NULL) {
+        /* Compute Right Ascension and Declination of the Moon */
+        Lmoon_0 = 318.351648;
+        P0 = 36.340410;
+        N0 = 318.510107;
+        Imoon = 5.145396;
+        days  = JD - 2447891.5;
+        Lmoon = 13.1763966*days + Lmoon_0;
+        Mmoon_m = Lmoon - 0.1114041*days - P0;
+        Nmoon = N0 - 0.0529539*days;
+        Cmoon = Lmoon*RadPerDeg - c->lambda_sun;
+        Emoon_nu = 1.2739*sin(2.0*Cmoon - Mmoon_m*RadPerDeg);
+        Amoon_e = 0.1858*sin(M);
+        Amoon_3 = 0.37*sin(M);
+        Mmoon_mp = Mmoon_m + Emoon_nu - Amoon_e - Amoon_3;
+        Emoon_c = 6.2886*sin(Mmoon_mp*RadPerDeg);
+        Amoon_4 = 0.214*sin(2.0*Mmoon_mp*RadPerDeg);
+        Lmoon_p = Lmoon + Emoon_nu + Emoon_c - Amoon_e + Amoon_4;
+        Vmoon = 0.6583*sin(2.0*(Lmoon_p*RadPerDeg - lambnew));
+        Lmoon_pp = Lmoon_p + Vmoon;
+        Nmoon_p = Nmoon - 0.16*sin(M);
+        LambdaMoon = atan2( sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*cos(Imoon*RadPerDeg),
+            		cos((Lmoon_pp - Nmoon_p)*RadPerDeg) ) + Nmoon_p*RadPerDeg;
+        BetaMoon = asin(sin((Lmoon_pp - Nmoon_p)*RadPerDeg)*sin(Imoon*RadPerDeg));
+        RA_Moon  = Lgm_angle360(atan2(sin(LambdaMoon)*cos(epsilon)-tan(BetaMoon)*sin(epsilon),
+            	cos(LambdaMoon))*DegPerRad);
+        DEC_Moon = asin( sin(BetaMoon)*cos(epsilon) + cos(BetaMoon)*sin(epsilon)*sin(LambdaMoon))*DegPerRad;
+        c->RA_moon = RA_Moon; 
+        c->DEC_moon = DEC_Moon;
+
+        /* Get phase of Moon */
+        c->MoonPhase = 0.5*(1.0 - cos(Lmoon_pp*RadPerDeg - c->lambda_sun));
+
+        /* Earth-Moon Distance in Earth Radii */
+        amoon = 384401.0;
+        emoon = 0.054900;
+        c->EarthMoonDistance = amoon*(1.0 - emoon*emoon)/(1.0 + emoon*cos((Mmoon_mp + Emoon_c)*RadPerDeg));
+        c->EarthMoonDistance /= Re;
+    }
+    else {
+        /* Compute Right Ascension and Declination of the Moon */
+        Lgm_JPLephem_position( JD, LGM_DE_MOON, jpl, &MoonGCRF);
+        Lgm_Convert_Coords( &MoonGCRF, &Moonmod, GEI2000_TO_MOD, c );        
+        Lgm_CartToSphCoords( &Moonmod, &Dec, &RA, &r);
+        c->RA_moon = Lgm_angle360(RA);
+        c->DEC_moon = Dec;
+
+        /* Get phase of Moon */
+        c->MoonPhase = LGM_FILL_VALUE;
+
+        /* Earth-Moon Distance in Earth Radii */
+        c->EarthMoonDistance = Lgm_Magnitude(&Moonmod)/Re; //Re comes from CTrans.h
     }
 
 }

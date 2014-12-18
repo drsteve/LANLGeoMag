@@ -176,7 +176,10 @@ void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephem
     double *T, ***cheby, **coefficients;
 
     tdb = bundle->tdb;
-    if ((tdb < jpl->jalpha) || (tdb > jpl->jomega)) { exit(-1); }
+    if ((tdb < jpl->jalpha) || (tdb > jpl->jomega)) { 
+        printf("Time (JD) is %15.8lf but must be between %15.8lf and %15.8lf\n", tdb, jpl->jalpha, jpl->jomega);
+        exit(-1);
+        }
 
     /* get DEXXX specific info */
     number_of_sets = Lgm_JPL_getNSets( objName, jpl);
@@ -307,6 +310,7 @@ void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_
     else {
         //precalculate
         Lgm_JPLephem_setup_object( objName, jpl, bundle );
+printf("FUCK YOU MOON!\n");
 
         //calculate positions
         dum = 0;
@@ -376,7 +380,6 @@ void Lgm_JPLephem_velocity( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_
     else {
         //precalculate
         Lgm_JPLephem_setup_object( objName, jpl, bundle );
-
         /* Chebyshev derivative */
         LGM_ARRAY_1D( dT, bundle->coefficient_count, double );
         dT[0] = 0.0;
