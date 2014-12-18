@@ -622,16 +622,10 @@ typedef struct Lgm_CTrans {
     double      true_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
 
     double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
+    double      beta_sun;           /**< Ecliptic elevation of Sun (in radians) */
     double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
     double      RA_sun;             /**< Right Ascention of Sun (in degrees) */
     double      DEC_sun;            /**< Declination of Sun (in degrees) */
-
-    double      lambda_sun_ha;      /**< high accuracy eccliptic coords of sun */
-    double      r_sun_ha;           /**< high accuracy eccliptic coords of sun */
-    double      beta_sun_ha;        /**< high accuracy eccliptic coords of sun */
-    double      beta_sun;        /**< high accuracy eccliptic coords of sun */
-    double      RA_sun_ha;          /**< high accuracy Right Ascention of Sun (in degrees) */
-    double      DEC_sun_ha;         /**< high accuracy Declination of Sun (in degrees) */
 
     Lgm_Vector  Sun;                /**< direction of Sun in GEI system (unit vector) */
     Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in GEI system (unit vector) */

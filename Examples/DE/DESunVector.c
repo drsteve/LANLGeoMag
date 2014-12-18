@@ -43,7 +43,6 @@ int main( ) {
     RA += 360.0;
     printf("DE421 Sun Vec (RA, Dec): %g %g\n", RA, Dec);
     printf("Lgm   Sun Vec (RA, Dec): %g %g\n", c->RA_sun, c->DEC_sun);
-    printf("LgmHA Sun Vec (RA, Dec): %g %g\n", c->RA_sun_ha, c->DEC_sun_ha);
 
     Lgm_free_ctrans( c ); // free the structure
     Lgm_FreeJPLephemInfo( jpl ); // free the structure

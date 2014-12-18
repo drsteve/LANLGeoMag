@@ -14,6 +14,10 @@ int main( ) {
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     // Set up all the necessary variables to do transformations for this Date and UTC
+    /* Options for setting Sun/Moon pos are:  */
+    //Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    //Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
+    //Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Same as NOT calling Set_CTrans_Options */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     // Do the transformation from GSM->SM
