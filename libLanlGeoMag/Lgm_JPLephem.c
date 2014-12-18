@@ -310,7 +310,6 @@ void Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_
     else {
         //precalculate
         Lgm_JPLephem_setup_object( objName, jpl, bundle );
-printf("FUCK YOU MOON!\n");
 
         //calculate positions
         dum = 0;

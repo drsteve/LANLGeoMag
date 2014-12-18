@@ -49,6 +49,11 @@
 #define  LGM_JD_GPS0    2444245.0 // Julian Date of introduction of GPS time. (0h, Jan 6, 1980)
 #define  LGM_JD_TAI0    2436205.0 // Julian Date of introduction of TAI time. (0h, Jan 1, 1958)
 
+#define LGM_EPH_LOW_ACCURACY    0
+#define LGM_EPH_HIGH_ACCURACY   1
+#define LGM_EPH_DE              2
+#define LGM_PN_IAU76            12
+#define LGM_PN_IAU06            12
 
 
 /*
@@ -614,6 +619,7 @@ typedef struct Lgm_CTrans {
 
     double      eccentricity;       /**< Eccentricity of Earth-Sun orbit */
     double      mean_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
+    double      true_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
 
     double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
     double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
@@ -623,6 +629,7 @@ typedef struct Lgm_CTrans {
     double      lambda_sun_ha;      /**< high accuracy eccliptic coords of sun */
     double      r_sun_ha;           /**< high accuracy eccliptic coords of sun */
     double      beta_sun_ha;        /**< high accuracy eccliptic coords of sun */
+    double      beta_sun;        /**< high accuracy eccliptic coords of sun */
     double      RA_sun_ha;          /**< high accuracy Right Ascention of Sun (in degrees) */
     double      DEC_sun_ha;         /**< high accuracy Declination of Sun (in degrees) */
 
@@ -637,6 +644,8 @@ typedef struct Lgm_CTrans {
     double      MoonPhase;          /**< The Phase of the Moon (in days) */
     double      EarthMoonDistance;  /**< Distance between the Earth and Moon (in earth-radii) */
 
+    int         ephModel;           /**< Model to use for Sun and Moon positions */
+    int         pnModel;            /**< Precession-nutation model */
 
     /*
      *  The following are various important parameters derived from
@@ -757,7 +766,9 @@ void        Lgm_mjd_to_ymdh ( double MJD, long int *Date, int *year, int *month,
 double      Lgm_hour24( double );
 double      Lgm_kepler( double, double );
 double      Lgm_Dipole_Tilt(long int date, double UTC);
+void        Lgm_Set_CTrans_Options( int ephModel, int pnModel, Lgm_CTrans *c );
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
+void        Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl );
 void        Lgm_ComputeMoon( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
