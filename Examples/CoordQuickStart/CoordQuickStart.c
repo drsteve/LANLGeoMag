@@ -5,7 +5,7 @@
 int main( ) {
 
     Lgm_CTrans  *c = Lgm_init_ctrans( 1 ); 
-    Lgm_Vector  Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000;
+    Lgm_Vector  Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000, Ugse2000;
     long int    Date;
     double      UTC, Lat, Lon, r;
     
@@ -26,6 +26,8 @@ int main( ) {
     Lgm_Convert_Coords( &Ugsm, &Ugse1, GSM_TO_GSE, c );
     // Do the transformation from SM->GSE
     Lgm_Convert_Coords( &Usm, &Ugse2, SM_TO_GSE, c );
+    // Do the transformation from GSM->GSE2000
+    Lgm_Convert_Coords( &Ugsm, &Ugse2000, GSM_TO_GSE2000, c );
 
 
     // Print out the final results
@@ -41,12 +43,17 @@ int main( ) {
 
     Lgm_PrintVector(&tmp);
     printf("\n");
+    printf("\nGoing from GSM to GSE2000\n");
+    printf("Ugse2000  = %.8lf %.8lf %.8lf Re\n", Ugse2000.x, Ugse2000.y, Ugse2000.z);
+    printf("Difference between GSE and GSE2000\n");
+    Lgm_VecSub(&tmp, &Ugse2, &Ugse2000 );
+    Lgm_PrintVector(&tmp);
 
 
     // compute the ground track
-    // Do the transformation from SM->J2000
-    Lgm_Convert_Coords( &Usm, &Uj2000, SM_TO_GEI2000, c );
-    printf("The ground track point:\n");
+    // Do the transformation from SM->WGS84
+    Lgm_Convert_Coords( &Usm, &Uj2000, SM_TO_WGS84, c );
+    printf("\nThe ground track point (geocentric):\n");
     Lgm_CartToSphCoords(&Uj2000, &Lat, &Lon, &r);
     printf("Lat:%lf Lon:%lf\n", Lat, Lon);
 
