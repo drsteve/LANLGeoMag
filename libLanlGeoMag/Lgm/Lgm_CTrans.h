@@ -182,7 +182,9 @@
 
 #define CDMAG_COORDS   11   //!< Centered Dipole Coords
 
-
+#define GSE2000_COORDS 12   //!< GSE2000 coordinates (for MMS mission)
+                            //!< X is J2000 Sun vector, Y is cross-product of X and ecliptic pole at J2000 epoch
+                            //!< Z is cross-product of X and Y
 
 
 
@@ -206,6 +208,7 @@
 #define EME2000_TO_SM           109
 #define EME2000_TO_EDMAG        110
 #define EME2000_TO_CDMAG        111
+#define EME2000_TO_GSE2000      112
 
 #define ICRF2000_TO_EME2000     101
 #define ICRF2000_TO_ICRF2000    101
@@ -222,6 +225,7 @@
 #define ICRF2000_TO_SM          109
 #define ICRF2000_TO_EDMAG       110
 #define ICRF2000_TO_CDMAG       111
+#define ICRF2000_TO_GSE2000     112
 
 #define GEI2000_TO_EME2000      101
 #define GEI2000_TO_ICRF2000     101
@@ -238,6 +242,7 @@
 #define GEI2000_TO_SM           109
 #define GEI2000_TO_EDMAG        110
 #define GEI2000_TO_CDMAG        111
+#define GEI2000_TO_GSE2000      112
 
 #define MOD_TO_EME2000          201
 #define MOD_TO_ICRF2000         201
@@ -254,6 +259,7 @@
 #define MOD_TO_SM               209
 #define MOD_TO_EDMAG            210
 #define MOD_TO_CDMAG            211
+#define MOD_TO_GSE2000          212
 
 #define TOD_TO_EME2000          301
 #define TOD_TO_ICRF2000         301
@@ -270,6 +276,7 @@
 #define TOD_TO_SM               309
 #define TOD_TO_EDMAG            310
 #define TOD_TO_CDMAG            311
+#define TOD_TO_GSE2000          312
 
 #define TEME_TO_EME2000         401
 #define TEME_TO_ICRF2000        401
@@ -286,6 +293,7 @@
 #define TEME_TO_SM              409
 #define TEME_TO_EDMAG           410
 #define TEME_TO_CDMAG           411
+#define TEME_TO_GSE2000         412
 
 #define PEF_TO_EME2000          501
 #define PEF_TO_ICRF2000         501
@@ -302,6 +310,7 @@
 #define PEF_TO_SM               509
 #define PEF_TO_EDMAG            510
 #define PEF_TO_CDMAG            511
+#define PEF_TO_GSE2000          512
 
 #define WGS84_TO_EME2000        601
 #define WGS84_TO_ICRF2000       601
@@ -318,6 +327,7 @@
 #define WGS84_TO_SM             609
 #define WGS84_TO_EDMAG          610
 #define WGS84_TO_CDMAG          611
+#define WGS84_TO_GSE2000        612
 
 #define ITRF_TO_EME2000         601
 #define ITRF_TO_ICRF2000        601
@@ -334,6 +344,7 @@
 #define ITRF_TO_SM              609
 #define ITRF_TO_EDMAG           610
 #define ITRF_TO_CDMAG           611
+#define ITRF_TO_GSE2000         612
 
 #define GEO_TO_EME2000          601
 #define GEO_TO_ICRF2000         601
@@ -350,6 +361,7 @@
 #define GEO_TO_SM               609
 #define GEO_TO_EDMAG            610
 #define GEO_TO_CDMAG            611
+#define GEO_TO_GSE2000          612
 
 #define GSE_TO_EME2000          701
 #define GSE_TO_ICRF2000         701
@@ -366,6 +378,7 @@
 #define GSE_TO_SM               709
 #define GSE_TO_EDMAG            710
 #define GSE_TO_CDMAG            711
+#define GSE_TO_GSE2000          712
 
 #define GSM_TO_EME2000          801
 #define GSM_TO_ICRF2000         801
@@ -382,6 +395,7 @@
 #define GSM_TO_SM               809
 #define GSM_TO_EDMAG            810
 #define GSM_TO_CDMAG            811
+#define GSM_TO_GSE2000          812
 
 #define SM_TO_EME2000           901
 #define SM_TO_ICRF2000          901
@@ -398,6 +412,7 @@
 #define SM_TO_SM                909
 #define SM_TO_EDMAG             910
 #define SM_TO_CDMAG             911
+#define SM_TO_GSE2000           912
 
 #define EDMAG_TO_EME2000       1001
 #define EDMAG_TO_ICRF2000      1001
@@ -414,6 +429,7 @@
 #define EDMAG_TO_SM            1009
 #define EDMAG_TO_EDMAG         1010
 #define EDMAG_TO_CDMAG         1011
+#define EDMAG_TO_GSE2000       1012
 
 #define CDMAG_TO_EME2000       1101
 #define CDMAG_TO_ICRF2000      1101
@@ -430,6 +446,24 @@
 #define CDMAG_TO_SM            1109
 #define CDMAG_TO_EDMAG         1110
 #define CDMAG_TO_CDMAG         1111
+#define CDMAG_TO_GSE2000       1112
+
+#define GSE2000_TO_EME2000     1201
+#define GSE2000_TO_ICRF2000    1201
+#define GSE2000_TO_GEI2000     1201
+#define GSE2000_TO_MOD         1202
+#define GSE2000_TO_TOD         1203
+#define GSE2000_TO_TEME        1204
+#define GSE2000_TO_PEF         1205
+#define GSE2000_TO_WGS84       1206
+#define GSE2000_TO_ITRF        1206
+#define GSE2000_TO_GEO         1206
+#define GSE2000_TO_GSE         1207
+#define GSE2000_TO_GSM         1208
+#define GSE2000_TO_SM          1209
+#define GSE2000_TO_EDMAG       1210
+#define GSE2000_TO_CDMAG       1211
+#define GSE2000_TO_GSE2000     1212
 
 typedef struct Lgm_LeapSeconds {
 
@@ -623,12 +657,13 @@ typedef struct Lgm_CTrans {
 
     double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
     double      beta_sun;           /**< Ecliptic elevation of Sun (in radians) */
-    double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
+    double      earth_sun_dist;     /**< Earth-Sun distance (in units of Earth radii) */
     double      RA_sun;             /**< Right Ascention of Sun (in degrees) */
     double      DEC_sun;            /**< Declination of Sun (in degrees) */
 
-    Lgm_Vector  Sun;                /**< direction of Sun in GEI system (unit vector) */
-    Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in GEI system (unit vector) */
+    Lgm_Vector  Sun;                /**< direction of Sun in MOD system (unit vector) */
+    Lgm_Vector  SunJ2000;           /**< direction of Sun in GEI2000 system (unit vector) */
+    Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in MOD system (unit vector) */
     double      psi;                /**< Geodipole tilt angle, \f$\psi\f$ (in radians) */
     double      sin_psi;            /**< \f$\sin(\psi)\f$ */
     double      cos_psi;            /**< \f$\cos(\psi)\f$ */
@@ -681,7 +716,7 @@ typedef struct Lgm_CTrans {
 
 
     /*
-     * Transformation matrices between various ccord systems
+     * Transformation matrices between various coord systems
      */
     double      Agei_to_mod[3][3];
     double      Amod_to_gei[3][3];
@@ -695,6 +730,8 @@ typedef struct Lgm_CTrans {
     double      Apef_to_wgs84[3][3];
     double      Agse_to_mod[3][3];
     double      Amod_to_gse[3][3];
+    double      Agse2000_to_gei[3][3];
+    double      Agei_to_gse2000[3][3];
     double      Asm_to_gsm[3][3];
     double      Agsm_to_sm[3][3];
     double      Agsm_to_mod[3][3];

@@ -519,7 +519,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
      *          The True Anomaly (nu)
      *	    The Eccentric Anomaly via Keplers equation (E)
      */
-    days    = Lgm_JD( c->TT.Year,  c->TT.Month,  c->TT.Day, c->TT.Time, LGM_TIME_SYS_TT, c) - 2447891.5;
+    days    = c->TT.JD - 2447891.5;
     varep90 = 279.403303*RadPerDeg;
     varpi90 = 282.768422*RadPerDeg;
     M       = Lgm_angle2pi(M_2PI/365.242191*days );
@@ -557,6 +557,19 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 
     /* Hand off to function to get Sun position by specified method */
     Lgm_ComputeSun(c, jpl); //last arg is Lgm_JPLephemInfo, method is set in Lgm_Set_CTrans_Options 
+
+
+    /* MMS-specific GSE2000 from GEI2000 */
+    K.x = 0.0; K.y = -0.39777715575399; K.z = 0.917482062146321; //ecliptic pole at J2000 epoch, Seidelmann, Suppl. to Astron. Almanac, 2006. Eq 3.222-1
+    Lgm_CrossProduct(&K, &c->SunJ2000, &Y);
+    Lgm_CrossProduct(&c->SunJ2000, &Y, &Z);
+    c->Agei_to_gse2000[0][0] = c->SunJ2000.x, c->Agei_to_gse2000[1][0] = c->SunJ2000.y, c->Agei_to_gse2000[2][0] = c->SunJ2000.z;
+    c->Agei_to_gse2000[0][1] = Y.x, c->Agei_to_gse2000[1][1] = Y.y, c->Agei_to_gse2000[2][1] = Y.z;
+    c->Agei_to_gse2000[0][2] = Z.x, c->Agei_to_gse2000[1][2] = Z.y, c->Agei_to_gse2000[2][2] = Z.z;
+
+    c->Agse2000_to_gei[0][0] = c->SunJ2000.x, c->Agse2000_to_gei[1][0] = Y.x, c->Agse2000_to_gei[2][0] = Z.x;
+    c->Agse2000_to_gei[0][1] = c->SunJ2000.y, c->Agse2000_to_gei[1][1] = Y.y, c->Agse2000_to_gei[2][1] = Z.y;
+    c->Agse2000_to_gei[0][2] = c->SunJ2000.z, c->Agse2000_to_gei[1][2] = Y.z, c->Agse2000_to_gei[2][2] = Z.z;
 
 
     /*
@@ -681,7 +694,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     Lgm_CrossProduct(&c->Sun, &Y, &Z);
 
 
-    //  Create transformation matrix from GEI to GSE (c->Amod_to_gse[cols][rows])
+    //  Create transformation matrix from MOD to GSE (c->Amod_to_gse[cols][rows])
     c->Amod_to_gse[0][0] = c->Sun.x, c->Amod_to_gse[1][0] = c->Sun.y, c->Amod_to_gse[2][0] = c->Sun.z;
     c->Amod_to_gse[0][1] = Y.x, c->Amod_to_gse[1][1] = Y.y, c->Amod_to_gse[2][1] = Y.z;
     c->Amod_to_gse[0][2] = Z.x, c->Amod_to_gse[1][2] = Z.y, c->Amod_to_gse[2][2] = Z.z;
@@ -690,7 +703,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     c->Agse_to_mod[0][1] = c->Sun.y, c->Agse_to_mod[1][1] = Y.y, c->Agse_to_mod[2][1] = Z.y;
     c->Agse_to_mod[0][2] = c->Sun.z, c->Agse_to_mod[1][2] = Y.z, c->Agse_to_mod[2][2] = Z.z;
 
-
+    
     /*
      *  Initialize IGRF to get (among other things) the dipole moment.
      *  We really should do this more carefully. Make sure the lat/lons
@@ -1005,6 +1018,14 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
         printf("                        [ %15.8e  %15.8e  %15.8e ]\n",   c->Apef_to_wgs84[0][0], c->Apef_to_wgs84[1][0], c->Apef_to_wgs84[2][0]);
         printf("    Apef_to_wgs84     = [ %15.8e  %15.8e  %15.8e ]\n",   c->Apef_to_wgs84[0][1], c->Apef_to_wgs84[1][1], c->Apef_to_wgs84[2][1]);
         printf("                        [ %15.8e  %15.8e  %15.8e ]\n\n", c->Apef_to_wgs84[0][2], c->Apef_to_wgs84[1][2], c->Apef_to_wgs84[2][2]);
+
+        printf("                        [ %15.8lf  %15.8lf  %15.8lf ]\n",   c->Agse2000_to_gei[0][0], c->Agse2000_to_gei[1][0], c->Agse2000_to_gei[2][0]);
+        printf("    Agse2000_to_gei   = [ %15.8lf  %15.8lf  %15.8lf ]\n",   c->Agse2000_to_gei[0][1], c->Agse2000_to_gei[1][1], c->Agse2000_to_gei[2][1]);
+        printf("                        [ %15.8lf  %15.8lf  %15.8lf ]\n\n", c->Agse2000_to_gei[0][2], c->Agse2000_to_gei[1][2], c->Agse2000_to_gei[2][2]);
+
+        printf("                        [ %15.8lf  %15.8lf  %15.8lf ]\n",   c->Agei_to_gse2000[0][0], c->Agei_to_gse2000[1][0], c->Agei_to_gse2000[2][0]);
+        printf("    Agei_to_gse2000   = [ %15.8lf  %15.8lf  %15.8lf ]\n",   c->Agei_to_gse2000[0][1], c->Agei_to_gse2000[1][1], c->Agei_to_gse2000[2][1]);
+        printf("                        [ %15.8lf  %15.8lf  %15.8lf ]\n\n", c->Agei_to_gse2000[0][2], c->Agei_to_gse2000[1][2], c->Agei_to_gse2000[2][2]);
     }
 
 }
@@ -1028,6 +1049,8 @@ void Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl ) {
         case LGM_EPH_DE:
             Lgm_JPL_getSunVector( c->TT.JD, jpl, &SunICRF);
             Lgm_Convert_Coords( &SunICRF, &Sunmod, GEI2000_TO_MOD, c );        
+            Lgm_NormalizeVector(&SunICRF);
+            c->SunJ2000 = SunICRF;
             Lgm_CartToSphCoords( &Sunmod, &Dec, &RA, &r);
             c->RA_sun = Lgm_angle360( RA );
             c->DEC_sun = Dec;
@@ -1056,6 +1079,8 @@ void Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl ) {
             S.y = cos(epsilon)*sin(c->lambda_sun);
             S.z = sin(epsilon)*sin(c->lambda_sun);
             c->Sun = S;
+            Lgm_Convert_Coords( &c->Sun, &SunICRF, MOD_TO_GEI2000, c );
+            c->SunJ2000 = SunICRF;
             break;
         case LGM_EPH_LOW_ACCURACY:
         default:
@@ -1073,6 +1098,8 @@ void Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl ) {
             S.y = cos(epsilon)*sin(c->lambda_sun);
             S.z = sin(epsilon)*sin(c->lambda_sun);
             c->Sun = S;
+            Lgm_Convert_Coords( &c->Sun, &SunICRF, MOD_TO_GEI2000, c );
+            c->SunJ2000 = SunICRF;
             break;
     }
 }
@@ -1315,6 +1342,10 @@ void Lgm_Convert_Coords( Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c )
         case GSE_COORDS: 	// in coords are in GSE
             Lgm_MatTimesVec(c->Agse_to_mod, u, &w);
             break;
+        case GSE2000_COORDS:
+            Lgm_MatTimesVec(c->Agse2000_to_gei, u, &r);
+            Lgm_MatTimesVec(c->Agei_to_mod, &r, &w);
+            break;
         case GSM_COORDS: 	// in coords are in GSM
             Lgm_MatTimesVec(c->Agsm_to_mod, u, &w);
             break;
@@ -1368,6 +1399,10 @@ void Lgm_Convert_Coords( Lgm_Vector *u, Lgm_Vector *v, int flag, Lgm_CTrans *c )
             break;
         case GSM_COORDS: 	// out coords are in GSM
             Lgm_MatTimesVec(c->Amod_to_gsm, &w, v);
+            break;
+        case GSE2000_COORDS: 	// out coords are in GSE2000
+            Lgm_MatTimesVec(c->Amod_to_gei, &w, &r);
+            Lgm_MatTimesVec(c->Agei_to_gse2000,  &r, v);
             break;
         case SM_COORDS: 	// out coords are in SM
             Lgm_MatTimesVec(c->Amod_to_gsm, &w, &r);
