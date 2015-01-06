@@ -8,8 +8,6 @@ It is still just a a partial solution
 
 
 """
-__author__ = 'Steve Morley, Brian Larsen (Python), Mike Henderson (C) - LANL'
-
 import itertools
 from ctypes import pointer, c_double
 
@@ -17,51 +15,35 @@ import numpy as np
 from spacepy import datamodel
 
 
-from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Convert_Coords, Lgm_McIlwain_L
-from Lgm_Wrap import SM_TO_GEI2000, SM_TO_TEME, SM_TO_TOD, SM_TO_MOD, TEME_TO_WGS84, WGS84_TO_GSM, GSM_TO_WGS84, WGS84_TO_GSE, GSE_TO_WGS84, SM_TO_GSM, GSM_TO_SM, GSM_TO_GSE, GSE_TO_GSM, MOD_TO_GSM, GSE_TO_SM, SM_TO_GSE, MOD_TO_GSE, MOD_TO_WGS84, GEO_TO_GSM, GSE_TO_GEI2000, GEI2000_TO_GSM, GSM_TO_GEI2000, GEI2000_TO_GSE, GEO_TO_GSE, GSE_TO_GEO
-from Lgm_Wrap import GEO_TO_TEME, GEO_TO_TOD, GEO_TO_MOD, GEO_TO_GEI2000
-from Lgm_Wrap import GEI2000_TO_TOD, GEI2000_TO_MOD, GEI2000_TO_GEO, TOD_TO_GEO
+from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Set_CTrans_Options, Lgm_Convert_Coords, Lgm_McIlwain_L
+from Lgm_Wrap import LGM_EPH_DE, LGM_PN_IAU76
+from Lgm_Wrap import GEI2000_COORDS, MOD_COORDS, TOD_COORDS, TEME_COORDS, PEF_COORDS, GEO_COORDS 
+from Lgm_Wrap import GSE_COORDS, GSM_COORDS, SM_COORDS, EDMAG_COORDS, CDMAG_COORDS, GSE2000_COORDS 
 from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
 from lgmpy.Lstar import Lstar_Data
 
 from _Bfield_dict import Bfield_dict
 
-conv_dict = {'SM_GSM': SM_TO_GSM,
-                 'GSM_SM': GSM_TO_SM,
-                 'SM_GSE': SM_TO_GSE,
-                 'GSE_SM': GSE_TO_SM,
-                 'TOD_GEO': TOD_TO_GEO,
-                 'WGS84_GSM': WGS84_TO_GSM,
-                 'GSM_WGS84': GSM_TO_WGS84,
-                 'WGS84_GSE': WGS84_TO_GSE,
-                 'GSE_WGS84': GSE_TO_WGS84,
-                 'GSM_GSE': GSM_TO_GSE,
-                 'GSE_GSM': GSE_TO_GSM,
-                 'TEME_WGS84': TEME_TO_WGS84,
-                 'MOD_GSM' : MOD_TO_GSM,
-                 'SM_GSE' : SM_TO_GSE,
-                 'SM_GEI2000' : SM_TO_GEI2000,
-                 'SM_TEME' : SM_TO_TEME,
-                 'SM_TOD' : SM_TO_TOD,
-                 'SM_MOD' : SM_TO_MOD,
-                 'MOD_GSE' : MOD_TO_GSE,
-                 'MOD_WGS84' : MOD_TO_WGS84,
-                 'GEO_GSM' : GEO_TO_GSM,
-                 'GEO_MOD' : GEO_TO_MOD,
-                 'GEO_TOD' : GEO_TO_TOD,
-                 'GEO_TEME' : GEO_TO_TEME,
-                 'GEO_GEI2000' : GEO_TO_GEI2000,
-                 'GSE_GEI2000' : GSE_TO_GEI2000,
-                 'GEI2000_GSE' : GEI2000_TO_GSE,
-                 'GEI2000_GEO' : GEI2000_TO_GEO,
-                 'GEI2000_TOD' : GEI2000_TO_TOD,
-                 'GEI2000_MOD' : GEI2000_TO_MOD,
-                 'GEI2000_GSM' : GEI2000_TO_GSM,
-                 'GSM_GEI2000' : GSM_TO_GEI2000,
-                 'GEO_GSE'     : GEO_TO_GSE,
-                 'GSE_GEO'     : GSE_TO_GEO}
+trans_dict = {'GEI2000':  GEI2000_COORDS,
+              'EME2000':  GEI2000_COORDS,
+              'ICRF2000': GEI2000_COORDS,
+              'MOD':      MOD_COORDS,
+              'TOD':      TOD_COORDS,
+              'TEME':     TEME_COORDS,
+              'PEF':      PEF_COORDS,
+              'WGS84':    GEO_COORDS,
+              'ITRF':     GEO_COORDS,
+              'GEO':      GEO_COORDS,
+              'GSE':      GSE_COORDS,
+              'GSM':      GSM_COORDS,
+              'SM':       SM_COORDS,
+              'EDMAG':    EDMAG_COORDS,
+              'CDMAG':    CDMAG_COORDS,
+              'GSE2000':  GSE2000_COORDS
+              }
 
-def coordTrans(*args):
+
+def coordTrans(pos_in, time_in, in_sys, out_sys, de_eph=False):
     '''
     Convert coordinates between almost any system using LanlGeoMag
 
@@ -75,6 +57,8 @@ def coordTrans(*args):
         a string giving the acronym for the input coordinate system
     system_out : str
         a string giving the acronym for the desired output coordinate system
+    de_eph : bool or int (optional)
+        a boolean stating whether JPL DE421 is to be used for Sun, etc.
 
     Returns
     -------
@@ -95,7 +79,7 @@ def coordTrans(*args):
     extend interface to get necessary args from a MagModel or cTrans structure
     '''
 
-    def doConversion(pos_in, to_str, cdict, cTrans):
+    def doConversion(pos_in, cdict, cTrans):
         """
         Function that does the conversion
 
@@ -120,39 +104,37 @@ def coordTrans(*args):
             vector of the new position
         """
 
-        if to_str not in cdict: raise NotImplementedError('Coordinate transform not implemented')
         try:
             Pin = Lgm_Vector.Lgm_Vector(*pos_in)
         except:
             Pin = pos_in
         Pout = Lgm_Vector.Lgm_Vector()
-        Lgm_Convert_Coords( pointer(Pin), pointer(Pout), cdict[to_str], cTrans )
+        Lgm_Convert_Coords( pointer(Pin), pointer(Pout), cdict, pointer(cTrans) )
         return Pout
 
-    #change args to named vars to make easier to process different input types
-    pos_in = args[0]
-    time_in = args[1]
-    in_sys = args[2]
-    out_sys = args[3]
-
     # change datetime to Lgm Datelong and UTC
-    mInfo = Lgm_MagModelInfo.Lgm_MagModelInfo()
+    ct = Lgm_CTrans.Lgm_CTrans(0)
+    if de_eph:
+        Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, pointer(ct))
     try:
         datelong = Lgm_CTrans.dateToDateLong(time_in)
         utc = Lgm_CTrans.dateToFPHours(time_in)
-        Lgm_Set_Coord_Transforms( datelong, utc, mInfo.c) # don't need pointer as it is one
+        Lgm_Set_Coord_Transforms( datelong, utc, pointer(ct)) # don't need pointer as it is one
     except AttributeError:
         raise(TypeError("Date must be a datetime object"))
 
-    to_str = in_sys+'_'+out_sys
+    try:
+        conv_val = trans_dict[in_sys]*100 + trans_dict[out_sys]
+    except KeyError:
+        raise KeyError('One of the specified coordinate systems is not recognised')
 
     ## do this as WGS uses Cartesian but needs to be converted from desired spherical input
     if 'WGS84' in in_sys:
         XYZ = Lgm_Vector.SphToCart(*pos_in)
         SPH = Lgm_Vector.Lgm_Vector(XYZ.x,XYZ.y, XYZ.z)
-        Pout = doConversion(SPH, to_str, cdict=conv_dict, cTrans=mInfo.c)
+        Pout = doConversion(SPH, conv_val, cTrans=ct)
     else:
-        Pout = doConversion(pos_in, to_str, conv_dict, mInfo.c)
+        Pout = doConversion(pos_in, conv_val, ct)
 
     if 'WGS84' in out_sys:
         nlat, nlon, nrad = Lgm_Vector.CartToSph(*Pout.tolist())

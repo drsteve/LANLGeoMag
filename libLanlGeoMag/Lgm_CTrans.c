@@ -1048,9 +1048,10 @@ void Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl ) {
     switch (c->ephModel) {
         case LGM_EPH_DE:
             Lgm_JPL_getSunVector( c->TT.JD, jpl, &SunICRF);
-            Lgm_Convert_Coords( &SunICRF, &Sunmod, GEI2000_TO_MOD, c );        
             Lgm_NormalizeVector(&SunICRF);
             c->SunJ2000 = SunICRF;
+            Lgm_MatTimesVec(c->Agei_to_mod, &SunICRF, &Sunmod);
+            //Lgm_Convert_Coords( &SunICRF, &Sunmod, GEI2000_TO_MOD, c );        
             Lgm_CartToSphCoords( &Sunmod, &Dec, &RA, &r);
             c->RA_sun = Lgm_angle360( RA );
             c->DEC_sun = Dec;
