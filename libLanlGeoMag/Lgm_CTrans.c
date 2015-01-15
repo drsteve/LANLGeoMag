@@ -562,6 +562,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     /* MMS-specific GSE2000 from GEI2000 */
     K.x = 0.0; K.y = -0.39777715575399; K.z = 0.917482062146321; //ecliptic pole at J2000 epoch, Seidelmann, Suppl. to Astron. Almanac, 2006. Eq 3.222-1
     Lgm_CrossProduct(&K, &c->SunJ2000, &Y);
+    Lgm_NormalizeVector(&Y);
     Lgm_CrossProduct(&c->SunJ2000, &Y, &Z);
     c->Agei_to_gse2000[0][0] = c->SunJ2000.x, c->Agei_to_gse2000[1][0] = c->SunJ2000.y, c->Agei_to_gse2000[2][0] = c->SunJ2000.z;
     c->Agei_to_gse2000[0][1] = Y.x, c->Agei_to_gse2000[1][1] = Y.y, c->Agei_to_gse2000[2][1] = Y.z;
@@ -689,6 +690,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     //  Taking X in direction of sun and Z parallel to K (ec. pole),
     //  compute the Y axis direction.
     Lgm_CrossProduct(&K, &c->Sun, &Y);
+    Lgm_NormalizeVector(&Y);
 
     //  Compute Zgse axis in MOD system
     Lgm_CrossProduct(&c->Sun, &Y, &Z);
