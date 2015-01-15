@@ -146,9 +146,12 @@ typedef struct Lgm_MagEphemInfo {
     double      Mcurr;
     double      Mref;
     double      Mused;
-    double      *LHilton;    //!< LHilton[ PitchAngleIndex ]
-    double      *LMcIlwain;  //!< LMcIlwain[ PitchAngleIndex ]
-    double      *Lstar;      //!< Lstar[ PitchAngleIndex ]
+    double      *LHilton;      //!< LHilton[ PitchAngleIndex ]
+    double      *LMcIlwain;    //!< LMcIlwain[ PitchAngleIndex ]
+    double      *Hmin;         //!< Hmin[ PitchAngleIndex ]
+    double      *Hmin_GeodLat; //!< Hmin[ PitchAngleIndex ]
+    double      *Hmin_GeodLon; //!< Hmin[ PitchAngleIndex ]
+    double      *Lstar;        //!< Lstar[ PitchAngleIndex ]
 
     int         *DriftOrbitType;     // e.g. Open, Closed, Shabansky
     int         **nMinima;           // # of minima on FL
@@ -273,6 +276,9 @@ typedef struct Lgm_MagEphemData {
     double      *H5_M_ref;
     double      *H5_M_igrf;
 
+    double      **H5_Hmin;
+    double      **H5_Hmin_GeodLat;
+    double      **H5_Hmin_GeodLon;
     double      **H5_Lstar;
     double      **H5_Sb;
     double      **H5_Tb;

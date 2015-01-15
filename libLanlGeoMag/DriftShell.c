@@ -213,7 +213,7 @@ mlatbest = mlat_min;
                 b = res;
                 c = res+2.0;
 
-                I  = ComputeI_FromMltMlat2( Bm, MLT, b, &r, I0, LstarInfo );
+                I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
                 if ( fabs(I) < 1e98 ) {
                     D0 = I-I0;
                     LstarInfo->MLATarr[LstarInfo->nImI0] = b;
@@ -256,7 +256,7 @@ mlatbest = mlat_min;
                 if ( !FoundZeroBracket ) {
 
 
-                    I  = ComputeI_FromMltMlat2( Bm, MLT, a, &r, I0, LstarInfo );
+                    I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
                     if ( fabs(I) < 1e98 ) {
                         LstarInfo->MLATarr[LstarInfo->nImI0] = a;
                         LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
@@ -296,7 +296,7 @@ mlatbest = mlat_min;
 
                     if ( !FoundZeroBracket ) {
 
-                        I  = ComputeI_FromMltMlat2( Bm, MLT, c, &r, I0, LstarInfo );
+                        I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
                         if ( fabs(I) < 1e98 ) {
                             LstarInfo->MLATarr[LstarInfo->nImI0] = c;
                             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
@@ -404,7 +404,7 @@ mlatbest = mlat_min;
                 FirstHalf = FALSE;
                 e = b + F1*d1;
             }
-            I = ComputeI_FromMltMlat2( Bm, MLT, e, &r, I0, LstarInfo );
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
             LstarInfo->MLATarr[LstarInfo->nImI0] = e;
             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
@@ -571,7 +571,7 @@ mlatbest = mlat_min;
             }
 
 
-            I = ComputeI_FromMltMlat2( Bm, MLT, e, &r, I0, LstarInfo );
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
             LstarInfo->MLATarr[LstarInfo->nImI0] = e;
             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
@@ -1247,7 +1247,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat1)
      *
      */
-    I = ComputeI_FromMltMlat2( Bm, MLT, mlat1, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
     Bracket->b = mlat1; Bracket->Ib = (I < 1e6) ? I : -1e31; Bracket->Db = Bracket->Ib - I0;
     if ( Bracket->Ib > 0.0 ) {
         // Cache I(mlat) point for possible future fitting.
@@ -1277,7 +1277,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat0)
      *
      */
-    I = ComputeI_FromMltMlat2( Bm, MLT, mlat0, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
     Bracket->a = mlat0; Bracket->Ia = (I < 1e6) ? I : -1e31; Bracket->Da = Bracket->Ia - I0;
     if ( Bracket->Ia > 0.0 ) {
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->a;
@@ -1320,7 +1320,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat2)
      *
      */
-    I = ComputeI_FromMltMlat2( Bm, MLT, mlat2, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
     Bracket->c = mlat2; Bracket->Ic = (I < 1e6) ? I : -1e31; Bracket->Dc = Bracket->Ic - I0;
     if ( Bracket->Ic > 0.0 ) {
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->c;
@@ -1484,7 +1484,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
         while (!done) {
 
             mmm = (Bracket->a + Bracket->b)/2.0;
-            I   = ComputeI_FromMltMlat2( Bm, MLT, mmm, &r, I0, LstarInfo );
+            I   = ComputeI_FromMltMlat( Bm, MLT, mmm, &r, I0, LstarInfo );
             if ( I < 1e6 ) {
                 D = I-I0;
                 LstarInfo->MLATarr[LstarInfo->nImI0]   = mmm;
@@ -1598,7 +1598,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
          *  I.e. we need a smaller I which (usually) is a smaller mlat. So try
          *  mlat0 next.
          */
-        I  = ComputeI_FromMltMlat2( Bm, MLT, mlat0, &r, I0, LstarInfo );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
         D0 = I-I0;
         LstarInfo->MLATarr[LstarInfo->nImI0] = mlat0;
@@ -1633,7 +1633,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
              *
              * Still no bracket. Evaluate the other side.
              */
-            I  = ComputeI_FromMltMlat2( Bm, MLT, mlat2, &r, I0, LstarInfo );
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
             if ( fabs(I) > 1e99 ) return(-5);
             D2 = I-I0;
             LstarInfo->MLATarr[LstarInfo->nImI0] = mlat2;
@@ -1678,7 +1678,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
          *  Then we would like to have the other side of the bracket be > 0.0.
          *  I.e. we need a bigger I which (usually) is a bigger mlat.
          */
-        I  = ComputeI_FromMltMlat2( Bm, MLT, mlat2, &r, I0, LstarInfo );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
         if ( fabs(I) > 1e99 ) return(-5);
         D2 = I-I0;
         LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat2;
@@ -1711,7 +1711,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
             /*
              * Still no bracket. Evaluate the other side.
              */
-            I  = ComputeI_FromMltMlat2( Bm, MLT, mlat0, &r, I0, LstarInfo );
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
             if ( fabs(I) > 1e99 ) return(-5);
             D0 = I-I0;
             LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat0;

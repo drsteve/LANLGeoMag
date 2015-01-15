@@ -1128,6 +1128,72 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
 
 
     if ( m->nAlpha > 0 ) {
+
+
+        fprintf( fp, "#  \"Hmin\":             { \"DESCRIPTION\": \"Minimum geodetic altitude of the particle as it bounces and drifts on its drift shell.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Hmin\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"HL!Bmin!N\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s H!Bmin!N\",\n", ExtModel );
+        fprintf( fp, "#                              \"UNITS\": \"km\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Hmin_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Hmin_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s H!Bmin!N %g!Ao!N\", ", ExtModel, m->Alpha[i] );
+        fprintf(fp, "\"H!Bmin!N %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+
+        fprintf( fp, "#  \"Hmin_GeodLat\":      { \"DESCRIPTION\": \"Geodetic Latitude of Hmin point.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Hmin_GeodLat\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"HL!Bmin!N GeodLat\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s H!Bmin!N GeodLat\",\n", ExtModel );
+        fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Hmin_GeodLat_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Hmin_GeodLat_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s H!Bmin!N GeodLat %g!Ao!N\", ", ExtModel, m->Alpha[i] );
+        fprintf(fp, "\"H!Bmin!N GeodLat %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+
+        fprintf( fp, "#  \"Hmin_GeodLon\":      { \"DESCRIPTION\": \"Geodetic Longitude of Hmin point.\",\n");
+        fprintf( fp, "#                               \"NAME\": \"Hmin_GeodLon\",\n");
+        fprintf( fp, "#                              \"TITLE\": \"HL!Bmin!N GeodLon\",\n");
+        fprintf( fp, "#                              \"LABEL\": \"%s H!Bmin!N GeodLon\",\n", ExtModel );
+        fprintf( fp, "#                              \"UNITS\": \"Degrees\",\n");
+        fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", m->nAlpha );
+        fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += m->nAlpha;
+        fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"Hmin_GeodLon_%g\", ", m->Alpha[i] );
+        fprintf(fp, "\"Hmin_GeodLon_%g\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
+        for (i=0; i<m->nAlpha-1; i++) fprintf(fp, "\"%s H!Bmin!N GeodLon %g!Ao!N\", ", ExtModel, m->Alpha[i] );
+        fprintf(fp, "\"H!Bmin!N GeodLon %g!Ao!N\" ],\n", m->Alpha[i] ); 
+        fprintf( fp, "#                           \"DEPEND_1\": \"Alpha\",\n");
+        //fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
+        //fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
+        fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
+        fprintf( fp, "#\n");
+
+
+
+
+
+
         fprintf( fp, "#  \"Lstar\":            { \"DESCRIPTION\": \"Generalized Roederer L-shell value (also known as L*).\",\n");
         fprintf( fp, "#                               \"NAME\": \"Lstar\",\n");
         fprintf( fp, "#                              \"TITLE\": \"L!A*!N\",\n");
@@ -1419,6 +1485,44 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
         n = 13*m->nAlpha;
         LGM_ARRAY_1D( Str2, n+10, char );
 
+        // Hmin header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, "  Hmin (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, "  Hmin " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+        // Hmin_GeodLat header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, "  Hmin_GeodLat (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, "  Hmin_GeodLat " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+        // Hmin_GeodLon header
+        p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
+        // add text in center
+        if ( m->nAlpha > 1 ) {
+            sprintf( TextStr, "  Hmin_GeodLon (%d Pitch Angles) ", m->nAlpha ); tsl = strlen( TextStr );
+        } else {
+            sprintf( TextStr, "  Hmin_GeodLon " ); tsl = strlen( TextStr );
+        }
+        n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
+        for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
+        fprintf( fp, " %*s", n+3,  Str2 );
+
+
+
         // Lstar header
         p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
         // add text in center
@@ -1430,6 +1534,8 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
         n2 = (n+3 - tsl)/2; if (n2<0) n2 = 0;
         for (p = Str2+n2, i=0; i<tsl; i++) *p++ = TextStr[i];
         fprintf( fp, " %*s", n+3,  Str2 );
+
+
 
         // DS Type header
         p = Str2; *p++ = ' '; *p++ = '+'; for (i=0; i<n; i++) *p++ = '-'; *p++ = '+'; *p++ = '\0';
@@ -1686,6 +1792,12 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
     fprintf( fp, " %12s", "M_ref" );
     fprintf( fp, " %12s", "M_igrf" );
     fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Hmin%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Hmin_GeodLat%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Hmin_GeodLon%d", i ); fprintf(fp, " %12s", Str ); }
+    fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "L*%d", i ); fprintf(fp, " %12s", Str ); }
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "DSType%d", i ); fprintf(fp, " %12s", Str ); }
@@ -1858,23 +1970,42 @@ void Lgm_WriteMagEphemHeader( FILE *fp, char *CodeVersion, char *ExtModel, int S
     fprintf( fp, " %12s", "nT" );   // M_IGRF
 
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); }
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "km" ); fprintf(fp, " %12s", Str ); } // Hmin
+
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Degrees" ); fprintf(fp, " %12s", Str ); } // Hmin_GeodLat
+
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Degrees" ); fprintf(fp, " %12s", Str ); } // Hmin_GeodLon
+
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); } // Lstar
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Dimless" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "nT" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
+
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re G^0.5" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "Re" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "s" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { sprintf( Str, "dimless" ); fprintf(fp, " %12s", Str ); }
+
     fprintf(fp, "\n");
 
     Lgm_free_ctrans(c);
@@ -2248,6 +2379,20 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     fprintf( fp, " %12g", m->Mused );   // M_Used
     fprintf( fp, " %12g", m->Mref );    // M_Ref
     fprintf( fp, " %12g", m->Mcurr );   // M_IGRF
+
+
+    // Hmin's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Hmin[i] ); }
+
+    // Hmin_GeodLat's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Hmin_GeodLat[i] ); }
+
+    // Hmin_GeodLon's
+    fprintf(fp, "    ");
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Hmin_GeodLon[i] ); }
+
 
     // L*'s
     fprintf(fp, "    ");

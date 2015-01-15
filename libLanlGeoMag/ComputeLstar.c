@@ -464,6 +464,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
      */
     LstarInfo->VerbosityLevel = 2;
     LstarInfo->LSimpleMax     = 10.0;
+    LstarInfo->ISearchMethod  = 1;
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
@@ -830,8 +831,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      *  Construct drift shell. Get a good initial estimate for mlat
      */
     Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &u, GSM_TO_SM, LstarInfo->mInfo->c );
-Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+printf("LstarInfo->mInfo->Pm_North = %g %g %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z);
+//MGH JAN 15 2015 commented out    Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+
     mlat = DegPerRad*asin(u.z/Lgm_Magnitude( &u ));
+
     MLT0 = atan2( u.y, u.x )*DegPerRad/15.0 + 12.0;
     if (LstarInfo->VerbosityLevel > 2) printf("\t\t%smlat = %g%s\n", PreStr, mlat, PostStr );
     LstarInfo->nPnts = 0;

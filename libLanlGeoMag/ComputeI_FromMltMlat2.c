@@ -1,7 +1,6 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 
-
 /*
  * This version traces FLs from the Earth at the given MLT/mlat instead of trying to find the Bm radially out first.
  */
