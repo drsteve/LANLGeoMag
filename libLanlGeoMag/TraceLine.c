@@ -1332,7 +1332,9 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
 
 
 
-        if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g    R, s = %g %g\n", P.x, P.y, P.z, R, ss );
+        if ( Info->VerbosityLevel > 2 ) {
+            printf("Lgm_TraceLine3(): P = %g %g %g    R, s = %g %g    S = %g   Step n = %d of N = %d (Nsubsteps = %d)\n", P.x, P.y, P.z, R, ss, S, n, N, nSubSteps );
+        }
 
         /*
          * Save this (new) point only if its different from the previous one)
@@ -1355,8 +1357,9 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
              *  Guard against tracing into the Earth. Can happen if we
              *  overshoot the target radius.
              */
-            if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g)  -- bailing.\n", __FILE__, __LINE__, R ); 
-            return(-1);
+            if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Below the surface of the Earth while tracing to get above the target height (R=%g) after tracing %d unique steps  -- bailing.\n", __FILE__, __LINE__, R, n ); 
+            //return(-1);
+            done = TRUE;
         } else if ( n > LGM_MAX_INTERP_PNTS-1  ) {
             /*
              *  Guard against cramming too many points into interpolation arrays

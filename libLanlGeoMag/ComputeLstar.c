@@ -2099,14 +2099,18 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             } else {
                 Pouter = Ptest;
                 Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
-                printf("Failed DS trace for alpha = %g at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
-                   LstarInfo_test->PitchAngle, Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+                if (LstarInfo->VerbosityLevel > 0) {
+                    printf("Failed DS trace for alpha = %g at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                        LstarInfo_test->PitchAngle, Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+                    }
             }
         } else {
             //FL open -> drift shell open
             Pouter = Ptest;
-            printf("Failed FL trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
-                   Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+            if (LstarInfo->VerbosityLevel > 0) {
+                printf("Failed FL trace at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                    Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+                }
         }
 
     nn++;
