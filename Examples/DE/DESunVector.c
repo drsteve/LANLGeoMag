@@ -706,8 +706,8 @@ for (j=0; j<12; j++){
     Lgm_Convert_Coords( &Uicrf, &Umod, GEI2000_TO_MOD, c );
     Lgm_CartToSphCoords( &Umod, &Dec, &RA, &r);
     RA += 360.0;
-    //printf("DE421 Sun Vec (RA, Dec): %g %g\n", RA, Dec);
-    //printf("Lgm   Sun Vec (RA, Dec): %g %g\n", c->RA_sun, c->DEC_sun);
+    printf("DE421 Sun Vec (RA, Dec): %g %g\n", RA, Dec);
+    printf("Lgm   Sun Vec (RA, Dec): %g %g\n", c->RA_sun, c->DEC_sun);
 
     //Uruss.x = 0.195353; Uruss.y = -0.899820; Uruss.z = -0.390078;
     Uruss.x = Russ[n][0]; Uruss.y = Russ[n][1]; Uruss.z = Russ[n][2];
