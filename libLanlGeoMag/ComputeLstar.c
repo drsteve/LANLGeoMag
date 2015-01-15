@@ -848,7 +848,6 @@ printf("LstarInfo->mInfo->Pm_North = %g %g %g\n", LstarInfo->mInfo->Pm_North.x, 
 
 
     nLines = LstarInfo->nFLsInDriftShell;
-printf("nLines = %d\n", nLines);
     DeltaMLT = 24.0/((double)nLines);
 
     delta = 3.0; // default
