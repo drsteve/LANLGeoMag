@@ -4,5 +4,8 @@
 CoordQuickStart: CoordQuickStart.c
 	gcc CoordQuickStart.c -Wall `pkg-config --cflags --libs lgm` -o CoordQuickStart
 
+CoordTransTest: CoordTransTest.c
+	gcc CoordTransTest.c -Wall `pkg-config --cflags --libs lgm` -o CoordTransTest
+
 clean:
 	rm CoordQuickStart
