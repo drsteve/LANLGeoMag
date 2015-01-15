@@ -42,6 +42,39 @@ trans_dict = {'GEI2000':  GEI2000_COORDS,
               'GSE2000':  GSE2000_COORDS
               }
 
+def _doConversion(pos_in, cdict, cTrans):
+    """
+    Function that does the conversion
+
+    .. warning::
+
+        This function is not called by the user
+
+    Parameters
+    ==========
+    pos_in : Lgm_Vector
+        the input position to convert
+    to_str : str
+        a string giving the acronym for the output coordinate system
+    cdict : dict
+        the coordinate transform dictionary
+    cTrans : Lgm_CTrans
+        the Lgm_CTrans object used in the conversion
+
+    Returns
+    =======
+    out : Lgm_Vector
+        vector of the new position
+    """
+
+    try:
+        Pin = Lgm_Vector.Lgm_Vector(*pos_in)
+    except:
+        Pin = pos_in
+    Pout = Lgm_Vector.Lgm_Vector()
+    Lgm_Convert_Coords( pointer(Pin), pointer(Pout), cdict, pointer(cTrans) )
+    return Pout
+
 
 def coordTrans(pos_in, time_in, in_sys, out_sys, de_eph=False):
     '''
@@ -78,40 +111,6 @@ def coordTrans(pos_in, time_in, in_sys, out_sys, de_eph=False):
     ----
     extend interface to get necessary args from a MagModel or cTrans structure
     '''
-
-    def doConversion(pos_in, cdict, cTrans):
-        """
-        Function that does the conversion
-
-        .. warning::
-
-            This function is not called by the user
-
-        Parameters
-        ==========
-        pos_in : Lgm_Vector
-            the input position to convert
-        to_str : str
-            a string giving the acronym for the output coordinate system
-        cdict : dict
-            the coordinate transform dictionary
-        cTrans : Lgm_CTrans
-            the Lgm_CTrans object used in the conversion
-
-        Returns
-        =======
-        out : Lgm_Vector
-            vector of the new position
-        """
-
-        try:
-            Pin = Lgm_Vector.Lgm_Vector(*pos_in)
-        except:
-            Pin = pos_in
-        Pout = Lgm_Vector.Lgm_Vector()
-        Lgm_Convert_Coords( pointer(Pin), pointer(Pout), cdict, pointer(cTrans) )
-        return Pout
-
     # change datetime to Lgm Datelong and UTC
     ct = Lgm_CTrans.Lgm_CTrans(0)
     if de_eph:
@@ -132,9 +131,9 @@ def coordTrans(pos_in, time_in, in_sys, out_sys, de_eph=False):
     if 'WGS84' in in_sys:
         XYZ = Lgm_Vector.SphToCart(*pos_in)
         SPH = Lgm_Vector.Lgm_Vector(XYZ.x,XYZ.y, XYZ.z)
-        Pout = doConversion(SPH, conv_val, cTrans=ct)
+        Pout = _doConversion(SPH, conv_val, cTrans=ct)
     else:
-        Pout = doConversion(pos_in, conv_val, ct)
+        Pout = _doConversion(pos_in, conv_val, ct)
 
     if 'WGS84' in out_sys:
         nlat, nlon, nrad = Lgm_Vector.CartToSph(*Pout.tolist())
@@ -230,14 +229,9 @@ def Lvalue(*args, **kwargs):
         #ans['Epoch'] = datamodel.dmarray([args[1]])
 
     if kwargs['coord_system'] != 'GSM':
-        Pin = Lgm_Vector.Lgm_Vector(*args[0])
-        Pgsm = Lgm_Vector.Lgm_Vector()
-        conv_str = kwargs['coord_system']+'_GSM'
-        try:
-            #TODO: Fix this so it uses the (generalized) coordTrans function above
-            Lgm_Convert_Coords( pointer(Pin), pointer(Pgsm), conv_dict[conv_str], mInfo.c )
-        except:
-            raise NotImplementedError('Coordinate system not implemented')
+        in_sys = kwargs['coord_system']
+        Pout = coordTrans(args[0], args[1], in_sys, 'GSM', de_eph=False)
+        Pgsm = Lgm_Vector.Lgm_Vector(*Pout)
     else:
         Pgsm = Lgm_Vector.Lgm_Vector(*args[0])
 
