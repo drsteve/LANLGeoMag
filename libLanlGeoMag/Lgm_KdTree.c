@@ -75,7 +75,7 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
             if (Positions[d][j] > t->Max[d] ) t->Max[d] = Positions[d][j];
             t->Data[j].Position[d] = Positions[d][j];
         }
-        //t->Data[j].Object = Objects[j];
+        t->Data[j].Object = Objects[j];
 
     }
     for (d=0; d<D; d++) t->Diff[d] = t->Max[d] - t->Min[d];
@@ -414,16 +414,12 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
 
     maxd2 = MaxDist2;
 
-
     // reset priority queue heap for points
     PQP = KdTree->PQP;
     PQP->HeapSize = 0;
 
-
-
     Root = KdTree->Root;
     *Kgot = 0;
-
 
     /*
      * Check to see if there are enough points.
@@ -431,9 +427,7 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
      */
     if ( Root->nDataBelow < K ) return( KDTREE_KNN_NOT_ENOUGH_DATA );
 
-
     Lgm_KdTree_DepthFirstSearch( Root, PQP, K, q, &maxd2 );
-
 
 // these are in reverse order -- fix...
     k = 0;
@@ -448,31 +442,21 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
         *Kgot = k;
         
     }
-    
-
-
 
     //Lgm_KdTree_PrintPQ( &PQ ); //only for debugging
-
     ++(KdTree->kNN_Lookups);
-
 
     /*
      *  return success
      */
-    return( KDTREE_KNN_SUCCESS );
+    if (k==K) {
+        return( KDTREE_KNN_SUCCESS );
+        }
+    else {
+        return( KDTREE_KNN_TOO_FEW_NNS );
+        }
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 /**
@@ -988,7 +972,12 @@ int Lgm_KdTree_kNN2( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, 
      *  return success
      */
     free( q );
-    return( KDTREE_KNN_SUCCESS );
+    if (k==K) {
+        return( KDTREE_KNN_SUCCESS );
+        }
+    else {
+        return( KDTREE_KNN_TOO_FEW_NNS );
+        }
 
 }
 #pragma GCC pop_options
