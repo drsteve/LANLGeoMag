@@ -1,6 +1,6 @@
 #include <Lgm_CTrans.h>
 #include <Lgm_Vec.h>
-#include <Lgm_JPLeph.h>
+//#include <Lgm_JPLeph.h>
 
 int main( ) {
 
