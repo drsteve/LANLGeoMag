@@ -887,6 +887,7 @@ double        UTCDaysSinceJ2000( double TAI, Lgm_CTrans *c );
 double        Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 void          Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c );
+void          Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 
 double        Lgm_CdipMirrorLat( double Alpha0 );

@@ -1519,24 +1519,6 @@ double Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  *  Convert JD directly to a UTC DateTime structure.
  */
@@ -1549,4 +1531,14 @@ void Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c ){
     Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
     Lgm_Make_UTC( Date, Time, UTC, c );
 
+}
+
+/*
+ *  Convert MJD directly to a UTC DateTime structure
+ */
+void Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    double   JD;
+
+    JD = MJD + 2400000.5;
+    Lgm_JD_to_DateTime( JD, UTC, c );
 }
