@@ -246,5 +246,7 @@ void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val );
 hid_t   CreateExtendableRank1DataSet( hid_t File, char *DataSetName, hid_t Type, hid_t *DataSpace );
 hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, hid_t Type, hid_t *DataSpace );
 hid_t   CreateExtendableRank3DataSet( hid_t File, char *DataSetName, int nCol, int nDepth, hid_t Type, hid_t *DataSpace );
+hid_t   CreateStrType( int StrLength );
+
 
 #endif
