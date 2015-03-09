@@ -8,38 +8,44 @@ typedef struct _MaterialProp {
 } MaterialProp;
 
 static MaterialProp mat_FieldLineType0 = {
+// greenish
   {0.0, 0.06, 0.1, 1.0},
   {  0.0/255.0, 105.0/255.0,  27.0/255.0, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
 static MaterialProp mat_FieldLineType1 = {
+// light brownish
   {0.0, 0.06, 0.1, 1.0},
   {152.0/255.0, 153.0/255.0, 122.0/255.0, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
 static MaterialProp mat_FieldLineType2 = {
+// dark brownish
   {0.0, 0.06, 0.1, 1.0},
-  { 98.0/255.0*0.6,  99.0/255.0*0.6,  77.0/255.0*0.6, 1.0},
+  { 99.0/255.0*0.6,  99.0/255.0*0.6,  77.0/255.0*0.6, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
 static MaterialProp mat_FieldLineType3 = {
+// blueish
   {0.0, 0.06, 0.1, 1.0},
   { 19.0/255.0,  83.0/255.0, 194.0/255.0, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
 static MaterialProp mat_FieldLineType4 = {
+// redish
   {0.0, 0.06, 0.1, 1.0},
   {150.0/255.0,  20.0/255.0,  20.0/255.0, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
 static MaterialProp mat_FieldLineType5 = {
+// yellowish
   {0.0, 0.06, 0.1, 1.0},
-  {148.0/255.0, 103.0/255.0,  19.0/255.0, 1.0},
+  {220.0/255.0, 220.0/255.0,  19.0/255.0, 1.0},
   {0.50196078, 0.50196078, 0.50196078, 1.0},
   0.25
 };
@@ -778,27 +784,50 @@ void ReGenerateFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 
     double  x, y, z;
-    int     i, j, ns, Gap, Flag;
+    int     i, j, ns, Gap, Flag, Type;
+    char    Line[128];
+    char    Line2[128];
     FILE    *fp;
 
     fp = fopen( "/home/mgh//git/LanlGeoMag/Examples/Trace/FieldLines.txt", "r" );
-    i = 0; j = 0; Flag = 0;
-    while ( fscanf( fp, "%lf %lf %lf %d", &x, &y, &z, &Gap ) != EOF ) {
+LGM_ARRAY_1D( ObjInfo->nPnts5,   2000, int );
+LGM_ARRAY_1D( ObjInfo->FL_Type5, 2000, int );
+LGM_ARRAY_2D( ObjInfo->x5_gsm,   2000, 2000, double );
+LGM_ARRAY_2D( ObjInfo->y5_gsm,   2000, 2000, double );
+LGM_ARRAY_2D( ObjInfo->z5_gsm,   2000, 2000, double );
 
-        if ( (Gap==3) && (Flag==1) ) {
+    j = -1; i = 0; Flag = 0;
+    while ( fgets( Line, 80, fp ) != EOF ) {
+
+        if ( Line[0] == '\0' ) {
+            break;
+        } else if ( Line[0] == 'T' ) {
+
+            // new FL
             ++j;
-            i=0;
+            sscanf( Line, "Type: %d\n", &Type );
+            ObjInfo->FL_Type5[j] = Type;
+            //printf("=========\n");
+            //printf("ObjInfo->FL_Type5[%d] = %d\n", j, ObjInfo->FL_Type5[j] );
+
+            i = 0;
+
+        } else {
+
+            sscanf( Line, "%lf %lf %lf %d\n", &x, &y, &z, &Gap );
+            //printf("j = %d   i=%d   x, y, z, Gap = %g %g %g %d\n", j, i, x, y, z, Gap);
+            ObjInfo->x5_gsm[j][i] = x;
+            ObjInfo->y5_gsm[j][i] = y;
+            ObjInfo->z5_gsm[j][i] = z;
+            if (i<1999) ++i;
+            ObjInfo->nPnts5[j] = i;
         }
 
-        ObjInfo->x5_gsm[j][i] = x;
-        ObjInfo->y5_gsm[j][i] = y;
-        ObjInfo->z5_gsm[j][i] = z;
-        ++i;
-        ObjInfo->nPnts5[j] = i;
 
-        Flag = 1;
+
+        Line[0]='\0';
     }
-    ++j;
+//exit(0);
     fclose( fp );
     ObjInfo->nFLs = j;
 
@@ -809,38 +838,51 @@ void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
     ObjInfo->MiscFieldLines = glGenLists( 1 );
     glNewList( ObjInfo->MiscFieldLines, GL_COMPILE );
     for (j=0; j<ObjInfo->nFLs; j++){
-        switch ( j ){
+        switch ( ObjInfo->FL_Type5[j] ){
         case 0:
-            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType0.ambient);
-            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType0.diffuse);
-            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType0.specular);
-            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType0.shininess * 128.0);
-            break;
-        case 1:
-            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType1.ambient);
-            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType1.diffuse);
-            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType1.specular);
-            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType1.shininess * 128.0);
-            break;
-        case 2:
-            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType2.ambient);
-            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType2.diffuse);
-            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType2.specular);
-            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType2.shininess * 128.0);
-            break;
-        case 3:
+            // OPEN
             glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType3.ambient);
             glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType3.diffuse);
             glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType3.specular);
             glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType3.shininess * 128.0);
             break;
+        case 1:
+            // CLOSED DAY
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType0.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType0.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType0.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType0.shininess * 128.0);
+            break;
+        case 2:
+            // CLOSED NIGHT y>20
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType1.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType1.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType1.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType1.shininess * 128.0);
+            break;
+        case 3:
+            // CLOSED NIGHT 
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType2.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType2.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType2.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType2.shininess * 128.0);
+            break;
         case 4:
+            // LOBE
+            glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType3.ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType3.diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType3.specular);
+            glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType3.shininess * 128.0);
+            break;
+        case 5:
+            // NORTH FUNNY
             glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType4.ambient);
             glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType4.diffuse);
             glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType4.specular);
             glMaterialf(  GL_FRONT, GL_SHININESS, mat_FieldLineType4.shininess * 128.0);
             break;
-        case 5:
+        case 6:
+            // SOUTH FUNNY
             glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_FieldLineType5.ambient);
             glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_FieldLineType5.diffuse);
             glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_FieldLineType5.specular);
@@ -848,7 +890,7 @@ void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
             break;
         }
 
-        MakeTube( ObjInfo->x5_gsm[j], ObjInfo->y5_gsm[j], ObjInfo->z5_gsm[j], ObjInfo->nPnts5[j], 12, 0.3/7 );
+        MakeTube( ObjInfo->x5_gsm[j], ObjInfo->y5_gsm[j], ObjInfo->z5_gsm[j], ObjInfo->nPnts5[j], 6, 3*0.1/7 );
         //MakeTube( ObjInfo->x5_gsm[j], ObjInfo->y5_gsm[j], ObjInfo->z5_gsm[j], ObjInfo->nPnts5[j], 12, 0.3 );
     }
 //exit(0);
@@ -860,6 +902,11 @@ void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 
 void ReGenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
     glDeleteLists( ObjInfo->MiscFieldLines, 1 );
+LGM_ARRAY_1D_FREE( ObjInfo->nPnts5 );
+LGM_ARRAY_1D_FREE( ObjInfo->FL_Type5 );
+LGM_ARRAY_2D_FREE( ObjInfo->x5_gsm );
+LGM_ARRAY_2D_FREE( ObjInfo->y5_gsm );
+LGM_ARRAY_2D_FREE( ObjInfo->z5_gsm );
     GenerateMiscFieldLineLists( ObjInfo );
 }
 

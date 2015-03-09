@@ -229,8 +229,8 @@
 
 #include "Lgm/Lgm_DFI_RBF.h"
 
-#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
-//#define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
+//#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
+#define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
 
 
 /** Given \f$\vec{v} = (x, y, z)\f$ and \f$\vec{v}_0 = (x_0, y_0, z_0)\f$ this

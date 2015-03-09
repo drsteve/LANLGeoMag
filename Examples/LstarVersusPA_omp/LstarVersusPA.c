@@ -62,6 +62,8 @@ int main( int argc, char *argv[] ){
     Date       = 20130327;
     Date       = 20000701;
     Date       = 20130101;
+    Date       = 20130322;
+    UTC        = 4.0 + 0.0/60.0 + 0.0/3600.0;
     UTC        = 0.0 + 0.0/60.0 + 0.0/3600.0;
     Lgm_Set_Coord_Transforms( Date, UTC, c );
     MagEphemInfo->LstarInfo->LSimpleMax = 35.0;
@@ -74,6 +76,7 @@ int main( int argc, char *argv[] ){
 Lgm_SetLstarTolerances( 3, 96, MagEphemInfo->LstarInfo );
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 1;
+    MagEphemInfo->LstarInfo->ISearchMethod = 2;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
 
     Kp = 2;
@@ -83,18 +86,19 @@ Lgm_SetLstarTolerances( 3, 96, MagEphemInfo->LstarInfo );
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
 
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89c;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_IGRF;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_Dungey;
+    MagEphemInfo->LstarInfo->mInfo->Bfield       = Lgm_B_T89c;
+    MagEphemInfo->LstarInfo->mInfo->c->psi       = 0.0;
 
 
     FILE         *fpjunk;
     int          done;
     char         fname[1024];
     double       Ra, Rc, Fa, Fc, R, F, Phi, Lat, MLT, Fmax, Rmax;
-    double       Kin = 0.5;
+    double       Kin = 1.5;
 
     sprintf(fname, "junk_K_v5_24.txt" );
     fpjunk = fopen(fname, "w");
@@ -103,7 +107,8 @@ Lgm_SetLstarTolerances( 3, 96, MagEphemInfo->LstarInfo );
 
 
 
-    for (MLT=0.0; MLT<=24.0; MLT+=0.05){
+//    for (MLT=0.0; MLT<=24.0; MLT+=0.05){
+    for (MLT=1.5; MLT<=1.5; MLT+=0.05){
 
 
         done = FALSE;

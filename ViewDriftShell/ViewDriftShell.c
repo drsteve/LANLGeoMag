@@ -3561,7 +3561,7 @@ static void realize( GtkWidget *widget, gpointer data) {
 
 
     // Misc Field Lines
-//    GenerateMiscFieldLineLists( ObjInfo );
+GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3764,11 +3764,11 @@ if (LightingStyle == 2){
 
 
 
-//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
-//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
-//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
-//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
-//glCallList( ObjInfo->MiscFieldLines );
+glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+glCallList( ObjInfo->MiscFieldLines );
 
 
 

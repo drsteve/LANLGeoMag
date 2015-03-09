@@ -235,6 +235,7 @@ int main( int argc, char *argv[] ){
     strcpy( ExtModel,  arguments.ExtModel );
 
     // Settings for Lstar calcs
+    LstarInfo->ISearchMethod = 2; // 1= Original ROEDERER METHOD (fing Bm along ray first); 2= Find Bm by tracing from footpoint along FL.
     LstarInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;

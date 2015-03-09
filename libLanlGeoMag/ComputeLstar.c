@@ -1,3 +1,4 @@
+// THIS CODE REALLY NEEDS CLEANING UP.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -476,6 +477,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
 }
 
 
+
 void FreeLstarInfo( Lgm_LstarInfo *s ) {
 
     Lgm_FreeMagInfo( s->mInfo );
@@ -830,11 +832,22 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     /*
      *  Construct drift shell. Get a good initial estimate for mlat
      */
-    Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &u, GSM_TO_SM, LstarInfo->mInfo->c );
-printf("LstarInfo->mInfo->Pm_North = %g %g %g\n", LstarInfo->mInfo->Pm_North.x, LstarInfo->mInfo->Pm_North.y, LstarInfo->mInfo->Pm_North.z);
-//MGH JAN 15 2015 commented out    Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+    if        ( LstarInfo->ISearchMethod  == 1 ) {
+        // this method uses the mlat as the mlat of the mirror point.
+        Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+   
+    } else if ( LstarInfo->ISearchMethod  == 2 ) {
 
+        // this method uses the mlat as the mlat of the footpoint.
+        Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
+
+    } else {
+
+        printf("Unrecognized value for LstarInfo->ISearchMethod ( = %d)\n", LstarInfo->ISearchMethod );
+
+    }
     mlat = DegPerRad*asin(u.z/Lgm_Magnitude( &u ));
+
 
     MLT0 = atan2( u.y, u.x )*DegPerRad/15.0 + 12.0;
     if (LstarInfo->VerbosityLevel > 2) printf("\t\t%smlat = %g%s\n", PreStr, mlat, PostStr );
@@ -1946,7 +1959,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo_test->mInfo->c );
 
     //Check for closed drift shell at brackets
-    LT *= 15;
+    LT *= 15.0;
     LT *= RadPerDeg;
     PinnerSM.x = brac1*cos(LT); PinnerSM.y = brac1*sin(LT); PinnerSM.z = 0.0;
     Lgm_Convert_Coords( &PinnerSM, &Pinner, SM_TO_GSM, LstarInfo_brac1->mInfo->c );
@@ -1957,6 +1970,8 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
 
     //Trace to minimum-B
     if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
+
+printf("About to call Lgm_Setup_AlphaOfK(); v3 = %g %g %g\n", v3.x, v3.y, v3.z);
         if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac1->mInfo ) > 0 ) {
             Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac1->mInfo );
             LstarInfo_brac1->PitchAngle = Alpha;
@@ -1964,6 +1979,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         } else {
             return(-8);
         }
+printf("GOIT HERE\n");
         if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
         sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
         LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
@@ -1978,6 +1994,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
             FreeLstarInfo( LstarInfo_brac1 );
             FreeLstarInfo( LstarInfo_brac2 );
             FreeLstarInfo( LstarInfo_test );
+printf("HERE I B MOFO\n");
             return(-8); //Inner bracket is bad - bail
         }
         LCDSv3 = v3;
@@ -1985,6 +2002,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         *K = (LstarInfo_brac1->I0)*sqrt(Lgm_Magnitude(&LstarInfo_brac1->Bmin[0]));
         if (LstarInfo->VerbosityLevel > 1) printf("Found valid inner bracket. Pinner, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pinner.x, Pinner.y, Pinner.z, LstarInfo_brac1->mInfo->Pmin.x, LstarInfo_brac1->mInfo->Pmin.y, LstarInfo_brac1->mInfo->Pmin.z);
         if (LstarInfo->VerbosityLevel > 1) printf("Lstar = %g\n", LstarInfo_brac1->LS);
+
     } else {
         FreeLstarInfo( LstarInfo_brac1 );
         FreeLstarInfo( LstarInfo_brac2 );

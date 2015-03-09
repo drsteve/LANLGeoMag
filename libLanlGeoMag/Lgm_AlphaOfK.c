@@ -79,6 +79,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      */
     if (  m->UseInterpRoutines ) {
 
+printf("HERE\n");
         /*
          * Start at Southern Footpoint and trace to Northern Footpoint.
          */
@@ -90,15 +91,17 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
         
         
         Lgm_TraceLine3( &v1, s, nDivs, 1.0, TRACE_TOL, FALSE, m );
+printf("nDivs = %d\n", nDivs);
         //Lgm_TraceLine2( &v1, &v4, m->Lgm_LossConeHeight, s/200.0, 1.0, TRACE_TOL, FALSE, m );
 
 
         if ( !InitSpline( m ) ) {
-            if (m->VerbosityLevel >= 2) {printf("Lgm_Setup_AlphaOfK(): Could not initialize spline curve\n");}
+            if (m->VerbosityLevel >= 2) {}{printf("Lgm_Setup_AlphaOfK(): Could not initialize spline curve\n");}
             return(-5);
         }
 
     } 
+printf("I got here!!!!!!!!!!!!  TraceFlag =   %d\n", TraceFlag);
     
     return( TraceFlag );
 

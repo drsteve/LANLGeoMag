@@ -48,10 +48,11 @@ typedef struct Vds_ObjectInfo {
     double               nz4_gsm[30][10*LGM_LSTARINFO_MAX_FL][200];  //!< ???? Normals?
 
     int                 nFLs;
-    int                 nPnts5[10];
-    double              x5_gsm[10][10000];
-    double              y5_gsm[10][10000];
-    double              z5_gsm[10][10000];
+    int                 *nPnts5;
+    double              **x5_gsm;
+    double              **y5_gsm;
+    double              **z5_gsm;
+    int                 *FL_Type5;
 
 
     GLuint               MiscFieldLines;         //!< OpenGL Display List for Misc Field Lines

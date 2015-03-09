@@ -251,6 +251,7 @@ if ( Lgm_Magnitude( v ) > 2.5 ) {
      * into a structure and add it to the hash table.
      */
     if ( rbf == NULL ) {
+//    if ( 0==0 ) {
 
         /*
          *   repack data into arrays. This is wasteful also.
@@ -275,7 +276,9 @@ if ( Lgm_Magnitude( v ) > 2.5 ) {
          *  reference to the pointer.  To free, use
          *  Lgm_B_FromScatteredData_TearDown().
          */
+eps = 1e-4;
         eps = 0.01;
+eps = 0.1;
         rbf = Lgm_DFI_RBF_Init( I_data, v_data, B_data, n_data, eps, LGM_RBF_GAUSSIAN );
 
         LGM_ARRAY_1D_FREE( I_data );
@@ -334,6 +337,9 @@ if ( Lgm_Magnitude( v ) > 2.5 ) {
     B->y = B1.y + B2.y;
     B->z = B1.z + B2.z;
 
+B->x = B1.x;
+B->y = B1.y;
+B->z = B1.z;
 
     return( 1 );
 

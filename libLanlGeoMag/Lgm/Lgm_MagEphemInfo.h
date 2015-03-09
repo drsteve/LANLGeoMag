@@ -158,6 +158,7 @@ typedef struct Lgm_MagEphemInfo {
     int         **nMaxima;           // # of maxima on FL (not including endpoints
 
 
+
 } Lgm_MagEphemInfo;
 
 /*! \struct Lgm_MagEphemData
