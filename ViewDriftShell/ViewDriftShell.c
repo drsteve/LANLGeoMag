@@ -3561,7 +3561,7 @@ static void realize( GtkWidget *widget, gpointer data) {
 
 
     // Misc Field Lines
-GenerateMiscFieldLineLists( ObjInfo );
+//GenerateMiscFieldLineLists( ObjInfo );
 
 
 
