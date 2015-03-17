@@ -379,7 +379,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 }
 
 
-void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
+void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Persistence ) {
 
     int                 t, nq, i, ny, nm, nd, nGood;
     double              *x, *y, MJD, UTC;
@@ -393,6 +393,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
     p->Date = Lgm_JD_to_Date( JD, &p->Year, &p->Month, &p->Day, &UTC );
     p->UTC  = UTC;
     Lgm_UT_to_HMS( UTC, &p->Hour, &p->Minute, &p->Second );
+    p->Persistence = Persistence;
 
     Lgm_read_QinDenton( p->Date, q );
 
@@ -425,7 +426,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose ) {
 
     } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
 
-        if (p->Persistence) {
+        if (p->Persistence == 1) {
             printf("No Qin Denton data in range -- using persistence. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
             p->Dst   =    q->Dst[q->nPnts-1];  // km/s
             p->fKp   =    q->fKp[q->nPnts-1];  // km/s
