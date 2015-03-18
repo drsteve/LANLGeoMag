@@ -5573,7 +5573,7 @@ void create_ViewDriftShell( void *data ) {
     /*
      * Initialize GtkGLExt.
      */
-//    gtk_gl_init (&xInfo->argc, &xInfo->argv);
+//    gtk_gl_init( &xInfo->argc, &xInfo->argv );
 
 
 
@@ -5684,7 +5684,7 @@ void create_ViewDriftShell( void *data ) {
     gtk_box_pack_start( GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0 );
     gtk_widget_show( drawing_area );
 
-printf("HERE\n");
+printf("1. HERE\n");
 
     /*
      *  Set Pitch Angles to Show
@@ -5725,8 +5725,9 @@ printf("HERE\n");
 
 
 
-    gtk_widget_show( ViewDriftShellWindow );
+//    gtk_widget_show( ViewDriftShellWindow );
 
+printf("2. HERE\n");
 
     return;
 

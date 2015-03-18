@@ -205,10 +205,12 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
     ObjInfo->MagEphemInfo = (Lgm_MagEphemInfo *)calloc( 1, sizeof(Lgm_MagEphemInfo));
     ObjInfo->MagEphemAlloced = TRUE;
     printf( "\t  Reading file: %s\n", Filename );
-    ReadMagEphemInfoStruct( Filename, &ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo );
+//    ReadMagEphemInfoStruct( Filename, &ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo );
     printf( "\t     Date/Time: %ld/%g\n", ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC );
     printf( "\t# Pitch Angles: %d\n", ObjInfo->MagEphemInfo->nAlpha );
+return;
 
+printf("%d %d %d\n", ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo->nShellPoints[0], ObjInfo->MagEphemInfo->nFieldPnts[0][0]);
 
 
     for ( i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) { // Loop over Pitch Angles
