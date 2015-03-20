@@ -35,6 +35,13 @@
 
 #define AU              149.5978700e6   // Astronomical Unit in km
 
+#define SOLAR_RADIUS    696342.0        // km (from SOHO meas.)
+
+
+#define LGM_NO_ECLIPSE          0
+#define LGM_PENUMBRAL_ECLIPSE   1
+#define LGM_UMBRAL_ECLIPSE      2
+
 
 #define LGM_GOLD                1.61803398874989484820  // Phi -- Golden ratio
 #define LGM_1_OVER_GOLD         0.61803398874989484820  // 1/Phi
@@ -891,6 +898,8 @@ void          Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c 
 
 
 double        Lgm_CdipMirrorLat( double Alpha0 );
+
+int           Lgm_Eclipse( Lgm_Vector Psc, Lgm_CTrans *c );
 
 
 

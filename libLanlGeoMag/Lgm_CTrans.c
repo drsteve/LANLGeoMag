@@ -120,7 +120,7 @@ Lgm_CTrans *Lgm_init_ctrans( int Verbose ) {
 
     c = (Lgm_CTrans *) calloc (1, sizeof(*c));
     Lgm_ctransDefaults(c, Verbose);
-//printf("LGM_EOP_DATA_DIR = %s\n", LGM_EOP_DATA_DIR);
+    //printf("LGM_EOP_DATA_DIR = %s\n", LGM_EOP_DATA_DIR);
 
     return c;
 
