@@ -36,6 +36,7 @@
 #define AU              149.5978700e6   // Astronomical Unit in km
 
 #define SOLAR_RADIUS    696342.0        // km (from SOHO meas.)
+#define LUNAR_RADIUS    1738.14         // km equatorial radius
 
 
 #define LGM_NO_ECLIPSE          0
@@ -899,7 +900,8 @@ void          Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c 
 
 double        Lgm_CdipMirrorLat( double Alpha0 );
 
-int           Lgm_Eclipse( Lgm_Vector Psc, Lgm_CTrans *c );
+int           Lgm_EarthEclipse( Lgm_Vector *Psc, Lgm_CTrans *c );
+int           Lgm_MoonEclipse( Lgm_Vector *Psc, Lgm_CTrans *c );
 
 
 
