@@ -54,7 +54,7 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
 
     
 
-    printf("Rsun_mag, Psun_mag, Psc_mag = %g %g %g\n", Rsun_mag, Psun_mag, Psc_mag );
+    //printf("Rsun_mag, Psun_mag, Psc_mag = %g %g %g\n", Rsun_mag, Psun_mag, Psc_mag );
 
 
     /*
@@ -66,12 +66,12 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     /*
      * Compute anglular radius of Earth and Sun as seen at S/C
      */
-printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
+    //printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
     ThetaE = asin( Re/Psc_mag );
     ThetaS = asin( SOLAR_RADIUS/Psun_mag );
+    //printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
 
 
-    printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
     /*
      * To have an umbral eclipse, need to have ThetaE > ThetaS 
      * and Theta < ThetaE - ThetaS.
@@ -155,7 +155,7 @@ int Lgm_MoonEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
 
     
 
-    printf("Moon: Rsun_mag, Psun_mag, Psc_mag = %g %g %g\n", Rsun_mag, Psun_mag, Psc_mag );
+    //printf("Moon: Rsun_mag, Psun_mag, Psc_mag = %g %g %g\n", Rsun_mag, Psun_mag, Psc_mag );
 
 
     /*
@@ -167,12 +167,11 @@ int Lgm_MoonEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     /*
      * Compute anglular radius of Earth and Sun as seen at S/C
      */
-printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
+    //printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
     ThetaE = asin( Re/Psc_mag );
     ThetaS = asin( LUNAR_RADIUS/Psun_mag );
+    //printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
 
-
-    printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
     /*
      * To have an umbral eclipse, need to have ThetaE > ThetaS 
      * and Theta < ThetaE - ThetaS.

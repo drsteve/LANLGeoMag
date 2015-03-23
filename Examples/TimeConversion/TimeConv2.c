@@ -38,6 +38,33 @@ int main( ) {
 
 
 
+
+    /*
+     * Lets go UTC -> GPS_Time
+     */
+    printf("Tests TaiSeconds <-> UTC over a Leap Seconds Day boundary\n");
+    printf("------------------------------------------------------\n\n");
+    printf("    Starting with 20150314 00:00:25 UTC\n");
+    Lgm_Make_UTC( 20150314, 25.0/3600.0, &UTC, c );
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 0, 8 ); printf("\n\n");
+
+    Lgm_UTC_to_TAI( &UTC, &TAI, c );
+    printf("    Results of Lgm_UTC_to_TAI\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI, 0, 8 ); printf("\n\n");
+
+    TaiSeconds = Lgm_UTC_to_TaiSeconds( &UTC, c );
+    printf("    Results of Lgm_UTC_to_TaiSeconds\n");
+    printf("\tTaiSeconds: %.8lf Seconds\n\n", TaiSeconds );
+
+    Lgm_TaiSeconds_to_TAI( TaiSeconds, &TAI2 );
+    printf("    Results of Lgm_TaiSeconds_to_TAI\n");
+    printf("\tTAI: "); Lgm_Print_DateTime( &TAI2, 0, 8 ); printf("\n\n");
+
+    Lgm_TaiSeconds_to_UTC( TaiSeconds, &UTC, c );
+    printf("    Results of Lgm_TaiSeconds_to_UTC\n");
+    printf("\tUTC: "); Lgm_Print_DateTime( &UTC, 0, 8 ); printf("\n\n");
+
+
     
     
     // free structures

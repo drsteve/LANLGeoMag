@@ -540,6 +540,9 @@ typedef struct Lgm_CTrans {
 
     Lgm_LeapSeconds   l;            //!< Structure containing Leap Second Info
 
+    Lgm_JPLephemInfo *jpl;          //!< Structure containing JPL Ephem info
+    int              jpl_initialized;  //!< Flag to indicate jpl has been initialized
+
     Lgm_DateTime     UT1;           //!< A corrected version of UT0.
                                     /**< A corrected version of UT0.
                                      *   UT is the mean solar time at Greenwich.
@@ -676,6 +679,7 @@ typedef struct Lgm_CTrans {
     double      sin_psi;            /**< \f$\sin(\psi)\f$ */
     double      cos_psi;            /**< \f$\cos(\psi)\f$ */
     double      tan_psi;            /**< \f$\tan(\psi)\f$ */
+    Lgm_Vector  MoonJ2000;           /**< direction of Moon in GEI2000 system (unit vector) */
     double      RA_moon;            /**< Right Ascension of Moon (in degrees) */
     double      DEC_moon;           /**< Declination of Moon (in degrees) */
     double      MoonPhase;          /**< The Phase of the Moon (in days) */
@@ -807,8 +811,8 @@ double      Lgm_kepler( double, double );
 double      Lgm_Dipole_Tilt(long int date, double UTC);
 void        Lgm_Set_CTrans_Options( int ephModel, int pnModel, Lgm_CTrans *c );
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
-void        Lgm_ComputeSun( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl );
-void        Lgm_ComputeMoon( Lgm_CTrans *c, Lgm_JPLephemInfo *jpl );
+void        Lgm_ComputeSun( Lgm_CTrans *c );
+void        Lgm_ComputeMoon( Lgm_CTrans *c );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
 int         Lgm_Doy( long int, int *, int *, int *, int * );
