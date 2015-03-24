@@ -75,6 +75,11 @@
 
 
 void Lgm_free_ctrans_children( Lgm_CTrans *c ) {
+
+    if ( c->jpl_initialized ) {
+        Lgm_FreeJPLephemInfo( c->jpl );
+    }
+
     free( c->l.LeapSecondDates );
     free( c->l.LeapSecondJDs );
     free( c->l.LeapSeconds );
