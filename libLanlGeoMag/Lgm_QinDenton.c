@@ -388,14 +388,15 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
     Lgm_QinDenton       *q = Lgm_init_QinDenton( Verbose );
 
     MJD = JD - 2400000.5;
-    p->JD   = JD;
-    p->MJD  = MJD;
-    p->Date = Lgm_JD_to_Date( JD, &p->Year, &p->Month, &p->Day, &UTC );
-    p->UTC  = UTC;
+    p->JD    = JD;
+    p->MJD   = MJD;
+    p->Date  = Lgm_JD_to_Date( JD, &p->Year, &p->Month, &p->Day, &UTC );
+    p->UTC   = UTC;
     Lgm_UT_to_HMS( UTC, &p->Hour, &p->Minute, &p->Second );
     p->Persistence = Persistence;
 
     Lgm_read_QinDenton( p->Date, q );
+    p->nPnts = q->nPnts;
 
     if (q->nPnts < 2) {
 

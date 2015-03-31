@@ -38,6 +38,7 @@ typedef struct Lgm_QinDenton {
 
 typedef struct Lgm_QinDentonOne {
 
+    int         nPnts;          // number of points in the file that these were obtained from
     int         Persistence;
     long int    Date;
     double      JD;

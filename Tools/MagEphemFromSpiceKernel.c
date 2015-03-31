@@ -1535,10 +1535,10 @@ printf("sclkdp = %lf\n", sclkdp);
 
                         // Set mag model parameters
                         if ( FixModelDateTime ) {
-                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
+                            Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0, 1 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         } else {
-                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
+                            Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0, 1 );
                             Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                         }
 
