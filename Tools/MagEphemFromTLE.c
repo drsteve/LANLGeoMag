@@ -1524,13 +1524,9 @@ int tiii = 0;
 
                             // Set up the trans matrices
                             Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-
                             MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
-
                             Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
-//PROBLEM AREA...
-//sce2s_c( BODY,    et, 30, sclkch );
 
                             /*
                              * Compute L*s, Is, Bms, Footprints, etc...
