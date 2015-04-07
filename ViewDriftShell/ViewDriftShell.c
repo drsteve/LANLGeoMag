@@ -2506,16 +2506,18 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].TLE = TLEs[i];
 
         SpaceObjects->Sat[i].DrawStreak              = FALSE;
+        SpaceObjects->Sat[i].sPeriodFrac             = 25.0;
         SpaceObjects->Sat[i].DrawGroundPathOfStreak  = FALSE;
         SpaceObjects->Sat[i].DrawStreakToGroundLines = FALSE;
 
-        SpaceObjects->Sat[i].DrawOrbit               = FALSE;
+        SpaceObjects->Sat[i].DrawOrbit               = TRUE;
+        SpaceObjects->Sat[i].oPeriodFrac             = 100.0;
         SpaceObjects->Sat[i].DrawGroundPathOfOrbit   = FALSE;
         SpaceObjects->Sat[i].DrawOrbitToGroundLines  = FALSE;
 
         SpaceObjects->Sat[i].DrawSatToGroundLine     = FALSE;
 
-        SpaceObjects->Sat[i].DrawLabel               = FALSE;
+        SpaceObjects->Sat[i].DrawLabel               = TRUE;
 
         // Streak Colors
         r = (double)rand()/(double)RAND_MAX;

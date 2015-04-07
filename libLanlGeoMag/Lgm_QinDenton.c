@@ -187,6 +187,10 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     static char *ftype[] = {"1min", "1hr" };
     char        *Path, QinDentonPath[2048];
     Lgm_CTrans  *c = Lgm_init_ctrans(0);
+    char        IsoTimeStr[80];
+    int         nMatches, tYear, tMonth, tDay, tHour, tMinute, tSecond, ByIMF_status, BzIMF_status, V_SW_status, Den_P_status, Pdyn_status, G1_status;
+    int         G2_status, G3_status, W1_status, W2_status, W3_status, W4_status, W5_status, W6_status;
+    double      ByIMF, BzIMF, V_SW, Den_P, Pdyn, G1, G2, G3, fKp, akp3, Dst, Bz1, Bz2, Bz3, Bz4, Bz5, Bz6, W1, W2, W3, W4, W5, W6, tTime, tMJD;
 
 
     Path = getenv( "QIN_DENTON_PATH" );
@@ -231,6 +235,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
 
     // Read in Previous Date -- Try 1min first, 1hr next...
+    tTime = -1e30;
     j = 0; done = FALSE; success1 = FALSE;
     while ( !done ){
 
@@ -238,19 +243,71 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
-                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                                &q->G1[n], &q->G2[n], &q->G3[n],
-                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                    ++n;
+                    nMatches = sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                IsoTimeStr, &tYear, &tMonth, &tDay, &tHour, &tMinute, &tSecond, &ByIMF, &BzIMF, &V_SW, &Den_P, &Pdyn, &G1, &G2, &G3,
+                                &ByIMF_status, &BzIMF_status, &V_SW_status, &Den_P_status, &Pdyn_status, &G1_status, &G2_status, &G3_status,
+                                &fKp, &akp3, &Dst, &Bz1, &Bz2, &Bz3, &Bz4, &Bz5, &Bz6, &W1, &W2, &W3, &W4, &W5, &W6, &W1_status, &W2_status, &W3_status, &W4_status, &W5_status, &W6_status );
+
+
+                    if ( nMatches == 44 ) {
+
+                        tTime = tHour + tMinute/60.0 + tSecond/3600.0;
+                        tMJD = Lgm_MJD( tYear, tMonth, tDay, tTime, LGM_TIME_SYS_UTC, c );
+
+                        if ( (MJD > 33282.0) && ((n==0) || (MJD > q->MJD[n])) ) {  // make sure MJD > Jan 1, 1950 and time is increasing
+
+                            strcpy( q->IsoTimeStr[n], IsoTimeStr );
+                            q->Year[n]   = tYear;
+                            q->Month[n]  = tMonth;
+                            q->Day[n]    = tDay;
+                            q->Hour[n]   = tHour;
+                            q->Minute[n] = tMinute;
+                            q->Second[n] = tSecond;
+                            q->ByIMF[n]  = ByIMF;
+                            q->BzIMF[n]  = BzIMF;
+                            q->V_SW[n]   = V_SW;
+                            q->Den_P[n]  = Den_P;
+                            q->Pdyn[n]   = Pdyn;
+                            q->G1[n]     = G1;
+                            q->G2[n]     = G2;
+                            q->G3[n]     = G3;
+                            q->ByIMF_status[n] = ByIMF_status;
+                            q->BzIMF_status[n] = BzIMF_status;
+                            q->V_SW_status[n]  = V_SW_status;
+                            q->Den_P_status[n] = Den_P_status;
+                            q->Pdyn_status[n]  = Pdyn_status;
+                            q->G1_status[n]    = G1_status;
+                            q->G2_status[n]    = G2_status;
+                            q->G3_status[n]    = G3_status;
+                            q->fKp[n]  = fKp;
+                            q->akp3[n] = akp3;
+                            q->Dst[n]  = Dst;
+                            q->Bz1[n]  = Bz1;
+                            q->Bz2[n]  = Bz2;
+                            q->Bz3[n]  = Bz3;
+                            q->Bz4[n]  = Bz4;
+                            q->Bz5[n]  = Bz5;
+                            q->Bz6[n]  = Bz6;
+                            q->W1[n]   = W1;
+                            q->W2[n]   = W2;
+                            q->W3[n]   = W3;
+                            q->W4[n]   = W4;
+                            q->W5[n]   = W5;
+                            q->W6[n]   = W6;
+                            q->W1_status[n] = W1_status;
+                            q->W2_status[n] = W2_status;
+                            q->W3_status[n] = W3_status;
+                            q->W4_status[n] = W4_status;
+                            q->W5_status[n] = W5_status;
+                            q->W6_status[n] = W6_status;
+
+                            q->MJD[n] = tMJD;
+                            ++n;
+
+                        } else {
+                            printf( "Warning. Times may be corrupted in QinDenton File: %s   Time = %g  MJD = %g\n", Filename, tTime, tMJD );
+                        }
+                    }
                 }
             }
             fclose( fp );
@@ -284,19 +341,73 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
-                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                                &q->G1[n], &q->G2[n], &q->G3[n],
-                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                    ++n;
+
+
+                    nMatches = sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                IsoTimeStr, &tYear, &tMonth, &tDay, &tHour, &tMinute, &tSecond, &ByIMF, &BzIMF, &V_SW, &Den_P, &Pdyn, &G1, &G2, &G3,
+                                &ByIMF_status, &BzIMF_status, &V_SW_status, &Den_P_status, &Pdyn_status, &G1_status, &G2_status, &G3_status,
+                                &fKp, &akp3, &Dst, &Bz1, &Bz2, &Bz3, &Bz4, &Bz5, &Bz6, &W1, &W2, &W3, &W4, &W5, &W6, &W1_status, &W2_status, &W3_status, &W4_status, &W5_status, &W6_status );
+
+                    if ( nMatches == 44 ) {
+
+                        tTime = tHour + tMinute/60.0 + tSecond/3600.0;
+                        tMJD = Lgm_MJD( tYear, tMonth, tDay, tTime, LGM_TIME_SYS_UTC, c );
+
+                        if ( (MJD > 33282.0) && ((n==0) || (MJD > q->MJD[n])) ) {  // make sure MJD > Jan 1, 1950 and time is increasing
+                            strcpy( q->IsoTimeStr[n], IsoTimeStr );
+                            q->Year[n]   = tYear;
+                            q->Month[n]  = tMonth;
+                            q->Day[n]    = tDay;
+                            q->Hour[n]   = tHour;
+                            q->Minute[n] = tMinute;
+                            q->Second[n] = tSecond;
+                            q->ByIMF[n]  = ByIMF;
+                            q->BzIMF[n]  = BzIMF;
+                            q->V_SW[n]   = V_SW;
+                            q->Den_P[n]  = Den_P;
+                            q->Pdyn[n]   = Pdyn;
+                            q->G1[n]     = G1;
+                            q->G2[n]     = G2;
+                            q->G3[n]     = G3;
+                            q->ByIMF_status[n] = ByIMF_status;
+                            q->BzIMF_status[n] = BzIMF_status;
+                            q->V_SW_status[n]  = V_SW_status;
+                            q->Den_P_status[n] = Den_P_status;
+                            q->Pdyn_status[n]  = Pdyn_status;
+                            q->G1_status[n]    = G1_status;
+                            q->G2_status[n]    = G2_status;
+                            q->G3_status[n]    = G3_status;
+                            q->fKp[n]  = fKp;
+                            q->akp3[n] = akp3;
+                            q->Dst[n]  = Dst;
+                            q->Bz1[n]  = Bz1;
+                            q->Bz2[n]  = Bz2;
+                            q->Bz3[n]  = Bz3;
+                            q->Bz4[n]  = Bz4;
+                            q->Bz5[n]  = Bz5;
+                            q->Bz6[n]  = Bz6;
+                            q->W1[n]   = W1;
+                            q->W2[n]   = W2;
+                            q->W3[n]   = W3;
+                            q->W4[n]   = W4;
+                            q->W5[n]   = W5;
+                            q->W6[n]   = W6;
+                            q->W1_status[n] = W1_status;
+                            q->W2_status[n] = W2_status;
+                            q->W3_status[n] = W3_status;
+                            q->W4_status[n] = W4_status;
+                            q->W5_status[n] = W5_status;
+                            q->W6_status[n] = W6_status;
+
+                            q->MJD[n] = tMJD;
+                            ++n;
+
+                        } else {
+                            printf( "Warning. Times may be corrupted in QinDenton File: %s   Time = %g  MJD = %g\n", Filename, tTime, tMJD );
+                        }
+
+                    }
+
                 }
             }
             fclose( fp );
@@ -329,19 +440,69 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
             while( fgets( Line, 2048, fp ) != NULL ) {
                 if ( Line[0] != '#' ) {
-                    sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
-                                q->IsoTimeStr[n], &q->Year[n], &q->Month[n], &q->Day[n], &q->Hour[n], &q->Minute[n], &q->Second[n],
-                                &q->ByIMF[n], &q->BzIMF[n], &q->V_SW[n], &q->Den_P[n], &q->Pdyn[n],
-                                &q->G1[n], &q->G2[n], &q->G3[n],
-                                &q->ByIMF_status[n], &q->BzIMF_status[n], &q->V_SW_status[n], &q->Den_P_status[n], &q->Pdyn_status[n],
-                                &q->G1_status[n], &q->G2_status[n], &q->G3_status[n],
-                                &q->fKp[n], &q->akp3[n], &q->Dst[n],
-                                &q->Bz1[n], &q->Bz2[n], &q->Bz3[n], &q->Bz4[n], &q->Bz5[n], &q->Bz6[n],
-                                &q->W1[n], &q->W2[n], &q->W3[n], &q->W4[n], &q->W5[n], &q->W6[n],
-                                &q->W1_status[n], &q->W2_status[n], &q->W3_status[n], &q->W4_status[n], &q->W5_status[n], &q->W6_status[n] );
-                    Time = q->Hour[n] + q->Minute[n]/60.0 + q->Second[n]/3600.0;
-                    q->MJD[n] = Lgm_MJD( q->Year[n], q->Month[n], q->Day[n], Time, LGM_TIME_SYS_UTC, c );
-                    ++n;
+                    nMatches = sscanf( Line, "%s %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d",
+                                IsoTimeStr, &tYear, &tMonth, &tDay, &tHour, &tMinute, &tSecond, &ByIMF, &BzIMF, &V_SW, &Den_P, &Pdyn, &G1, &G2, &G3,
+                                &ByIMF_status, &BzIMF_status, &V_SW_status, &Den_P_status, &Pdyn_status, &G1_status, &G2_status, &G3_status,
+                                &fKp, &akp3, &Dst, &Bz1, &Bz2, &Bz3, &Bz4, &Bz5, &Bz6, &W1, &W2, &W3, &W4, &W5, &W6, &W1_status, &W2_status, &W3_status, &W4_status, &W5_status, &W6_status );
+
+                    if ( nMatches == 44 ) {
+
+                        tTime = tHour + tMinute/60.0 + tSecond/3600.0;
+                        tMJD = Lgm_MJD( tYear, tMonth, tDay, tTime, LGM_TIME_SYS_UTC, c );
+
+                        if ( (MJD > 33282.0) && ((n==0) || (MJD > q->MJD[n])) ) {  // make sure MJD > Jan 1, 1950 and time is increasing
+                            strcpy( q->IsoTimeStr[n], IsoTimeStr );
+                            q->Year[n]   = tYear;
+                            q->Month[n]  = tMonth;
+                            q->Day[n]    = tDay;
+                            q->Hour[n]   = tHour;
+                            q->Minute[n] = tMinute;
+                            q->Second[n] = tSecond;
+                            q->ByIMF[n]  = ByIMF;
+                            q->BzIMF[n]  = BzIMF;
+                            q->V_SW[n]   = V_SW;
+                            q->Den_P[n]  = Den_P;
+                            q->Pdyn[n]   = Pdyn;
+                            q->G1[n]     = G1;
+                            q->G2[n]     = G2;
+                            q->G3[n]     = G3;
+                            q->ByIMF_status[n] = ByIMF_status;
+                            q->BzIMF_status[n] = BzIMF_status;
+                            q->V_SW_status[n]  = V_SW_status;
+                            q->Den_P_status[n] = Den_P_status;
+                            q->Pdyn_status[n]  = Pdyn_status;
+                            q->G1_status[n]    = G1_status;
+                            q->G2_status[n]    = G2_status;
+                            q->G3_status[n]    = G3_status;
+                            q->fKp[n]  = fKp;
+                            q->akp3[n] = akp3;
+                            q->Dst[n]  = Dst;
+                            q->Bz1[n]  = Bz1;
+                            q->Bz2[n]  = Bz2;
+                            q->Bz3[n]  = Bz3;
+                            q->Bz4[n]  = Bz4;
+                            q->Bz5[n]  = Bz5;
+                            q->Bz6[n]  = Bz6;
+                            q->W1[n]   = W1;
+                            q->W2[n]   = W2;
+                            q->W3[n]   = W3;
+                            q->W4[n]   = W4;
+                            q->W5[n]   = W5;
+                            q->W6[n]   = W6;
+                            q->W1_status[n] = W1_status;
+                            q->W2_status[n] = W2_status;
+                            q->W3_status[n] = W3_status;
+                            q->W4_status[n] = W4_status;
+                            q->W5_status[n] = W5_status;
+                            q->W6_status[n] = W6_status;
+
+                            q->MJD[n] = tMJD;
+                            ++n;
+
+                        } else {
+                            printf( "Warning. Times may be corrupted in QinDenton File: %s   Time = %g  MJD = %g\n", Filename, tTime, tMJD );
+                        }
+                    }
                 }
             }
             fclose( fp );
@@ -564,10 +725,10 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
             }
         }
         if ( nGood >= 2 ) {
-            spline = gsl_interp_alloc( gsl_interp_linear, nGood );
-            gsl_interp_init( spline, x, y, nGood );
-            p->Den_P = gsl_interp_eval( spline, x, y, MJD, NULL );
-            gsl_interp_free( spline );
+            spline = gsl_spline_alloc( gsl_interp_linear, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->Den_P = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free( spline );
         } else {
             p->Den_P = 1.0;
             printf("No Good Qin Denton data in range for Den_P. Setting Den_P to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Den_P, q->MJD[0], q->MJD[q->nPnts-1], MJD);
@@ -587,10 +748,10 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
             }
         }
         if ( nGood >= 2 ) {
-            spline = gsl_interp_alloc( gsl_interp_linear, nGood );
-            gsl_interp_init( spline, x, y, nGood );
-            p->Pdyn = gsl_interp_eval( spline, x, y, MJD, NULL );
-            gsl_interp_free( spline );
+            spline = gsl_spline_alloc( gsl_interp_linear, nGood );
+            gsl_spline_init( spline, x, y, nGood ); 
+            p->Pdyn = gsl_spline_eval( spline, MJD, acc );
+            gsl_spline_free( spline );
         } else {
             p->Pdyn = 2.3;
             printf("No Good Qin Denton data in range for Pdyn. Setting Pdyn to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Pdyn, q->MJD[0], q->MJD[q->nPnts-1], MJD);

@@ -77,16 +77,18 @@ int LoadSpaceObjects( ){
 
 
                 Group->Sat[j].DrawStreak              = TRUE;
+                Group->Sat[j].sPeriodFrac             = 25.0;
                 Group->Sat[j].DrawGroundPathOfStreak  = FALSE;
                 Group->Sat[j].DrawStreakToGroundLines = FALSE;
 
-                Group->Sat[j].DrawOrbit               = FALSE;
+                Group->Sat[j].DrawOrbit               = TRUE;
+                Group->Sat[j].oPeriodFrac             = 100.0;
                 Group->Sat[j].DrawGroundPathOfOrbit   = FALSE;
                 Group->Sat[j].DrawOrbitToGroundLines  = FALSE;
 
                 Group->Sat[j].DrawSatToGroundLine     = FALSE;
 
-                Group->Sat[j].DrawLabel               = FALSE;
+                Group->Sat[j].DrawLabel               = TRUE;
 
 
                 // Streak Colors
@@ -573,6 +575,7 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
         // for Label
         checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
         gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawLabel );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+1 ) );
         ++Col;
 
