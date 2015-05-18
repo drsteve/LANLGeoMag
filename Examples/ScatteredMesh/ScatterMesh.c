@@ -28,22 +28,23 @@ int main( ) {
 
     mInfo = Lgm_InitMagInfo( );
 
-    Date = 20020713;                        // August 12, 2004
-    Time = 18.0 + 0.0/60.0 + 30.0/3600.0;   // Universal Time Coordinated (in decimal hours)
+    Date = 20090207;                        // August 12, 2004
+    Time = 4.0 + 20.0/60.0 + 30.0/3600.0;   // Universal Time Coordinated (in decimal hours)
     JD = Lgm_Date_to_JD( Date, Time, c );    // Compute JD
 
     // Get (interpolate) the QinDenton vals from the values in the file at the given Julian Date
-    Lgm_get_QinDenton_at_JD( JD, &p, 0 );
+    Lgm_get_QinDenton_at_JD( JD, &p, 0, 1 );
 
 
     Lgm_Set_Coord_Transforms( Date, Time, mInfo->c );
     Lgm_set_QinDenton( &p, mInfo );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
 
     d = 0.5;
     n = 0;
     Lgm_PrintCurrentTime( &t );
-    for ( x = -15.0; x <= 15.0; x += d ){
+    for ( x = -70.0; x <= 15.0; x += d ){
         for ( y = -15.0; y <= 15.0; y += d ){
             for ( z = -15.0; z <= 15.0; z += d ){
                 q.x = x; q.y = y; q.z = z;
@@ -88,21 +89,23 @@ int main( ) {
      * Test interpolation...
      */
     mInfo->Octree = Octree;
-    Lgm_Set_Octree_kNN_k( mInfo, 12 );
+    Lgm_Set_Octree_kNN_k( mInfo, 24 );
+    mInfo->Octree_kNN_MaxDist2 = 10.0;
+
     d = 0.01; y = 0.0; z = 0.0;
     y = 0.0; z = 0.0;
     for ( x = -9.0; x <= -2.0; x += d ){
         q.x = x; q.y = y; q.z = z;
 
-        mInfo->Bfield = Lgm_B_FromScatteredData;
+        mInfo->Bfield = Lgm_B_FromScatteredData2;
         mInfo->Bfield( &q, &Binterp, mInfo );
 
-        mInfo->Bfield = Lgm_B_edip;
-        mInfo->Bfield( &q, &Bcd, mInfo );
-
-        Binterp.x += Bcd.x;
-        Binterp.y += Bcd.y;
-        Binterp.z += Bcd.z;
+//        mInfo->Bfield = Lgm_B_edip;
+//        mInfo->Bfield( &q, &Bcd, mInfo );
+//
+//        Binterp.x += Bcd.x;
+//        Binterp.y += Bcd.y;
+//        Binterp.z += Bcd.z;
 
         mInfo->Bfield = Lgm_B_T89;
         mInfo->Bfield( &q, &Bmodel, mInfo );
@@ -113,8 +116,29 @@ int main( ) {
     }
 
 
+    Lgm_Vector  v1, v2, v3;
+    int         Flag;
+    u->x = -10.0; u->y = 0.0; u->z = -5.0;
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
+    mInfo->Bfield = Lgm_B_FromScatteredData2;
+    Flag = Lgm_Trace( u, &v1, &v2, &v3, 6000.0, 1e-7, 1e-7, mInfo );                                                                                      
+    printf("v1 = %g %g %g\n", v1.x, v1.y, v1.z);
+    printf("v2 = %g %g %g\n", v2.x, v2.y, v2.z);
+    printf("v3 = %g %g %g\n", v3.x, v3.y, v3.z);
 
+    mInfo->fp = fopen("test.txt", "w");
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
+    mInfo->Bfield = Lgm_B_FromScatteredData2;
+    mInfo->SavePoints = TRUE;
+    Lgm_TraceToEarth( &v1, &v2, 120.0, 1.0, 1e-7, mInfo );
+    fclose(mInfo->fp);
 
+    mInfo->fp = fopen("test2.txt", "w");
+    mInfo->Bfield = Lgm_B_T89;
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
+    mInfo->SavePoints = TRUE;
+    Lgm_TraceToEarth( &v1, &v2, 120.0, 1.0, 1e-7, mInfo );
+    fclose(mInfo->fp);
 
 
 

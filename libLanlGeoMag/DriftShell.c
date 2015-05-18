@@ -127,13 +127,16 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
         }
         return( -11 );   
     }
+//printf("HERE 1. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
 
+//printf("HERE 1a. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
 
-    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value of I that is within tolerance -- we're done.
+//    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value of I that is within tolerance -- we're done.
+//printf("HERE 2. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
 
@@ -159,6 +162,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
 
+//printf("HERE 3. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
 
@@ -527,9 +531,11 @@ mlatbest = mlat_min;
         /*
          * We probably converged in minimization phase above.
          */
+//printf("HERE 4. Ifound = %g\n", *Ifound);
 
     } else if ( FoundZeroBracket ){
 
+//printf("HERE 5. Ifound = %g\n", *Ifound);
         /*
          * We have a bracket on a zero value. Go in for the kill using bisection.
          */
@@ -677,9 +683,11 @@ mlatbest = mlat_min;
 
         }
 
+//printf("HERE 6. Ifound = %g\n", *Ifound);
 
     } else {
 
+//printf("HERE 7. Ifound = %g\n", *Ifound);
         /*
          *  After all this, its unlikely we can find a solution.
          */
@@ -696,6 +704,7 @@ mlatbest = mlat_min;
 
 
 
+//printf("HERE 8. Ifound = %g\n", *Ifound);
 
 
 
@@ -1300,6 +1309,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
                 printf("\t\t\t> Found Zero Bracket. [a, b] = %g %g  [Da, Db] = %g %g\n", Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
             }
             Bracket->FoundZeroBracket = TRUE;
+//printf("returning 1\n");
             return( 1 );
         }
 

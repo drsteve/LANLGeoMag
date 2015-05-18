@@ -59,12 +59,12 @@ int main( int argc, char *argv[] ){
     Lgm_Set_Coord_Transforms( Date, UTC, c );
     MagEphemInfo->LstarInfo->LSimpleMax = 25.0;
     MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
-    MagEphemInfo->LstarInfo->nFLsInDriftShell = 24;
+    MagEphemInfo->LstarInfo->nFLsInDriftShell = 48;
 
     //USER INPUT STUFF
     MagEphemInfo->LstarQuality   = 3;
     MagEphemInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->VerbosityLevel = 1;
+    MagEphemInfo->LstarInfo->VerbosityLevel = 3;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
 
     Kp = 2;
@@ -85,7 +85,7 @@ int main( int argc, char *argv[] ){
     int          done;
     char         fname[1024];
     double       Ra, Rc, Fa, Fc, R, F, Phi, Lat, MLT, Fmax, Rmax;
-    double       Kin = 0.5;
+    double       Kin = 2.0;
 
     sprintf(fname, "junk_K_v5_24.txt" );
     fpjunk = fopen(fname, "w");
@@ -94,7 +94,7 @@ int main( int argc, char *argv[] ){
 
 
 
-    for (MLT=0.00; MLT<=24.0; MLT+=0.05){
+    for (MLT=0.00; MLT<=-1.0; MLT+=0.05){
 
 
         done = FALSE;
@@ -148,7 +148,13 @@ if (Fmax > Fa) printf("************************* Fmax, Fa = %g %g\n", Fmax, Fa);
 
 
 
-    //WriteMagEphemInfoStruct( "test.dat", nAlpha, MagEphemInfo );
+MLT = 0.0;
+Rmax= 4.1;
+Kin = 0.1;
+    Phi = (MLT*15.0 - 180.0)*RadPerDeg; Lat = 0.0*RadPerDeg;
+    P.x = Rmax*cos( Phi )*cos(Lat); P.y = Rmax*sin( Phi )*cos(Lat); P.z = Rmax*sin(Lat);
+    printf( "Final = %g\n", LS(  Date, UTC, Kin, &P, MagEphemInfo  ));
+    WriteMagEphemInfoStruct( "test.dat", 1, MagEphemInfo );
 
     fp = fopen("Lstar.dat", "w");
     for ( i=0; i<nAlpha; ++i ) {

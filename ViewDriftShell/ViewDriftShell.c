@@ -1438,75 +1438,75 @@ void LoadTextures(){
      *      GL_LINEAR_MIPMAP_NEAREST    nearest neighbor after lin. interp between mipmap levels
      *      GL_LINEAR_MIPMAP_LINEAR     lin interp after lin. interp between mipmap levels
      */
-//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
 
     /*
      *  Texture for the TopSide Image
      */
-    glGenTextures( 1, &Texture_TopSide );
-    glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Lat_Versus_Lon_Top_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_TopSide );
+//    glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Lat_Versus_Lon_Top_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the Meridional plane 1
      */
-    glGenTextures( 1, &Texture_MeridPlane1 );
-    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid1_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_MeridPlane1 );
+//    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid1_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the Meridional plane 2
      */
-    glGenTextures( 1, &Texture_MeridPlane2 );
-    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid2_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_MeridPlane2 );
+//    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid2_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the EQ plane
      */
-    glGenTextures( 1, &Texture_EqPlane );
-    glBindTexture( GL_TEXTURE_2D, Texture_EqPlane );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/checkerboard_lg.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_EqPlane );
+//    glBindTexture( GL_TEXTURE_2D, Texture_EqPlane );
+//    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/checkerboard_lg.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
 
     /*
@@ -2359,7 +2359,7 @@ void LoadStars( ) {
     glNewList( StarsDL, GL_COMPILE );
         glDisable(GL_LIGHTING);
         glPointSize( 3.0 );
-        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
+glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
         glEnable(GL_POINT_SMOOTH);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
@@ -2393,7 +2393,7 @@ void LoadStars( ) {
         glEnable(GL_POINT_SMOOTH);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
-        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
+//        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
         glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 
     	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -2506,16 +2506,18 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].TLE = TLEs[i];
 
         SpaceObjects->Sat[i].DrawStreak              = FALSE;
+        SpaceObjects->Sat[i].sPeriodFrac             = 25.0;
         SpaceObjects->Sat[i].DrawGroundPathOfStreak  = FALSE;
         SpaceObjects->Sat[i].DrawStreakToGroundLines = FALSE;
 
-        SpaceObjects->Sat[i].DrawOrbit               = FALSE;
+        SpaceObjects->Sat[i].DrawOrbit               = TRUE;
+        SpaceObjects->Sat[i].oPeriodFrac             = 100.0;
         SpaceObjects->Sat[i].DrawGroundPathOfOrbit   = FALSE;
         SpaceObjects->Sat[i].DrawOrbitToGroundLines  = FALSE;
 
         SpaceObjects->Sat[i].DrawSatToGroundLine     = FALSE;
 
-        SpaceObjects->Sat[i].DrawLabel               = FALSE;
+        SpaceObjects->Sat[i].DrawLabel               = TRUE;
 
         // Streak Colors
         r = (double)rand()/(double)RAND_MAX;
@@ -3561,7 +3563,7 @@ static void realize( GtkWidget *widget, gpointer data) {
 
 
     // Misc Field Lines
-//    GenerateMiscFieldLineLists( ObjInfo );
+//GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3764,11 +3766,11 @@ if (LightingStyle == 2){
 
 
 
-//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
-//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
-//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
-//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
-//glCallList( ObjInfo->MiscFieldLines );
+glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+glCallList( ObjInfo->MiscFieldLines );
 
 
 
@@ -5573,7 +5575,7 @@ void create_ViewDriftShell( void *data ) {
     /*
      * Initialize GtkGLExt.
      */
-//    gtk_gl_init (&xInfo->argc, &xInfo->argv);
+//    gtk_gl_init( &xInfo->argc, &xInfo->argv );
 
 
 
@@ -5684,7 +5686,7 @@ void create_ViewDriftShell( void *data ) {
     gtk_box_pack_start( GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0 );
     gtk_widget_show( drawing_area );
 
-printf("HERE\n");
+printf("1. HERE\n");
 
     /*
      *  Set Pitch Angles to Show
@@ -5725,6 +5727,8 @@ printf("HERE\n");
 
 
 
+
+printf("2. HERE ViewDriftShellWindow = %p\n", ViewDriftShellWindow);
     gtk_widget_show( ViewDriftShellWindow );
 
 

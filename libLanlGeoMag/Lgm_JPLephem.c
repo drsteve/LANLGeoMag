@@ -17,12 +17,15 @@
 
 
 Lgm_JPLephemInfo *Lgm_InitJPLephemInfo( int DEnum, int getBodies, int verbosity ) {
-    Lgm_JPLephemInfo  *jpl = (Lgm_JPLephemInfo *) calloc (1, sizeof(Lgm_JPLephemInfo));
-    Lgm_InitJPLephDefaults(DEnum, getBodies, verbosity, jpl );
-    return jpl;
-    }
 
-void Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLephemInfo *jpl ) {
+    Lgm_JPLephemInfo  *jpl = (Lgm_JPLephemInfo *) calloc (1, sizeof(Lgm_JPLephemInfo));
+    Lgm_InitJPLephDefaults( DEnum, getBodies, verbosity, jpl );
+    return jpl;
+
+}
+
+void Lgm_InitJPLephDefaults( int DEnum, int getBodies, int verbosity, Lgm_JPLephemInfo *jpl ) {
+
     //getBodies is (logical OR) sum of variable numbers
     //Sun=1; EarthMoon=2; InnerPlanets=4; OuterPlanets=8; LibrationNutation=16;
     jpl->DEnum = DEnum;
@@ -33,35 +36,45 @@ void Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLeph
     if (LGM_DE_INNERPLANETS & getBodies) { jpl->getInnerPlanets=TRUE; }
     if (LGM_DE_OUTERPLANETS & getBodies) { jpl->getOuterPlanets=TRUE; }
     if (LGM_DE_LIBR_NUT & getBodies) { jpl->getLibrationNutation=TRUE; }
+
+}
+
+void Lgm_FreeJPLephemInfo( Lgm_JPLephemInfo *jpl ) {
+
+    if ( jpl->SunAlloced ) { 
+        LGM_ARRAY_3D_FREE( jpl->sun );
     }
 
-void Lgm_FreeJPLephemInfo (Lgm_JPLephemInfo *jpl) {
-    if (jpl->SunAlloced) { LGM_ARRAY_3D_FREE( jpl->sun ); }
-    if (jpl->EarthMoonAlloced) {
+    if ( jpl->EarthMoonAlloced ) {
         LGM_ARRAY_3D_FREE( jpl->earthmoon );
         LGM_ARRAY_3D_FREE( jpl->moon_wrt_earth );
-        }
-    if (jpl->InnerPlanetsAlloced) {
+    }
+
+    if ( jpl->InnerPlanetsAlloced ) {
         LGM_ARRAY_3D_FREE( jpl->mercury );
         LGM_ARRAY_3D_FREE( jpl->venus );
         LGM_ARRAY_3D_FREE( jpl->mars );
-        }
-    if (jpl->OuterPlanetsAlloced) {
+    }
+
+    if ( jpl->OuterPlanetsAlloced ) {
         LGM_ARRAY_3D_FREE( jpl->jupiter );
         LGM_ARRAY_3D_FREE( jpl->saturn );
         LGM_ARRAY_3D_FREE( jpl->uranus );
         LGM_ARRAY_3D_FREE( jpl->neptune );
         LGM_ARRAY_3D_FREE( jpl->pluto );
-        }
-    if (jpl->LibrNutAlloced) {
-        LGM_ARRAY_3D_FREE( jpl->libration );
-        LGM_ARRAY_3D_FREE( jpl->nutation );
-        }
-    free( jpl );
     }
 
+    if ( jpl->LibrNutAlloced ) {
+        LGM_ARRAY_3D_FREE( jpl->libration );
+        LGM_ARRAY_3D_FREE( jpl->nutation );
+    }
 
-void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
+    free( jpl );
+
+}
+
+
+void Lgm_ReadJPLephem( Lgm_JPLephemInfo *jpl ) {
 
     double      *JDparams;
     char        *Path, JPLephemPath[2048];
@@ -77,8 +90,10 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
      */
     Path = getenv( "JPL_EPHEM_PATH" );
     if ( Path == NULL ) {
+
         strcpy( JPLephemPath, LGM_INDEX_DATA_DIR );
         strcat( JPLephemPath, "/DE_FILES" );
+
     } else {
         /*
          * Test for existence
@@ -91,6 +106,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
         } else {
             strcpy( JPLephemPath, Path );
         }
+
     }
 
     // jpl structure has member DEnum that should be cast to a string
@@ -101,17 +117,18 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
     InFileExists = ( (StatError = stat( JPLephemFile, &StatBuf )) != -1 ) ? TRUE : FALSE;
 
     if ( ( InFileExists ) && ( H5Fis_hdf5( JPLephemFile ) )) {
+
         // Read HDF5 file here
         file = H5Fopen( JPLephemFile, H5F_ACC_RDONLY, H5P_DEFAULT );
         if (jpl->verbosity > 1) {
             printf("Loading JPL definitive ephemeris from %s\n", JPLephemFile);
-            }
+        }
         // get DEXXX Chebyshev polynomial coefficients for requested objects read into variables
         if (jpl->getSun) {
             jpl->sun = Get_DoubleDataset_3D( file, "/Sun", dims);
             jpl->sun_nvals = dims[0]; jpl->sun_naxes = dims[1]; jpl->sun_ncoeffs = dims[2];
             jpl->SunAlloced = TRUE;
-            }
+        }
         if (jpl->getEarth) { //gets Earth-Moon barycenter (heliocentric) and Moon (geocentric)
             jpl->earthmoon = Get_DoubleDataset_3D( file, "/EarthMoon", dims);
             jpl->earthmoon_nvals = dims[0];
@@ -122,7 +139,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
             jpl->moon_wrt_earth_naxes = dims[1];
             jpl->moon_wrt_earth_ncoeffs = dims[2];
             jpl->EarthMoonAlloced = TRUE;
-            }
+        }
         if (jpl->getInnerPlanets) { 
             jpl->mercury = Get_DoubleDataset_3D( file, "/Mercury", dims);
             jpl->mercury_nvals = dims[0]; jpl->mercury_naxes = dims[1]; jpl->mercury_ncoeffs = dims[2];
@@ -131,7 +148,7 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
             jpl->mars = Get_DoubleDataset_3D( file, "/Mars", dims);
             jpl->mars_nvals = dims[0]; jpl->mars_naxes = dims[1]; jpl->mars_ncoeffs = dims[2];
             jpl->InnerPlanetsAlloced = TRUE;
-            }
+        }
         if (jpl->getOuterPlanets) { 
             jpl->jupiter = Get_DoubleDataset_3D( file, "/Jupiter", dims);
             jpl->jupiter_nvals = dims[0]; jpl->jupiter_naxes = dims[1]; jpl->jupiter_ncoeffs = dims[2];
@@ -144,14 +161,14 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
             jpl->pluto = Get_DoubleDataset_3D( file, "/Pluto", dims);
             jpl->pluto_nvals = dims[0]; jpl->pluto_naxes = dims[1]; jpl->pluto_ncoeffs = dims[2];
             jpl->OuterPlanetsAlloced = TRUE;
-            }
+        }
         if (jpl->getLibrationNutation) { 
             jpl->libration = Get_DoubleDataset_3D( file, "/Librations", dims);
             jpl->libration_nvals = dims[0]; jpl->libration_naxes = dims[1]; jpl->libration_ncoeffs = dims[2];
             jpl->nutation = Get_DoubleDataset_3D( file, "/Nutations", dims);
             jpl->nutation_nvals = dims[0]; jpl->nutation_naxes = dims[1]; jpl->nutation_ncoeffs = dims[2];
             jpl->LibrNutAlloced = TRUE;
-            }
+        }
         JDparams = Get_DoubleDataset_1D( file, "/JDparams", dims);
         jpl->jalpha = JDparams[0];
         jpl->jomega = JDparams[1];
@@ -159,12 +176,15 @@ void Lgm_ReadJPLephem(Lgm_JPLephemInfo *jpl) {
         LGM_ARRAY_1D_FREE( JDparams );
         //now close up
         status = H5Fclose( file );
-        }
-    else {
+
+    } else {
+
         printf("Problem encountered finding/opening the specified definitive ephemeris file (%s)\n", JPLephemFile);
         exit(2);
-        }
+
     }
+
+}
 
 
 void Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephemBundle *bundle ) {

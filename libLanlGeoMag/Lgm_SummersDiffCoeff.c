@@ -2990,17 +2990,25 @@ double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, 
 }
 
 /*
- *	The following routine computes all 3 components of the diffusion tensor (Daa, Dap and Dpp) at a specific value of the tangent of the wave normal angle using the derivation in Glauert 
- *	and Horne 2005.  Note that the frequencies in Glauert and Horne use units of radians/second, whereas I use units of cycles/second (Hz).  The difference is mostly irrelevant since the 
- *	solution to the dispersion relation is done using normalized frequencies (frequency divided by gyrofrequency).  The appearance of w^2 in the weighting coefficient, where
- *	w_i is a resonant frequency, is effectively divided out by the k^2 in the N(w) term, so the units here also cancel out.  All of the terms dw/dk similarly cancel out in 
- *	terms of whether or not one uses frequency in Hz or radians/second.  The only place it remains, then, is in the term dw in the denominator of Asquared.  The term dw in Hz
- *	must be multiplied by 2*pi in order to match Glauert and Horne 2005.
+ *	The following routine computes all 3 components of the diffusion tensor
+ *	(Daa, Dap and Dpp) at a specific value of the tangent of the wave normal
+ *	angle using the derivation in Glauert and Horne 2005.  Note that the
+ *	frequencies in Glauert and Horne use units of radians/second, whereas I use
+ *	units of cycles/second (Hz).  The difference is mostly irrelevant since the
+ *	solution to the dispersion relation is done using normalized frequencies
+ *	(frequency divided by gyrofrequency).  The appearance of w^2 in the
+ *	weighting coefficient, where w_i is a resonant frequency, is effectively
+ *	divided out by the k^2 in the N(w) term, so the units here also cancel out.
+ *	All of the terms dw/dk similarly cancel out in terms of whether or not one
+ *	uses frequency in Hz or radians/second.  The only place it remains, then,
+ *	is in the term dw in the denominator of Asquared.  The term dw in Hz must
+ *	be multiplied by 2*pi in order to match Glauert and Horne 2005.
  *
- *	Modified by Greg Cunningham on 6-1-2013 to eliminate resonant roots for which the wave normal angle is larger than the resonance cone angle.  This change was made at the same
- *	time as the change above to the normalizer routine, normalizerForWavePowerSpectrumFunction, that computes N(w).
+ *	Modified by Greg Cunningham on 6-1-2013 to eliminate resonant roots for
+ *	which the wave normal angle is larger than the resonance cone angle.  This
+ *	change was made at the same time as the change above to the normalizer
+ *	routine, normalizerForWavePowerSpectrumFunction, that computes N(w).
  */
-
 int localDiffusionCoefficientAtSpecificThetaGlauertAndHorneReturnTensorInPlace(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p, double *Daa, double *Dap, double *Dpp)
 {
     	int    	nRoots, i, j, nCyclotron, indexIntoNw, test;
@@ -3027,23 +3035,22 @@ int localDiffusionCoefficientAtSpecificThetaGlauertAndHorneReturnTensorInPlace(d
 
 /*	Define constants that are needed */
 	theta = atan(tanTheta); 					//FIXME: this means that the function is only valid for wave normal angles between -pi/2 and pi/2
-    	SinAlpha=sin(alpha);             
-    	SinAlpha2=SinAlpha*SinAlpha;             
-    	cosAlpha=cos(alpha);             
-    	Mu2=1.0-SinAlpha2;
-    	E=KE/0.511;               					//input normalized energy (KE/m0c2)
-    	Gamma = E+1.0; Gamma2 = Gamma*Gamma;
-    	momentum=sqrt((KE+LGM_Ee0)*(KE+LGM_Ee0)-(LGM_Ee0*LGM_Ee0));	//momentum in MeV/c
-    	tanTheta2=tanTheta*tanTheta;
-    	cosTheta=cos(theta);
-    	cosTheta2=cosTheta*cosTheta;					
-    	Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  // square of (v_par/c)*cos(theta)
+    SinAlpha=sin(alpha);             
+    SinAlpha2=SinAlpha*SinAlpha;             
+    cosAlpha=cos(alpha);             
+    Mu2=1.0-SinAlpha2;
+    E=KE/0.511;               					//input normalized energy (KE/m0c2)
+    Gamma = E+1.0; Gamma2 = Gamma*Gamma;
+    momentum=sqrt((KE+LGM_Ee0)*(KE+LGM_Ee0)-(LGM_Ee0*LGM_Ee0));	//momentum in MeV/c
+    tanTheta2=tanTheta*tanTheta;
+    cosTheta=cos(theta);
+    cosTheta2=cosTheta*cosTheta;					
+    Beta2 = E*(E+2.0)*Mu2*cosTheta2/Gamma2;  // square of (v_par/c)*cos(theta)
 	Beta=sqrt(Beta2);
 	*Daa=0.0;
 	*Dap=0.0;
 	*Dpp=0.0;
-    	for (nCyclotron=nCyclotronLow; nCyclotron<=nCyclotronHigh; nCyclotron++)   		//input cyclotron mode
-		{
+    for (nCyclotron=nCyclotronLow; nCyclotron<=nCyclotronHigh; nCyclotron++) {  		//input cyclotron mode
 /*		resonance condition depends on nCyclotron */
     		a  = s*nCyclotron/Gamma; a2 = a*a; 			//assume electrons so lambda absorbed in basic formula; s is 1 for R-mode, -1 for L-mode; FIXME: is this right?
 
@@ -3375,23 +3382,36 @@ int computeNormalizerForWavePowerSpectrumFunctionForRangeOfPlasmaParameters(doub
 }
 
 /*
- *	Compute N(w), a normalization that ensures that the energy per unit frequency is given by B^2(w) for any wave normal angle distribution consistent with the dispersion relation.
- *	I believe that the idea here is that the wave power is partitioned into wave normal angles as well as frequency; however, for a specified wave normal angle and frequency, there
- * 	are only two wave number magnitudes, |k|, that satisfy the dispersion relation and presumably only one that is the right 'mode'.  This is the wave number magnitude we use in the
- *	equations from Glauert and Horne.  Thus, we need to perform an integral of the function h(X)=1/2pi^2[g(X)k^2/(1+X^2)^3/2][dk/dw]X over X.  First, we define the function h(X) and 
- *	then we integrate over it, using quadpack since this is what Mike uses to do the Summers' integrals.
+ *	Compute N(w), a normalization that ensures that the energy per unit
+ *	frequency is given by B^2(w) for any wave normal angle distribution
+ *	consistent with the dispersion relation.  I believe that the idea here is
+ *	that the wave power is partitioned into wave normal angles as well as
+ *	frequency; however, for a specified wave normal angle and frequency, there
+ *	are only two wave number magnitudes, |k|, that satisfy the dispersion
+ *	relation and presumably only one that is the right 'mode'.  This is the
+ *	wave number magnitude we use in the equations from Glauert and Horne.
+ *	Thus, we need to perform an integral of the function
+ *	h(X)=1/2pi^2[g(X)k^2/(1+X^2)^3/2][dk/dw]X over X.  First, we define the
+ *	function h(X) and then we integrate over it, using quadpack since this is
+ *	what Mike uses to do the Summers' integrals.
  *
- *	Modified by Greg Cunningham on 6-1-2013 to account for the fact that, for each frequency w (which is contained in the struct element p.w), there is potentially a resonance cone angle, 
- *	theta, in the interval 0<=theta<=pi/2 that limits the range of theta over which resonant roots should be accepted to [0,theta].  If the input argument, tanTheta, is not within this
- *	range then the routine should return zero since we will not be accepting resonant roots for values of theta outside this range.
+ *	Modified by Greg Cunningham on 6-1-2013 to account for the fact that, for
+ *	each frequency w (which is contained in the struct element p.w), there is
+ *	potentially a resonance cone angle, theta, in the interval 0<=theta<=pi/2
+ *	that limits the range of theta over which resonant roots should be accepted
+ *	to [0,theta].  If the input argument, tanTheta, is not within this range
+ *	then the routine should return zero since we will not be accepting resonant
+ *	roots for values of theta outside this range.
  *
- *	Modified by Greg Cunningham on 6-6-2014 to use only normalized frequencies and aStar=wce^2/wpe^2 instead of wce, wpe, w, etc. Unfortunately, this means that the result that is returned
- *	is 1/wce^2 times the old result and so callers of this routine have to multiply the result by wce^2.  This change was made so that the array Nw[i] that is used to normalize the spectrum
- *	at each frequency can be precomputed for a range of aStar's and then the column that corresponds to the correct aStar can be selected.
+ *	Modified by Greg Cunningham on 6-6-2014 to use only normalized frequencies
+ *	and aStar=wce^2/wpe^2 instead of wce, wpe, w, etc. Unfortunately, this
+ *	means that the result that is returned is 1/wce^2 times the old result and
+ *	so callers of this routine have to multiply the result by wce^2.  This
+ *	change was made so that the array Nw[i] that is used to normalize the
+ *	spectrum at each frequency can be precomputed for a range of aStar's and
+ *	then the column that corresponds to the correct aStar can be selected.
  */
-
-double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p) 
-{
+double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p) {
 	double	aStar,x2,tanTheta2,sinTheta2,sinTheta4,cosTheta2;
 	double 	P,R,L,S,D,P2,D2,A,B,F,F2,n2_1,n2_2,n2,polarization1,polarization2,k,k2,c2,x,y,h,thisg,g,dwdk,dkdw;
 	double	xmean, xmin, xmax, dx, weight, test;
@@ -3482,14 +3502,17 @@ double normalizerForWavePowerSpectrumFunction(double tanTheta, void *p)
 }
 
 /*
- *	The following function evaluates the normalizing constant |/phi_{nk}|^2 in equation A13 of Glauert and Horne 2005.
- *	The Bessel functions are evaluated using the argument \frac{k_{/perp}p_{/perp}}{m_{/sigma}/Omega_{/sigma}} where /sigma
- *	denotes the particle type (electron or proton) and the gyrofreq is signed.  Because p is specified in units of MeV/c, 
- *	and y=ck/wce, the product p*y/m_e 
- *	has units of MeV/kg; need to convert MeV to kg*m/sec
- *	so that the units work out properly.  Since 1 MeV=1e6 eV=1.6e-13 Joules and c=3e8 m/s, we have p(MeV/c)*1.6e-13/3e8 has
- *	units of kg*m/s.  Meanwhile, y=ck/wce must be divided by c to get k/wce, which has units of 1/(m/s) so that y*p*sin(theta)/m_e,
- *	where m_e is the electron mass in kg, is unitless.
+ *	The following function evaluates the normalizing constant |/phi_{nk}|^2 in
+ *	equation A13 of Glauert and Horne 2005.  The Bessel functions are evaluated
+ *	using the argument \frac{k_{/perp}p_{/perp}}{m_{/sigma}/Omega_{/sigma}}
+ *	where /sigma denotes the particle type (electron or proton) and the
+ *	gyrofreq is signed.  Because p is specified in units of MeV/c, and
+ *	y=ck/wce, the product p*y/m_e has units of MeV/kg; need to convert MeV to
+ *	kg*m/sec so that the units work out properly.  Since 1 MeV=1e6 eV=1.6e-13
+ *	Joules and c=3e8 m/s, we have p(MeV/c)*1.6e-13/3e8 has units of kg*m/s.
+ *	Meanwhile, y=ck/wce must be divided by c to get k/wce, which has units of
+ *	1/(m/s) so that y*p*sin(theta)/m_e, where m_e is the electron mass in kg,
+ *	is unitless.
  *
  *	s			particle type (-1=electron, +1=proton)
  *	p			momentum (in units of MeV/c)
@@ -3546,8 +3569,9 @@ double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNum
 }
 
 /*
- *	The following routine finds intervals in theta for which it is possible that there is a resonant root at the intersection between the resonance condition 
- *	and the dispersion relation.  Inputs are 
+ *	The following routine finds intervals in theta for which it is possible
+ *	that there is a resonant root at the intersection between the resonance
+ *	condition and the dispersion relation.  Inputs are 
  *		wn	doppler shift, s*n*wce/gamma, normalized by the gyrofrequency, wce, to give s*n/gamma
  *		wlc	lower cutoff frequency normalized by the gyrofrequency
  *		wuc	uppper cutoff frequency normalized by the gyrofrequency
@@ -3555,9 +3579,12 @@ double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNum
  *		mode	=1 for R-mode, =-1 for L-mode
  *		vpar	the parallel velocity divided by the speed of light
  *
- *	The code determines the intervals in theta for which both of two inequality conditions is met (the minimum of one monotonic function is less than the maximum of 
- *	the other, and vice versa).  A list of intervals in theta that satisfy each of the two conditions is returned by the code and then the intersection of these intervals
- *	is computed and returned. The process may result in 0, 1 or as many as 4 intervals being returned.
+ *	The code determines the intervals in theta for which both of two inequality
+ *	conditions is met (the minimum of one monotonic function is less than the
+ *	maximum of the other, and vice versa).  A list of intervals in theta that
+ *	satisfy each of the two conditions is returned by the code and then the
+ *	intersection of these intervals is computed and returned. The process may
+ *	result in 0, 1 or as many as 4 intervals being returned.
  *
  */
 int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, struct inequalityParameters *inequalityParamsLC, struct inequalityParameters *inequalityParamsUC, int mode, int *nIntervals, double *thetaStart, double *thetaEnd) 
