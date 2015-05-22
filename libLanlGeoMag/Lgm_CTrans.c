@@ -1064,6 +1064,7 @@ void Lgm_ComputeSun( Lgm_CTrans *c  ) {
     switch (c->ephModel) {
         case LGM_EPH_DE:
             Lgm_JPL_getSunVector( c->TT.JD, c->jpl, &SunICRF);
+            Lgm_NormalizeVector(&SunICRF);
             c->SunJ2000 = SunICRF;
             Lgm_MatTimesVec(c->Agei_to_mod, &SunICRF, &Sunmod);
             //Lgm_Convert_Coords( &SunICRF, &Sunmod, GEI2000_TO_MOD, c );        

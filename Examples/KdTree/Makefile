@@ -1,6 +1,6 @@
 # Very simple makefile illustrating how to use pkg-config to compile
 
-all: test DstNNs TLE_NNs
+all: test DstNNs TLE_NNs magConj
 
 test: test.c
 	gcc test.c `pkg-config --cflags --libs lgm` -o test
@@ -11,5 +11,8 @@ DstNNs: DstNNs.c
 TLE_NNs: TLE_NNs.c
 	gcc TLE_NNs.c `pkg-config --cflags --libs lgm` -o TLE_NNs
 
+magConj: magConj.c
+	gcc magConj.c `pkg-config --cflags --libs lgm` -o magConj
+
 clean:
-	rm test DstNNs TLE_NNs
+	rm test DstNNs TLE_NNs magConj
