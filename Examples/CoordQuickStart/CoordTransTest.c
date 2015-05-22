@@ -22,8 +22,8 @@ int main( ) {
     Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c);
 
     /* read test file */
-    testfile = fopen("LgmTestTransforms_MMS20150115.txt","r");
-    if (makeNew) outfile = fopen("LgmTestTransforms_MMS20150115.txt", "w");
+    testfile = fopen("LgmTestTransforms_MMS20150522.txt","r");
+    if (makeNew) outfile = fopen("LgmTestTransforms_MMS20150522.txt", "w");
 
     /* step through test cases one line at a time */
     line = 0;
