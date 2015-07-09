@@ -59,7 +59,7 @@ int main( ) {
             else {
                 nFail++;
                 printf("*****  warning : difference >= 1.0e-5 km (1 cm)  *****\n");
-                printf("Test %d failed (diff: %g %g %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z);
+                printf("Test %d failed (diff: %g %g %g   %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
                 }
             if (makeNew) fprintf(outfile, "%s %lld %s %s %lf %lf %lf %lf %lf %lf\n", IsoDate, TT2000, sysIn, sysOut, Ucent.x, Ucent.y, Ucent.z, Utest.x, Utest.y, Utest.z);
 
