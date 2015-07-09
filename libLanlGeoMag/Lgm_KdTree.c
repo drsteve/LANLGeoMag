@@ -76,6 +76,9 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
             t->Data[j].Position[d] = Positions[d][j];
         }
         t->Data[j].Object = Objects[j];
+        //double *bbb;
+        //bbb = (double *)Objects[j];
+        //printf("bbb = %g %g %g\n", bbb[0], bbb[1], bbb[2]);
 
     }
     for (d=0; d<D; d++) t->Diff[d] = t->Max[d] - t->Min[d];
@@ -437,9 +440,11 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
         index = FarthestPoint.index;
         p     = (Lgm_KdTreeNode *)FarthestPoint.Data;
 
-        kNN[ k   ]       = p->Data[index];
-        kNN[ k++ ].Dist2 = dist; // save the dist2 into the data struct
-        *Kgot = k;
+        if ( dist <= MaxDist2 ) {
+            kNN[ k   ]       = p->Data[index];
+            kNN[ k++ ].Dist2 = dist; // save the dist2 into the data struct
+            *Kgot = k;
+        }
         
     }
 
@@ -451,10 +456,9 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
      */
     if (k==K) {
         return( KDTREE_KNN_SUCCESS );
-        }
-    else {
+    } else {
         return( KDTREE_KNN_TOO_FEW_NNS );
-        }
+    }
 
 }
 

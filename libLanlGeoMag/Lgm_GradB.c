@@ -49,22 +49,28 @@ void Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lg
 
     if (m->VerbosityLevel > 0) printf("\t\tLgm_GradB: Computing GradB with DerivScheme = %d,  h = %g", DerivScheme, h);
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.x += H;
-        m->Bfield( &u, &Bvec, m );
-        B = Lgm_Magnitude( &Bvec );
-        fx[i+N] = B;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.x += H;
+            m->Bfield( &u, &Bvec, m );
+            B = Lgm_Magnitude( &Bvec );
+            fx[i+N] = B;
+        }
     }
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.y += H;
-        m->Bfield( &u, &Bvec, m );
-        B = Lgm_Magnitude( &Bvec );
-        fy[i+N] = B;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.y += H;
+            m->Bfield( &u, &Bvec, m );
+            B = Lgm_Magnitude( &Bvec );
+            fy[i+N] = B;
+        }
     }
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.z += H;
-        m->Bfield( &u, &Bvec, m );
-        B = Lgm_Magnitude( &Bvec );
-        fz[i+N] = B;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.z += H;
+            m->Bfield( &u, &Bvec, m );
+            B = Lgm_Magnitude( &Bvec );
+            fz[i+N] = B;
+        }
     }
 
 
@@ -200,38 +206,50 @@ void Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lg
     if (m->VerbosityLevel > 0) printf("\t\tLgm_CurlB: Computing CurlB with DerivScheme = %d,  h = %g", DerivScheme, h);
     // dBx/dy and dBx/dz
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.y += H;
-        m->Bfield( &u, &Bvec, m );
-        fxy[i+N] = Bvec.x;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.y += H;
+            m->Bfield( &u, &Bvec, m );
+            fxy[i+N] = Bvec.x;
+        }
     }
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.z += H;
-        m->Bfield( &u, &Bvec, m );
-        fxz[i+N] = Bvec.x;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.z += H;
+            m->Bfield( &u, &Bvec, m );
+            fxz[i+N] = Bvec.x;
+        }
     }
 
     // dBy/dx and dBy/dz
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.x += H;
-        m->Bfield( &u, &Bvec, m );
-        fyx[i+N] = Bvec.y;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.x += H;
+            m->Bfield( &u, &Bvec, m );
+            fyx[i+N] = Bvec.y;
+        }
     }
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.z += H;
-        m->Bfield( &u, &Bvec, m );
-        fyz[i+N] = Bvec.y;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.z += H;
+            m->Bfield( &u, &Bvec, m );
+            fyz[i+N] = Bvec.y;
+        }
     }
 
     // dBz/dx and dBz/dy
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.x += H;
-        m->Bfield( &u, &Bvec, m );
-        fzx[i+N] = Bvec.z;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.x += H;
+            m->Bfield( &u, &Bvec, m );
+            fzx[i+N] = Bvec.z;
+        }
     }
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.y += H;
-        m->Bfield( &u, &Bvec, m );
-        fzy[i+N] = Bvec.z;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.y += H;
+            m->Bfield( &u, &Bvec, m );
+            fzy[i+N] = Bvec.z;
+        }
     }
 
     if (DerivScheme == LGM_DERIV_SIX_POINT){
@@ -265,6 +283,9 @@ void Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lg
     CurlB->x = dBzdy - dBydz;
     CurlB->y = dBxdz - dBzdx;
     CurlB->z = dBydx - dBxdy;
+//printf("NRM dBdx = %g %g %g\n", -999.0, dBydx, dBzdx );
+//printf("NRM dBdy = %g %g %g\n", dBxdy, -999.0, dBzdy );
+//printf("NRM dBdz = %g %g %g\n", dBxdz, dBydz, -999.0 );
     if (m->VerbosityLevel > 0) printf("   CurlB = (%g %g %g)\n", CurlB->x, CurlB->y, CurlB->z );
 
     return;
@@ -320,6 +341,9 @@ void Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_
 }
 
 
+
+
+
 /**
  *  \brief
  *      Compute the divergence of B at a given point.
@@ -372,23 +396,29 @@ void Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagM
     if (m->VerbosityLevel > 0) printf("\t\tLgm_DivB: Computing DivB with DerivScheme = %d,  h = %g", DerivScheme, h);
     // dBx/dx
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.x += H;
-        m->Bfield( &u, &Bvec, m );
-        fxx[i+N] = Bvec.x;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.x += H;
+            m->Bfield( &u, &Bvec, m );
+            fxx[i+N] = Bvec.x;
+        }
     }
 
     // dBy/dy
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.y += H;
-        m->Bfield( &u, &Bvec, m );
-        fyy[i+N] = Bvec.y;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.y += H;
+            m->Bfield( &u, &Bvec, m );
+            fyy[i+N] = Bvec.y;
+        }
     }
 
     // dBz/dz
     for (i=-N; i<=N; ++i){
-        u = *u0; H = (double)i*h; u.z += H;
-        m->Bfield( &u, &Bvec, m );
-        fzz[i+N] = Bvec.z;
+        if ( N != 0 ) {
+            u = *u0; H = (double)i*h; u.z += H;
+            m->Bfield( &u, &Bvec, m );
+            fzz[i+N] = Bvec.z;
+        }
     }
 
     if (DerivScheme == LGM_DERIV_SIX_POINT){
