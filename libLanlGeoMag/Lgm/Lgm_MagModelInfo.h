@@ -5,6 +5,7 @@
 #include "Lgm/Lgm_QuadPack.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Octree.h"
+#include "Lgm/Lgm_KdTree.h"
 #include "Lgm/Lgm_Constants.h"
 #include "Lgm/Lgm_DFI_RBF.h"
 #include "Lgm/Lgm_Tsyg1996.h"
@@ -95,8 +96,9 @@
 #define LGM_EXTMODEL_OP77               8
 #define LGM_EXTMODEL_SCATTERED_DATA     9
 #define LGM_EXTMODEL_SCATTERED_DATA2    10
-#define LGM_EXTMODEL_TU82               11
-#define LGM_EXTMODEL_OP88               12
+#define LGM_EXTMODEL_SCATTERED_DATA3    11
+#define LGM_EXTMODEL_TU82               12
+#define LGM_EXTMODEL_OP88               13
 
 
 
@@ -409,14 +411,31 @@ typedef struct Lgm_MagModelInfo {
     Lgm_OctreeData *Octree_kNN;
     int             Octree_kNN_Alloced; // number of elements allocated. (0 if unallocated).
 
+    /*
+     * Variables for defining KdTree stuff
+     */
+    Lgm_KdTree     *KdTree;
+    int             KdTree_Alloced;     // TRUE if memory is alloced for the KdTree, FALSE otherwise.
+    int             KdTree_kNN_InterpMethod;
+    int             KdTree_kNN_k;
+    double          KdTree_kNN_MaxDist2;
+    Lgm_KdTreeData *KdTree_kNN;
+    int             KdTree_kNN_Alloced; // number of elements allocated. (0 if unallocated).
+
 
     /*
      *  hash table used in Lgm_B_FromScatteredData*()
      */
-    Lgm_DFI_RBF_Info   *rbf_ht;         // hash table (uthash)
-    int                 rbf_ht_alloced; // Flag to indicate whether or not rbf_ht is allocated with data.
-    long int            RBF_nHashFinds; // Number of HASH_FIND()'s performed.
-    long int            RBF_nHashAdds;  // Number of HASH_ADD_KEYPTR()'s performed.
+    Lgm_DFI_RBF_Info   *rbf_ht;             // hash table (uthash)
+    int                 rbf_ht_alloced;     // Flag to indicate whether or not rbf_ht is allocated with data.
+    long int            RBF_nHashFinds;     // Number of HASH_FIND()'s performed.
+    long int            RBF_nHashAdds;      // Number of HASH_ADD_KEYPTR()'s performed.
+    Lgm_Vector          RBF_dBdx;           // deriv of B-vec wrt x computed using DFI_RBF.
+    Lgm_Vector          RBF_dBdy;           // deriv of B-vec wrt y computed using DFI_RBF.
+    Lgm_Vector          RBF_dBdz;           // deriv of B-vec wrt z computed using DFI_RBF.
+    int                 RBF_CompGradAndCurl;
+    Lgm_Vector          RBF_Grad_B;         // Grad_B
+    Lgm_Vector          RBF_Curl_B;         // Curl_B
 
 
     /*
@@ -691,6 +710,7 @@ void    Tsyg_T02( int IOPT, double *PARMOD, double PS, double SINPS, double COSP
 
 int Lgm_B_FromScatteredData( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
 
@@ -750,6 +770,9 @@ void Lgm_MagModelInfo_Set_Octree( Lgm_Octree *Octree, int k, Lgm_MagModelInfo *m
 void Lgm_Set_Octree_kNN_InterpMethod( Lgm_MagModelInfo *m, int Method );
 void Lgm_Set_Octree_kNN_k( Lgm_MagModelInfo *m, int k );
 void Lgm_Set_Octree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 );
+void Lgm_MagModelInfo_Set_KdTree( Lgm_KdTree *KdTree, int k, Lgm_MagModelInfo *m );
+void Lgm_Set_KdTree_kNN_k( Lgm_MagModelInfo *m, int k );
+void Lgm_Set_KdTree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
 void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m );

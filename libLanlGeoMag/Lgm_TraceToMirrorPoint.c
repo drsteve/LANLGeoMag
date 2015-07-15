@@ -66,7 +66,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
     double	    Rlc, R, Fa, Fb, F, Fmin, B, Fs, Fn;
     double	    Ra, Rb, Height;
     Lgm_Vector	w, Pa, Pb, P, Bvec, Pmin;
-    int		    done, FoundBracket, reset, nIts;
+    int		    done, FoundBracket, reset, nIts, nSteps;
     double      MinValidHeight;
 
     reset = TRUE;
@@ -236,6 +236,7 @@ int Lgm_TraceToMirrorPoint( Lgm_Vector *u, Lgm_Vector *v, double *Sm, double Bm,
      */
     done         = FALSE;
     FoundBracket = FALSE;
+    nSteps       = 0;
     while ( !done ) {
 
 //printf("P = %g %g %g   u_scale=%g %g %g\n", P.x, P.y, P.z, u_scale.x, u_scale.y, u_scale.z);
@@ -306,6 +307,7 @@ if (Htry > 0.1) Htry = 0.1;
 double Rvalidmin = 1.0 + MinValidHeight/Re;
         //if (Htry > (R-1.0)) Htry = 0.95*(R-1.0);
         if (Htry > (R-Rvalidmin)) Htry = 0.95*(R-Rvalidmin);
+if (Htry < 0.01) Htry = 0.01;
 
 
         // If Htry gets to be too small, there is probably something wrong.
@@ -330,6 +332,15 @@ double Rvalidmin = 1.0 + MinValidHeight/Re;
                 printf( "**************** End Detailed Output From TraceToMirrorPoint (VerbosityLevel = %d) ******************\n\n\n", Info->VerbosityLevel );
             }
             return(-1); /* dropped below surface of the Earth */
+        }
+
+        ++nSteps;
+
+        if ( nSteps > 1000 ) {
+            if ( Info->VerbosityLevel > 1 ) {
+                printf("    Lgm_TraceToMirrorPoint: Took too many steps to find bracket. (nSteps = %d) \n", nSteps );
+            }
+            return(-3);
         }
 
     }

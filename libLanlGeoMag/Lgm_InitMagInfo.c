@@ -158,10 +158,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     /*
      *  Initialize hash table used in Lgm_B_FromScatteredData*()
      */
-    MagInfo->rbf_ht         = NULL;
-    MagInfo->rbf_ht_alloced = FALSE;
-    MagInfo->RBF_nHashFinds = 0;
-    MagInfo->RBF_nHashAdds  = 0;
+    MagInfo->rbf_ht              = NULL;
+    MagInfo->rbf_ht_alloced      = FALSE;
+    MagInfo->RBF_nHashFinds      = 0;
+    MagInfo->RBF_nHashAdds       = 0;
+    MagInfo->RBF_CompGradAndCurl = FALSE;
 
 
     /*
@@ -361,6 +362,12 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 break;
 
+        case LGM_EXTMODEL_SCATTERED_DATA3:
+                                m->Bfield = Lgm_B_FromScatteredData3;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                break;
+
         default:
                                 printf("No such B field model\n");
                                 exit(-1);
@@ -392,6 +399,25 @@ void Lgm_Set_Octree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 ) {
     m->Octree_kNN_MaxDist2 = MaxDist2; // This maxdist is in physical units
     return;
 }
+
+
+void Lgm_MagModelInfo_Set_KdTree( Lgm_KdTree *KdTree, int k, Lgm_MagModelInfo *m ) {
+    m->KdTree         = KdTree;
+    m->KdTree_Alloced = TRUE;
+    Lgm_Set_KdTree_kNN_k( m, k );
+    return;
+}
+void Lgm_Set_KdTree_kNN_k( Lgm_MagModelInfo *m, int k ) {
+    m->KdTree_kNN_k = k;
+    return;
+}
+void Lgm_Set_KdTree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 ) {
+    m->KdTree_kNN_MaxDist2 = MaxDist2; // This maxdist is in physical units
+    return;
+}
+
+
+
 
 
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax ){

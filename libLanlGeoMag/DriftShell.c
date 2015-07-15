@@ -381,9 +381,9 @@ mlatbest = mlat_min;
          */
         if ( (Db > Da) || (Db > Dc) ) {
             *Ifound = 9e99;
-            printf("\t\t\t> No Zero bracket found (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n",
-                Bracket.a, Bracket.b, Bracket.c,
-                Bracket.Da, Bracket.Db, Bracket.Dc );
+            if (LstarInfo->VerbosityLevel > 1){
+                printf("\t\t\t> No Zero bracket found (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n", Bracket.a, Bracket.b, Bracket.c, Bracket.Da, Bracket.Db, Bracket.Dc );
+            }
             return(-5);
         }
 
