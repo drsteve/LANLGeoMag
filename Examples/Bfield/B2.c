@@ -24,7 +24,7 @@ int main(){
 
 
     // Get (interpolate) the QinDenton vals from the values in the file at the given Julian Date
-    Lgm_get_QinDenton_at_JD( JD, &p, 1 );
+    Lgm_get_QinDenton_at_JD( JD, &p, 1, 0 );
 
     // Set params in mInfo structure.
     Lgm_set_QinDenton( &p, mInfo );
