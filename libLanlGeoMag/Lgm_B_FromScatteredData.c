@@ -481,8 +481,7 @@ int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 
             if ( Info->KdTree_kNN_Alloced == 0 ) {
 
-//                LGM_ARRAY_1D( Info->KdTree_kNN, K, Lgm_KdTreeData );
-LGM_ARRAY_1D( Info->KdTree_kNN, 10*K, Lgm_KdTreeData );
+                LGM_ARRAY_1D( Info->KdTree_kNN, K, Lgm_KdTreeData );
                 Info->KdTree_kNN_Alloced = K;
 
             } else if ( K != Info->KdTree_kNN_Alloced ) {
@@ -491,8 +490,7 @@ LGM_ARRAY_1D( Info->KdTree_kNN, 10*K, Lgm_KdTreeData );
                  * kNN is allocated but K has changed. Realloc.
                  */
                 LGM_ARRAY_1D_FREE( Info->KdTree_kNN );
-//                LGM_ARRAY_1D( Info->KdTree_kNN, K, Lgm_KdTreeData );
-LGM_ARRAY_1D( Info->KdTree_kNN, K*10, Lgm_KdTreeData );
+                LGM_ARRAY_1D( Info->KdTree_kNN, K, Lgm_KdTreeData );
 
             }
             Info->KdTree_kNN_Alloced = K;
@@ -516,80 +514,6 @@ LGM_ARRAY_1D( Info->KdTree_kNN, K*10, Lgm_KdTreeData );
         q[0] = v->x; q[1] = v->y; q[2] = v->z;
         Lgm_KdTree_kNN( q, 3, Info->KdTree, K, &Kgot, Info->KdTree_kNN_MaxDist2, Info->KdTree_kNN );
         //printf("K, Kgot = %d %d    q = %g %g %g  Info->KdTree_kNN_MaxDist2 = %g \n", K, Kgot, q[0], q[1], q[2], Info->KdTree_kNN_MaxDist2 );
-
-
-//testing 
-// add other points to kNN
-int            k, Kgot1, HaveIt, kk, kkk, K1;
-Lgm_KdTreeData *kNN1;
-LGM_ARRAY_1D( kNN1, K, Lgm_KdTreeData );
-K1 = K;
-
-q[0] = v->x-0.5; q[1] = v->y-1.50; q[2] = v->z-1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-printf("Kgot1 = %d\n", Kgot1);
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-
-q[0] = v->x-1.5; q[1] = v->y-1.50; q[2] = v->z+1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x-1.5; q[1] = v->y+1.50; q[2] = v->z-1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x-1.5; q[1] = v->y+1.50; q[2] = v->z+1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x+1.5; q[1] = v->y-1.50; q[2] = v->z-1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x+1.5; q[1] = v->y-1.50; q[2] = v->z+1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x+1.5; q[1] = v->y+1.50; q[2] = v->z-1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-
-q[0] = v->x+1.5; q[1] = v->y+1.50; q[2] = v->z+1.50; Lgm_KdTree_kNN( q, 3, Info->KdTree, K1, &Kgot1, Info->KdTree_kNN_MaxDist2, kNN1 );
-for (kkk=0, k=0; k<Kgot1; k++ ) {
-    for (HaveIt=0, kk=0; kk<Kgot; kk++ ) { if ( Info->KdTree_kNN[kk].Id == kNN1[k].Id ) { HaveIt = 1; break; } }
-    if ( !HaveIt ) { Info->KdTree_kNN[Kgot+kkk] = kNN1[k]; ++kkk; }
-}
-Kgot += kkk;
-printf("Kgot = %d\n", Kgot);
-
-
-
-LGM_ARRAY_1D_FREE( kNN1 );
-
-
-
 
 
 
@@ -766,9 +690,6 @@ Info->RBF_Eps = 1.0/(d2min);
     B->x = B1.x + B2.x;
     B->y = B1.y + B2.y;
     B->z = B1.z + B2.z;
-B->x = B1.x;
-B->y = B1.y;
-B->z = B1.z;
 
 
     //if ( Info->RBF_CompGradAndCurl ) {
@@ -1460,6 +1381,7 @@ int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
             }
             QSORT( unsigned long int, I_data, n_data, int_lt );
 
+/*
 double dx, dy, dz, d2, d2min;
 int j;
 d2min = 1e6;
@@ -1471,7 +1393,7 @@ for ( i=0; i<n_data; i++){
         dy = v_data[i].x - v_data[j].x;
         dz = v_data[i].x - v_data[j].x;
         d2 = dx*dx + dy*dy + dz*dz;
-        if ( (d2 > 0.0) && ( d2 < d2min) ) {
+        if ( (d2 > .25*.25) && ( d2 < d2min) ) {
             d2min = d2;
         }
     
@@ -1479,8 +1401,7 @@ for ( i=0; i<n_data; i++){
   }
 }
 //printf("d2min = %g\n", d2min);
-Info->RBF_Eps = 1.0/(d2min*10.0);
-/*
+Info->RBF_Eps = 1.0/(d2min*4.0);
 */
 
 
@@ -1571,9 +1492,6 @@ Info->RBF_Eps = 1.0/(d2min*10.0);
     B->x = B1.x + B2.x;
     B->y = B1.y + B2.y;
     B->z = B1.z + B2.z;
-//B->x = B1.x;
-//B->y = B1.y;
-//B->z = B1.z;
 
 
     //if ( Info->RBF_CompGradAndCurl ) {
@@ -1720,3 +1638,5 @@ dBdz.z = Info->RBF_dBdz.z;
     return( 1 );
 
 }
+
+
