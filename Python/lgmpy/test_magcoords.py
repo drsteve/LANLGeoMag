@@ -80,7 +80,7 @@ class magcoords_Tests(unittest.TestCase):
         self.assertRaises(TypeError, magcoords.Lvalue,
                           [-4, 0, 1],
                           'bad datetime')
-        self.assertRaises(NotImplementedError, magcoords.Lvalue,
+        self.assertRaises(KeyError, magcoords.Lvalue,
                           [-4, 0, 1],
                           datetime.datetime(2009,1,1),
                           coord_system='bad coords')
@@ -88,7 +88,7 @@ class magcoords_Tests(unittest.TestCase):
 
     def test_input(self):
         """there is some input checking"""
-        self.assertRaises(NotImplementedError, magcoords.coordTrans, [-3.608026916281573, 2.5673907444456745e-16,
+        self.assertRaises(KeyError, magcoords.coordTrans, [-3.608026916281573, 2.5673907444456745e-16,
             -1.7268878861662329], datetime.datetime(2009,1,1),'GSM','BAD')
 
     def test_Pin_pos_in(self):

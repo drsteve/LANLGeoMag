@@ -649,10 +649,14 @@ int Lgm_MagStep_RK5( Lgm_Vector *u, Lgm_Vector *u_scale,
         /*
          * Test accuracy.
          */
+double dum = 0.0;
         ErrMax = 0.0;
         for ( i=0; i<3; i++ ) {
-            ErrMax = FMAX( ErrMax, fabs( yerr[i]/yscal[i]) );
+//            ErrMax = FMAX( ErrMax, fabs( yerr[i]/yscal[i]) );
+dum    = fabs( yerr[i]/yscal[i]);
+ErrMax += dum*dum;
         }
+ErrMax = sqrt(ErrMax); //gets to RMS of scaled error
 
         ErrMax /= eps;
 
@@ -704,6 +708,7 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
     double  b31 = 0.075;
     double  b32 = 0.225;
 
+    // b41=3.0/10.0, b42=-9.0/10.0, b43=6.0/5.0;
     double  b41 =  0.3;
     double  b42 = -0.9;
     double  b43 =  1.2;
@@ -752,7 +757,7 @@ int Lgm_RKCK( Lgm_Vector *u0, Lgm_Vector *b0, Lgm_Vector *v, double h, double sg
     // 1st step
     ak1[0] = b0->x; ak1[1] = b0->y; ak1[2] = b0->z;
     for ( i=0; i<3; i++ ) {
-        ytemp[i] = y[i] + b21*H*ak1[i];
+        ytemp[i] = y[i] + b21*H*ak1[i]; //WHY DOESN'T ytemp GET USED IN NEXT CALL TO Mag?????
     }
 
 

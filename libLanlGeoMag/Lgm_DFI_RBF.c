@@ -91,15 +91,15 @@
  *
  *      \f[
  *          \begin{array}{rclcl}
- *          \Phi_{00} & = & -\partial_y^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+x^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} \\
- *          \Phi_{01} & = & \partial_x\partial_y         & = & -e^2 x y ( e r^2 + 1 )^{-3} \psi^{-1} \\
- *          \Phi_{02} & = & \partial_x\partial_z         & = & -e^2 x z ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{00} & = & -\partial_y^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+x^2) + 2\epsilon) \psi^{-3} \\
+ *          \Phi_{01} & = & \partial_x\partial_y         & = & -e^2 x y \psi^{-3} \\
+ *          \Phi_{02} & = & \partial_x\partial_z         & = & -e^2 x z \psi^{-3} \\
  *          \Phi_{10} & = & \partial_y\partial_x         & = &  \Phi_{01}\\
- *          \Phi_{11} & = & -\partial_x^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+y^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} \\
- *          \Phi_{12} & = & \partial_y\partial_z         & = & -e^2 x z ( e r^2 + 1 )^{-3} \psi^{-1} \\
+ *          \Phi_{11} & = & -\partial_x^2 - \partial_z^2 & = & -( \epsilon^2 (r^2+y^2) + 2\epsilon) \psi^{-3} \\
+ *          \Phi_{12} & = & \partial_y\partial_z         & = & -e^2 y z \psi^{-3} \\
  *          \Phi_{20} & = & \partial_z\partial_x         & = &  \Phi_{02}\\
  *          \Phi_{21} & = & \partial_z\partial_y         & = &  \Phi_{12}\\
- *          \Phi_{22} & = & -\partial_x^2 - \partial_y^2 & = & -( \epsilon^2 (r^2+z^2) + 2\epsilon) ( e r^2 + 1 )^{-3} \psi^{-1} 
+ *          \Phi_{22} & = & -\partial_x^2 - \partial_y^2 & = & -( \epsilon^2 (r^2+z^2) + 2\epsilon) \psi^{-3} 
  *          \end{array}
  *      \f]
  *
@@ -227,10 +227,11 @@
  *
  */
 
-#include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/Lgm_RBF.h"
 
-#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
-//#define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
+//#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
+#define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
+//#define LGM_DFI_RBF_SOLVER  LGM_SVD
 
 
 /** Given \f$\vec{v} = (x, y, z)\f$ and \f$\vec{v}_0 = (x_0, y_0, z_0)\f$ this
@@ -256,7 +257,7 @@
  */
 void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DFI_RBF_Info *rbf  ) {
 
-    double  psi, psi2, psi3, x, y, z, x2, y2, z2, r2, f, g;
+    double  psi, psi2, psi3, psi5, x, y, z, x2, y2, z2, r2, f, g;
     double  eps, Eps2, TwoEps;
 
     eps = rbf->eps;
@@ -292,17 +293,40 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DF
         psi2   = f; psi3 = psi*psi2;
         g      = 1.0/psi3;
 
-        Phi[0][0] = ( Eps2*(r2+x2) + TwoEps) *g;
-        Phi[0][1] = Eps2*x*y *g;
-        Phi[0][2] = Eps2*y*z *g;
+        Phi[0][0] = -( Eps2*(r2+x2) + TwoEps) *g;
+        Phi[0][1] = -Eps2*x*y *g;
+        Phi[0][2] = -Eps2*x*z *g;
+
 
         Phi[1][0] = Phi[0][1];
-        Phi[1][1] = ( Eps2*(r2+y2) + TwoEps) *g;
-        Phi[1][2] = Eps2*x*z *g;
+        Phi[1][1] = -( Eps2*(r2+y2) + TwoEps) *g;
+        Phi[1][2] = -Eps2*y*z *g;
 
         Phi[2][0] = Phi[0][2];
         Phi[2][1] = Phi[1][2];
-        Phi[2][2] = ( Eps2*(r2+z2) + TwoEps) *g;
+        Phi[2][2] = -( Eps2*(r2+z2) + TwoEps) *g;
+        
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_INV_MULTIQUADRIC ) {
+
+        Eps2   = eps*eps;
+        TwoEps = 2.0*eps;
+        f      = 1.0 + eps*r2;
+        psi    = 1.0/sqrt( f );
+        psi2   = f; psi3 = psi*psi2; psi5 = psi3*psi2;
+        g      = 1.0/psi5;
+
+        Phi[0][0] = -( Eps2*(-2.0*x2+y2+z2) - TwoEps) *g;
+        Phi[0][1] = 3.0*Eps2*x*y *g;
+        Phi[0][2] = 3.0*Eps2*x*z *g;
+
+
+        Phi[1][0] = Phi[0][1];
+        Phi[1][1] = -( Eps2*(x2-2.0*y2+z2) - TwoEps) *g;
+        Phi[1][2] = 3.0*Eps2*y*z *g;
+
+        Phi[2][0] = Phi[0][2];
+        Phi[2][1] = Phi[1][2];
+        Phi[2][2] = -( Eps2*(x2+y2-2.0*z2) - TwoEps) *g;
         
 
     } else {
@@ -326,6 +350,232 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DF
 }
 
 
+void    Lgm_DFI_RBF_dPhi_dx( Lgm_Vector *v, Lgm_Vector *v0, double dPdx[3][3], Lgm_DFI_RBF_Info *rbf  ) {
+
+    double  psi, psi2, psi3, x, y, z, x2, y2, z2, r2, f, f2, g;
+    double  e, e2, e3;
+
+    e = rbf->eps;
+    x = v->x - v0->x;
+    y = v->y - v0->y;
+    z = v->z - v0->z;
+    x2 = x*x; y2 = y*y; z2 = z*z;
+    r2 = x2 + y2 + z2;
+
+    if ( rbf->RadialBasisFunction == LGM_RBF_GAUSSIAN ) {
+
+        psi = exp( -e*r2 );
+
+        dPdx[0][0] = 8.0*e*e*x*( e*(y2 + z2) - 1.0) * psi;
+        dPdx[0][1] = 4.0*e*e*y*(1.0 - 2.0*e*x2) * psi;
+        dPdx[0][2] = 4.0*e*e*z*(1.0 - 2.0*e*x2) * psi;
+
+        dPdx[1][0] = dPdx[0][1];
+        dPdx[1][1] = 8.0*e*e*x*( e*(x2 + z2) - 2.0 ) * psi;
+        dPdx[1][2] = -8.0*e*e*e*x*y*z * psi;
+
+        dPdx[2][0] = dPdx[0][2];
+        dPdx[2][1] = dPdx[1][2];
+        dPdx[2][2] = 8.0*e*e*x*( e*(x2 + y2) - 2.0 ) * psi;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f;
+        psi = sqrt( f );
+        g   = f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdx[0][0] = e2*x*(2.0 + e*(2.0*x2-y2-z2)) / g;
+        dPdx[0][1] = -( e2*y*(1.0+e*(y2+z2-2.0*x2)) ) / g;
+        dPdx[0][2] = -( e2*z*(1.0+e*(y2+z2-2.0*x2)) ) / g;
+
+        dPdx[1][0] = dPdx[0][1];
+        dPdx[1][1] = e2*x*(4.0 + e*(x2+4.0*y2+z2)) / g;
+        dPdx[1][2] = 3.0*e3*x*y*z/ g;
+
+        dPdx[2][0] = dPdx[0][2];
+        dPdx[2][1] = dPdx[1][2];
+        dPdx[2][2] = e2*x*(4.0 + e*(x2+y2+4.0*z2)) / g;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_INV_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f;
+        psi = sqrt( f );
+        g   = f*f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdx[0][0] = 3.0*e2*x*( -2.0 + e*(-2.0*x2+3.0*(y2+z2)) ) / g;
+        dPdx[0][1] = 3.0*e2*y*( 1.0 + e*(-4.0*x2+y2+z2) ) / g;
+        dPdx[0][2] = 3.0*e2*z*( 1.0 + e*(-4.0*x2+y2+z2) ) / g;
+
+        dPdx[1][0] = dPdx[0][1];
+        dPdx[1][1] = 3.0*e2*x*( -4.0 + e*(x2-4.0*y2+z2) ) / g;
+        dPdx[1][2] = -15.0*e3*x*y*z / g;
+
+        dPdx[2][0] = dPdx[0][2];
+        dPdx[2][1] = dPdx[1][2];
+        dPdx[2][2] = 3.0*e2*x*( -4.0 + e*(x2+y2-4.0*z2) ) / g;
+
+    } else {
+        printf("Lgm_DFI_RBF_dPhi_dx: Unknown value for rbf->RadialBasisFunction. (Got %d)\n", rbf->RadialBasisFunction );
+    }
+
+    return;
+
+}
+
+
+void    Lgm_DFI_RBF_dPhi_dy( Lgm_Vector *v, Lgm_Vector *v0, double dPdy[3][3], Lgm_DFI_RBF_Info *rbf  ) {
+
+    double  psi, psi2, psi3, x, y, z, x2, y2, z2, r2, f, f2, f3, f5, g;
+    double  e, e2, e3;
+
+    e = rbf->eps;
+    x = v->x - v0->x;
+    y = v->y - v0->y;
+    z = v->z - v0->z;
+    x2 = x*x; y2 = y*y; z2 = z*z;
+    r2 = x2 + y2 + z2;
+
+    if ( rbf->RadialBasisFunction == LGM_RBF_GAUSSIAN ) {
+
+        psi = exp( -e*r2 );
+
+        dPdy[0][0] = 8.0*e*e*y*( e*(y2 + z2) - 2.0) * psi;
+        dPdy[0][1] = 4.0*e*e*x*(1.0 - 2.0*e*y2) * psi;
+        dPdy[0][2] = -8.0*e*e*e*x*y*z * psi;
+
+        dPdy[1][0] = dPdy[0][1];
+        dPdy[1][1] = 8.0*e*e*y*( e*(x2 + z2) - 1.0 ) * psi;
+        dPdy[1][2] = 4.0*e*e*z*(1.0 - 2.0*e*y2) * psi;
+
+        dPdy[2][0] = dPdy[0][2];
+        dPdy[2][1] = dPdy[1][2];
+        dPdy[2][2] = 8.0*e*e*y*( e*(x2 + y2) - 2.0 ) * psi;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f;
+        psi = sqrt( f );
+        g   = f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdy[0][0] = e2*y*(4.0 + e*(4.0*x2+y2+z2)) / g;
+        dPdy[0][1] = -( e2*x*(1.0+e*(x2-2.0*y2+z2)) ) / g;
+        dPdy[0][2] = 3.0*e3*x*y*z / g;
+
+        dPdy[1][0] = dPdy[0][1];
+        dPdy[1][1] = e2*y*(2.0 - e*(x2-2.0*y2+z2)) / g;
+        dPdy[1][2] = -( e2*z*(1.0+e*(x2-2.0*y2+z2)) ) / g;
+
+        dPdy[2][0] = dPdy[0][2];
+        dPdy[2][1] = dPdy[1][2];
+        dPdy[2][2] = e2*y*(4.0 + e*(x2+y2+4.0*z2)) / g;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_INV_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f;
+        psi = sqrt( f );
+        g   = f*f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdy[0][0] = 3.0*e2*y*( -4.0 + e*(-4.0*x2+y2+z2) ) / g;
+        dPdy[0][1] = 3.0*e2*x*( 1.0 + e*(x2-4.0*y2+z2) ) / g;
+        dPdy[0][2] = -15.0*e3*x*y*z / g;
+
+        dPdy[1][0] = dPdy[0][1];
+        dPdy[1][1] = 3.0*e2*y*( -2.0 + e*(3.0*(x2+z2)-2.0*y2) ) / g;
+        dPdy[1][2] = 3.0*e2*z*( 1.0 + e*(x2-4.0*y2+z2) ) / g;
+
+        dPdy[2][0] = dPdy[0][2];
+        dPdy[2][1] = dPdy[1][2];
+        dPdy[2][2] = 3.0*e2*y*( -4.0 + e*(x2+y2-4.0*z2) ) / g;
+
+    } else {
+        printf("Lgm_DFI_RBF_dPhi_dy: Unknown value for rbf->RadialBasisFunction. (Got %d)\n", rbf->RadialBasisFunction );
+    }
+
+    return;
+
+}
+
+
+void    Lgm_DFI_RBF_dPhi_dz( Lgm_Vector *v, Lgm_Vector *v0, double dPdz[3][3], Lgm_DFI_RBF_Info *rbf  ) {
+
+    double  psi, psi2, psi3, x, y, z, x2, y2, z2, r2, f, f2, f3, f5, g;
+    double  e, e2, e3;
+
+    e = rbf->eps;
+    x = v->x - v0->x;
+    y = v->y - v0->y;
+    z = v->z - v0->z;
+    x2 = x*x; y2 = y*y; z2 = z*z;
+    r2 = x2 + y2 + z2;
+
+    if ( rbf->RadialBasisFunction == LGM_RBF_GAUSSIAN ) {
+
+        psi = exp( -e*r2 );
+
+        dPdz[0][0] = 8.0*e*e*z*( e*(y2 + z2) - 2.0) * psi;
+        dPdz[0][1] = -8.0*e*e*e*x*y*z * psi;
+        dPdz[0][2] = 4.0*e*e*x*(1.0 - 2.0*e*z2) * psi;
+
+        dPdz[1][0] = dPdz[0][1];
+        dPdz[1][1] = 8.0*e*e*z*( e*(x2 + z2) - 2.0 ) * psi;
+        dPdz[1][2] = 4.0*e*e*y*(1.0 - 2.0*e*z2) * psi;
+
+        dPdz[2][0] = dPdz[0][2];
+        dPdz[2][1] = dPdz[1][2];
+        dPdz[2][2] = 8.0*e*e*z*( e*(x2 + y2) - 1.0 ) * psi;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f; 
+        psi = sqrt( f );
+        g   = f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdz[0][0] = e2*z*(4.0 + e*(4.0*x2+y2+z2)) / g;
+        dPdz[0][1] = 3.0*e3*x*y*z / g;
+        dPdz[0][2] = -( e2*x*(1.0+e*(x2+y2-2.0*z2)) ) / g;
+
+        dPdz[1][0] = dPdz[0][1];
+        dPdz[1][1] = e2*z*(4.0 + e*(x2+4.0*y2+z2)) / g;
+        dPdz[1][2] = -( e2*y*(1.0+e*(x2+y2-2.0*z2)) ) / g;
+
+        dPdz[2][0] = dPdz[0][2];
+        dPdz[2][1] = dPdz[1][2];
+        dPdz[2][2] = e2*z*(2.0 - e*(x2+y2-2.0*z2)) / g;
+
+    } else if ( rbf->RadialBasisFunction == LGM_RBF_INV_MULTIQUADRIC ) {
+
+        f   = 1.0 + e*r2; f2 = f*f;
+        psi = sqrt( f );
+        g   = f*f2*psi;
+        e2  = e*e; e3 = e2*e;
+
+        dPdz[0][0] = 3.0*e2*z*( -4.0 + e*(-4.0*x2+y2+z2) ) / g;
+        dPdz[0][1] = -15.0*e3*x*y*z / g;
+        dPdz[0][2] = 3.0*e2*x*( 1.0 + e*(x2+y2-4.0*z2) ) / g;
+
+        dPdz[1][0] = dPdz[0][1];
+        dPdz[1][1] = 3.0*e2*z*( -4.0 + e*(x2-4.0*y2+z2) ) / g;
+        dPdz[1][2] = 3.0*e2*y*( 1.0 + e*(x2+y2-4.0*z2) ) / g;
+
+        dPdz[2][0] = dPdz[0][2];
+        dPdz[2][1] = dPdz[1][2];
+        dPdz[2][2] = 3.0*e2*z*( -2.0 + e*(3.0*(x2+y2)-2.0*z2) ) / g;
+
+    } else {
+        printf("Lgm_DFI_RBF_dPhi_dz: Unknown value for rbf->RadialBasisFunction. (Got %d)\n", rbf->RadialBasisFunction );
+    }
+
+    return;
+
+}
+
+
+
 
 /** From a vector-field dataset, compute the vector-valued weighting factors,
  *  \f$\vec{c}_j\f$. Info is returned in the rbf structure.
@@ -341,7 +591,7 @@ void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DF
  *           is responsible for freeing with Lgm_DFI_RBF_Free().
  *
  *  \author  M. G. Henderson
- *  \date    January 24, 2012
+ *  date    January 24, 2012
  *
  *
  */
@@ -349,8 +599,8 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
 
     int              i, j, ii, jj, p, q, n3, s;
     double           *d, **a, Phi[3][3], val;
-    gsl_matrix       *A;
-    gsl_vector       *D, *c;
+    gsl_matrix       *A, *V;
+    gsl_vector       *D, *c, *S, *Work;
     Lgm_DFI_RBF_Info *rbf;
 
     n3 = 3*n;
@@ -374,17 +624,27 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
         rbf->LookUpKey[i] = I_data[i];
         rbf->v[i] = v[i];
     }
+    // This subtraction doesntm seem to work out very well...
+//    rbf->Bx0 = B[0].x;
+//    rbf->By0 = B[0].y;
+//    rbf->Bz0 = B[0].z;
+
+double Bbkg;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].x; rbf->Bx0 = Bbkg/(double)n;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].y; rbf->By0 = Bbkg/(double)n;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].z; rbf->Bz0 = Bbkg/(double)n;
+    rbf->Bx0 = 0.0;
+    rbf->By0 = 0.0;
+    rbf->Bz0 = 0.0;
     
-
-
     /*
-     * Fill d array.
+     * Fill d array. (Subtract off the field at the nearest point v[0] -- See
+     * McNally [2011].) We add this field back on later.
      */
-    for ( ii=0, i=0; i<n; i++ ) {
-        gsl_vector_set( D, ii, B[i].x); ii++;
-        gsl_vector_set( D, ii, B[i].y); ii++;
-        gsl_vector_set( D, ii, B[i].z); ii++;
-        //printf("B = %g %g %g\n", B[i].x, B[i].y, B[i].z);
+    for (i=0; i<n; i++){
+        gsl_vector_set( D, 3*i+0, B[i].x - rbf->Bx0 );
+        gsl_vector_set( D, 3*i+1, B[i].y - rbf->By0 );
+        gsl_vector_set( D, 3*i+2, B[i].z - rbf->Bz0 );
     }
 
 
@@ -413,12 +673,17 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
 
     }
 
-    //for (i=0; i<n3; i++){
-    //    for (j=0; j<n3; j++){
-    //        printf("%15g ", gsl_matrix_get(A, i, j ) );
-    //    }
-    //    printf("\n");
-    //}
+    /*
+    for (i=0; i<n; i++ ) {
+        printf("v%02d = %8g %8g %8g   B%02d = %8g %8g %8g\n", i, v[i].x, v[i].y, v[i].z, i, B[i].x, B[i].y, B[i].z );
+    }
+    for (i=0; i<n3; i++){
+        for (j=0; j<n3; j++){
+            printf("%8g ", gsl_matrix_get(A, i, j ) );
+        }
+        printf("\n");
+    }
+    */
 
 
 
@@ -443,6 +708,15 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
         gsl_linalg_LU_decomp( A, P, &s );
         gsl_linalg_LU_solve( A, P, D, c );
         gsl_permutation_free( P );
+    } else if ( LGM_DFI_RBF_SOLVER == LGM_SVD ){
+        V    = gsl_matrix_calloc( n3, n3 );
+        S    = gsl_vector_alloc( n3 );
+        Work = gsl_vector_alloc( n3 );
+        gsl_linalg_SV_decomp( A, V, S, Work );
+        gsl_linalg_SV_solve( A, V, S, D, c );
+        gsl_vector_free( Work );
+        gsl_vector_free( S );
+        gsl_matrix_free( V );
     }
 
     for (i=0; i<n; i++){
@@ -515,8 +789,68 @@ void    Lgm_DFI_RBF_Eval( Lgm_Vector *v, Lgm_Vector *B, Lgm_DFI_RBF_Info *rbf ) 
 
         Lgm_DFI_RBF_Phi( v, &rbf->v[j], Phi, rbf );
         Lgm_MatTimesVec( Phi, &rbf->c[j], &W );
-        //printf("c = %g %g %g   W = %g %g %g\n", rbf->c[j].x, rbf->c[j].y, rbf->c[j].z, W.x, W.y, W.z);
+        //printf("rbf->n = %d   c = %g %g %g   W = %g %g %g\n", rbf->n, rbf->c[j].x, rbf->c[j].y, rbf->c[j].z, W.x, W.y, W.z);
         B->x += W.x; B->y += W.y; B->z += W.z;
+
+    }
+
+    // Add the subtracted "background" back in (that we subtracted prior to the interp).
+    B->x += rbf->Bx0;
+    B->y += rbf->By0;
+    B->z += rbf->Bz0;
+    //printf("rbf->Bx0, rbf->By0, rbf->Bz0 = %g %g %g\n", rbf->Bx0, rbf->By0, rbf->Bz0 );
+    //printf("v = %g %g %g   B = %g %g %g\n", v->x, v->y, v->z, B->x, B->y, B->z );
+
+
+    return;
+    
+}
+
+
+
+
+
+/**  Compute Divergence Free interpolant at the specified position vector. The
+ *   weights given in \f$\vec{c}\f$ must have been pre-computed with
+ *   Lgm_DFI_RBF_Init().
+ *
+ *
+ *  \param[in]         v   -   position vector to compute B at.
+ *  \param[out]     dBdx   -   interpolated value of dB/dx at v.
+ *  \param[out]     dBdy   -   interpolated value of dB/dy at v.
+ *  \param[out]     dBdz   -   interpolated value of dB/dz at v.
+ *  \param[out]      rbf   -   pointer to initialized Lgm_DFI_RBF_Info structure.
+ *
+ *  \return  void
+ *
+ *  \author  M. G. Henderson
+ *  \date    July 1, 2015
+ *
+ *
+ */
+void    Lgm_DFI_RBF_Derivs_Eval( Lgm_Vector *v, Lgm_Vector *dBdx, Lgm_Vector *dBdy, Lgm_Vector *dBdz, Lgm_DFI_RBF_Info *rbf ) {
+
+    int         j;
+    Lgm_Vector  W;
+    double      P[3][3];
+
+
+    dBdx->x = dBdx->y = dBdx->z = 0.0;
+    dBdy->x = dBdy->y = dBdy->z = 0.0;
+    dBdz->x = dBdz->y = dBdz->z = 0.0;
+    for ( j=0; j<rbf->n; j++ ){
+
+        Lgm_DFI_RBF_dPhi_dx( v, &rbf->v[j], P, rbf );
+        Lgm_MatTimesVec( P, &rbf->c[j], &W );
+        dBdx->x += W.x; dBdx->y += W.y; dBdx->z += W.z;
+
+        Lgm_DFI_RBF_dPhi_dy( v, &rbf->v[j], P, rbf );
+        Lgm_MatTimesVec( P, &rbf->c[j], &W );
+        dBdy->x += W.x; dBdy->y += W.y; dBdy->z += W.z;
+
+        Lgm_DFI_RBF_dPhi_dz( v, &rbf->v[j], P, rbf );
+        Lgm_MatTimesVec( P, &rbf->c[j], &W );
+        dBdz->x += W.x; dBdz->y += W.y; dBdz->z += W.z;
 
     }
 

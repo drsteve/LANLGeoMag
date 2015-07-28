@@ -27,8 +27,11 @@ int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info) {
     Info->M_Dungey = 30500.0;
     Info->dB_Dungey = -14.474;
 
-    M  = Info->M_Dungey;  // Chen and Shultyz have 30500.0 nT
+    M  = Info->M_Dungey;  // Chen and Shultz have 30500.0 nT
     dB = Info->dB_Dungey;  // Constant Delta-B in SM z--direction
+    //For details see: Chen, M. W., M. Schulz, L. R. Lyons, and D. J. Gorney (1993),
+    //                 Stormtime transport of ring current and radiation belt ions,
+    //                 J. Geophys. Res., 98(A3), 3835–3849, doi:10.1029/92JA02608.
 
     /*
      *  compute SM coords from GSM coords

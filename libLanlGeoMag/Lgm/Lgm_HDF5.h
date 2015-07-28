@@ -21,7 +21,7 @@
 {\
     hsize_t     Rank, NewSize[4], Offset[4], SlabSize[4];\
     hid_t       DataSet, DataSpace, MemSpace;\
-    herr_t      status;\
+    herr_t      status __attribute__((unused));\
     \
     Rank        = 1;\
     NewSize[0]  = nRow+1;\
@@ -48,7 +48,7 @@
 {\
     hsize_t     Rank, NewSize[4], Offset[4], SlabSize[4];\
     hid_t       DataSet, DataSpace, MemSpace;\
-    herr_t      status;\
+    herr_t      status __attribute__((unused));\
     \
     Rank        = 2;\
     NewSize[0]  = nRow+1;  NewSize[1]  = nCol;\
@@ -76,7 +76,7 @@
 {\
     hsize_t     Rank, NewSize[4], Offset[4], SlabSize[4];\
     hid_t       DataSet, DataSpace, MemSpace;\
-    herr_t      status;\
+    herr_t      status __attribute__((unused));\
     \
     Rank        = 3;\
     NewSize[0]  = nRow+1;  NewSize[1]  = nCol;      NewSize[2]  = nDepth;\
@@ -246,5 +246,7 @@ void Lgm_WriteDoubleAttr( hid_t DataSet, char *AttrNAme, double Val );
 hid_t   CreateExtendableRank1DataSet( hid_t File, char *DataSetName, hid_t Type, hid_t *DataSpace );
 hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, hid_t Type, hid_t *DataSpace );
 hid_t   CreateExtendableRank3DataSet( hid_t File, char *DataSetName, int nCol, int nDepth, hid_t Type, hid_t *DataSpace );
+hid_t   CreateStrType( int StrLength );
+
 
 #endif

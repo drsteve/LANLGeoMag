@@ -11,6 +11,7 @@
 #include <math.h>
 #include "Lgm_Vec.h"
 #include "Lgm_WGS84.h"
+#include "Lgm_JPLeph.h"
 
 #define DegPerRad       57.295779513082320876798154814105
 #define RadPerDeg        0.017453292519943295769236907568
@@ -34,6 +35,14 @@
 
 #define AU              149.5978700e6   // Astronomical Unit in km
 
+#define SOLAR_RADIUS    696342.0        // km (from SOHO meas.)
+#define LUNAR_RADIUS    1738.14         // km equatorial radius
+
+
+#define LGM_NO_ECLIPSE          0
+#define LGM_PENUMBRAL_ECLIPSE   1
+#define LGM_UMBRAL_ECLIPSE      2
+
 
 #define LGM_GOLD                1.61803398874989484820  // Phi -- Golden ratio
 #define LGM_1_OVER_GOLD         0.61803398874989484820  // 1/Phi
@@ -48,6 +57,11 @@
 #define  LGM_JD_GPS0    2444245.0 // Julian Date of introduction of GPS time. (0h, Jan 6, 1980)
 #define  LGM_JD_TAI0    2436205.0 // Julian Date of introduction of TAI time. (0h, Jan 1, 1958)
 
+#define LGM_EPH_LOW_ACCURACY    0
+#define LGM_EPH_HIGH_ACCURACY   1
+#define LGM_EPH_DE              2
+#define LGM_PN_IAU76            12
+#define LGM_PN_IAU06            12
 
 
 /*
@@ -176,7 +190,9 @@
 
 #define CDMAG_COORDS   11   //!< Centered Dipole Coords
 
-
+#define GSE2000_COORDS 12   //!< GSE2000 coordinates (for MMS mission)
+                            //!< X is J2000 Sun vector, Y is cross-product of X and ecliptic pole at J2000 epoch
+                            //!< Z is cross-product of X and Y
 
 
 
@@ -200,6 +216,7 @@
 #define EME2000_TO_SM           109
 #define EME2000_TO_EDMAG        110
 #define EME2000_TO_CDMAG        111
+#define EME2000_TO_GSE2000      112
 
 #define ICRF2000_TO_EME2000     101
 #define ICRF2000_TO_ICRF2000    101
@@ -216,6 +233,7 @@
 #define ICRF2000_TO_SM          109
 #define ICRF2000_TO_EDMAG       110
 #define ICRF2000_TO_CDMAG       111
+#define ICRF2000_TO_GSE2000     112
 
 #define GEI2000_TO_EME2000      101
 #define GEI2000_TO_ICRF2000     101
@@ -232,6 +250,7 @@
 #define GEI2000_TO_SM           109
 #define GEI2000_TO_EDMAG        110
 #define GEI2000_TO_CDMAG        111
+#define GEI2000_TO_GSE2000      112
 
 #define MOD_TO_EME2000          201
 #define MOD_TO_ICRF2000         201
@@ -248,6 +267,7 @@
 #define MOD_TO_SM               209
 #define MOD_TO_EDMAG            210
 #define MOD_TO_CDMAG            211
+#define MOD_TO_GSE2000          212
 
 #define TOD_TO_EME2000          301
 #define TOD_TO_ICRF2000         301
@@ -264,6 +284,7 @@
 #define TOD_TO_SM               309
 #define TOD_TO_EDMAG            310
 #define TOD_TO_CDMAG            311
+#define TOD_TO_GSE2000          312
 
 #define TEME_TO_EME2000         401
 #define TEME_TO_ICRF2000        401
@@ -280,6 +301,7 @@
 #define TEME_TO_SM              409
 #define TEME_TO_EDMAG           410
 #define TEME_TO_CDMAG           411
+#define TEME_TO_GSE2000         412
 
 #define PEF_TO_EME2000          501
 #define PEF_TO_ICRF2000         501
@@ -296,6 +318,7 @@
 #define PEF_TO_SM               509
 #define PEF_TO_EDMAG            510
 #define PEF_TO_CDMAG            511
+#define PEF_TO_GSE2000          512
 
 #define WGS84_TO_EME2000        601
 #define WGS84_TO_ICRF2000       601
@@ -312,6 +335,7 @@
 #define WGS84_TO_SM             609
 #define WGS84_TO_EDMAG          610
 #define WGS84_TO_CDMAG          611
+#define WGS84_TO_GSE2000        612
 
 #define ITRF_TO_EME2000         601
 #define ITRF_TO_ICRF2000        601
@@ -328,6 +352,7 @@
 #define ITRF_TO_SM              609
 #define ITRF_TO_EDMAG           610
 #define ITRF_TO_CDMAG           611
+#define ITRF_TO_GSE2000         612
 
 #define GEO_TO_EME2000          601
 #define GEO_TO_ICRF2000         601
@@ -344,6 +369,7 @@
 #define GEO_TO_SM               609
 #define GEO_TO_EDMAG            610
 #define GEO_TO_CDMAG            611
+#define GEO_TO_GSE2000          612
 
 #define GSE_TO_EME2000          701
 #define GSE_TO_ICRF2000         701
@@ -360,6 +386,7 @@
 #define GSE_TO_SM               709
 #define GSE_TO_EDMAG            710
 #define GSE_TO_CDMAG            711
+#define GSE_TO_GSE2000          712
 
 #define GSM_TO_EME2000          801
 #define GSM_TO_ICRF2000         801
@@ -376,6 +403,7 @@
 #define GSM_TO_SM               809
 #define GSM_TO_EDMAG            810
 #define GSM_TO_CDMAG            811
+#define GSM_TO_GSE2000          812
 
 #define SM_TO_EME2000           901
 #define SM_TO_ICRF2000          901
@@ -392,6 +420,7 @@
 #define SM_TO_SM                909
 #define SM_TO_EDMAG             910
 #define SM_TO_CDMAG             911
+#define SM_TO_GSE2000           912
 
 #define EDMAG_TO_EME2000       1001
 #define EDMAG_TO_ICRF2000      1001
@@ -408,6 +437,7 @@
 #define EDMAG_TO_SM            1009
 #define EDMAG_TO_EDMAG         1010
 #define EDMAG_TO_CDMAG         1011
+#define EDMAG_TO_GSE2000       1012
 
 #define CDMAG_TO_EME2000       1101
 #define CDMAG_TO_ICRF2000      1101
@@ -424,6 +454,24 @@
 #define CDMAG_TO_SM            1109
 #define CDMAG_TO_EDMAG         1110
 #define CDMAG_TO_CDMAG         1111
+#define CDMAG_TO_GSE2000       1112
+
+#define GSE2000_TO_EME2000     1201
+#define GSE2000_TO_ICRF2000    1201
+#define GSE2000_TO_GEI2000     1201
+#define GSE2000_TO_MOD         1202
+#define GSE2000_TO_TOD         1203
+#define GSE2000_TO_TEME        1204
+#define GSE2000_TO_PEF         1205
+#define GSE2000_TO_WGS84       1206
+#define GSE2000_TO_ITRF        1206
+#define GSE2000_TO_GEO         1206
+#define GSE2000_TO_GSE         1207
+#define GSE2000_TO_GSM         1208
+#define GSE2000_TO_SM          1209
+#define GSE2000_TO_EDMAG       1210
+#define GSE2000_TO_CDMAG       1211
+#define GSE2000_TO_GSE2000     1212
 
 typedef struct Lgm_LeapSeconds {
 
@@ -491,6 +539,9 @@ typedef struct Lgm_CTrans {
     int               Verbose;
 
     Lgm_LeapSeconds   l;            //!< Structure containing Leap Second Info
+
+    Lgm_JPLephemInfo *jpl;          //!< Structure containing JPL Ephem info
+    int              jpl_initialized;  //!< Flag to indicate jpl has been initialized
 
     Lgm_DateTime     UT1;           //!< A corrected version of UT0.
                                     /**< A corrected version of UT0.
@@ -612,29 +663,30 @@ typedef struct Lgm_CTrans {
                                      */
 
     double      eccentricity;       /**< Eccentricity of Earth-Sun orbit */
+    double      mean_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
+    double      true_anomaly;       /**< Mean anomaly of Earth-Sun orbit */
 
     double      lambda_sun;         /**< Ecliptic Long. of Sun (in radians) */
-    double      earth_sun_dist;     /**< Earth-Sun distance (in units of earth radii) */
+    double      beta_sun;           /**< Ecliptic elevation of Sun (in radians) */
+    double      earth_sun_dist;     /**< Earth-Sun distance (in units of Earth radii) */
     double      RA_sun;             /**< Right Ascention of Sun (in degrees) */
     double      DEC_sun;            /**< Declination of Sun (in degrees) */
 
-    double      lambda_sun_ha;      /**< high accuracy eccliptic coords of sun */
-    double      r_sun_ha;           /**< high accuracy eccliptic coords of sun */
-    double      beta_sun_ha;        /**< high accuracy eccliptic coords of sun */
-    double      RA_sun_ha;          /**< high accuracy Right Ascention of Sun (in degrees) */
-    double      DEC_sun_ha;         /**< high accuracy Declination of Sun (in degrees) */
-
-    Lgm_Vector  Sun;                /**< direction of Sun in GEI system (unit vector) */
-    Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in GEI system (unit vector) */
+    Lgm_Vector  Sun;                /**< direction of Sun in MOD system (unit vector) */
+    Lgm_Vector  SunJ2000;           /**< direction of Sun in GEI2000 system (unit vector) */
+    Lgm_Vector  EcPole;             /**< direction of Ecliptic Pole in MOD system (unit vector) */
     double      psi;                /**< Geodipole tilt angle, \f$\psi\f$ (in radians) */
     double      sin_psi;            /**< \f$\sin(\psi)\f$ */
     double      cos_psi;            /**< \f$\cos(\psi)\f$ */
     double      tan_psi;            /**< \f$\tan(\psi)\f$ */
-    double      RA_moon;            /**< Right Ascention of Moon (in degrees) */
+    Lgm_Vector  MoonJ2000;           /**< direction of Moon in GEI2000 system (unit vector) */
+    double      RA_moon;            /**< Right Ascension of Moon (in degrees) */
     double      DEC_moon;           /**< Declination of Moon (in degrees) */
     double      MoonPhase;          /**< The Phase of the Moon (in days) */
     double      EarthMoonDistance;  /**< Distance between the Earth and Moon (in earth-radii) */
 
+    int         ephModel;           /**< Model to use for Sun and Moon positions */
+    int         pnModel;            /**< Precession-nutation model */
 
     /*
      *  The following are various important parameters derived from
@@ -676,7 +728,7 @@ typedef struct Lgm_CTrans {
 
 
     /*
-     * Transformation matrices between various ccord systems
+     * Transformation matrices between various coord systems
      */
     double      Agei_to_mod[3][3];
     double      Amod_to_gei[3][3];
@@ -690,6 +742,8 @@ typedef struct Lgm_CTrans {
     double      Apef_to_wgs84[3][3];
     double      Agse_to_mod[3][3];
     double      Amod_to_gse[3][3];
+    double      Agse2000_to_gei[3][3];
+    double      Agei_to_gse2000[3][3];
     double      Asm_to_gsm[3][3];
     double      Agsm_to_sm[3][3];
     double      Agsm_to_mod[3][3];
@@ -755,7 +809,10 @@ void        Lgm_mjd_to_ymdh ( double MJD, long int *Date, int *year, int *month,
 double      Lgm_hour24( double );
 double      Lgm_kepler( double, double );
 double      Lgm_Dipole_Tilt(long int date, double UTC);
+void        Lgm_Set_CTrans_Options( int ephModel, int pnModel, Lgm_CTrans *c );
 void        Lgm_Set_Coord_Transforms( long int, double, Lgm_CTrans * );
+void        Lgm_ComputeSun( Lgm_CTrans *c );
+void        Lgm_ComputeMoon( Lgm_CTrans *c );
 void        Lgm_Convert_Coords(Lgm_Vector *, Lgm_Vector *, int, Lgm_CTrans * );
 int         Lgm_IsValidDate( long int );
 int         Lgm_Doy( long int, int *, int *, int *, int * );
@@ -842,9 +899,13 @@ double        UTCDaysSinceJ2000( double TAI, Lgm_CTrans *c );
 double        Lgm_TDBSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 void          Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c );
+void          Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c );
 
 
 double        Lgm_CdipMirrorLat( double Alpha0 );
+
+int           Lgm_EarthEclipse( Lgm_Vector *Psc, Lgm_CTrans *c );
+int           Lgm_MoonEclipse( Lgm_Vector *Psc, Lgm_CTrans *c );
 
 
 

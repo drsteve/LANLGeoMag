@@ -1438,59 +1438,59 @@ void LoadTextures(){
      *      GL_LINEAR_MIPMAP_NEAREST    nearest neighbor after lin. interp between mipmap levels
      *      GL_LINEAR_MIPMAP_LINEAR     lin interp after lin. interp between mipmap levels
      */
-//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
 
     /*
      *  Texture for the TopSide Image
      */
-    glGenTextures( 1, &Texture_TopSide );
-    glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Lat_Versus_Lon_Top_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_TopSide );
+//    glBindTexture( GL_TEXTURE_2D, Texture_TopSide );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Lat_Versus_Lon_Top_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the Meridional plane 1
      */
-    glGenTextures( 1, &Texture_MeridPlane1 );
-    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid1_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_MeridPlane1 );
+//    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane1 );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid1_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the Meridional plane 2
      */
-    glGenTextures( 1, &Texture_MeridPlane2 );
-    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
-    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid2_035.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_MeridPlane2 );
+//    glBindTexture( GL_TEXTURE_2D, Texture_MeridPlane2 );
+//    strcpy( Filename, "/home/mgh/IMPACT/GITM/Image_Merid2_035.png");
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
     /*
      *  Texture for the EQ plane
@@ -1915,8 +1915,8 @@ void CreateEarth( ){
     glNewList( EqPlaneGridDL, GL_COMPILE );
         glDisable(GL_LIGHTING);
         glPushMatrix();
-        glColor4f( 0.0, 0.1, 0.1, 0.5 );
-        glLineWidth( 1.0 );
+        glColor4f( 0.5, 0.5, 0.5, 0.1 );
+        glLineWidth( 0.5 );
         glEnable(GL_LINE_SMOOTH);
         glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
         for (R=1.0; R<=10.0; R += 1.0) {
@@ -2359,7 +2359,7 @@ void LoadStars( ) {
     glNewList( StarsDL, GL_COMPILE );
         glDisable(GL_LIGHTING);
         glPointSize( 3.0 );
-        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
+glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
         glEnable(GL_POINT_SMOOTH);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
@@ -2393,7 +2393,7 @@ void LoadStars( ) {
         glEnable(GL_POINT_SMOOTH);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
-        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
+//        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
         glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 
     	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -2506,16 +2506,18 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].TLE = TLEs[i];
 
         SpaceObjects->Sat[i].DrawStreak              = FALSE;
+        SpaceObjects->Sat[i].sPeriodFrac             = 25.0;
         SpaceObjects->Sat[i].DrawGroundPathOfStreak  = FALSE;
         SpaceObjects->Sat[i].DrawStreakToGroundLines = FALSE;
 
-        SpaceObjects->Sat[i].DrawOrbit               = FALSE;
+        SpaceObjects->Sat[i].DrawOrbit               = TRUE;
+        SpaceObjects->Sat[i].oPeriodFrac             = 100.0;
         SpaceObjects->Sat[i].DrawGroundPathOfOrbit   = FALSE;
         SpaceObjects->Sat[i].DrawOrbitToGroundLines  = FALSE;
 
         SpaceObjects->Sat[i].DrawSatToGroundLine     = FALSE;
 
-        SpaceObjects->Sat[i].DrawLabel               = FALSE;
+        SpaceObjects->Sat[i].DrawLabel               = TRUE;
 
         // Streak Colors
         r = (double)rand()/(double)RAND_MAX;
@@ -2538,10 +2540,10 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].sglAlf = 0.75*0.75;
 
         // Orbit Colors
-        SpaceObjects->Sat[i].oRed = 1.0;
-        SpaceObjects->Sat[i].oGrn = 1.0;
-        SpaceObjects->Sat[i].oBlu = 1.0;
-        SpaceObjects->Sat[i].oAlf = 0.1;
+        SpaceObjects->Sat[i].oRed = 0.0;
+        SpaceObjects->Sat[i].oGrn = 0.0;
+        SpaceObjects->Sat[i].oBlu = 0.0;
+        SpaceObjects->Sat[i].oAlf = 0.9;
 
         SpaceObjects->Sat[i].ogpRed = 0.2;
         SpaceObjects->Sat[i].ogpGrn = 0.2;
@@ -2623,6 +2625,7 @@ void DrawSatLabels(){
 
                         if (bufferZ >= winz){
                             cairo_set_source_rgba( cr, 1.0, 1.0, 1.0, 1.0 );
+cairo_set_source_rgba( cr, 0.0, 0.0, 0.0, 1.0 );
                         } else {
                             // it is occluded, draw dimly (or not at all?)
                             //cairo_set_source_rgba( cr, 1.0, 1.0, 1.0, 0.3 );
@@ -3076,6 +3079,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                             // ORBIT
                             if ( Group->Sat[i].DrawOrbit ) {
                                 glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
+glColor4f( 0.0, 0.0, 0.0, 0.8 );
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                                 glEnd();
@@ -3494,13 +3498,13 @@ static void realize( GtkWidget *widget, gpointer data) {
      */
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-//glClearColor( 0.8, 0.8, 0.8, 0.8 );
+//    glClearColor( 0.0, 0.0, 0.0, 0.0 );
+glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
 
 
 
-    glClearDepth (1.0);
+    glClearDepth( 1.0 );
 
     glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
     glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -3561,7 +3565,7 @@ static void realize( GtkWidget *widget, gpointer data) {
 
 
     // Misc Field Lines
-//    GenerateMiscFieldLineLists( ObjInfo );
+//GenerateMiscFieldLineLists( ObjInfo );
 
 
 
@@ -3764,11 +3768,11 @@ if (LightingStyle == 2){
 
 
 
-//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
-//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
-//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
-//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
-//glCallList( ObjInfo->MiscFieldLines );
+glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+glCallList( ObjInfo->MiscFieldLines );
 
 
 
@@ -4243,8 +4247,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z ); // Position things properly rel. to "camera" or "eye"
 
 
-    glClearColor (0.0, 0.0, 0.0, 1.0);
-//glClearColor( 1.0, 1.0, 1.0, 1.0 );
+//    glClearColor (0.0, 0.0, 0.0, 1.0);
+glClearColor( 1.0, 1.0, 1.0, 1.0 );
 //glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {
@@ -5573,7 +5577,7 @@ void create_ViewDriftShell( void *data ) {
     /*
      * Initialize GtkGLExt.
      */
-//    gtk_gl_init (&xInfo->argc, &xInfo->argv);
+//    gtk_gl_init( &xInfo->argc, &xInfo->argv );
 
 
 
@@ -5684,7 +5688,7 @@ void create_ViewDriftShell( void *data ) {
     gtk_box_pack_start( GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0 );
     gtk_widget_show( drawing_area );
 
-printf("HERE\n");
+printf("1. HERE\n");
 
     /*
      *  Set Pitch Angles to Show
@@ -5725,6 +5729,8 @@ printf("HERE\n");
 
 
 
+
+printf("2. HERE ViewDriftShellWindow = %p\n", ViewDriftShellWindow);
     gtk_widget_show( ViewDriftShellWindow );
 
 

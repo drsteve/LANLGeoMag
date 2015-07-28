@@ -1,17 +1,19 @@
 #include <Lgm_CTrans.h>
 #include <Lgm_Eop.h>
+#include <Lgm_JPLeph.h>
 
 int main(){
 
     Lgm_CTrans      *c = Lgm_init_ctrans( 0 ); // more compact declaration
     Lgm_Eop         *e = Lgm_init_eop( 0 );
     Lgm_EopOne      eop;
-    Lgm_Vector      u_mod, u_gei;
+    Lgm_JPLephemInfo  *jpl = Lgm_InitJPLephemInfo( 421, LGM_DE_SUN|LGM_DE_EARTHMOON, 1);
+    Lgm_Vector      u_mod, u_gei, Ugcrf;
     long int        Date;
     double          UTC, UT, JD, JD0;
     int             HH, ny, nm, nd;
     double          RA_JPL, DEC_JPL, RA_LOW, DEC_LOW, RA_HIGH, DEC_HIGH;
-    double          RA_hh, RA_mm, RA_ss, DEC_dd, DEC_mm, DEC_ss, sgn;
+    double          RA_hh, RA_mm, RA_ss, DEC_dd, DEC_mm, DEC_ss, sgn, r;
     char            Line[300];
     FILE            *fp, *fpout;
 
@@ -24,7 +26,7 @@ int main(){
 
     // Read in the EOP vals
     Lgm_read_eop( e );
-
+    Lgm_ReadJPLephem( jpl );
 
 
     fp    = fopen("jpl.dat", "r");
@@ -39,20 +41,29 @@ int main(){
         /*
          * Position of Sun according to JPL Ephemerides
          */
-        RA_JPL  = RA_hh + RA_mm/60.0 + RA_ss/3600.0;
-        // the sign is carried by the degrees field. But if its -00 this gets read as
-        // 0. So we actually have to test for the - sign. PITA.
-        sgn = (Line[12] == '-') ? -1.0 : 1.0; 
-        DEC_JPL = sgn*( fabs(DEC_dd) + DEC_mm/60.0 + DEC_ss/3600.0);
+        // RA_JPL  = RA_hh + RA_mm/60.0 + RA_ss/3600.0;
+        // // the sign is carried by the degrees field. But if its -00 this gets read as
+        // // 0. So we actually have to test for the - sign. PITA.
+        // sgn = (Line[12] == '-') ? -1.0 : 1.0; 
+        // DEC_JPL = sgn*( fabs(DEC_dd) + DEC_mm/60.0 + DEC_ss/3600.0);
 
+        /* for given date use DE421*/
+        Date = Lgm_JD_to_Date( JD, &ny, &nm, &nd, &UTC );
+        Lgm_get_eop_at_JD( JD, &eop, e ); // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+        Lgm_set_eop( &eop, c );           // Set the EOP vals in the CTrans structure.
+        Lgm_Set_Coord_Transforms( Date, UTC, c );
+        Lgm_JPL_getSunVector( JD, jpl, &Ugcrf);
+        Lgm_CartToSphCoords( &Ugcrf, &DEC_JPL, &RA_JPL, &r);
+        if (RA_JPL<0.0) RA_JPL += 360.0;
+        RA_JPL /= 15.0;
 
         /*
          * Compute low- and high-accuracy positions of Sun with LGM
          */
         Date = Lgm_JD_to_Date( JD, &ny, &nm, &nd, &UTC );
-        Lgm_get_eop_at_JD( JD, &eop, e ); // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
-        Lgm_set_eop( &eop, c );           // Set the EOP vals in the CTrans structure.
-        Lgm_Set_Coord_Transforms( Date, UTC, c );
+        // Lgm_get_eop_at_JD( JD, &eop, e ); // Get (interpolate) the EOP vals from the values in the file at the given Julian Date
+        // Lgm_set_eop( &eop, c );           // Set the EOP vals in the CTrans structure.
+        // Lgm_Set_Coord_Transforms( Date, UTC, c );
 
         Lgm_Radec_to_Cart( c->RA_sun, c->DEC_sun, &u_mod );
         Lgm_Convert_Coords( &u_mod, &u_gei, MOD_TO_GEI2000, c );

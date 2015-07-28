@@ -6,6 +6,7 @@
 
 typedef struct BracketType {
     double  a, b, c;
+    double  Ia, Ib, Ic;
     double  Da, Db, Dc;
     double  mlat_min, Dmin;
     int     FoundZeroBracket;
@@ -100,7 +101,15 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      */
     Dmin = 9e99;
 
+    Bracket.mlat_min = 9e99; Bracket.Dmin = 9e99;
+    Bracket.a = -1.0; Bracket.Da = -1.0;
+    Bracket.b = -1.0; Bracket.Db = -1.0;
+    Bracket.c = -1.0; Bracket.Dc = -1.0;
+    Bracket.c = -1.0; Bracket.Dc = -1.0;
+    Bracket.FoundZeroBracket = FALSE;
 
+    *mlat   = -1e31;
+    *Ifound = -1e31;
 
     /*
      * Attempt to bracket the zero in I-I0. Note that this may not be easy if
@@ -110,14 +119,36 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
     Bracket.Dmin = 9e99;
     Flag = BracketZero( I0, Ifound, Bm, MLT, mlat, rad, mlat0, mlat1, mlat2, &Bracket, LstarInfo );
     if ( Flag < 0 )  {
-        // should we be bailing here?
-        return( -11 );   // An evaluation in BracketZero() hit on a value
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("\t\t\t> No zero bracket found: (mlat0, mlat1, mlat2) = %g %g %g  (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n\n",
+                mlat0, mlat1, mlat2,
+                Bracket.a, Bracket.b, Bracket.c,
+                Bracket.Da, Bracket.Db, Bracket.Dc );
+        }
+        return( -11 );   
     }
-                                     //  of I that was undefined -- bail.
-    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value
-                                     // of I that is within tolerance -- we're done.
+//printf("HERE 1. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
-    FoundZeroBracket = ( Flag == 1 ) ? TRUE : FALSE; // flag whether we found a zero bracket or not.
+
+
+//printf("HERE 1a. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
+
+
+
+//    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value of I that is within tolerance -- we're done.
+//printf("HERE 2. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
+
+
+
+    if (  Flag == 1 ) {
+        FoundZeroBracket = TRUE; 
+        a = Bracket.a; Da = Bracket.Da;
+        b = Bracket.b; Db = Bracket.Db;
+    } else {
+        FoundZeroBracket = FALSE; 
+    }
+
+
     if (LstarInfo->VerbosityLevel > 1){
         if ( FoundZeroBracket ) {
             printf("\t\t\t> Found zero bracket: (a,b) = %g %g  (Da, Db) = %g %g\n", Bracket.a, Bracket.b, Bracket.Da, Bracket.Db );
@@ -127,6 +158,19 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
                 Bracket.Da, Bracket.Db, Bracket.Dc );
         }
     }
+
+
+
+
+//printf("HERE 3. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
+
+
+
+
+
+
+
+
 
 
 
@@ -319,7 +363,7 @@ mlatbest = mlat_min;
 
 
     /*
-     *  Use minimization to try and get to the requested tolerance, or get a negatibe i-I0
+     *  Use minimization to try and get to the requested tolerance, or get a negatibe I-I0
      */
     if ( !FoundZeroBracket ){
 
@@ -337,6 +381,9 @@ mlatbest = mlat_min;
          */
         if ( (Db > Da) || (Db > Dc) ) {
             *Ifound = 9e99;
+            if (LstarInfo->VerbosityLevel > 1){
+                printf("\t\t\t> No Zero bracket found (a,b,c) = %g %g %g  (Da,Db,Dc) = %g %g %g\n", Bracket.a, Bracket.b, Bracket.c, Bracket.Da, Bracket.Db, Bracket.Dc );
+            }
             return(-5);
         }
 
@@ -484,9 +531,11 @@ mlatbest = mlat_min;
         /*
          * We probably converged in minimization phase above.
          */
+//printf("HERE 4. Ifound = %g\n", *Ifound);
 
     } else if ( FoundZeroBracket ){
 
+//printf("HERE 5. Ifound = %g\n", *Ifound);
         /*
          * We have a bracket on a zero value. Go in for the kill using bisection.
          */
@@ -634,9 +683,11 @@ mlatbest = mlat_min;
 
         }
 
+//printf("HERE 6. Ifound = %g\n", *Ifound);
 
     } else {
 
+//printf("HERE 7. Ifound = %g\n", *Ifound);
         /*
          *  After all this, its unlikely we can find a solution.
          */
@@ -653,6 +704,7 @@ mlatbest = mlat_min;
 
 
 
+//printf("HERE 8. Ifound = %g\n", *Ifound);
 
 
 
@@ -707,12 +759,17 @@ double RadBmFunc( double r, double Bm, void *data ) {
  *            \return 0 - no Bm value found.
  *
  */
+typedef struct MinBracketType {
+    double a, b, c;
+    double Da, Db, Dc;
+} MinBracketType;
 int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo ) {
 
     Lgm_Vector  u, v, Bvec;
-    int         done, FoundValidBm, Flag;
-    double      Phi, D, a0, c0, Da0, Dc0;
+    int         i, done, FoundValidBm, Flag, FoundZeroBracket, nMinima;
+    double      Phi, D, a0, b0, c0, Da0, Db0, Dc0;
     double      a, b, c, d, B, cl, sl, cp, sp, lat, f, g;
+    MinBracketType MinBracket[50];
 
     LstarInfo->mInfo->nFunc = 0;
 
@@ -728,51 +785,191 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  without actually do a search.  But it would appear that this is not the
      *  case. Lets search for it in 0.5 Re increments. Assume a0, but lets step
      *  out to find c0.
+     *
+     *  Note: What we are hoping to find in this first search is the radial
+     *  distance at which B-Bm reverses sign -- then we know there must be a
+     *  solution (i.e. a point where B == Bm) somewhere in between.
+     *
+     *  We have to be careful though! It is possible to have a situation where
+     *  B decreases and then increases again. For example, the Dungey field is
+     *  a dipole + uniform southward IMF. This field has an axi-symmetric
+     *  x-line in it where B==0 (between 8-9 Re or so I think). AS you go
+     *  farther out, B increases to the uniform magnitude in the IMF. In this
+     *  case, and probably in many other field models, just stepping out in
+     *  0.5 Re increments can "skip" over the real solution -- i.e. the
+     *  "negative values" of B-Bm (if there are any) *could* be lost between
+     *  steps. This is *known* to cause issues here, so to avoid this issue, we
+     *  will maintain a triple bracket so that we can also bracket potential
+     *  minima along the way. With a triple bracket, if we dont find a bracket
+     *  around zero, but we do find a bracket around a minima, we can then
+     *  further explore the minima to see if our solution lies within.
+     *
      */
-    a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // 110 km altitude
-//a0 = 1.0;
-
+    a0 = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/Re;      // Atm. losscone altitude (e.g. 100km or whatever Lgm_LossConeHeight is set to
     u.x = a0*f; u.y = a0*g; u.z = a0*sl;
     Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
     LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
     B = Lgm_Magnitude( &Bvec );
     Da0 = B - Bm;
 
-    //c0 = 20.0;                // this ought to be big enough!?
-    //c0 = 15.0;                // this ought to be big enough!?
-    c0 = a0;
+    b0 = a0 + 0.1;
+    u.x = b0*f; u.y = b0*g; u.z = b0*sl;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+    LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+    B = Lgm_Magnitude( &Bvec );
+    Db0 = B - Bm;
+
+    c0 = b0 + 0.1;
+    u.x = c0*f; u.y = c0*g; u.z = c0*sl;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+    LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+    B = Lgm_Magnitude( &Bvec );
+    Dc0 = B - Bm;
+
+
+    FoundZeroBracket = FALSE;
+    nMinima = 0;
     done = FALSE;
     while ( !done ) {
 
         // Increment c0 and recompute Dc0.
-        c0 += 1.0;
+        c0 += 0.10;
         u.x = c0*f; u.y = c0*g; u.z = c0*sl;
         Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
         LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
         B = Lgm_Magnitude( &Bvec );
         Dc0 = B - Bm;
 
-        // Check to see if we went beyond Bm
-        if ( Dc0 < 0.0 ) {
-            done = TRUE;
-        } else {
-            a0  = c0;
-            Da0 = Dc0;
+        /*
+         * Test triple for a minima bracket.
+         */
+        if ( (Db0<Da0) && (Db0 < Dc0) && (nMinima < 50) ){
+            /*
+             * Minima-Bracket. A minima lies in [a,c] -- save it for possible exploration later.
+             */
+            MinBracket[nMinima].a = a0; MinBracket[nMinima].Da = Da0;
+            MinBracket[nMinima].b = b0; MinBracket[nMinima].Db = Db0;
+            MinBracket[nMinima].c = c0; MinBracket[nMinima].Dc = Dc0;
+            ++nMinima;
         }
 
 
-        //printf("c0 = %g     B = %g    Bm = %g\n", c0, B, Bm);
-        // We may never be able to get a B value low enough...
-        if (c0>20.0) return(FALSE);
+
+        /*
+         * Test triple for a zero-bracket.
+         */
+        if ( Da0*Db0 <= 0.0 ) {
+            /*
+             * Zero-Bracket. A zero lies in [a,b] - we are done.
+             */
+            done = TRUE;
+            FoundZeroBracket = TRUE;
+            c0 = b0; Dc0 = Db0; 
+            
+        } else if ( Db0*Dc0 <= 0.0 ) {
+            /*
+             * Zero-Bracket. A zero lies in [b,c] - we are done.
+             */
+            done = TRUE;
+            FoundZeroBracket = TRUE;
+            a0 = b0; Da0 = Db0; 
+            
+        } else if ( c0 > 20.0 ) {
+            /*
+             * We have gone as far as we want to try and we have not yet found a Zero-Bracket.
+             * Stop this search and explore any minima we may have detected.
+             */
+            done = TRUE;
+            FoundZeroBracket = FALSE;
+
+        } else {
+
+            /*
+             * Keep stepping.
+             * Shift a and b up
+             */
+            a0 = b0; Da0 = Db0;
+            b0 = c0; Db0 = Dc0;
+
+            /*
+             * Increment c0 and recompute Dc0.
+             */
+            c0 += 0.1;
+            u.x = c0*f; u.y = c0*g; u.z = c0*sl;
+            Lgm_Convert_Coords( &u, &v, SM_TO_GSM, LstarInfo->mInfo->c );
+            LstarInfo->mInfo->Bfield( &v, &Bvec, LstarInfo->mInfo );
+            B = Lgm_Magnitude( &Bvec );
+            Dc0 = B - Bm;
+
+        }
+
+
     }
 
 
 
 
-    if (LstarInfo->VerbosityLevel > 5) {
+    if ( !FoundZeroBracket && (nMinima > 0) ) {
+
+        /*
+         * At least one minima was found -- need to check them.
+         */
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No Zero-Bracket bracket found, but %d minima were detected.%s\n", LstarInfo->PreStr, nMinima, LstarInfo->PostStr  ); }
+
+        /*
+         * We have a minima bracket. Use brent's method to find the minimum.
+         * Then check to see if its negative.
+         */
+        for (i=0; i<nMinima; i++ ) {
+
+            LstarInfo->mInfo->Ptmp.x = f;
+            LstarInfo->mInfo->Ptmp.y = g;
+            LstarInfo->mInfo->Ptmp.z = sl;
+            BrentFuncInfo bfi;
+            bfi.Info    = (void *)LstarInfo->mInfo;
+            bfi.func    = &RadBmFunc;
+            bfi.Val     = Bm;
+            Flag = Lgm_Brent( MinBracket[i].a, MinBracket[i].b, MinBracket[i].c, &bfi, tol, r, &D );
+            if (LstarInfo->VerbosityLevel > 0) { printf( "%sFindBmRadius: Minima found at r = %g   D = %g %s\n", LstarInfo->PreStr, *r, D, LstarInfo->PostStr  ); }
+            if ( Flag ) {
+                if ( fabs(D) < tol ) {
+                    // value found.
+                    return( TRUE );
+                } else if ( D < 0.0 ) {
+                    // bracket found.
+                    a0 = MinBracket[i].a; Da0 = MinBracket[i].Da;
+                    c0 = *r; Dc0 = D;
+                    FoundZeroBracket = TRUE;
+                    break;
+                }
+            }
+        }
+
+    }
+
+    if (LstarInfo->VerbosityLevel > 4) {
         printf( "%sFindBmRadius: a0, c0 = %g %g   Da0, Dc0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, Da0, Dc0, LstarInfo->PostStr  );
     }
 
+
+
+    if ( !FoundZeroBracket ) {
+
+        /*
+         * No zero-bracket or minima were detected.
+         */
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
+        return( FALSE );
+
+    }
+
+
+
+
+    /*
+     * If we get this far, a zero bracket was found.
+     */
+    if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: Zero Bracket found, a0, c0 = %g %g   Da0, Dc0 = %g %g%s\n", LstarInfo->PreStr, a0, c0, Da0, Dc0, LstarInfo->PostStr  ); }
 
     /*
      *  For the search to work, Da0 (B-Bm at a0) must be positive to start with.
@@ -782,8 +979,6 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
      *  initial c0.
      */
     if ( ( Da0 < 0.0 ) || ( Dc0 > 0.0 ) ) return( FALSE ); // bracket not found
-
-
 
     /*
      * We have a bracket. Use brent's method to find root.
@@ -796,15 +991,13 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     bfi.func    = &RadBmFunc;
     bfi.Val     = Bm;
     Flag = Lgm_zBrent( a0, c0, Da0, Dc0, &bfi, tol, r, &D );
-//printf("tol = %g\n", tol);
-    FoundValidBm = (Flag) ? TRUE : FALSE;
+    FoundValidBm = ( Flag ) ? TRUE : FALSE;
 
-//printf("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG     D = %g\n", D);
-    if (LstarInfo->VerbosityLevel > 5) {
-      printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr );
-    }
+    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
 
     return( FoundValidBm );
+
+
 
 }
 
@@ -1033,41 +1226,366 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
 }
 
 
+
+
+/*
+ * This routine is designed to find a bracket on the D=0 root. Here, D = I-I0.
+ * A zero bracket is defined by having D change signs -- then there must (or
+ * probably) is a root in between.
+ */
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo ){
 
-    double  I, r, D0, D1, D2, Dmin, mlat_min;
-    int     FoundZeroBracket;
+    double      I, r, D, D0, D1, D2, Dmin, mlat_min, mmm;
+    int         FoundZeroBracket, nDefined, done;
+    BracketType Bracket0;
 
     Dmin = Bracket->Dmin;
+//    Dmin = 9e99;
+
+    nDefined = 0;
+
 
 
     /*
-     *    I( mlat1 )
+     *  First, lets evaluate what value of I-I0 we get from the 3 mlat's we
+     *  were given. Start with the "best" guess case. Note that for some reason
+     *  (lost to history) I returns 9e99 if its undefined -- here we translate
+     *  it to -1e31.
      *
-     * Compute I-I0 at best-guess mlat. If the caller predicted well, then this
-     * may be dead on, so try it first.
+     *     I(mlat1)
+     *
      */
-    I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
-    if ( fabs(I) > 1e99 ) return(-5);
-    D1 = I-I0;
-    LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat1;
-    LstarInfo->ImI0arr[LstarInfo->nImI0++] = D1;
-    if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
-    Bracket->Dmin = Dmin; Bracket->mlat_min = mlat_min;
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+    Bracket->b = mlat1; Bracket->Ib = (I < 1e6) ? I : -1e31; Bracket->Db = Bracket->Ib - I0;
+    if ( Bracket->Ib > 0.0 ) {
+        // Cache I(mlat) point for possible future fitting.
+        LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->b;
+        LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Db;
+        if (fabs(Bracket->Db) < Dmin){ Dmin = fabs(Bracket->Db); mlat_min = Bracket->b; }
+        Bracket->Dmin = Dmin; Bracket->mlat_min = mlat_min;
 
-    if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
-        /*
-         *  Already Converged with requested tolerance.
-         */
-        //printf("mlat_min= %g Dmin = %g\n", mlat_min, Dmin);
-        *rad    = r;
-        *Ifound = I;
-        *mlat   = mlat_min;
+        if ( fabs(Bracket->Db) < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            // Already Converged with requested tolerance -- we are done.
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat1;
+            return( 2 );
+        }
 
-        //printf("Dmin = %g   LstarInfo->mInfo->Lgm_FindShellLine_I_Tol = %g\n", Dmin, LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
-        return( 2 );
+        ++nDefined;
     }
-    //printf("Bracket->Dmin = %g\n", Bracket->Dmin);
+
+
+
+
+
+    /* 
+     * Try lower bound next. And test for bracket right away to save work...
+     *
+     *     I(mlat0)
+     *
+     */
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
+    Bracket->a = mlat0; Bracket->Ia = (I < 1e6) ? I : -1e31; Bracket->Da = Bracket->Ia - I0;
+    if ( Bracket->Ia > 0.0 ) {
+        LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->a;
+        LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Da;
+        if (fabs(Bracket->Da) < Dmin){ Dmin = fabs(Bracket->Da); mlat_min = Bracket->a; }
+        Bracket->Dmin = Dmin; Bracket->mlat_min = mlat_min;
+
+        if ( fabs(Bracket->Da) < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            // Already Converged with requested tolerance -- we found a good I.
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat0;
+            return( 2 );
+        } 
+
+        if ( (Bracket->Ib > 0.0) && (Bracket->Db*Bracket->Da < 0.0) ) {
+            /*
+             * These first two points form a zero bracket -- return bracket.
+             */
+            if (LstarInfo->VerbosityLevel > 1){
+                printf("\t\t\t> Found Zero Bracket. [a, b] = %g %g  [Da, Db] = %g %g\n", Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
+            }
+            Bracket->FoundZeroBracket = TRUE;
+//printf("returning 1\n");
+            return( 1 );
+        }
+
+        ++nDefined;
+
+    }
+
+
+
+
+
+
+
+    /* 
+     * Try upper bound last. 
+     *
+     *     I(mlat2)
+     *
+     */
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+    Bracket->c = mlat2; Bracket->Ic = (I < 1e6) ? I : -1e31; Bracket->Dc = Bracket->Ic - I0;
+    if ( Bracket->Ic > 0.0 ) {
+        LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->c;
+        LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Dc;
+        if (fabs(Bracket->Dc) < Dmin){ Dmin = fabs(Bracket->Dc); mlat_min = Bracket->c; }
+        Bracket->Dmin = Dmin; Bracket->mlat_min = mlat_min;
+
+        if ( fabs(Bracket->Dc) < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+            // Already Converged with requested tolerance.
+            *rad    = r;
+            *Ifound = I;
+            *mlat   = mlat2;
+            return( 2 );
+        }
+
+        ++nDefined;
+
+    }
+
+    //printf("\n\t\t\t> BracketZero: mlat0 = %g   I-I0 = %g\n", Bracket->a, Bracket->Da );
+    //printf("\t\t\t> BracketZero: mlat1 = %g   I-I0 = %g\n", Bracket->b, Bracket->Db );
+    //printf("\t\t\t> BracketZero: mlat2 = %g   I-I0 = %g\n\n", Bracket->c, Bracket->Dc );
+
+    /*
+     * We already checked the [a,b] pair for a zero bracket above.
+     * Here, check for the [b,c] pair.
+     */
+    if ( (Bracket->Ib > 0.0) && (Bracket->Ic > 0.0) && (Bracket->Db*Bracket->Dc < 0.0) ) {
+        // both are defined and there is a sign change in D
+        Bracket->FoundZeroBracket = TRUE;
+        Bracket->a = Bracket->b; Bracket->Ia = Bracket->Ib; Bracket->Da = Bracket->Db;
+        Bracket->b = Bracket->c; Bracket->Ib = Bracket->Ic; Bracket->Db = Bracket->Dc;
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("\t\t\t> Found Zero Bracket. [a, b] = %g %g  [Da, Db] = %g %g\n", Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
+        }
+        return( 1 );
+    }
+
+
+    /*
+     *   Lets check the [a,c] pair just in case...
+     */
+    if ( (Bracket->Ia > 0.0) && (Bracket->Ic > 0.0) && (Bracket->Da*Bracket->Dc < 0.0) ) {
+        // both are defined and there is a sign change in D
+        Bracket->FoundZeroBracket = TRUE;
+        Bracket->b = Bracket->c; Bracket->Ib = Bracket->Ic; Bracket->Db = Bracket->Dc;
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("\t\t\t> Found Zero Bracket. [a,b] = %g %g  [Da, Db] = %g %g\n", Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
+        }
+        return( 1 );
+    }
+
+
+
+
+
+
+    /*
+     *  The three points we were given did not yield a zero bracket. But lets
+     *  explore special cases more deeply now.
+     *
+     *  Here are the possibilities that are left (note there cant be any combos
+     *  where there is both a '+' and a '-' because then we'd already have a
+     *  bracket and returned by now.);
+     *  
+     *  In the following, '-' means a negative D, '+' means a possitive D, U
+     *  means an undefined D.
+     *
+     *  Indeterminant Cases
+     *  -------------------
+     *       1) [ -, -, -]  (all negatives - no bracket. Dont know what to do with this -- send it back.)
+     *       2) [ +, +, +]  (all positives - no bracket. Dont know what to do with this -- send it back.)
+     *
+     *      These cases will still have added points to the fitting arrays. There is still hope that fits will
+     *      eventually yield a bracket.
+     *
+     *       3) [ U, U, U]  (3 Us. Dont know what to do with this -- send it back.)
+     *
+     *
+     *   - to U Cases
+     *  --------------
+     *      *4) [ -, -, U]  (2 negs and U -- bracket still possible.)
+     *      *5) [ -, U, U]  (1 neg and 2 Us -- bracket still possible.)
+     *      *6) [ U, -, U]  (There could still be a bracket between the upper pair.)
+     *       7) [ U, U, -]  (2 Us and a neg. Bracket unlikely because I-I0<0 for the highest latitude.)
+     *       8) [ U, -, -]  (1 U and 2 negs. Bracket unlikely because I-I0<0 for the highest latitude.)
+     *       9) [ -, U, -]  (could happen if [a,b,c] are weirdly ordered?)
+     *
+     *      Transition between I values that are too small -> Undefined
+     *      These all have at least one negative and a U. There is still room
+     *      between the defined and undefined values to find a bracket.
+     *      Probably occur when the FL is getting close to
+     *      the LCFL -- a modified bisection may still work to find a bracket.
+     *
+     *
+     *   U to + Cases
+     *  --------------
+     *      10) [ U, +, +]  ( U followed by Is that are too big. )
+     *      11) [ U, U, +]  ( Us followed by an I that is too big. ) 
+     *      12) [ U, +, U]  ( U followed by an I that is too big. )
+     *      13) [ +, U, U]  ( I thats too big followed by Us ).
+     *      14) [ +, +, U]  ( Is that are too big followed by U. )
+     *      15) [ +, U, +]  (could happen if [a,b,c] are weirdly ordered?)
+     *
+     *      Transition between I values that are too big -> Undefined
+     *      These all have at least one positive and a U. There is still room
+     *      between the defined and undefined values to find a bracket.
+     *      Probably occur when the FL is getting close to
+     *      the Earth? -- a modified bisection may still work to find a bracket.
+     *
+     *  
+     *
+     */
+
+
+    /*
+     *  Check to see if, among the defined points there is a negative-D and an undefined one
+     */
+    if ( nDefined == 0 ) {
+
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("No valid points, no zero bracket!\n");
+        }
+        return(-5);
+
+    } else if ( nDefined == 3  ) {
+
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("\t\t\t> No zero bracket found!\n");
+        }
+        return(-5);
+
+    } else if ( (nDefined == 1) || (nDefined == 2)) {
+
+        if ( (Bracket->Ia > 0.0)&&(Bracket->Da < 0.0)
+             && (Bracket->Ib > 0.0)&&(Bracket->Db < 0.0)
+             && (Bracket->Ic < 0.0)   ){
+
+            // Case 4  reset so first two points are [b,c]
+            Bracket->a = Bracket->b; Bracket->Da = Bracket->Db; Bracket->Ia = Bracket->Ib;
+            Bracket->b = Bracket->c; Bracket->Db = Bracket->Dc; Bracket->Ib = Bracket->Ic;
+
+        } else if (  ( Bracket->Da < 0.0 ) && ( Bracket->Ib < 0.0 ) && ( Bracket->Ic < 0.0 ) ) {
+
+            // Case 5  first two points are already [a,b]
+
+        } else if (  ( Bracket->Ia < 0.0 ) && ( Bracket->Db < 0.0 ) && ( Bracket->Ic < 0.0 ) ) {
+
+            // Case 6 reset so first two points are [b,c]
+            Bracket->a = Bracket->b; Bracket->Da = Bracket->Db; Bracket->Ia = Bracket->Ib;
+            Bracket->b = Bracket->c; Bracket->Db = Bracket->Dc; Bracket->Ib = Bracket->Ic;
+
+        }
+
+        
+        Bracket0 = *Bracket;
+        done = FALSE;
+        while (!done) {
+
+            mmm = (Bracket->a + Bracket->b)/2.0;
+            I   = ComputeI_FromMltMlat( Bm, MLT, mmm, &r, I0, LstarInfo );
+            if ( I < 1e6 ) {
+                D = I-I0;
+                LstarInfo->MLATarr[LstarInfo->nImI0]   = mmm;
+                LstarInfo->ImI0arr[LstarInfo->nImI0++] = D;
+            } else {
+                D = -1e31;
+            }
+
+        
+            if ( ( I > 1e6 ) || ( I < 0.0 ) ) {
+    
+                //This is an undefined value -- move outer bracket in
+                Bracket->b = mmm; Bracket->Db = -1e31; Bracket->Ib = 1e31;
+
+            } else {//if ( D > Bracket->Da ) {
+
+                //This is a less negative value of D -- move inner bracket out
+                Bracket->a = mmm; Bracket->Da = D; Bracket->Ia = I;
+
+            }
+
+            if ( fabs( Bracket->b - Bracket->a ) < 1e-6 ) done = TRUE;
+                
+            if (LstarInfo->VerbosityLevel > 1){
+                printf("\t\t\t> mlat = %g  I = %g   [a,b] = %g %g    [Da,Db] = %g %g\n", mmm, I, Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
+            }
+
+            if ( D > 0.0 ) {
+                if (LstarInfo->VerbosityLevel > 1){
+                    printf("\t\t\t> Found Zero Bracket. [a,b] = %g %g  [Da, Db] = %g %g\n", Bracket->a, Bracket->b, Bracket->Da, Bracket->Db );
+                }
+                Bracket->a = Bracket0.a; Bracket->Da = Bracket0.Da; Bracket->Ia = Bracket0.Ia;
+                Bracket->b = mmm;        Bracket->Db = D;           Bracket->Ib = I;
+                return( 1 );
+            }
+
+        }
+
+
+
+    }
+
+
+
+
+
+    /*
+     *   If we get here, then we still dont have a zero bracket. Check to see
+     *   if there are any undefined values in the triple we have.
+     */
+    if ( (Bracket->Ia < 0.0) && (Bracket->Ib < 0.0) && (Bracket->Ic < 0.0) ) {
+        if (LstarInfo->VerbosityLevel > 1){
+            printf("No valiud points!\n");
+        }
+        return(-5);
+    }
+
+
+
+
+
+
+/*
+ *    I( mlat1 )
+ *
+ * Compute I-I0 at best-guess mlat. If the caller predicted well, then this
+ * may be dead on, so try it first.
+ */
+//I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+//if ( fabs(I) > 1e99 ) {
+//    printf("\t\t\t> BracketZero: I undefined at mlat1 = %g\n", mlat1 );
+//    return(-5);
+//}
+
+
+
+
+
+
+
+
+//D1 = I-I0;
+//LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat1;
+//LstarInfo->ImI0arr[LstarInfo->nImI0++] = D1;
+//if (fabs(D1) < Dmin){ Dmin = fabs(D1); mlat_min = mlat1; }
+//Bracket->Dmin = Dmin; Bracket->mlat_min = mlat_min;
+//if ( Dmin < LstarInfo->mInfo->Lgm_FindShellLine_I_Tol ) {
+//    // Already Converged with requested tolerance.
+//    *rad    = r;
+//    *Ifound = I;
+//    *mlat   = mlat_min;
+//    return( 2 );
+//}
+
+
 
 
 
