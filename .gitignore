@@ -52,3 +52,4 @@ Python/Makefile
 /libLanlGeoMag/EopData/GetEopFiles
 /libLanlGeoMag/lgm.pc
 /libLanlGeoMag/libLanlGeoMag.la
+/INSTALL
