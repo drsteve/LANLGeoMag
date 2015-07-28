@@ -1381,10 +1381,12 @@ int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
             }
             QSORT( unsigned long int, I_data, n_data, int_lt );
 
+
 /*
-double dx, dy, dz, d2, d2min;
+double dx, dy, dz, d2, d2min, d2avg;
 int j;
 d2min = 1e6;
+d2avg = 0.0;
 for ( i=0; i<n_data; i++){
   for ( j=0; i<n_data; i++){
     if (i!=j){
@@ -1393,6 +1395,7 @@ for ( i=0; i<n_data; i++){
         dy = v_data[i].x - v_data[j].x;
         dz = v_data[i].x - v_data[j].x;
         d2 = dx*dx + dy*dy + dz*dz;
+        d2avg += d2;
         if ( (d2 > .25*.25) && ( d2 < d2min) ) {
             d2min = d2;
         }
@@ -1401,7 +1404,8 @@ for ( i=0; i<n_data; i++){
   }
 }
 //printf("d2min = %g\n", d2min);
-Info->RBF_Eps = 1.0/(d2min*4.0);
+//Info->RBF_Eps = 1.0/(d2min*16.0);
+Info->RBF_Eps = 1.0/(d2avg*16.0);
 */
 
 
