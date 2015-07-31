@@ -227,10 +227,11 @@
  *
  */
 
-#include "Lgm/Lgm_DFI_RBF.h"
+#include "Lgm/Lgm_RBF.h"
 
 //#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
 #define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
+//#define LGM_DFI_RBF_SOLVER  LGM_SVD
 
 
 /** Given \f$\vec{v} = (x, y, z)\f$ and \f$\vec{v}_0 = (x_0, y_0, z_0)\f$ this
@@ -590,7 +591,7 @@ void    Lgm_DFI_RBF_dPhi_dz( Lgm_Vector *v, Lgm_Vector *v0, double dPdz[3][3], L
  *           is responsible for freeing with Lgm_DFI_RBF_Free().
  *
  *  \author  M. G. Henderson
- *  \date    January 24, 2012
+ *  date    January 24, 2012
  *
  *
  */
@@ -598,8 +599,8 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
 
     int              i, j, ii, jj, p, q, n3, s;
     double           *d, **a, Phi[3][3], val;
-    gsl_matrix       *A;
-    gsl_vector       *D, *c;
+    gsl_matrix       *A, *V;
+    gsl_vector       *D, *c, *S, *Work;
     Lgm_DFI_RBF_Info *rbf;
 
     n3 = 3*n;
@@ -624,9 +625,14 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
         rbf->v[i] = v[i];
     }
     // This subtraction doesntm seem to work out very well...
-    //rbf->Bx0 = B[0].x;
-    //rbf->By0 = B[0].y;
-    //rbf->Bz0 = B[0].z;
+//    rbf->Bx0 = B[0].x;
+//    rbf->By0 = B[0].y;
+//    rbf->Bz0 = B[0].z;
+
+double Bbkg;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].x; rbf->Bx0 = Bbkg/(double)n;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].y; rbf->By0 = Bbkg/(double)n;
+for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].z; rbf->Bz0 = Bbkg/(double)n;
     rbf->Bx0 = 0.0;
     rbf->By0 = 0.0;
     rbf->Bz0 = 0.0;
@@ -667,12 +673,17 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
 
     }
 
-    //for (i=0; i<n3; i++){
-    //    for (j=0; j<n3; j++){
-    //        printf("%15g ", gsl_matrix_get(A, i, j ) );
-    //    }
-    //    printf("\n");
-    //}
+    /*
+    for (i=0; i<n; i++ ) {
+        printf("v%02d = %8g %8g %8g   B%02d = %8g %8g %8g\n", i, v[i].x, v[i].y, v[i].z, i, B[i].x, B[i].y, B[i].z );
+    }
+    for (i=0; i<n3; i++){
+        for (j=0; j<n3; j++){
+            printf("%8g ", gsl_matrix_get(A, i, j ) );
+        }
+        printf("\n");
+    }
+    */
 
 
 
@@ -697,6 +708,15 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
         gsl_linalg_LU_decomp( A, P, &s );
         gsl_linalg_LU_solve( A, P, D, c );
         gsl_permutation_free( P );
+    } else if ( LGM_DFI_RBF_SOLVER == LGM_SVD ){
+        V    = gsl_matrix_calloc( n3, n3 );
+        S    = gsl_vector_alloc( n3 );
+        Work = gsl_vector_alloc( n3 );
+        gsl_linalg_SV_decomp( A, V, S, Work );
+        gsl_linalg_SV_solve( A, V, S, D, c );
+        gsl_vector_free( Work );
+        gsl_vector_free( S );
+        gsl_matrix_free( V );
     }
 
     for (i=0; i<n; i++){
@@ -779,6 +799,7 @@ void    Lgm_DFI_RBF_Eval( Lgm_Vector *v, Lgm_Vector *B, Lgm_DFI_RBF_Info *rbf ) 
     B->y += rbf->By0;
     B->z += rbf->Bz0;
     //printf("rbf->Bx0, rbf->By0, rbf->Bz0 = %g %g %g\n", rbf->Bx0, rbf->By0, rbf->Bz0 );
+    //printf("v = %g %g %g   B = %g %g %g\n", v->x, v->y, v->z, B->x, B->y, B->z );
 
 
     return;

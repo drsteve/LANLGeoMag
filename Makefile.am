@@ -55,14 +55,15 @@ AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 
 if DX_COND_html
 #and make sure html is build when doing a make all
+#(for some reason this bit doesn't honor DESTDIR without doing it explicitly)
 all-local: @DX_DOCDIR@/html
 
 install-data-local:
-	$(MKDIR_P) -m 755 $(htmldir)/html/
-	$(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(htmldir)/html/
+	$(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/
+	$(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(DESTDIR)$(htmldir)/html/
 	if [ -d @DX_DOCDIR@/html/search ]; then \
-	    $(MKDIR_P) -m 755 $(htmldir)/html/search; \
-	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(htmldir)/html/search; \
+	    $(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/search; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(DESTDIR)$(htmldir)/html/search; \
 	fi
 
 uninstall-local:

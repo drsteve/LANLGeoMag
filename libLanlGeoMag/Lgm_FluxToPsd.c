@@ -1919,8 +1919,8 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
 
     int             LogScale;
 
-    LogScale = FALSE;
     LogScale = TRUE;
+    LogScale = FALSE;
 
 
     //printf("Min, Max = %g %g\n", Min, Max);
