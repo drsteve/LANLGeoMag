@@ -2,7 +2,10 @@
 
 ##Example programs:
  - DstNNs.c. Finds similar magnetic storms by kNN search on Dst time series.
- - TLE_NNs.c. Finds physical conjunctions between satellites using TLEs to generate orbits (Collision candidates)
+ - TLE_NNs.c. Finds physical conjunctions between satellites using TLEs to 
+   generate orbits (Collision candidates)
+ - magConj.c. Builds kd-tree from set of HDF5 MagEphem files, uses kNN to find
+   magnetic conjunctions with input query points
  - test.c. Tests implementation of kd tree
 
 ## Notes for compiling (Oct 2015)
