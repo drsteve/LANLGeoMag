@@ -51,6 +51,12 @@ Just once (or just occasionally):
 autoreconf -i
 ./configure
 
+NB (Oct 2015): Recent updates to HDF5 include non-standard locations and use of
+pkg-config. If you have problems with HDF5 when running configure, try:
+
+./configure CFLAGS=`pkg-config hdf5 --cflags` LIBS=`pkg-config hdf5 --libs|grep -o '^\S*'`
+
+
 Every time:
 
 make
