@@ -35,6 +35,7 @@ static char ArgsDoc[] = "InFile OutFile";
 static struct argp_option Options[] = {
     {"Pattern",         'p',    "pattern",                    0,                                      "Glob pattern for finding input files"   },
     {"Object",          'o',    "object",                     0,                                      "Name of search object"   },
+    {"Target",          'T',    "target",                     0,                                      "Name of target (query object)"   },
     {"Distance",        'd',    "distance",                   0,                                      "Maximum 1-D distance between leaf nodes and points for retrieval."                  },
     {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
     {"verbose",         'v',    "verbosity",                  0,                                      "Produce verbose output"                  },
@@ -46,6 +47,7 @@ struct Arguments {
     char        *args[ nArgs ];
     char        Pattern[256];
     char        Object[256];
+    char        Target[128];
     int         verbose;
     int         Force;
     double      Distance;
@@ -67,6 +69,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'd': // distance for search
             sscanf( arg, "%lf", &arguments->Distance );
+            break;
+        case 'T':
+            strncpy( arguments->Target, arg, 127 );
             break;
         case 'F':
             arguments->Force = 1;
@@ -184,9 +189,12 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
 }
 
 
-void SetupHDF5(hid_t *file, int maxNsats) {
+void SetupHDF5(hid_t *file, int maxNsats, char *target) {
     hid_t       space, atype, DataSet;
     herr_t      status __attribute__((unused));
+
+    //Write global attributes
+    Lgm_WriteStringAttr( *file, "Target", target );
 
     //Create spaces, etc. for Time, matches (4D: ID number, time, K, L*)
     atype   = CreateStrType(24);
@@ -309,7 +317,7 @@ int main( int argc, char *argv[] ) {
     double              *q, *fac, **u, **MagEphem_K, **MagEphem_Lstar, mjd, sep, **Kquery, **Lquery;
     char                **Info, **IsoTimes, *pch, *dum, InFile[512], oname[256];
     char                **queryTime, ***matchTime, *temp;
-    char                fname[128];
+    char                fname[128], tStr[128];
     long int            Id;
     unsigned long int   n;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
@@ -338,10 +346,12 @@ int main( int argc, char *argv[] ) {
      *  Parse CmdLine arguments and options
      */
     strcpy( arguments.Object, match ); //set default
+    strcpy( arguments.Target, "Undefined");
     arguments.verbose = 0;
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
     verbose = (arguments.verbose) ? arguments.verbose : 0;
-    sep = (arguments.Distance) ? arguments.Distance : 1000.0;
+    sep = (arguments.Distance) ? arguments.Distance : 1500.0;
+    strcpy(&tStr[0], arguments.Target);
 
     //set up scaling for search/storage
     Lgm_DateTime targ, UTC;
@@ -349,8 +359,8 @@ int main( int argc, char *argv[] ) {
     LGM_ARRAY_1D( q, D, double );
     LGM_ARRAY_1D( fac, D, double );
     fac[0] = 86400.0;
-    fac[1] = 30.0*60.0*10.0;
-    fac[2] = 30.0*60.0*2.0;
+    fac[1] = 30.0*60.0*5.0;//*10.0;
+    fac[2] = 30.0*60.0;//*2.0;
 
     /*
      * Read in magephem data from files (just need time, K, L*)
@@ -363,10 +373,10 @@ int main( int argc, char *argv[] ) {
         file      = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
         //Read ISO time
         queryTime = Get_StringDataset_1D( file, "IsoTime", Dims);
-        printf("Get IsoTime done. Dims are %d\n", (int)Dims[0]);
+        if (verbose) printf("Get IsoTime done. Dims are %d\n", (int)Dims[0]);
         // Read GSM and Lstar position
         Kquery    = Get_DoubleDataset_2D( file, "K", Dims);
-        printf("Get K done. Dims are %d, %d\n", (int)Dims[0], (int)Dims[1]);
+        if (verbose) printf("Get K done. Dims are %d, %d\n", (int)Dims[0], (int)Dims[1]);
         Lquery    = Get_DoubleDataset_2D( file, "Lstar", Dims);
         nQueries  = Dims[0];
         status    = H5Fclose( file );
@@ -479,7 +489,7 @@ int main( int argc, char *argv[] ) {
      */
     strcpy(fname, arguments.args[1]);
     file = H5Fcreate( fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-    SetupHDF5( &file, nSats );
+    SetupHDF5( &file, nSats, tStr );
 
 //strcpy(&queryTime[0][0], "2012-10-11T00:52:30");
     int nskip=0;
@@ -507,8 +517,12 @@ int main( int argc, char *argv[] ) {
         if (verbose) printf("Number of NN (excluding %s) = %ld\n", arguments.Object, Nout);
         if (Nout==0) {
             if (verbose>2) printf("%d\n", nskip++);
-            WriteToHDF5( &file, ii, queryTime, &Kquery[ii][0], &Lquery[ii][0], nSats, Nout, matchTime, new_kNN, fac );
-            continue; } //if there aren't any matches, then skip the rest of the loop
+                WriteToHDF5( &file, ii, queryTime, &Kquery[ii][0], &Lquery[ii][0], nSats, Nout, matchTime, new_kNN, fac );
+                LGM_ARRAY_1D_FREE( kNN );
+                LGM_ARRAY_1D_FREE( new_kNN );
+                LGM_ARRAY_1D_FREE( new_kNN2 );
+                continue; //if there aren't any matches, then skip the rest of the loop
+            }
         //drop all kNN for each object beyond the closest match
         int Ncopy = Nout;
         Ncopy = NearestPerObject(new_kNN, Ncopy, new_kNN2, verbose);
