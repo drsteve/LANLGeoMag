@@ -1,47 +1,48 @@
 #include <Lgm_MagModelInfo.h>
+#include <Lgm_QinDenton.h>
 
 int main(){
 
 
     long int            Date;
-    double              UTC;
-    Lgm_Vector          u, v;
+    double              Time;
+    Lgm_Vector          u, v1, v2, v3;
     Lgm_MagModelInfo    *MagInfo;
+    Lgm_DateTime        UTC;
+    Lgm_QinDentonOne    p;
+    
+    Date = 20100203;
+    Time = 12.34567;
     
 
-    Date = 20100203;
-    UTC  = 12.34567;
-
     MagInfo = Lgm_InitMagInfo( );
-//    MagInfo->c->Verbose = 1;
-    Lgm_Set_Coord_Transforms( Date, UTC, MagInfo->c );
+    Lgm_Set_Coord_Transforms( Date, Time, MagInfo->c );
 
-    MagInfo->Bfield = Lgm_B_T01S;
-    MagInfo->Bfield = Lgm_B_TS04;
-    MagInfo->Bfield = Lgm_B_T89;
-    MagInfo->Bfield = Lgm_B_OP77;
-    MagInfo->Bfield = Lgm_B_cdip;
-    MagInfo->Bfield = Lgm_B_igrf;
-    MagInfo->Kp     = 5;
+    Lgm_MagModelInfo_Set_MagModel( LGM_EXTMODEL_TS04, LGM_IGRF, MagInfo );
 
-    MagInfo->VerbosityLevel = 5;
+    /*
+     * Fill UTC DateTime structure
+     */
+    Lgm_Make_UTC( Date, Time, &UTC, MagInfo->c );
 
 
+    /*
+     * Get QinDenton Parameters for the given Date and Time
+     */
+    Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1, 0 );
+    Lgm_set_QinDenton( &p, MagInfo );
 
-    u.x = -1.6; u.y =  0.0;  u.z =  0.0; // Re
-    u.x = -1.601; u.y =  0.0;  u.z =  0.0; // Re
+
+
+
+
     u.x = -6.6; u.y =  0.0;  u.z =  0.0; // Re
-    Lgm_TraceToEarth( &u, &v, 120.0, -1.0, 1e-7, MagInfo );
+    Lgm_Trace( &u, &v1, &v2, &v3, 120.0, 1e-7, 1e-7, MagInfo );
     printf( "u = %g %g %g Re\n", u.x, u.y, u.z );
-    printf( "v = %g %g %g Re\n", v.x, v.y, v.z );
-    printf( "Manitude(v) = %g\n", Lgm_Magnitude( &v ) );
+    printf( "v1 = %g %g %g Re\n", v1.x, v1.y, v1.z );
+    printf( "v2 = %g %g %g Re\n", v2.x, v2.y, v2.z );
+    printf( "v3 = %g %g %g Re\n", v3.x, v3.y, v3.z );
 
-
-    u.x = -2.6; u.y =  0.0;  u.z =  0.0; // Re
-    Lgm_TraceToEarth( &u, &v, 120.0, -1.0, 1e-7, MagInfo );
-    printf( "u = %g %g %g Re\n", u.x, u.y, u.z );
-    printf( "v = %g %g %g Re\n", v.x, v.y, v.z );
-    printf( "Manitude(v) = %g\n", Lgm_Magnitude( &v ) );
 
 
     Lgm_FreeMagInfo( MagInfo );
