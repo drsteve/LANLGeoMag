@@ -37,7 +37,7 @@ UTC = 0.0;
 Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
 JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
 // Get (interpolate) the QinDenton vals from the values in the file at the given Julian Date
-Lgm_get_QinDenton_at_JD( JD, &p, 0 );
+Lgm_get_QinDenton_at_JD( JD, &p, 0, 0 );
 // Set params in mInfo structure.
 Lgm_set_QinDenton( &p, mInfo );
 
