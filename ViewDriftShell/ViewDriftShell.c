@@ -1406,8 +1406,8 @@ void LoadTextures(){
      */
     if ( (ReadPng( MapImageFilename, &Width, &Height, &pImage ) < 0) || (MapImageFilename == NULL) ) {
         if ( MapImageFilename != NULL ) free( MapImageFilename );
-        MapImageFilename = (char *)malloc( sizeof(char)*sizeof("/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png") );
-        strcpy( MapImageFilename, "/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+        MapImageFilename = (char *)malloc( sizeof(char)*sizeof("/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png") );
+        strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
         ReadPng( MapImageFilename, &Width, &Height, &pImage );
     }
     printf("PNG image %s: Width, Height = %d %d\n", MapImageFilename, Width, Height );
@@ -2124,9 +2124,9 @@ void CreateHiResEarthQuad( int LoadQuad, int nph, int nth, long int QuadId, GLui
         glGenTextures( 1, &Texture ); *TexId = Texture;
         glBindTexture( GL_TEXTURE_2D, Texture );
         if ((nph == 80 )&&(nth == 40)) {
-            sprintf(Filename, "/home/mgh/BlueMarble/86400x43200/200406/TextureAtlas_80x40/Quad_%02d_%02d.png", i, j );
+            sprintf(Filename, "/data1/mgh/BlueMarble/86400x43200/200406/TextureAtlas_80x40/Quad_%02d_%02d.png", i, j );
         } else {
-            sprintf(Filename, "/home/mgh/BlueMarble/43200x21600/200406/TextureAtlas_40x20/Quad_%02d_%02d.png", i, j );
+            sprintf(Filename, "/data1/mgh/BlueMarble/43200x21600/200406/TextureAtlas_40x20/Quad_%02d_%02d.png", i, j );
         }
         if ( ReadPng( Filename, &Width, &Height, &pImage ) >= 0 ){
             printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
@@ -7984,10 +7984,10 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_container_add (GTK_CONTAINER (vbox2), table1);
 
     filechooserbutton = gtk_file_chooser_button_new (_("Select A File"), GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_file_chooser_set_current_folder_file( GTK_FILE_CHOOSER(filechooserbutton), g_file_new_for_path( "/home/mgh/BlueMarble/5400x2700" ), NULL );
-    gtk_file_chooser_set_filename( GTK_FILE_CHOOSER(filechooserbutton), "/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
-    gtk_file_chooser_select_filename( GTK_FILE_CHOOSER(filechooserbutton), "/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
-    gtk_file_chooser_set_file( GTK_FILE_CHOOSER(filechooserbutton), g_file_new_for_path("/home/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png"), NULL );
+    gtk_file_chooser_set_current_folder_file( GTK_FILE_CHOOSER(filechooserbutton), g_file_new_for_path( "/data1/mgh/BlueMarble/5400x2700" ), NULL );
+    gtk_file_chooser_set_filename( GTK_FILE_CHOOSER(filechooserbutton), "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+    gtk_file_chooser_select_filename( GTK_FILE_CHOOSER(filechooserbutton), "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+    gtk_file_chooser_set_file( GTK_FILE_CHOOSER(filechooserbutton), g_file_new_for_path("/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png"), NULL );
 
     PngFilter = gtk_file_filter_new( );
     gtk_file_filter_set_name( PngFilter, "PNG Images" );

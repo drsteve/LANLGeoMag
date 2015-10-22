@@ -126,6 +126,17 @@
 #define LGM_MAGSTEP_ODE_RK5     1
 #endif
 
+typedef struct CircularBuffer {
+
+    int oldest_i;
+    int newest_i;
+    int n;
+    int N;
+    int nEntries;
+    Lgm_Vec_RBF_Info **Buf1; // array of pointers to rbf's
+    Lgm_Vec_RBF_Info **Buf2; // array of pointers to rbf's
+
+} CircularBuffer;
 
 typedef struct Lgm_MagModelInfo {
 
@@ -429,8 +440,17 @@ typedef struct Lgm_MagModelInfo {
      *  hash table, etc.  used in Lgm_B_FromScatteredData*()
      */
     Lgm_DFI_RBF_Info   *rbf_ht;             // hash table (uthash)
+
     Lgm_Vec_RBF_Info   *vec_rbf_ht;         // hash table (uthash)
+    double             vec_rbf_ht_size;     // hash table size in MB
+    double             vec_rbf_ht_maxsize;  // hash table max size in MB
+    CircularBuffer     RBF_CB;
+
     Lgm_Vec_RBF_Info   *vec_rbf_e_ht;       // hash table (uthash)
+    double             vec_rbf_e_ht_size;   // hash table size in MB
+    double             vec_rbf_e_ht_maxsize;// hash table max size in MB
+    CircularBuffer     RBF_E_CB;
+
     int                 rbf_ht_alloced;     // Flag to indicate whether or not rbf_ht is allocated with data.
     long int            RBF_nHashFinds;     // Number of HASH_FIND()'s performed.
     long int            RBF_nHashAdds;      // Number of HASH_ADD_KEYPTR()'s performed.
@@ -446,6 +466,7 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector          RBF_Curl_B;         // Curl_B
     Lgm_Vector          RBF_Curl_E;         // Curl_B
     int                 RBF_Type;           // Type of RBF to use
+    int                 RBF_DoPoly;         // Flag to simultaneously fit a linear polynomail ( i.e. Sum_ijk{ a_ijl x^i y^j z^k }) as well.
     double              RBF_Eps;            // Eps value to use
 
 

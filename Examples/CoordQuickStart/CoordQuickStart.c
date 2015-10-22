@@ -9,10 +9,10 @@ int main( ) {
     long int    Date;
     double      UTC, Lat, Lon, r;
     
-    Date = 20130623;    // Jan 1, 2000
+    Date = 20130322;    // Jan 1, 2000
     //Date = 20000101;    // Jan 1, 2000
     UTC  = 5.0 + 24.0/60.0 + 24.0/3600.0;         // Universal Time Coordinated (in decimal hours)
-UTC = 0.0;
+UTC = 23.33;
 //    Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     double GLON;
