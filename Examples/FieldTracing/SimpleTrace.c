@@ -18,7 +18,7 @@ int main(){
     MagInfo = Lgm_InitMagInfo( );
     Lgm_Set_Coord_Transforms( Date, Time, MagInfo->c );
 
-    Lgm_MagModelInfo_Set_MagModel( LGM_EXTMODEL_TS04, LGM_IGRF, MagInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, MagInfo );
 
     /*
      * Fill UTC DateTime structure
