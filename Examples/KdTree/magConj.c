@@ -172,7 +172,7 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
     }
     if (!Nout) {
         if (verbose) printf("****** purgeObject: Nothing to keep ******\n");
-        kNN[0].Dist2=1.0e31; //set empty entry...
+        kNN[0].Dist2=LGM_FILL_VALUE; //set empty entry...
         }
     if (verbose) printf("\nNumber of non-matching entries = %ld\n", Nout);
 
