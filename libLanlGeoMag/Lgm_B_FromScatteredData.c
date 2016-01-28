@@ -536,15 +536,12 @@ int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 
 
 
-<<<<<<< HEAD
     /*
      * If key didnt exist in hash-table, we need to compute RBF weeights, package up info
      * into a structure and add it to the hash table.
      */
     if ( rbf == NULL ) {
 //    if ( 0==0 ) {
-=======
->>>>>>> master
 
         /*
          *  Find the K Nearest Neighbors.
@@ -571,18 +568,11 @@ int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
          *  later.
          *
          */
-<<<<<<< HEAD
-eps = 1e-4;
-        eps = 0.01;
-eps = 0.1;
-        rbf = Lgm_DFI_RBF_Init( I_data, v_data, B_data, n_data, eps, LGM_RBF_GAUSSIAN );
-=======
         LGM_ARRAY_1D( LookUpKey, Kgot, unsigned long int );
         for ( i=0; i<Kgot; i++ ) LookUpKey[i] = Info->KdTree_kNN[i].Id;
         KeyLength = Kgot*sizeof( unsigned long int );
         QSORT( unsigned long int, LookUpKey, Kgot, int_lt );
         //quicksort_uli( (long int)Kgot, LookUpKey-1 );
->>>>>>> master
 
 
 

@@ -1523,7 +1523,6 @@ double Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 }
 
 
-<<<<<<< HEAD
 
 
 
@@ -1615,9 +1614,6 @@ double Lgm_UTC_to_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
 
 
-
-=======
->>>>>>> master
 /*
  *  Convert JD directly to a UTC DateTime structure.
  */

@@ -414,13 +414,8 @@ void Lgm_QuatSquad( double Q0[4], double Q1[4], double S0[4], double S1[4], doub
 
     double  A[4], B[4], hh;
 
-<<<<<<< HEAD
-//Lgm_QuatSlerp( Q0, Q1, h, Qout );
-//return;
-=======
     //Lgm_QuatSlerp( Q0, Q1, h, Qout );
     //return;
->>>>>>> master
 
     Lgm_QuatSlerp( Q0, Q1, h, A );
     Lgm_QuatSlerp( S0, S1, h, B );
