@@ -1971,7 +1971,6 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
     //Trace to minimum-B
     if ( Lgm_Trace( &Pinner, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac1->mInfo ) == LGM_CLOSED ) {
 
-printf("About to call Lgm_Setup_AlphaOfK(); v3 = %g %g %g\n", v3.x, v3.y, v3.z);
         if ( Lgm_Setup_AlphaOfK( &DT_UTC, &v3, LstarInfo_brac1->mInfo ) > 0 ) {
             Alpha = Lgm_AlphaOfK( Kin, LstarInfo_brac1->mInfo );
             LstarInfo_brac1->PitchAngle = Alpha;
@@ -1979,7 +1978,6 @@ printf("About to call Lgm_Setup_AlphaOfK(); v3 = %g %g %g\n", v3.x, v3.y, v3.z);
         } else {
             return(-8);
         }
-printf("GOIT HERE\n");
         if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
         sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
         LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
@@ -1994,7 +1992,6 @@ printf("GOIT HERE\n");
             FreeLstarInfo( LstarInfo_brac1 );
             FreeLstarInfo( LstarInfo_brac2 );
             FreeLstarInfo( LstarInfo_test );
-printf("HERE I B MOFO\n");
             return(-8); //Inner bracket is bad - bail
         }
         LCDSv3 = v3;
