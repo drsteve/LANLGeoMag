@@ -3,11 +3,12 @@ LGMSRCDIR = $(top_srcdir)/libLanlGeoMag/
 lgmpydir = $(pythondir)/lgmpy
 lgmpy_PYTHON = $(srcdir)/lgmpy/*.py
 nodist_lgmpy_PYTHON = Lgm_Wrap.py
+HDF5FLAGS = `pkg-config hdf5 --cflags --libs 2>/dev/null`
 
 all-local: Lgm_Wrap_gen.py #make generic wrapper at build time
 
 Lgm_Wrap_gen.py: $(top_builddir)/libLanlGeoMag/libLanlGeoMag.la $(LGMSRCDIR)/Lgm/*.h
-	PYTHONPATH=$(srcdir)/ctypesgen:${PYTHONPATH} $(PYTHON) $(srcdir)/ctypesgen/ctypesgen.py -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap_gen.py --compile-libdir=$(top_builddir)/libLanlGeoMag/.libs --runtime-libdir=RUNTIME_LIBDIR --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
+	PYTHONPATH=$(srcdir)/ctypesgen:${PYTHONPATH} $(PYTHON) $(srcdir)/ctypesgen/ctypesgen.py $(HDF5FLAGS) -lLanlGeoMag --no-macro-warnings -o Lgm_Wrap_gen.py --compile-libdir=$(top_builddir)/libLanlGeoMag/.libs --runtime-libdir=RUNTIME_LIBDIR --includedir=$(LGMSRCDIR)/Lgm --includedir=$(LGMSRCDIR) $(LGMSRCDIR)/Lgm/*.h >ctypesgen.log 2>ctypesgen.log
 	-rm -f $(srcdir)/ctypesgen/ctypesgencore/*.pyc
 	-rm -f $(srcdir)/ctypesgen/ctypesgencore/*/*.pyc
 
