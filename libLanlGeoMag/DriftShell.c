@@ -136,7 +136,13 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
 
-//    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value of I that is within tolerance -- we're done.
+    if ( Flag == 2 ) {
+        //converged to I0 during BracketZero evaluation, so we're done.
+        //Already set rad, Ifound and mlat
+        FoundValidI = TRUE;
+        return( FoundValidI );
+    }
+    
 //printf("HERE 2. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
