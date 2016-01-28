@@ -1,6 +1,9 @@
 #include <Lgm_CTrans.h>
 #include <Lgm_Vec.h>
+<<<<<<< HEAD
 //#include <Lgm_JPLeph.h>
+=======
+>>>>>>> master
 
 int main( ) {
 

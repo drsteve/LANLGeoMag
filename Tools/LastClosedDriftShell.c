@@ -419,7 +419,7 @@ int main( int argc, char *argv[] ){
             Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &UTC );
             Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c);
         
-            Lgm_get_QinDenton_at_JD( JD, &qd, 1 );
+            Lgm_get_QinDenton_at_JD( JD, &qd, 1, 1 );
             Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
 
         

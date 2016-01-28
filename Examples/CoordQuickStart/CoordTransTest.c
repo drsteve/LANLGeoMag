@@ -22,8 +22,8 @@ int main( ) {
     Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c);
 
     /* read test file */
-    testfile = fopen("LgmTestTransforms_MMS20150115.txt","r");
-    if (makeNew) outfile = fopen("LgmTestTransforms_MMS20150115.txt", "w");
+    testfile = fopen("LgmTestTransforms_MMS20150522.txt","r");
+    if (makeNew) outfile = fopen("LgmTestTransforms_MMS20150522.txt", "w");
 
     /* step through test cases one line at a time */
     line = 0;
@@ -59,7 +59,7 @@ int main( ) {
             else {
                 nFail++;
                 printf("*****  warning : difference >= 1.0e-5 km (1 cm)  *****\n");
-                printf("Test %d failed (diff: %g %g %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z);
+                printf("Test %d failed (diff: %g %g %g   %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
                 }
             if (makeNew) fprintf(outfile, "%s %lld %s %s %lf %lf %lf %lf %lf %lf\n", IsoDate, TT2000, sysIn, sysOut, Ucent.x, Ucent.y, Ucent.z, Utest.x, Utest.y, Utest.z);
 

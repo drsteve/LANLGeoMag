@@ -333,7 +333,7 @@ int main( int argc, char *argv[] ){
         Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &UTC );
         Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c);
 printf("LstarInfo->mInfo->c->psi = %g", LstarInfo->mInfo->c->psi*DegPerRad); 
-        Lgm_get_QinDenton_at_JD( JD, &qd, 1 );
+        Lgm_get_QinDenton_at_JD( JD, &qd, 1 , 0);
         Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
     
         //LstarInfo->mInfo->Bfield        = Lgm_B_T89c;

@@ -39,3 +39,17 @@ INSTALL
 Python/Makefile
 *.dSYM
 .DS_Store
+/Python/Lgm_Wrap_gen.py
+/Python/ctypesgen.log
+/Tools/LastClosedDriftShell
+/Tools/MagEphemFromSpiceKernel
+/Tools/MagEphemFromTLE
+/docs/
+/lanlgeomag.spec
+/COPYING
+.deps/
+.libs/
+/libLanlGeoMag/EopData/GetEopFiles
+/libLanlGeoMag/lgm.pc
+/libLanlGeoMag/libLanlGeoMag.la
+/INSTALL

@@ -213,7 +213,7 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         /*
          * Provides a fallback in case the Lgm_LeapSecondDates.dat was not present.
          */
-        N = 26;
+        N = 27;
         l->nLeapSecondDates = N;
         l->LeapSecondDates  = (long int *) malloc( N*sizeof(long int) );
         l->LeapSecondJDs    = (double *)   malloc( N*sizeof(double) );
@@ -244,6 +244,7 @@ int Lgm_LoadLeapSeconds( Lgm_CTrans  *c ) {
         l->LeapSecondDates[23] = 20060101, l->LeapSecondJDs[23] = 2453736.5, l->LeapSeconds[23] = 33.0;
         l->LeapSecondDates[24] = 20090101, l->LeapSecondJDs[24] = 2454832.5, l->LeapSeconds[24] = 34.0;
         l->LeapSecondDates[25] = 20120701, l->LeapSecondJDs[25] = 2456109.5, l->LeapSeconds[25] = 35.0;
+        l->LeapSecondDates[26] = 20150701, l->LeapSecondJDs[26] = 2457204.5, l->LeapSeconds[26] = 36.0;
         printf("Lgm_LoadLeapSeconds: Could not open Lgm_LeapSecondDates.dat file!\n");
         printf("                     Setting the leap second values that I know about\n");
         printf("                     (latest leap second I know about was introduced on\n");
@@ -1522,6 +1523,7 @@ double Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 }
 
 
+<<<<<<< HEAD
 
 
 
@@ -1614,6 +1616,8 @@ double Lgm_UTC_to_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
 
 
+=======
+>>>>>>> master
 /*
  *  Convert JD directly to a UTC DateTime structure.
  */
@@ -1626,4 +1630,14 @@ void Lgm_JD_to_DateTime( double JD, Lgm_DateTime *UTC, Lgm_CTrans *c ){
     Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &Time );
     Lgm_Make_UTC( Date, Time, UTC, c );
 
+}
+
+/*
+ *  Convert MJD directly to a UTC DateTime structure
+ */
+void Lgm_MJD_to_DateTime( double MJD, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    double   JD;
+
+    JD = MJD + 2400000.5;
+    Lgm_JD_to_DateTime( JD, UTC, c );
 }

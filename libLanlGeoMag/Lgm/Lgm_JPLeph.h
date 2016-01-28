@@ -389,19 +389,19 @@ typedef struct Lgm_JPLephemBundle {
 /*
  *  Function prototypes
  */
-Lgm_JPLephemInfo *Lgm_InitJPLephemInfo( int DEnum, int getBodies, int Verbosity );
-void        Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLephemInfo *jpl );
-void        Lgm_FreeJPLephemInfo( Lgm_JPLephemInfo  *jpl );
-void        Lgm_ReadJPLephem( Lgm_JPLephemInfo *jpl );
+Lgm_JPLephemInfo   *Lgm_InitJPLephemInfo( int DEnum, int getBodies, int Verbosity );
+void                Lgm_InitJPLephDefaults (int DEnum, int getBodies, int verbosity, Lgm_JPLephemInfo *jpl );
+void                Lgm_FreeJPLephemInfo( Lgm_JPLephemInfo  *jpl );
+void                Lgm_ReadJPLephem( Lgm_JPLephemInfo *jpl );
 
 Lgm_JPLephemBundle *Lgm_InitJPLephemBundle( double tdb );
-void        Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle );
-void        Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephemBundle *bundle );
-double      ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLephemInfo *jpl);
-int         Lgm_JPL_getNCoeffs( int objName, Lgm_JPLephemInfo *jpl);
-int         Lgm_JPL_getNAxes( int objName, Lgm_JPLephemInfo *jpl);
-int         Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl);
+void                Lgm_FreeJPLephemBundle( Lgm_JPLephemBundle *bundle );
+void                Lgm_JPLephem_setup_object( int objName, Lgm_JPLephemInfo *jpl, Lgm_JPLephemBundle *bundle );
+double              ***Lgm_JPL_getCoeffSet(int objName, Lgm_JPLephemInfo *jpl);
+int                 Lgm_JPL_getNCoeffs( int objName, Lgm_JPLephemInfo *jpl);
+int                 Lgm_JPL_getNAxes( int objName, Lgm_JPLephemInfo *jpl);
+int                 Lgm_JPL_getNSets( int objName, Lgm_JPLephemInfo *jpl);
 
-void        Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *position);
-void        Lgm_JPLephem_velocity( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *velocity);
-void        Lgm_JPL_getSunVector ( double tdb, Lgm_JPLephemInfo *jpl, Lgm_Vector *position );
+void                Lgm_JPLephem_position( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *position);
+void                Lgm_JPLephem_velocity( double tdb, int objName, Lgm_JPLephemInfo *jpl, Lgm_Vector *velocity);
+void                Lgm_JPL_getSunVector ( double tdb, Lgm_JPLephemInfo *jpl, Lgm_Vector *position );

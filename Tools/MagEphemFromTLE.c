@@ -644,7 +644,7 @@ int main( int argc, char *argv[] ){
     char             **Existing_H5_IsoTimes;
     Lgm_ElapsedTimeInfo t;
     long int         IdNumber;
-    char             IntDesig[10], CommonName[80];
+    char             IntDesig[512], CommonName[512];
     double           et, pos[3];
 
     struct Arguments arguments;
@@ -662,7 +662,7 @@ int main( int argc, char *argv[] ){
     int              DumpShellFiles, UseEop, Colorize, Force, Update;
     FILE             *fp_in, *fp_MagEphem;
     int              nBirds, iBird;
-    char             **Birds, Bird[80];
+    char             **Birds, Bird[512];
     double           Inc, Alpha[1000], FootpointHeight;
     int              nAlpha, Quality, nFLsInDriftShell, Verbosity;
     long int         StartDate, EndDate, Date, Delta;
@@ -691,8 +691,8 @@ int main( int argc, char *argv[] ){
     BrentFuncInfo   bInfo;
     afInfo          *afi;
     int             nPerigee, nApogee, nAscend;
-    int             ApogeeOrbitNumber[4];
-    int             PerigeeOrbitNumber[4];
+    int             ApogeeOrbitNumber[20];
+    int             PerigeeOrbitNumber[20];
     Lgm_DateTime    *Perigee_UTC;
     Lgm_DateTime    *Apogee_UTC;
     Lgm_DateTime    *Ascend_UTC;
@@ -722,13 +722,13 @@ int main( int argc, char *argv[] ){
 
 
 
-    LGM_ARRAY_1D( ApoPeriTimeList, 20, TimeList );
-    LGM_ARRAY_1D( Perigee_UTC, 10, Lgm_DateTime );
-    LGM_ARRAY_1D( Apogee_UTC,  10, Lgm_DateTime );
-    LGM_ARRAY_1D( Ascend_UTC,  10, Lgm_DateTime );
-    LGM_ARRAY_1D( Perigee_U, 10, Lgm_Vector );
-    LGM_ARRAY_1D( Apogee_U,  10, Lgm_Vector );
-    LGM_ARRAY_1D( Ascend_U,  10, Lgm_Vector );
+    LGM_ARRAY_1D( ApoPeriTimeList, 40, TimeList );
+    LGM_ARRAY_1D( Perigee_UTC, 20, Lgm_DateTime );
+    LGM_ARRAY_1D( Apogee_UTC,  20, Lgm_DateTime );
+    LGM_ARRAY_1D( Ascend_UTC,  20, Lgm_DateTime );
+    LGM_ARRAY_1D( Perigee_U, 20, Lgm_Vector );
+    LGM_ARRAY_1D( Apogee_U,  20, Lgm_Vector );
+    LGM_ARRAY_1D( Ascend_U,  20, Lgm_Vector );
 
     /*
      * Default option values.
@@ -1211,10 +1211,10 @@ if ( Update ) {
                         printf("TLE read and parsed.\n");
                     }
                     LgmSgp_SortListOfTLEs( nTle, tle );
-                    printf("Line0: %s\n", tle[10].Line0);
-                    printf("Line1: %s\n", tle[10].Line1);
-                    printf("Line2: %s\n\n", tle[10].Line2);
-                    LgmSgp_SGP4_Init( sgp, &tle[10] );
+                    printf("Line0: %s\n", tle[0].Line0);
+                    printf("Line1: %s\n", tle[0].Line1);
+                    printf("Line2: %s\n\n", tle[0].Line2);
+                    LgmSgp_SGP4_Init( sgp, &tle[0] );
 
 
                     /*
@@ -1230,7 +1230,7 @@ if ( Update ) {
 afi->BODY = BODY;
                     // initialize the propagator
                     afi->sgp = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
-                    afi->tle = tle[10];
+                    afi->tle = tle[0];
                     LgmSgp_SGP4_Init( afi->sgp, &(afi->tle) );
                     
 
@@ -1239,6 +1239,7 @@ afi->BODY = BODY;
                     bInfo.Val  = 0.0;
                     bInfo.Info = (void *)afi;
                     bInfo.func = ApogeeFunc;
+
                     Ta = -900; Ra = bInfo.func( (double)Ta, 0.0, (void *)afi );
                     Tb =    0; Rb = bInfo.func( (double)Tb, 0.0, (void *)afi );
                     Tc =  900; Rc = bInfo.func( (double)Tc, 0.0, (void *)afi );
@@ -1254,7 +1255,7 @@ afi->BODY = BODY;
 
 
                                 // do the propagation
-                                tsince = (Apogee_UTC[nApogee].JD - tle[10].JD)*1440.0;
+                                tsince = (Apogee_UTC[nApogee].JD - tle[0].JD)*1440.0;
                                 LgmSgp_SGP4( tsince, afi->sgp );
 
                                 // Convert from TEME -> GEI2000
@@ -1303,10 +1304,11 @@ afi->BODY = BODY;
                             Lgm_Brent( (double)Ta, (double)Tb, (double)Tc, &bInfo, 1e-10, &Tmin, &Rmin );
 
                             if ( (Tmin >=0) && (Tmin < 86400) ) {
+printf("nPerigee = %d, Date, Tmin = %ld %g\n", nPerigee, Date, Tmin );
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Perigee_UTC[nPerigee], c );
 
                                 // do the propagation
-                                tsince = (Perigee_UTC[nApogee].JD - tle[10].JD)*1440.0;
+                                tsince = (Perigee_UTC[nApogee].JD - tle[0].JD)*1440.0;
                                 LgmSgp_SGP4( tsince, afi->sgp );
 
                                 // Convert from TEME -> GEI2000
@@ -1351,7 +1353,7 @@ afi->BODY = BODY;
                     lfi = (lfInfo *)calloc( 1, sizeof(lfInfo) );
 
                     lfi->sgp = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
-                    lfi->tle = tle[10];
+                    lfi->tle = tle[0];
                     LgmSgp_SGP4_Init( lfi->sgp, &(lfi->tle) );
 
                     lfi->Date = Date;
@@ -1372,7 +1374,7 @@ afi->BODY = BODY;
                                 Lgm_Make_UTC( Date, Tmin/3600.0, &Ascend_UTC[nAscend], c );
 
                                 // do the propagation
-                                tsince = (Ascend_UTC[nAscend].JD - tle[10].JD)*1440.0;
+                                tsince = (Ascend_UTC[nAscend].JD - tle[0].JD)*1440.0;
                                 LgmSgp_SGP4( tsince, lfi->sgp );
 
                                 // Convert from TEME -> GEI2000
@@ -1428,6 +1430,7 @@ afi->BODY = BODY;
                      */
 //PROBLEM AREA...
 //BODY?
+
                     if ( !Update ) {
                         file    = H5Fcreate( HdfOutFile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
                         Lgm_WriteMagEphemHeaderHdf( file, argp_program_version, ExtModel, BODY, CommonName, IdNumber, IntDesig, CmdLine, 
@@ -1464,7 +1467,7 @@ afi->BODY = BODY;
                          * to see if we already have this time in the file.
                          */
                         et = Lgm_TDBSecSinceJ2000( &UTC, c );
-printf("et, UpdateAfter_et = %g %g\n", et, UpdateAfter_et);
+//printf("et, UpdateAfter_et = %g %g\n", et, UpdateAfter_et);
                         if ( !Update || WeDontAlreadyHaveThisTime( IsoTimeString, nExisting_H5_IsoTimes, Existing_H5_IsoTimes )  || ( et >= UpdateAfter_et ) ) {
 
 
@@ -1472,12 +1475,13 @@ printf("et, UpdateAfter_et = %g %g\n", et, UpdateAfter_et);
 
 
 // Lets just see what TLE we actually would get by searching...
-int tiii = LgmSgp_FindTLEforGivenTime( nTle, tle, 1, UTC.JD, 1 );
-if (tiii < 0 ) tiii = 0;
-printf("tle index to use: %d  tsince = %g    (prev, next = %g %g)\n", tiii, (UTC.JD - tle[tiii].JD)*1440.0, (UTC.JD - tle[tiii-1].JD)*1440.0, (UTC.JD - tle[tiii+1].JD)*1440.0);
-printf("Line0: %s\n", tle[tiii].Line0 );
-printf("Line1: %s\n", tle[tiii].Line1 );
-printf("Line2: %s\n", tle[tiii].Line2 );
+//int tiii = LgmSgp_FindTLEforGivenTime( nTle, tle, 1, UTC.JD, 1 );
+int tiii = 0;
+//if (tiii < 0 ) tiii = 0;
+//printf("tle index to use: %d  tsince = %g    (prev, next = %g %g)\n", tiii, (UTC.JD - tle[tiii].JD)*1440.0, (UTC.JD - tle[tiii-1].JD)*1440.0, (UTC.JD - tle[tiii+1].JD)*1440.0);
+//printf("Line0: %s\n", tle[tiii].Line0 );
+//printf("Line1: %s\n", tle[tiii].Line1 );
+//printf("Line2: %s\n", tle[tiii].Line2 );
 
                             LgmSgp_SGP4_Init( sgp, &tle[tiii] );
 
@@ -1504,10 +1508,10 @@ printf("Line2: %s\n", tle[tiii].Line2 );
 
                             // Set mag model parameters
                             if ( FixModelDateTime ) {
-                                Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0 );
+                                Lgm_get_QinDenton_at_JD( ModelDateTime.JD, &p, (Verbosity > 0)? 1 : 0, 1 );
                                 Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                             } else {
-                                Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0 );
+                                Lgm_get_QinDenton_at_JD( UTC.JD, &p, (Verbosity > 0)? 1 : 0, 1 );
                                 Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
                             }
 
@@ -1522,13 +1526,9 @@ printf("Line2: %s\n", tle[tiii].Line2 );
 
                             // Set up the trans matrices
                             Lgm_Set_Coord_Transforms( UTC.Date, UTC.Time, c );
-
                             MagEphemInfo->OrbitNumber = GetOrbitNumber( &UTC, nPerigee, Perigee_UTC, PerigeeOrbitNumber );
-
                             Lgm_Convert_Coords( &U, &Rgsm, GEI2000_TO_GSM, c );
 
-//PROBLEM AREA...
-//sce2s_c( BODY,    et, 30, sclkch );
 
                             /*
                              * Compute L*s, Is, Bms, Footprints, etc...

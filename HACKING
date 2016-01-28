@@ -51,6 +51,12 @@ Just once (or just occasionally):
 autoreconf -i
 ./configure
 
+NB (Oct 2015): Recent updates to HDF5 include non-standard locations and use of
+pkg-config. If you have problems with HDF5 when running configure, try:
+
+./configure CFLAGS=`pkg-config hdf5 --cflags` LIBS=`pkg-config hdf5 --libs|grep -o '^\S*'`
+
+
 Every time:
 
 make
@@ -61,7 +67,7 @@ Installing
 sudo make install
 
 Note: This will run the script GetEopFiles. If you are behind a proxy, you may
-need to modify youe /etc/sudoers file to include the line;
+need to modify your /etc/sudoers file to include the line;
 
 Defaults env_keep = "http_proxy ftp_proxy" 
 

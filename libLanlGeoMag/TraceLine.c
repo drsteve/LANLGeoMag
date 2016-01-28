@@ -222,9 +222,16 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
         }
 //printf("\n");
 
-
-
         if ( fabs(Htry-Hdid)>1e-4) printf("Htry, Hdid = %g %g    htry = %g   Count = %d\n", Htry, Hdid, htry, Count);
+        if ( Count >= 100 ) {
+            /*
+             *  Guard against too many iterations.
+             */
+            if ( Info->VerbosityLevel > 0 ) printf("In File %s, Line %d: Too many iterations.\n", __FILE__, __LINE__); 
+            return(-1);
+        }
+
+
 
 
         R = Lgm_Magnitude( &P );
