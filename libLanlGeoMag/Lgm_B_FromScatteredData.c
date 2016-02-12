@@ -482,8 +482,6 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
  *
  *
  */
-
-
 int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     int                 K, Kgot, n_data, i;
@@ -538,12 +536,6 @@ int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 
 
 
-    /*
-     * If key didnt exist in hash-table, we need to compute RBF weeights, package up info
-     * into a structure and add it to the hash table.
-     */
-    if ( rbf == NULL ) {
-//    if ( 0==0 ) {
 
         /*
          *  Find the K Nearest Neighbors.
@@ -729,9 +721,6 @@ Info->RBF_Eps = 1.0/(d2min);
     B->y = B1.y + B2.y;
     B->z = B1.z + B2.z;
 
-B->x = B1.x;
-B->y = B1.y;
-B->z = B1.z;
 
     //if ( Info->RBF_CompGradAndCurl ) {
 {
@@ -2178,6 +2167,7 @@ double EstimateGridRes( Lgm_Vector *v ){
 
 
 }
+
 
 
 
