@@ -1404,7 +1404,12 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
         Info->s[n-1] = S;
     }
     if ( S-Info->s[n-1] > 0.0 ) {
-        printf("AHA:    S, ss, S-ss = %g %g %g\n", S, ss, S-ss);
+        /*  S is the distance requested (i.e. how far we should trace along the FL)
+         *  ss is the total distance traced so far
+         *  If we get here we've determined that we're done tracing, for whatever reason...
+         */
+        if (Info->VerbosityLevel > 1) printf("Trace did not get to requested endpoint:    Target (S), Actual (ss), S-ss = %g %g %g\n", S, ss, S-ss);
+        return(-1);
     }
 
 
