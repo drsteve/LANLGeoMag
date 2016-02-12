@@ -547,7 +547,10 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
     gsl_interp_accel    *acc;
     gsl_spline          *spline;
     Lgm_QinDenton       *q = Lgm_init_QinDenton( Verbose );
+    int                 UsePersistence;
+    double[]            Wdefaults = {0.44, 0.42, 0.66, 0.48, 0.49, 0.91}; //Avg values at status flag 2 (Table 3, Qin et al.)
 
+    UsePersistence = FALSE;
     MJD = JD - 2400000.5;
     p->JD    = JD;
     p->MJD   = MJD;
@@ -558,6 +561,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
 
     Lgm_read_QinDenton( p->Date, q );
     p->nPnts = q->nPnts;
+
 
     if (q->nPnts < 2) {
 
@@ -573,12 +577,12 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
         p->G2    =    0.0; // units? what's a good nominal value here?
         p->G3    =    0.0; // units? what's a good nominal value here?
         p->akp3  =    2.0; // unitless
-        p->W1    =    0.0; // units? what's a good nominal value here?
-        p->W2    =    0.0; // units? what's a good nominal value here?
-        p->W3    =    0.0; // units? what's a good nominal value here?
-        p->W4    =    0.0; // units? what's a good nominal value here?
-        p->W5    =    0.0; // units? what's a good nominal value here?
-        p->W6    =    0.0; // units? what's a good nominal value here?
+        p->W1    =    Wdefaults[0]; // units?
+        p->W2    =    Wdefaults[1]; // units?
+        p->W3    =    Wdefaults[2]; // units?
+        p->W4    =    Wdefaults[3]; // units?
+        p->W5    =    Wdefaults[4]; // units?
+        p->W6    =    Wdefaults[5]; // units?
         p->Bz1   =    0.0; // nT
         p->Bz2   =    0.0; // nT
         p->Bz3   =    0.0; // nT
@@ -589,6 +593,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
     } else if ( (MJD < q->MJD[0]) || (MJD > q->MJD[q->nPnts-1]) ){
 
         if (p->Persistence == 1) {
+            UsePersistence = TRUE;
             printf("No Qin Denton data in range -- using persistence. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
             p->Dst   =    q->Dst[q->nPnts-1];  // km/s
             p->fKp   =    q->fKp[q->nPnts-1];  // km/s
@@ -627,12 +632,12 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
             p->G2    =    0.0; // units? what's a good nominal value here?
             p->G3    =    0.0; // units? what's a good nominal value here?
             p->akp3  =    2.0; // unitless
-            p->W1    =    0.0; // units? what's a good nominal value here?
-            p->W2    =    0.0; // units? what's a good nominal value here?
-            p->W3    =    0.0; // units? what's a good nominal value here?
-            p->W4    =    0.0; // units? what's a good nominal value here?
-            p->W5    =    0.0; // units? what's a good nominal value here?
-            p->W6    =    0.0; // units? what's a good nominal value here?
+            p->W1    =    Wdefaults[0]; // units?
+            p->W2    =    Wdefaults[1]; // units?
+            p->W3    =    Wdefaults[2]; // units?
+            p->W4    =    Wdefaults[3]; // units?
+            p->W5    =    Wdefaults[4]; // units?
+            p->W6    =    Wdefaults[5]; // units?
             p->Bz1   =    0.0; // nT
             p->Bz2   =    0.0; // nT
             p->Bz3   =    0.0; // nT
@@ -1079,7 +1084,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
 
     if ( q->Verbosity > 0 ) {
         printf("\n");
-        if (!p->Persistence) {
+        if (!UsePersistence) {
             printf("\t\t         QinDenton Parameters\n");
             printf("\t\t    --------------------------------\n");
         } else {
