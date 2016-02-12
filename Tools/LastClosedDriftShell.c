@@ -299,7 +299,7 @@ int main( int argc, char *argv[] ){
         fp = fopen(Filename, "w");
     
         // Bracket Position in GSM
-        brac1 = -6.0;
+        brac1 = -3.5;
         brac2 = -13.0;
     
     
