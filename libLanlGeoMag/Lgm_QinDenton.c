@@ -548,8 +548,8 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
     gsl_spline          *spline;
     Lgm_QinDenton       *q = Lgm_init_QinDenton( Verbose );
     int                 UsePersistence;
-    double[]            Wdefaults = {0.44, 0.42, 0.66, 0.48, 0.49, 0.91}; //Avg values at status flag 2 (Table 3, Qin et al.)
-    double[]            Gdefaults = {6.0, 10.0, 60.0};
+    double              Wdefaults[10] = {0.44, 0.42, 0.66, 0.48, 0.49, 0.91}; //Avg values at status flag 2 (Table 3, Qin et al.)
+    double              Gdefaults[10] = {6.0, 10.0, 60.0};
 
     UsePersistence = FALSE;
     MJD = JD - 2400000.5;
