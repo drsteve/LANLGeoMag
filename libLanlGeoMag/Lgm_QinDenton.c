@@ -549,6 +549,7 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
     Lgm_QinDenton       *q = Lgm_init_QinDenton( Verbose );
     int                 UsePersistence;
     double[]            Wdefaults = {0.44, 0.42, 0.66, 0.48, 0.49, 0.91}; //Avg values at status flag 2 (Table 3, Qin et al.)
+    double[]            Gdefaults = {6.0, 10.0, 60.0};
 
     UsePersistence = FALSE;
     MJD = JD - 2400000.5;
@@ -573,9 +574,9 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
         p->Pdyn  =    p->Den_P * 1e6 * LGM_PROTON_MASS * p->V_SW*p->V_SW*1e6 * 1e9;   // nPa
         p->ByIMF =    5.0; // nT 
         p->BzIMF =   -5.0; // nT 
-        p->G1    =    0.0; // units? what's a good nominal value here?
-        p->G2    =    0.0; // units? what's a good nominal value here?
-        p->G3    =    0.0; // units? what's a good nominal value here?
+        p->G1    =    Gdefaults[0]; // units?
+        p->G2    =    Gdefaults[1]; // units?
+        p->G3    =    Gdefaults[2]; // units?
         p->akp3  =    2.0; // unitless
         p->W1    =    Wdefaults[0]; // units?
         p->W2    =    Wdefaults[1]; // units?
@@ -628,9 +629,9 @@ void Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int P
             p->Pdyn  =    p->Den_P * 1e6 * LGM_PROTON_MASS * p->V_SW*p->V_SW*1e6 * 1e9;   // nPa
             p->ByIMF =    2.0; // nT 
             p->BzIMF =   -2.0; // nT 
-            p->G1    =    0.0; // units? what's a good nominal value here?
-            p->G2    =    0.0; // units? what's a good nominal value here?
-            p->G3    =    0.0; // units? what's a good nominal value here?
+            p->G1    =    Gdefaults[0]; // units?
+            p->G2    =    Gdefaults[1]; // units?
+            p->G3    =    Gdefaults[2]; // units?
             p->akp3  =    2.0; // unitless
             p->W1    =    Wdefaults[0]; // units?
             p->W2    =    Wdefaults[1]; // units?
