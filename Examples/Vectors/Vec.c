@@ -5,7 +5,7 @@
 
 
 int main(void) {
-  Lgm_Vector *v, *v2;
+  Lgm_Vector *v, *v2, *v3, *v4;
   double Lat, Lon, r, ang;
   double Arr[3];
 
@@ -66,8 +66,37 @@ int main(void) {
   ang = Lgm_VectorAngle(v, v2);
   printf("Angle:%lf\n", ang);
 
+  Lgm_SetVecElements(v, -2, 3, 1);
+  Lgm_SetVecElements(v2, 0, 4, 0);
+  v3 = Lgm_CreateVector(-1, 3, 3);
+
+  r = Lgm_ScalarTripleProduct(v, v2, v3);
+  printf("The ScalarTripleProduct of\n");
+  Lgm_PrintVector(v);
+  Lgm_PrintVector(v2);
+  Lgm_PrintVector(v3);
+  printf("  is %lf\n", r);
+
+  Lgm_SetVecElements(v,  1, 2, 3);
+  Lgm_SetVecElements(v2, 1, -3, 4);
+  Lgm_SetVecElements(v3, 2, 4, -2);
+
+  v4 = Lgm_CreateVector(0,0,0);
+
+  Lgm_VectorTripleProduct(v, v2, v3, v4);
+  printf("The VectorTripleProduct of\n");
+  Lgm_PrintVector(v);
+  Lgm_PrintVector(v2);
+  Lgm_PrintVector(v3);
+  printf("  is \n");
+  Lgm_PrintVector(v4);
+
+
+
   Lgm_FreeVector(v);
   Lgm_FreeVector(v2);
+  Lgm_FreeVector(v3);
+  Lgm_FreeVector(v4);
   return(0);
 }
 
