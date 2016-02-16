@@ -12,7 +12,7 @@
 
 int main( int argc, char *argv[] ){
 
-    double           UTC, Alpha[1000], a;
+    double           UTC, Alpha[1000], a, dist;
     long int         Date;
     int              nAlpha, Kp, Colorize, i;
     char             Filename[1024];
@@ -29,8 +29,8 @@ int main( int argc, char *argv[] ){
     // Position in SM
 //    Psm.x = -1.5; Psm.y = 0.0; Psm.z = 0.0;
 //    Psm.x = -1.25; Psm.y = 0.0; Psm.z = 0.0;
-    Psm.x = -1.05; Psm.y = 0.0; Psm.z = 0.0;
-//    Psm.x = -6.6; Psm.y = 0.0; Psm.z = 0.0;
+//    Psm.x = -1.05; Psm.y = 0.0; Psm.z = 0.0;
+    Psm.x = -6.6; Psm.y = 0.0; Psm.z = 0.0;
 //    Psm.x = -3.0; Psm.y = 0.0; Psm.z = 0.0;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, c );
 
@@ -52,7 +52,7 @@ int main( int argc, char *argv[] ){
 
 
 //USER INPUT STUFF
-    Lgm_SetMagEphemLstarQuality( 8, 24, MagEphemInfo );
+    Lgm_SetMagEphemLstarQuality( 3, 24, MagEphemInfo );
     MagEphemInfo->SaveShellLines = TRUE;
     MagEphemInfo->LstarInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
@@ -77,14 +77,15 @@ int main( int argc, char *argv[] ){
     /*
      * Dump results
      */
+     dist = Lgm_Magnitude(&Psm);
 double puke = pow(10.0, -MagEphemInfo->LstarQuality);
     //sprintf( Filename, "DipoleTest_3.0/results_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
-    sprintf( Filename, "DipoleTest_1.05/results_%d.dat", MagEphemInfo->LstarQuality);
+    sprintf( Filename, "masterTestresults_%d.dat", MagEphemInfo->LstarQuality);
     fpout = fopen(Filename, "w");
     for (i=0; i<nAlpha; i++ ){
         if ( MagEphemInfo->Lstar[i] > 0.0 ) {
-            fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (1.05-MagEphemInfo->Lstar[i])/puke );
-            printf("%.15lf %.15lf %g\n", MagEphemInfo->Alpha[i], (1.05-MagEphemInfo->Lstar[i])/puke, 1.05-MagEphemInfo->Lstar[i] );
+            fprintf(fpout, "%.9lf %.9lf %.9lf %g\n", MagEphemInfo->Alpha[i], dist, MagEphemInfo->Lstar[i], dist-MagEphemInfo->Lstar[i] );
+            printf("%.9lf %.9lf %.9lf %g\n", MagEphemInfo->Alpha[i], dist, MagEphemInfo->Lstar[i], dist-MagEphemInfo->Lstar[i] );
         }
     }
     fclose(fpout);
