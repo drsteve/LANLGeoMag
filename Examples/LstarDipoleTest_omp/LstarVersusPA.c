@@ -78,10 +78,10 @@ int main( int argc, char *argv[] ){
     /*
      * Dump results
      */
-    dist = Lgm_Magnitude(&Psm);
-double puke = pow(10.0, -MagEphemInfo->LstarQuality);
     //sprintf( Filename, "DipoleTestResults_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
     sprintf( Filename, "DipoleTestResults_%d_Meth%d.dat", MagEphemInfo->LstarQuality, MagEphemInfo->LstarInfo->ISearchMethod);
+     dist = Lgm_Magnitude(&Psm);
+double puke = pow(10.0, -MagEphemInfo->LstarQuality);
     fpout = fopen(Filename, "w");
     for (i=0; i<nAlpha; i++ ){
         if ( MagEphemInfo->Lstar[i] > 0.0 ) {
