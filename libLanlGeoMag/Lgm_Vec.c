@@ -96,6 +96,26 @@ double Lgm_DotProduct(Lgm_Vector *a, Lgm_Vector *b) {
     return(a->x * b->x + a->y * b->y + a->z * b->z);
 }
 
+/*
+ * Given vectors a, b, and c compute the scalar triple product
+ *  a \cdot (b \crossprod c)
+ */
+double Lgm_ScalarTripleProduct(Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *c) {
+    Lgm_Vector tmp;
+    Lgm_CrossProduct(b,c,&tmp);
+    return( Lgm_DotProduct(a, &tmp ) );
+}
+
+/*
+ * Given vectors a, b, and c compute the vector triple product
+ *  a x (b x c) or (c x b) x a
+ */
+void Lgm_VectorTripleProduct(Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *c, Lgm_Vector *d) {
+    Lgm_Vector tmp;
+    Lgm_CrossProduct(b, c, &tmp);
+    Lgm_CrossProduct(a, &tmp, d) ;
+}
+
 
 /*
  * Normalize the given vector. I.e. make it into a unit vector.
