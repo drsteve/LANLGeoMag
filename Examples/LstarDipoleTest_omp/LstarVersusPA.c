@@ -66,7 +66,7 @@ int main( int argc, char *argv[] ){
     MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0 ) ? Kp : KP_DEFAULT;
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
 
-
+    MagEphemInfo->LstarInfo->ISearchMethod = 2;
 
     /*
      * Compute L*s, Is, Bms, Footprints, etc...
@@ -80,13 +80,13 @@ int main( int argc, char *argv[] ){
      */
     dist = Lgm_Magnitude(&Psm);
 double puke = pow(10.0, -MagEphemInfo->LstarQuality);
-    //sprintf( Filename, "DipoleTest_3.0/results_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
-    sprintf( Filename, "DipoleTest_1.05/newresults_%d.dat", MagEphemInfo->LstarQuality);
+    //sprintf( Filename, "DipoleTestResults_%.0e.dat", MagEphemInfo->LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
+    sprintf( Filename, "DipoleTestResults_%d_Meth%d.dat", MagEphemInfo->LstarQuality, MagEphemInfo->LstarInfo->ISearchMethod);
     fpout = fopen(Filename, "w");
     for (i=0; i<nAlpha; i++ ){
         if ( MagEphemInfo->Lstar[i] > 0.0 ) {
-            fprintf(fpout, "%.15lf %.15lf\n", MagEphemInfo->Alpha[i], (dist-MagEphemInfo->Lstar[i])/puke );
-            printf("%.15lf %.15lf %g\n", MagEphemInfo->Alpha[i], (dist-MagEphemInfo->Lstar[i])/puke, dist-MagEphemInfo->Lstar[i] );
+            fprintf(fpout, "%.9lf %.9lf %.9lf %g\n", MagEphemInfo->Alpha[i], dist, MagEphemInfo->Lstar[i], dist-MagEphemInfo->Lstar[i] );
+            printf("%.9lf %.9lf %.9lf %g\n", MagEphemInfo->Alpha[i], dist, MagEphemInfo->Lstar[i], dist-MagEphemInfo->Lstar[i] );
         }
     }
     fclose(fpout);

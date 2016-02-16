@@ -351,7 +351,7 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 1e-5;
 
             s->mInfo->Lgm_I_Integrator        = DQAGS;
-            s->mInfo->Lgm_I_Integrator_epsabs = 0.0;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-5;
             s->mInfo->Lgm_I_Integrator_epsrel = 1e-5;
 
             s->mInfo->Lgm_FindShellLine_I_Tol = 1e-3;
@@ -375,7 +375,7 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
             s->mInfo->Lgm_I_Integrator_epsrel = 1e-3;
             s->mInfo->Lgm_I_Integrator_epsabs = 1e-3;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-2;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-3;
 
             s->mInfo->nDivs = 200;
 
@@ -414,10 +414,10 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
             s->mInfo->Lgm_LambdaIntegral_Integrator_epsrel = 5e-4;
 
             s->mInfo->Lgm_I_Integrator        = DQK21; // Note - changed to simpler integrator.
-            s->mInfo->Lgm_I_Integrator_epsrel = 5e-2;
-            s->mInfo->Lgm_I_Integrator_epsabs = 5e-2;
+            s->mInfo->Lgm_I_Integrator_epsrel = 1e-2;
+            s->mInfo->Lgm_I_Integrator_epsabs = 1e-2;
 
-            s->mInfo->Lgm_FindShellLine_I_Tol = 5e-1;
+            s->mInfo->Lgm_FindShellLine_I_Tol = 1e-1;
 
             s->mInfo->nDivs = 50;
 
