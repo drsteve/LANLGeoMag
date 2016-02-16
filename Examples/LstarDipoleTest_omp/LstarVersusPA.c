@@ -31,8 +31,8 @@ int main( int argc, char *argv[] ){
 //    Psm.x = -1.5;
 //    Psm.x = -1.25;
 //    Psm.x = -1.05;
-//    Psm.x = -6.6;
-    Psm.x = -3.0;
+    Psm.x = -6.6;
+//    Psm.x = -3.0;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, c );
 
     // Create array of Pitch Angles to compute
