@@ -34,7 +34,7 @@ int Lgm_TraceToSMEquat( Lgm_Vector *u, Lgm_Vector *v, double tol, Lgm_MagModelIn
 
     Hmax = 20.0;
     Hmin = 0.001;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
     Za = Zb = Zc = 0.0;
 
 

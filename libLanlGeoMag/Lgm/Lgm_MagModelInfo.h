@@ -521,6 +521,8 @@ typedef struct Lgm_MagModelInfo {
     //long int       FP_nHashAdds;        // Number of HASH_ADD_KEYPTR()'s performed.
 
 
+    void        *Data;
+
 
 } Lgm_MagModelInfo;
 

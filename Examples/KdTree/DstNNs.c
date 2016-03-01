@@ -27,8 +27,9 @@ int main( ) {
 
 
     /*
-     * Read in Dst data from 1958 -> 2015
+     * Read in Dst data from 1976 -> 2011
      */
+    Date = 19760101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 19580101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 20110101; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
     n = 0;

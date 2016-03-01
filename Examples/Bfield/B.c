@@ -12,7 +12,7 @@ int main(){
     int                 i, j;
 
 
-    Date = 20050831;
+    Date = 20150831;
     UTC  = 9.0;
 
     mInfo = Lgm_InitMagInfo( );

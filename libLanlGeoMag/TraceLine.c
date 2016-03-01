@@ -92,7 +92,7 @@ int Lgm_TraceLine( Lgm_Vector *u, Lgm_Vector *v, double H0, double sgn, double t
     Htry = Info->Hmax;  // we want to step with constant increments.
     Hmin = 0.0001;      // This may be necessary to find the endpoint.
     Hmax = Info->Hmax;  // Dont use step bigger than this.
-    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
     R = Ra = Rb = Rc = 0.0;
     F = Fa = Fb = Fc = 0.0;
 
@@ -470,7 +470,7 @@ int Lgm_TraceLine2( Lgm_Vector *u, Lgm_Vector *v, double H0, double MinDist, dou
     Hmin = 0.0001;      // This may be necessary to find the endpoint.
     Hmin = 1e-7;
     Hmax = Info->Hmax; // Dont use step bigger than this.
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x =  u_scale.y = u_scale.z = 1.0;
     R = Ra = Rb = Rc = 0.0;
     F = Fa = Fb = Fc = 0.0;
 
@@ -1269,7 +1269,7 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     Htry0 = Info->Hmax;  // we want to step with constant increments.
     Hmin = 1e-7;        // This may be necessary to find the endpoint.
     Hmax = Info->Hmax;  // Dont use step bigger than this.
-    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
 
 
     /*
@@ -1404,7 +1404,12 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
         Info->s[n-1] = S;
     }
     if ( S-Info->s[n-1] > 0.0 ) {
-        printf("AHA:    S, ss, S-ss = %g %g %g\n", S, ss, S-ss);
+        /*  S is the distance requested (i.e. how far we should trace along the FL)
+         *  ss is the total distance traced so far
+         *  If we get here we've determined that we're done tracing, for whatever reason...
+         */
+        if (Info->VerbosityLevel > 1) printf("Trace did not get to requested endpoint:    Target (S), Actual (ss), S-ss = %g %g %g\n", S, ss, S-ss);
+        return(-1);
     }
 
 
@@ -1494,7 +1499,7 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
     Htry = Info->Hmax;  // we want to step with constant increments.
     Hmin = 1e-7;        // This may be necessary to find the endpoint.
     Hmax = Info->Hmax;  // Dont use step bigger than this.
-    u_scale.x =  10.0;  u_scale.y = 1.0; u_scale.z = 10.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
 
 
     /*

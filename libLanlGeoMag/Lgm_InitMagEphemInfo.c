@@ -60,6 +60,9 @@ void Lgm_InitMagEphemInfoDefaults( Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchA
     LGM_ARRAY_1D( MagEphemInfo->nShellPoints,   MaxPitchAngles, int );
     LGM_ARRAY_1D( MagEphemInfo->LHilton,        MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->LMcIlwain,      MaxPitchAngles, double );
+    LGM_ARRAY_1D( MagEphemInfo->Hmin,           MaxPitchAngles, double );
+    LGM_ARRAY_1D( MagEphemInfo->Hmin_GeodLat,   MaxPitchAngles, double );
+    LGM_ARRAY_1D( MagEphemInfo->Hmin_GeodLon,   MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->Lstar,          MaxPitchAngles, double );
     LGM_ARRAY_1D( MagEphemInfo->DriftOrbitType, MaxPitchAngles, int );
 
@@ -76,6 +79,9 @@ void Lgm_InitMagEphemInfoDefaults( Lgm_MagEphemInfo *MagEphemInfo, int MaxPitchA
         MagEphemInfo->nShellPoints[i]   = 0;
         MagEphemInfo->LHilton[i]        = LGM_FILL_VALUE;
         MagEphemInfo->LMcIlwain[i]      = LGM_FILL_VALUE;
+        MagEphemInfo->Hmin[i]           = LGM_FILL_VALUE;
+        MagEphemInfo->Hmin_GeodLat[i]   = LGM_FILL_VALUE;
+        MagEphemInfo->Hmin_GeodLon[i]   = LGM_FILL_VALUE;
         MagEphemInfo->Lstar[i]          = LGM_FILL_VALUE;
         MagEphemInfo->DriftOrbitType[i] = LGM_DRIFT_ORBIT_OPEN;
     }
@@ -161,6 +167,9 @@ void Lgm_FreeMagEphemInfo_Children( Lgm_MagEphemInfo  *MagEphemInfo ) {
     LGM_ARRAY_1D_FREE( MagEphemInfo->LHilton );
     LGM_ARRAY_1D_FREE( MagEphemInfo->LMcIlwain );
     LGM_ARRAY_1D_FREE( MagEphemInfo->Lstar );
+    LGM_ARRAY_1D_FREE( MagEphemInfo->Hmin );
+    LGM_ARRAY_1D_FREE( MagEphemInfo->Hmin_GeodLat );
+    LGM_ARRAY_1D_FREE( MagEphemInfo->Hmin_GeodLon );
     LGM_ARRAY_1D_FREE( MagEphemInfo->DriftOrbitType );
 
     FreeLstarInfo( MagEphemInfo->LstarInfo );
@@ -224,9 +233,12 @@ void WriteMagEphemInfoStruct( char *Filename, int nPitchAngles, Lgm_MagEphemInfo
     dum = write( fd, &MagEphemInfo->y_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
     dum = write( fd, &MagEphemInfo->z_gsm[0][0][0],      nPitchAngles*LGM_LSTARINFO_MAX_FL*1000*sizeof( double ) );
 
-    dum = write( fd, &MagEphemInfo->LHilton[0],   nPitchAngles*sizeof( double ) );
-    dum = write( fd, &MagEphemInfo->LMcIlwain[0], nPitchAngles*sizeof( double ) );
-    dum = write( fd, &MagEphemInfo->Lstar[0],     nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->LHilton[0],      nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->LMcIlwain[0],    nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->Hmin[0],         nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->Hmin_GeodLat[0], nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->Hmin_GeodLon[0], nPitchAngles*sizeof( double ) );
+    dum = write( fd, &MagEphemInfo->Lstar[0],        nPitchAngles*sizeof( double ) );
 
     close(fd);
 
@@ -390,6 +402,20 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
     dum = read( fd, ddata, n*sizeof( double ) );
     LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->LMcIlwain, ddata, n, double );
 
+
+    ddata = (double *)calloc( n, sizeof(double) );
+    dum = read( fd, ddata,     n*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->Hmin, ddata, n, double );
+
+    ddata = (double *)calloc( n, sizeof(double) );
+    dum = read( fd, ddata,     n*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->Hmin_GeodLat, ddata, n, double );
+
+    ddata = (double *)calloc( n, sizeof(double) );
+    dum = read( fd, ddata,     n*sizeof( double ) );
+    LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->Hmin_GeodLon, ddata, n, double );
+
+
     ddata = (double *)calloc( n, sizeof(double) );
     dum = read( fd, ddata,     n*sizeof( double ) );
     LGM_ARRAY_FROM_DATA_1D( MagEphemInfo->Lstar, ddata, n, double );
@@ -520,6 +546,9 @@ Lgm_MagEphemData *Lgm_InitMagEphemData( int nRows, int nPA ) {
     LGM_ARRAY_1D( MagEphemData->H5_M_ref,             nRows,          double );
     LGM_ARRAY_1D( MagEphemData->H5_M_igrf,            nRows,          double );
 
+    LGM_ARRAY_2D( MagEphemData->H5_Hmin,              nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Hmin_GeodLat,      nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_Hmin_GeodLon,      nRows, nPA,     double );
     LGM_ARRAY_2D( MagEphemData->H5_Lstar,             nRows, nPA,     double );
     LGM_ARRAY_2D( MagEphemData->H5_Sb,                nRows, nPA,     double );
     LGM_ARRAY_2D( MagEphemData->H5_Tb,                nRows, nPA,     double );
@@ -645,6 +674,9 @@ void Lgm_FreeMagEphemData( Lgm_MagEphemData *MagEphemData ) {
     LGM_ARRAY_1D_FREE( MagEphemData->H5_M_ref );
     LGM_ARRAY_1D_FREE( MagEphemData->H5_M_igrf );
 
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Hmin );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Hmin_GeodLat );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_Hmin_GeodLon );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_Lstar );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_Sb );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_Tb );

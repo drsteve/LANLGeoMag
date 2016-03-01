@@ -892,6 +892,8 @@ int main( int argc, char *argv[] ){
     int NNN = (int)( (eJD-sJD+1)*86400.0/(double)Delta + 1.0);
     if (NNN > 86401 ) NNN = 86401;
     med = Lgm_InitMagEphemData( NNN, 80 );
+    
+
 
 
     if ( nAlpha > 0 ){
@@ -901,6 +903,7 @@ int main( int argc, char *argv[] ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, 1);
     }
     MagEphemInfo->PropagatorType = SGP4;
+    MagEphemInfo->LstarInfo->ISearchMethod = 1;
 
 
     // Settings for Lstar calcs
@@ -961,7 +964,6 @@ int main( int argc, char *argv[] ){
     }
 
 
-MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_Dungey;
 
 
     /*

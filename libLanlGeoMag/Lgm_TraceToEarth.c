@@ -156,7 +156,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
     P = *u;
     Hmax = Info->Hmax;
     Hmin = 0.001;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
     Height = Height_a = Height_b = Height_c = 0.0;
     F = Fa = Fb = Fc = 0.0;
 

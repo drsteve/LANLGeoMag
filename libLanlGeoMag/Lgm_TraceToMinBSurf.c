@@ -46,7 +46,7 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 //    Hmin = 0.00001;
     Hmin = 1e-7;
     Hmin = 1e-10;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
 
 
     /*

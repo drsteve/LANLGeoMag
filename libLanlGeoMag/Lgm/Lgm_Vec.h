@@ -50,6 +50,8 @@ void        Lgm_VecToArr( Lgm_Vector *u, double *A );
 void        Lgm_ArrToVec( double *A, Lgm_Vector *u);
 void        Lgm_VecDivideScalar( Lgm_Vector *v, double x);
 void        Lgm_VecMultiplyScalar( Lgm_Vector *v, double x);
+double      Lgm_ScalarTripleProduct(Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *c);
+void        Lgm_VectorTripleProduct(Lgm_Vector *a, Lgm_Vector *b, Lgm_Vector *c, Lgm_Vector *d);
 
 
 

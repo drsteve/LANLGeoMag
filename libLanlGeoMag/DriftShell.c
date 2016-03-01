@@ -61,6 +61,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
     *Iterations = 0;
 
+
     /*
      *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
      *  caller. The hope is that the field line with the I we are looking for
@@ -1457,14 +1458,14 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
     if ( nDefined == 0 ) {
 
         if (LstarInfo->VerbosityLevel > 1){
-            printf("No valid points, no zero bracket!\n");
+            printf("nDefined = 0, No valid points, no zero bracket!\n");
         }
         return(-5);
 
     } else if ( nDefined == 3  ) {
 
         if (LstarInfo->VerbosityLevel > 1){
-            printf("\t\t\t> No zero bracket found!\n");
+            printf("\t\t\t> nDefined = 3, No zero bracket found!\n");
         }
         return(-5);
 
@@ -1487,6 +1488,9 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
             // Case 6 reset so first two points are [b,c]
             Bracket->a = Bracket->b; Bracket->Da = Bracket->Db; Bracket->Ia = Bracket->Ib;
             Bracket->b = Bracket->c; Bracket->Db = Bracket->Dc; Bracket->Ib = Bracket->Ic;
+
+        } else {
+
 
         }
 

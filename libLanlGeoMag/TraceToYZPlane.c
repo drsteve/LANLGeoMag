@@ -25,7 +25,7 @@ int Lgm_TraceToYZPlane( Lgm_Vector *u, Lgm_Vector *v, double Xtarget, double sgn
 
     Hmax = 20.0;
     Hmin = 0.01;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
 
 
     /* 

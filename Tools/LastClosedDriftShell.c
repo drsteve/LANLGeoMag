@@ -235,6 +235,7 @@ int main( int argc, char *argv[] ){
     strcpy( ExtModel,  arguments.ExtModel );
 
     // Settings for Lstar calcs
+    LstarInfo->ISearchMethod = 2; // 1= Original ROEDERER METHOD (fing Bm along ray first); 2= Find Bm by tracing from footpoint along FL.
     LstarInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->Lgm_LossConeHeight = FootpointHeight;
@@ -298,7 +299,7 @@ int main( int argc, char *argv[] ){
         fp = fopen(Filename, "w");
     
         // Bracket Position in GSM
-        brac1 = -6.0;
+        brac1 = -3.5;
         brac2 = -13.0;
     
     

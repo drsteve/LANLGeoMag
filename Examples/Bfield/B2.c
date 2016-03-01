@@ -15,10 +15,10 @@ int main(){
 
     mInfo = Lgm_InitMagInfo( );
 
-    Date  = 20040812;                        // August 12, 2004
-    UTC   = 16.0 + 27.0/60.0 + 29.99/3600.0;   // Universal Time Coordinated (in decimal hours)
-    UTC   = 0.0;
-    JD    = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
+    Date = 20141201;                        // December 1, 2014
+    UTC  = 16.0 + 27.0/60.0 + 29.99/3600.0;   // Universal Time Coordinated (in decimal hours)
+    UTC  = 0.0;
+    JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
 
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
 
@@ -92,7 +92,7 @@ int main(){
     printf( "       Bx,By,Bz in GSM: %20.14lf  %20.14lf  %20.14lf\n", B.x, B.y, B.z );
     printf( "                   |B|: %20.14lf\n", Lgm_Magnitude( &B ) );
 
-    printf( "   http://www.ngdc.noaa.gov/geomag-web/#igrfwmm value for |B|: %20.14lf\n",  50371.8 );
+    printf( "   http://www.ngdc.noaa.gov/geomag-web/#igrfwmm value for |B|: %g\n",  50567.3 );
 
 
 
