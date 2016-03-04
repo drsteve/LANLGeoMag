@@ -328,7 +328,7 @@ int main( int argc, char *argv[] ) {
     Lgm_DateTime        d;
     int                 K, Kgot, i, ii, j, D=3, t, k, nQueries;
     int                 nPts = 0, ndims, status_n __attribute__((unused));
-    size_t              nSats=15; //maximum number of files expected on input
+    size_t              nSats=50; //maximum number of files expected on input
     hsize_t             Dims[3];
     hid_t               file, dataset, dataspace;
     herr_t              status __attribute__((unused));
@@ -337,9 +337,8 @@ int main( int argc, char *argv[] ) {
     long int            Nout;
 
     /* Set pattern for FN matching and match string for filtering given object */
-    const char          *pattern = "/mnt/projects/dream/Spacecraft/ns*/MagEphem/*/201210*h5";
+    //const char          *pattern = "/mnt/projects/dream/Spacecraft/ns*/MagEphem/*/201210*h5";
     //const char          *pattern = "/mnt/projects/dream/Spacecraft/\?\?\?\?-\?\?\?/MagEphem/*/2012101[01]*h5";
-    //TODO: get match files (pattern) from command line
     char                match[] = "default_match_string";
 
     /*
@@ -359,8 +358,8 @@ int main( int argc, char *argv[] ) {
     LGM_ARRAY_1D( q, D, double );
     LGM_ARRAY_1D( fac, D, double );
     fac[0] = 86400.0;
-    fac[1] = 30.0*60.0*5.0;//*10.0;
-    fac[2] = 30.0*60.0;//*2.0;
+    fac[1] = 30.0*60.0*8.0;//*10.0;
+    fac[2] = 30.0*60.0*1.5;
 
     /*
      * Read in magephem data from files (just need time, K, L*)
@@ -387,7 +386,7 @@ int main( int argc, char *argv[] ) {
         }
 
     //now do wildcard matches for target dataset
-    glob_status = glob( pattern , 0 , NULL , &glob_buffer );
+    glob_status = glob( arguments.Pattern , 0 , NULL , &glob_buffer );
     if (glob_status != GLOB_NOMATCH) {
         nSats = glob_buffer.gl_pathc;
     }
@@ -403,7 +402,7 @@ int main( int argc, char *argv[] ) {
     for (n=0; n<nSats; n++) {
         strcpy( &InFile[0], glob_buffer.gl_pathv[n]);
         if (H5Fis_hdf5( InFile )) {
-            // Read the InFilea
+            // Read the InFile
             if (verbose > 2) printf("Inspecting %s\n", InFile);
             file          = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
             dataset       = H5Dopen( file, "/Lstar", H5P_DEFAULT );
