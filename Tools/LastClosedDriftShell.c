@@ -324,9 +324,9 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"PA%d\" ],\n", i ); 
     
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nK-1; i++) fprintf(fp, "\"%g R!IE!N G!U1/2!N\", ", Kin[i] );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"%g R_E G^1/2\", ", Kin[i] );
             fprintf(fp, "\"%g Deg.\" ],\n", Kin[i] ); 
-            fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!U1/2!N\",\n");
+            fprintf( fp, "#                              \"UNITS\": \"R_E G^1/2\",\n");
             fprintf( fp, "#                          \"VALID_MIN\":  0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 20.0,\n");
             fprintf( fp, "#                         \"FILL_VALUE\": -1e31 },\n");
@@ -353,7 +353,7 @@ int main( int argc, char *argv[] ){
             for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS_%g\", ", Kin[i] );
             fprintf(fp, "\"LCDS_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS %g!Eo!N\", ", Kin[i] );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS K=%g\", ", Kin[i] );
             fprintf(fp, "\"LCDS %g!Eo!N\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -365,15 +365,15 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#  \"Kcalc\":          { \"DESCRIPTION\": \"Modified second adiabatic invariant, K, calculated during drift shell trace\",\n");
             fprintf( fp, "#                               \"NAME\": \"K\",\n");
             fprintf( fp, "#                              \"TITLE\": \"K\",\n");
-            fprintf( fp, "#                              \"LABEL\": \"K, [R!IE!N G!U1/2!N]\",\n");
-            fprintf( fp, "#                              \"UNITS\": \"R!IE!N G!U1/2!N\",\n");
+            fprintf( fp, "#                              \"LABEL\": \"K, [R_E G^1/2]\",\n");
+            fprintf( fp, "#                              \"UNITS\": \"R_E G^1/2\",\n");
             fprintf( fp, "#                          \"DIMENSION\": [ %d ],\n", nK );
             fprintf( fp, "#                       \"START_COLUMN\": %d,\n", nCol); nCol += nK;
             fprintf( fp, "#                      \"ELEMENT_NAMES\": [ ");
             for (i=0; i<nK-1; i++) fprintf(fp, "\"K_%g\", ", Kin[i] );
             fprintf(fp, "\"K_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nK-1; i++) fprintf(fp, "\"K %g!Eo!N\", ", Kin[i] );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"K %g\", ", Kin[i] );
             fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
@@ -393,7 +393,7 @@ int main( int argc, char *argv[] ){
             for (i=0; i<nK-1; i++) fprintf(fp, "\"K_%g\", ", Kin[i] );
             fprintf(fp, "\"Bm_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
-            for (i=0; i<nK-1; i++) fprintf(fp, "\"Bm %g!Eo!N\", ", Kin[i] );
+            for (i=0; i<nK-1; i++) fprintf(fp, "\"Bm K=%g\", ", Kin[i] );
             fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
