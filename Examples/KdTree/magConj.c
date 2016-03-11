@@ -209,12 +209,13 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
 }
 
 
-void SetupHDF5(hid_t *file, int maxNsats, char *target) {
+void SetupHDF5(hid_t *file, int maxNsats, char *target, char *CmdLine) {
     hid_t       space, atype, DataSet;
     herr_t      status __attribute__((unused));
 
     //Write global attributes
     Lgm_WriteStringAttr( *file, "Target", target );
+    Lgm_WriteStringAttr( *file, "CommandLine", CmdLine );
 
     //Create spaces, etc. for Time, matches (4D: ID number, time, K, L*)
     atype   = CreateStrType(24);
@@ -336,7 +337,7 @@ int main( int argc, char *argv[] ) {
     struct Arguments arguments;
     double              *q, *fac, **u, **MagEphem_K, **MagEphem_Lstar, mjd, sep, **Kquery, **Lquery;
     char                **Info, **IsoTimes, *pch, *dum, InFile[512], oname[256];
-    char                **queryTime, ***matchTime, *temp, **Birds, **BirdsTmp;
+    char                **queryTime, ***matchTime, *temp, **Birds, **BirdsTmp, *CmdLine;
     char                fname[128], tStr[128], Bird[128], NewStr[512];
     int                 nBirds, nBirdsTmp, iBird, setBirds;
     long int            Id;
@@ -369,6 +370,15 @@ int main( int argc, char *argv[] ) {
     strcpy( arguments.Target, "Undefined");
     strcpy( arguments.Birds, "\0");
     arguments.verbose = 0;
+    /* Reconstruct the full command line as a string showing how we called this */
+    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+    n += argc;
+    LGM_ARRAY_1D( CmdLine, n+1, char );
+    for (i=0; i<argc; i++) {
+        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+        strcat( CmdLine, " ");      // pad with spaces
+    }
+    /* Now call argp_parse and make the arguments structure */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
     verbose = (arguments.verbose) ? arguments.verbose : 0;
     sep = (arguments.Distance) ? arguments.Distance : 1500.0;
@@ -494,25 +504,17 @@ int main( int argc, char *argv[] ) {
         for (t=0; t<nTimes[n]; t++) {
             IsoTimeStringToDateTime( IsoTimes[t], &d, c ); //time system is now LGM_TIME_SYS_UTC
             for (k=0; k<ndims; k++) {
+                //first check whether K or Lstar are negative
+                if ((MagEphem_K[t][k] < 0) || (MagEphem_Lstar[t][k] < 0)) {
+                    continue; //if they are, don't add them to the Kd-tree
+                    }
                 u[0][j] = fac[0]*Lgm_MJD( d.Year, d.Month, d.Day, d.Time, LGM_TIME_SYS_UTC, c ); //seconds -- 30 minutes is 1800 s
                 u[1][j] = fac[1]*MagEphem_K[t][k];
                 u[2][j] = fac[2]*MagEphem_Lstar[t][k];
                 pch = basename(InFile);
-                if (1==1) {
-                    getObjectName(pch, oname);
-                    strcpy( Info[j], oname);
-                }
-                else {
-                    dum = strstr(pch, "ns"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    //dum = strstr(pch, "LANL"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    if(dum != NULL){
-                        strncpy ( Info[j], dum , 8 );
-                        Info[j][9] = '\0';
-                        }
-                    else {
-                        strcpy( Info[j], pch);
-                        }
-                }
+                //now apply satellite name to point
+                getObjectName(pch, oname);
+                strcpy( Info[j], oname);
                 j++;
                 }
             //printf("t = %d, j = %d, k = %d, n = %d\n", t, j, k, n);
@@ -533,7 +535,7 @@ int main( int argc, char *argv[] ) {
      */
     strcpy(fname, arguments.args[1]);
     file = H5Fcreate( fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-    SetupHDF5( &file, nSats, tStr );
+    SetupHDF5( &file, nSats, tStr, CmdLine );
 
 //strcpy(&queryTime[0][0], "2012-10-11T00:52:30");
     int nskip=0;
