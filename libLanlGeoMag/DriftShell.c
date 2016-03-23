@@ -965,7 +965,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
         /*
          * No zero-bracket or minima were detected.
          */
-        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.%s\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
         return( FALSE );
 
     }
@@ -1000,7 +1000,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     Flag = Lgm_zBrent( a0, c0, Da0, Dc0, &bfi, tol, r, &D );
     FoundValidBm = ( Flag ) ? TRUE : FALSE;
 
-    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
+    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %ld)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
 
     return( FoundValidBm );
 

@@ -713,7 +713,7 @@ int Lgm_Octree_kNN( Lgm_Vector *q_in, Lgm_Octree *Octree, int K, int *Kgot, doub
     pQueue          *PQ, *p;
     Lgm_OctreeCell  *Root;
     Lgm_Vector      q;
-static count=0;
+static int count=0;
 
 
     Root = Octree->Root;

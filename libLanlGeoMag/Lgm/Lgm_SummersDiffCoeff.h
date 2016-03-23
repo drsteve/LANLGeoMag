@@ -89,6 +89,7 @@ typedef struct Lgm_SummersInfo {
 
 } Lgm_SummersInfo;
 
+
 int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
 //int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xm, double *dx, double *weightsOnWaveNormalAngleDistributions,int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
 int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xm, double *dx, double *weightsOnWaveNormalAngleDistributions,int WaveMode, int Species, double MaxWaveLat, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nw, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);

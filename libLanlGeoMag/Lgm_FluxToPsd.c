@@ -15,6 +15,12 @@
 #include "Lgm/Lgm_DynamicMemory.h"
 
 
+void praxis( int n, double *x, int *data, double (*funct)(double *, void *data), double *in, double *out);
+int WriteGIF( FILE *fp, unsigned char *pic, int ptype, int w, int h, unsigned char *rmap, unsigned char *gmap, unsigned char *bmap, int numcols, int colorstyle, char *comment);
+void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double **Image );
+
+
+
 
 
 typedef struct _FitData {
@@ -1884,7 +1890,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
     sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    WriteGIF(fp_gif, uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
 
     free( uImage );
@@ -1901,7 +1907,7 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
     }
     sprintf( Filename, "%s_Bar.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    WriteGIF(fp_gif, uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
     free( uImage );
 
@@ -1962,7 +1968,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
 
     sprintf( Filename, "%s.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    WriteGIF(fp_gif, uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
 
     free( uImage );
@@ -1979,7 +1985,7 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
     }
     sprintf( Filename, "%s_Bar.gif", FilenameBase);
     fp_gif = fopen(Filename, "w");
-    WriteGIF(fp_gif, (byte *)uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
+    WriteGIF(fp_gif, uImage, 0, W, H, Rainbow3_Red, Rainbow3_Grn, Rainbow3_Blu, 256, 0, "");
     fclose(fp_gif);
     free( uImage );
 

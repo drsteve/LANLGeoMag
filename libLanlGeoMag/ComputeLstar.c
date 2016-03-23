@@ -15,6 +15,7 @@
 
 void PredictMlat1( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta );
 void PredictMlat2( double *MirrorMLT, double *MirrorMlat, int k, double MLT, double *pred_mlat, double *pred_delta_mlat, double *delta, Lgm_LstarInfo *LstarInfo );
+int FitQuadAndFindZero( double *x, double *y, double *dy, int n, double *res );
 
 /*
  * Routine determines type of FL that is present in the LstarInfo->mInfo

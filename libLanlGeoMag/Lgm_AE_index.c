@@ -248,8 +248,8 @@ void Lgm_Read_AEfile(int year, int month, int day) {
   cntr = 0 ;
 
   do {
-    sscanf(buffer,"%s %d %d %d %d\n", &UTC, &AE_index[cntr], &AL_index[cntr], &AU_index[cntr], 
-	   &AO_index[cntr]) ;
+
+    sscanf( buffer, "%s %d %d %d %d\n", UTC, &AE_index[cntr], &AL_index[cntr], &AU_index[cntr], &AO_index[cntr] );
 
     sscanf(UTC,"%d-%d-%dT%d:%d:%d", &AEdatetime[cntr].Year, &AEdatetime[cntr].Month, 
 	   &AEdatetime[cntr].Day, &AEdatetime[cntr].Hour, &AEdatetime[cntr].Minute, 
@@ -265,8 +265,7 @@ void Lgm_Read_AEfile(int year, int month, int day) {
 
     cntr += 1 ;
 
-  }
-  while (fgets(buffer,1024,fp) != NULL) ;
+  } while (fgets(buffer,1024,fp) != NULL) ;
 
   index_length = cntr ;
 
