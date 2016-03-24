@@ -177,7 +177,7 @@ DX_ENV_APPEND(PDF_LINKS, $DX_ENABLE_PDF_HYPERLINKS)
 
 
 # Check for check
-AM_PATH_CHECK(,[have_check="yes"],
+AM_PATH_CHECK(0.9.4,[have_check="yes"],
   AC_MSG_WARN([Check not found; cannot run unit tests!])
   [have_check="no"])
 AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
