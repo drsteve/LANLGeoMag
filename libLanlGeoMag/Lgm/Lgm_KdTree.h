@@ -126,7 +126,7 @@ Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigne
 
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
 double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
-inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 );
+int                 Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 );
 double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_pQueue *PQ, double MaxDist2 );
 void                Lgm_KdTree_InsertPoint( Lgm_KdTreeNode *Node, int j, double *q, Lgm_pQueue *PQ );
 //Lgm_KdTree_pQueue  *Lgm_KdTree_PopObj( Lgm_KdTree_pQueue **PQ );

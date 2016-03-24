@@ -1,8 +1,13 @@
 #ifndef LGM_CTRANS_H
 #define LGM_CTRANS_H
 
+#ifndef STRINGIFY
 #define STRINGIFY(x) #x
+#endif
+
+#ifndef EXPAND
 #define EXPAND(x) STRINGIFY(x)
+#endif
 
 
 #include <stdio.h>
@@ -16,7 +21,11 @@
 #define DegPerRad       57.295779513082320876798154814105
 #define RadPerDeg        0.017453292519943295769236907568
 #define RadPerArcSec     4.848136811095359935899141023579e-6    /* radians per arc-second */
+
+#ifndef M_SQRTPI
 #define M_SQRTPI         1.772453850905516027298167483341       /*  sqrt(PI)      */
+#endif
+
 #define M_SQRTPI_2       0.886226925452758013649083741671       /*  sqrt(PI)/2.0  */
 #define M_1_SQRTPI       0.564189583547756286948079451561       /*  1/sqrt(PI)    */
 #ifndef M_2PI
@@ -25,8 +34,13 @@
 #define M_OneThird       0.333333333333333333333333333333       /* 1.0/3.0        */
 #define M_SQRT_3        1.7320508075688772935274463415058       /* sqrt(3)        */
 
+#ifndef FALSE
 #define FALSE           0
+#endif
+
+#ifndef TRUE
 #define TRUE            1
+#endif
 
 
 

@@ -16,7 +16,19 @@ double electronColdPlasmaGroupVelocity(double aStar, double tanTheta2, double x,
 double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
 double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p);
 //old calling style double localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(int tensorFlag, int s, double KE, double aStar, double wce, double xm, double xmin, double xmax, double dx, double wm, double dw, double wlc, double wuc, double Bw, double alpha, double tanTheta, int nCyclotronLow, int nCyclotronHigh, double *Nw, int nNw, int Directions);
-int Lgm_SimpleRiemannSum(double (*f)(double, _qpInfo *), _qpInfo *qpInfo, double xleft, double xright, double *result, int VerbosityLevel );
+
+int Lgm_SimpleRiemannSum( double (*f)( double, _qpInfo * ), _qpInfo *qpInfo, double xleft, double xright, double *result, int VerbosityLevel );
+int computeInequalityParameters(double x, double aStar, double vpar, struct inequalityParameters *params);
+int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(  double wn, double wlc, double wuc, struct inequalityParameters *inequalityParamsLC, 
+                                                                struct inequalityParameters *inequalityParamsUC, 
+                                                                int mode, int *nIntervals, double *thetaStart, double *thetaEnd);
+
+int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd);
+
+int mergeOneIntervalWithOneInterval(   double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd );
+int mergeTwoIntervalsWithOneInterval(  double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd );
+int mergeOneIntervalWithTwoIntervals(  double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd );
+int mergeTwoIntervalsWithTwoIntervals( double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd );
 
 /**
  *  \brief
@@ -2819,8 +2831,9 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 	vpar = cos(alpha)*sqrt(1-(1.0/(gamma*gamma)));
 	j = computeInequalityParameters(wxl, p2.aStar, vpar, &inequalityParamsLC);
 	j = computeInequalityParameters(wxh, p2.aStar, vpar, &inequalityParamsUC);
-	for (i=-5; i<=5; i++)
-		{
+
+	for (i=-5; i<=5; i++) {
+
  		p2.nCyclotronLow=(int) i; p2.nCyclotronHigh=(int) i; 
 //printf("iCyclotron number=%d\n", i);
 /*		
@@ -2832,38 +2845,43 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
  *		vpar	the parallel velocity divided by the speed of light
  */
 		double wn;
+
 		wn = (p2.s)*i/gamma;
 		j = computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(wn, wxl, wxh, &inequalityParamsLC, &inequalityParamsUC, (int) 1, &nIntervals, thetaStart, thetaEnd);
 		tempDaa=0.0;
-		if (nIntervals !=0) 
-			{
-			if (nIntervals == 1) 
-				{
-				tempxmin = tan(thetaStart[0]);
-				if (tempxmin < xmin) {tempxmin=xmin;}
-				tempxmax = tan(thetaEnd[0]);
-				if (tempxmax > xmax) {tempxmax=xmax;}
-				if (tempxmax>tempxmin)
-					{
+
+		if (nIntervals !=0) {
+
+			if (nIntervals == 1) {
+
+				tempxmin = tan(thetaStart[0]); if (tempxmin < xmin) { tempxmin = xmin; }
+				tempxmax = tan(thetaEnd[0]); if (tempxmax > xmax) { tempxmax = xmax; }
+
+				if (tempxmax>tempxmin) {
 					j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, &tempDaa, (int) 0);
-					}
-				}
-			else
-				{
-				j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) xmin,(double) xmax, &tempDaa, (int) 0);
-				}
+			    }
+
+	        } else {
+
+				j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta, (_qpInfo *) &p2,(double) xmin,(double) xmax, &tempDaa, (int) 0);
+
+            }
+
 			totalDaa += tempDaa;
-			}
-		}
+
+        }
+    }
 	return(totalDaa);
 }
 
-double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta(double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p2)
-{
+// these long names are pretty excessive -- it makes the code structure less readable
+double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta( double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p2 ) {
+
 	double 	unweightedDaa;
 		
-	unweightedDaa = (double) localDiffusionCoefficientAtSpecificThetaGlauertAndHorne(tanTheta, p2);
-	return(unweightedDaa*tanTheta);
+	unweightedDaa = (double) localDiffusionCoefficientAtSpecificThetaGlauertAndHorne( tanTheta, p2 );
+	return( unweightedDaa*tanTheta );
+
 }
 
 /*
@@ -3587,8 +3605,7 @@ double besselFunctionNormalizer(int s, double p, double alpha, int nCyclotronNum
  *	result in 0, 1 or as many as 4 intervals being returned.
  *
  */
-int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, struct inequalityParameters *inequalityParamsLC, struct inequalityParameters *inequalityParamsUC, int mode, int *nIntervals, double *thetaStart, double *thetaEnd) 
-{
+int computeWaveNormalAngleIntervalsWhereResonantRootsMayExist(double wn, double wlc, double wuc, struct inequalityParameters *inequalityParamsLC, struct inequalityParameters *inequalityParamsUC, int mode, int *nIntervals, double *thetaStart, double *thetaEnd) {
 	double	x, dw, thisThetaStart[2], thisThetaEnd[2];
 	int	thisN, i;
 
@@ -3675,8 +3692,7 @@ for (i=0; i<*nIntervals; i++) {printf("		combined interval %d is [%g,%g]\n", i, 
 	return(0);
 }
 
-int mergeOneIntervalWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
-{
+int mergeOneIntervalWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd) {
 	if (thisThetaStart[0] < thetaStart[0])
 		{
 		if (thisThetaEnd[0] < thetaStart[0]) {return(0);}	// the two intervals do not overlap; return 0 intervals
@@ -3705,8 +3721,7 @@ int mergeOneIntervalWithOneInterval(double *thisThetaStart, double *thisThetaEnd
  *	Return two intervals that are the intersection of the contributing intervals.
  */
 
-int mergeTwoIntervalsWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
-{
+int mergeTwoIntervalsWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd) {
 	if (thisThetaEnd[0] < thetaEnd[0]) 			//left-hand interval of one collection is subsumed by the other
 		{
 		if (thisThetaStart[1] < thetaEnd[0])		//right-hand interval of this same collection intersects left-hand interval of the other; have 3 intervals
@@ -3755,8 +3770,7 @@ int mergeTwoIntervalsWithTwoIntervals(double *thisThetaStart, double *thisThetaE
  *	Merge an interval of the sort (a,b) with two intervals of the sort [0,c)+(d,pi/2]
  */
 
-int mergeOneIntervalWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
-{
+int mergeOneIntervalWithTwoIntervals(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd) {
 	if (thisThetaStart[0] < thetaEnd[0])
 		{
 		if (thisThetaEnd[0] < thetaEnd[0]) 		// interval (a,b) subsumed by left-hand interval described by theta*, return (a,b) interval only
@@ -3802,8 +3816,7 @@ int mergeOneIntervalWithTwoIntervals(double *thisThetaStart, double *thisThetaEn
 	return(0);
 }
 
-int mergeTwoIntervalsWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd)
-{
+int mergeTwoIntervalsWithOneInterval(double *thisThetaStart, double *thisThetaEnd, double *thetaStart, double *thetaEnd) {
 	double	newThetaStart[3], newThetaEnd[3];
 	int	i, j;
 
@@ -3824,8 +3837,7 @@ int mergeTwoIntervalsWithOneInterval(double *thisThetaStart, double *thisThetaEn
  * 	Following routine computes the parameters that are re-usable for all harmonic numbers in order to minimize the cost of doing the inequality test.
  */
 
-int computeInequalityParameters(double x, double aStar, double vpar, struct inequalityParameters *params)
-{
+int computeInequalityParameters(double x, double aStar, double vpar, struct inequalityParameters *params) {
 	double	R, L, S, P;
 
 	R = 1.0-(x/(aStar*x*x*(x-1)));
@@ -3841,8 +3853,7 @@ int computeInequalityParameters(double x, double aStar, double vpar, struct ineq
 	return(0);
 }
 
-int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd)
-{
+int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, int inequalitySign, int *nIntervals, double *thetaStart, double *thetaEnd) {
 	double	dw2,dw4,D,E,F,arg,root1,root2;
 
 	dw2 = dw*dw;
@@ -3945,8 +3956,8 @@ int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, in
  *  The function is parameterized by args.  The result of the integration is put into result.
  */
 
-int Lgm_SimpleRiemannSum(double (*f)(double, _qpInfo *), _qpInfo *args, double xleft, double xright, double *result, int VerbosityLevel )
-{
+int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double xleft, double xright, double *result, int VerbosityLevel ) {
+
 	int	nIntervals, nSubIntervals, i;
 	double	x,sum,dx, epsabs=0.0, epsrel=0.1,abserr;
 	size_t 	neval;
