@@ -19,7 +19,8 @@ import numpy as np
 
 from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
-    Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords
+    Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords, Lgm_Slerp, \
+    Lgm_InitSlerp
 
 __author__ = 'Brian Larsen (Python), Mike Henderson (C) - LANL'
 
@@ -425,6 +426,42 @@ class Lgm_Vector(Lgm_Vector):
         """
         Lgm_ForceMagnitude(pointer(self), val)
 
+    def slerp(self, other, frac):
+        """
+        In computer graphics, Slerp is shorthand for spherical linear interpolation, introduced by Ken Shoemake in the
+        context of quaternion interpolation for the purpose of animating 3D rotation. It refers to constant-speed
+        motion along a unit-radius great circle arc, given the ends and an interpolation parameter between 0 and 1.
+
+        Parameters
+        ----------
+        other : another Lgm_Vector
+        frac  : float
+            Fractional distance between the two vectors to interpolate
+            
+        Returns
+        -------
+        out : Lgm_Vector
+            New vector between self and other
+
+        Examples
+        --------
+        >>> from lgmpy import Lgm_Vector
+        >>> v1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> v2 = Lgm_Vector.Lgm_Vector(3,7,1)
+        >>> print(v1.slerp(v2, 0)
+        []
+        >>> print(v1.slerp(v2, 1)
+        []
+        >>> print(v1.slerp(v2, 0.3)
+        []
+        """
+        frac = float(frac)
+        out = Lgm_Vector(0,0,0)
+        si = Lgm_SlerpInfo()
+        Lgm_InitSlerp(pointer(self), pointer(other), pointer(si))
+        Lgm_Slerp( pointer(self), pointer(other), pointer(out), c_double(frac), pointer(si))
+        return out
+        
 def SphToCart(lat, lon, rad):
     """
     takes an input Lat, Lon, Rad and returns x, y, z
