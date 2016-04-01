@@ -1,7 +1,6 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 
-
 /*
  * This version traces FLs from the Earth at the given MLT/mlat instead of trying to find the Bm radially out first.
  */
@@ -15,6 +14,8 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
 
 
 
+
+
     /*
      *  First do a trace to identify the FL type and some of its critical points.
      */
@@ -22,17 +23,21 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
     Phi = 15.0*(MLT-12.0)*RadPerDeg;
     cl = cos( mlat * RadPerDeg ); sl = sin( mlat * RadPerDeg );
     w.x = (*r)*cl*cos(Phi); w.y = (*r)*cl*sin(Phi); w.z = (*r)*sl;
+
     Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
-printf("w = %g %g %g\n", w.x, w.y, w.z);
     TraceFlag = Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo );
+
     LstarInfo->mInfo->Bfield( &v3, &Bvec, LstarInfo->mInfo );
     Bmin = Lgm_Magnitude( &Bvec );
-printf("Got here\n");
+    //printf("Pmin = %g %g %g\n", v3.x, v3.y, v3.z);
 
     if ( TraceFlag != LGM_CLOSED ) {
 
-        if (LstarInfo->VerbosityLevel > 1){ printf( "\t\t\t> Field Line not closed\n" ); }
-        return( 9e99 );
+        I = 9e99;
+        if (LstarInfo->VerbosityLevel > 1) {
+            printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Field Line not closed%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+        }
+        return( I );
 
     } else if ( Bmin <= Bm ) {
 
@@ -43,12 +48,24 @@ printf("Got here\n");
         SS1 = 0.0;
         if ( Lgm_TraceToMirrorPoint( &P, &Pmirror1, &SS1, LstarInfo->mInfo->Bm,  1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 )  {
 
+            LstarInfo->mInfo->Pm_North = Pmirror1;
+            //printf("Pmirror1 = %g %g %g   Bm = %g    LstarInfo->mInfo->Bm = %g\n", Pmirror1.x, Pmirror1.y, Pmirror1.z, Bm, LstarInfo->mInfo->Bm);
+
+
+            P = v3;
             SS2 = 0.0;
             if ( Lgm_TraceToMirrorPoint( &P, &Pmirror2, &SS2, LstarInfo->mInfo->Bm,  -1.0, LstarInfo->mInfo->Lgm_TraceToMirrorPoint_Tol, LstarInfo->mInfo ) > 0 )  {
 
+                LstarInfo->mInfo->Pm_South = Pmirror2;
+                //printf("Pmirror2 = %g %g %g\n", Pmirror2.x, Pmirror2.y, Pmirror2.z);
+
             } else {
-                if (LstarInfo->VerbosityLevel > 3){ printf( "\t\t\t> Unable to find southern mirror point\n" ); }
                 return( 9e99 );
+                I = 9e99;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find southern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                }
+            return( I );
             }
 
             // total distance between mirror point.
@@ -56,13 +73,19 @@ printf("Got here\n");
             
             // If its really small, just return 0.0 for I
             if ( fabs(SS) < 1e-7) {
-                if (LstarInfo->VerbosityLevel > 3){ printf( "\t\t\t> Distance between mirror points is < 1e-7Re, Assuming I=0\n" ); }
-                return( 0.0 );
+                I = 0.0;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Distance between mirror points is < 1e-7Re, Assuming I=0%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                }
+                return( I );
             }
 
         } else {
-            if (LstarInfo->VerbosityLevel > 3){ printf( "\t\t\t> Unable to find northern mirror point\n" ); }
-            return( 9e99 );
+            I = 9e99;
+            if (LstarInfo->VerbosityLevel > 1) {
+                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find northern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+            }
+            return( I );
         }
 
         /*
@@ -113,6 +136,9 @@ printf("Got here\n");
 
         } else {
             I = 9e99;
+             if (LstarInfo->VerbosityLevel > 1) {
+                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   Couldnt initialize spline%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+             }
         }
 
 

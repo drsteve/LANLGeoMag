@@ -306,7 +306,7 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
          */
         if ( fInfo->Lgm_Sb_integrand_FirstCall  == TRUE ) {
             fInfo->Lgm_Sb_integrand_FirstCall = FALSE;
-	        fInfo->Lgm_Sb_integrand_u_scale.x =  10.0;  fInfo->Lgm_Sb_integrand_u_scale.y = 1.0; fInfo->Lgm_Sb_integrand_u_scale.z = 10.0;
+	        fInfo->Lgm_Sb_integrand_u_scale.x = fInfo->Lgm_Sb_integrand_u_scale.y = fInfo->Lgm_Sb_integrand_u_scale.z = 1.0;
             fInfo->Lgm_Sb_integrand_P = fInfo->Pm_South;
 	        dS = s;
 	        fInfo->Lgm_Sb_integrand_S = 0.0;
@@ -330,7 +330,7 @@ double Sb_integrand( double s, _qpInfo *qpInfo ) {
         if ( fInfo->Lgm_Sb_integrand_FirstCall  == TRUE ) {
     	    fInfo->Lgm_Sb_integrand_FirstCall = FALSE;
         }
-	    fInfo->Lgm_Sb_integrand_u_scale.x =  10.0;  fInfo->Lgm_Sb_integrand_u_scale.y = 1.0; fInfo->Lgm_Sb_integrand_u_scale.z = 10.0;
+	    fInfo->Lgm_Sb_integrand_u_scale.x = fInfo->Lgm_Sb_integrand_u_scale.y = fInfo->Lgm_Sb_integrand_u_scale.z = 1.0;
     	fInfo->Lgm_Sb_integrand_P = fInfo->Pm_South;
     	H = s; sgn = 1.0;
 

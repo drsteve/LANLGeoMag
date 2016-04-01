@@ -45,7 +45,7 @@ void Lgm_pQueue_Insert( Lgm_pQueue_Node *X, Lgm_pQueue *p ) {
         n = 2*p->nHeapArray;
         p->HeapArray  = (Lgm_pQueue_Node *)realloc( p->HeapArray, n*sizeof(Lgm_pQueue_Node) );
         if ( !p->HeapArray ) {
-            printf("Lgm_pQueue_Insert: Memory allocation failure. Trying to realloc %d elements\n");
+            printf("Lgm_pQueue_Insert: Memory allocation failure. Trying to realloc %d elements\n", n);
             exit(1);
         } else {
             p->nHeapArray = n;

@@ -9,9 +9,9 @@
  *             Animation, Technical Report DIKU-TR-98/5, Department of Computer
  *             Science, University of Copenhagen, Universitetsparken 1, DK-2100
  *             Kbh 0, Denmark (July 17, 1998).
-
+ *
  *          2. Eberly, D., Quaternion Algebra and Calculus, Geometric Tools,
- *             LLC,  http://www.geometrictools.com/ (August 18, 2010).
+ *             LLC,  http://www.geometrictools.com/Documentation/Quaternions.pdf (August 18, 2010).
  *
  *
  *  \author M.G. Henderson
@@ -104,9 +104,9 @@ void Lgm_MatrixToQuat( double A[3][3], double *Q ) {
         Q[3] = 0.5*SqrtT;
 
         f = 0.25/Q[3];
-        Q[0] = (A[2][1]-A[1][2]) * f;
-        Q[1] = (A[0][2]-A[2][0]) * f;
-        Q[2] = (A[1][0]-A[0][1]) * f;
+        Q[0] = (A[1][2]-A[2][1]) * f;
+        Q[1] = (A[2][0]-A[0][2]) * f;
+        Q[2] = (A[0][1]-A[1][0]) * f;
 
     } else {
 
@@ -114,23 +114,23 @@ void Lgm_MatrixToQuat( double A[3][3], double *Q ) {
            f = sqrt( 1.0 + A[0][0] - A[1][1] - A[2][2] ) * 2.0; // f=4*qx 
            finv = 1.0/f;
            Q[0] = 0.25 * f;
-           Q[1] = (A[0][1] + A[1][0]) * finv; 
-           Q[2] = (A[0][2] + A[2][0]) * finv; 
-           Q[3] = (A[1][2] - A[2][1]) * finv;
+           Q[1] = (A[1][0] + A[0][1]) * finv; 
+           Q[2] = (A[2][0] + A[0][2]) * finv; 
+           Q[3] = (A[2][1] - A[1][2]) * finv;
         } else if (A[1][1] > A[2][2]) { 
            f = sqrt( 1.0 + A[1][1] - A[0][0] - A[2][2] ) * 2.0; // f=4*qy
            finv = 1.0/f;
-           Q[0] = (A[0][1] + A[1][0]) * finv; 
+           Q[0] = (A[1][0] + A[0][1]) * finv; 
            Q[1] = 0.25 * f;
-           Q[2] = (A[1][2] + A[2][1]) * finv; 
-           Q[3] = (A[0][2] - A[2][0]) * finv;
+           Q[2] = (A[2][1] + A[1][2]) * finv; 
+           Q[3] = (A[2][0] - A[0][2]) * finv;
         } else { 
            f = sqrt( 1.0 + A[2][2] - A[0][0] - A[1][1] ) * 2.0; // f=4*qz
            finv = 1.0/f;
-           Q[0] = (A[0][2] + A[2][0]) * finv; 
-           Q[1] = (A[1][2] + A[2][1]) * finv; 
+           Q[0] = (A[2][0] + A[0][2]) * finv; 
+           Q[1] = (A[2][1] + A[1][2]) * finv; 
            Q[2] = 0.25 * f;
-           Q[3] = (A[0][1] - A[1][0]) * finv;
+           Q[3] = (A[1][0] - A[0][1]) * finv;
         }
 
     }
@@ -140,15 +140,15 @@ void Lgm_MatrixToQuat( double A[3][3], double *Q ) {
 
 void Lgm_Quat_To_Matrix( double Q[4], double A[3][3] ) {
     A[0][0] = 1.0 - 2.0 * (Q[1] * Q[1] + Q[2] * Q[2]);
-    A[0][1] = 2.0 * (Q[0] * Q[1] - Q[2] * Q[3]);
-    A[0][2] = 2.0 * (Q[2] * Q[0] + Q[1] * Q[3]);
+    A[1][0] = 2.0 * (Q[0] * Q[1] - Q[2] * Q[3]);
+    A[2][0] = 2.0 * (Q[2] * Q[0] + Q[1] * Q[3]);
 
-    A[1][0] = 2.0 * (Q[0] * Q[1] + Q[2] * Q[3]);
+    A[0][1] = 2.0 * (Q[0] * Q[1] + Q[2] * Q[3]);
     A[1][1]= 1.0 - 2.0 * (Q[2] * Q[2] + Q[0] * Q[0]);
-    A[1][2] = 2.0 * (Q[1] * Q[2] - Q[0] * Q[3]);
+    A[2][1] = 2.0 * (Q[1] * Q[2] - Q[0] * Q[3]);
 
-    A[2][0] = 2.0 * (Q[2] * Q[0] - Q[1] * Q[3]);
-    A[2][1] = 2.0 * (Q[1] * Q[2] + Q[0] * Q[3]);
+    A[0][2] = 2.0 * (Q[2] * Q[0] - Q[1] * Q[3]);
+    A[1][2] = 2.0 * (Q[1] * Q[2] + Q[0] * Q[3]);
     A[2][2] = 1.0 - 2.0 * (Q[1] * Q[1] + Q[0] * Q[0]);
 }
 
@@ -539,7 +539,7 @@ int Lgm_QuatSquadInterp( double *T,   double *Q[4], long int N,   double *t, dou
 
 
     for (i=0; i<N; i++){
-        printf("\tT[%d] = %g Q[%d] = ", i, T[i], i ); Lgm_PrintQuat( Q[i] );
+        printf("\tT[%ld] = %g Q[%ld] = ", i, T[i], i ); Lgm_PrintQuat( Q[i] );
     }
 
 
@@ -550,12 +550,12 @@ int Lgm_QuatSquadInterp( double *T,   double *Q[4], long int N,   double *t, dou
      */
     if ( N < 2 ) {
 
-        printf( "Lgm_QuatSquadInterp: Not enough points to interpolate: N = %d\n", N );
+        printf( "Lgm_QuatSquadInterp: Not enough points to interpolate: N = %ld\n", N );
         return( -1 );
 
     } else if ( N==2 ) {
 
-        printf( "Lgm_QuatSquadInterp: Not enough points to perform a SQUAD interpolation: N = %d. Do a SLERP instead\n", N );
+        printf( "Lgm_QuatSquadInterp: Not enough points to perform a SQUAD interpolation: N = %ld. Do a SLERP instead\n", N );
         // PUT code HERE to PERFORM SLERP
         return( 0 );
 
@@ -596,18 +596,18 @@ int Lgm_QuatSquadInterp( double *T,   double *Q[4], long int N,   double *t, dou
             ip1 = i+1;
             h = (t[j] - T[i])/(T[ip1] - T[i]); // fraction of the way through the interval -- is there abtter way to do this than linear?
 if ((h <0.0)||(h>1.0)) {
-printf("h not in range [0-1], h = %g   j=%d i=%d t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
+printf("h not in range [0-1], h = %g   j=%ld i=%ld t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
 //exit(0);
 }
             Lgm_QuatSlerp( Q[0], Q[1], h, q[j] );
 
         } else if ( i == N-2 ) {
 
-            printf( "Lgm_QuatSquadInterp: Warning. i == %ld, can only do SLERP on [%ld,%ld] interval.\n", N-2, N-1 );
+            printf( "Lgm_QuatSquadInterp: Warning. i == %ld, can only do SLERP on [%ld,%ld] interval.\n", i, N-2, N-1 );
             ip1 = i+1;
             h = (t[j] - T[i])/(T[ip1] - T[i]); // fraction of the way through the interval -- is there abtter way to do this than linear?
 if ((h <0.0)||(h>1.0)) {
-printf("h not in range [0-1], h = %g   j=%d i=%d t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
+printf("h not in range [0-1], h = %g   j=%ld i=%ld t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
 //exit(0);
 }
             Lgm_QuatSlerp( Q[N-2], Q[N-1], h, q[j] );
@@ -632,7 +632,7 @@ printf("h not in range [0-1], h = %g   j=%d i=%d t[j] = %g T[i] = %g T[i+1] = %g
              */
             h = (t[j] - T[i])/(T[ip1] - T[i]); // fraction of the way through the interval -- is there abtter way to do this than linear?
 if ((h <0.0)||(h>1.0)) {
-printf("h not in range [0-1], h = %g   j=%d i=%d t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
+printf("h not in range [0-1], h = %g   j=%ld i=%ld t[j] = %g T[i] = %g T[i+1] = %g\n", h, j, i, t[j], T[i], T[i+1]);
 //exit(0);
 }
             Lgm_QuatSquad( Q[i], Q[ip1], si, sip1, h, q[j] );

@@ -1,7 +1,36 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 
+/*
+ *  This is a wrapper function to switch between ways of computing I when doing the L* calcs.
+ *
+ *  1. The original method (ROEDERER's) seacrhes for Bm along a ray launched from the gievn MLT/MLAT.
+ *
+ *  2. The new method seacrhes for Bm along a FL launched traced from the surface at the given MLT/MLAT.
+ *
+ */
 double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
+
+    if ( LstarInfo->ISearchMethod == 1 ) {
+
+        return( ComputeI_FromMltMlat1( Bm, MLT, mlat, r, I0, LstarInfo ) );
+
+    } else if ( LstarInfo->ISearchMethod == 2 ) {
+
+        return( ComputeI_FromMltMlat2( Bm, MLT, mlat, r, I0, LstarInfo ) );
+
+    } else {
+
+        printf("Unkown valid for ISearchMethod (must be 1 or 2)\n");
+        exit(0);
+
+    }
+
+}
+
+
+
+double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
 
     int         reset=1, reset2;
 
@@ -42,6 +71,13 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
             printf("\t%sResults of FindBmRadius: u_sm  = %g %g %g%s\n", LstarInfo->PreStr, w.x, w.y, w.z, LstarInfo->PostStr);
             printf("\t%sResults of FindBmRadius: u_gsm = %g %g %g%s\n", LstarInfo->PreStr, u.x, u.y, u.z, LstarInfo->PostStr);
         }
+
+        /*
+         * Check to see if FL is opne/closed/etc.
+         */
+        Lgm_Vector Foot_n, Foot_s;
+        if ( !Lgm_TraceToSphericalEarth( &u, &Foot_n, 120.0, -1.0, 0.01, LstarInfo->mInfo ) ) return( -1 );
+        if ( !Lgm_TraceToSphericalEarth( &u, &Foot_s, 120.0,  1.0, 0.01, LstarInfo->mInfo ) ) return( -1 );
 
 
         Pmirror1 = u;
@@ -214,6 +250,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
                 //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
                 if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
+//printf("LstarInfo->mInfo->Pm_South = %g %g %g\n", LstarInfo->mInfo->Pm_South.x, LstarInfo->mInfo->Pm_South.y, LstarInfo->mInfo->Pm_South.z );
 //printf("P0 = %g %g %g\n", LstarInfo->mInfo->Px[0], LstarInfo->mInfo->Py[0], LstarInfo->mInfo->Pz[0]);
 //printf("Plast = %g %g %g\n", LstarInfo->mInfo->Px[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Py[LstarInfo->mInfo->nPnts-1], LstarInfo->mInfo->Pz[LstarInfo->mInfo->nPnts-1]);
 
@@ -270,7 +307,9 @@ if (0==1){
                     /*
                      *  Do I integral with interped integrand.
                      */
+//printf("I = %g\n", I);
                     I = Iinv_interped( LstarInfo->mInfo );
+//printf("I = %g     Sm_South, Sm_North = %g %g\n", I, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North);
 //                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     if (LstarInfo->VerbosityLevel > 1) {
                         printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I, I0, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );

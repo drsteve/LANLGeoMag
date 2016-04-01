@@ -380,7 +380,7 @@ Info->Hmax = 0.10;
         Px[3] = Info->Pmin.x;
         Py[3] = Info->Pmin.y;
         Pz[3] = Info->Pmin.z;
-        u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0; reset = TRUE;
+        u_scale.x =  u_scale.y = u_scale.z = 1.0; reset = TRUE;
         for (i=-3; i<=3; i++){
             if (i != 0) {
                 s = i*h;

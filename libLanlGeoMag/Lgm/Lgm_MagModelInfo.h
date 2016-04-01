@@ -126,6 +126,17 @@
 #define LGM_MAGSTEP_ODE_RK5     1
 #endif
 
+typedef struct CircularBuffer {
+
+    int oldest_i;
+    int newest_i;
+    int n;
+    int N;
+    int nEntries;
+    Lgm_Vec_RBF_Info **Buf1; // array of pointers to rbf's
+    Lgm_Vec_RBF_Info **Buf2; // array of pointers to rbf's
+
+} CircularBuffer;
 
 typedef struct Lgm_MagModelInfo {
 
@@ -429,8 +440,17 @@ typedef struct Lgm_MagModelInfo {
      *  hash table, etc.  used in Lgm_B_FromScatteredData*()
      */
     Lgm_DFI_RBF_Info   *rbf_ht;             // hash table (uthash)
+
     Lgm_Vec_RBF_Info   *vec_rbf_ht;         // hash table (uthash)
+    double             vec_rbf_ht_size;     // hash table size in MB
+    double             vec_rbf_ht_maxsize;  // hash table max size in MB
+    CircularBuffer     RBF_CB;
+
     Lgm_Vec_RBF_Info   *vec_rbf_e_ht;       // hash table (uthash)
+    double             vec_rbf_e_ht_size;   // hash table size in MB
+    double             vec_rbf_e_ht_maxsize;// hash table max size in MB
+    CircularBuffer     RBF_E_CB;
+
     int                 rbf_ht_alloced;     // Flag to indicate whether or not rbf_ht is allocated with data.
     long int            RBF_nHashFinds;     // Number of HASH_FIND()'s performed.
     long int            RBF_nHashAdds;      // Number of HASH_ADD_KEYPTR()'s performed.
@@ -446,6 +466,7 @@ typedef struct Lgm_MagModelInfo {
     Lgm_Vector          RBF_Curl_B;         // Curl_B
     Lgm_Vector          RBF_Curl_E;         // Curl_B
     int                 RBF_Type;           // Type of RBF to use
+    int                 RBF_DoPoly;         // Flag to simultaneously fit a linear polynomail ( i.e. Sum_ijk{ a_ijl x^i y^j z^k }) as well.
     double              RBF_Eps;            // Eps value to use
 
 
@@ -499,6 +520,8 @@ typedef struct Lgm_MagModelInfo {
     //long int       FP_nHashFinds;       // Number of HASH_FIND()'s performed.
     //long int       FP_nHashAdds;        // Number of HASH_ADD_KEYPTR()'s performed.
 
+
+    void        *Data;
 
 
 } Lgm_MagModelInfo;
@@ -699,6 +722,7 @@ void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  *
  *  Function Prototypes for TS07 model
  */
+void Lgm_DeAllocate_TS07( LgmTsyg2007_Info *tInfo );
 int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
@@ -709,10 +733,11 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  *  Function Prototypes for T01S model
  */
 double mypow( double, double );
-int     Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
-int     Lgm_B_T02( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T02( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
+void   Lgm_Init_T01S( LgmTsyg2001_Info *t );
+int    Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void   Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
+int    Lgm_B_T02( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void   Tsyg_T02( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
 
 /*
  *  Computing B from scattered data -- (e.g. an irregular mesh)
@@ -823,6 +848,7 @@ void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo);
  * coordinate conversions to/from corrected Geomag.
  */
 int  Lgm_GSM_TO_CBM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
+int  Lgm_CBM_TO_GSM( double CgmLat, double CgmLon, double CgmRad, Lgm_Vector *u, Lgm_MagModelInfo *m );
 int  Lgm_GEOD_TO_CGM( double geoLat, double geoLon, double geoAlt, double *CgmLat, double *CgmLon, double *CgmRad, Lgm_MagModelInfo *m );
 int  Lgm_CGM_TO_GEOD( double CgmLat, double CgmLon, double CgmRadi, double *geoLat, double *geoLon, double *geoAlt, Lgm_MagModelInfo *m );
 

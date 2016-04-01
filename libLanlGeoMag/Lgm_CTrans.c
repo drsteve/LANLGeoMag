@@ -40,8 +40,8 @@
  *
  *             Or,
  *                              [ x ]      [ Xsc-hat_xgsm  Xsc-hat_ygsm   Xsc-hat_zgsm ] [ x ]
- *                              | y |   =  | Ysc-hat_gsm   Ysc-hat_ygsm   Ysc-hat_zgsm | | y |
- *                              [ z ]sc    [ Zsc-hat_gsm   Zsc-hat_ygsm   Zsc-hat_zgsm ] [ z ]gsm
+ *                              | y |   =  | Ysc-hat_xgsm  Ysc-hat_ygsm   Ysc-hat_zgsm | | y |
+ *                              [ z ]sc    [ Zsc-hat_xgsm  Zsc-hat_ygsm   Zsc-hat_zgsm ] [ z ]gsm
  *
  *                                u_sc = A_gsm_to_sc  * u_gsm
  *
@@ -1064,6 +1064,7 @@ void Lgm_ComputeSun( Lgm_CTrans *c  ) {
     switch (c->ephModel) {
         case LGM_EPH_DE:
             Lgm_JPL_getSunVector( c->TT.JD, c->jpl, &SunICRF);
+            c->earth_sun_dist = Lgm_Magnitude( &SunICRF )/Re;
             Lgm_NormalizeVector(&SunICRF);
             c->SunJ2000 = SunICRF;
             Lgm_MatTimesVec(c->Agei_to_mod, &SunICRF, &Sunmod);
@@ -1071,7 +1072,6 @@ void Lgm_ComputeSun( Lgm_CTrans *c  ) {
             Lgm_CartToSphCoords( &Sunmod, &Dec, &RA, &r);
             c->RA_sun = Lgm_angle360( RA );
             c->DEC_sun = Dec;
-            c->earth_sun_dist = Lgm_Magnitude( &SunICRF )/Re;
             // Direction of the Sun in MOD coords
             Lgm_NormalizeVector(&Sunmod);
             c->Sun = Sunmod;

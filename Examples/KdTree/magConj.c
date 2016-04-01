@@ -8,14 +8,29 @@
 #include <Lgm_DynamicMemory.h>
 #include <Lgm_CTrans.h>
 #include <Lgm_KdTree.h>
+#include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
+
+void StringSplit( char *Str, char *StrArray[], int len, int *n );
 
 
 const  char *ProgramName = "magConj";
 const  char *argp_program_version     = "magConj_0.1";
 const  char *argp_program_bug_address = "<smorley@lanl.gov>";
 static char doc[] = "\nUsing magnetic ephemerii of S/C from input files, computes magnetic conjunctions"
-                    " using a kd-tree storage structure and nearest neighbour algorithm.\n";
+                    " using a kd-tree storage structure and nearest neighbour algorithm.\n\n"
+                    " Satellite names can be left as shell-type wildcards or can be replaced by '%B', both"
+                    " together is not currently supported.\n"
+                    " Sample usage with wildcards:\n\n\t ./magConj -v 3 -p "
+                    "\"/Spacecraft/*/MagEphem/2014/20140126_*_MagEphem_T89c.h5\" "
+                    "\n\t\t -T RBSPA /Spacecraft/RBSPA/MagEphem/2014/rbspa_MagEphem_T89D_20140126.h5\n"
+                    "\t\t test_magConj.h5"
+                    " \n\n"
+                    " Sample usage with '%B' token:\n\n\t ./magConj -b \"ns61, ns62, ns63\" -p \n"
+                    "\t\t \"/Spacecraft/%B/MagEphem/2014/20140126_%B_MagEphem_T89c.h5\" "
+                    "\n\t\t -T RBSPA /Spacecraft/RBSPA/MagEphem/2014/rbspa_MagEphem_T89D_20140126.h5\n"
+                    "\t\t test_magConj.h5"
+                    " \n\n";
 
 // Mandatory arguments
 #define     nArgs   2
@@ -35,6 +50,7 @@ static char ArgsDoc[] = "InFile OutFile";
 static struct argp_option Options[] = {
     {"Pattern",         'p',    "pattern",                    0,                                      "Glob pattern for finding input files"   },
     {"Object",          'o',    "object",                     0,                                      "Name of search object"   },
+    {"Bird",            'b',    "bird",                       0,                                      "List of satellite names to substitute for %B token"   },
     {"Target",          'T',    "target",                     0,                                      "Name of target (query object)"   },
     {"Distance",        'd',    "distance",                   0,                                      "Maximum 1-D distance between leaf nodes and points for retrieval."                  },
     {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
@@ -45,9 +61,10 @@ static struct argp_option Options[] = {
 
 struct Arguments {
     char        *args[ nArgs ];
-    char        Pattern[256];
-    char        Object[256];
+    char        Pattern[512];
+    char        Object[512];
     char        Target[128];
+    char        Birds[512];
     int         verbose;
     int         Force;
     double      Distance;
@@ -61,11 +78,14 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
       know is a pointer to our arguments structure. */
     struct Arguments *arguments = state->input;
     switch( key ) {
+        case 'b':
+            strncpy( arguments->Birds, arg, 511 );
+            break;
         case 'p': // glob pattern
-            strncpy( arguments->Pattern, arg, 255 );
+            strncpy( arguments->Pattern, arg, 511 );
             break;
         case 'o': // glob pattern
-            strncpy( arguments->Object, arg, 255 );
+            strncpy( arguments->Object, arg, 511 );
             break;
         case 'd': // distance for search
             sscanf( arg, "%lf", &arguments->Distance );
@@ -172,7 +192,7 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
     }
     if (!Nout) {
         if (verbose) printf("****** purgeObject: Nothing to keep ******\n");
-        kNN[0].Dist2=1.0e31; //set empty entry...
+        kNN[0].Dist2=LGM_FILL_VALUE; //set empty entry...
         }
     if (verbose) printf("\nNumber of non-matching entries = %ld\n", Nout);
 
@@ -189,12 +209,13 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
 }
 
 
-void SetupHDF5(hid_t *file, int maxNsats, char *target) {
+void SetupHDF5(hid_t *file, int maxNsats, char *target, char *CmdLine) {
     hid_t       space, atype, DataSet;
     herr_t      status __attribute__((unused));
 
     //Write global attributes
     Lgm_WriteStringAttr( *file, "Target", target );
+    Lgm_WriteStringAttr( *file, "CommandLine", CmdLine );
 
     //Create spaces, etc. for Time, matches (4D: ID number, time, K, L*)
     atype   = CreateStrType(24);
@@ -316,8 +337,9 @@ int main( int argc, char *argv[] ) {
     struct Arguments arguments;
     double              *q, *fac, **u, **MagEphem_K, **MagEphem_Lstar, mjd, sep, **Kquery, **Lquery;
     char                **Info, **IsoTimes, *pch, *dum, InFile[512], oname[256];
-    char                **queryTime, ***matchTime, *temp;
-    char                fname[128], tStr[128];
+    char                **queryTime, ***matchTime, *temp, **Birds, **BirdsTmp, *CmdLine;
+    char                fname[128], tStr[128], Bird[128], NewStr[512];
+    int                 nBirds, nBirdsTmp, iBird, setBirds;
     long int            Id;
     unsigned long int   n;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
@@ -328,7 +350,7 @@ int main( int argc, char *argv[] ) {
     Lgm_DateTime        d;
     int                 K, Kgot, i, ii, j, D=3, t, k, nQueries;
     int                 nPts = 0, ndims, status_n __attribute__((unused));
-    size_t              nSats=15; //maximum number of files expected on input
+    size_t              nSats=50; //maximum number of files expected on input
     hsize_t             Dims[3];
     hid_t               file, dataset, dataspace;
     herr_t              status __attribute__((unused));
@@ -337,9 +359,8 @@ int main( int argc, char *argv[] ) {
     long int            Nout;
 
     /* Set pattern for FN matching and match string for filtering given object */
-    const char          *pattern = "/mnt/projects/dream/Spacecraft/ns*/MagEphem/*/201210*h5";
+    //const char          *pattern = "/mnt/projects/dream/Spacecraft/ns*/MagEphem/*/201210*h5";
     //const char          *pattern = "/mnt/projects/dream/Spacecraft/\?\?\?\?-\?\?\?/MagEphem/*/2012101[01]*h5";
-    //TODO: get match files (pattern) from command line
     char                match[] = "default_match_string";
 
     /*
@@ -347,11 +368,25 @@ int main( int argc, char *argv[] ) {
      */
     strcpy( arguments.Object, match ); //set default
     strcpy( arguments.Target, "Undefined");
+    strcpy( arguments.Birds, "\0");
     arguments.verbose = 0;
+    /* Reconstruct the full command line as a string showing how we called this */
+    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+    n += argc;
+    LGM_ARRAY_1D( CmdLine, n+1, char );
+    for (i=0; i<argc; i++) {
+        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+        strcat( CmdLine, " ");      // pad with spaces
+    }
+    /* Now call argp_parse and make the arguments structure */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
     verbose = (arguments.verbose) ? arguments.verbose : 0;
     sep = (arguments.Distance) ? arguments.Distance : 1500.0;
     strcpy(&tStr[0], arguments.Target);
+
+    LGM_ARRAY_2D( BirdsTmp, 300, 128, char );
+    StringSplit( arguments.Birds, BirdsTmp, 128, &nBirdsTmp );
+    setBirds = ( arguments.Birds[0] != '\0') ? TRUE : FALSE;
 
     //set up scaling for search/storage
     Lgm_DateTime targ, UTC;
@@ -359,8 +394,8 @@ int main( int argc, char *argv[] ) {
     LGM_ARRAY_1D( q, D, double );
     LGM_ARRAY_1D( fac, D, double );
     fac[0] = 86400.0;
-    fac[1] = 30.0*60.0*5.0;//*10.0;
-    fac[2] = 30.0*60.0;//*2.0;
+    fac[1] = 30.0*60.0*8.0;//*10.0;
+    fac[2] = 30.0*60.0*1.5;
 
     /*
      * Read in magephem data from files (just need time, K, L*)
@@ -386,24 +421,43 @@ int main( int argc, char *argv[] ) {
         exit(-1);
         }
 
-    //now do wildcard matches for target dataset
-    glob_status = glob( pattern , 0 , NULL , &glob_buffer );
-    if (glob_status != GLOB_NOMATCH) {
-        nSats = glob_buffer.gl_pathc;
+    //if satellites names specified, search/replace on %B
+    //TODO: allow %B tokens and wildcards...
+    if (setBirds) {
+        LGM_ARRAY_2D( Birds, nBirdsTmp, 256, char );
+        if (verbose) printf("Substituting tokens in filenames\n");
+        for ( iBird = 0; iBird < nBirdsTmp; iBird++ ) {
+        NewStr[0] = '\0';
+            Lgm_ReplaceSubString( NewStr, arguments.Pattern, "%B", BirdsTmp[iBird] );    strcpy( Birds[iBird], NewStr );
+            if (verbose) printf("Adding file %s to list; %d of %d\n", Birds[iBird], iBird+1, nBirdsTmp);
+        }
     }
     else {
-        printf("%s: Glob couldn't match any files with the specified pattern. Status = %d.\n\n", __FILE__, glob_status);
-        exit(-1);
+        //now do wildcard matches for target dataset
+        glob_status = glob( arguments.Pattern , 0 , NULL , &glob_buffer );
+        if (glob_status != GLOB_NOMATCH) {
+            nBirdsTmp = glob_buffer.gl_pathc;
+            LGM_ARRAY_2D( Birds, nBirdsTmp, 256, char );
+            for (iBird=0; iBird<nBirdsTmp; iBird++) {
+                strcpy( Birds[iBird], glob_buffer.gl_pathv[iBird] );
+                if (verbose) printf("Found file %s; %d of %d\n", Birds[iBird], iBird+1, nBirdsTmp);
+            }
+        }
+        else {
+            printf("%s: Glob couldn't match any files with the specified pattern. Status = %d.\n\n", __FILE__, glob_status);
+            exit(-1);
+        }
     }
+    nSats = nBirdsTmp;
 
     // Get number of data points across all input files
     LGM_ARRAY_3D( matchTime, nQueries, (int)nSats, 24, char );
     cumTimes[0] = 0;
     cumPts[0] = 0;
     for (n=0; n<nSats; n++) {
-        strcpy( &InFile[0], glob_buffer.gl_pathv[n]);
+        strcpy( &InFile[0], &Birds[n][0]);
         if (H5Fis_hdf5( InFile )) {
-            // Read the InFilea
+            // Read the InFile
             if (verbose > 2) printf("Inspecting %s\n", InFile);
             file          = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
             dataset       = H5Dopen( file, "/Lstar", H5P_DEFAULT );
@@ -428,10 +482,10 @@ int main( int argc, char *argv[] ) {
     //do this for each given satellite
     j = 0;
     for (n=0; n<nSats; n++) {
-        strcpy( &InFile[0], glob_buffer.gl_pathv[n]);
+        strcpy( &InFile[0], &Birds[n][0]);
         if (H5Fis_hdf5( InFile )) {
             // Read the InFile
-            //printf("Reading %s\n", InFile);
+            printf("Reading %s\n", InFile);
             file = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
             //Read ISO time
             IsoTimes = Get_StringDataset_1D( file, "/IsoTime", Dims);
@@ -450,25 +504,17 @@ int main( int argc, char *argv[] ) {
         for (t=0; t<nTimes[n]; t++) {
             IsoTimeStringToDateTime( IsoTimes[t], &d, c ); //time system is now LGM_TIME_SYS_UTC
             for (k=0; k<ndims; k++) {
+                //first check whether K or Lstar are negative
+                if ((MagEphem_K[t][k] < 0) || (MagEphem_Lstar[t][k] < 0)) {
+                    continue; //if they are, don't add them to the Kd-tree
+                    }
                 u[0][j] = fac[0]*Lgm_MJD( d.Year, d.Month, d.Day, d.Time, LGM_TIME_SYS_UTC, c ); //seconds -- 30 minutes is 1800 s
                 u[1][j] = fac[1]*MagEphem_K[t][k];
                 u[2][j] = fac[2]*MagEphem_Lstar[t][k];
                 pch = basename(InFile);
-                if (1==1) {
-                    getObjectName(pch, oname);
-                    strcpy( Info[j], oname);
-                }
-                else {
-                    dum = strstr(pch, "ns"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    //dum = strstr(pch, "LANL"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    if(dum != NULL){
-                        strncpy ( Info[j], dum , 8 );
-                        Info[j][9] = '\0';
-                        }
-                    else {
-                        strcpy( Info[j], pch);
-                        }
-                }
+                //now apply satellite name to point
+                getObjectName(pch, oname);
+                strcpy( Info[j], oname);
                 j++;
                 }
             //printf("t = %d, j = %d, k = %d, n = %d\n", t, j, k, n);
@@ -489,7 +535,7 @@ int main( int argc, char *argv[] ) {
      */
     strcpy(fname, arguments.args[1]);
     file = H5Fcreate( fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-    SetupHDF5( &file, nSats, tStr );
+    SetupHDF5( &file, nSats, tStr, CmdLine );
 
 //strcpy(&queryTime[0][0], "2012-10-11T00:52:30");
     int nskip=0;
@@ -507,7 +553,7 @@ int main( int argc, char *argv[] ) {
     
         mjd = Lgm_MJD( targ.Year, targ.Month, targ.Day, targ.Time, LGM_TIME_SYS_UTC, c );
         q[0] = fac[0]*mjd;
-        q[1] = fac[1]*Kquery[ii][0];
+        q[1] = fac[1]*Kquery[ii][0]; // <--- Index 0 hardcodes this to lowest K in MagEphem?
         q[2] = fac[2]*Lquery[ii][0];
     
         if (verbose) printf("Finding %d nearest neighbours.\n", K );
@@ -561,7 +607,27 @@ int main( int argc, char *argv[] ) {
     LGM_ARRAY_2D_FREE( queryTime );
     LGM_ARRAY_2D_FREE( matchTime );
     Lgm_free_ctrans( c ); // free the structure
-    globfree( &glob_buffer );
+    if (!setBirds) globfree( &glob_buffer );
+    LGM_ARRAY_2D_FREE( Birds );
 
     return(0);
+}
+
+
+void StringSplit( char *Str, char **StrArray, int len, int *n ) {
+
+    int         nStr;
+    const char  delimiters[] = " ,;";
+    char        *token, *ss;
+
+    *n   = 0;
+    ss   = Str;
+    nStr = strlen( Str );
+    while ( ( token = strtok( ss, delimiters ) ) != NULL ) {
+        strncpy( StrArray[*n], token, len-1 );
+        if ( nStr >= len ) StrArray[*n][len-1] = '\0';
+        ++(*n);
+        ss = NULL;
+    }
+
 }

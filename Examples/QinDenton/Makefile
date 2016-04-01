@@ -1,13 +1,11 @@
 # Very simple makefile illustrating how to use pkg-config to compile
+HDF5FLAGS = `pkg-config hdf5 --cflags --libs 2>/dev/null`
+LGMFLAGS = `pkg-config lgm --cflags --libs`
 
-all: QinDenton QinDenton2
+all: QinDenton
 
 QinDenton: QinDenton.c
-	gcc QinDenton.c `pkg-config --cflags --libs lgm` -o QinDenton
-
-QinDenton2: QinDenton2.c
-	gcc QinDenton2.c `pkg-config --cflags --libs lgm` -o QinDenton2
-
+	gcc QinDenton.c $(LGMFLAGS) $(HDF5FLAGS) -o QinDenton
 
 clean:
-	rm QinDenton QinDenton2
+	rm QinDenton

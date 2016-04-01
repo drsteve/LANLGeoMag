@@ -168,7 +168,7 @@ class PosixLibraryLoader(LibraryLoader):
         try: directories.extend([dir.strip() for dir in open('/etc/ld.so.conf')])
         except IOError: pass
 
-        unix_lib_dirs_list = ['/lib', '/usr/lib', '/lib64', '/usr/lib64']
+        unix_lib_dirs_list = ['/lib', '/usr/lib', '/usr/local/lib', '/lib64', '/usr/lib64']
         if sys.platform.startswith('linux'):
             # Try and support multiarch work in Ubuntu
             # https://wiki.ubuntu.com/MultiarchSpec

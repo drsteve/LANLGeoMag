@@ -1445,6 +1445,9 @@ double Lgm_RemapTime( double Time, double SecondsInADay ) {
 
 
 
+
+
+
 /*
  * We really should examine the TimeSystem field in the Lgm_DateTime structure
  * and convert appropriately . But for now lets just assume input is in UTc.
@@ -1518,6 +1521,97 @@ double Lgm_UTC_to_TdbSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
     Lgm_UTC_to_TDB( UTC, &TDB, c );
     return( Lgm_TDB_to_TdbSecSinceJ2000( &TDB) );
 }
+
+
+
+
+
+
+
+
+/*
+ * To TT
+ */
+double Lgm_UTC_to_TTSeconds( Lgm_DateTime *UTC, Lgm_CTrans *c ){
+    return( Lgm_TTSecSinceJ2000( UTC, c ) );
+}
+
+
+/*
+ */
+double Lgm_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ){
+
+    long int        JDN;
+    double          DaySeconds, Seconds;
+    Lgm_DateTime    TT;
+
+    // Convet to TT
+    Lgm_UTC_to_TT( UTC, &TT, c );
+
+    // Get JDN
+    JDN = Lgm_JDN( TT.Year, TT.Month, TT.Day );
+
+    // Get seconds past start of day (i.e. midnight)
+    DaySeconds = TT.Time*3600.0;
+
+    // Compute Seconds since J2000
+    Seconds = ((JDN-LGM_JD_J2000)*86400 - 43200) + DaySeconds;
+
+    return( Seconds );
+
+}
+
+
+
+double  Lgm_TT_to_TTSecSinceJ2000( Lgm_DateTime *TT ) {
+    double  JDN, Seconds;
+    JDN  = Lgm_JDN( TT->Year, TT->Month, TT->Day );
+    Seconds = ((JDN - LGM_JD_J2000)*86400.0 - 43200.0) + TT->Time*3600.0;
+    return( Seconds );
+}
+
+void Lgm_TTSecSinceJ2000_to_TT( double TTSeconds, Lgm_DateTime *TT ) {
+
+    long int dJDN;
+    double   tmp, JDN;
+    dJDN = (long int)((TTSeconds + 43200.0)/86400.0);
+    TT->Time = (TTSeconds - dJDN*86400.0 + 43200.0)/3600.0;
+    JDN = LGM_JD_J2000 + dJDN;
+
+    Lgm_jd_to_ymdh( JDN, &TT->Date, &TT->Year, &TT->Month, &TT->Day, &tmp);
+    
+    TT->JD   = JDN + TT->Time/24.0;
+    TT->T    = (TT->JD - 2451545.0)/36525.0;
+    TT->TimeSystem = LGM_TIME_SYS_TT;
+
+}
+
+void Lgm_TTSecSinceJ2000_to_UTC( double TTSeconds, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    Lgm_DateTime TT;
+    Lgm_TTSecSinceJ2000_to_TT( TTSeconds, &TT );
+    Lgm_TT_to_UTC( &TT, UTC, c );
+    UTC->TimeSystem = LGM_TIME_SYS_UTC;
+}
+
+    Lgm_DateTime TT;
+double Lgm_UTC_to_TTSecSinceJ2000( Lgm_DateTime *UTC, Lgm_CTrans *c ) {
+    Lgm_UTC_to_TT( UTC, &TT, c );
+    return( Lgm_TT_to_TTSecSinceJ2000( &TT) );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*

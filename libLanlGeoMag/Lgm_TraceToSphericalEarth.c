@@ -130,9 +130,10 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Pc.x = Pc.y = Pc.z = 0.0;
     P = *u;
     Hmax = Info->Hmax;
+Hmax = 1.0;
     Hmin = 0.001;
     Hmin = 1e-8;
-    u_scale.x =  100.0;  u_scale.y = 100.0; u_scale.z = 100.0;
+    u_scale.x = u_scale.y = u_scale.z = 1.0;
     Height = Height_a = Height_b = Height_c = 0.0;
     F = Fa = Fb = Fc = 0.0;
     //printf("\nHmax = %g\n", Hmax);
@@ -238,7 +239,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      *  If if ( Lgm_MagStep() gives back an Hnext thats higher, we'll crank Htry up then...
      */
     Htry = 0.9*Height_a;	    // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
-    if (Htry > 0.1) Htry = 0.1; // If its bigger than 0.1 reset it to 0.1 -- to be safe.
+    if (Htry > Hmax) Htry = Hmax; // If its bigger than Hmax reset it to Hmax -- to be safe.
 
 
 
@@ -302,6 +303,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 
         if ( Count > 1000) {
             printf("File: %s Lgm_TraceToSphericalEarth(), Line: %d; Too many iterations trying to reach target height (are we in a weird field region?) Returning with -1.\n", __FILE__, __LINE__ );
+exit(0);
             return(-1);
         }
         ++Count;

@@ -61,6 +61,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
     *Iterations = 0;
 
+
     /*
      *  Set the bracket for the mlat range. We got mlat0 and mlat2 from the
      *  caller. The hope is that the field line with the I we are looking for
@@ -135,7 +136,13 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
 
 
 
-//    if ( Flag == 2 ) return( TRUE ); // An evaluation in BracketZero() hit on a value of I that is within tolerance -- we're done.
+    if ( Flag == 2 ) {
+        //converged to I0 during BracketZero evaluation, so we're done.
+        //Already set rad, Ifound and mlat
+        FoundValidI = TRUE;
+        return( FoundValidI );
+    }
+    
 //printf("HERE 2. Ifound = %g Flag = %d FoundValidI = %d\n", *Ifound, Flag, FoundValidI);
 
 
@@ -958,7 +965,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
         /*
          * No zero-bracket or minima were detected.
          */
-        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
+        if (LstarInfo->VerbosityLevel > 4) { printf( "%sFindBmRadius: No bracket found.%s\n", LstarInfo->PreStr, LstarInfo->PostStr  ); }
         return( FALSE );
 
     }
@@ -993,7 +1000,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
     Flag = Lgm_zBrent( a0, c0, Da0, Dc0, &bfi, tol, r, &D );
     FoundValidBm = ( Flag ) ? TRUE : FALSE;
 
-    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %n)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
+    if (LstarInfo->VerbosityLevel > 4) { printf("%sFindBmRadius: Final r = %.15lf  (B-Bm = %g nFunc = %ld)%s\n", LstarInfo->PreStr, *r, D, LstarInfo->mInfo->nFunc, LstarInfo->PostStr ); }
 
     return( FoundValidBm );
 
@@ -1451,14 +1458,14 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
     if ( nDefined == 0 ) {
 
         if (LstarInfo->VerbosityLevel > 1){
-            printf("No valid points, no zero bracket!\n");
+            printf("nDefined = 0, No valid points, no zero bracket!\n");
         }
         return(-5);
 
     } else if ( nDefined == 3  ) {
 
         if (LstarInfo->VerbosityLevel > 1){
-            printf("\t\t\t> No zero bracket found!\n");
+            printf("\t\t\t> nDefined = 3, No zero bracket found!\n");
         }
         return(-5);
 
@@ -1481,6 +1488,9 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
             // Case 6 reset so first two points are [b,c]
             Bracket->a = Bracket->b; Bracket->Da = Bracket->Db; Bracket->Ia = Bracket->Ib;
             Bracket->b = Bracket->c; Bracket->Db = Bracket->Dc; Bracket->Ib = Bracket->Ic;
+
+        } else {
+
 
         }
 

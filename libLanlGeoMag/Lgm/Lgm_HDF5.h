@@ -248,5 +248,9 @@ hid_t   CreateExtendableRank2DataSet( hid_t File, char *DataSetName, int Cols, h
 hid_t   CreateExtendableRank3DataSet( hid_t File, char *DataSetName, int nCol, int nDepth, hid_t Type, hid_t *DataSpace );
 hid_t   CreateStrType( int StrLength );
 
+hid_t   CreateSimpleRank1DataSet( hid_t File, char *DataSetName, int n, hid_t Type, hid_t *DataSpace );
+hid_t   CreateSimpleRank2DataSet( hid_t File, char *DataSetName, int n, int m, hid_t Type, hid_t *DataSpace );
+
+
 
 #endif

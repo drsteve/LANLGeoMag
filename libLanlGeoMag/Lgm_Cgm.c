@@ -46,12 +46,22 @@ int  Lgm_GSM_TO_CBM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmR
 
     } else if ( TraceFlag == LGM_OPEN_N_LOBE ) {
 
-        // should really trace to a set R
+        /*
+         * The field line is an open northern FL. The point we get here is just
+         * whereever we left the box that we decided was the threshold for
+         * calling it open. The problem with this is that to go in the reverse
+         * direction, its not easy to know where to start. Should really retrace out to
+         * a fixed R so that the inverse transformation would knbow where to start.
+         */
         Lgm_Convert_Coords( &v2, &v3_cdmag, GSM_TO_CDMAG, m->c );
+
+
+
+
 
     } else if ( TraceFlag == LGM_OPEN_S_LOBE ) {
 
-        // should really trace to a set R
+        // should really trace to a set R rather than just whereever we ended up at
         Lgm_Convert_Coords( &v1, &v3_cdmag, GSM_TO_CDMAG, m->c );
 
     }
@@ -88,6 +98,75 @@ int  Lgm_GSM_TO_CBM( Lgm_Vector *u, double *CgmLat, double *CgmLon, double *CgmR
     return( TraceFlag );
 
 }
+
+
+/*
+ *
+ * Input:
+ *
+ *
+ * Output:
+ *
+ *
+ */
+int  Lgm_CBM_TO_GSM( double CgmLat, double CgmLon, double CgmRad, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
+
+    int         TraceFlag;
+    double      r, R, L, Lat, Lon, CosLat, CosLat2;
+    Lgm_Vector  v1, v2, v3, w, w_cdmag, Bvec;
+
+
+
+    /*
+     * From the given CgmLatm, CgmLon, CgmRad, trace out to eq. plane with
+     * centered dipole field.  This doesnt need to be done numerically...
+     */
+    r = CgmRad;
+    CosLat  = cos( CgmLat*RadPerDeg );
+    CosLat2 = CosLat*CosLat;
+    L = r/CosLat2; 
+if ( L > 50.0 ) {
+return(0);
+}
+
+
+    
+    /*
+     * convert the equatorial point to CDMAG
+     */
+    R   = L;
+    Lon = CgmLon;
+    Lat = 0.0;
+    w_cdmag.x = R*cos( CgmLon*RadPerDeg ); // R*cos(Lon)*cos(Lat)
+    w_cdmag.y = R*sin( CgmLon*RadPerDeg ); // R*sin(Lon)*cos(Lat)
+    w_cdmag.z = 0.0;                       // R*sin(Lat)
+
+
+    Lgm_Convert_Coords( &w_cdmag, &w, CDMAG_TO_GSM, m->c );
+    
+
+    TraceFlag = Lgm_Trace( &w, &v1, &v2, &v3, 100.0, TRACE_TOL, TRACE_TOL, m );
+
+    Lgm_Convert_Coords( &v2, u, GSM_TO_WGS84, m->c );
+
+    
+    return( TraceFlag );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int  Lgm_GEOD_TO_CGM( double geoLat, double geoLon, double geoAlt, double *CgmLat, 
