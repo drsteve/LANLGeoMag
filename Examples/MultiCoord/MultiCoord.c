@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <Lgm_CTrans.h>
 int main( ) {
     Lgm_CTrans   *c = Lgm_init_ctrans( 1 ); // more compact declaration
