@@ -303,7 +303,7 @@ Hmax = 1.0;
 
         if ( Count > 1000) {
             printf("File: %s Lgm_TraceToSphericalEarth(), Line: %d; Too many iterations trying to reach target height (are we in a weird field region?) Returning with -1.\n", __FILE__, __LINE__ );
-exit(0);
+//exit(0);
             return(-1);
         }
         ++Count;
