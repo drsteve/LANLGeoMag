@@ -1,6 +1,8 @@
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_LstarInfo.h"
 
+#define   TRACE_TOL  1e-7
+
 /*
  * This version traces FLs from the Earth at the given MLT/mlat instead of trying to find the Bm radially out first.
  */
@@ -25,7 +27,7 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
     w.x = (*r)*cl*cos(Phi); w.y = (*r)*cl*sin(Phi); w.z = (*r)*sl;
 
     Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
-    TraceFlag = Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo );
+    TraceFlag = Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
 
     LstarInfo->mInfo->Bfield( &v3, &Bvec, LstarInfo->mInfo );
     Bmin = Lgm_Magnitude( &Bvec );

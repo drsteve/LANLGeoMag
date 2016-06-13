@@ -618,7 +618,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 	    B = Lgm_Magnitude( &Bvec );
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
     }
-    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, 1e-6, 1e-8, LstarInfo->mInfo ) == LGM_CLOSED ) {
+    if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
         LstarInfo->Sb0     = LstarInfo->mInfo->Sb0; // Equatorial value of Sb Integral.
         LstarInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second derivative of B wrt s at equator.
