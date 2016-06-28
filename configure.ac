@@ -306,6 +306,14 @@ AC_DEFINE_UNQUOTED([USE_OPENMP], [$USE_OPENMP], [
 Enable multithreading/processing w/OpenMP])
 
 # check for hdf5
+AM_CONDITIONAL([HAVE_HDF5], false)
+PKG_CHECK_MODULES([hdf5], [hdf5], AM_CONDITIONAL([HAVE_HDF5], true), [
+AC_MSG_WARN([hdf5 not found in pkgconfig, hopefully it's in normal paths])])
+#Can't do the assignment until out of the PKG_CHECK
+AM_COND_IF(HAVE_HDF5, [
+LIBS=${LIBS}\ $hdf5_LIBS
+CFLAGS=${CFLAGS}\ $hdf5_CFLAGS])
+
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
