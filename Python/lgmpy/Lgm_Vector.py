@@ -436,7 +436,7 @@ class Lgm_Vector(Lgm_Vector):
         ----------
         other : another Lgm_Vector
         frac  : float
-            Fractional distance between the two vectors to interpolate
+            Fractional distance between the two unit vectors to interpolate
             
         Returns
         -------
@@ -447,7 +447,9 @@ class Lgm_Vector(Lgm_Vector):
         --------
         >>> from lgmpy import Lgm_Vector
         >>> v1 = Lgm_Vector.Lgm_Vector(1,2,3)
+        >>> v1.normalize() 
         >>> v2 = Lgm_Vector.Lgm_Vector(3,7,1)
+        >>> v2.normalize()
         >>> print(v1.slerp(v2, 0)
         []
         >>> print(v1.slerp(v2, 1)
