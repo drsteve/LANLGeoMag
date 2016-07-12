@@ -68,11 +68,12 @@ int main(void) {
     }
   }
 
+  
   /* One would really only want to do this if the actual size of val was not known at */
   /* compile time.   */
  
-  printf("Summing via Lgm_DynamicMemory.h gives: %lf\n", sum_dyn( (double*)val, 10, 5, 7));
-  printf("Summing via pointer math gives:        %lf\n", sum( (double*)val, 10, 5, 7));
+  printf("Summing via pointer math gives:        %lf\n", sum( *val, 10, 5, 7));
+  printf("Summing via Lgm_DynamicMemory.h gives: %lf\n", sum_dyn( *val, 10, 5, 7));
  
   return(0);
 }

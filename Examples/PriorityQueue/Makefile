@@ -2,7 +2,7 @@
 
 
 All: PQ.c
-	gcc PQ.c `pkg-config --cflags --libs lgm` -o PQ
+	gcc PQ.c -Wall `pkg-config --cflags --libs lgm` -o PQ
 
 clean:
 	rm PQ
