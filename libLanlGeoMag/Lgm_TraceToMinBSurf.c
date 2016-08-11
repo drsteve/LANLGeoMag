@@ -34,11 +34,12 @@ int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, 
 
     Lgm_Vector	u_scale;
     double	    Htry_max, Hdid, Hnext, Hmin, Hmax, s=0.0, sgn, r2;
-    double	    Sa, Sb, Sc, s2, d1, d2;
+    double	    Sa, Sb, Sc, d1, d2;
     double	    Ba, Bb, Bc, B, B2, R;
     Lgm_Vector	Btmp;
     Lgm_Vector	Pa, Pb, Pc, P, P2;
     int		    done, reset=TRUE;
+    double s2 = 0.0;
 
 
 

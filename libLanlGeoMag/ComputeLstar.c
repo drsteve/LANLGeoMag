@@ -572,13 +572,14 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[3*LGM_LSTARINFO_MAX_FL], MirrorMlat[3*LGM_LSTARINFO_MAX_FL], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
-    double	MirrorMLT_Old[3*LGM_LSTARINFO_MAX_FL], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], PredMinusActualMlat, res;
+    double	MirrorMLT_Old[3*LGM_LSTARINFO_MAX_FL], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
 //    FILE	*fp;
 
     PreStr = LstarInfo->PreStr;
     PostStr = LstarInfo->PostStr;
+    double PredMinusActualMlat = 0.0;
 
 
     /*
@@ -1531,7 +1532,7 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
     //epsabs = 0.0;
     //epsrel = 1e-5;
     epsabs = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsabs;
-    epsabs = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsrel;
+    epsrel = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsrel;
 
 
 
@@ -1646,7 +1647,7 @@ double LambdaIntegral( Lgm_LstarInfo *LstarInfo ) {
     //epsabs = 0.0;
     //epsrel = 1e-3;
     epsabs = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsabs;
-    epsabs = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsrel;
+    epsrel = LstarInfo->mInfo->Lgm_MagFlux_Integrator_epsrel;
 
     limit = 500; lenw = 4*limit; key = 6;
 /*

@@ -18,7 +18,8 @@ int Lgm_BrentP(double Sa, double Sb, double Sc, double Bb, Lgm_Vector Pa, Lgm_Ve
     int         iter;
     double      a, b, d, etemp, fu, fv, fw, fx, p, q, r, tol1, tol2, u, v, w, x, xm;
     double      e = 0.0;
-    double      Htry, Hdid, Hnext, du, s, B;
+    double      Htry, Hdid, du, s, B;
+    double      Hnext = -1.0e99;
 
     a = (Sa < Sc ? Sa : Sc);
     b = (Sa > Sc ? Sa : Sc);
@@ -125,8 +126,9 @@ int Lgm_zBrentP(double S1, double S2, double F1, double F2, Lgm_Vector P1, Lgm_V
 	int         iter, Count;
 	double      a, b, c, d, e, min1, min2;
 	double      fa, fb, fc, p, q, r, s, tol1, xm;
-    double      Htry, Hdid, Hnext, dd, sgn, htry, hdid;
+    double      Htry, Hdid, dd, sgn, htry, hdid;
     Lgm_Vector  Pa, Pb, Pc, P;
+    double      Hnext = -1.0e99;
 
     a = S1; Pa = P1; fa = F1;
     b = S2; Pb = P2; fb = F2;
