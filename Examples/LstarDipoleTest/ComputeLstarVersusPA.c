@@ -56,7 +56,7 @@ void ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha,
     for (i=0; i<MagEphemInfo->nAlpha; i++) MagEphemInfo->Alpha[i] = Alpha[i];
 
     // Set Tolerances
-    SetLstarTolerances( MagEphemInfo->LstarQuality, LstarInfo );
+    Lgm_SetLstarTolerances( MagEphemInfo->LstarQuality, 24, LstarInfo );
 
 sprintf( Filename, "DipoleTest_6.6/results_%.0e.dat", LstarInfo->mInfo->Lgm_FindShellLine_I_Tol );
 fpout = fopen(Filename, "w");

@@ -50,8 +50,8 @@ int main( int argc, char *argv[] ){
 
     Kp = 1;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_T89;
-    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_OP77;
+    MagEphemInfo->LstarInfo->mInfo->Bfield        = Lgm_B_cdip;
     MagEphemInfo->LstarInfo->mInfo->InternalModel = LGM_CDIP;
     MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0 ) ? Kp : KP_DEFAULT;
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
