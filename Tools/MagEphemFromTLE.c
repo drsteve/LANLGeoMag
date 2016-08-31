@@ -639,7 +639,6 @@ void Lgm_WriteMagEphemDataKML( FILE *fp, int i, Lgm_MagEphemData *med ) {
  *  Compute magnetic ephemerii of S/C.
  */
 int main( int argc, char *argv[] ){
-
     int              nExisting_H5_IsoTimes;
     char             **Existing_H5_IsoTimes;
     Lgm_ElapsedTimeInfo t;

@@ -54,7 +54,7 @@
 
 
 typedef long int        count_int;
-typedef unsigned char byte;
+//typedef unsigned char byte;
 /*
 typedef unsigned long  u_long;
 */
@@ -68,7 +68,7 @@ static int  Interlace;
 /* static byte bw[2] = {0, 0xff}; */
 
 static void putword     PARM((int, FILE *));
-static void compress    PARM((int, FILE *, byte *, int));
+static void compress    PARM((int, FILE *, unsigned char *, int));
 static void output      PARM((int));
 static void cl_block    PARM((void));
 static void cl_hash     PARM((count_int));
@@ -77,7 +77,7 @@ static void char_out    PARM((int));
 static void flush_char  PARM((void));
 
 
-static byte pc2nc[256],r1[256],g1[256],b1[256];
+static unsigned char pc2nc[256],r1[256],g1[256],b1[256];
 
 
 
@@ -118,9 +118,9 @@ void SwapIntBytes( int *a ){
 int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
 	     comment)
      FILE *fp;
-     byte *pic;
+     unsigned char *pic;
      int   ptype, w,h;
-     byte *rmap, *gmap, *bmap;
+     unsigned char *rmap, *gmap, *bmap;
      int   numcols, colorstyle;
      char *comment;
 {
@@ -129,7 +129,7 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
   int   LeftOfs, TopOfs;
   int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
   int   i,j,nc;
-  byte *pic8;
+  unsigned char *pic8;
 
   if (ptype == PIC24) {  /* have to quantize down to 8 bits */
 	exit(1);
@@ -393,7 +393,7 @@ static int EOFCode;
 static void compress(init_bits, outfile, data, len)
 int   init_bits;
 FILE *outfile;
-byte *data;
+unsigned char *data;
 int   len;
 {
   register long fcode;

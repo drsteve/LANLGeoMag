@@ -481,7 +481,7 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
  *      \date           2013
  *
  */
-inline double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
+double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
 
     int     d, D;
     double  distance2, delta;
@@ -523,7 +523,7 @@ inline double  Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q ) {
  *      \date           2013
  *
  */
-inline int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 ) {
+int  Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 ) {
 
     int     d;
     double  distance2, delta, qd;

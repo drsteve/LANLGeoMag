@@ -8,6 +8,8 @@
 #include "Lgm/Lgm_Tsyg2007.h"
 #include "Lgm/Lgm_DynamicMemory.h"
 
+void mysincos(double val, double *sin_val, double *cos_val);
+
 
 /*
  *  Converted to C by Michael G. Henderson (mghenderson@lanl.gov) Aug 10, 2012.

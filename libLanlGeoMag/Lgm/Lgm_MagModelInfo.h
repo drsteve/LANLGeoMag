@@ -722,6 +722,7 @@ void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  *
  *  Function Prototypes for TS07 model
  */
+void Lgm_DeAllocate_TS07( LgmTsyg2007_Info *tInfo );
 int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
@@ -732,10 +733,11 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
  *  Function Prototypes for T01S model
  */
 double mypow( double, double );
-int     Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
-int     Lgm_B_T02( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
-void    Tsyg_T02( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
+void   Lgm_Init_T01S( LgmTsyg2001_Info *t );
+int    Lgm_B_T01S( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void   Tsyg_T01S( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
+int    Lgm_B_T02( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+void   Tsyg_T02( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2001_Info *tInfo );
 
 /*
  *  Computing B from scattered data -- (e.g. an irregular mesh)

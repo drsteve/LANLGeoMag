@@ -13,7 +13,8 @@
 
 /******************************************************************************/
 
-void Lgm_metadata_initvar(Lgm_metadata_variable *var, int dimension, int data, char* name) {
+void Lgm_metadata_initvar( Lgm_metadata_variable *var, int dimension, int data, char* name ) {
+
   int dm[] = {dimension};
   var->dimension = dimension;
   var->name = name;
@@ -21,8 +22,8 @@ void Lgm_metadata_initvar(Lgm_metadata_variable *var, int dimension, int data, c
   var->attributes = NULL;
   var->data = data;
   //Lgm_metadata_addIntAttr(var, "DIMENSION", 1, &dimension); // the & since it wants a pointer
-  Lgm_metadata_addStringAttr(var, "DIMENSION", Lgm_metadata_intArrayToString(1, &dm), 1);
- 
+  Lgm_metadata_addStringAttr( var, "DIMENSION", Lgm_metadata_intArrayToString(1, dm), 1 );
+
 }
 
 /******************************************************************************/
@@ -145,7 +146,8 @@ char *Lgm_metadata_stringArrayToString(int len, char** instring) {
 
 /******************************************************************************/
 
-char *Lgm_metadata_intArrayToString(int len, int* invals) {
+char *Lgm_metadata_intArrayToString(int len, int *invals ) {
+
   char Buffer[Lgm_metadata_MAXHEADERLEN];
   char *outstr;
   char *p;
@@ -163,6 +165,7 @@ char *Lgm_metadata_intArrayToString(int len, int* invals) {
   strncpy(outstr, Buffer, L);
   outstr[L] = '\0';  
   return (outstr);
+
 }
 
 /******************************************************************************/
@@ -251,7 +254,8 @@ int Lgm_metadata_addStringAttrArray2(Lgm_metadata_variable *var, char *name, int
 
 /******************************************************************************/
 
-int Lgm_metadata_addStringAttr(Lgm_metadata_variable *var, char *name, char * value, int array) {
+int Lgm_metadata_addStringAttr( Lgm_metadata_variable *var, char *name, char * value, int array ) {
+
   Lgm_metadata_attr atr;
   Lgm_metadata_variable newvar;
   Lgm_metadata_attr* old_attr;

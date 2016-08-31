@@ -17,8 +17,8 @@ double sum_dyn(double *inval, long x, long y, long z) {
   LGM_ARRAY_FROM_DATA_3D( invaltmp, inval, x, y, z, double );
 
   for (i=0; i<x; i++) {
-    for (j=0; j<x; j++) {
-      for (k=0; k<x; k++) {
+    for (j=0; j<y; j++) {
+      for (k=0; k<z; k++) {
 	// this is a lot more pleasant especially for high dimensionality
 	ans += invaltmp[i][j][k];
       }
@@ -45,8 +45,8 @@ double sum(double *inval, long x, long y, long z) {
   long i, j, k;
 
   for (i=0; i<x; i++) {
-    for (j=0; j<x; j++) {
-      for (k=0; k<x; k++) {
+    for (j=0; j<y; j++) {
+      for (k=0; k<z; k++) {
 	// this is OK, but hard to debug and annoying at high dim
 	ans += inval[i*y*z + j*z + k];
       }
@@ -68,11 +68,12 @@ int main(void) {
     }
   }
 
+  
   /* One would really only want to do this if the actual size of val was not known at */
   /* compile time.   */
  
-  printf("Summing via Lgm_DynamicMemory.h gives: %lf\n", sum_dyn( (double*)val, 10, 5, 7));
   printf("Summing via pointer math gives:        %lf\n", sum( (double*)val, 10, 5, 7));
+  printf("Summing via Lgm_DynamicMemory.h gives: %lf\n", sum_dyn( (double*)val, 10, 5, 7));
  
   return(0);
 }

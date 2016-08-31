@@ -30,6 +30,11 @@ static char doc[] = "\nUsing magnetic ephemerii of S/C from input files, compute
                     "\t\t \"/Spacecraft/%B/MagEphem/2014/20140126_%B_MagEphem_T89c.h5\" "
                     "\n\t\t -T RBSPA /Spacecraft/RBSPA/MagEphem/2014/rbspa_MagEphem_T89D_20140126.h5\n"
                     "\t\t test_magConj.h5"
+                    " \n\n"
+                    " Sample usage with fixed query point (requires dummy input filename):\n\n"
+                    "\t ./magConj -Q \"1.0,6.0\" -s 2014-01-21T18:00:00 -e 2014-01-22T22:00:00 -c 20 -p "
+                    "\t\t \"/mnt/projects/dream/Spacecraft/*/MagEphem/2014/*2014012[12]_*T89c*.h5\"\n"
+                    "\t\t dum fixed_1_6_magConj.h5"
                     " \n\n";
 
 // Mandatory arguments
@@ -48,13 +53,17 @@ static char ArgsDoc[] = "InFile OutFile";
  *             or OPTION_NO_USAGE
  */
 static struct argp_option Options[] = {
-    {"Pattern",         'p',    "pattern",                    0,                                      "Glob pattern for finding input files"   },
-    {"Object",          'o',    "object",                     0,                                      "Name of search object"   },
-    {"Bird",            'b',    "bird",                       0,                                      "List of satellite names to substitute for %B token"   },
-    {"Target",          'T',    "target",                     0,                                      "Name of target (query object)"   },
-    {"Distance",        'd',    "distance",                   0,                                      "Maximum 1-D distance between leaf nodes and points for retrieval."                  },
-    {"Force",           'F',    0,                            0,                                      "Overwrite output file even if it already exists" },
-    {"verbose",         'v',    "verbosity",                  0,                                      "Produce verbose output"                  },
+    {"Pattern",         'p',    "pattern",           0,         "Glob pattern for finding input files"},
+    {"Object",          'o',    "object",            0,         "Name of search object"},
+    {"Bird",            'b',    "bird",              0,         "List of satellite names to substitute for %B token"},
+    {"Target",          'T',    "target",            0,         "Name of target (query object)"},
+    {"Distance",        'd',    "distance",          0,         "Maximum 1-D distance between leaf nodes and points for retrieval."},
+    {"QueryPoint",      'Q',    "querypoint",        0,         "Query Point (K, L*), e.g. \"0.11,4.1\" "},
+    {"StartDate",       's',    "yyyymmdd",          0,         "ISO StartDate "},
+    {"EndDate",         'e',    "yyyymmdd",          0,         "ISO EndDate "},
+    {"Cadence",         'c',    "cadence",           0,         "Cadence for query points, when using fixed target+start date+end date"},
+    {"Force",           'F',    0,                   0,         "Overwrite output file even if it already exists"},
+    {"verbose",         'v',    "verbosity",         0,         "Produce verbose output"},
     { 0 }
 };
 
@@ -68,6 +77,11 @@ struct Arguments {
     int         verbose;
     int         Force;
     double      Distance;
+
+    char        QueryPoint[128];
+    char        StartDate[128];
+    char        EndDate[128];
+    double      Cadence;
 };
 
 
@@ -78,6 +92,18 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
       know is a pointer to our arguments structure. */
     struct Arguments *arguments = state->input;
     switch( key ) {
+        case 's': // start date
+            strncpy( arguments->StartDate, arg, 127 );
+            break;
+        case 'e': // end date
+            strncpy( arguments->EndDate, arg, 127 );
+            break;
+        case 'c':
+            sscanf( arg, "%lf", &arguments->Cadence );
+            break;
+        case 'Q':
+            strncpy( arguments->QueryPoint, arg, 127 );
+            break;
         case 'b':
             strncpy( arguments->Birds, arg, 511 );
             break;
@@ -157,7 +183,7 @@ long int NearestPerObject(Lgm_KdTreeData *kNN, long int N, Lgm_KdTreeData *new_k
         if (verbose) printf("****** NearestPerObject: Nothing to keep ******\n");
         exit(-1);
         }
-    if (verbose) printf("\nNumber of kept entries = %ld\n", Nout);
+    if (verbose > 1) printf("\nNumber of kept entries = %ld\n", Nout);
 
     j = 0;
     for (i=0; i<N; i++) {
@@ -194,7 +220,7 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
         if (verbose) printf("****** purgeObject: Nothing to keep ******\n");
         kNN[0].Dist2=LGM_FILL_VALUE; //set empty entry...
         }
-    if (verbose) printf("\nNumber of non-matching entries = %ld\n", Nout);
+    if (verbose > 1) printf("\nNumber of non-matching entries = %ld\n", Nout);
 
     j = 0;
     for (i=0; i<N; i++) {
@@ -209,12 +235,13 @@ long int purgeObject(Lgm_KdTreeData *kNN, long int N, void *Object, Lgm_KdTreeDa
 }
 
 
-void SetupHDF5(hid_t *file, int maxNsats, char *target) {
+void SetupHDF5(hid_t *file, int maxNsats, char *target, char *CmdLine) {
     hid_t       space, atype, DataSet;
     herr_t      status __attribute__((unused));
 
     //Write global attributes
     Lgm_WriteStringAttr( *file, "Target", target );
+    Lgm_WriteStringAttr( *file, "CommandLine", CmdLine );
 
     //Create spaces, etc. for Time, matches (4D: ID number, time, K, L*)
     atype   = CreateStrType(24);
@@ -334,11 +361,11 @@ void getObjectName(char *strin, char *strout) {
 
 int main( int argc, char *argv[] ) {
     struct Arguments arguments;
-    double              *q, *fac, **u, **MagEphem_K, **MagEphem_Lstar, mjd, sep, **Kquery, **Lquery;
+    double              *q, *fac, **u, **MagEphem_K, **MagEphem_Lstar, mjd, sep, **Kquery, **Lquery, jDate;
     char                **Info, **IsoTimes, *pch, *dum, InFile[512], oname[256];
-    char                **queryTime, ***matchTime, *temp, **Birds, **BirdsTmp;
+    char                **queryTime, ***matchTime, *temp, **Birds, **BirdsTmp, *CmdLine, **QueryTmp;
     char                fname[128], tStr[128], Bird[128], NewStr[512];
-    int                 nBirds, nBirdsTmp, iBird, setBirds;
+    int                 nBirds, nBirdsTmp, iBird, setBirds, nQueryTmp, fixedTarget;
     long int            Id;
     unsigned long int   n;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
@@ -349,7 +376,7 @@ int main( int argc, char *argv[] ) {
     Lgm_DateTime        d;
     int                 K, Kgot, i, ii, j, D=3, t, k, nQueries;
     int                 nPts = 0, ndims, status_n __attribute__((unused));
-    size_t              nSats=50; //maximum number of files expected on input
+    size_t              nSats=150; //maximum number of files expected on input
     hsize_t             Dims[3];
     hid_t               file, dataset, dataspace;
     herr_t              status __attribute__((unused));
@@ -369,6 +396,16 @@ int main( int argc, char *argv[] ) {
     strcpy( arguments.Target, "Undefined");
     strcpy( arguments.Birds, "\0");
     arguments.verbose = 0;
+    arguments.Cadence = 5.0;
+    /* Reconstruct the full command line as a string showing how we called this */
+    for (n=0, i=0; i<argc; i++) n += strlen(argv[i]);
+    n += argc;
+    LGM_ARRAY_1D( CmdLine, n+1, char );
+    for (i=0; i<argc; i++) {
+        strcat( CmdLine, argv[i]);  // add all argv items to CmdLine string
+        strcat( CmdLine, " ");      // pad with spaces
+    }
+    /* Now call argp_parse and make the arguments structure */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
     verbose = (arguments.verbose) ? arguments.verbose : 0;
     sep = (arguments.Distance) ? arguments.Distance : 1500.0;
@@ -378,8 +415,15 @@ int main( int argc, char *argv[] ) {
     StringSplit( arguments.Birds, BirdsTmp, 128, &nBirdsTmp );
     setBirds = ( arguments.Birds[0] != '\0') ? TRUE : FALSE;
 
+    fixedTarget = (arguments.QueryPoint) ? TRUE : FALSE;
+    if (fixedTarget) {
+        strcpy(&tStr[0], "FixedPoint");
+        LGM_ARRAY_2D( QueryTmp, 2, 128, char );
+        StringSplit( arguments.QueryPoint, QueryTmp, 128, &nQueryTmp );
+    }
+
     //set up scaling for search/storage
-    Lgm_DateTime targ, UTC;
+    Lgm_DateTime targ, UTC, UTC_start, UTC_end;
     //LGM_ARRAY_2D( queryTime, 2, 24, char );
     LGM_ARRAY_1D( q, D, double );
     LGM_ARRAY_1D( fac, D, double );
@@ -389,27 +433,58 @@ int main( int argc, char *argv[] ) {
 
     /*
      * Read in magephem data from files (just need time, K, L*)
+     * UNLESS
+     * target specified is a query point, then generate series
      */
-    //start with file for input times, positions
-    strcpy( &InFile[0], arguments.args[0]);
-    if (H5Fis_hdf5( InFile )) {
-        // Read the InFile
-        printf("Reading %s\n", InFile);
-        file      = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
-        //Read ISO time
-        queryTime = Get_StringDataset_1D( file, "IsoTime", Dims);
-        if (verbose) printf("Get IsoTime done. Dims are %d\n", (int)Dims[0]);
-        // Read GSM and Lstar position
-        Kquery    = Get_DoubleDataset_2D( file, "K", Dims);
-        if (verbose) printf("Get K done. Dims are %d, %d\n", (int)Dims[0], (int)Dims[1]);
-        Lquery    = Get_DoubleDataset_2D( file, "Lstar", Dims);
-        nQueries  = Dims[0];
-        status    = H5Fclose( file );
+    if (fixedTarget) {
+        //need to set arrays: queryTime, Kquery, Lquery, nQueries
+        //so need start time, end time, cadence and point (K,L)
+        if (!arguments.StartDate) exit(-9);
+        if (!arguments.EndDate) exit(-9);
+        IsoTimeStringToDateTime( arguments.StartDate, &UTC_start, c); //JD is in UTC_start.JD
+        IsoTimeStringToDateTime( arguments.EndDate, &UTC_end, c);
+        //calculate number of elements between start and end dates at given cadence
+        double sJD, eJD;
+        sJD = Lgm_JD( UTC_start.Year, UTC_start.Month, UTC_start.Day, UTC_start.Time, LGM_TIME_SYS_UTC, c );
+        eJD = Lgm_JD( UTC_end.Year, UTC_end.Month, UTC_end.Day, UTC_end.Time, LGM_TIME_SYS_UTC, c );
+        nQueries = (int)((eJD - sJD)/(arguments.Cadence/1440.0));
+        //nQueries++;
+        //set array sizes
+        LGM_ARRAY_2D( Kquery, nQueries, 2, double );
+        LGM_ARRAY_2D( Lquery, nQueries, 2, double );
+        LGM_ARRAY_2D( queryTime, nQueries, 32, char );
+        int ind=0;
+        for (jDate = sJD; jDate < eJD; jDate+=arguments.Cadence/1440.0) {
+            //stuff t, K and L* into queryTime, Kquery and Lquery
+            Lgm_JD_to_DateTime( jDate, &UTC, c );
+            Lgm_DateTimeToString( queryTime[ind], &UTC, 0, 3 );
+            Kquery[ind][0] = atof(QueryTmp[0]);
+            Lquery[ind][0] = atof(QueryTmp[1]);
+            ind++;
         }
+    }
     else {
-        printf("%s: Failed to read input HDF5 file (%s)\n", __FILE__, InFile);
-        exit(-1);
-        }
+        //start with file for input times, positions
+        strcpy( &InFile[0], arguments.args[0]);
+        if (H5Fis_hdf5( InFile )) {
+            // Read the InFile
+            printf("Reading %s\n", InFile);
+            file      = H5Fopen( InFile, H5F_ACC_RDONLY, H5P_DEFAULT );
+            //Read ISO time
+            queryTime = Get_StringDataset_1D( file, "IsoTime", Dims);
+            if (verbose) printf("Get IsoTime done. Dims are %d\n", (int)Dims[0]);
+            // Read GSM and Lstar position
+            Kquery    = Get_DoubleDataset_2D( file, "K", Dims);
+            if (verbose) printf("Get K done. Dims are %d, %d\n", (int)Dims[0], (int)Dims[1]);
+            Lquery    = Get_DoubleDataset_2D( file, "Lstar", Dims);
+            nQueries  = Dims[0];
+            status    = H5Fclose( file );
+            }
+        else {
+            printf("%s: Failed to read input HDF5 file (%s)\n", __FILE__, InFile);
+            exit(-1);
+            }
+    }
 
     //if satellites names specified, search/replace on %B
     //TODO: allow %B tokens and wildcards...
@@ -494,25 +569,17 @@ int main( int argc, char *argv[] ) {
         for (t=0; t<nTimes[n]; t++) {
             IsoTimeStringToDateTime( IsoTimes[t], &d, c ); //time system is now LGM_TIME_SYS_UTC
             for (k=0; k<ndims; k++) {
+                //first check whether K or Lstar are negative
+                if ((MagEphem_K[t][k] < 0) || (MagEphem_Lstar[t][k] < 0)) {
+                    continue; //if they are, don't add them to the Kd-tree
+                    }
                 u[0][j] = fac[0]*Lgm_MJD( d.Year, d.Month, d.Day, d.Time, LGM_TIME_SYS_UTC, c ); //seconds -- 30 minutes is 1800 s
                 u[1][j] = fac[1]*MagEphem_K[t][k];
                 u[2][j] = fac[2]*MagEphem_Lstar[t][k];
                 pch = basename(InFile);
-                if (1==1) {
-                    getObjectName(pch, oname);
-                    strcpy( Info[j], oname);
-                }
-                else {
-                    dum = strstr(pch, "ns"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    //dum = strstr(pch, "LANL"); //hardcoded for GPS to pull out satellite name... perhaps put sat name into HDF5 metadata somewhere?
-                    if(dum != NULL){
-                        strncpy ( Info[j], dum , 8 );
-                        Info[j][9] = '\0';
-                        }
-                    else {
-                        strcpy( Info[j], pch);
-                        }
-                }
+                //now apply satellite name to point
+                getObjectName(pch, oname);
+                strcpy( Info[j], oname);
                 j++;
                 }
             //printf("t = %d, j = %d, k = %d, n = %d\n", t, j, k, n);
@@ -533,9 +600,8 @@ int main( int argc, char *argv[] ) {
      */
     strcpy(fname, arguments.args[1]);
     file = H5Fcreate( fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-    SetupHDF5( &file, nSats, tStr );
+    SetupHDF5( &file, nSats, tStr, CmdLine );
 
-//strcpy(&queryTime[0][0], "2012-10-11T00:52:30");
     int nskip=0;
     printf("Making %d queries\n", nQueries);
     for (ii=0; ii<nQueries; ii++) {
@@ -545,6 +611,7 @@ int main( int argc, char *argv[] ) {
         /*
          *  Set target ("query") state 
          */
+        if (verbose>1) printf("Query %d: %s\n", ii, queryTime[ii]);
         IsoTimeStringToDateTime( queryTime[ii], &targ, c );
         //Kquery = 0.25;
         //Lquery = 4.8;

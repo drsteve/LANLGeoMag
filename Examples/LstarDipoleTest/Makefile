@@ -1,15 +1,13 @@
 #CFLAGS    = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
 FFLAGS    =  -fno-automatic 
-LIBS      = `pkg-config --libs lgm`
-CFLAGS    = `pkg-config --cflags lgm`
+LGM      = `pkg-config lgm --cflags --libs`
+HDF5      = `pkg-config hdf5 --cflags --libs &2> /dev/null`
 CC        = gcc
-
-FILES1    =  ComputeLstarVersusPA.c
 
 all   : LstarVersusPA
 
-LstarVersusPA : Makefile $(FILES1) LstarVersusPA.o
-	$(CC) $(FILES1) LstarVersusPA.o $(LIBS) $(CFLAGS) -o LstarVersusPA
+LstarVersusPA : LstarVersusPA.c
+	$(CC) ComputeLstarVersusPA.c LstarVersusPA.c $(HDF5) $(LGM) -o LstarVersusPA
 
 
 clean :

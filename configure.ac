@@ -3,15 +3,33 @@
 
 
 AC_INIT([LanlGeoMag], [1.5.15], [mghenderson@lanl.gov])
+AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([tar-ustar])
+
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_SED
+AC_PROG_MKDIR_P
+
+AC_PROG_LIBTOOL
+#LT_INIT
+
+
+
+# Checks for header files.
+AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h math.h])
+
+
 
 AC_PREREQ([2.59])
 THE_PKG_RELEASE=1
 PKG_RELEASE=$THE_PKG_RELEASE
 AC_SUBST([PKG_RELEASE])
 
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_AUX_DIR([build-aux])
 AC_LANG([C])
 #AC_DEFINE([LGM_EOP_DATA_DIR],["/usr/local/share/LanlGeoMag/EopData"],["Define directory where Eop data can be found"])
 #AH_VERBATIM([PDDH], [#define LGM_EOP_DATA_DIR "@datadir@/LanlGeoMag/EopData"])
@@ -19,9 +37,9 @@ AC_LANG([C])
 AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory where Eop data can be found])
 AC_DEFINE([LGM_INDEX_DATA_DIR],[(DATADIR "/LanlGeoMag/Data")],[Define directory where Geophysical Index Data (e.g. Kp, AE, Dst, etc. data can be found])
 AC_DEFINE([LGM_TS07_DATA_DIR],[(DATADIR "/LanlGeoMag/Data")],[Define directory where TS07 data files are located])
-AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AM_INIT_AUTOMAKE
-AC_PROG_LIBTOOL
+
+
 
 AM_CPPFLAGS=-DDATADIR='$(datadir)'
 
@@ -91,12 +109,9 @@ AS_IF([test "x$enable_static_tools" == "xyes"],
     [AM_CONDITIONAL([ENABLE_STATIC_TOOLS], false)]
 )
 
-# Checks for programs.
-AC_PROG_CC
-AC_PROG_SED
+
 #check for rsync (but just use cp if don't have it)
 AC_PATH_PROG([RSYNC_CMD], [rsync], [cp])
-AC_PROG_MKDIR_P
 
 # Checks for libraries.
 dnl Need to directly specify SPICE location for MagEphem
@@ -162,9 +177,7 @@ DX_ENV_APPEND(PDF_LINKS, $DX_ENABLE_PDF_HYPERLINKS)
 
 
 # Check for check
-#AM_PATH_CHECK(,[have_check="yes"],
-#  AC_MSG_WARN([Check not found; cannot run unit tests!])
-#  [have_check="no"])
+#AM_PATH_CHECK(0.9.4,[have_check="yes"], AC_MSG_WARN([Check not found; cannot run unit tests!]) [have_check="no"])
 #AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
 
 
@@ -291,6 +304,14 @@ AC_DEFINE_UNQUOTED([USE_OPENMP], [$USE_OPENMP], [
 Enable multithreading/processing w/OpenMP])
 
 # check for hdf5
+AM_CONDITIONAL([HAVE_HDF5], false)
+PKG_CHECK_MODULES([hdf5], [hdf5], AM_CONDITIONAL([HAVE_HDF5], true), [
+AC_MSG_WARN([hdf5 not found in pkgconfig, hopefully it's in normal paths])])
+#Can't do the assignment until out of the PKG_CHECK
+AM_COND_IF(HAVE_HDF5, [
+LIBS=${LIBS}\ $hdf5_LIBS
+CFLAGS=${CFLAGS}\ $hdf5_CFLAGS])
+
 AC_CHECK_HEADERS([hdf5.h], , [AC_MSG_FAILURE([hdf5 header files not found, try CFLAGS=-I/path/to/headers])])
 AC_CHECK_LIB([hdf5], [H5Acreate2], , [AC_MSG_FAILURE([hdf5 library 1.8 not found, try LDFLAGS=-L/path/to/library])])
 
@@ -310,8 +331,6 @@ AC_MSG_RESULT([not found])
 AC_MSG_WARN([check not found; testsuite not available])
 LIBS=${OLD_LIBS}])])
 
-# Checks for header files.
-AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -329,7 +348,7 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/EopData/GetEopFiles
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
-		 Tools/Makefile
-		 Python/Makefile
+		         Tools/Makefile
+		         Python/Makefile
                  ])
 AC_OUTPUT
