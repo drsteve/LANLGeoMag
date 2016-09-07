@@ -1353,8 +1353,8 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
 
 // REALLY SHOULD ASSUME WE HAVE THESE ALREADY. I.E. from MahEphemInfo pre-processing.
             //p->KofA[k] = Lgm_KofAlpha( AlphaEq, mInfo2 );
-            Lgm_InterpArr( Aarr, Karr, narr,   AlphaEq, &p->KofA[k] );
-            Lgm_InterpArr( Aarr, Larr, narr,   AlphaEq, &p->LstarOfA[k] );
+//            Lgm_InterpArr( Aarr, Karr, narr,   AlphaEq, &p->KofA[k] );
+//            Lgm_InterpArr( Aarr, Larr, narr,   AlphaEq, &p->LstarOfA[k] );
 //GUARD AGAINST BAD VALS HERE!!!? i.e. negative vals
             //printf("KofA[%d] = %g    LstarOfA[%d] = %g\n", k, p->KofA[k], k, p->LstarOfA[k]);
 
@@ -1368,9 +1368,6 @@ void Lgm_P2F_GetFluxAtConstEsAndAs( double *E, int nE, double *A, int nA, double
         }
     }   // end parallel
 //    Lgm_TearDown_AlphaOfK( mInfo );
-
-
-
 
 
 
@@ -1389,10 +1386,6 @@ assumes electrons -- generalize this...
             //printf("p->E[%d], p->A[%d], p->KofA[%d], p->B, f->MuofE[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, p->E[m], p->A[k], p->KofA[k], p->B, p->MuofE[m][k]);
         }
     }
-
-
-
-
 
 
 
@@ -1479,9 +1472,9 @@ assumes electrons -- generalize this...
         } // end energy loop (m index)
     } // end pitch angle loop (k index)
 
+    if ( p->DumpDiagnostics ) {
         DumpGif( "Lgm_PsdToFlux_PSD_EA", p->nA, p->nE, p->PSD_EA );
         DumpGif( "Lgm_PsdToFlux_FLUX_EA", p->nA, p->nE, p->FLUX_EA );
-    if ( p->DumpDiagnostics ) {
     }
 
 
