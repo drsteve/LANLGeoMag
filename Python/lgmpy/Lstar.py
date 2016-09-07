@@ -1009,14 +1009,13 @@ def get_Lstar2(pos, date, alpha = 90.,
 ##                                 double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
 
 
-
     if QinDenton:# and Bfield == 'Lgm_B_TS04': # these are the params we will use.
         # Grab the QinDenton data
         # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
         # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
         JD = Lgm_Wrap.Lgm_Date_to_JD(datelong, utc, pointer(mmi.c))
         qd_one = Lgm_Wrap.Lgm_QinDentonOne()
-        Lgm_Wrap.Lgm_get_QinDenton_at_JD( JD, pointer(qd_one), cverbosity)
+        Lgm_Wrap.Lgm_get_QinDenton_at_JD( JD, pointer(qd_one), cverbosity, 0)
         Lgm_Wrap.Lgm_set_QinDenton(pointer(qd_one), pointer(mmi.c))
         
         ans['params'] = dm.SpaceData()
@@ -1040,8 +1039,7 @@ def get_Lstar2(pos, date, alpha = 90.,
     Lgm_ComputeLstarVersusPA( ctypes.c_long(datelong), ctypes.c_double(utc), ctypes.pointer(Pgsm), 
                              ctypes.c_int(len(Alpha)), 
                              np.require(Alpha, requirements=['C']).ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
-                             ctypes.c_int(LstarQuality), ctypes.c_int(Colorize), 
-                             ctypes.pointer(MagEphemInfo) )
+                             ctypes.c_int(Colorize), ctypes.pointer(MagEphemInfo) )
 
     for ii, pa in enumerate(Alpha):
         if int(pa) == pa:
