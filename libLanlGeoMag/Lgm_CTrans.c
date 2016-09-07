@@ -1719,7 +1719,7 @@ void Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
     double  x_sm, y_sm, z_sm;
     double  x_ed, y_ed, z_ed;
     double  rho, theta, phi;
-    Lgm_Vector  Bsm;
+    Lgm_Vector  Bsm, ED_sm, ED_geo;
     double  B_rho, B_theta, B_phi;
     double  M, rho2, rho3;
     double  cp, sp, ct, st;
@@ -1735,11 +1735,18 @@ void Lgm_B_edip_ctrans(Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c) {
 
 
     /*
+     * Convert (c->ED_x0, c->ED_x0, c->ED_x0) to SM
+     */
+    ED_geo.x = c->ED_x0; ED_geo.y = c->ED_y0; ED_geo.z = c->ED_z0;
+    Lgm_Convert_Coords( &ED_geo, &ED_sm, WGS84_TO_SM, c );
+       
+
+    /*
      *  compute ED coords from SM coords  (i.e. offset the dipole)
      */
-    x_ed = x_sm - c->ED_x0;
-    y_ed = y_sm - c->ED_y0;
-    z_ed = z_sm - c->ED_z0;
+    x_ed = x_sm - ED_sm.x;
+    y_ed = y_sm - ED_sm.y;
+    z_ed = z_sm - ED_sm.z;
 
 
     /*

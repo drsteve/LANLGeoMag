@@ -346,6 +346,7 @@ void Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int 
     int     d2, yy, yyyy;
     int     hh, mm, ss, i, ll;
     long    d1;
+    double  mu, gg;
     Lgm_CTrans *c = Lgm_init_ctrans(0); // need this for JD calcs
 
     /*
@@ -480,6 +481,21 @@ void Lgm_SgpDecodeTle( char *Line0, char *Line1, char *Line2, _SgpTLE *TLE, int 
     sscanf( str, "%lf", &(TLE->MeanMotion));
     TLE->Period = 1440.0/TLE->MeanMotion; // period in minutes
     if (Verbosity > 3) printf("\t\tMeanMotion      = %14.8lf (revs/day)  (Period = %g min)\n", TLE->MeanMotion, TLE->Period);
+
+    // Semi-Major Axis
+    mu = 3.986004418e5;  // This is the gravitational constant times m_earth (km^3/s^2) see Vallado eqn 1-29
+    gg = 86400.0/(2.0*M_PI*TLE->MeanMotion);
+    TLE->SemiMajor = cbrt( mu * gg*gg );
+    
+
+    // Perigee
+    TLE->PeriApsis  = TLE->SemiMajor * (1.0 - TLE->Eccentricity);
+    TLE->PerigeeAlt = TLE->PeriApsis - Re;
+
+    // Apogeee
+    TLE->ApoApsis  = TLE->SemiMajor * (1.0 + TLE->Eccentricity);
+    TLE->ApogeeAlt = TLE->ApoApsis - Re;
+
     
     // Revolution Number at Epoch
     strncpy( str, Line2+63, 5 ); str[5] = '\0';

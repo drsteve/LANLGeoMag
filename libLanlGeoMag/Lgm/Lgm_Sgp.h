@@ -89,6 +89,11 @@ typedef struct _SgpTLE {
     char      Dow[5];
     double    JD;             // Julian Date of Epoch
     double    Period;         // in minutes
+    double    SemiMajor;      // km
+    double    PeriApsis;      // km
+    double    ApoApsis;       // km
+    double    PerigeeAlt;     // km
+    double    ApogeeAlt;      // km
     char      IntDesig2[20];  // e.g. 1989-046A
     char      ObjectType[20]; // SAT, R/B or DEB
     char      EpochStr[20];   // A more readabl version of the epoch time...
