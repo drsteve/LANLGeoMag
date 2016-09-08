@@ -185,7 +185,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
      */
     if ( f0*f1 > 0.0 ) {
         if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): [a0:a1] = [%g: %g] does not bracket root? Lgm_AlphaOfK_Func( %g, %g ) = %g, Lgm_AlphaOfK_Func( %g, %g ) = %g\n", a0, a1, K, a0, f0, K, a1, f1);
-        return(-9e99);
+        return(LGM_FILL_VALUE);
     }
 
 
@@ -248,7 +248,7 @@ double  Lgm_AlphaOfK( double K, Lgm_MagModelInfo *m ) {
          * Assume value is no good...
          */
 printf("%s: no alpha value found for K=%g!\n", __func__, K);
-        a = -9e99;
+        a = LGM_FILL_VALUE;
 
     }
 
@@ -324,13 +324,13 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
                 if (m->VerbosityLevel >= 2) {
                     if ( m->Sm_South < m->s[0] ) {
                         printf("Lgm_AlphaOfK(), Line %d: Sm_South (= %g) is less than s[0] (= %g)\n",  __LINE__, m->Sm_South, m->s[0] );
-                        printf("\tAssuming particle mirrors below loss cone height, Setting K to -9e99\n" );
+                        printf("\tAssuming particle mirrors below loss cone height, Setting K to %g\n", LGM_FILL_VALUE );
                     } else if ( m->Sm_North > m->s[m->nPnts-1] ) {
                         printf("Lgm_AlphaOfK(), Line %d: Sm_North (= %g) is less than s[%d] (= %g)\n",  __LINE__, m->Sm_North, m->nPnts-1, m->s[m->nPnts-1] );
-                        printf("\tAssuming particle mirrors below loss cone height, Setting K to -9e99\n" );
+                        printf("\tAssuming particle mirrors below loss cone height, Setting K to %g\n", LGM_FILL_VALUE);
                     }
                 }
-                K = -9e99;
+                K = LGM_FILL_VALUE;
 
             } else if ( Smb <= 1e-5 ) {
 
@@ -377,7 +377,7 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
         }
      }
 
-     return( -9e99 );
+     return( LGM_FILL_VALUE );
 
 
 }
@@ -416,7 +416,7 @@ double Lgm_AlphaOfK_Func( double Kt, double Alpha, Lgm_MagModelInfo *m ) {
 
     if ( K < 0.0 ) {
 
-        return( -9e99 );
+        return( LGM_FILL_VALUE );
 
     } else {
 

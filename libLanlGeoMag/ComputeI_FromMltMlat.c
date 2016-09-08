@@ -220,7 +220,7 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
 
 
                 // Do not include Bmin here (second to last arg must be FALSE). We dont have a proper Bmin here.
-                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -9e99 );
+                //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), (*r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( LGM_FILL_VALUE );
                 //if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, 200, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( 9e99 );
 //printf("MIKE: SS = %g\n", SS);
 //printf("MIKE: SS/LstarInfo->mInfo->nDivs = %g\n", SS/LstarInfo->mInfo->nDivs);

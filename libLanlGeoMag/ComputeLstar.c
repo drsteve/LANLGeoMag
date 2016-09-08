@@ -45,7 +45,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
     Type = 0;
 
-    Max  = -1e31;
+    Max  = LGM_FILL_VALUE;
     iMax = -1;
     
     /*
@@ -65,7 +65,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
      */
     nMinima = 0;
     nMaxima = 0;
-    Diff = -1e31;
+    Diff = LGM_FILL_VALUE;
     for ( i=1; i<m->nPnts; i++ ){
         
         OldDiff = Diff;
@@ -710,7 +710,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
 
-                    //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(-9e99);
+                    //if ( Lgm_TraceLine2( &(LstarInfo->mInfo->Pm_South), &LstarInfo->mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-LstarInfo->mInfo->Hmax, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return(LGM_FILL_VALUE);
                     if ( Lgm_TraceLine3( &(LstarInfo->mInfo->Pm_South), SS, LstarInfo->mInfo->nDivs, 1.0, 1e-7, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
                     // Lgm_TraceLine4() doesnt seem to work -- dont use it....
                     //if ( Lgm_TraceLine4( &(LstarInfo->mInfo->Pm_South), &(LstarInfo->mInfo->Pm_North), dSa, dSb, LstarInfo->mInfo->nDivs, FALSE, LstarInfo->mInfo ) < 0 ) return( -1 );
@@ -756,7 +756,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
                     } else {
 
-                        I = -9e99;
+                        I = LGM_FILL_VALUE;
 
                     }
 

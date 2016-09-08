@@ -141,7 +141,7 @@ double Iinv( Lgm_MagModelInfo *mInfo ) {
          *  Unknown Integrator
          */
         printf("Iinv: Unknown integrator. Lgm_Inv_Integrator = %d\n", mInfo->Lgm_n_I_integrand_Calls );
-        result = -9e99;
+        result = LGM_FILL_VALUE;
 
     }
 
@@ -236,7 +236,7 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
          *  Unknown Integrator
          */
         printf("Iinv_interped: Unknown integrator. Lgm_I_Integrator = %d\n", mInfo->Lgm_n_I_integrand_Calls );
-        result = -9e99;
+        result = LGM_FILL_VALUE;
 
     }
 

@@ -49,10 +49,10 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
     u_scale.x = u_scale.y = u_scale.z = 1.0;
 
-    *I  = -9e99;
-    *Bm = -9e99;
-    *M  = -9e99;
-    L   = -9e99;
+    *I  = LGM_FILL_VALUE;
+    *Bm = LGM_FILL_VALUE;
+    *M  = LGM_FILL_VALUE;
+    L   = LGM_FILL_VALUE;
 
 
     /*
@@ -153,7 +153,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                         }
 
                     } else if ( mInfo->UseInterpRoutines ) {
-                        if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(-9e99);
+                        if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(LGM_FILL_VALUE);
 //printf("BEFORE mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
                         ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_North, mInfo );
@@ -194,7 +194,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
                         } else {
 
-                            *I = -9e99;
+                            *I = LGM_FILL_VALUE;
 
                         }
 
@@ -235,7 +235,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
          *  McIlwain L, via McIlwain's original tables or via Hilton approx.
          */
         if ( *I < 0.0 ){
-            L = -9e99;
+            L = LGM_FILL_VALUE;
         } else if ( Type == 0 ) {
             L = LFromIBmM_McIlwain( *I, *Bm, *M );
         } else {

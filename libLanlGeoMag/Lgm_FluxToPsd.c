@@ -113,7 +113,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
 
     double  sa, sa2, Ek;
 
-    if ( a < 0.0 ) return( -9e99 );
+    if ( a < 0.0 ) return( LGM_FILL_VALUE );
 
     sa = sin( a*RadPerDeg );    // sin(Alpha)
     sa2 = sa*sa;                // sin^2(Alpha)
@@ -639,11 +639,11 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
                     if ( SinA <= 1.0 ) {
                         f->AofK[k] = DegPerRad*asin( SinA );
                     } else {
-                        f->AofK[k] = -9e99;
+                        f->AofK[k] = LGM_FILL_VALUE;
                         //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
                     }
                 } else {
-                    f->AofK[k] = -9e99;
+                    f->AofK[k] = LGM_FILL_VALUE;
                     //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
                 }
                 //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
@@ -663,7 +663,7 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
         // Blocal will have been set in Lgm_Setup_AlphaOfK() even if it returned a value <= 0.
         f->B = mInfo->Blocal;
-        for ( k=0; k<nK; k++ ) f->AofK[k] = -9e99;
+        for ( k=0; k<nK; k++ ) f->AofK[k] = LGM_FILL_VALUE;
 
     }
 
@@ -814,7 +814,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
     _FitData    *FitData;
 
     // if a < 0, we should return fill value.
-    if ( a < 0.0 ) return(-9e99);
+    if ( a < 0.0 ) return(LGM_FILL_VALUE);
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
     FitData->nMaxwellians = f->nMaxwellians;
@@ -825,10 +825,10 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
      * f(E).
      */
     if ( a < f->A[0] ) {
-        return(-9e99);
+        return(LGM_FILL_VALUE);
         //i0 = 0; i1 = 1;
     } else if ( a > f->A[f->nA - 1] ) {
-        return(-9e99);
+        return(LGM_FILL_VALUE);
         //i0 = f->nA - 2; i1 = f->nA - 1;
     } else {
         for (i=1; i<f->nA; i++) {
@@ -987,7 +987,6 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
                 gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
                 psd = pow( 10.0, yi );
             } else {
-                //psd = -9e99;
                 psd = LGM_FILL_VALUE;
             }
 
@@ -1068,7 +1067,6 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
             //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
         } else {
 
-            //psd = -9e99;
             psd = LGM_FILL_VALUE;
 
         }
@@ -1457,7 +1455,7 @@ assumes electrons -- generalize this...
                 // Now do conversion from units of PSD to Flux
                 if ( p->PSD_EA[m][k] < 0.0 ) {
 //printf("p->PSD_EA[%d][%d] = %g\n", m, k, p->PSD_EA[m][k]);
-                    p->FLUX_EA[m][k] = -9e99;
+                    p->FLUX_EA[m][k] = LGM_FILL_VALUE;
                 } else {
                     p->FLUX_EA[m][k] = Lgm_PsdToDiffFlux( p->PSD_EA[m][k], p2c2 );
                 }
@@ -1512,7 +1510,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     _FitData    *FitData;
 
     // if K < 0, we should return fill value.
-    if ( K < 0.0 ) return(-9e99);
+    if ( K < 0.0 ) return(LGM_FILL_VALUE);
 
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
     FitData->nMaxwellians = p->nMaxwellians;
@@ -1523,11 +1521,11 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
      */
     if ( K > p->K[p->nK - 1] ) {
         //printf("Lgm_P2F_GetPsdAtMuAndK: (A) K >  p->K[%d] = %g %g\n", K, p->nK - 1, p->K[p->nK - 1] );
-        return(-9e99);
+        return(LGM_FILL_VALUE);
         i0 = p->nK - 2; i1 = p->nK - 1;
     } else if ( K < p->K[0] ) {
         //printf("Lgm_P2F_GetPsdAtMuAndK: (B) K <  p->K[0] = %g %g\n", K, p->K[0] );
-        return(-9e99);
+        return(LGM_FILL_VALUE);
         i0 = 0; i1 = 1;
     } else {
         for (i=1; i<p->nK; i++) {
@@ -1614,7 +1612,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         //printf("E, A = %g %g  x = %g %g psd = %g\n", E, A, x[1], x[2], psd);
     } else {
 
-        psd = -9e99;
+        psd = LGM_FILL_VALUE;
 
     }
 
@@ -1834,13 +1832,13 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
 
     // Determine Min/Max values...
     Min =  9e99;
-    Max = -9e99;
+    Max = LGM_FILL_VALUE;
     for ( w=0; w<W; w++ ){
         for ( h=0; h<H; h++ ) {
 
             Val = Image[h][w];
             if ( LogScale ) {
-                Val2 = (Val > 0.0) ? log10( Val ) : -9e99;
+                Val2 = (Val > 0.0) ? log10( Val ) : LGM_FILL_VALUE;
             } else {
                 Val2 = Image[h][w];
             }
@@ -1866,11 +1864,11 @@ void DumpGif( char *FilenameBase, int W, int H, double **Image ){
         for ( h=0; h<H; h++ ) {
 
             if ( LogScale ) {
-                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : LGM_FILL_VALUE;
             } else {
                 Val = Image[h][w];
             }
-            if ( Val < -1e99 ) {
+            if ( Val <= LGM_FILL_VALUE ) {
                 uVal = 0;
             } else {
                 dVal = (Val - Min)/(Max-Min)*255.0;
@@ -1938,11 +1936,11 @@ void DumpGif2( char *FilenameBase, double Min, double Max, int W, int H, double 
         for ( h=0; h<H; h++ ) {
 
             if ( LogScale ) {
-                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : -9e99;
+                Val = Image[h][w] > 0.0 ? log10( Image[h][w] ) : LGM_FILL_VALUE;
             } else {
                 Val = Image[h][w];
             }
-            if ( Val < -1e99 ) {
+            if ( Val <= LGM_FILL_VALUE  ) {
                 uVal = 0;
             } else {
                 dVal = (Val - Min)/(Max-Min)*255.0;

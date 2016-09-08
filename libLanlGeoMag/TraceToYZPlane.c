@@ -78,7 +78,7 @@ int Lgm_TraceToYZPlane( Lgm_Vector *u, Lgm_Vector *v, double Xtarget, double sgn
     done = FALSE;
     sgn  = sgn0;
     P    = Pa;
-    Sb   = -9e99;
+    Sb   = LGM_FILL_VALUE;
 //printf("Htry =%g   sgn = %g\n", Htry, sgn );
 //printf("Xtarget = %g f = %g P = %g %g %g\n", Xtarget, f, P.x, P.y, P.z);
     while ( !done ) {

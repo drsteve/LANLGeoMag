@@ -207,10 +207,10 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     
 
 
-    Info->Smin   = -9e99;
-    Info->Snorth = -9e99;
-    Info->Ssouth = -9e99;
-    Info->Bmin   = -9e99;
+    Info->Smin   = LGM_FILL_VALUE;
+    Info->Snorth = LGM_FILL_VALUE;
+    Info->Ssouth = LGM_FILL_VALUE;
+    Info->Bmin   = LGM_FILL_VALUE;
 
 
 
