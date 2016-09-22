@@ -7,6 +7,7 @@
 #include <math.h>
 #include "Lgm/Lgm_Tsyg2007.h"
 #include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/Lgm_CTrans.h"
 
 void mysincos(double val, double *sin_val, double *cos_val);
 
@@ -17,26 +18,34 @@ void mysincos(double val, double *sin_val, double *cos_val);
 
 void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
-    int     k;
-    char    Filename[1024];
+    int     k, year, month, day, doy, hour, minute, min5;
+    double  fpart;
+    char    Filename[1024], tmpstr[512];
     FILE    *fp;
+    const char* TS07_DATA_PATH = getenv("TS07_DATA_PATH");
+    if (TS07_DATA_PATH==NULL) {
+        TS07_DATA_PATH = LGM_TS07_DATA_DIR;
+    }
 
-    /*
-     * Just hard code for now....
-     */
+    Lgm_Doy(Date, &year, &month, &day, &doy);
+    //get time and round to nearest 5 minutes... TODO:should read two files and interpolate coeffs
+    hour = (int)UTC;
+    fpart = UTC - (int)UTC;
+    minute = (int)(fpart*60.0);
+    min5 = ((minute + 5/2) / 5) * 5;
 
     /*
      *  Read in coeffs
      */
-    sprintf( Filename, "%s/TS07D_FILES/CoeffParFiles/2002/2002_107_00_00.par", LGM_TS07_DATA_DIR );
-
-
+    sprintf( Filename, "%s/Coeffs/%d_%03d/%d_%03d_%02d_%02d.par", TS07_DATA_PATH, year, doy, year, doy, hour, min5 );
 
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
         for ( k=1; k<=101; k++ ) {
-            fscanf( fp, "%lf", &t->A[k] );
-            //printf("t->A[%d] = %g\n", k, t->A[k]);
+            fgets( &tmpstr, 512, fp);
+            sscanf( &tmpstr, "%lf", &t->A[k] );
+            //fscanf( fp, "%lf%*[\n]\n", &t->A[k] );
+            printf("t->A[%d] = %g\n", k, t->A[k]);
         }
 	    fclose(fp);
 
@@ -48,8 +57,8 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
     }
 
-
-
+    //printf("\n********\nLgm_SetCoeffs_TS07(): Loaded %s for (date, time) = %d, %g\n********\n\n", Filename, Date, UTC );
+    //printf("1. t->P[1][1], t->S_P[1][1] = %g, %g\n", t->P[1][1], t->S_P[1][1]);
 }
 
 
@@ -61,6 +70,11 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     int     i, j, k;
     char    Filename[1024];
     FILE    *fp;
+    const char* TS07_DATA_PATH = getenv("TS07_DATA_PATH");
+//printf("[TS07] Got path: %s\n", TS07_DATA_PATH);
+    if (TS07_DATA_PATH==NULL) {
+        TS07_DATA_PATH = LGM_TS07_DATA_DIR;
+    }
 
     // Init some params
     t->OLD_PS = -9e99;
@@ -100,7 +114,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
      */
     for ( i=1; i<=5; i++ ) {
 
-        sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamebhr%1d.par", LGM_TS07_DATA_DIR, i );
+        sprintf( Filename, "%s/TAIL_PAR/tailamebhr%1d.par", TS07_DATA_PATH, i );
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
             for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSS[k][i] );
@@ -119,9 +133,8 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     for ( i=1; i<=5; i++ ) {
         for ( j=1; j<=4; j++ ) {
 
-            sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_o_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
+            sprintf( Filename, "%s/TAIL_PAR/tailamhr_o_%1d%1d.par", TS07_DATA_PATH, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
-
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSO[k][i][j] );
 		fclose(fp);
 
@@ -139,7 +152,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     for ( i=1; i<=5; i++ ) {
         for ( j=1; j<=4; j++ ) {
 
-            sprintf( Filename, "%s/TS07D_FILES/TailParFiles/tailamhr_e_%1d%1d.par", LGM_TS07_DATA_DIR, i, j );
+            sprintf( Filename, "%s/TAIL_PAR/tailamhr_e_%1d%1d.par", TS07_DATA_PATH, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSE[k][i][j] );
@@ -155,7 +168,6 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
 
         }
     }
-
 
 
 
