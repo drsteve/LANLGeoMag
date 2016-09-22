@@ -640,11 +640,11 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
                         f->AofK[k] = DegPerRad*asin( SinA );
                     } else {
                         f->AofK[k] = LGM_FILL_VALUE;
-                        //printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n");
+                        printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n", AlphaEq);
                     }
                 } else {
                     f->AofK[k] = LGM_FILL_VALUE;
-                    //printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+                    printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
                 }
                 //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
@@ -779,11 +779,13 @@ double Cost( double *x, void *data ){
 
     for ( sum = 0.0, i=0; i<FitData->n; ++i ){
 
-        g_model = log10( Model( x, FitData->nMaxwellians, FitData->E[i] ) );
-        d = log10( FitData->g[i] ) - g_model;
+        g_model = Model( x, FitData->nMaxwellians, FitData->E[i] ) ;
+        d = log10( FitData->g[i]) - log10( g_model);
 
         sum += d*d;
         //sum += fabs(d);
+        ///d = (d >= 0.0) ? d : -d;
+        ///sum += d;
 if (isinf(sum)) {
 //    printf("Cost, INF: g_model, g = %g %g %g     x[1], x[2] = %g %g\n", g_model, FitData->g[i], log10( FitData->g[i] ), x[1], x[2]);
     return( 9e99 );
@@ -1520,7 +1522,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
      * Interpolate on K first to get a 1D array of f(mu).
      */
     if ( K > p->K[p->nK - 1] ) {
-        //printf("Lgm_P2F_GetPsdAtMuAndK: (A) K >  p->K[%d] = %g %g\n", K, p->nK - 1, p->K[p->nK - 1] );
+        //printf("Lgm_P2F_GetPsdAtMuAndK: (A) K >  p->K[%d] = %d %g\n", K, p->nK - 1, p->K[p->nK - 1] );
         return(LGM_FILL_VALUE);
         i0 = p->nK - 2; i1 = p->nK - 1;
     } else if ( K < p->K[0] ) {
