@@ -19,8 +19,10 @@ void mysincos(double val, double *sin_val, double *cos_val);
 void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
     int     k, year, month, day, doy, hour, minute, min5;
+    int     foundP=FALSE;
     double  fpart;
     char    Filename[1024], tmpstr[512];
+    char    *p_str="Pdyn";
     FILE    *fp;
     const char* TS07_DATA_PATH = getenv("TS07_DATA_PATH");
     if (TS07_DATA_PATH==NULL) {
@@ -47,7 +49,16 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
             //fscanf( fp, "%lf%*[\n]\n", &t->A[k] );
             printf("t->A[%d] = %g\n", k, t->A[k]);
         }
-	    fclose(fp);
+        while ((!foundP) && (!feof(fp))) {
+            fgets( &tmpstr, 512, fp);
+            if ( strstr( &tmpstr, p_str) != NULL ) { //check line for Pdyn, if present read value
+                sscanf( &tmpstr, "%*s %lf", &t->Pdyn);
+                foundP = TRUE;
+            }
+        }
+        printf("t->Pdyn = %g\n", t->Pdyn);
+        
+        fclose(fp);
 
     } else {
 

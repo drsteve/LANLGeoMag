@@ -52,6 +52,7 @@ typedef struct LgmTsyg2007_Info {
     double  **TSS;    //[81][6];
     double  ***TSO;   //[81][6][5];
     double  ***TSE;   //[81][6][5];
+    double  Pdyn;
 
 
 
