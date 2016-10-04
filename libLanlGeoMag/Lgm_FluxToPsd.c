@@ -1116,6 +1116,7 @@ Lgm_PsdToFlux *Lgm_P2F_CreatePsdToFlux( int DumpDiagnostics ) {
 
     p->Extrapolate  = TRUE;
     p->nMaxwellians = 2;
+    p->FitType = LGM_P2F_SPLINE;
 
     p->Alloced1 = FALSE;
     p->Alloced2 = FALSE;
@@ -1507,7 +1508,7 @@ assumes electrons -- generalize this...
  */
 double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p ) {
 
-    int         j, i, i0, i1;
+    int         j, i, i0, i1, nn;
     double      K0, K1, y0, y1, slp, psd, E, g;
     _FitData    *FitData;
 
@@ -1537,8 +1538,6 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
             }
         }
     }
-    //printf("Lgm_P2F_GetPsdAtMuAndK: i0, i1 = %d %d\n", i0, i1);
-
 
     // interpolate K
     LGM_ARRAY_1D( FitData->E, p->nMu, double );
@@ -1549,21 +1548,132 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         K1   = p->K[i1];
         y0   = p->PSD_MK[j][i0];
         y1   = p->PSD_MK[j][i1];
-//printf("y0, y1 = %g %g\n", y0, y1);
         if ( (y0>0.0)&&(y1>0.0) ){
             slp  = (y1-y0)/(K1-K0);
             g = slp*(K-K1) + y1;
             if ( g > 1e-40 ) {
                 FitData->g[ FitData->n ] = g;
                 FitData->E[ FitData->n ] = Lgm_Mu_to_Ek( p->Mu[j], A, p->B, LGM_Ee0 );
-//printf("i0, i1 = %d %d   K0, K1 = %g %g   y0, y1, slp = %g %g %g   K = %g, FitData->E[%d] = %g FitData->g[%d] = %g\n", i0, i1, K0, K1, y0, y1, slp, K,  FitData->n, FitData->E[ FitData->n ], FitData->n , FitData->g[ FitData->n ]);
-//printf("%g %g\n", FitData->E[ FitData->n ], FitData->g[ FitData->n ]);
                 ++(FitData->n);
             }
         }
     }
 
-    if ( FitData->n >=  2 ) {
+    if ( p->FitType == LGM_P2F_SPLINE ) {
+
+        /*
+         * Use smoothing spline.
+         */
+        int n;
+        int ncoeffs = 8;
+        int nbreak  = ncoeffs - 2;
+
+        // determine number of points
+        for (n=0, j=0; j<FitData->n; ++j){
+            if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+                ++n;
+            }
+        }
+
+        if ( n > 20 ) {
+            ncoeffs = 12;
+        } else if ( n > 5 ) {
+            ncoeffs = 4;
+        } else {
+            ncoeffs = n/2;
+        }
+        nbreak  = ncoeffs-2;
+
+        if ( (n >= 4) && (nbreak>=2) ) {
+
+            // allocate a cubic bspline workspace (k = 4)
+            gsl_bspline_workspace *bs_bw;
+            gsl_vector            *bs_B;
+            bs_bw = gsl_bspline_alloc( 4, nbreak );
+            bs_B  = gsl_vector_alloc( ncoeffs );
+
+            gsl_vector *bs_x, *bs_y, *bs_c, *bs_w;
+            gsl_matrix *bs_X, *bs_cov;
+            gsl_multifit_linear_workspace *bs_mw;
+            double  bs_chisq, xi, yi, yierr, sigma;
+
+            bs_x = gsl_vector_alloc( n );
+            bs_y = gsl_vector_alloc( n );
+            bs_X = gsl_matrix_alloc( n, ncoeffs );
+            bs_c = gsl_vector_alloc( ncoeffs );
+            bs_w = gsl_vector_alloc( n );
+            bs_cov = gsl_matrix_alloc( ncoeffs, ncoeffs );
+            bs_mw = gsl_multifit_linear_alloc( n, ncoeffs );
+
+            // set up data arrays.
+            for ( nn=0, j=0; j<FitData->n; j++ ){
+
+                if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+                    xi = log10( FitData->E[j] );
+                    yi = log10( FitData->g[j] );
+
+                    sigma = 0.2*yi; // FIX -- i.e. need real values...
+                    gsl_vector_set( bs_x, nn, xi );
+                    gsl_vector_set( bs_y, nn, yi );
+                    gsl_vector_set( bs_w, nn, 1.0/(sigma*sigma) );
+
+                    ++nn;
+                }
+
+            }
+
+            // use uniform breakpoints on defined data interval
+            gsl_bspline_knots_uniform( gsl_vector_get( bs_x, 0 ), gsl_vector_get( bs_x, n-1 ), bs_bw );
+
+            // construct the fit matrix X
+            for ( i=0; i<n; i++ ) {
+                xi = gsl_vector_get( bs_x, i );
+
+                // compute B_j(xi) for all j
+                gsl_bspline_eval( xi, bs_B, bs_bw );
+
+                // fill in row i of X
+                for ( j=0; j<ncoeffs; j++ ) {
+                    double Bj = gsl_vector_get( bs_B, j );
+                    gsl_matrix_set( bs_X, i, j, Bj );
+                }
+            }
+
+            /* do the fit */
+            gsl_multifit_wlinear( bs_X, bs_w, bs_y, bs_c, bs_cov, &bs_chisq, bs_mw );
+
+            E = Lgm_Mu_to_Ek( Mu, A, p->B, LGM_Ee0 );
+            xi = log10( E );
+
+            if ( (xi >= gsl_vector_get( bs_x, 0 )) && (xi <= gsl_vector_get( bs_x, n-1 )) ) {
+                gsl_bspline_eval( xi, bs_B, bs_bw );
+                gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
+                psd = pow( 10.0, yi );
+            } else {
+                psd = LGM_FILL_VALUE;
+            }
+
+            gsl_bspline_free( bs_bw );
+            gsl_vector_free( bs_B );
+            gsl_vector_free( bs_x );
+            gsl_vector_free( bs_y );
+            gsl_matrix_free( bs_X );
+            gsl_vector_free( bs_c );
+            gsl_vector_free( bs_w );
+            gsl_matrix_free( bs_cov );
+            gsl_multifit_linear_free( bs_mw );
+
+
+
+        } else {
+
+            psd = LGM_FILL_VALUE;
+
+        }
+
+    } else if ( p->FitType == LGM_P2F_MAXWELLIAN ) {
+
+      if ( FitData->n >=  2 ) {
 
 
         // interpolate/fit E
@@ -1583,39 +1693,22 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
         x[3] = -2.0;
         x[4] = 200.0;
         praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
-    /*
-    printf("out[0] = %g\n", out[0]);
-    printf("out[1] = %g\n", out[1]);
-    printf("out[2] = %g\n", out[2]);
-    printf("out[3] = %g\n", out[3]);
-    printf("out[4] = %g\n", out[4]);
-    printf("out[5] = %g\n", out[5]);
-    printf("out[6] = %g\n", out[6]);
-    printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
 
-    FILE *fp;
-    printf("E = %g\n", E);
-    fp = fopen("data.txt", "w");
-    for (j=0; j<f->nE; ++j){
-    fprintf(fp, "%g %g\n", f->E[j], FitData->g[j]);
-    }
-    fclose(fp);
-
-    exit(0);
-    */
-
-
-    //x[2] = 200.0;
         //printf("PSD_TO_FLUX: x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
         E = Lgm_Mu_to_Ek( Mu, A, p->B, LGM_Ee0 );
         psd = Model( x,  FitData->nMaxwellians, E );
         //psd = (double)a;
 
         //printf("E, A = %g %g  x = %g %g psd = %g\n", E, A, x[1], x[2], psd);
-    } else {
+      } else {
 
         psd = LGM_FILL_VALUE;
 
+      }
+
+    } else {
+      //FitType not valid...
+      psd = LGM_FILL_VALUE;
     }
 
 

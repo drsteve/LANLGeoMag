@@ -167,6 +167,10 @@ typedef struct Lgm_FluxToPsd {
 } Lgm_FluxToPsd;
 
 
+#define         LGM_P2F_SPLINE                           0
+#define         LGM_P2F_MAXWELLIAN                       1
+
+
 typedef struct Lgm_PsdToFlux {
 
 
