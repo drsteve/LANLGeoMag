@@ -21,7 +21,7 @@ int Lgm_B_T96( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 //printf("t->CB_T96_DX1.DX = %g\n", Info->CB_T96_DX1.DX);
     /*
     printf("Bts04 =  (%g, %g, %g)\n", Bx, By, Bz);
-    B_cdip(  v, &B2, Info );
+    Lgm_B_cdip(  v, &B2, Info );
     printf("Bcdip =  (%f, %f, %f)\n", B2.x, B2.y, B2.z);
     */
     switch ( Info->InternalModel ){

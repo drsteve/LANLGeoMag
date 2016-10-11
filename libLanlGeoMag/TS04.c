@@ -26,7 +26,7 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     Tsyg_TS04( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->TS04_Info );
     /*
     printf("Bts04 =  (%g, %g, %g)\n", Bx, By, Bz);
-    B_cdip(  v, &B2, Info );
+    Lgm_B_cdip(  v, &B2, Info );
     printf("Bcdip =  (%f, %f, %f)\n", B2.x, B2.y, B2.z);
     */
     switch ( Info->InternalModel ){

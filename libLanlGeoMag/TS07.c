@@ -7,6 +7,7 @@ int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
 
     parmod[1]  = Info->TS07_Info.Pdyn; 	// Pressure in nPa
+printf("parmod[1] = %g\n", parmod[1]);
 
     iopt = 0;		// this param supposedly doesnt actually do anything for this model
 
@@ -16,7 +17,7 @@ int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     Tsyg_TS07( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->TS07_Info );
     /*
     printf("Bts07 =  (%g, %g, %g)\n", Bx, By, Bz);
-    B_cdip(  v, &B2, Info );
+    Lgm_B_cdip(  v, &B2, Info );
     printf("Bcdip =  (%f, %f, %f)\n", B2.x, B2.y, B2.z);
     */
     switch ( Info->InternalModel ){
