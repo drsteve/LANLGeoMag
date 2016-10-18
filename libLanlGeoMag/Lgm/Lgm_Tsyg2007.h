@@ -92,6 +92,14 @@ typedef struct LgmTsyg2007_Info {
     double      S_XAPPA;
 
 
+    // Vars cached in TS07D_SHTBNORM_O, TS07D_SHTBNORM_E, TS07D_SHTBNORM_S
+    double phi;
+    double RHO, RHOI, RHOI2;
+    double DPDX, DPDY;
+    double SMP[15];
+    double CMP[15];
+
+
 
 } LgmTsyg2007_Info;
 
@@ -115,7 +123,7 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
         double BZTE[][5], double *BXR11, double *BYR11, double *BZR11, double *BXR12, double *BYR12, double *BZR12, double *BXR21a, double *BYR21a,                       
         double *BZR21a, double *BXR21s, double *BYR21s, double *BZR21s, double *BX, double *BY, double *BZ,  LgmTsyg2007_Info *tInfo );
 
-void    T07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
+void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
 void    TS07D_DEFORMED( double PS, double X, double Y, double Z,                                                                                                          
         double BXS[], double BYS[], double BZS[], double BXO[][5], double BYO[][5], double BZO[][5],                                                                      

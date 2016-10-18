@@ -8,8 +8,69 @@
 #include "Lgm/Lgm_Tsyg2007.h"
 #include "Lgm/Lgm_DynamicMemory.h"
 #include "Lgm/Lgm_CTrans.h"
+#include <gsl/gsl_sf_bessel.h>
 
 void mysincos(double val, double *sin_val, double *cos_val);
+
+int J_N_Arr( int n, double x, double *JnArr ) {
+
+    int i;
+
+
+    // use gsl's array func
+    //gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
+    //return( 1 );
+
+
+    // use num recip.
+    if ( n<0 ) {
+        printf("Bad value of n: n = %d (must be >=0)\n", n);
+        return( -1 );
+    }
+
+    JnArr[0] = bessj0( x );
+    if ( n == 0 ) return( 1 );
+
+    JnArr[1] = bessj1( x );
+    if ( n == 1 ) return( 1 );
+
+    for ( i=2; i<=n; i++ ) {
+        // This is an unstable recurrence -- dont use!
+        //JnArr[i] = 2.0*(i-1)*JnArr[i-1]/x - JnArr[i-2];
+
+        JnArr[i] = bessj( i, x );
+    }
+
+    return( 1 );
+
+}
+
+int SinN_CosN_Arr( int n, double phi, double *SinArr, double *CosArr ) {
+
+    int i;
+
+
+    if ( n<0 ) {
+        printf("Bad value of n: n = %d (must be >=0)\n", n);
+        return( -1 );
+    }
+
+    SinArr[0] = 0.0;
+    CosArr[0] = 1.0;
+    if ( n == 0 ) return( 1 );
+
+    SinArr[1] = sin( phi );
+    CosArr[1] = cos( phi );
+    if ( n == 1 ) return( 1 );
+
+    for ( i=2; i<=n; i++ ) {
+        SinArr[i] = 2.0*CosArr[1]*SinArr[i-1] - SinArr[i-2];
+        CosArr[i] = 2.0*CosArr[1]*CosArr[i-1] - CosArr[i-2];
+    }
+
+    return( 1 );
+
+}
 
 
 /*
@@ -271,13 +332,13 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
 
 
 
-    if ( PDYN != tInfo->OLD_PDYN ) {
+    //if ( PDYN != tInfo->OLD_PDYN ) {
         //XAPPA = mypow( 0.5*PDYN, 0.155 );   //  0.155 is the value obtained in TS05
         XAPPA = pow( 0.5*PDYN, 0.155 );   //  0.155 is the value obtained in TS05
         tInfo->XAPPA = XAPPA;
-    } else {
-        XAPPA = tInfo->XAPPA;
-    }
+    //} else {
+    //    XAPPA = tInfo->XAPPA;
+    //}
 
     XAPPA2 = XAPPA*XAPPA;
     XAPPA3 = XAPPA*XAPPA2;
@@ -304,7 +365,14 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
     AM = A0_A/XAPPA;    // pressure scaling has been reinstated, even though these parameters are not used in this code
     S0 = A0_S0;
 
+
     if ( IOPGEN <= 1 ) {
+        TS07D_SHLCAR3X3( XX, YY, ZZ, PS, &CFX, &CFY, &CFZ, tInfo ); //  DIPOLE SHIELDING FIELD
+
+        *BXCF = CFX*XAPPA3;
+        *BYCF = CFY*XAPPA3;
+        *BZCF = CFZ*XAPPA3;
+    } else {
         *BXCF = 0.0;
         *BYCF = 0.0;
         *BZCF = 0.0;
@@ -315,6 +383,7 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
     if ( (IOPGEN == 0) || (IOPGEN == 2) ) {
 
       TS07D_DEFORMED( PS, XX, YY, ZZ, BXTS, BYTS, BZTS, BXTO, BYTO, BZTO, BXTE, BYTE, BZTE, tInfo ); // TAIL FIELD (THREE MODES)
+//printf("BXTS[2], BYTS[2], BZTS[2] = %g %g %g\n", BXTS[2], BYTS[2], BZTS[2]);
 
     } else {
 
@@ -372,11 +441,13 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
     P_FACTOR = sqrt( PDYN/PDYN_0 ) - 1.0;
     IND = 1;
 
+
     for ( K=1; K<=5; K++ ){
         ++IND;
         TX += ( A[IND] + A[IND+45]*P_FACTOR )*BXTS[K];  //   2 - 6  &  47 - 51
         TY += ( A[IND] + A[IND+45]*P_FACTOR )*BYTS[K];
         TZ += ( A[IND] + A[IND+45]*P_FACTOR )*BZTS[K];
+//printf("TX, A[IND], BXTS[K]  = %g %g %g\n", TX, A[IND], BXTS[K] );
     }
 
 
@@ -400,6 +471,8 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
     BBX = A[1]*(*BXCF) + TX + A_R11*(*BXR11) + A_R12*(*BXR12) + A_R21a*(*BXR21a) + A_R21s*(*BXR21s);
     BBY = A[1]*(*BYCF) + TY + A_R11*(*BYR11) + A_R12*(*BYR12) + A_R21a*(*BYR21a) + A_R21s*(*BYR21s);
     BBZ = A[1]*(*BZCF) + TZ + A_R11*(*BZR11) + A_R12*(*BZR12) + A_R21a*(*BZR21a) + A_R21s*(*BZR21s);
+
+//printf("TX, P_FACTOR = %g %g\n", TX, P_FACTOR );
 
 
     *BX = BBX;
@@ -427,7 +500,7 @@ void TS07D_EXTERN( int IOPGEN, double *A, int NTOT, double PS, double PDYN, doub
  *        (ONE FOR THE PSI=0 MODE AND ANOTHER FOR THE PSI=90 MODE)
  *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-void    T07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo ) {
+void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo ) {
 
     static double    A[] = { -9e99, -901.2327248,895.8011176,817.6208321,-845.5880889,
                       -83.73539535,86.58542841,336.8781402,-329.3619944,-311.2947120,
@@ -766,6 +839,7 @@ void    TS07D_DEFORMED( double PS, double X, double Y, double Z,
     double  R2;
 
     RH0 = tInfo->CB_RH0.RH0;
+//printf("RH0 = %g\n", RH0);
 
     /*
      *  RH0,RH1,RH2, AND IEPS CONTROL THE TILT-RELATED DEFORMATION OF THE TAIL FIELD
@@ -809,6 +883,7 @@ void    TS07D_DEFORMED( double PS, double X, double Y, double Z,
     FAC3 = DZASDX*DXASDY-DXASDX*DZASDY;
 
 
+//printf("FAC1, FAC2, FAC3 = %g %g %g\n", FAC1, FAC2, FAC3);
 
 
 
@@ -816,6 +891,7 @@ void    TS07D_DEFORMED( double PS, double X, double Y, double Z,
      *     DEFORM:
      */
     TS07D_WARPED( PS, XAS, Y, ZAS, BXASS, BYASS, BZASS, BXASO, BYASO, BZASO, BXASE, BYASE, BZASE, tInfo );
+//printf("BXASS[2], BYASS[2], BZASS[2] = %g %g %g\n", BXASS[2], BYASS[2], BZASS[2]);
 
 
 
@@ -900,15 +976,18 @@ void TS07D_WARPED( double PS, double X, double Y, double Z,
     DFDPHI=1.0-G*RHO2*RR4L4*SPHI*SPS;
     DFDRHO=G* RR4L4_2 *(3.0*XL4-RHO4)*CPHI*SPS;
     DFDX=RR4L4*CPHI*SPS*(DGDX*RHO2-G*RHO*RR4L4*4.0*XL3*DXLDX)+TW/10.0;  //  THE LAST TERM DESCRIBES THE IMF-INDUCED TWISTING (ADDED 04/21/06)
+//printf("F, DFDPHI, DFDRHO, DFDX = %g %g %g %g\n", F, DFDPHI, DFDRHO, DFDX);
 
 
     //CF  = cos(F); SF  = sin(F);
     mysincos( F, &SF, &CF );
     YAS = RHO*CF;
     ZAS = RHO*SF;
+//printf("YAS, ZAS = %g %g\n", YAS, ZAS );
 
 
     TS07D_UNWARPED( X, YAS, ZAS, BX_ASS, BY_ASS, BZ_ASS, BX_ASO, BY_ASO, BZ_ASO, BX_ASE, BY_ASE, BZ_ASE, tInfo );
+//printf("BX_ASS[2], BY_ASS[2], BZ_ASS[2] = %g %g %g\n", BX_ASS[2], BY_ASS[2], BZ_ASS[2] );
 
 
 
@@ -977,7 +1056,8 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
     int     K, L;
     double  **TSS, ***TSO, ***TSE;
     double  D0, BXSK, BYSK, BZSK, BXOKL, BYOKL, BZOKL, BXEKL, BYEKL, BZEKL;
-    //double  HXSK, HYSK, HZSK, HXOKL, HYOKL, HZOKL, HXEKL, HYEKL, HZEKL;
+    double  HXSK, HYSK, HZSK, HXOKL, HYOKL, HZOKL, HXEKL, HYEKL, HZEKL;
+    int     XChanged, YChanged, ZChanged;
 
     /*
      *    CALCULATES GSM COMPONENTS OF THE SHIELDED FIELD OF 45 TAIL MODES WITH UNIT
@@ -991,6 +1071,18 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
     D0  = tInfo->CB_TAIL.D;
 
 
+
+    // MGH
+    tInfo->phi   = atan2( Y, X );
+    tInfo->RHO   = sqrt( X*X + Y*Y );
+    tInfo->RHOI  = (  tInfo->RHO < 1e-8 ) ? 1e8 : 1.0/tInfo->RHO;
+    tInfo->RHOI2 = tInfo->RHOI*tInfo->RHOI;
+    tInfo->DPDX  = -Y*tInfo->RHOI2;
+    tInfo->DPDY  =  X*tInfo->RHOI2;
+    SinN_CosN_Arr( 14, tInfo->phi, tInfo->SMP, tInfo->CMP );
+
+
+
     /*
      *
      * --- New tail structure -------------
@@ -1000,11 +1092,11 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
     for ( K=1; K<=5; K++ ){
 
         TS07D_TAILSHT_S( K, X, Y, Z, &BXSK, &BYSK, &BZSK, tInfo );
-        //SHTBNORM_S( K, X, Y, Z, &HXSK, &HYSK, &HZSK );
+        TS07D_SHTBNORM_S( K, X, Y, Z, &HXSK, &HYSK, &HZSK, tInfo );
 
-        BXS[K] = BXSK;  // +HXSK
-        BYS[K] = BYSK;  // +HYSK
-        BZS[K] = BZSK;  // +HZSK
+        BXS[K] = BXSK + HXSK;
+        BYS[K] = BYSK + HYSK;
+        BZS[K] = BZSK + HZSK;
 
     }
 
@@ -1013,19 +1105,19 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
         for ( L=1; L<=4; L++ ){
 
             TS07D_TAILSHT_OE( 1, K, L, X, Y, Z, &BXOKL, &BYOKL, &BZOKL, tInfo );
-            //SHTBNORM_O( K, L, X, Y, Z, &HXOKL, &HYOKL, &HZOKL );
+            TS07D_SHTBNORM_O( K, L, X, Y, Z, &HXOKL, &HYOKL, &HZOKL, tInfo );
 
 
-          BXO[K][L] = BXOKL; // +HXOKL
-          BYO[K][L] = BYOKL; // +HYOKL
-          BZO[K][L] = BZOKL; // +HZOKL
+          BXO[K][L] = BXOKL + HXOKL;
+          BYO[K][L] = BYOKL + HYOKL;
+          BZO[K][L] = BZOKL + HZOKL;
 
           TS07D_TAILSHT_OE( 0, K, L, X, Y, Z, &BXEKL, &BYEKL, &BZEKL, tInfo );
-          //SHTBNORM_E( K, L, X, Y, Z, &HXEKL, &HYEKL, &HZEKL );
+          TS07D_SHTBNORM_E( K, L, X, Y, Z, &HXEKL, &HYEKL, &HZEKL, tInfo );
 
-          BXE[K][L] = BXEKL;  // +HXEKL
-          BYE[K][L] = BYEKL;  // +HYEKL
-          BZE[K][L] = BZEKL;  // +HZEKL
+          BXE[K][L] = BXEKL + HXEKL;
+          BYE[K][L] = BYEKL + HYEKL;
+          BZE[K][L] = BZEKL + HZEKL;
 
         }
     }
@@ -1089,11 +1181,24 @@ void TS07D_TAILSHT_S( int M, double X, double Y, double Z, double *BX, double *B
 
 
 
+/*
+ * MGH - these routines are very wasteful.
+ *       AJM  - is the bessel function of order m, J_m( AKNR )
+ *       AJMD - looks to be its derivative, J'_m( AKNR ) which is given by J'_m( AKNR ) = J_m-1( AKNR ) - m*J_m( AKNR )/AKNR
+ *       There are at least two problems here;
+ *          1) Many calcs are repeated over and over.
+ *          2) AKN only depends on the AK[n] parameters -- which never change (for a gievn set of parameters)!
+ *       Two fixes: 1) compute all at once, and 2) cache results and only recompute if necessary
+ *       
+ *       Similar problem for other costly functions.
+ *       cos( m*phi ) and sin( m*phi ) 
+ *       Fix: Switch to recurrence relation and only compite if X or Y changes.
+ */
 void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     L, m1, m, n;
-    double  AK[6], phi, CMP, SMP, RHO, AKN, AKNR, CHZ, SHZ;
-    double  AKNRI, RHOI, AJM, AJM1, AJMD, DPDX, DPDY;
+    int     m1, m, mm, n;
+    double  AK[6], AKN, AKNR, CHZ, SHZ;
+    double  AKNRI, AJM[15], AJM1, AJMD[15];
     double  HX1, HX2, HX, HY1, HY2, HY, HZ;
     double  **TSS;
 
@@ -1106,94 +1211,63 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
     AK[5] = TSS[80][K];
 
 
-    phi = atan2( Y, X );
+    /* fed in through tInfo
+    phi   = atan2( Y, X );
+    RHO   = sqrt( X*X + Y*Y );
+    RHOI  = ( RHO < 1e-8 ) ? 1.0e8 : 1.0/RHO;
+    RHOI2 = RHOI*RHOI;
+    DPDX  = -Y*RHOI2;
+    DPDY  =  X*RHOI2;
+
+    SinN_CosN_Arr( 14, phi, SMP, CMP );
+    */
 
 
-    L = 0;
+
+
+
     *FX = *FY = *FZ = 0.0;
 
-    for ( m1=1; m1<=15; m1++ ) {
-        m = m1-1;
 
-        CMP = cos( m*phi );
-        SMP = sin( m*phi );
+    for ( n=1; n<=5; n++ ) {
 
-        for ( n=1; n<=5; n++ ) {
+        AKN   = fabs( AK[n] );
+        AKNR  = AKN*tInfo->RHO;
+        AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
 
-            RHO  = sqrt( X*X + Y*Y );
-            AKN  = fabs( AK[n] );
-            AKNR = AKN*RHO;
+        CHZ = cosh( Z*AKN ); // only changes if Z changes
+        SHZ = sinh( Z*AKN ); // only changes if Z changes
 
-            CHZ = cosh( Z*AKN );
-            SHZ = sinh( Z*AKN );
+        J_N_Arr( 14, AKNR, AJM );
+        // using gsl bessel funcs
+        //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
 
-            if ( AKNR < 1e-8 ) {
-                AKNRI = 1.0e8;
-            } else {
-                AKNRI = 1.0/AKNR;
-            }
+        // using original bessel funcs
+        //AJM[0] = bessj0( AKNR );
+        //AJM[1] = bessj1( AKNR );
+        //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
 
-            if ( RHO < 1e-8 ) {
-                RHOI = 1.0e8;
-            } else {
-                RHOI = 1.0/RHO;
-            }
+        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
+        
 
+        for ( m=0; m<=14; m++ ) {
 
-            if ( m > 2 ) {
-
-                AJM  = bessj( m, AKNR );
-                AJM1 = bessj( m-1, AKNR );
-                AJMD = AJM1 - m*AJM*AKNRI;
-
-            } else {
-
-                if ( m == 2 ) {
-
-                    AJM  = bessj( 2, AKNR );
-                    AJM1 = bessj1( AKNR );
-                    AJMD = AJM1 - m*AJM*AKNRI;
-
-                } else {
-
-                   if ( m == 1 ) {
-
-                        AJM  = bessj1( AKNR );
-                        AJM1 = bessj0( AKNR );
-                        AJMD = AJM1 - AJM*AKNRI;
-
-                    } else {
-
-                        AJM  =  bessj0(AKNR);
-                        AJMD = -bessj1(AKNR);
-
-                    }
-
-                }
-
-            }
-
-
-            DPDX = -Y*RHOI*RHOI;
-            DPDY =  X*RHOI*RHOI;
-
-            HX1 =  m*DPDX*SMP*SHZ*AJM;
-            HX2 = -AKN*X*RHOI*CMP*SHZ*AJMD;
+            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ * AJM[m];
+            HX2 = -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ * AJMD[m];
 
             HX = HX1 + HX2;
 
-            HY1 =  m*DPDY*SMP*SHZ*AJM;
-            HY2 = -AKN*Y*RHOI*CMP*SHZ*AJMD;
+            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ * AJM[m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ * AJMD[m];
 
             HY = HY1 + HY2;
 
-            HZ = -AKN*CMP*CHZ*AJM;
+            HZ = -AKN*tInfo->CMP[m]*CHZ * AJM[m];
 
-            ++L;
 
-            *FX += HX*TSS[L][K];
-            *FY += HY*TSS[L][K];
-            *FZ += HZ*TSS[L][K];
+            *FX += HX*TSS[n+5*m][K];
+            *FY += HY*TSS[n+5*m][K];
+            *FZ += HZ*TSS[n+5*m][K];
 
         }
     }
@@ -1290,10 +1364,10 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
 
 void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m, m1, n, L1;
-    double  AK[6], phi, CMP, SMP, RHO, AKN;
-    double  AKNR, CHZ, SHZ, AKNRI, RHOI, AJM, AJM1, AJMD;
-    double  DPDX, DPDY, HX1, HX2,HY1, HY2;
+    int     m, mm, n;
+    double  AK[6], AKN;
+    double  AKNR, CHZ, SHZ, AKNRI, AJM[15], AJM1, AJMD[15];
+    double  HX1, HX2,HY1, HY2;
     double  HX, HY, HZ;
     double  ***TSO;
 
@@ -1306,78 +1380,59 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
     AK[5] = TSO[80][K][L];
 
 
-    phi = atan2( Y, X );
 
-    L1 = 0;
+    /* These values all fed in throuygh tInfo
+    phi   = atan2( Y, X );
+    RHO   = sqrt( X*X + Y*Y );
+    RHOI  = (  RHO < 1e-8 ) ? 1e8 : 1.0/RHO;
+    RHOI2 = RHOI*RHOI;
+    DPDX  = -Y*RHOI2;
+    DPDY  =  X*RHOI2;
+    SinN_CosN_Arr( 14, phi, SMP, CMP );
+    */
+    
+
     *FX = *FY = *FZ = 0.0;
-    for ( m1=1; m1<=15; m1++ ){
-        m = m1-1;
 
-        CMP = cos( m*phi );
-        SMP = sin( m*phi );
-        for ( n=1; n<=5; n++ ){
 
-            RHO  = sqrt( X*X + Y*Y );
-            AKN  = fabs( AK[n] );
-            AKNR = AKN*RHO;
+    for ( n=1; n<=5; n++ ){
 
-            CHZ = cosh( Z*AKN );
-            SHZ = sinh( Z*AKN );
+        AKN   = fabs( AK[n] );
+        AKNR  = AKN*tInfo->RHO;
+        AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
 
-            AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
-            RHOI  = (  RHO < 1e-8 ) ? 1e8 : 1.0/RHO;
+        CHZ = cosh( Z*AKN );
+        SHZ = sinh( Z*AKN );
 
-            if ( m > 2 ) {
+        J_N_Arr( 14, AKNR, AJM );
 
-                AJM  = bessj( m, AKNR );
-                AJM1 = bessj( m-1, AKNR );
-                AJMD = AJM1 - m*AJM*AKNRI;
+        // using gsl bessel funcs
+        //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
 
-            } else {
+        // using original bessel funcs
+        //AJM[0] = bessj0( AKNR );
+        //AJM[1] = bessj1( AKNR );
+        //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
 
-                if ( m == 2 ) {
+        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
 
-                   AJM  = bessj( 2, AKNR );
-                   AJM1 = bessj1( AKNR );
-                   AJMD = AJM1 - m*AJM*AKNRI;
 
-                } else {
+        for ( m=0; m<=14; m++ ){
 
-                    if ( m == 1 ) {
-
-                        AJM  = bessj1( AKNR );
-                        AJM1 = bessj0( AKNR );
-                        AJMD = AJM1 - AJM*AKNRI;
-
-                    } else {
-
-                        AJM  =  bessj0( AKNR );
-                        AJMD = -bessj1( AKNR );
-
-                    }
-
-                }
-
-            }
-
-            DPDX = -Y*RHOI*RHOI;
-            DPDY = X*RHOI*RHOI;
-
-            HX1 =  m*DPDX*SMP*SHZ*AJM;
-            HX2 =  -AKN*X*RHOI*CMP*SHZ*AJMD;
+            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ*AJM[m];
+            HX2 =  -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ*AJMD[m];
             HX  = HX1+HX2;
 
-            HY1 =  m*DPDY*SMP*SHZ*AJM;
-            HY2 = -AKN*Y*RHOI*CMP*SHZ*AJMD;
+            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ*AJM[m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ*AJMD[m];
             HY  = HY1 + HY2;
 
-            HZ = -AKN*CMP*CHZ*AJM;
+            HZ = -AKN*tInfo->CMP[m]*CHZ*AJM[m];
 
-            ++L1;
 
-            *FX += HX*TSO[L1][K][L];
-            *FY += HY*TSO[L1][K][L];
-            *FZ += HZ*TSO[L1][K][L];
+            *FX += HX*TSO[n+5*m][K][L];
+            *FY += HY*TSO[n+5*m][K][L];
+            *FZ += HZ*TSO[n+5*m][K][L];
 
         }
     }
@@ -1391,10 +1446,10 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
 
 void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m, m1, n, L1;
-    double  AK[6], phi, CMP, SMP, RHO, AKN;
-    double  AKNR, CHZ, SHZ, AKNRI, RHOI, AJM, AJM1, JMD;
-    double  DPDX, DPDY, HX1, HX2, HY1, HY2, AJMD, HX, HY, HZ;
+    int     m, mm, n;
+    double  AK[6], AKN;
+    double  AKNR, CHZ, SHZ, AKNRI, RHOI, RHOI2, AJM[15], AJM1, JMD;
+    double  DPDX, DPDY, HX1, HX2, HY1, HY2, AJMD[15], HX, HY, HZ;
     double  ***TSE;
 
     TSE = tInfo->TSE;
@@ -1406,79 +1461,61 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
     AK[5] = TSE[80][K][L];
 
 
-    phi = atan2( Y, X );
+    /* fed in from tInfo
+    phi   = atan2( Y, X );
+    RHO   = sqrt( X*X + Y*Y );
+    RHOI  = (  RHO < 1e-8 ) ? 1e8 : 1.0/RHO;
+    RHOI2 = RHOI*RHOI;
+    DPDX  = -Y*RHOI2;
+    DPDY  = X*RHOI2;
 
-    L1 = 0;
+    SinN_CosN_Arr( 14, phi, SMP, CMP );
+    */
+
+
+
     *FX = *FY = *FZ = 0.0;
-    for ( m1=1; m1<=15; m1++ ) {
-        m = m1-1;
-
-        CMP = cos( m*phi );
-        SMP = sin( m*phi );
-        for ( n=1; n<=5; n++ ) {
-
-            RHO  = sqrt( X*X + Y*Y );
-            AKN  = fabs( AK[n] );
-            AKNR = AKN*RHO;
-
-            CHZ = cosh( Z*AKN );
-            SHZ = sinh( Z*AKN );
-
-            AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
-            RHOI  = (  RHO < 1e-8 ) ? 1e8 : 1.0/RHO;
-
-            if ( m > 2 ) {
-
-                   AJM  = bessj( m, AKNR );
-                   AJM1 = bessj( m-1, AKNR );
-                   AJMD = AJM1 - m*AJM*AKNRI;
-
-            } else {
-
-                if( m == 2 ) {
-
-                   AJM  = bessj( 2, AKNR );
-                   AJM1 = bessj1( AKNR );
-                   AJMD = AJM1 - m*AJM*AKNRI;
-
-                } else {
-
-                    if ( m == 1 ) {
-
-                        AJM  = bessj1( AKNR );
-                        AJM1 = bessj0( AKNR );
-                        AJMD = AJM1 - AJM*AKNRI;
-
-                    } else {
-
-                        AJM  =  bessj0( AKNR );
-                        AJMD = -bessj1( AKNR );
-
-                    }
-
-                }
-            }
 
 
 
-            DPDX = -Y*RHOI*RHOI;
-            DPDY = X*RHOI*RHOI;
+    for ( n=1; n<=5; n++ ) {
 
-            HX1 = -m*DPDX*CMP*SHZ*AJM;
-            HX2 = -AKN*X*RHOI*SMP*SHZ*AJMD;
+        AKN  = fabs( AK[n] );
+        AKNR = AKN*tInfo->RHO;
+
+        CHZ = cosh( Z*AKN );
+        SHZ = sinh( Z*AKN );
+
+        AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
+
+        J_N_Arr( 14, AKNR, AJM );
+
+        // using gsl bessel funcs
+        //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
+
+        // using original bessel funcs
+        //AJM[0] = bessj0( AKNR );
+        //AJM[1] = bessj1( AKNR );
+        //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
+
+        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
+
+        for ( m=0; m<=14; m++ ) {
+
+            HX1 = -m*tInfo->DPDX*tInfo->CMP[m]*SHZ*AJM[m];
+            HX2 = -AKN*X*tInfo->RHOI*tInfo->SMP[m]*SHZ*AJMD[m];
             HX  = HX1 + HX2;
 
-            HY1 = -m*DPDY*CMP*SHZ*AJM;
-            HY2 = -AKN*Y*RHOI*SMP*SHZ*AJMD;
+            HY1 = -m*tInfo->DPDY*tInfo->CMP[m]*SHZ*AJM[m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->SMP[m]*SHZ*AJMD[m];
             HY  = HY1 + HY2;
 
-            HZ = -AKN*SMP*CHZ*AJM;
+            HZ = -AKN*tInfo->SMP[m]*CHZ*AJM[m];
 
-            ++L1;
 
-            *FX += HX*TSE[L1][K][L];
-            *FY += HY*TSE[L1][K][L];
-            *FZ += HZ*TSE[L1][K][L];
+            *FX += HX*TSE[n+5*m][K][L];
+            *FY += HY*TSE[n+5*m][K][L];
+            *FZ += HZ*TSE[n+5*m][K][L];
 
         }
     }
@@ -1756,22 +1793,32 @@ void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
 
     double      X_SC, FX11, FY11, FZ11, HX11, HY11, HZ11, FX12, FY12, FZ12, HX12, HY12, HZ12;
     double      FX21, FY21, FZ21, HX21, HY21, HZ21, FX22, FY22, FZ22, HX22, HY22, HZ22, XKAPPA;
-    int         PSChanged, XChanged, YChanged, ZChanged;
+    int         J, PSChanged, XChanged, YChanged, ZChanged;
+
+    PSChanged = ( fabs(PS-tInfo->OLD_PS) > 1e-10 ) ? TRUE : FALSE;
+    XChanged = ( fabs(X-tInfo->OLD_X) > 1e-10 ) ? TRUE : FALSE;
+    YChanged = ( fabs(Y-tInfo->OLD_Y) > 1e-10 ) ? TRUE : FALSE;
+    ZChanged = ( fabs(Z-tInfo->OLD_Z) > 1e-10 ) ? TRUE : FALSE;
 
     tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;               // FORWARDED IN BIRK_1N2
     X_SC                         = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIRK_1N2( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11, tInfo );        //  REGION 1, MODE 1
-    //BIRK_SHL( SH11,PS,X_SC,X,Y,Z,&HX11,&HY11,&HZ11, tInfo);
-    *BX11 = FX11;  // + HX11;
-    *BY11 = FY11;  // + HY11;
-    *BZ11 = FZ11;  // + HZ11;
+// where are J, PSChanged, XChanged, YChanged, ZChanged defined???
+    TS07D_BIRK_SHL( 0, PSChanged, XChanged, YChanged, ZChanged, SH11, PS, X_SC, X, Y, Z, &HX11, &HY11, &HZ11, tInfo);
+//printf("C 11 >>>>>>>>>>>> FX11,FY11,FZ11 = %g %g %g\n", FX11,FY11,FZ11 );
+//printf("C 11 >>>>>>>>>>>> HX11,HY11,HZ11 = %g %g %g\n", HX11,HY11,HZ11 );
+    *BX11 = FX11 + HX11;
+    *BY11 = FY11 + HY11;
+    *BZ11 = FZ11 + HZ11;
 
     TS07D_BIRK_1N2( 1, 2, PS, X, Y, Z, &FX12, &FY12, &FZ12, tInfo );        //  REGION 1, MODE 2
-    //BIRK_SHL( SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12, tInfo );
-    *BX12 = FX12;  // + HX12;
-    *BY12 = FY12;  // + HY12;
-    *BZ12 = FZ12;  // + HZ12;
+    TS07D_BIRK_SHL( 1, PSChanged, XChanged, YChanged, ZChanged, SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12, tInfo );
+//printf("C 12 >>>>>>>>>>>> FX12,FY12,FZ12 = %g %g %g\n", FX12,FY12,FZ12 );
+//printf("C 12 >>>>>>>>>>>> HX12,HY12,HZ12 = %g %g %g\n", HX12,HY12,HZ12 );
+    *BX12 = FX12 + HX12;
+    *BY12 = FY12 + HY12;
+    *BZ12 = FZ12 + HZ12;
 
 
 
@@ -1780,16 +1827,20 @@ void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
     X_SC                         = tInfo->CB_BIRKPAR.XKAPPA2 - 1.0;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIRK_1N2( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21, tInfo );        //  REGION 2, MODE 1
-    //BIRK_SHL( SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
-    *BX21 = FX21;  // + HX21;
-    *BY21 = FY21;  // + HY21;
-    *BZ21 = FZ21;  // + HZ21;
+    TS07D_BIRK_SHL( 2, PSChanged, XChanged, YChanged, ZChanged, SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
+//printf("C 21 >>>>>>>>>>>> FX21,FY21,FZ21 = %g %g %g\n", FX21,FY21,FZ21 );
+//printf("C 21 >>>>>>>>>>>> HX21,HY21,HZ21 = %g %g %g\n", HX21,HY21,HZ21 );
+    *BX21 = FX21 + HX21;
+    *BY21 = FY21 + HY21;
+    *BZ21 = FZ21 + HZ21;
 
     TS07D_BIRK_1N2( 2, 2, PS, X, Y, Z, &FX22, &FY22, &FZ22, tInfo );        //  REGION 2, MODE 2
-    //BIRK_SHL( SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22, tInfo );
-    *BX22 = FX22;  // + HX22;
-    *BY22 = FY22;  // + HY22;
-    *BZ22 = FZ22;  // + HZ22;
+    TS07D_BIRK_SHL( 3, PSChanged, XChanged, YChanged, ZChanged, SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22, tInfo );
+//printf("C 22 >>>>>>>>>>>> FX22,FY22,FZ22 = %g %g %g\n", FX22,FY22,FZ22 );
+//printf("C 22 >>>>>>>>>>>> HX22,HY22,HZ22 = %g %g %g\n", HX22,HY22,HZ22 );
+    *BX22 = FX22 + HX22;
+    *BY22 = FY22 + HY22;
+    *BZ22 = FZ22 + HZ22;
 
     return;
 
@@ -2311,6 +2362,7 @@ void    TS07D_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZC
 
 
 
+//    printf("PS = %.15lf\n", PS);
 
 
     L  = 0;
@@ -2336,6 +2388,7 @@ void    TS07D_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZC
                             FX = -tInfo->SQPR[J][I][K]*tInfo->EPR[J][I][K]*tInfo->CYPI[J][I]*tInfo->SZRK[J][K];
                             FY =  tInfo->EPR[J][I][K]*tInfo->SYPI[J][I]*tInfo->SZRK[J][K]*tInfo->ooP[J][I];
                             FZ = -tInfo->EPR[J][I][K]*tInfo->CYPI[J][I]*tInfo->CZRK[J][K]*tInfo->ooR[J][K];
+                            //printf("1. FX, FY, FZ = %.10lf %.10lf %.10lf\n", FX, FY, FZ );
 
                             if (N == 1) {
 
@@ -2365,6 +2418,7 @@ void    TS07D_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZC
                             FX = -tInfo->SPS*tInfo->SQQS[J][I][K]*tInfo->EQS[J][I][K]*tInfo->CYQI[J][I]*tInfo->CZSK[J][K];
                             FY = tInfo->SPS*tInfo->ooQ[J][I]*tInfo->EQS[J][I][K]*tInfo->SYQI[J][I]*tInfo->CZSK[J][K];
                             FZ = tInfo->SPS*tInfo->ooS[J][K]*tInfo->EQS[J][I][K]*tInfo->CYQI[J][I]*tInfo->SZSK[J][K];
+                            //printf("2. FX, FY, FZ = %.10lf %.10lf %.10lf\n", FX, FY, FZ );
 
                             if (N == 1) {
                                 if (NN == 1) {
@@ -2403,6 +2457,7 @@ void    TS07D_BIRK_SHL( int J, int PSChanged, int XChanged, int YChanged, int ZC
                         GX = GX + HXR*A[L];
                         GY = GY + HY *A[L];
                         GZ = GZ + HZR*A[L];
+//printf("GX, GY, GZ, A[L] = %.8lf %.8lf %.8lf %.8lf\n", GX, GY, GZ, A[L]);
 
 
                     }
@@ -2520,20 +2575,28 @@ void     TS07D_BIRTOTSY( double PS, double X, double Y, double Z,
     double      FX21, FY21, FZ21, HX21, HY21, HZ21, FX22, FY22, FZ22, HX22, HY22, HZ22, XKAPPA;
     int         PSChanged, XChanged, YChanged, ZChanged;
 
+    PSChanged = ( fabs(PS-tInfo->OLD_PS) > 1e-10 ) ? TRUE : FALSE;
+    XChanged = ( fabs(X-tInfo->OLD_X) > 1e-10 ) ? TRUE : FALSE;
+    YChanged = ( fabs(Y-tInfo->OLD_Y) > 1e-10 ) ? TRUE : FALSE;
+    ZChanged = ( fabs(Z-tInfo->OLD_Z) > 1e-10 ) ? TRUE : FALSE;
+
+
     tInfo->CB_DPHI_B_RHO0.XKAPPA = tInfo->CB_BIRKPAR.XKAPPA1;               // FORWARDED IN BIRK_1N2
     X_SC                         = tInfo->CB_BIRKPAR.XKAPPA1 - 1.1;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIR1N2SY( 1, 1, PS, X, Y, Z, &FX11, &FY11, &FZ11, tInfo );        //  REGION 1, MODE 1
-    //BIRK_SHL( SH11,PS,X_SC,X,Y,Z,&HX11,&HY11,&HZ11, tInfo);
-    *BX11 = FX11;  // + HX11;
-    *BY11 = FY11;  // + HY11;
-    *BZ11 = FZ11;  // + HZ11;
+    TS07D_BIRSH_SY( 0, PSChanged, XChanged, YChanged, ZChanged, SH11,PS, X_SC, X, Y, Z, &HX11, &HY11, &HZ11, tInfo );
+    *BX11 = FX11 + HX11;
+    *BY11 = FY11 + HY11;
+    *BZ11 = FZ11 + HZ11;
+//    printf( "FX11, FY11, FZ11, HX11, HY11, HZ11 = %g %g %g %g %g %g\n", FX11, FY11, FZ11, HX11, HY11, HZ11 );
 
     TS07D_BIR1N2SY( 1, 2, PS, X, Y, Z, &FX12, &FY12, &FZ12, tInfo );        //  REGION 1, MODE 2
-    //BIRK_SHL( SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12, tInfo );
-    *BX12 = FX12;  // + HX12;
-    *BY12 = FY12;  // + HY12;
-    *BZ12 = FZ12;  // + HZ12;
+    TS07D_BIRSH_SY( 1, PSChanged, XChanged, YChanged, ZChanged, SH12, PS, X_SC, X, Y, Z, &HX12, &HY12, &HZ12, tInfo );
+    *BX12 = FX12 + HX12;
+    *BY12 = FY12 + HY12;
+    *BZ12 = FZ12 + HZ12;
+//    printf( "FX12, FY12, FZ12, HX12, HY12, HZ12 = %g %g %g %g %g %g\n", FX12, FY12, FZ12, HX12, HY12, HZ12 );
 
 
 
@@ -2542,16 +2605,18 @@ void     TS07D_BIRTOTSY( double PS, double X, double Y, double Z,
     X_SC                         = tInfo->CB_BIRKPAR.XKAPPA2 - 1.0;         // FORWARDED IN BIRK_SHL
 
     TS07D_BIR1N2SY( 2, 1, PS, X, Y, Z, &FX21, &FY21, &FZ21, tInfo );        //  REGION 2, MODE 1
-    //BIRK_SHL( SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
-    *BX21 = FX21;  // + HX21;
-    *BY21 = FY21;  // + HY21;
-    *BZ21 = FZ21;  // + HZ21;
+    TS07D_BIRSH_SY( 2, PSChanged, XChanged, YChanged, ZChanged, SH21, PS, X_SC, X, Y, Z, &HX21, &HY21, &HZ21, tInfo );
+    *BX21 = FX21 + HX21;
+    *BY21 = FY21 + HY21;
+    *BZ21 = FZ21 + HZ21;
+//    printf( "FX21, FY21, FZ21, HX21, HY21, HZ21 = %g %g %g %g %g %g\n", FX21, FY21, FZ21, HX21, HY21, HZ21 );
 
     TS07D_BIR1N2SY( 2, 2, PS, X, Y, Z, &FX22, &FY22, &FZ22, tInfo );        //  REGION 2, MODE 2
-    //BIRK_SHL( SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22, tInfo );
-    *BX22 = FX22;  // + HX22;
-    *BY22 = FY22;  // + HY22;
-    *BZ22 = FZ22;  // + HZ22;
+    TS07D_BIRSH_SY( 3, PSChanged, XChanged, YChanged, ZChanged, SH22, PS, X_SC, X, Y, Z, &HX22, &HY22, &HZ22, tInfo );
+    *BX22 = FX22 + HX22;
+    *BY22 = FY22 + HY22;
+    *BZ22 = FZ22 + HZ22;
+//    printf( "FX22, FY22, FZ22, HX22, HY22, HZ22 = %g %g %g %g %g %g\n", FX22, FY22, FZ22, HX22, HY22, HZ22 );
 
     return;
 
@@ -2833,9 +2898,12 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
      *  if PS has changed we need to recompute things
      */
     if ( PSChanged || !tInfo->S_DoneJ[J] ) {
-        tInfo->S_CPS  = tInfo->S_cos_psi_op;
-        tInfo->S_SPS  = tInfo->S_sin_psi_op;
-        tInfo->S_S3PS = 2.0*tInfo->S_CPS;
+        //tInfo->S_CPS  = tInfo->S_cos_psi_op;
+        //tInfo->S_SPS  = tInfo->S_sin_psi_op;
+        //tInfo->S_S3PS = 2.0*tInfo->S_CPS;
+        tInfo->S_CPS  = tInfo->cos_psi_op;
+        tInfo->S_SPS  = tInfo->sin_psi_op;
+        tInfo->S_S3PS = 2.0*tInfo->CPS;
         tInfo->S_PST1[J] = PS*A[85];
         tInfo->S_PST2[J] = PS*A[86];
         tInfo->S_ST1[J] = sin(tInfo->S_PST1[J]);

@@ -7,7 +7,7 @@ int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
 
     parmod[1]  = Info->TS07_Info.Pdyn; 	// Pressure in nPa
-printf("parmod[1] = %g\n", parmod[1]);
+//printf("parmod[1] = %g\n", parmod[1]);
 
     iopt = 0;		// this param supposedly doesnt actually do anything for this model
 
