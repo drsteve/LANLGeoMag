@@ -1,4 +1,5 @@
 #ifdef HAVE_CONFIG_H
+// MGH
 #include <config.h>
 #endif
 
@@ -16,10 +17,13 @@ int J_N_Arr( int n, double x, double *JnArr ) {
 
     int i;
 
+    // use Jay Albert's NR mod
+    //bessjj( n, x, JnArr );
+    //return( 1 );
 
     // use gsl's array func
-    //gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
-    //return( 1 );
+    gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
+    return( 1 );
 
 
     // use num recip.
@@ -241,6 +245,11 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
         }
     }
 
+
+    /*
+     * Init the cache "flags for SHTBNORM func
+     */
+    t->SHTBNORM_S_RHO_LAST = LGM_FILL_VALUE;
 
 
     return;
@@ -1080,6 +1089,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
     tInfo->DPDX  = -Y*tInfo->RHOI2;
     tInfo->DPDY  =  X*tInfo->RHOI2;
     SinN_CosN_Arr( 14, tInfo->phi, tInfo->SMP, tInfo->CMP );
+    tInfo->ZD    = sqrt( Z*Z + tInfo->CB_TAIL.D*tInfo->CB_TAIL.D );
 
 
 
@@ -1108,16 +1118,16 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
             TS07D_SHTBNORM_O( K, L, X, Y, Z, &HXOKL, &HYOKL, &HZOKL, tInfo );
 
 
-          BXO[K][L] = BXOKL + HXOKL;
-          BYO[K][L] = BYOKL + HYOKL;
-          BZO[K][L] = BZOKL + HZOKL;
+            BXO[K][L] = BXOKL + HXOKL;
+            BYO[K][L] = BYOKL + HYOKL;
+            BZO[K][L] = BZOKL + HZOKL;
 
-          TS07D_TAILSHT_OE( 0, K, L, X, Y, Z, &BXEKL, &BYEKL, &BZEKL, tInfo );
-          TS07D_SHTBNORM_E( K, L, X, Y, Z, &HXEKL, &HYEKL, &HZEKL, tInfo );
+            TS07D_TAILSHT_OE( 0, K, L, X, Y, Z, &BXEKL, &BYEKL, &BZEKL, tInfo );
+            TS07D_SHTBNORM_E( K, L, X, Y, Z, &HXEKL, &HYEKL, &HZEKL, tInfo );
 
-          BXE[K][L] = BXEKL + HXEKL;
-          BYE[K][L] = BYEKL + HYEKL;
-          BZE[K][L] = BZEKL + HZEKL;
+            BXE[K][L] = BXEKL + HXEKL;
+            BYE[K][L] = BYEKL + HYEKL;
+            BZE[K][L] = BZEKL + HZEKL;
 
         }
     }
@@ -1143,7 +1153,8 @@ void TS07D_TAILSHT_S( int M, double X, double Y, double Z, double *BX, double *B
     DLTK = 1.0;           // through the above common block
 
 
-    RHO   = sqrt( X*X + Y*Y );
+    //RHO   = sqrt( X*X + Y*Y );
+    RHO   = tInfo->RHO;
     CSPHI = X/RHO;
     SNPHI = Y/RHO;
 
@@ -1153,11 +1164,16 @@ void TS07D_TAILSHT_S( int M, double X, double Y, double Z, double *BX, double *B
     RKMZ = RKM*Z;
     RKMR = RKM*RHO;
 
-    ZD = sqrt( Z*Z + D*D );
+    //ZD = sqrt( Z*Z + D*D );
+    ZD = tInfo->ZD;
 
+// MGH
+// for a given M,X,Y,Z, these dont change.
+// can these be cached?
     RJ0 = bessj0( RKMR );
     RJ1 = bessj1( RKMR );
     REX = exp( RKM*ZD );
+
 
     *BX = RKMZ*RJ1*CSPHI/ZD/REX;
     *BY = RKMZ*RJ1*SNPHI/ZD/REX;
@@ -1196,7 +1212,7 @@ void TS07D_TAILSHT_S( int M, double X, double Y, double Z, double *BX, double *B
  */
 void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m1, m, mm, n;
+    int     k, m, mm, n;
     double  AK[6], AKN, AKNR, CHZ, SHZ;
     double  AKNRI, AJM[15], AJM1, AJMD[15];
     double  HX1, HX2, HX, HY1, HY2, HY, HZ;
@@ -1204,11 +1220,11 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
 
     TSS = tInfo->TSS;
 
-    AK[1] = TSS[76][K];
-    AK[2] = TSS[77][K];
-    AK[3] = TSS[78][K];
-    AK[4] = TSS[79][K];
-    AK[5] = TSS[80][K];
+    //AK[1] = TSS[76][K];
+    //AK[2] = TSS[77][K];
+    //AK[3] = TSS[78][K];
+    //AK[4] = TSS[79][K];
+    //AK[5] = TSS[80][K];
 
 
     /* fed in through tInfo
@@ -1222,6 +1238,31 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
     SinN_CosN_Arr( 14, phi, SMP, CMP );
     */
 
+    if ( tInfo->RHO != tInfo->SHTBNORM_S_RHO_LAST ) {
+        // do all K's here to simplfy book-keeping
+        for ( k=1; k<=5; k++ ) {
+            for ( n=1; n<=5; n++ ) {
+                AKN   = fabs( TSS[75+n][k] );
+                AKNR  = AKN*tInfo->RHO;
+                AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
+                // cache results
+                tInfo->SHTBNORM_S_AKN[k][n]  = AKN;
+                tInfo->SHTBNORM_S_AKNR[k][n] = AKNR;
+
+                J_N_Arr( 14, AKNR, AJM );
+                // cache results
+                for ( m=0; m<=14; m++ ) tInfo->SHTBNORM_S_AJM[k][n][m] = AJM[m];
+                tInfo->SHTBNORM_S_AJMD[k][n][0] = -tInfo->SHTBNORM_S_AJM[k][n][1]; 
+                for ( m=1; m<=14; m++ ) {   
+                    tInfo->SHTBNORM_S_AJMD[k][n][m] = tInfo->SHTBNORM_S_AJM[k][n][m-1] 
+                                                    - m*tInfo->SHTBNORM_S_AJM[k][n][m]*AKNRI;
+                }
+            }
+        }
+        // flag that we've cached them for this RHO value.
+        tInfo->SHTBNORM_S_RHO_LAST = tInfo->RHO;
+    }
+
 
 
 
@@ -1231,14 +1272,15 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
 
     for ( n=1; n<=5; n++ ) {
 
-        AKN   = fabs( AK[n] );
-        AKNR  = AKN*tInfo->RHO;
-        AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
+        //AKN   = fabs( AK[n] );
+        //AKNR  = AKN*tInfo->RHO;
+        //AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
+        AKN = tInfo->SHTBNORM_S_AKN[K][n];
 
         CHZ = cosh( Z*AKN ); // only changes if Z changes
         SHZ = sinh( Z*AKN ); // only changes if Z changes
 
-        J_N_Arr( 14, AKNR, AJM );
+        //J_N_Arr( 14, AKNR, AJM );
         // using gsl bessel funcs
         //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
 
@@ -1247,22 +1289,22 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
         //AJM[1] = bessj1( AKNR );
         //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
 
-        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
+        //AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
         
 
         for ( m=0; m<=14; m++ ) {
 
-            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ * AJM[m];
-            HX2 = -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ * AJMD[m];
+            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ * tInfo->SHTBNORM_S_AJM[K][n][m];
+            HX2 = -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ * tInfo->SHTBNORM_S_AJMD[K][n][m];
 
             HX = HX1 + HX2;
 
-            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ * AJM[m];
-            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ * AJMD[m];
+            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ * tInfo->SHTBNORM_S_AJM[K][n][m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ * tInfo->SHTBNORM_S_AJMD[K][n][m];
 
             HY = HY1 + HY2;
 
-            HZ = -AKN*tInfo->CMP[m]*CHZ * AJM[m];
+            HZ = -AKN*tInfo->CMP[m]*CHZ * tInfo->SHTBNORM_S_AJM[K][n][m];
 
 
             *FX += HX*TSS[n+5*m][K];
@@ -1289,13 +1331,16 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
     DLTK = 1.0;                 // step in Km
 
 
-    RHO = sqrt( X*X + Y*Y );
+    //RHO = sqrt( X*X + Y*Y );
+    RHO   = tInfo->RHO;
     CSPHI = X/RHO;
     SNPHI = Y/RHO;
 
-    phi    = atan2( Y, X );
-    CSMPHI = cos( M*phi );
-    SNMPHI = sin( M*phi );
+    //phi    = atan2( Y, X );
+    //CSMPHI = cos( M*phi );
+    //SNMPHI = sin( M*phi );
+    CSMPHI = tInfo->CMP[M];
+    SNMPHI = tInfo->SMP[M];
 
     DKM = 1.0 + (MK-1)*DLTK;
     RKM = DKM/RNOT;
@@ -1303,8 +1348,12 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
     RKMZ = RKM*Z;
     RKMR = RKM*RHO;
 
-    ZD = sqrt( Z*Z + D0*D0 );
+    //ZD = sqrt( Z*Z + D0*D0 );
+    ZD = tInfo->ZD;
 
+// MGH
+// for a given M,X,Y,Z, these dont change.
+// can these be cached?
     REX = exp( RKM*ZD );
 
 
@@ -1401,9 +1450,14 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
         AKNR  = AKN*tInfo->RHO;
         AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
 
+// MGH
+// for a given M,X,Y,Z, these dont change.
+// can these be cached?
         CHZ = cosh( Z*AKN );
         SHZ = sinh( Z*AKN );
 
+// to cache, we need
+// AJM[K][K][M]
         J_N_Arr( 14, AKNR, AJM );
 
         // using gsl bessel funcs
@@ -1483,11 +1537,16 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
         AKN  = fabs( AK[n] );
         AKNR = AKN*tInfo->RHO;
 
+// MGH
+// for a given M,X,Y,Z, these dont change.
+// can these be cached?
         CHZ = cosh( Z*AKN );
         SHZ = sinh( Z*AKN );
 
         AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
 
+// to cache need 
+// AJM[K][L][M]
         J_N_Arr( 14, AKNR, AJM );
 
         // using gsl bessel funcs
@@ -1707,6 +1766,98 @@ double  bessj( int n, double x ) {
     if( (x < 0.0)&&( n%2 == 1) ) result = -result; // CHECK
 
     return( result );
+}
+
+
+// mod due to Jay Albert (saves intermediate vals)...
+void bessjj( int n, double x, double *Jarr ) {
+
+    /*
+     * (C) Copr. 1986-92 Numerical Recipes Software .)+1YX39'=K+1.
+     */
+    int     IACC=40, j;
+    double  BIGNO=1e10;
+    double  BIGNI=1e-10;
+    int     m, jsum, i;
+    double  ax, result, tox, bjm, bjp, bj, sum;
+
+    if ( n < 0 ) {
+        printf("bessjj(): bad argument n in bessjj: n = %d\n", n);
+        exit(-1);
+    }
+
+    if ( n == 0 ) {
+        Jarr[0] = bessj0( x );
+        return;
+    }
+
+    if ( n == 1 ) {
+        Jarr[0] = bessj0( x );
+        Jarr[1] = bessj1( x );
+        return;
+    }
+
+
+    ax = fabs(x);
+
+    if( ax == 0.0 ) {
+
+        Jarr[0] = 0.0;
+
+    } else if ( ax > (double)n ) {
+
+        tox = 2.0/ax;
+        Jarr[0] = bjm = bessj0( ax );   // J_0(x)
+        Jarr[1] = bj  = bessj1( ax );   // J_1(x)
+
+        for ( j=1; j<n; j++ ) {
+            bjp = j*tox*bj - bjm;
+            bjm = bj;
+            bj  = bjp;
+            Jarr[j+1] = bjp;            // J_j+1(x)
+        }
+
+
+    } else {
+
+        tox = 2.0/ax;
+        m = 2*( ( n + (int)(sqrt(IACC*n)) )/2 );
+
+        jsum = 0;
+        sum = 0.0;
+        bjp = 0.0;
+        bj  = 1.0;
+        for ( i=1; i<=n; i++ ) Jarr[i] = 0.0;
+
+        for ( j=m; j>=1; j-- ) {
+
+            bjm = j*tox*bj - bjp;
+            bjp = bj;
+            bj  = bjm;
+
+            if ( fabs(bj) > BIGNO ) {
+                bj     *= BIGNI;
+                bjp    *= BIGNI;
+                sum    *= BIGNI;
+                for ( i=j+1; i<=n; i++ ) Jarr[i] *= BIGNI;
+            }
+
+            if ( jsum != 0 ) sum += bj;
+            jsum = 1 - jsum;
+            if ( j <= n ) Jarr[j] = bjp; // J_j(x)
+
+        }
+
+        sum   = 2.0*sum - bj;
+        for ( i=1; i<=n; i++ ) Jarr[i] /= sum;
+        Jarr[0] = bj/sum;
+    }
+
+    if( x < 0.0 ) {
+        for ( i=1; i<=n; i+=2 ) Jarr[i] = -Jarr[i];
+    }
+
+    return;
 }
 
 
@@ -2034,6 +2185,8 @@ void    TS07D_ONE_CONE( double *A, double X, double Y, double Z, double *BX, dou
 
     THETA0 = A[31];
 
+// MGH
+// Dont we have these in the tInfop structure already?
     RHO2  = X*X+Y*Y;
     RHO   = sqrt(RHO2);
     R     = sqrt(RHO2+Z*Z);

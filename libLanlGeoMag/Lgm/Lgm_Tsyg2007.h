@@ -98,6 +98,13 @@ typedef struct LgmTsyg2007_Info {
     double DPDX, DPDY;
     double SMP[15];
     double CMP[15];
+    double ZD;
+
+    double SHTBNORM_S_RHO_LAST; // the last value of RHO used
+    double SHTBNORM_S_AKN[6][6];
+    double SHTBNORM_S_AKNR[6][6];
+    double SHTBNORM_S_AJM[6][6][15];
+    double SHTBNORM_S_AJMD[6][6][15];
 
 
 
@@ -145,6 +152,7 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
 double  bessj0( double x );
 double  bessj1( double x );
 double  bessj( int n, double x );
+void    bessjj( int n, double x, double *Jarr );
 void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
         double *BX11, double *BY11, double *BZ11, double *BX12, double *BY12, double *BZ12,
         double *BX21, double *BY21, double *BZ21, double *BX22, double *BY22, double *BZ22, LgmTsyg2007_Info *tInfo );
