@@ -10,6 +10,7 @@
 #include "Lgm/Lgm_DynamicMemory.h"
 #include "Lgm/Lgm_CTrans.h"
 #include <gsl/gsl_sf_bessel.h>
+#include <float.h>
 
 void mysincos(double val, double *sin_val, double *cos_val);
 
@@ -18,8 +19,8 @@ int J_N_Arr( int n, double x, double *JnArr ) {
     int i;
 
     // use Jay Albert's NR mod
-    bessjj( n, x, JnArr );
-    return( 1 );
+    //bessjj( n, x, JnArr );
+    //return( 1 );
 
     // use gsl's array func
     //gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
@@ -317,12 +318,12 @@ void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
             BXTO, BYTO, BZTO, BXTE, BYTE, BZTE, &BXR11, &BYR11, &BZR11, &BXR12, &BYR12, &BZR12,
             &BXR21a, &BYR21a, &BZR21a, &BXR21s, &BYR21s, &BZR21s, BX, BY, BZ, tInfo );
 
-//    printf("BXCF,   BYCF,   BZCF   = %g %g %g\n", BXCF, BYCF, BZCF );
-//    printf("BXR11,  BYR11,  BZR11  = %g %g %g\n", BXR11, BYR11, BZR11 );
-//    printf("BXR12,  BYR12,  BZR12  = %g %g %g\n", BXR12, BYR12, BZR12 );
-//    printf("BXR21a, BYR21a, BZR21a = %g %g %g\n", BXR21a, BYR21a, BZR21a );
-//    printf("BXR21s, BYR21s, BZR21s = %g %g %g\n", BXR21s, BYR21s, BZR21s );
-//    printf("BX,     BY,     BZ     = %g %g %g\n", *BX, *BY, *BZ);
+    //printf("BXCF,   BYCF,   BZCF   = %.8lf %.8lf %.8lf\n", BXCF, BYCF, BZCF );
+    //printf("BXR11,  BYR11,  BZR11  = %.8lf %.8lf %.8lf\n", BXR11, BYR11, BZR11 );
+    //printf("BXR12,  BYR12,  BZR12  = %.8lf %.8lf %.8lf\n", BXR12, BYR12, BZR12 );
+    //printf("BXR21a, BYR21a, BZR21a = %.8lf %.8lf %.8lf\n", BXR21a, BYR21a, BZR21a );
+    //printf("BXR21s, BYR21s, BZR21s = %.8lf %.8lf %.8lf\n", BXR21s, BYR21s, BZR21s );
+    //printf("BX,     BY,     BZ     = %.8lf %.8lf %.8lf\n", *BX, *BY, *BZ);
 
 
 
@@ -1139,6 +1140,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
 
         TS07D_TAILSHT_S( K, X, Y, Z, &BXSK, &BYSK, &BZSK, tInfo );
         TS07D_SHTBNORM_S( K, X, Y, Z, &HXSK, &HYSK, &HZSK, tInfo );
+        //printf("C: HXSK,HYSK,HZSK = %lf %lf %lf\n", HXSK,HYSK,HZSK);
 
         BXS[K] = BXSK + HXSK;
         BYS[K] = BYSK + HYSK;
@@ -1164,6 +1166,7 @@ void    TS07D_UNWARPED( double X, double Y, double Z, double BXS[6], double BYS[
             BXE[K][L] = BXEKL + HXEKL;
             BYE[K][L] = BYEKL + HYEKL;
             BZE[K][L] = BZEKL + HZEKL;
+//            printf("C: BXE[K][L], BYE[K][L], BZE[K][L] = %lf %lf %lf\n", BXE[K][L], BYE[K][L], BZE[K][L]);
 
         }
     }
@@ -1805,17 +1808,18 @@ double  bessj( int n, double x ) {
 }
 
 
-// mod due to Jay Albert (saves intermediate vals)...
+// mod due to Jay Albert (its the NR code with mods to save intermediate vals)...
 void bessjj( int n, double x, double *Jarr ) {
 
     /*
      * (C) Copr. 1986-92 Numerical Recipes Software .)+1YX39'=K+1.
      */
-    int     IACC=40, j;
+    int     IACC=40;
     double  BIGNO=1e10;
     double  BIGNI=1e-10;
-    int     m, jsum, i;
-    double  ax, result, tox, bjm, bjp, bj, sum;
+    int     m, jsum, i, j, k;
+    double  ax, result, tox, bjm, bjp, bj, sum, dum;
+    int     IEXP = DBL_MAX_EXP/2;
 
     if ( n < 0 ) {
         printf("bessjj(): bad argument n in bessjj: n = %d\n", n);
@@ -1875,8 +1879,15 @@ void bessjj( int n, double x, double *Jarr ) {
                 bj     *= BIGNI;
                 bjp    *= BIGNI;
                 sum    *= BIGNI;
-                for ( i=j+1; i<=n; i++ ) Jarr[i] *= BIGNI;
+                for ( i=j+1; i<=n; i++ ) *(Jarr+i) *= BIGNI;
             }
+            //dum = frexp( bj, &k );
+            //if ( k > IEXP ) {
+            //    bj  = ldexp( bj,  -IEXP );
+            //    bjp = ldexp( bjp, -IEXP );
+            //    sum = ldexp( sum, -IEXP );
+            //    for ( i=j+1; i<=n; i++ ) Jarr[i] = ldexp( Jarr[i], -IEXP );
+            //}
 
             if ( jsum != 0 ) sum += bj;
             jsum = 1 - jsum;
@@ -1895,6 +1906,7 @@ void bessjj( int n, double x, double *Jarr ) {
 
     return;
 }
+
 
 
 void     TS07D_BIRK_TOT( double PS, double X, double Y, double Z,
@@ -3094,12 +3106,12 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
         tInfo->S_S3PS = 2.0*tInfo->CPS;
         tInfo->S_PST1[J] = PS*A[85];
         tInfo->S_PST2[J] = PS*A[86];
-        //tInfo->S_ST1[J] = sin(tInfo->S_PST1[J]);
-        //tInfo->S_CT1[J] = cos(tInfo->S_PST1[J]);
-        sincos( tInfo->S_PST1[J], &(tInfo->S_ST1[J]), &(tInfo->S_CT1[J]) );
-        //tInfo->S_ST2[J] = sin(tInfo->S_PST2[J]);
-        //tInfo->S_CT2[J] = cos(tInfo->S_PST2[J]);
-        sincos( tInfo->S_PST2[J], &(tInfo->S_ST2[J]), &(tInfo->S_CT2[J]) );
+        tInfo->S_ST1[J] = sin(tInfo->S_PST1[J]);
+        tInfo->S_CT1[J] = cos(tInfo->S_PST1[J]);
+        //sincos( tInfo->S_PST1[J], &(tInfo->S_ST1[J]), &(tInfo->S_CT1[J]) );
+        tInfo->S_ST2[J] = sin(tInfo->S_PST2[J]);
+        tInfo->S_CT2[J] = cos(tInfo->S_PST2[J]);
+        //sincos( tInfo->S_PST2[J], &(tInfo->S_ST2[J]), &(tInfo->S_CT2[J]) );
     }
 
 
@@ -3139,11 +3151,11 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
 
             //tInfo->S_SZRK[J][K] = sin(tInfo->S_Z1ooR[J][K]);
             //tInfo->S_CZRK[J][K] = cos(tInfo->S_Z1ooR[J][K]);
-            sincos( tInfo->S_Z1ooR[J][I], &(tInfo->S_SZRK[J][I]), &(tInfo->S_CZRK[J][I]) );
+            sincos( tInfo->S_Z1ooR[J][K], &(tInfo->S_SZRK[J][K]), &(tInfo->S_CZRK[J][K]) );
 
             //tInfo->S_SZSK[J][K] = sin(tInfo->S_Z2ooS[J][K]);
             //tInfo->S_CZSK[J][K] = cos(tInfo->S_Z2ooS[J][K]);
-            sincos( tInfo->S_Z2ooS[J][I], &(tInfo->S_SZSK[J][I]), &(tInfo->S_CZSK[J][I]) );
+            sincos( tInfo->S_Z2ooS[J][K], &(tInfo->S_SZSK[J][K]), &(tInfo->S_CZSK[J][K]) );
         }
     }
 
