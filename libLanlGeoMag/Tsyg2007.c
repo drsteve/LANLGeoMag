@@ -83,7 +83,7 @@ int SinN_CosN_Arr( int n, double phi, double *SinArr, double *CosArr ) {
 
 void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
-    int     k, year, month, day, doy, hour, minute, min5;
+    int     k, year, month, day, doy, hour, minute, min5, isLeap;
     int     foundP=FALSE;
     double  fpart;
     char    Filename[1024], tmpstr[512];
@@ -94,12 +94,33 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
         TS07_DATA_PATH = LGM_TS07_DATA_DIR;
     }
 
+    //get time and round to nearest 5 minutes... 
     Lgm_Doy(Date, &year, &month, &day, &doy);
-    //get time and round to nearest 5 minutes... TODO:should read two files and interpolate coeffs
+    //TODO: should read two files and interpolate coeffs
     hour = (int)UTC;
     fpart = UTC - (int)UTC;
     minute = (int)(fpart*60.0);
     min5 = ((minute + 5/2) / 5) * 5;
+    //at this point we can have minute 60, so we need to make sure the hours/minutes are right
+    //solution must be robust to day and year boundaries
+    if (min5>=60) { // if minute is 60 (or more) then recycle and increment hour
+        min5 = min5 % 60;
+        hour++;
+    }
+    if (hour>=24) {
+        hour = hour % 24;
+        doy++;
+    }
+    //to increment year, check if it's a leap year...
+    isLeap = Lgm_LeapYear(year);
+    if ((isLeap) && (doy>366)) {
+        doy = 1;
+        year++;
+    }
+    if ((!isLeap) && (doy>365)) {
+        doy = 1;
+        year++;
+    }
 
     /*
      *  Read in coeffs
@@ -112,7 +133,7 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
             fgets( &tmpstr, 512, fp);
             sscanf( &tmpstr, "%lf", &t->A[k] );
             //fscanf( fp, "%lf%*[\n]\n", &t->A[k] );
-            printf("t->A[%d] = %g\n", k, t->A[k]);
+            //printf("t->A[%d] = %g\n", k, t->A[k]);
         }
         while ((!foundP) && (!feof(fp))) {
             fgets( &tmpstr, 512, fp);
@@ -121,7 +142,7 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
                 foundP = TRUE;
             }
         }
-        printf("t->Pdyn = %g\n", t->Pdyn);
+        //printf("t->Pdyn = %g\n", t->Pdyn);
         
         fclose(fp);
 
