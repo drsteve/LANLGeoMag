@@ -19,8 +19,8 @@ int J_N_Arr( int n, double x, double *JnArr ) {
     int i;
 
     // use Jay Albert's NR mod
-    //bessjj( n, x, JnArr );
-    //return( 1 );
+    bessjj( n, x, JnArr );
+    return( 1 );
 
     // use gsl's array func
     //gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
