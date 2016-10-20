@@ -18,12 +18,12 @@ int J_N_Arr( int n, double x, double *JnArr ) {
     int i;
 
     // use Jay Albert's NR mod
-    //bessjj( n, x, JnArr );
-    //return( 1 );
+    bessjj( n, x, JnArr );
+    return( 1 );
 
     // use gsl's array func
-    gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
-    return( 1 );
+    //gsl_sf_bessel_Jn_array( 0, n, x, JnArr );
+    //return( 1 );
 
 
     // use num recip.
@@ -51,7 +51,8 @@ int J_N_Arr( int n, double x, double *JnArr ) {
 
 int SinN_CosN_Arr( int n, double phi, double *SinArr, double *CosArr ) {
 
-    int i;
+    double  g;
+    int     i;
 
 
     if ( n<0 ) {
@@ -63,13 +64,13 @@ int SinN_CosN_Arr( int n, double phi, double *SinArr, double *CosArr ) {
     CosArr[0] = 1.0;
     if ( n == 0 ) return( 1 );
 
-    SinArr[1] = sin( phi );
-    CosArr[1] = cos( phi );
+    sincos( phi, &SinArr[1], &CosArr[1] );
     if ( n == 1 ) return( 1 );
 
+    g = 2.0*CosArr[1];
     for ( i=2; i<=n; i++ ) {
-        SinArr[i] = 2.0*CosArr[1]*SinArr[i-1] - SinArr[i-2];
-        CosArr[i] = 2.0*CosArr[1]*CosArr[i-1] - CosArr[i-2];
+        SinArr[i] = g*SinArr[i-1] - SinArr[i-2];
+        CosArr[i] = g*CosArr[i-1] - CosArr[i-2];
     }
 
     return( 1 );
@@ -574,8 +575,10 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
     CPS = tInfo->cos_psi_op; SPS = tInfo->sin_psi_op; S2PS = 2.0*CPS; // MODIFIED HERE (INSTEAD OF SIN(3*PS) I TRY SIN(2*PS)
 
 
-    ST1 = sin( PS*T1 ); CT1 = cos( PS*T1 );
-    ST2 = sin( PS*T2 ); CT2 = cos( PS*T2 );
+    //ST1 = sin( PS*T1 ); CT1 = cos( PS*T1 );
+    sincos( PS*T1, &ST1, &CT1 );
+    //ST2 = sin( PS*T2 ); CT2 = cos( PS*T2 );
+    sincos( PS*T2, &ST2, &CT2 );
 
     X1 = X*CT1 - Z*ST1; Z1 = X*ST1 + Z*CT1;
     X2 = X*CT2 - Z*ST2; Z2 = X*ST2 + Z*CT2;
@@ -621,13 +624,19 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
     Z1oR3 = Z1*ooR3;
 
 
-    COSZ1oR1 = cos(Z1oR1); SINZ1oR1 = sin(Z1oR1);
-    COSZ1oR2 = cos(Z1oR2); SINZ1oR2 = sin(Z1oR2);
-    COSZ1oR3 = cos(Z1oR3); SINZ1oR3 = sin(Z1oR3);
+    //COSZ1oR1 = cos(Z1oR1); SINZ1oR1 = sin(Z1oR1);
+    sincos( Z1oR1, &SINZ1oR1, &COSZ1oR1 );
+    //COSZ1oR2 = cos(Z1oR2); SINZ1oR2 = sin(Z1oR2);
+    sincos( Z1oR2, &SINZ1oR2, &COSZ1oR2 );
+    //COSZ1oR3 = cos(Z1oR3); SINZ1oR3 = sin(Z1oR3);
+    sincos( Z1oR3, &SINZ1oR3, &COSZ1oR3 );
 
-    COSYoP1 = cos(YoP1); SINYoP1 = sin(YoP1);
-    COSYoP2 = cos(YoP2); SINYoP2 = sin(YoP2);
-    COSYoP3 = cos(YoP3); SINYoP3 = sin(YoP3);
+    //COSYoP1 = cos(YoP1); SINYoP1 = sin(YoP1);
+    sincos( YoP1, &SINYoP1, &COSYoP1 );
+    //COSYoP2 = cos(YoP2); SINYoP2 = sin(YoP2);
+    sincos( YoP2, &SINYoP2, &COSYoP2 );
+    //COSYoP3 = cos(YoP3); SINYoP3 = sin(YoP3);
+    sincos( YoP3, &SINYoP3, &COSYoP3 );
 
 
     // I = 1
@@ -745,13 +754,19 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
     Z2oS2 = Z2*ooS2;
     Z2oS3 = Z2*ooS3;
 
-    COSZ2oS1 = cos(Z2oS1); SINZ2oS1 = sin(Z2oS1);
-    COSZ2oS2 = cos(Z2oS2); SINZ2oS2 = sin(Z2oS2);
-    COSZ2oS3 = cos(Z2oS3); SINZ2oS3 = sin(Z2oS3);
+    //COSZ2oS1 = cos(Z2oS1); SINZ2oS1 = sin(Z2oS1);
+    sincos( Z2oS1, &SINZ2oS1, &COSZ2oS1 );
+    //COSZ2oS2 = cos(Z2oS2); SINZ2oS2 = sin(Z2oS2);
+    sincos( Z2oS2, &SINZ2oS2, &COSZ2oS2 );
+    //COSZ2oS3 = cos(Z2oS3); SINZ2oS3 = sin(Z2oS3);
+    sincos( Z2oS3, &SINZ2oS3, &COSZ2oS3 );
 
-    COSYoQ1 = cos(YoQ1); SINYoQ1 = sin(YoQ1);
-    COSYoQ2 = cos(YoQ2); SINYoQ2 = sin(YoQ2);
-    COSYoQ3 = cos(YoQ3); SINYoQ3 = sin(YoQ3);
+    //COSYoQ1 = cos(YoQ1); SINYoQ1 = sin(YoQ1);
+    sincos( YoQ1, &SINYoQ1, &COSYoQ1 );
+    //COSYoQ2 = cos(YoQ2); SINYoQ2 = sin(YoQ2);
+    sincos( YoQ2, &SINYoQ2, &COSYoQ2 );
+    //COSYoQ3 = cos(YoQ3); SINYoQ3 = sin(YoQ3);
+    sincos( YoQ3, &SINYoQ3, &COSYoQ3 );
 
     // I = 1
     SQQS =  sqrtQ1S1; EXQS =  exp(SQQS*X2);
@@ -3036,7 +3051,6 @@ void     TS07D_TWOCONSS( double *A, double X, double Y, double Z, double *BX, do
 
 
 // This is one of the costliest routines -- mostly due to sin,cos,exp
-// Almost 13% of Lstar calc is done in here.
 void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZChanged, double *A, double PS, double X_SC,
                                 double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo ) {
 
@@ -3080,10 +3094,12 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
         tInfo->S_S3PS = 2.0*tInfo->CPS;
         tInfo->S_PST1[J] = PS*A[85];
         tInfo->S_PST2[J] = PS*A[86];
-        tInfo->S_ST1[J] = sin(tInfo->S_PST1[J]);
-        tInfo->S_CT1[J] = cos(tInfo->S_PST1[J]);
-        tInfo->S_ST2[J] = sin(tInfo->S_PST2[J]);
-        tInfo->S_CT2[J] = cos(tInfo->S_PST2[J]);
+        //tInfo->S_ST1[J] = sin(tInfo->S_PST1[J]);
+        //tInfo->S_CT1[J] = cos(tInfo->S_PST1[J]);
+        sincos( tInfo->S_PST1[J], &(tInfo->S_ST1[J]), &(tInfo->S_CT1[J]) );
+        //tInfo->S_ST2[J] = sin(tInfo->S_PST2[J]);
+        //tInfo->S_CT2[J] = cos(tInfo->S_PST2[J]);
+        sincos( tInfo->S_PST2[J], &(tInfo->S_ST2[J]), &(tInfo->S_CT2[J]) );
     }
 
 
@@ -3105,10 +3121,14 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
         for (I=1; I<=3; I++ ){
             tInfo->S_YooP[J][I] = Y*tInfo->S_ooP[J][I];
             tInfo->S_YooQ[J][I] = Y*tInfo->S_ooQ[J][I];
-            tInfo->S_CYPI[J][I] = cos(tInfo->S_YooP[J][I]);
-            tInfo->S_CYQI[J][I] = cos(tInfo->S_YooQ[J][I]);
-            tInfo->S_SYPI[J][I] = sin(tInfo->S_YooP[J][I]);
-            tInfo->S_SYQI[J][I] = sin(tInfo->S_YooQ[J][I]);
+
+            //tInfo->S_SYQI[J][I] = sin(tInfo->S_YooQ[J][I]);
+            //tInfo->S_CYQI[J][I] = cos(tInfo->S_YooQ[J][I]);
+            sincos( tInfo->S_YooQ[J][I], &(tInfo->S_SYQI[J][I]), &(tInfo->S_CYQI[J][I]) );
+
+            //tInfo->S_SYPI[J][I] = sin(tInfo->S_YooP[J][I]);
+            //tInfo->S_CYPI[J][I] = cos(tInfo->S_YooP[J][I]);
+            sincos( tInfo->S_YooP[J][I], &(tInfo->S_SYPI[J][I]), &(tInfo->S_CYPI[J][I]) );
         }
     }
 
@@ -3116,10 +3136,14 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
         for (K=1; K<=3; K++ ){
             tInfo->S_Z1ooR[J][K] = tInfo->S_Z1[J]*tInfo->S_ooR[J][K];
             tInfo->S_Z2ooS[J][K] = tInfo->S_Z2[J]*tInfo->S_ooS[J][K];
-            tInfo->S_SZRK[J][K] = sin(tInfo->S_Z1ooR[J][K]);
-            tInfo->S_CZSK[J][K] = cos(tInfo->S_Z2ooS[J][K]);
-            tInfo->S_CZRK[J][K] = cos(tInfo->S_Z1ooR[J][K]);
-            tInfo->S_SZSK[J][K] = sin(tInfo->S_Z2ooS[J][K]);
+
+            //tInfo->S_SZRK[J][K] = sin(tInfo->S_Z1ooR[J][K]);
+            //tInfo->S_CZRK[J][K] = cos(tInfo->S_Z1ooR[J][K]);
+            sincos( tInfo->S_Z1ooR[J][I], &(tInfo->S_SZRK[J][I]), &(tInfo->S_CZRK[J][I]) );
+
+            //tInfo->S_SZSK[J][K] = sin(tInfo->S_Z2ooS[J][K]);
+            //tInfo->S_CZSK[J][K] = cos(tInfo->S_Z2ooS[J][K]);
+            sincos( tInfo->S_Z2ooS[J][I], &(tInfo->S_SZSK[J][I]), &(tInfo->S_CZSK[J][I]) );
         }
     }
 
