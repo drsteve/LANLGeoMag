@@ -2540,15 +2540,15 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].sglAlf = 0.75*0.75;
 
         // Orbit Colors
-        SpaceObjects->Sat[i].oRed = 0.0;
-        SpaceObjects->Sat[i].oGrn = 0.0;
-        SpaceObjects->Sat[i].oBlu = 0.0;
-        SpaceObjects->Sat[i].oAlf = 0.9;
+        SpaceObjects->Sat[i].oRed = 0.6;
+        SpaceObjects->Sat[i].oGrn = 0.6;
+        SpaceObjects->Sat[i].oBlu = 0.6;
+        SpaceObjects->Sat[i].oAlf = 0.7;
 
-        SpaceObjects->Sat[i].ogpRed = 0.2;
-        SpaceObjects->Sat[i].ogpGrn = 0.2;
-        SpaceObjects->Sat[i].ogpBlu = 0.2;
-        SpaceObjects->Sat[i].ogpAlf = 0.8;
+        SpaceObjects->Sat[i].ogpRed = 1.0;
+        SpaceObjects->Sat[i].ogpGrn = 0.0;
+        SpaceObjects->Sat[i].ogpBlu = 0.0;
+        SpaceObjects->Sat[i].ogpAlf = 1.0;
 
         SpaceObjects->Sat[i].oglRed = 0.7;
         SpaceObjects->Sat[i].oglGrn = 0.7;
@@ -2625,7 +2625,7 @@ void DrawSatLabels(){
 
                         if (bufferZ >= winz){
                             cairo_set_source_rgba( cr, 1.0, 1.0, 1.0, 1.0 );
-cairo_set_source_rgba( cr, 0.0, 0.0, 0.0, 1.0 );
+//cairo_set_source_rgba( cr, 0.0, 0.0, 0.0, 1.0 );
                         } else {
                             // it is occluded, draw dimly (or not at all?)
                             //cairo_set_source_rgba( cr, 1.0, 1.0, 1.0, 0.3 );
@@ -3009,7 +3009,7 @@ void CreateSatOrbits() {
         glDepthMask( GL_FALSE );
         glDisable(GL_LIGHTING);
         glEnable(GL_LINE_SMOOTH);
-        glLineWidth( 3.0 );
+        glLineWidth( 5.0 );
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
 
@@ -3078,8 +3078,10 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
 
                             // ORBIT
                             if ( Group->Sat[i].DrawOrbit ) {
+glLineWidth( 5.0 );
                                 glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
-glColor4f( 0.0, 0.0, 0.0, 0.8 );
+glColor4f( 0.6, 0.6, 0.6, 0.7);
+//glColor4f( 0.0, 0.0, 0.0, 0.8 );
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                                 glEnd();
@@ -3087,10 +3089,11 @@ glColor4f( 0.0, 0.0, 0.0, 0.8 );
                             // GROUND PATH
                             if ( Group->Sat[i].DrawGroundPathOfOrbit ) {
                                 glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf );
+glColor4f( 0.6, 0.6, 0.6, 0.7);
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) {
                                         uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.001 );
+                                        Lgm_ForceMagnitude( &uu, 1.01 );
                                         glVertex3f( uu.x, uu.y, uu.z );
                                     }
                                 glEnd();
@@ -3103,7 +3106,7 @@ glColor4f( 0.0, 0.0, 0.0, 0.8 );
                                 glBegin( GL_LINES );
                                     for (j=0; j<n; j += 1) {
                                         uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.001 );
+                                        Lgm_ForceMagnitude( &uu, 1.01 );
                                         glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                                         glVertex3f( uu.x, uu.y, uu.z );
                                     }
@@ -3498,8 +3501,8 @@ static void realize( GtkWidget *widget, gpointer data) {
      */
     if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)) return;
 
-//    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-glClearColor( 0.8, 0.8, 0.8, 0.8 );
+    glClearColor( 0.0, 0.0, 0.0, 0.0 );
+//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
 
 
@@ -4247,8 +4250,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z ); // Position things properly rel. to "camera" or "eye"
 
 
-//    glClearColor (0.0, 0.0, 0.0, 1.0);
-glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    glClearColor (0.0, 0.0, 0.0, 1.0);
+//glClearColor( 1.0, 1.0, 1.0, 1.0 );
 //glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {

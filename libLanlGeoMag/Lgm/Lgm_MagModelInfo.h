@@ -727,6 +727,7 @@ int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
 
+
 /*
  *  T01S
  *

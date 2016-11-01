@@ -1281,7 +1281,7 @@ dBdz.z = Info->RBF_dBdz.z;
 int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     int                 K, Kgot, n_data, i, j, k;
-    double              d, dx, dy, dz, d2x, d2y, d2z, d2, ux, uy, uz, vx, vy, vz;
+    double              R, d, dx, dy, dz, d2x, d2y, d2z, d2, ux, uy, uz, vx, vy, vz;
     double              d2min_p[4][1000], d2min_m[4][1000], d2min_min[4], d2min_max[4], d2avg[4];
     double              d2xmin_p[1000], d2xmin_m[1000];
     double              d2ymin_p[1000], d2ymin_m[1000];
@@ -1298,13 +1298,28 @@ int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     int                 (*Dipole)();              // tmp Pointer to Bfield function
 
 
+//if (Info->KdTree_kNN_MaxDist2 < 1e8) printf("AHA Info->KdTree_kNN_MaxDist2 = %g\n", Info->KdTree_kNN_MaxDist2 );
     
 
 
     /*
      *  Make sure KdTree has been initialized
      */
-    if ( Lgm_Magnitude( v ) > 1.5 ) {
+    if ( !isfinite(v->x) || !isfinite(v->y) || !isfinite(v->z)  ) {
+        printf("Lgm_B_FromScatteredData5(): Error. Input point is not finite!  v = %g %g %g\n", v->x, v->y, v->z );
+        B->x = B->y = B->z = 0.0;
+        return(-1);
+    }
+
+    R = Lgm_Magnitude( v );
+    if ( R > 1e6 ) {
+        printf("Lgm_B_FromScatteredData5(): Error. Input point is too large!  v = %g %g %g\n", v->x, v->y, v->z );
+        B->x = B->y = B->z = 0.0;
+        return(-1);
+    }
+
+
+    if ( R > 1.5 ) {
 
         /*
          *  Allocate space for the K Nearest Neighbors.
@@ -1353,8 +1368,10 @@ double GridRes = EstimateGridRes( v );
          */
         double q[3];
         q[0] = v->x; q[1] = v->y; q[2] = v->z;
+double mike = Info->KdTree_kNN_MaxDist2;
         Lgm_KdTree_kNN( q, 3, Info->KdTree, K, &Kgot, Info->KdTree_kNN_MaxDist2, Info->KdTree_kNN );
         //printf("K, Kgot = %d %d    q = %g %g %g  Info->KdTree_kNN_MaxDist2 = %g GridRes = %g\n", K, Kgot, q[0], q[1], q[2], Info->KdTree_kNN_MaxDist2, GridRes );
+if (Kgot < 1) printf("AHA   q = %g %g %g   Kgot = %d   mike = %g Info->KdTree_kNN_MaxDist2 = %g\n", v->x, v->y, v->z, Kgot, mike, Info->KdTree_kNN_MaxDist2 );
 
 
 
@@ -1375,6 +1392,10 @@ double GridRes = EstimateGridRes( v );
          *  later.
          *
          */
+if (Kgot < 1) printf("AHA   Kgot = %d   Info->KdTree_kNN_MaxDist2 = %g\n", Kgot, Info->KdTree_kNN_MaxDist2 );
+//exit(0);
+//B->x = 0.0; B->y = 0.0; B->z = 0.0; return(-1);
+
         LGM_ARRAY_1D( LookUpKey, Kgot, unsigned long int );
         for ( i=0; i<Kgot; i++ ) LookUpKey[i] = Info->KdTree_kNN[i].Id;
         KeyLength = Kgot*sizeof( unsigned long int );
@@ -1526,9 +1547,9 @@ eps_z[i] = 1.0/(d2*8.0*8.0);
 
             }
 
-//for ( i=0; i<n_data; i++) eps_x[i] = 1.0/(49.0*GridRes*GridRes);
-//for ( i=0; i<n_data; i++) eps_y[i] = 1.0/(49.0*GridRes*GridRes);
-//for ( i=0; i<n_data; i++) eps_z[i] = 1.0/(49.0*GridRes*GridRes);
+for ( i=0; i<n_data; i++) eps_x[i] = 1.0/(49.0*GridRes*GridRes);
+for ( i=0; i<n_data; i++) eps_y[i] = 1.0/(49.0*GridRes*GridRes);
+for ( i=0; i<n_data; i++) eps_z[i] = 1.0/(49.0*GridRes*GridRes);
 
 
 int n_data2;

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "Lgm_TabularBessel.h"
 
 /*
  *    Lgm_Tsyg2007.h
@@ -16,6 +17,7 @@
 #ifndef FALSE
 #define FALSE   0
 #endif
+
 
 
 /*
@@ -106,6 +108,26 @@ typedef struct LgmTsyg2007_Info {
     double SHTBNORM_S_AJM[6][6][15];
     double SHTBNORM_S_AJMD[6][6][15];
 
+    double SHTBNORM_E_RHO_LAST; // the last value of RHO used
+    double SHTBNORM_E_AKN[6][5][6];
+    double SHTBNORM_E_AKNR[6][5][6];
+    double SHTBNORM_E_AJM[6][5][6][15];
+    double SHTBNORM_E_AJMD[6][5][6][15];
+
+    double SHTBNORM_O_RHO_LAST; // the last value of RHO used
+    double SHTBNORM_O_AKN[6][5][6];
+    double SHTBNORM_O_AKNR[6][5][6];
+    double SHTBNORM_O_AJM[6][5][6][15];
+    double SHTBNORM_O_AJMD[6][5][6][15];
+
+
+    /*
+     * Switch to use tabulated Bessel Funcs
+     */
+    int    UseTabulatedBessel;
+    int    BesselTableAlloced;
+    Lgm_TabularBessel *BesselTable;
+
 
 
 } LgmTsyg2007_Info;
@@ -120,7 +142,9 @@ typedef struct LgmTsyg2007_Info {
  *  Function declarations
  */
 void Lgm_Init_TS07( LgmTsyg2007_Info *t );
+int Lgm_Copy_TS07_Info( LgmTsyg2007_Info *t, LgmTsyg2007_Info *s );
 void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t );
+void Lgm_SetTabulatedBessel_TS07( int Flag, LgmTsyg2007_Info *t );
 
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z,
                 double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );

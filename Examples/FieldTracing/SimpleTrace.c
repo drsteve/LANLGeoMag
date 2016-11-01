@@ -14,11 +14,14 @@ int main(){
     Date = 20100203;
     Time = 12.34567;
     
+    Date = 20120903;
+    Time = 14.0 + 57.0/60.0 + 30.0/3600.0;
 
     MagInfo = Lgm_InitMagInfo( );
     Lgm_Set_Coord_Transforms( Date, Time, MagInfo->c );
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, MagInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, MagInfo );
 
     /*
      * Fill UTC DateTime structure
@@ -32,11 +35,13 @@ int main(){
     Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1, 0 );
     Lgm_set_QinDenton( &p, MagInfo );
 
+    Lgm_SetCoeffs_TS07( Date, Time, &(MagInfo->TS07_Info) );
 
 
 
 
-    u.x = -6.6; u.y =  0.0;  u.z =  0.0; // Re
+    u.x = 2.74384; u.y =  5.96585;  u.z =  -0.815308; // Re
+
     Lgm_Trace( &u, &v1, &v2, &v3, 120.0, 1e-7, 1e-7, MagInfo );
     printf( "u = %g %g %g Re\n", u.x, u.y, u.z );
     printf( "v1 = %g %g %g Re\n", v1.x, v1.y, v1.z );

@@ -253,9 +253,11 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
     }
 
 
+    /*
+     * Copy the TS07_Info structure
+     */
+    Lgm_Copy_TS07_Info( &(t->TS07_Info), &(s->TS07_Info) );
 
-    // TEMP KLUDGE
-    t->TS07_Info.ArraysAlloced = FALSE;
 
 
     return( t );

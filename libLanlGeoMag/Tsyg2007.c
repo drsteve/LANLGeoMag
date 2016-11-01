@@ -12,11 +12,57 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <float.h>
 
+#define USE_CACHEING 0
+
+
 void mysincos(double val, double *sin_val, double *cos_val);
 
-int J_N_Arr( int n, double x, double *JnArr ) {
+void Lgm_SetTabulatedBessel_TS07( int Flag, LgmTsyg2007_Info *t ){
+
+    t->UseTabulatedBessel = ( Flag <= 0 ) ? 0 : 1;
+
+    if ( !(t->BesselTableAlloced) && t->UseTabulatedBessel ) {
+
+        t->BesselTable = (Lgm_TabularBessel *)calloc( 1, sizeof(Lgm_TabularBessel) );
+        Lgm_TabularBessel_Init( 200000, 14, -1.0, 14.5, t->BesselTable );
+        t->BesselTableAlloced = 1;
+
+    }
+
+}
+
+int J_N_Arr( int n, double x, double *JnArr, LgmTsyg2007_Info *tInfo  ) {
 
     int i;
+    double xa, JDnArr[20];
+
+
+    if ( tInfo->UseTabulatedBessel ) {
+
+        xa = fabs( x );
+        if ( xa < 14.0 ) {
+// Check sign!!!!!
+            Lgm_TabularBessel_Eval( xa, 4, JnArr, JDnArr, tInfo->BesselTable );
+            return( 1 );
+        }
+
+    }
+
+
+    // use Lau's routine
+    //bessjlau( n, x, JnArr );
+    //return( 1 );
+
+/*
+if (x > max_x ) {
+    max_x = x;
+    printf("min_x, max_x = %g %g\n", min_x, max_x);
+}
+if (x < min_x ) {
+    min_x = x;
+    printf("min_x, max_x = %g %g\n", min_x, max_x);
+}
+*/
 
     // use Jay Albert's NR mod
     bessjj( n, x, JnArr );
@@ -162,6 +208,88 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
 
 
 
+/*
+ * Copy from source ('s') to taget ('t')
+ */
+int Lgm_Copy_TS07_Info( LgmTsyg2007_Info *t, LgmTsyg2007_Info *s ){
+
+    int i, j, k, N, M;
+
+    if ( s == NULL) {
+        printf("Lgm_Copy_TS07_Info: Error, source structure is NULL\n");
+        return(-1);
+    }
+
+
+    /*
+     * Do memcpy. Note that for things that are dynamically allocated in
+     * LgmTsyg2007_Info structure, this will copy pointers to to memory that belong
+     * to the source.  Need to take care of these things.
+     */
+    memcpy( t, s, sizeof(LgmTsyg2007_Info) );
+
+
+    /*
+     * Allocate memory for parameter arrays.
+     */
+    LGM_ARRAY_1D( t->A,   102, double );
+    LGM_ARRAY_2D( t->TSS, 81, 6, double );
+    LGM_ARRAY_3D( t->TSO, 81, 6, 5, double );
+    LGM_ARRAY_3D( t->TSE, 81, 6, 5, double );
+    t->ArraysAlloced = TRUE;
+
+    for ( i=0; i<102; i++ ) { t->A[i] = s->A[i]; }
+    for ( i=0; i<81; i++ ) { 
+        for ( j=0; j<6; j++ ) { 
+            t->TSS[i][j] = s->TSS[i][j]; 
+            for ( k=0; k<5; k++ ) { 
+                t->TSO[i][j][k] = s->TSO[i][j][k]; 
+                t->TSE[i][j][k] = s->TSE[i][j][k]; 
+            }
+        }
+    }
+
+// This should work, but Ive had problems with it!?
+//    memcpy( t->A,   s->A,      102*sizeof(double) );
+//    memcpy( t->TSS, s->TSS,   81*6*sizeof(double) );
+//    memcpy( t->TSO, s->TSO, 81*6*5*sizeof(double) );
+//    memcpy( t->TSE, s->TSE, 81*6*5*sizeof(double) );
+
+
+
+    if ( t->BesselTableAlloced ) {
+        M = s->BesselTable->M;
+        N = s->BesselTable->N;
+        t->BesselTable = (Lgm_TabularBessel *)calloc( 1, sizeof(Lgm_TabularBessel) );
+        t->BesselTable->M    = M;
+        t->BesselTable->N    = N;
+        t->BesselTable->xmin = s->BesselTable->xmin;
+        t->BesselTable->xmax = s->BesselTable->xmax;
+        t->BesselTable->s    = s->BesselTable->s;
+        LGM_ARRAY_1D( t->BesselTable->JnTabular_x,       M, double );
+        LGM_ARRAY_2D( t->BesselTable->JnTabular,    N+3, M, double );
+        LGM_ARRAY_2D( t->BesselTable->JDnTabular,   N+3, M, double );
+        LGM_ARRAY_2D( t->BesselTable->JDDnTabular,  N+3, M, double );
+        for ( i=0; i<M; i++ ) {
+            t->BesselTable->JnTabular_x[i] = s->BesselTable->JnTabular_x[i];
+            for ( j=0; j<=(N+2); j++ ) {
+                t->BesselTable->JnTabular[j][i]   = s->BesselTable->JnTabular[j][i];
+                t->BesselTable->JDnTabular[j][i]  = s->BesselTable->JDnTabular[j][i];
+                t->BesselTable->JDDnTabular[j][i] = s->BesselTable->JDDnTabular[j][i];
+            }
+        }
+        //memcpy( t->BesselTable->JnTabular_x, s->BesselTable->JnTabular_x,    M*sizeof(double) );
+        //memcpy( t->BesselTable->JnTabular,   s->BesselTable->JnTabular,   17*M*sizeof(double) );
+        //memcpy( t->BesselTable->JDnTabular,  s->BesselTable->JDnTabular,  17*M*sizeof(double) );
+        //memcpy( t->BesselTable->JDDnTabular, s->BesselTable->JDDnTabular, 17*M*sizeof(double) );
+    }
+
+
+
+
+    return( 1 );
+
+}
 
 
 void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
@@ -174,6 +302,7 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
     if (TS07_DATA_PATH==NULL) {
         TS07_DATA_PATH = LGM_TS07_DATA_DIR;
     }
+
 
     // Init some params
     t->OLD_PS = -9e99;
@@ -217,12 +346,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
         if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
             for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSS[k][i] );
-	    fclose(fp);
+	        fclose(fp);
 
         } else {
 
             printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
-	    perror("Error");
+	        perror("Error");
             exit(-1);
 
         }
@@ -235,12 +364,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             sprintf( Filename, "%s/TAIL_PAR/tailamhr_o_%1d%1d.par", TS07_DATA_PATH, i, j );
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSO[k][i][j] );
-		fclose(fp);
+		        fclose(fp);
 
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
-		perror("Error");
+		        perror("Error");
                 exit(-1);
 
             }
@@ -255,12 +384,12 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
             if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
                 for ( k=1; k<=80; k++ ) fscanf( fp, "%lf", &t->TSE[k][i][j] );
-		fclose(fp);
+		        fclose(fp);
 
             } else {
 
                 printf("Lgm_Init_TS07(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, Filename );
-		perror("Error");
+		        perror("Error");
                 exit(-1);
 
             }
@@ -273,6 +402,11 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
      * Init the cache "flags for SHTBNORM func
      */
     t->SHTBNORM_S_RHO_LAST = LGM_FILL_VALUE;
+    t->SHTBNORM_E_RHO_LAST = LGM_FILL_VALUE;
+    t->SHTBNORM_O_RHO_LAST = LGM_FILL_VALUE;
+
+
+    t->BesselTableAlloced = 0;
 
 
     return;
@@ -287,6 +421,11 @@ void Lgm_DeAllocate_TS07( LgmTsyg2007_Info *t ){
         LGM_ARRAY_3D_FREE( t->TSO );
         LGM_ARRAY_3D_FREE( t->TSE );
         t->ArraysAlloced = FALSE;
+    }
+
+    if ( t->BesselTableAlloced ) {
+        Lgm_TabularBessel_Free( t->BesselTable );
+        t->BesselTableAlloced = FALSE;
     }
 
 }
@@ -1288,7 +1427,7 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
                 tInfo->SHTBNORM_S_AKN[k][n]  = AKN;
                 tInfo->SHTBNORM_S_AKNR[k][n] = AKNR;
 
-                J_N_Arr( 14, AKNR, AJM );
+                J_N_Arr( 14, AKNR, AJM, tInfo );
                 // cache results
                 for ( m=0; m<=14; m++ ) tInfo->SHTBNORM_S_AJM[k][n][m] = AJM[m];
                 tInfo->SHTBNORM_S_AJMD[k][n][0] = -tInfo->SHTBNORM_S_AJM[k][n][1]; 
@@ -1319,7 +1458,7 @@ void TS07D_SHTBNORM_S( int K, double X, double Y, double Z, double *FX, double *
         CHZ = cosh( Z*AKN ); // only changes if Z changes
         SHZ = sinh( Z*AKN ); // only changes if Z changes
 
-        //J_N_Arr( 14, AKNR, AJM );
+        //J_N_Arr( 14, AKNR, AJM, tInfo );
         // using gsl bessel funcs
         //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
 
@@ -1452,7 +1591,7 @@ void TS07D_TAILSHT_OE( int IEVO, int MK, int M, double X, double Y, double Z, do
 
 void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m, mm, n;
+    int     m, mm, n, k, l;
     double  AK[6], AKN;
     double  AKNR, CHZ, SHZ, AKNRI, AJM[15], AJM1, AJMD[15];
     double  HX1, HX2,HY1, HY2;
@@ -1461,11 +1600,13 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
 
     TSO = tInfo->TSO;
 
+    /*
     AK[1] = TSO[76][K][L];
     AK[2] = TSO[77][K][L];
     AK[3] = TSO[78][K][L];
     AK[4] = TSO[79][K][L];
     AK[5] = TSO[80][K][L];
+    */
 
 
 
@@ -1478,6 +1619,33 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
     DPDY  =  X*RHOI2;
     SinN_CosN_Arr( 14, phi, SMP, CMP );
     */
+
+    if ( tInfo->RHO != tInfo->SHTBNORM_O_RHO_LAST ) {
+        // do all K's and L's here to simplfy book-keeping
+        for ( k=1; k<=5; k++ ) {
+            for ( l=1; l<=4; l++ ) {
+                for ( n=1; n<=5; n++ ) {
+                    AKN   = fabs( TSO[75+n][k][l] );
+                    AKNR  = AKN*tInfo->RHO;
+                    AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
+                    // cache results
+                    tInfo->SHTBNORM_O_AKN[k][l][n]  = AKN;
+                    tInfo->SHTBNORM_O_AKNR[k][l][n] = AKNR;
+
+                    J_N_Arr( 14, AKNR, AJM, tInfo );
+                    // cache results
+                    for ( m=0; m<=14; m++ ) tInfo->SHTBNORM_O_AJM[k][l][n][m] = AJM[m];
+                    tInfo->SHTBNORM_O_AJMD[k][l][n][0] = -tInfo->SHTBNORM_O_AJM[k][l][n][1]; 
+                    for ( m=1; m<=14; m++ ) {   
+                        tInfo->SHTBNORM_O_AJMD[k][l][n][m] = tInfo->SHTBNORM_O_AJM[k][l][n][m-1] 
+                                                        - m*tInfo->SHTBNORM_O_AJM[k][l][n][m]*AKNRI;
+                    }
+                }
+            }
+        }
+        // flag that we've cached them for this RHO value.
+        tInfo->SHTBNORM_O_RHO_LAST = tInfo->RHO;
+    }
     
 
     *FX = *FY = *FZ = 0.0;
@@ -1485,19 +1653,15 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
 
     for ( n=1; n<=5; n++ ){
 
-        AKN   = fabs( AK[n] );
-        AKNR  = AKN*tInfo->RHO;
-        AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
+        //AKN   = fabs( AK[n] );
+        //AKNR  = AKN*tInfo->RHO;
+        //AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
+        AKN = tInfo->SHTBNORM_O_AKN[K][L][n];
 
-// MGH
-// for a given M,X,Y,Z, these dont change.
-// can these be cached?
         CHZ = cosh( Z*AKN );
         SHZ = sinh( Z*AKN );
 
-// to cache, we need
-// AJM[K][K][M]
-        J_N_Arr( 14, AKNR, AJM );
+        //J_N_Arr( 14, AKNR, AJM, tInfo );
 
         // using gsl bessel funcs
         //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
@@ -1507,20 +1671,20 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
         //AJM[1] = bessj1( AKNR );
         //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
 
-        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
+        //AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
 
 
         for ( m=0; m<=14; m++ ){
 
-            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ*AJM[m];
-            HX2 =  -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ*AJMD[m];
+            HX1 =  m*tInfo->DPDX*tInfo->SMP[m]*SHZ*tInfo->SHTBNORM_O_AJM[K][L][n][m];
+            HX2 =  -AKN*X*tInfo->RHOI*tInfo->CMP[m]*SHZ*tInfo->SHTBNORM_O_AJMD[K][L][n][m];
             HX  = HX1+HX2;
 
-            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ*AJM[m];
-            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ*AJMD[m];
+            HY1 =  m*tInfo->DPDY*tInfo->SMP[m]*SHZ*tInfo->SHTBNORM_O_AJM[K][L][n][m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->CMP[m]*SHZ*tInfo->SHTBNORM_O_AJMD[K][L][n][m];
             HY  = HY1 + HY2;
 
-            HZ = -AKN*tInfo->CMP[m]*CHZ*AJM[m];
+            HZ = -AKN*tInfo->CMP[m]*CHZ*tInfo->SHTBNORM_O_AJM[K][L][n][m];
 
 
             *FX += HX*TSO[n+5*m][K][L];
@@ -1539,7 +1703,7 @@ void TS07D_SHTBNORM_O( int K, int L, double X, double Y, double Z, double *FX, d
 
 void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, double *FY, double *FZ, LgmTsyg2007_Info *tInfo ) {
 
-    int     m, mm, n;
+    int     m, mm, n, k, l;
     double  AK[6], AKN;
     double  AKNR, CHZ, SHZ, AKNRI, RHOI, RHOI2, AJM[15], AJM1, JMD;
     double  DPDX, DPDY, HX1, HX2, HY1, HY2, AJMD[15], HX, HY, HZ;
@@ -1547,11 +1711,13 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
 
     TSE = tInfo->TSE;
 
+    /*
     AK[1] = TSE[76][K][L];
     AK[2] = TSE[77][K][L];
     AK[3] = TSE[78][K][L];
     AK[4] = TSE[79][K][L];
     AK[5] = TSE[80][K][L];
+    */
 
 
     /* fed in from tInfo
@@ -1565,6 +1731,33 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
     SinN_CosN_Arr( 14, phi, SMP, CMP );
     */
 
+    if ( tInfo->RHO != tInfo->SHTBNORM_E_RHO_LAST ) {
+        // do all K's and L's here to simplfy book-keeping
+        for ( k=1; k<=5; k++ ) {
+            for ( l=1; l<=4; l++ ) {
+                for ( n=1; n<=5; n++ ) {
+                    AKN   = fabs( TSE[75+n][k][l] );
+                    AKNR  = AKN*tInfo->RHO;
+                    AKNRI = ( AKNR < 1e-8 ) ? 1.0e8 : 1.0/AKNR;
+                    // cache results
+                    tInfo->SHTBNORM_E_AKN[k][l][n]  = AKN;
+                    tInfo->SHTBNORM_E_AKNR[k][l][n] = AKNR;
+
+                    J_N_Arr( 14, AKNR, AJM, tInfo );
+                    // cache results
+                    for ( m=0; m<=14; m++ ) tInfo->SHTBNORM_E_AJM[k][l][n][m] = AJM[m];
+                    tInfo->SHTBNORM_E_AJMD[k][l][n][0] = -tInfo->SHTBNORM_E_AJM[k][l][n][1]; 
+                    for ( m=1; m<=14; m++ ) {   
+                        tInfo->SHTBNORM_E_AJMD[k][l][n][m] = tInfo->SHTBNORM_E_AJM[k][l][n][m-1] 
+                                                        - m*tInfo->SHTBNORM_E_AJM[k][l][n][m]*AKNRI;
+                    }
+                }
+            }
+        }
+        // flag that we've cached them for this RHO value.
+        tInfo->SHTBNORM_E_RHO_LAST = tInfo->RHO;
+    }
+
 
 
     *FX = *FY = *FZ = 0.0;
@@ -1573,20 +1766,16 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
 
     for ( n=1; n<=5; n++ ) {
 
-        AKN  = fabs( AK[n] );
-        AKNR = AKN*tInfo->RHO;
+        //AKN   = fabs( AK[n] );
+        //AKNR  = AKN*tInfo->RHO;
+        //AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
+        AKN = tInfo->SHTBNORM_E_AKN[K][L][n];
 
-// MGH
-// for a given M,X,Y,Z, these dont change.
-// can these be cached?
         CHZ = cosh( Z*AKN );
         SHZ = sinh( Z*AKN );
 
-        AKNRI = ( AKNR < 1e-8 ) ? 1e8 : 1.0/AKNR;
 
-// to cache need 
-// AJM[K][L][M]
-        J_N_Arr( 14, AKNR, AJM );
+        //J_N_Arr( 14, AKNR, AJM, tInfo );
 
         // using gsl bessel funcs
         //gsl_sf_bessel_Jn_array( 0, 14, AKNR, AJM );
@@ -1596,19 +1785,19 @@ void TS07D_SHTBNORM_E( int K, int L, double X, double Y, double Z, double *FX, d
         //AJM[1] = bessj1( AKNR );
         //for ( mm=2; mm<=14; mm++ ) AJM[mm] = bessj( mm, AKNR );
 
-        AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
+        //AJMD[0] = -AJM[1]; for ( mm=1; mm<=14; mm++ ) AJMD[mm] = AJM[mm-1] - mm*AJM[mm]*AKNRI;
 
         for ( m=0; m<=14; m++ ) {
 
-            HX1 = -m*tInfo->DPDX*tInfo->CMP[m]*SHZ*AJM[m];
-            HX2 = -AKN*X*tInfo->RHOI*tInfo->SMP[m]*SHZ*AJMD[m];
+            HX1 = -m*tInfo->DPDX*tInfo->CMP[m]*SHZ*tInfo->SHTBNORM_E_AJM[K][L][n][m];
+            HX2 = -AKN*X*tInfo->RHOI*tInfo->SMP[m]*SHZ*tInfo->SHTBNORM_E_AJMD[K][L][n][m];
             HX  = HX1 + HX2;
 
-            HY1 = -m*tInfo->DPDY*tInfo->CMP[m]*SHZ*AJM[m];
-            HY2 = -AKN*Y*tInfo->RHOI*tInfo->SMP[m]*SHZ*AJMD[m];
+            HY1 = -m*tInfo->DPDY*tInfo->CMP[m]*SHZ*tInfo->SHTBNORM_E_AJM[K][L][n][m];
+            HY2 = -AKN*Y*tInfo->RHOI*tInfo->SMP[m]*SHZ*tInfo->SHTBNORM_E_AJMD[K][L][n][m];
             HY  = HY1 + HY2;
 
-            HZ = -AKN*tInfo->SMP[m]*CHZ*AJM[m];
+            HZ = -AKN*tInfo->SMP[m]*CHZ*tInfo->SHTBNORM_E_AJM[K][L][n][m];
 
 
             *FX += HX*TSE[n+5*m][K][L];
@@ -1905,6 +2094,78 @@ void bessjj( int n, double x, double *Jarr ) {
     }
 
     return;
+}
+
+int startlau( int n, double x, int t ) {
+
+    int s;
+    double  p, q, r, y;
+    
+    s = 2*t-1;
+    p = 36.0/x-t;
+    r=n/x;
+    if ( (r>1.0) || (t==1) ){
+        q = sqrt(r*r+s);
+        r = r*log(q+r)-q;
+    } else {
+        r = 0.0;
+    }
+    q = 18.0/x+r;
+    r = (p>q) ? p : q;
+    p = sqrt(2.0*(t+r));
+    p = x*((1.0+r)+p)/(1.0+p);
+    y = 0.0;
+    q = y;
+    do{
+        y=p;
+        p/=x;
+        q=sqrt(p*p+s);
+        p = x*(r+q)/log(p +q);
+        q = y;
+    } while ( (p>q) || (p < (q-1.0)) );
+    return( (t==1) ? floor(p+1.0) : -floor(-p/2.0)*2);
+    
+
+}
+
+
+void bessjlau( int n, double x, double *Jarr ) {
+
+    int l, m, nu, signx;
+    double x2, r, s;
+    
+
+    if ( x == 0.0 ) {
+
+        Jarr[0] = 1.0;
+        for (; n>=1; n--) Jarr[n] = 0.0;
+
+    } else {
+
+        signx = ( x> 0.0) ? 1 : -1;
+        x = fabs(x);
+        r = s = 0.0;
+        x2 = 2.0/x;
+        l = 0;
+        nu = startlau(n, x, 0);
+        for (m=nu; m>=1; m--){
+            r = 1.0/(x2*m-r);
+            l = 2-l;
+            s = r*(l+s);
+            if ( m<=n) Jarr[m] = r;
+        }   
+        Jarr[0] = r=1.0/(1.0+s);
+
+        for (m=1; m<=n; m++) r = Jarr[m] *= r;
+        if (signx < 0.0) 
+            for (m=1; m<=n; m +=2) Jarr[n] = Jarr[m];
+        
+        
+
+    }
+
+    
+        
 }
 
 

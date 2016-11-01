@@ -199,8 +199,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 25; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 25; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 200; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 200; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -219,17 +219,17 @@ int main(){
 
     Date = 20120814;
     UTC  = 2.0 + 3.0/60.0 + 30.0/3600.0;
+    Date = 20120910;
+    UTC  = 3.0 + 0.0/60.0 + 0.0/3600.0;
     JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
     printf("Tilt = %g\n", mInfo->c->psi*DegPerRad );
 //exit(0);
-    Lgm_get_QinDenton_at_JD( JD, &p, 1 );
+    Lgm_get_QinDenton_at_JD( JD, &p, 1, 1 );
     Lgm_set_QinDenton( &p, mInfo );
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
-Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
-Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
 
 Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP77, mInfo );
@@ -238,6 +238,10 @@ Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TU82, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
+
+Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
+Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
+Lgm_SetTabulatedBessel_TS07( TRUE, &mInfo->TS07_Info );
     
     Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
@@ -248,21 +252,23 @@ Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     LGM_ARRAY_2D( ImageYZ15, YZ_NY, YZ_NZ, double );
     LGM_ARRAY_2D( ImageYZ30, YZ_NY, YZ_NZ, double );
     LGM_ARRAY_2D( ImageYZ45, YZ_NY, YZ_NZ, double );
-mInfo->SavePoints = TRUE;
-mInfo->fp = fopen("FieldLines.txt", "w");
-mInfo->SavePoints = FALSE;
+//mInfo->SavePoints = TRUE;
+//mInfo->fp = fopen("FieldLines.txt", "w");
+//mInfo->SavePoints = FALSE;
 
     { // BEGIN PARALLEL EXECUTION
-//        #pragma omp parallel private(ii,jj,x,y,j,GeodLat,GeodLong,u,v,v1,v2,v3,ww,ww2,Flag,mInfo2)
-//        #pragma omp for schedule(dynamic, 1)
+        #pragma omp parallel private(ii,jj,x,y,j,GeodLat,GeodLong,u,v,v1,v2,v3,ww,ww2,Flag,mInfo2)
+        #pragma omp for schedule(dynamic, 1)
         for ( i=0; i<NX; i++ ) {
             x = (LX_MAX-LX_MIN) * i / ((double)(NX-1)) + LX_MIN;
+
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );
 
             printf("i=%d\n", i);
             
             for ( j=0; j<NY; j++ ) {
+            //for ( j=NY/2; j<=NY/2; j++ ) {
                 y = (LY_MAX-LY_MIN) * j / ((double)(NY-1)) + LY_MIN;
 
 
@@ -274,27 +280,27 @@ mInfo->SavePoints = FALSE;
                 R    = 120.0/Re + 1.0;
                 MLAT = 90.0 - sqrt( x*x + y*y );
                 MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
-                Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo->c );
-                Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo->c );
+                Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo2->c );
+                Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo2->c );
 
                 v3.x = v3.y = v3.z = -1e31;
                 Flag = Lgm_Trace( &u, &v1, &v2, &v3, GeodHeight, 1e-7, 1e-7, mInfo2 );
 
 v22 = v2;
 
-                Lgm_Convert_Coords( &v2, &w, GSM_TO_SM, mInfo->c );
+                Lgm_Convert_Coords( &v2, &w, GSM_TO_SM, mInfo2->c );
                 if ( w.x > 0.0 ) Lgm_TraceToSMEquat( &v2, &v3, 1e-6, mInfo2 );
 
-                Lgm_Convert_Coords( &v3, &w, GSM_TO_SM, mInfo->c );
+                Lgm_Convert_Coords( &v3, &w, GSM_TO_SM, mInfo2->c );
                 EnhancedFlag = ClassifyFL_Enhanced2( Flag, &v1, &v2, &v3, mInfo2 );
                 Image[i][j] = (double)EnhancedFlag;
                 if (Image[i][j] < 0.0) Image[i][j] = 8.0;
 
 
-fprintf( mInfo->fp,  "Type: %d\n", EnhancedFlag );
-mInfo2->SavePoints = TRUE;
-Lgm_TraceToEarth( &v22, &v4, GeodHeight, -1.0, 1e-7, mInfo2 );
-mInfo2->SavePoints = FALSE;
+//fprintf( mInfo2->fp,  "Type: %d\n", EnhancedFlag );
+//mInfo2->SavePoints = TRUE;
+//Lgm_TraceToEarth( &v22, &v4, GeodHeight, -1.0, 1e-7, mInfo2 );
+//mInfo2->SavePoints = FALSE;
 
 
 
@@ -398,28 +404,28 @@ mInfo2->SavePoints = FALSE;
                 MLAT = 90.0 - sqrt( x*x + y*y );
                 MLAT *= -1.0;
                 MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
-                Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo->c );
-                Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo->c );
+                Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo2->c );
+                Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo2->c );
 
                 v3.x = v3.y = v3.z = -1e31;
                 Flag = Lgm_Trace( &u, &v1, &v2, &v3, GeodHeight, 1e-7, 1e-7, mInfo2 );
 v11 = v1;
 
-                Lgm_Convert_Coords( &v2, &w, GSM_TO_SM, mInfo->c );
+                Lgm_Convert_Coords( &v2, &w, GSM_TO_SM, mInfo2->c );
                 if ( w.x > 0.0 ) Lgm_TraceToSMEquat( &v2, &v3, 1e-6, mInfo2 );
 
 
-                Lgm_Convert_Coords( &v3, &w, GSM_TO_SM, mInfo->c );
+                Lgm_Convert_Coords( &v3, &w, GSM_TO_SM, mInfo2->c );
                 EnhancedFlag = ClassifyFL_Enhanced2( Flag, &v1, &v2, &v3, mInfo2 );
                 ImageSouth[i][j] = (double)EnhancedFlag;
                 if (ImageSouth[i][j] < 0.0) ImageSouth[i][j] = 8.0;
 
 
 printf( "u = %g %g %g   Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
-fprintf( mInfo->fp,  "Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
-mInfo2->SavePoints = TRUE;
-Lgm_TraceToEarth( &v11, &v4, GeodHeight, 1.0, 1e-7, mInfo2 );
-mInfo2->SavePoints = FALSE;
+//fprintf( mInfo2->fp,  "Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
+//mInfo2->SavePoints = TRUE;
+//Lgm_TraceToEarth( &v11, &v4, GeodHeight, 1.0, 1e-7, mInfo2 );
+//mInfo2->SavePoints = FALSE;
 
                 /*
                  *  Add point to the Equatorial plane image.
@@ -511,20 +517,6 @@ mInfo2->SavePoints = FALSE;
                     } 
 
                 } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             }
 

@@ -351,7 +351,7 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
     rtol = Info->Lgm_MagStep_BS_rtol;
 
 
-    if ( ( eps != Info->Lgm_MagStep_BS_eps_old ) || ( *reset ) ){
+        if ( ( eps != Info->Lgm_MagStep_BS_eps_old ) || ( *reset ) ){
 
         Info->Lgm_nMagEvals = 0;
         Info->Lgm_MagStep_BS_eps_old = eps;
@@ -389,8 +389,8 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
         printf("Lgm_MagStep(): Bmag too small at u0 = %g %g %g (Bmag = %g; Bx,y,z = %g, %g, %g) (returning with -1).\n", u0.x, u0.y, u0.z, Bmag, b0.x, b0.y, b0.z );
-printf("Line %d\n", __LINE__ );
-exit(-1);
+//printf("Line %d\n", __LINE__ );
+//exit(-1);
         return(-1);
     }
 

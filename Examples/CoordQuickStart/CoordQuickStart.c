@@ -8,11 +8,15 @@ int main( ) {
     Lgm_Vector  Ugeo, Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000, Ugse2000, Umod;
     long int    Date;
     double      UTC, Lat, Lon, r;
+int i;
+//double GLON_ARR[] = { 103.84, 69.235, -165.151, 67.024, -49.931, -144.592 };
+double GLON_ARR[] = { 227.0, 285.66, 275.20, 255.46, 270.58, 224.72 };
     
-    Date = 20130322;    // Jan 1, 2000
+    Date = 20100405;    // Jan 1, 2000
     //Date = 20000101;    // Jan 1, 2000
+    Date = 19800101;    // Jan 1, 2000
     UTC  = 5.0 + 24.0/60.0 + 24.0/3600.0;         // Universal Time Coordinated (in decimal hours)
-UTC = 23.33;
+UTC = 9.0 + 48.0/60.0;
 //    Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     double GLON;
@@ -23,17 +27,24 @@ UTC = 23.33;
     GLON = -143.1;
     GLON = 14.6;
     GLON = -49.2;
-    Ugeo.x = 6.619*cos( 360.0-GLON*RadPerDeg );
-    Ugeo.y = 6.619*sin( 360.0-GLON*RadPerDeg );
+    GLON = -49.87;
+    GLON = 69.44;
+    GLON = -165.425;
+    GLON = 19.83;
+
+for (i=0; i<6; i++ ){
+
+    Ugeo.x = 6.619*cos( GLON_ARR[i]*RadPerDeg );
+    Ugeo.y = 6.619*sin( GLON_ARR[i]*RadPerDeg );
     Ugeo.z = 0.0;
-    printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
+    //printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
 
 
 
     // Set up all the necessary variables to do transformations for this Date and UTC
     /* Options for setting Sun/Moon pos are:  */
     //Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
-    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
+    //Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
     //Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Same as NOT calling Set_CTrans_Options */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
@@ -50,8 +61,8 @@ UTC = 23.33;
 
 
     // Print out the final results
-    printf("Date = %8ld\n", Date);
-    printf("UTC  = %lf\n", UTC);
+    //printf("Date = %8ld\n", Date);
+    //printf("UTC  = %lf\n", UTC);
 //    printf("Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z);
     printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
 double mlon;
@@ -69,7 +80,9 @@ if (MLT < 0.0) MLT += 24.0;
 if (MLT > 24.0) MLT -= 24.0;
 printf("MLT: %g\n", MLT);
 
-exit(0);
+}
+
+//exit(0);
 
 
     printf("Umod = %.8lf %.8lf %.8lf Re\n", Umod.x, Umod.y, Umod.z);
