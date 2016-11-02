@@ -165,7 +165,16 @@ typedef struct Lgm_MagModelInfo {
      * Variable to control which internal model to use
      */
     int         InternalModel;          // Can be LGM_CDIP, LGM_EDIP or LGM_IGRF
+    char        IntMagModelStr1[80];
+    char        IntMagModelStr2[1024];
+    char        IntMagModelStr3[1024];
+    char        IntMagModelStr4[1024];
+
     int         ExternalModel;          // Can be from list above (e.g. LGM_EXTMODEL_T89)
+    char        ExtMagModelStr1[80];
+    char        ExtMagModelStr2[1024];
+    char        ExtMagModelStr3[1024];
+    char        ExtMagModelStr4[1024];
 
     /*
      * Temporary variable to hold a generic position
@@ -819,6 +828,10 @@ void Lgm_Set_KdTree_kNN_MaxDist2( Lgm_MagModelInfo *m, double MaxDist2 );
 void Lgm_Set_Open_Limits( Lgm_MagModelInfo *m, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 void Lgm_Set_LossConeHeight( Lgm_MagModelInfo *m, double LossConeHeight );
 void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m );
+void Lgm_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m );
+void Lgm_Get_MagModel( int *InternalModel, int *ExternalModel, Lgm_MagModelInfo *m );
+void Lgm_Get_IntMagModelStrings( char **s1, char **s2, char **s3, char **s4, Lgm_MagModelInfo *m );
+void Lgm_Get_ExtMagModelStrings( char **s1, char **s2, char **s3, char **s4, Lgm_MagModelInfo *m );
 
 void Lgm_B_FromScatteredData_SetRbf( Lgm_MagModelInfo *Info, double eps, int RbfType );
 

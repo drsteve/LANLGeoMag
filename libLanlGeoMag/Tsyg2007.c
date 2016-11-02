@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include "Lgm/Lgm_Tsyg2007.h"
 #include "Lgm/Lgm_DynamicMemory.h"
@@ -141,6 +142,18 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
     if (TS07_DATA_PATH==NULL) {
         TS07_DATA_PATH = LGM_TS07_DATA_DIR;
     }
+
+
+    if ( access( TS07_DATA_PATH, F_OK ) < 0 ) {
+        printf("Lgm_SetCoeffs_TS07: Warning, TS07 Data directory not found at %s. Use TS07_DATA_PATH environment variable to set path.\n", TS07_DATA_PATH );
+        exit(-1);
+    }
+
+    if ( !(t->ArraysAlloced) ){
+        Lgm_Init_TS07( t );
+    }
+
+
 
     //get time and round to nearest 5 minutes... 
     Lgm_Doy(Date, &year, &month, &day, &doy);
@@ -303,6 +316,10 @@ void Lgm_Init_TS07( LgmTsyg2007_Info *t ){
         TS07_DATA_PATH = LGM_TS07_DATA_DIR;
     }
 
+    if ( access( TS07_DATA_PATH, F_OK ) < 0 ) {
+        printf("Lgm_SetCoeffs_TS07: Warning, TS07 Data directory not found at %s. Use TS07_DATA_PATH environment variable to set path.\n", TS07_DATA_PATH );
+        exit(-1);
+    }
 
     // Init some params
     t->OLD_PS = -9e99;

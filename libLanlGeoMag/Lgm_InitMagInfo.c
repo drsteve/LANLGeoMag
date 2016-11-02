@@ -19,7 +19,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 
     MagInfo->AllocedSplines = FALSE;
 
-    MagInfo->Bfield = Lgm_B_T89;
+    MagInfo->Bfield = Lgm_B_T89c;
     MagInfo->InternalModel = LGM_IGRF;
 
     MagInfo->c     = Lgm_init_ctrans( 0 );
@@ -143,7 +143,9 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     /*
      * Inits for TS07
      */
-    Lgm_Init_TS07( &MagInfo->TS07_Info );
+    // Do this in the first call that sets coeff files.
+    // I.e. do it in first call to Lgm_SetCoeffs_TS07()
+    // Lgm_Init_TS07( &MagInfo->TS07_Info );
 
 
     /*
@@ -256,7 +258,9 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
     /*
      * Copy the TS07_Info structure
      */
-    Lgm_Copy_TS07_Info( &(t->TS07_Info), &(s->TS07_Info) );
+    if ( s->TS07_Info.ArraysAlloced ) {
+        Lgm_Copy_TS07_Info( &(t->TS07_Info), &(s->TS07_Info) );
+    }
 
 
 
@@ -277,10 +281,57 @@ void Lgm_MagModelInfo_Set_Psw( double Psw, Lgm_MagModelInfo *m ) {
 void Lgm_MagModelInfo_Set_Kp( double Kp, Lgm_MagModelInfo *m ) {
     m->Kp = Kp;
 }
+
+
+
+/*
+ *  Just Calls Lgm_MagModelInfo_Set_MagModel()
+ */
+void Lgm_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m ){
+    Lgm_MagModelInfo_Set_MagModel( InternalModel, ExternalModel, m );
+}
+
 void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_MagModelInfo *m ){
 
     m->InternalModel = InternalModel;
     m->ExternalModel = ExternalModel;
+
+    switch( m->InternalModel ) {
+
+        case LGM_CDIP:
+                        strcpy( m->IntMagModelStr1, "CDIP" );
+                        strcpy( m->IntMagModelStr2, "Centered Dipole Model." );
+                        strcpy( m->IntMagModelStr3, "Reference: International Geomagnetic Reference Field: the 12th generation, Thébault et al. Earth, Planets and Space 2015, 67:79 (27 May 2015)." );
+                        strcpy( m->IntMagModelStr4, "Comments: Use first 3 time-dependent IGRF coefficients." );
+                        break;
+
+        case LGM_EDIP:
+                        strcpy( m->IntMagModelStr1, "EDIP" );
+                        strcpy( m->IntMagModelStr2, "Eccentric Dipole Model." );
+                        strcpy( m->IntMagModelStr3, "References: (1) International Geomagnetic Reference Field: the 12th generation, Thébault et al. Earth, Planets and Space 2015, 67:79 (27 May 2015); (2) Eccentric dipole coordinates for Magsat data presentation and analysis of ecternal current effects (1982), Geophys. Res. Lett., 9(4), pp. 353-356; (3) Fraser-Smith, A. C., Centered and Eccentric Geomagnetic Dipoles and Their Poles, 1600-1985, Rev. Geophys., 25, 1, pp. 1-16, 1987." );
+                        strcpy( m->IntMagModelStr4, "Comments: Use first 8 time-dependent IGRF coefficients. " );
+                        break;
+
+        case LGM_DUNGEY:
+                        strcpy( m->IntMagModelStr1, "DUNGEY" );
+                        strcpy( m->IntMagModelStr2, "Dungey Field Model" );
+                        strcpy( m->IntMagModelStr3, "Reference: See Schulz, M. (1997), Direct influence of ring current on auroral oval diameter, J. Geophys. Res., 102(A7), 14149–14154, doi:10.1029/97JA00827." );
+                        strcpy( m->IntMagModelStr4, "Comments: Centered dipole + a uniform -Bz component. Not very realistic, but L* can be computed analytically, so it makes a good test for L* numerics." );
+                        break;
+
+        case LGM_IGRF:
+        default:
+                        strcpy( m->IntMagModelStr1, "IGRF12" );
+                        strcpy( m->IntMagModelStr2, "International Geomagnetic Reference Field: the 12th generation" );
+                        strcpy( m->IntMagModelStr3, "Reference: International Geomagnetic Reference Field: the 12th generation, Thébault et al. Earth, Planets and Space 2015, 67:79 (27 May 2015)." );
+                        strcpy( m->IntMagModelStr4, "Comments: Uses all available coefficients for all radial distances." );
+                        break;
+
+    }
+        
+
+
+
 
     switch ( m->ExternalModel ) {
 
@@ -301,86 +352,161 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                     m->Bfield = Lgm_B_igrf;
                                 }
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "NULL" );
+                                strcpy( m->ExtMagModelStr2, "No External model - internal only" );
+                                strcpy( m->ExtMagModelStr3, "Reference: N/A" );
+                                strcpy( m->ExtMagModelStr4, "Comments: Running with only internal model." );
                                 break;
 
         case LGM_EXTMODEL_TU82:
                                 m->Bfield = Lgm_B_TU82;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "TU82" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko Usmanov 1982 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A. and A. V. Usmanov, Determination of the magnetospheric current system parameters and development of experimental geomagnetic field models based on data from IMP and HEOS satellites, Planet. Space Sci., 30 (1982), pp.  985-998." );
+                                strcpy( m->ExtMagModelStr4, "Comments: " );
+
                                 break;
         case LGM_EXTMODEL_OP88:
                                 m->Bfield = Lgm_B_OP88;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "OP88" );
+                                strcpy( m->ExtMagModelStr2, "Olson Pfitzer 1988 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Pfitzer, K. A., W. P. Olson, and T. Mogstad (1988), A time-dependent, source-driven magnetospheric magnetic field model, Eos Trans. AGU, 69(16), 426." );
+                                strcpy( m->ExtMagModelStr4, "Comments: " );
+
                                 break;
         case LGM_EXTMODEL_T87:
                                 m->Bfield = Lgm_B_T87;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T87" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 1987 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A., Global quantitative models of the geomagnetic field in the cislunar magnetosphere for different disturbance levels, Planet. Space Sci., 35 (1987), pp. 1347-1358. doi:10.1016/0032-0633(87)90046-8." );
+                                strcpy( m->ExtMagModelStr4, "Comments: " );
                                 break;
 
+//should we chanmge this to T89orig or some such thing to avoid confusion????
         case LGM_EXTMODEL_T89:
                                 m->Bfield = Lgm_B_T89;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T89" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 1989 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A. (1989), A magnetospheric magnetic field model with a warped tail current sheet, Planet. Space Sci., 37, 5-20, doi:10.1016/0032-0633(89)90066-4.");
+                                strcpy( m->ExtMagModelStr4, "Comments: The original published version of the code (with corrections to coefficients.)" );
                                 break;
 
         case LGM_EXTMODEL_T89c:
                                 m->Bfield = Lgm_B_T89c;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T89c" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 1989c Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A. (1989), A magnetospheric magnetic field model with a warped tail current sheet, Planet. Space Sci., 37, 5-20, doi:10.1016/0032-0633(89)90066-4.");
+                                strcpy( m->ExtMagModelStr4, "Comments: A modified version of the originally published model. This is the version that is now most commonly referred to as T89.");
                                 break;
 
         case LGM_EXTMODEL_T96:
                                 m->Bfield = Lgm_B_T96;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T96" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 1996 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A. (1995), Modeling the Earth's magnetospheric magnetic field confined within a realistic magnetopause, J. Geophys. Res., 100(A4), 5599–5612, doi:10.1029/94JA03193." );
+                                strcpy( m->ExtMagModelStr4, "Comments: ");
                                 break;
 
         case LGM_EXTMODEL_T02:
                                 m->Bfield = Lgm_B_T02;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T02" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 2002 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "References: (1) Tsyganenko, N. A., A model of the magnetosphere with a dawn-dusk asymmetry, 1, Mathematical structure, J. Geophys. Res., 107(A8), doi:10.1029/2001JA000219, 2002; (2) Tsyganenko, N. A., A model of the near magnetosphere with a dawn-dusk asymmetry, 2, Parameterization and fitting to observations, J. Geophys. Res., 107(A8), doi:10.1029/2001JA000220, 2002.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Also known as T01_01.");
                                 break;
 
         case LGM_EXTMODEL_T01S:
                                 m->Bfield = Lgm_B_T01S;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "T01S" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko 2001 Storm-time Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "References: (1) Tsyganenko, N. A., A model of the magnetosphere with a dawn-dusk asymmetry, 1, Mathematical structure, J. Geophys. Res., 107(A8), doi:10.1029/2001JA000219, 2002; (2) Tsyganenko, N. A., A model of the near magnetosphere with a dawn-dusk asymmetry, 2, Parameterization and fitting to observations, J. Geophys. Res., 107(A8), doi:10.1029/2001JA000220, 2002; (3) Tsyganenko, N. A., H. J. Singer, and J. C. Kasper, Storm-time distortion of the inner magnetosphere: How severe can it get? J. Geophys. Res., 108(A5), 1209, doi:10.1029/2002JA009808, 2003.");
+                                strcpy( m->ExtMagModelStr4, "Comments: The T02 model optimized for storms. Only uses data from |X| < 15Re.");
                                 break;
 
         case LGM_EXTMODEL_TS04:
                                 m->Bfield = Lgm_B_TS04;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "TS04" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko Sitnov 2004 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A., and M. I. Sitnov (2005), Modeling the dynamics of the inner magnetosphere during strong geomagnetic storms, J. Geophys. Res., 110, A03208, doi:10.1029/2004JA010798.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Also known as TS05.");
+
+
+
+
                                 break;
         case LGM_EXTMODEL_TS07:
                                 m->Bfield = Lgm_B_TS07;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "TS07" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko Sitnov 2007 Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A., and M. I. Sitnov (2007), Magnetospheric configurations from a high-resolution data-based magnetic field model, J. Geophys. Res., 112, A06225, doi:10.1029/2007JA012260." );
+                                strcpy( m->ExtMagModelStr4, "Comments: Coefficients are time-dependent. Coefficient files are required for this model to work properly.");
                                 break;
 
         case LGM_EXTMODEL_OP77:
                                 m->Bfield = Lgm_B_OP77;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "OP77" );
+                                strcpy( m->ExtMagModelStr2, "Olson Pfitzer, 1977 Magnetic Field Model." );
+                                strcpy( m->ExtMagModelStr3, "Reference: Olson, W. P., and K. A. Pfitzer (1977), Magnetospheric Magnetic Field Modeling, Ann. Sci. Rep. F44620-75-C-0033, Air Force Off.  of Sci. Res., Arlington, Va." );
+                                strcpy( m->ExtMagModelStr4, "Comments: " );
                                 break;
 
         case LGM_EXTMODEL_SCATTERED_DATA:
                                 m->Bfield = Lgm_B_FromScatteredData;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
 
         case LGM_EXTMODEL_SCATTERED_DATA2:
                                 m->Bfield = Lgm_B_FromScatteredData2;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData2" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData2" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
 
         case LGM_EXTMODEL_SCATTERED_DATA3:
                                 m->Bfield = Lgm_B_FromScatteredData3;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData3" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData3" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
         case LGM_EXTMODEL_SCATTERED_DATA4:
                                 m->Bfield = Lgm_B_FromScatteredData4;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData4" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData4" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
         case LGM_EXTMODEL_SCATTERED_DATA5:
                                 m->Bfield = Lgm_B_FromScatteredData5;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData5" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData5" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
 
 
@@ -391,6 +517,27 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 
 
     }
+
+}
+
+void Lgm_Get_IntMagModelStrings( char **Str1, char **Str2, char **Str3, char **Str4, Lgm_MagModelInfo *m ){
+    *Str1 = m->IntMagModelStr1;
+    *Str2 = m->IntMagModelStr2;
+    *Str3 = m->IntMagModelStr3;
+    *Str4 = m->IntMagModelStr4;
+}
+
+void Lgm_Get_ExtMagModelStrings( char **Str1, char **Str2, char **Str3, char **Str4, Lgm_MagModelInfo *m ){
+    *Str1 = m->ExtMagModelStr1;
+    *Str2 = m->ExtMagModelStr2;
+    *Str3 = m->ExtMagModelStr3;
+    *Str4 = m->ExtMagModelStr4;
+}
+
+void Lgm_Get_MagModel( int *InternalModel, int *ExternalModel, Lgm_MagModelInfo *m ){
+
+    *InternalModel = m->InternalModel;
+    *ExternalModel = m->ExternalModel;
 
 }
 

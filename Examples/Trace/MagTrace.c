@@ -199,8 +199,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 200; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 200; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 2; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 2; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -242,6 +242,17 @@ Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
 Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
 Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
 Lgm_SetTabulatedBessel_TS07( TRUE, &mInfo->TS07_Info );
+
+
+
+
+
+char *s1, *s2, *s3, *s4;
+Lgm_Get_ExtMagModelStrings( &s1, &s2, &s3, &s4, mInfo );
+printf( "s1 = %s\n", s1 );
+printf( "s2 = %s\n", s2 );
+printf( "s3 = %s\n", s3 );
+printf( "s4 = %s\n", s4 );
     
     Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
@@ -527,12 +538,14 @@ printf( "u = %g %g %g   Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
 
 
 
-    DumpImage( "ImageNorth_T89", NX, NY, Image );
-    DumpImage( "ImageSouth_T89", NX, NY, ImageSouth );
-    DumpImage( "ImageEq_T89", EQ_NX, EQ_NY, ImageEq );
-    DumpImage( "ImageYZ15_T89", YZ_NY, YZ_NZ, ImageYZ15 );
-    DumpImage( "ImageYZ30_T89", YZ_NY, YZ_NZ, ImageYZ30 );
-    DumpImage( "ImageYZ45_T89", YZ_NY, YZ_NZ, ImageYZ45 );
+    char Basename[256];
+    sprintf( Basename, "ImageNorth_%s", s1 ); DumpImage( Basename, NX, NY, Image );
+    sprintf( Basename, "ImageSouth_%s", s1 ); DumpImage( Basename, NX, NY, ImageSouth );
+    sprintf( Basename, "ImageEq_%s",    s1 ); DumpImage( Basename, EQ_NX, EQ_NY, ImageEq );
+    sprintf( Basename, "ImageYZ15_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ15 );
+    sprintf( Basename, "ImageYZ30_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ30 );
+    sprintf( Basename, "ImageYZ45_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ45 );
+
     LGM_ARRAY_2D_FREE( Image );
     LGM_ARRAY_2D_FREE( ImageSouth );
     LGM_ARRAY_2D_FREE( ImageEq );
