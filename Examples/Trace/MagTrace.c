@@ -199,8 +199,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 2; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 2; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 100; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 100; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -228,7 +228,6 @@ int main(){
     Lgm_get_QinDenton_at_JD( JD, &p, 1, 1 );
     Lgm_set_QinDenton( &p, mInfo );
 
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
 
 Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
@@ -239,6 +238,7 @@ Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
 Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
 Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
 Lgm_SetTabulatedBessel_TS07( TRUE, &mInfo->TS07_Info );
@@ -254,7 +254,7 @@ printf( "s2 = %s\n", s2 );
 printf( "s3 = %s\n", s3 );
 printf( "s4 = %s\n", s4 );
     
-    Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
+    //Lgm_Set_Open_Limits( mInfo, -60.0, 30.0, -40.0, 40.0, -40.0, 40.0 );
 
 
     LGM_ARRAY_2D( Image, NX, NY, double );
@@ -278,7 +278,8 @@ printf( "s4 = %s\n", s4 );
 
             printf("i=%d\n", i);
             
-            for ( j=0; j<NY; j++ ) {
+            //for ( j=0; j<NY; j++ ) {
+            for ( j=0; j<NY/2; j++ ) {
             //for ( j=NY/2; j<=NY/2; j++ ) {
                 y = (LY_MAX-LY_MIN) * j / ((double)(NY-1)) + LY_MIN;
 
@@ -324,7 +325,7 @@ v22 = v2;
                     jj = (v3.x - EQ_XMIN)/(EQ_XMAX-EQ_XMIN) * (EQ_NX-1);
                     //printf("ii, jj = %d %d\n", ii, jj );
                     if ( (ii>=0)&&(ii<EQ_NY)&&(jj>=0)&&(jj<EQ_NX) ) {
-                        ImageEq[ii][jj] = Image[i][j];
+                        ImageEq[EQ_NY-ii][jj] = Image[i][j];
                     }
                 }
 
@@ -446,7 +447,7 @@ printf( "u = %g %g %g   Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
                     jj = (v3.x - EQ_XMIN)/(EQ_XMAX-EQ_XMIN) * (EQ_NX-1);
                     //printf("ii, jj = %d %d\n", ii, jj );
                     if ( (ii>=0)&&(ii<EQ_NY)&&(jj>=0)&&(jj<EQ_NX) ) {
-                        ImageEq[ii][jj] = ImageSouth[i][j];
+                        ImageEq[EQ_NY-ii][jj] = ImageSouth[i][j];
                     }
                 }
 
@@ -545,6 +546,10 @@ printf( "u = %g %g %g   Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
     sprintf( Basename, "ImageYZ15_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ15 );
     sprintf( Basename, "ImageYZ30_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ30 );
     sprintf( Basename, "ImageYZ45_%s",  s1 ); DumpImage( Basename, YZ_NY, YZ_NZ, ImageYZ45 );
+
+    char Command[256];
+    sprintf( Command, "sed -e \"s/TEMPLATE/%s/\" TEMPLATE_Mapping.svg > %s_Mapping.svg", s1, s1 );
+    system( Command );
 
     LGM_ARRAY_2D_FREE( Image );
     LGM_ARRAY_2D_FREE( ImageSouth );
