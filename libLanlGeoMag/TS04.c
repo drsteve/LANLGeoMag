@@ -49,8 +49,8 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     B->x = Bx + B2.x;
     B->y = By + B2.y;
     B->z = Bz + B2.z;
-    Bmag = Lgm_Magnitude( B );
 /*
+    Bmag = Lgm_Magnitude( B );
     B->x = B2.x;
     B->y = B2.y;
     B->z = B2.z;
