@@ -153,7 +153,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                         }
 
                     } else if ( mInfo->UseInterpRoutines ) {
-                        if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) < 0 ) return(LGM_FILL_VALUE);
+                        if ( Lgm_TraceLine2( &(mInfo->Pm_South), &mInfo->Pm_North, (r-1.0)*Re, 0.5*SS-mInfo->Hmax, 1.0, mInfo->Lgm_TraceToEarth_Tol, FALSE, mInfo ) <= 0 ) return(LGM_FILL_VALUE);
 //printf("BEFORE mInfo->nPnts = %d   mInfo->s[0] = %g   mInfo->s[1] = %g    mInfo->s[mInfo->nPnts-2] = %g   mInfo->s[mInfo->nPnts-1] = %g    SS = %g\n", mInfo->nPnts, mInfo->s[0], mInfo->s[1], mInfo->s[mInfo->nPnts-2], mInfo->s[mInfo->nPnts-1], SS );
                         ReplaceFirstPoint( 0.0, mInfo->Bm, &mInfo->Pm_South, mInfo );
                         ReplaceLastPoint( SS, mInfo->Bm, &mInfo->Pm_North, mInfo );
