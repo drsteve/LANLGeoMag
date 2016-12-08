@@ -932,8 +932,6 @@ int main( int argc, char *argv[] ){
     }
 
 
-MagEphemInfo->LstarInfo->mInfo->Bfield = Lgm_B_T89c;
-
 
     /*
      * Set pitch angles in MagEphemInfo structure

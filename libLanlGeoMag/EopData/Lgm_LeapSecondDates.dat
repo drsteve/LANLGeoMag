@@ -5,14 +5,14 @@
 #            on which leap seconds were introduced
 #            (also contains what the leap seconds were set to)
 #         
-#            FILE CREATED: Wed Mar 18 2015 21:46:14 UTC
-#            (Julian Date: 2456005.40710648 )
+#            FILE CREATED: Tue Nov 29 2016 20:25:56 UTC
+#            (Julian Date: 2457722.35134259 )
 #         
 #        ****************************************************
 #
 # Data extracted from the following files with modification times as indicated;
 #
-#   (Last mod.: Mar 12 2015 18:04) (JD: 2455999.25277778) (Age: 6.15432870388031 days) http://maia.usno.navy.mil/ser7/tai-utc.dat
+#   (Last mod.: ) (JD: ) (Age: 2457722.35134259 days) 
 #
 #YYYYMMDD Julian Date LeapSeconds
 19720101   2441317.5    10
@@ -42,3 +42,4 @@
 20090101   2454832.5    34
 20120701   2456109.5    35
 20150701   2457204.5    36
+20170101   2457754.5    37

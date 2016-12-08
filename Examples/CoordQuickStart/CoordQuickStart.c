@@ -5,86 +5,39 @@
 int main( ) {
 
     Lgm_CTrans  *c = Lgm_init_ctrans( 1 ); 
-    Lgm_Vector  Ugeo, Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000, Ugse2000, Umod;
+    Lgm_Vector  Ugsm, Usm, Ugse1, Ugse2, tmp, Uj2000, Ugse2000, Umod;
     long int    Date;
     double      UTC, Lat, Lon, r;
-int i;
-//double GLON_ARR[] = { 103.84, 69.235, -165.151, 67.024, -49.931, -144.592 };
-double GLON_ARR[] = { 227.0, 285.66, 275.20, 255.46, 270.58, 224.72 };
     
-    Date = 20100405;    // Jan 1, 2000
+    Date = 20170101;    // Jan 1, 2000
     //Date = 20000101;    // Jan 1, 2000
-    Date = 19800101;    // Jan 1, 2000
-    UTC  = 5.0 + 24.0/60.0 + 24.0/3600.0;         // Universal Time Coordinated (in decimal hours)
-UTC = 9.0 + 48.0/60.0;
-//    Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
-
-    double GLON;
-    GLON = -49.2;
-    GLON = -165.9;
-    GLON = 103.1;
-    GLON = 70.0;
-    GLON = -143.1;
-    GLON = 14.6;
-    GLON = -49.2;
-    GLON = -49.87;
-    GLON = 69.44;
-    GLON = -165.425;
-    GLON = 19.83;
-
-for (i=0; i<6; i++ ){
-
-    Ugeo.x = 6.619*cos( GLON_ARR[i]*RadPerDeg );
-    Ugeo.y = 6.619*sin( GLON_ARR[i]*RadPerDeg );
-    Ugeo.z = 0.0;
-    //printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
-
-
+    UTC  = 12.0+0.0/60.0;         // Universal Time Coordinated (in decimal hours)
+    Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     // Set up all the necessary variables to do transformations for this Date and UTC
     /* Options for setting Sun/Moon pos are:  */
     //Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
-    //Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
+    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
     //Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Same as NOT calling Set_CTrans_Options */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 
     // Do the transformation from GSM->SM
-    Lgm_Convert_Coords( &Ugeo, &Usm, GEO_TO_SM, c );
+    Lgm_Convert_Coords( &Ugsm, &Usm, GSM_TO_SM, c );
     // Do the transformation from GSM->GSE
-//    Lgm_Convert_Coords( &Ugeo, &Ugse1, GEO_TO_GSE, c );
-//    // Do the transformation from SM->GSE
-//    Lgm_Convert_Coords( &Ugeo, &Ugse2, GEO_TO_GSE, c );
-//    // Do the transformation from GSM->GSE2000
-//    Lgm_Convert_Coords( &Ugeo, &Ugse2000, GEO_TO_GSE2000, c );
-//    // Do the transformation from GSM->MOD
-//    Lgm_Convert_Coords( &Ugeo, &Umod, GEO_TO_MOD, c );
+    Lgm_Convert_Coords( &Ugsm, &Ugse1, GSM_TO_GSE, c );
+    // Do the transformation from SM->GSE
+    Lgm_Convert_Coords( &Usm, &Ugse2, SM_TO_GSE, c );
+    // Do the transformation from GSM->GSE2000
+    Lgm_Convert_Coords( &Ugsm, &Ugse2000, GSM_TO_GSE2000, c );
+    // Do the transformation from GSM->MOD
+    Lgm_Convert_Coords( &Ugsm, &Umod, GSM_TO_MOD, c );
 
 
     // Print out the final results
-    //printf("Date = %8ld\n", Date);
-    //printf("UTC  = %lf\n", UTC);
-//    printf("Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z);
+    printf("Date = %8ld\n", Date);
+    printf("UTC  = %lf\n", UTC);
+    printf("Ugsm = %.8lf %.8lf %.8lf Re\n", Ugsm.x, Ugsm.y, Ugsm.z);
     printf("Usm  = %.8lf %.8lf %.8lf Re\n", Usm.x, Usm.y, Usm.z);
-double mlon;
-    mlon = atan2( Usm.y, Usm.x )*DegPerRad;
-
-Lgm_Vector u, v;
-double mmidlon;
-u.x = -c->Sun.x; u.y = -c->Sun.y; u.z = -c->Sun.z;
-Lgm_Convert_Coords( &u, &v, MOD_TO_GSM, c );
-mmidlon = atan2( v.y, v.x )*DegPerRad;
-
-double MLT;
-MLT =  (mlon - mmidlon) / 15.0;
-if (MLT < 0.0) MLT += 24.0;
-if (MLT > 24.0) MLT -= 24.0;
-printf("MLT: %g\n", MLT);
-
-}
-
-//exit(0);
-
-
     printf("Umod = %.8lf %.8lf %.8lf Re\n", Umod.x, Umod.y, Umod.z);
     printf("\nGoing to GSE from SM and GSM\n");
     printf("Ugse  = %.8lf %.8lf %.8lf Re\n", Ugse1.x, Ugse1.y, Ugse1.z);
@@ -128,4 +81,3 @@ printf("MLT: %g\n", MLT);
 
     return(0);
 }
-
