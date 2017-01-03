@@ -8,8 +8,6 @@ int main( ) {
 
 
 
-
-
     TAI = Lgm_DateTime_Create( 1990, 1, 1, 12.0, LGM_TIME_SYS_TAI, c );
     UTC = Lgm_DateTime_Create( 1990, 1, 1, 12.0, LGM_TIME_SYS_UTC, c );
 
@@ -17,6 +15,22 @@ int main( ) {
     printf("-------------------------      --------------------------\n");
 
     for (ns = 2300; ns < 2700; ns += 25 ) {
+        TAI->Time  = ns/360000.0;
+        TAI->JD = Lgm_JD( TAI->Year, TAI->Month, TAI->Day, TAI->Time, LGM_TIME_SYS_TAI, c );
+        Lgm_TAI_to_UTC( TAI, UTC, c );
+        Lgm_Print_DateTime( TAI, 4, 2 ); printf("\t"); Lgm_Print_DateTime( UTC, 4, 2 ); printf("\n");
+    }
+    
+    printf("\n\n\n");
+
+
+    TAI = Lgm_DateTime_Create( 2016, 1, 1, 12.0, LGM_TIME_SYS_TAI, c );
+    UTC = Lgm_DateTime_Create( 2016, 1, 1, 12.0, LGM_TIME_SYS_UTC, c );
+
+    printf("          TAI                             UTC\n");
+    printf("-------------------------      --------------------------\n");
+
+    for (ns = 3400; ns < 3800; ns += 25 ) {
         TAI->Time  = ns/360000.0;
         TAI->JD = Lgm_JD( TAI->Year, TAI->Month, TAI->Day, TAI->Time, LGM_TIME_SYS_TAI, c );
         Lgm_TAI_to_UTC( TAI, UTC, c );
