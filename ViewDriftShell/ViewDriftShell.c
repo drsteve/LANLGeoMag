@@ -100,7 +100,7 @@ GtkWidget   *cFramesLabel;
 int         MonthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 char        *MonthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 double      MaxStarMagnitude;
-char        *MapImageFilename = NULL;
+char        MapImageFilename[1024];
 
 
 double qradius=0.0;
@@ -1390,6 +1390,7 @@ void LoadTextures(){
     GLubyte *pImage;
     int     Width;
     int     Height;
+    int     PngImageOK;
 
 
 
@@ -1401,47 +1402,50 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_Earth );
     glBindTexture( GL_TEXTURE_2D, Texture_Earth );
 
+
+
+
+
     /*
      * Read Filename
      */
-    if ( (ReadPng( MapImageFilename, &Width, &Height, &pImage ) < 0) || (MapImageFilename == NULL) ) {
-        if ( MapImageFilename != NULL ) free( MapImageFilename );
-        MapImageFilename = (char *)malloc( sizeof(char)*sizeof("/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png") );
-        strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
-        ReadPng( MapImageFilename, &Width, &Height, &pImage );
-    }
+    strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+    PngImageOK = ReadPng( MapImageFilename, &Width, &Height, &pImage );
     printf("PNG image %s: Width, Height = %d %d\n", MapImageFilename, Width, Height );
 
+    if ( PngImageOK ) {
 
-    /* Put the image into texture memory */
-    glTexImage2D( GL_TEXTURE_2D,    /* texture dim and whether or not a proxy */
-              0,                    /* texture level. Always 0 unless mipmapping */
-              GL_RGBA,              /* suggested internal format */
-              Width, Height,        /* width, height of the source image */
-              0,                    /* border. Not covered in this course */
-              GL_RGBA,              /* source image format */
-              GL_UNSIGNED_BYTE,     /* source image data type */
-              pImage                /* pointer to source image */ );
+	    /* Put the image into texture memory */
+	    glTexImage2D( GL_TEXTURE_2D,    /* texture dim and whether or not a proxy */
+		      0,                    /* texture level. Always 0 unless mipmapping */
+		      GL_RGBA,              /* suggested internal format */
+		      Width, Height,        /* width, height of the source image */
+		      0,                    /* border. Not covered in this course */
+		      GL_RGBA,              /* source image format */
+		      GL_UNSIGNED_BYTE,     /* source image data type */
+		      pImage                /* pointer to source image */ );
 
-    /*
-     * Build a sequence of MIPMAPS to reduce artifatcs in rendering the texture.
-     */
-    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage );
-    free( pImage );
+	    /*
+	     * Build a sequence of MIPMAPS to reduce artifatcs in rendering the texture.
+	     */
+	    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage );
+	    free( pImage );
 
-    /*
-     * Set Minification filter to:
-     *      GL_NEAREST                  nearest neighbor when not using mipmaps
-     *      GL_LINEAR                   linear interpolation when not using mipmaps
-     *      GL_NEAREST_MIPMAP_NEAREST   nearest neighbor in nearest mipmap level
-     *      GL_NEAREST_MIPMAP_LINEAR    lin. interp in nearest mipmap level
-     *      GL_LINEAR_MIPMAP_NEAREST    nearest neighbor after lin. interp between mipmap levels
-     *      GL_LINEAR_MIPMAP_LINEAR     lin interp after lin. interp between mipmap levels
-     */
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	    /*
+	     * Set Minification filter to:
+	     *      GL_NEAREST                  nearest neighbor when not using mipmaps
+	     *      GL_LINEAR                   linear interpolation when not using mipmaps
+	     *      GL_NEAREST_MIPMAP_NEAREST   nearest neighbor in nearest mipmap level
+	     *      GL_NEAREST_MIPMAP_LINEAR    lin. interp in nearest mipmap level
+	     *      GL_LINEAR_MIPMAP_NEAREST    nearest neighbor after lin. interp between mipmap levels
+	     *      GL_LINEAR_MIPMAP_LINEAR     lin interp after lin. interp between mipmap levels
+	     */
+	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+    }
 
 
     /*
@@ -1495,18 +1499,18 @@ void LoadTextures(){
     /*
      *  Texture for the EQ plane
      */
-    glGenTextures( 1, &Texture_EqPlane );
-    glBindTexture( GL_TEXTURE_2D, Texture_EqPlane );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/checkerboard_lg.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glGenTextures( 1, &Texture_EqPlane );
+//    glBindTexture( GL_TEXTURE_2D, Texture_EqPlane );
+//    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/checkerboard_lg.png" );
+//    ReadPng( Filename, &Width, &Height, &pImage );
+//    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+//    free( pImage );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
 
     /*
@@ -1514,42 +1518,48 @@ void LoadTextures(){
      */
     glGenTextures( 1, &Texture_Debris );
     glBindTexture( GL_TEXTURE_2D, Texture_Debris );
+
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/HexNut.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
+
 
     glGenTextures( 1, &Texture_RocketBody );
     glBindTexture( GL_TEXTURE_2D, Texture_RocketBody );
+
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/RocketBody4.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
 
     glGenTextures( 1, &Texture_Spacecraft );
     glBindTexture( GL_TEXTURE_2D, Texture_Spacecraft );
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/spacecraft2.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
 
 
     /*
@@ -1558,15 +1568,16 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_Sun );
     glBindTexture( GL_TEXTURE_2D, Texture_Sun );
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/happy.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
 
 
     /*
@@ -1575,15 +1586,16 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_Moon );
     glBindTexture( GL_TEXTURE_2D, Texture_Moon );
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/Moon.png");
-    ReadPng( Filename, &Width, &Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
 
 
     /*
@@ -1592,15 +1604,16 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_Logo );
     glBindTexture( GL_TEXTURE_2D, Texture_Logo );
     strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/LANL_LOGO_REV_ALPHA_50_V2.png");
-    ReadPng( Filename, &Logo_Width, &Logo_Height, &pImage );
-    printf("PNG image %s: Width, Height = %d %d\n", Filename, Logo_Width, Logo_Height );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Logo_Width, Logo_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Logo_Width, Logo_Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
-    free( pImage );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    if ( ReadPng( Filename, &Logo_Width, &Logo_Height, &pImage ) ) {
+        printf("PNG image %s: Width, Height = %d %d\n", Filename, Logo_Width, Logo_Height );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Logo_Width, Logo_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Logo_Width, Logo_Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
+        free( pImage );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    }
 
 
     /*
@@ -2348,72 +2361,75 @@ void CreateSCPos( ) {
 void LoadStars( ) {
 
     // Stars
-    FILE        *fp = fopen("/home/mgh/DREAM/Dream/Dream/Misc/Stars.txt", "r");
+    FILE        *fp;
     float       val, sRed, sGrn, sBlu;
     double      RA, DEC, MAG;
     Lgm_Vector  P_gei, P;
     char        TYPE;
     GLfloat     quadratic[3] = {1.0f, 0.0f, 0.0f };
 
-    StarsDL = glGenLists( 1 );
-    glNewList( StarsDL, GL_COMPILE );
-        glDisable(GL_LIGHTING);
-        glPointSize( 3.0 );
-glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
-        glEnable(GL_POINT_SMOOTH);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
-        glBegin( GL_POINTS );
-          while( fscanf(fp, "%lf %lf %lf %c", &RA, &DEC, &MAG, &TYPE) != EOF ){
-            if ( MAG < MaxStarMagnitude ) {
-                Lgm_Radec_to_Cart( 15.0*RA, DEC, &P_gei );
-                Lgm_ScaleVector( &P_gei, 70.0 );
-                Lgm_Convert_Coords( &P_gei, &P, StarsConvertFlag, mInfo->c );
-                StarColor( TYPE, &sRed, &sGrn, &sBlu ); // sets the star color based on its spectral type
-                val = (0.1-1.5)/(6.5 - -1.47)*(MAG - -1.47) + 1.5; // controls brightness based on stars magnitude
-                glColor3f( sRed*val, sGrn*val, sBlu*val);
-                glVertex3f( P.x, P.y, P.z );
-            }
-          }
-          fclose(fp);
-        glEnd();
-        glDisable(GL_BLEND);
-        glEnable(GL_LIGHTING);
-    glEndList( );
+    if ( ( fp = fopen("/home/mgh/DREAM/Dream/Dream/Misc/Stars.txt", "r") ) != NULL ) {
+
+        StarsDL = glGenLists( 1 );
+        glNewList( StarsDL, GL_COMPILE );
+            glDisable(GL_LIGHTING);
+            glPointSize( 3.0 );
+            glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, &quadratic[0] );
+            glEnable(GL_POINT_SMOOTH);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
+            glBegin( GL_POINTS );
+              while( fscanf(fp, "%lf %lf %lf %c", &RA, &DEC, &MAG, &TYPE) != EOF ){
+                if ( MAG < MaxStarMagnitude ) {
+                    Lgm_Radec_to_Cart( 15.0*RA, DEC, &P_gei );
+                    Lgm_ScaleVector( &P_gei, 70.0 );
+                    Lgm_Convert_Coords( &P_gei, &P, StarsConvertFlag, mInfo->c );
+                    StarColor( TYPE, &sRed, &sGrn, &sBlu ); // sets the star color based on its spectral type
+                    val = (0.1-1.5)/(6.5 - -1.47)*(MAG - -1.47) + 1.5; // controls brightness based on stars magnitude
+                    glColor3f( sRed*val, sGrn*val, sBlu*val);
+                    glVertex3f( P.x, P.y, P.z );
+                }
+              }
+              fclose(fp);
+            glEnd();
+            glDisable(GL_BLEND);
+            glEnable(GL_LIGHTING);
+        glEndList( );
 
 
 
-    SunDL = glGenLists( 1 );
-    glNewList( SunDL, GL_COMPILE );
+        SunDL = glGenLists( 1 );
+        glNewList( SunDL, GL_COMPILE );
 
-        glEnable(GL_POINT_SPRITE);
-        glEnable(GL_TEXTURE_2D);
-        glDepthMask( GL_FALSE );
-        glDisable(GL_LIGHTING);
-        glEnable(GL_POINT_SMOOTH);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
+            glEnable(GL_POINT_SPRITE);
+            glEnable(GL_TEXTURE_2D);
+            glDepthMask( GL_FALSE );
+            glDisable(GL_LIGHTING);
+            glEnable(GL_POINT_SMOOTH);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
 //        glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
-        glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+            glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 
-    	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-        glBindTexture( GL_TEXTURE_2D, Texture_Sun );
+            glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+            glBindTexture( GL_TEXTURE_2D, Texture_Sun );
 
-        glPointSize( 32.0 );
-        glBegin( GL_POINTS );
-                Lgm_Radec_to_Cart( mInfo->c->RA_sun, mInfo->c->DEC_sun, &P_gei );
-                Lgm_ScaleVector( &P_gei, 69.0 );
-                Lgm_Convert_Coords( &P_gei, &P, StarsConvertFlag, mInfo->c );
-                glColor3f( 1.0, 1.0, 1.0);
-                glVertex3f( P.x, P.y, P.z );
-        glEnd();
-        glDisable(GL_BLEND);
-        glDisable(GL_POINT_SMOOTH);
-        glEnable(GL_LIGHTING);
-        glDepthMask( GL_TRUE );
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_POINT_SPRITE);
-    glEndList( );
+            glPointSize( 32.0 );
+            glBegin( GL_POINTS );
+                    Lgm_Radec_to_Cart( mInfo->c->RA_sun, mInfo->c->DEC_sun, &P_gei );
+                    Lgm_ScaleVector( &P_gei, 69.0 );
+                    Lgm_Convert_Coords( &P_gei, &P, StarsConvertFlag, mInfo->c );
+                    glColor3f( 1.0, 1.0, 1.0);
+                    glVertex3f( P.x, P.y, P.z );
+            glEnd();
+            glDisable(GL_BLEND);
+            glDisable(GL_POINT_SMOOTH);
+            glEnable(GL_LIGHTING);
+            glDepthMask( GL_TRUE );
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_POINT_SPRITE);
+        glEndList( );
+    }
 
 
 }
@@ -4705,10 +4721,12 @@ static void toggle_animation( GtkWidget *widget ) {
 
 void  ChangeMapImage( GtkFileChooser *chooser,  gpointer user_data){
 
-    if (MapImageFilename != NULL) g_free( MapImageFilename );
-    MapImageFilename = gtk_file_chooser_get_filename( chooser );
+    char *filename;
+    filename = gtk_file_chooser_get_filename( chooser );
+    if ( filename == NULL ) return;
+
+    strcpy( MapImageFilename, filename );
     printf( "******************************************** You selected file: %s\n", MapImageFilename );
-    if ( MapImageFilename == NULL ) return;
     LoadTextures();
 
     return;
