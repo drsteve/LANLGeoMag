@@ -250,17 +250,28 @@ PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
 #get out JUST the rpath bit, since this needs to go in LDFLAGS
 PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
 
+HDF5_LDFLAGS=`pkg-config --libs hdf5 2>/dev/null`
+HDF5_CFLAGS=`pkg-config --cflags hdf5 2>/dev/null`
+
+CHECK_LIBS=`pkg-config --libs check 2>/dev/null`
+CHECK_CFLAGS=`pkg-config --cflags check 2>/dev/null`
+
+
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
-CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}
-LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}
+CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}\ ${HDF5_CFLAGS}
+LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}\ ${HDF5_LDFLAGS}
 AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
 CFLAGS=${OLD_CFLAGS}
 LDFLAGS=${OLD_LDFLAGS}\ ${PERL_RPATH}
 LIBS=${OLD_LIBS}
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
+AC_SUBST(HDF5_CFLAGS)
+AC_SUBST(HDF5_LDFLAGS)
+AC_SUBST(CHECK_CFLAGS)
+AC_SUBST(CHECK_LIBS)
 
 dnl Check for gsl, http://www.gnu.org/software/gsl/manual/html_node/Autoconf-Macros.html
 AC_CHECK_LIB([m], [cos], ,

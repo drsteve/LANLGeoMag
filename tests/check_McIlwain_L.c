@@ -10,8 +10,8 @@ Lgm_MagModelInfo    *mInfo;
 Lgm_CTrans          *c;
 
 void McIlwain_L_Setup(void) {
-    c = Lgm_init_ctrans( 0 );
     mInfo = Lgm_InitMagInfo();
+    c     = Lgm_init_ctrans( 0 );
     return;
 }
 
@@ -33,7 +33,6 @@ START_TEST(test_MCILWAIN_01) {
     FILE                *fp_got;
 
     if ( (fp_expected = fopen( "check_McIlwain_L_01.expected", "r" )) != NULL ) {
-
         fscanf( fp_expected, "%lf", &L_expected );
         fscanf( fp_expected, "%lf", &I_expected );
         fscanf( fp_expected, "%lf", &Bm_expected );
@@ -45,8 +44,10 @@ START_TEST(test_MCILWAIN_01) {
 
 
     Date = 20090101; UTC  = 0.0; mInfo->Kp = 2; Lgm_Set_Coord_Transforms( Date, UTC, c );
-    u.x = -4.0; u.y = 0.0; u.z = 1.0;
-    L = Lgm_McIlwain_L( Date, UTC, &u, 90.0, 1, &I, &Bm, &M, mInfo );
+    u.x = -4.0; u.y = 0.0; u.z = 0.0;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, c );
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, mInfo );
+    L = Lgm_McIlwain_L( Date, UTC, &v, 90.0, 0, &I, &Bm, &M, mInfo );
 
     if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
     if ( !Passed ){

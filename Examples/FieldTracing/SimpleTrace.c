@@ -20,8 +20,8 @@ int main(){
     MagInfo = Lgm_InitMagInfo( );
     Lgm_Set_Coord_Transforms( Date, Time, MagInfo->c );
 
+    //Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, MagInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, MagInfo );
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, MagInfo );
 
     /*
      * Fill UTC DateTime structure
@@ -35,7 +35,7 @@ int main(){
     Lgm_get_QinDenton_at_JD( UTC.JD, &p, 1, 0 );
     Lgm_set_QinDenton( &p, MagInfo );
 
-    Lgm_SetCoeffs_TS07( Date, Time, &(MagInfo->TS07_Info) );
+//    Lgm_SetCoeffs_TS07( Date, Time, &(MagInfo->TS07_Info) );
 
 
 
