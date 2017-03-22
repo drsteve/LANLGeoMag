@@ -5501,6 +5501,7 @@ static void TLE_TraceFieldLines( GtkWidget *widget, gpointer data) {
 static void ChangeTLE( GtkWidget *widget, gpointer data) {
     int     i;
     double  val;
+    char    Filename[1024];
 
     i   = GPOINTER_TO_INT( data );
     val = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
@@ -5719,7 +5720,8 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
     printf("Line1: |%s|\n", tle.Line1 );
     printf("Line2: |%s|\n", tle.Line2 );
 
-    FILE *fp_tle = fopen( "/home/mgh/SAT_GROUPS/TLE.txt", "w" );
+    sprintf( Filename, "%s/SAT_GROUPS/TLE.txt", getenv("HOME") );
+    FILE *fp_tle = fopen( Filename, "w" );
     fprintf( fp_tle, "%s\n", tle.Line0 );
     fprintf( fp_tle, "%s\n", tle.Line1 );
     fprintf( fp_tle, "%s\n", tle.Line2 );
@@ -9352,6 +9354,7 @@ int main( int argc, char *argv[] ) {
 
     int         i;
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
+    char       Command[2048];
 
     
     /*
@@ -9511,6 +9514,8 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
     tle.RevNum = 331;
 
 
+    sprintf( Command, "mkdir -p %s/SAT_GROUPS", getenv("HOME") );
+    system( Command );
 
 
 
