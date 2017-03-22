@@ -25,7 +25,7 @@
 
 #ifndef LGM_BLUEMARBLE_DATA_DIR
 #warning "hard-coding LGM_BLUEMARBLE_DATA_DIR because it was not in config.h"
-#define LGM_BLUEMARBLE_DATA_DIR    "/usr/local/share/LanlGeoMag/Images/BlueMarble/5400x2700"
+#define LGM_BLUEMARBLE_DATA_DIR    "/usr/local/share/LanlGeoMag/Images/BlueMarble"
 #endif
 
 
@@ -1524,8 +1524,7 @@ void LoadTextures(){
     /*
      * Read Filename
      */
-    sprintf( MapImageFilename, "%s/world.topo.bathy.200406.3x5400x2700.png", LGM_BLUEMARBLE_DATA_DIR );
-    //strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+    sprintf( MapImageFilename, "%s/5400x2700/world.topo.bathy.200406.3x5400x2700.png", LGM_BLUEMARBLE_DATA_DIR );
     PngImageOK = ReadPng( MapImageFilename, &Width, &Height, &pImage );
     printf("PNG image %s: Width, Height = %d %d\n", MapImageFilename, Width, Height );
 
@@ -1635,7 +1634,7 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_Debris );
     glBindTexture( GL_TEXTURE_2D, Texture_Debris );
 
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/HexNut.png");
+    sprintf( Filename, "%s/HexNut.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -1651,7 +1650,7 @@ void LoadTextures(){
     glGenTextures( 1, &Texture_RocketBody );
     glBindTexture( GL_TEXTURE_2D, Texture_RocketBody );
 
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/RocketBody4.png");
+    sprintf( Filename, "%s/RocketBody4.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -1665,7 +1664,7 @@ void LoadTextures(){
 
     glGenTextures( 1, &Texture_Spacecraft );
     glBindTexture( GL_TEXTURE_2D, Texture_Spacecraft );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/spacecraft2.png");
+    sprintf( Filename, "%s/spacecraft2.png.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -1683,7 +1682,7 @@ void LoadTextures(){
      */
     glGenTextures( 1, &Texture_Sun );
     glBindTexture( GL_TEXTURE_2D, Texture_Sun );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/happy.png");
+    sprintf( Filename, "%s/sun.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -1701,7 +1700,7 @@ void LoadTextures(){
      */
     glGenTextures( 1, &Texture_Moon );
     glBindTexture( GL_TEXTURE_2D, Texture_Moon );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/Moon.png");
+    sprintf( Filename, "%s/Moon.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -1719,7 +1718,7 @@ void LoadTextures(){
      */
     glGenTextures( 1, &Texture_Logo );
     glBindTexture( GL_TEXTURE_2D, Texture_Logo );
-    strcpy( Filename, "/home/mgh/DREAM/Dream/Dream/Images/LANL_LOGO_REV_ALPHA_50_V2.png");
+    sprintf( Filename, "%s/LANL_LOGO_REV_ALPHA_50_V2.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Logo_Width, &Logo_Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Logo_Width, Logo_Height );
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Logo_Width, Logo_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
@@ -2253,9 +2252,9 @@ void CreateHiResEarthQuad( int LoadQuad, int nph, int nth, long int QuadId, GLui
         glGenTextures( 1, &Texture ); *TexId = Texture;
         glBindTexture( GL_TEXTURE_2D, Texture );
         if ((nph == 80 )&&(nth == 40)) {
-            sprintf(Filename, "/data1/mgh/BlueMarble/86400x43200/200406/TextureAtlas_80x40/Quad_%02d_%02d.png", i, j );
+            sprintf(Filename, "%s/86400x43200/200406/TextureAtlas_80x40/Quad_%02d_%02d.png", LGM_BLUEMARBLE_DATA_DIR, i, j );
         } else {
-            sprintf(Filename, "/data1/mgh/BlueMarble/43200x21600/200406/TextureAtlas_40x20/Quad_%02d_%02d.png", i, j );
+            sprintf(Filename, "%s/43200x21600/200406/TextureAtlas_40x20/Quad_%02d_%02d.png", LGM_BLUEMARBLE_DATA_DIR, i, j );
         }
         if ( ReadPng( Filename, &Width, &Height, &pImage ) >= 0 ){
             printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
@@ -2483,8 +2482,11 @@ void LoadStars( ) {
     Lgm_Vector  P_gei, P;
     char        TYPE;
     GLfloat     quadratic[3] = {1.0f, 0.0f, 0.0f };
+    char        Filename[256];
 
-    if ( ( fp = fopen("/home/mgh/DREAM/Dream/Dream/Misc/Stars.txt", "r") ) != NULL ) {
+    
+    sprintf( Filename, "%s/Stars.txt", LGM_DATA_DIR );
+    if ( ( fp = fopen( Filename, "r") ) != NULL ) {
 
         StarsDL = glGenLists( 1 );
         glNewList( StarsDL, GL_COMPILE );
@@ -2622,7 +2624,7 @@ int LoadTLEs( ){
     for (i=0; i<nSatTypes; i++){
         if ( ShowSatellites[i] ) {
             nTLEs = 0;
-            sprintf(Filename, "/home/mgh/DREAM/Dream/Data/TLEs/%s_Latest.txt", SatTypes[i]);
+            sprintf( Filename, "/home/mgh/DREAM/Dream/Data/TLEs/%s_Latest.txt", SatTypes[i]);
             LgmSgp_ReadTlesFromFile( Filename, &nTLEs, TLEs, 0 );
             printf("File = %s nTLEs found=%d\n", Filename, nTLEs);
             SpaceObjects->nSat = nTLEs;
@@ -9438,9 +9440,9 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
     gtk_set_locale( );
     gtk_init( &argc, &argv );
     //add_pixmap_directory( PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps" );
-    add_pixmap_directory( "/home/mgh/Desktop" );
+//    add_pixmap_directory( "/home/mgh/Desktop" );
     add_pixmap_directory( "." );
-    add_pixmap_directory( "/home/mgh/DREAM/Dream/Dream/Images" );
+//    add_pixmap_directory( "/home/mgh/DREAM/Dream/Dream/Images" );
 
 
 
