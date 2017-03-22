@@ -21,6 +21,97 @@
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
 #include "Vds_DriftShell.h"
+#include <Lgm_Objects.h>
+
+typedef struct TleInfo {
+
+    char        Name[80];       // 0
+
+    long int    SatNum;         // 1
+    char        IntDesig[10];   // 2
+    double      Epoch;          // 3
+    double      d1MeanMotion;   // 4
+    double      d2MeanMotion;   // 5
+    double      BSTAR;          // 6
+    int         ElemNum;        // 7
+
+    double      Inc;            // 8
+    double      RAAN;           // 9
+    double      Ecc;            // 10
+    double      AoP;            // 11
+    double      MeanAnomaly;    // 12
+    double      MeanMotion;     // 13
+    int         RevNum;         // 14
+
+    char        Line0[256];
+    char        Line1[256];
+    char        Line2[256];
+
+    GtkWidget   *Line0Label;
+    GtkWidget   *Line1Label;
+    GtkWidget   *Line2Label;
+
+} TleInfo;
+
+TleInfo tle;
+
+
+void BSTAR_to_STR( double bs, char *Str3 ) {
+
+    int sgn;
+    char *p, Str[80], Str2[80];
+    long int a;
+    double val, man;
+    int ex;
+
+    sgn = ( bs  < 0.0 ) ? -1 : 1;
+    val = fabs( bs );
+
+    //printf( "val = %.5e\n", val );
+    sprintf( Str, "%.5e", val );
+    //printf( "Str = %s\n", Str );
+    
+    // get mantissa
+    p = strstr( Str, "." );
+    strncpy( Str2, p-1, 7 );
+    Str2[7] = '\0';
+    //printf("Str2 = %s\n", Str2);
+    sscanf( Str2, "%lf", &man );
+    //printf( "man = %g\n", man );
+    
+    // get exponent
+    p = strstr( Str, "e" );
+    sscanf( p+1, "%d", &ex );
+    //printf( "ex = %d\n", ex );
+    
+    // make man < 1
+    man /= 10.0; ++ex;
+    //printf( "man = %g\n", man );
+    //printf( "ex = %d\n", ex );
+    
+    a = (long int)(man*1e5);
+    //printf("STRING:  %05ld%d", a, ex );
+    
+    
+    if ( a == 0 ) {
+        sprintf( Str3, " 00000-0" );
+    } else {
+        if ( sgn < 0 ) {
+            if ( ex < 0 ) {
+                sprintf( Str3, "-%05ld-%d", a, abs(ex) );
+            } else {
+                sprintf( Str3, "-%05ld+%d", a, abs(ex) );
+            }
+        } else {
+            if ( ex < 0 ) {
+                sprintf( Str3, " %05ld-%d", a, abs(ex) );
+            } else {
+                sprintf( Str3, " %05ld+%d", a, abs(ex) );
+            }
+        }
+    }
+
+}
 
 
 GtkWidget *PUKE_SATSEL_VBOX;
@@ -128,8 +219,9 @@ int                 StarsConvertFlag  = GEI2000_TO_GSM;
 int                 SatsConvertFlag   = GEI2000_TO_GSM;
 int                 AtmosConvertFlag  = GSM_TO_GSM;
 int                 ObsToGeoConvertFlag  = GSM_TO_GEO;
+int                 GeoToObsConvertFlag  = GEO_TO_GSM;
 GtkWidget           *RadioCoordSystem[5];
-GtkWidget           *RadioLightingStyle[2];
+GtkWidget           *RadioLightingStyle[3];
 
 double IdentityMatrix[3][3] = { {1.0, 0.0, 0.0 }, {0.0, 1.0, 0.0 }, {0.0, 0.0, 1.0} };
 
@@ -266,7 +358,7 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     // Set transforms, get Tilt
     Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
     DipoleTiltAngle = mInfo->c->psi*DegPerRad;;
-printf("CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
+printf("MIKE MIKE:   CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
 printf("DipoleTiltAngle = %g\n", DipoleTiltAngle);
 
 
@@ -288,52 +380,62 @@ printf("DipoleTiltAngle = %g\n", DipoleTiltAngle);
 
         Lgm_MatrixToQuat( IdentityMatrix, Q );
 
-        Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Awgs84_to_gsm, A ); // A = Awgs84_to_sm
+
+        //Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Awgs84_to_gsm, A ); // A = Awgs84_to_sm
+        Lgm_MatTimesMat( mInfo->c->Agsm_to_wgs84, mInfo->c->Asm_to_gsm, A ); // A = Asm_to_wgs84
         Lgm_MatrixToQuat( A, Q2 );
 
-        Lgm_MatrixToQuat( mInfo->c->Awgs84_to_gsm, Q3 );
+        //Lgm_MatrixToQuat( mInfo->c->Awgs84_to_gsm, Q3 );
+        Lgm_MatrixToQuat( mInfo->c->Agsm_to_wgs84, Q3 );
 
     } else if ( ObserverCoords == GSM_COORDS ) {
 
-printf("HERE\n");
 //Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
-        Lgm_MatrixToQuat( mInfo->c->Agsm_to_wgs84, Q );
-printf("                        [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][0], mInfo->c->Agsm_to_wgs84[1][0], mInfo->c->Agsm_to_wgs84[2][0]);
-printf("    Agsm_to_wgs84     = [ %15.8e  %15.8e  %15.8e ]\n",   mInfo->c->Agsm_to_wgs84[0][1], mInfo->c->Agsm_to_wgs84[1][1], mInfo->c->Agsm_to_wgs84[2][1]);
-printf("                        [ %15.8e  %15.8e  %15.8e ]\n\n", mInfo->c->Agsm_to_wgs84[0][2], mInfo->c->Agsm_to_wgs84[1][2], mInfo->c->Agsm_to_wgs84[2][2]);
+//FIX ME
+        //Lgm_MatrixToQuat( mInfo->c->Agsm_to_wgs84, Q );
+        Lgm_MatrixToQuat( mInfo->c->Awgs84_to_gsm, Q );
 
 
-        Lgm_MatrixToQuat( mInfo->c->Agsm_to_sm, Q2 );
+        //Lgm_MatrixToQuat( mInfo->c->Agsm_to_sm, Q2 );
+        Lgm_MatrixToQuat( mInfo->c->Asm_to_gsm, Q2 );
 
         Lgm_MatrixToQuat( IdentityMatrix, Q3 );
 
     } else if ( ObserverCoords == GEI2000_COORDS ) {
 
-        Lgm_MatrixToQuat( mInfo->c->Agei_to_wgs84, Q );
+        //Lgm_MatrixToQuat( mInfo->c->Agei_to_wgs84, Q );
+        Lgm_MatrixToQuat( mInfo->c->Awgs84_to_gei, Q );
 
-        Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Amod_to_gsm, A ); // A = Agei_to_sm
+        //Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Amod_to_gsm, A ); // A = Amod_to_sm
+        Lgm_MatTimesMat( mInfo->c->Agsm_to_mod, mInfo->c->Asm_to_gsm, A ); // A = Asm_to_mod
         Lgm_MatrixToQuat( A, Q2 );
 
-        Lgm_MatrixToQuat( mInfo->c->Amod_to_gsm, Q3 );
+        //Lgm_MatrixToQuat( mInfo->c->Amod_to_gsm, Q3 );
+        Lgm_MatrixToQuat( mInfo->c->Agsm_to_mod, Q3 );
 
     } else if ( ObserverCoords == GSE_COORDS ) {
 
-        Lgm_MatTimesMat( mInfo->c->Agsm_to_wgs84, mInfo->c->Agse_to_gsm, A ); // A = Agse_to_wgs84
+        //Lgm_MatTimesMat( mInfo->c->Agsm_to_wgs84, mInfo->c->Agse_to_gsm, A ); // A = Agse_to_wgs84
+        Lgm_MatTimesMat( mInfo->c->Agsm_to_gse, mInfo->c->Awgs84_to_gsm, A ); // A = Awgs84_to_gse
         Lgm_MatrixToQuat( A, Q );
 
-        Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Agse_to_gsm, A ); // A = Agse_to_sm
+        //Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Agse_to_gsm, A ); // A = Agse_to_sm
+        Lgm_MatTimesMat( mInfo->c->Agsm_to_gse, mInfo->c->Asm_to_gsm, A ); // A = Asm_to_gse
         Lgm_MatrixToQuat( A, Q2 );
 
-        Lgm_MatrixToQuat( mInfo->c->Agse_to_gsm, Q3 );
+        //Lgm_MatrixToQuat( mInfo->c->Agse_to_gsm, Q3 );
+        Lgm_MatrixToQuat( mInfo->c->Agsm_to_gse, Q3 );
 
     } else if ( ObserverCoords == SM_COORDS ) {
 
-        Lgm_MatTimesMat( mInfo->c->Agsm_to_wgs84, mInfo->c->Asm_to_gsm, A ); // A = Asm_to_wgs84
+        //Lgm_MatTimesMat( mInfo->c->Agsm_to_wgs84, mInfo->c->Asm_to_gsm, A ); // A = Asm_to_wgs84
+        Lgm_MatTimesMat( mInfo->c->Agsm_to_sm, mInfo->c->Awgs84_to_gsm, A ); // A = Awgs84_to_sm
         Lgm_MatrixToQuat( A, Q );
 
         Lgm_MatrixToQuat( IdentityMatrix, Q2 );
 
-        Lgm_MatrixToQuat( mInfo->c->Asm_to_gsm, Q3 );
+        //Lgm_MatrixToQuat( mInfo->c->Asm_to_gsm, Q3 );
+        Lgm_MatrixToQuat( mInfo->c->Agsm_to_sm, Q3 );
 
     }
 
@@ -1102,6 +1204,7 @@ GtkWidget   *PitchAngleCheckMenuItem[91];
 //int         ShowSun                 =  0;
 int         ShowStars               =  1;
 int         ShowEarth               =  1;
+int         ShowThemisFovs          =  1;
 int         ShowAtmosphere          =  1;
 int         ShowFullFieldLine       =  0;
 int         ShowDriftShellSurface   =  0;
@@ -1132,6 +1235,7 @@ static GLuint SunDirectionDL   = 0;  // Display List for Direction to Sun
 static GLuint ScPositionDL     = 0;  // Display List for S/C position
 static GLuint StarsDL          = 0;  // Display List for Stars
 static GLuint SatsDL           = 0;  // Display List for Sats
+static GLuint ThemisFovsDL     = 0;  // Display List for Themis ASI FOVs
 static GLuint SatOrbitsDL      = 0;  // Display List for Sat Orbits
 static GLuint EqPlaneDL        = 0;  // Display List
 static GLuint EqPlaneGridDL    = 0;  // Display List
@@ -2762,18 +2866,18 @@ void CreateSats() {
 
 
                 glBegin( GL_POINTS );
-                    for (i=0; i<Group->nSat; i++){
-                        if ( strstr(Group->Sat[i].TLE.Name, " DEB") && Group->DrawDebris ){
-                            tsince = (JD - Group->Sat[i].TLE.JD)*1440.0;
-                            LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
-                            LgmSgp_SGP4( tsince, s );
-                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
-                            //glColor4f( 0.7, 0.1, 0.0, 0.5 );
-                            glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
-                            Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;
-                        }
+                for (i=0; i<Group->nSat; i++){
+                    if ( strstr(Group->Sat[i].TLE.Name, " DEB") && Group->DrawDebris ){
+                        tsince = (JD - Group->Sat[i].TLE.JD)*1440.0;
+                        LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
+                        LgmSgp_SGP4( tsince, s );
+                        Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
+                        Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
+                        //glColor4f( 0.7, 0.1, 0.0, 0.5 );
+                        glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
+                        Group->Sat[i].x = Ugsm.x; Group->Sat[i].y = Ugsm.y; Group->Sat[i].z = Ugsm.z;
                     }
+                }
                 glEnd();
 
 
@@ -2979,6 +3083,191 @@ Lgm_Convert_Coords( &u, &uu, GEO_TO_GEI2000, c );
 
 }
 
+void CreateThemisFovs() {
+
+    int     i, j, k;
+
+    /*
+     *  This section of code adds the Themis FOVs as overlays.
+            20 Goose Bay GBAY 53.316 N 299.540 E 61.233 N 23.114E 3:36 03 GBO-14 GMAG-6 (10532/5009) Feb-06
+            18 Kuujjuaq KUUJ 58.155 N 291.468 E 67.364 N 13.143E 4:12 13 GBO-13 GMAG-8 (10547/5011) Nov-07
+            19 Chibougam au CHBG 49.814 N 285.581 E 60.048 N 3.249E 4:44 16 GBO-17 GMAG-9 (10546/5013) Sep-06
+            16 Sanikiluaq SNKQ 56.536 N 280.769 E 66.895 N 3.466W 5:08 09 GBO-22 NRCan w/ GPS-9 Oct-06
+            17 Kapuskasin g KAPU 49.392 N 277.680 E 60.183 N 8.605W 5:29 21 GBO-15 GMAG-7 (10545/5012) May- 06
+            10 Rankin Inlet RANK 62.828 N 267.887 E 72.748 N 25.138W 6:25 12 GBO-09 CGSM w/ GPS-4 (10528) Sep-05
+            13 Gillam GILL 56.354 N 265.344 E 66.502 N 28.043W 6:34 19 GBO-19 CGSM w/ GPS-7 (10516) May- 06
+            15 Pinawa (LdB) PINA 50.163 N 263.934 E 60.375 N 29.294W 6:39 18 GBO-16 CGSM w/ GPS-8 May- 06
+            14 The Pas TPAS 53.994 N 259.059 E 63.532 N 37.044W 7:05 08 GBO-06 GMAG-1 (10505/4001) May- 05
+            11 Fort Smith FSMI 59.984 N 248.158 E 67.551 N 54.383W 8:08 10 GBO-10 CGSM w/ GPS-3 (10527) Jul-05
+            12 Athabasca ATHA 54.714 N 246.686 E 62.128 N 54.096W 8:08 02 GBO-02 NRCan w/ GPS-0 Aug-04
+            7 / Ekati EKAT 64.717 N 250.667 E 72.474 N 53.555W 8:11 04 GBO-04 GMAG-3 (10503/4003) Dec-04
+            9 Prince George PGEO 53.815 N 237.172 E 59.218 N 65.096W 8:53 15 GBO-03 GMAG-2 (10501/4002) Sep-04
+            8 Fort Simpson FSIM 61.762 N 238.779 E 67.407 N 67.180W 8:58 05 GBO-21 CGSM w/ GPS-6 (10539) Nov-06
+            6 White Horse WHIT 61.010 N 224.777 E 63.690 N 81.709W 10:02 07 GBO-07 GMAG-4 (10533/4015) Jul-05
+            5 Inuvik INUV 68.413 N 226.230 E 71.246 N 86.064W 10:19 17 GBO-08 GMAG-11 (10550/5017) Jun-05
+            1 Gakona GAKO 62.407 N 214.842 E 63.051 N 91.750W 10:49 20 GBO-18 GI w/ GPS-10 Aug-06
+            2 Fort Yukon FYKN 66.560 N 214.786 E 67.218 N 94.757W 11:02 14 GBO-12 GI w/ GPS-5 (10529) Oct-05
+            3 Mcgrath MCGR 62.953 N 204.404 E 61.679 N 100.823 W 11:33 11 GBO-11 GMAG-5 (10525/4016) Aug-05
+            4 Kiana KIAN 66.971 199.562 65.071 107.234 12:04 22 GBO-20 GMAG-10 Sep-06
+
+            Rabbit Lake 53.1416 252.2326
+            Lucky Lake  50.9833 252.8667
+    */
+
+    Lgm_Vector v, Z, X, Y, Pole;
+    double  GeodLat, GeodLon;
+    double  Ageo_to_asi[3][3];
+    double  Aasi_to_geo[3][3];
+
+    int     N_THEMIS_ASI = 23;
+
+    double  THEMIS_ASI_LAT[] = { 53.316, 58.155, 49.814, 56.536, 49.392, 
+                                 62.828, 56.354, 50.163, 53.994, 59.984, 
+                                 54.714, 64.717, 53.815, 61.762, 61.010, 
+                                 68.413, 62.407, 66.560, 62.953, 66.971,  58.22, 50.9833, 48.4284 };
+
+    double  THEMIS_ASI_LON[] = { 299.540, 291.468, 285.581, 280.769, 277.680, 
+                                 267.887, 265.344, 263.934, 259.059, 248.158, 
+                                 246.686, 250.667, 237.172, 238.779, 224.777, 
+                                 226.230, 214.842, 214.786, 204.404, 199.562, 256.33, 252.8667, 236.6344 };
+
+    int     TREX_STATION[]   = { 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
+
+    
+    double      tUT;
+    long int    tDate;
+    int         tYear, tMonth, tDay;
+    Lgm_CTrans  *c = Lgm_init_ctrans( 0 );
+    
+    ThemisFovsDL = glGenLists( 1 );
+    glNewList( ThemisFovsDL, GL_COMPILE );
+    glDepthMask( GL_FALSE );
+    glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
+
+    Lgm_jd_to_ymdh( CurrentJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+    Lgm_Set_Coord_Transforms( tDate, tUT, c );
+
+    /*
+     *  Geo position of the ASI
+     */
+    for ( k=0; k<N_THEMIS_ASI; k++ ){
+        GeodLat = THEMIS_ASI_LAT[k];
+        GeodLon = THEMIS_ASI_LON[k];
+        //GeodLat =  61.762;
+        //GeodLon = 238.779;
+        Lgm_GEOD_to_WGS84( GeodLat, GeodLon, 0.0, &v );
+        Lgm_ForceMagnitude( &v, WGS84_A ); //km Lgm_GEOD_to_WGS84() appears to use WGS84_A to reprort units of Re.
+
+
+        /*
+         *  Create a local coord system.
+         *    Z - zenith pointing
+         *    Y - perp to both Z and rotation axis in east direction
+         *    X - completes (points northward)
+         */
+        Z.x = v.x;
+        Z.y = v.y;
+        Z.z = v.z;
+        Lgm_NormalizeVector( &Z );
+
+
+        Pole.x = 0.0; Pole.y = 0.0; Pole.z = 1.0;
+        Lgm_CrossProduct( &Z, &Pole, &Y );
+        Lgm_NormalizeVector( &Y );
+        
+        Lgm_CrossProduct( &Y, &Z, &X );
+        Lgm_NormalizeVector( &X );
+
+
+        /*
+         *  Setup transformation matrix between local system and GEO
+         */
+        Ageo_to_asi[0][0] = X.x; Ageo_to_asi[1][0] = X.y; Ageo_to_asi[2][0] = X.z;
+        Ageo_to_asi[0][1] = Y.x; Ageo_to_asi[1][1] = Y.y; Ageo_to_asi[2][1] = Y.z;
+        Ageo_to_asi[0][2] = Z.x; Ageo_to_asi[1][2] = Z.y; Ageo_to_asi[2][2] = Z.z;
+
+        for ( i=0; i<3; i++ ) {
+            for ( j=0; j<3; j++ ) {
+                Aasi_to_geo[i][j] = Ageo_to_asi[j][i];
+            }
+        }
+
+        /*
+         *   Now create a circular FOV in asi coords and intersect with 110km altitude sphere.
+         */
+        RayType Ray;
+        EllipsoidType Sphere_110;
+        Lgm_Vector u_asi, u_geo, u_obs;
+        double phi, theta, tmin, tmax, t;
+        Sphere_110.Origin.x  = Sphere_110.Origin.y = Sphere_110.Origin.z = 0.0;
+        Sphere_110.Radius_a  = WGS84_A+110.0; // km 
+        Sphere_110.Radius_b  = WGS84_B+110.0; // km 
+        Sphere_110.Radius2_a = Sphere_110.Radius_a*Sphere_110.Radius_a;
+        Sphere_110.Radius2_b = Sphere_110.Radius_b*Sphere_110.Radius_b;
+        theta = 82.5*RadPerDeg; // 85 deg. half angle (total 170 deg FOV)
+
+        Ray.Origin.x = v.x; // km
+        Ray.Origin.y = v.y; // km
+        Ray.Origin.z = v.z; // km
+
+        glLineWidth( 1.0 );
+        if ( TREX_STATION[k]  ){
+            glColor4f( 1.0, 0.2, 0.2, 0.7);
+        } else {
+            glColor4f( 0.5, 0.5, 0.5, 0.7);
+        }
+        glBegin( GL_LINE_STRIP );
+        for ( phi=0.0; phi <=2.0*M_PI+0.09; phi += 0.1 ){
+
+            u_asi.x = cos( phi ) * sin( theta );
+            u_asi.y = sin( phi ) * sin( theta );
+            u_asi.z = cos( theta );
+
+            Lgm_MatTimesVec( Aasi_to_geo, &u_asi, &u_geo );
+
+            Ray.Direction.x = u_geo.x;
+            Ray.Direction.y = u_geo.y;
+            Ray.Direction.z = u_geo.z;
+
+                
+            Lgm_EllipsoidIntersect( &Sphere_110, &Ray, &tmin, &tmax, &t );
+            //printf("tmin, tmax, t = %g %g %g\n", tmin, tmax, t);
+
+
+            // intersection point 
+            u_geo.x = Ray.Origin.x + tmax*Ray.Direction.x;
+            u_geo.y = Ray.Origin.y + tmax*Ray.Direction.y;
+            u_geo.z = Ray.Origin.z + tmax*Ray.Direction.z;
+
+
+            Lgm_Convert_Coords( &u_geo, &u_obs, GeoToObsConvertFlag, c );
+
+            glVertex3f( u_obs.x/Re, u_obs.y/Re, u_obs.z/Re );
+
+        }
+        glEnd();
+
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glDepthMask( GL_TRUE );
+
+    glEndList( );
+
+    Lgm_free_ctrans( c ); // free the CTrans structure 
+
+}
+
+void ReCreateThemisFovs( ) {
+    glDeleteLists( ThemisFovsDL, 1 );
+    CreateThemisFovs( );
+}
+
+
+
 void ReCreateSats( ) {
     glDeleteLists( SatsDL, 1 );
     CreateSats( );
@@ -2986,16 +3275,18 @@ void ReCreateSats( ) {
 
 void CreateSatOrbits() {
 
-    double              tsince, tsince0, JD, dt;
-    double              tJD, tUT, period, tinc, OrbitFrac = 0.125, Theta;
-    long int            tDate;
-    int                 tYear, tMonth, tDay;
-    Lgm_Vector          Ugsm[10001], Ugei, aa, bb, uu;
-    int                 i, j, n, nMax;
+    double              tsince, tsince0, JD, dt, Height, FLL;
+    double              tJD[10001], tUT[10001], period, tinc, OrbitFrac = 0.125, Theta;
+    long int            tDate[10001];
+    int                 tYear, tMonth, tDay, Flag;
+    Lgm_Vector          Ugei[10001], UGSM[10001], Ugsm[10001], aa, bb, uu, v1[10001], v2[10001], v3[10001];
+    Lgm_Vector          Wgsm, Wcoord;
+    int                 i, j, jj, n, nMax;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
     _GroupNode          *g;
     _SpaceObjects       *Group;
     _SgpInfo            *s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
+    Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
 
     /*
      * All the TLEs have their own epoch times in them. And the propagator (sgp4)
@@ -3004,225 +3295,356 @@ void CreateSatOrbits() {
      */
     JD = CurrentJD;
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
+
     SatOrbitsDL = glGenLists( 1 );
     glNewList( SatOrbitsDL, GL_COMPILE );
-        glDepthMask( GL_FALSE );
-        glDisable(GL_LIGHTING);
-        glEnable(GL_LINE_SMOOTH);
-        glLineWidth( 5.0 );
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
+    glDepthMask( GL_FALSE );
+    glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth( 5.0 );
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);;
 
-        g = SatSelectorInfo->SatGroupList;
-        while ( g != NULL ) {
-            Group = g->Group;
+    g = SatSelectorInfo->SatGroupList;
+    while ( g != NULL ) {
+        Group = g->Group;
 
-            if ( Group->DrawGroup ) {
+        if ( Group->DrawGroup ) {
 
-                /*
-                 *  DRAW ORBIT, ETC
-                 *  Orbits are drawn from a half orbit before current time to
-                 *  half orbit after.  (If oPeriodFrac is 100%. lengths of
-                 *  orbits are scaled appropriately for other values of
-                 *  oPeriodFrac)
-                 */
-                for (i=0; i<Group->nSat; i++){
-                    if ( Group->Sat[i].Draw ) {
+            /*
+             *  DRAW ORBIT, ETC
+             *  Orbits are drawn from a half orbit before current time to
+             *  half orbit after.  (If oPeriodFrac is 100%. lengths of
+             *  orbits are scaled appropriately for other values of
+             *  oPeriodFrac)
+             */
+            for (i=0; i<Group->nSat; i++){
+                if ( Group->Sat[i].Draw ) {
 
-                        if ( (Group->Sat[i].DrawOrbit) || (Group->Sat[i].DrawGroundPathOfOrbit) || (Group->Sat[i].DrawOrbitToGroundLines) ){
-                            LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
-                            tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
-                            period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
+                    if ( (Group->Sat[i].DrawOrbit) || (Group->Sat[i].DrawGroundPathOfOrbit) || (Group->Sat[i].DrawOrbitToGroundLines) ){
+                        LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
+                        tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
+                        period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
 period *= Group->Sat[i].oPeriodFrac/100.0;
 
-                            // init n to zero and start half an orbit ahead of current time.
-                            n=0; dt = period/2.0;
+                        // init n to zero and start half an orbit ahead of current time.
+                        n=0; dt = period/2.0;
 
-                            // do first one to start
-                            tinc = period/1000.0; // start out with very small increment
+                        // do first one to start
+                        tinc = period/1000.0; // start out with very small increment
+                        tsince = tsince0+dt;
+                        LgmSgp_SGP4( tsince, s );
+                        Ugei[n].x = s->X/Re; Ugei[n].y = s->Y/Re; Ugei[n].z = s->Z/Re;
+                        tJD[n] = JD + dt/1440.0;
+                        Lgm_jd_to_ymdh( tJD[n], &tDate[n], &tYear, &tMonth, &tDay, &tUT[n] );
+                        Lgm_Set_Coord_Transforms( tDate[n], tUT[n], c );
+                        Lgm_Convert_Coords( &Ugei[n], &Ugsm[n], SatsConvertFlag, c ); // Unfortunately, Ugsm looks like it isnt always GSM!
+                        Lgm_Convert_Coords( &Ugei[n], &UGSM[n], GEI2000_TO_GSM, c );  // Save a copy of GMS that is really GSM...
+                        aa = Ugsm[n]; Lgm_NormalizeVector( &aa );
+                        n++; dt -= tinc;
+
+                        while ( (dt >= -period/2.0) && (n<10000) ) {
                             tsince = tsince0+dt;
                             LgmSgp_SGP4( tsince, s );
-                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            tJD = JD + dt/1440.0;
-                            Lgm_jd_to_ymdh( tJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-                            Lgm_Set_Coord_Transforms( tDate, tUT, c );
-                            Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
-                            aa = Ugsm[n]; Lgm_NormalizeVector( &aa );
+                            Ugei[n].x = s->X/Re; Ugei[n].y = s->Y/Re; Ugei[n].z = s->Z/Re;
+                            tJD[n] = JD + dt/1440.0;
+                            Lgm_jd_to_ymdh( tJD[n], &tDate[n], &tYear, &tMonth, &tDay, &tUT[n] );
+                            Lgm_Set_Coord_Transforms( tDate[n], tUT[n], c );
+                            Lgm_Convert_Coords( &Ugei[n], &Ugsm[n], SatsConvertFlag, c );
+                            Lgm_Convert_Coords( &Ugei[n], &UGSM[n], GEI2000_TO_GSM, c );
+
+
+                            bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
+//Lgm_VecSub( &cc, &bb, &aa );
+                            Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
+                            if (Theta > 1.0) tinc *= 0.61803398875;
+                            if (Theta < 0.5) tinc *= 1.61803398875;
+//                            DS = Lgm_Magnitude( &cc );
+//                            if (DS > 1.0)  tinc *= 0.61803398875;
+//                            if (DS < 0.5) tinc *= 1.61803398875;
+
+
                             n++; dt -= tinc;
-
-                            while ( (dt >= -period/2.0) && (n<10000) ) {
-                                tsince = tsince0+dt;
-                                LgmSgp_SGP4( tsince, s );
-                                Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                                tJD = JD + dt/1440.0;
-                                Lgm_jd_to_ymdh( tJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-                                Lgm_Set_Coord_Transforms( tDate, tUT, c );
-                                Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
-
-
-                                bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
-    //Lgm_VecSub( &cc, &bb, &aa );
-                                Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
-                                if (Theta > 1.0) tinc *= 0.61803398875;
-                                if (Theta < 0.5) tinc *= 1.61803398875;
-    //                            DS = Lgm_Magnitude( &cc );
-    //                            if (DS > 1.0)  tinc *= 0.61803398875;
-    //                            if (DS < 0.5) tinc *= 1.61803398875;
-
-
-                                n++; dt -= tinc;
-                                aa = bb;
-                            }
+                            aa = bb;
+                        }
 //printf("n = %d\n", n);
 
 
-                            // ORBIT
-                            if ( Group->Sat[i].DrawOrbit ) {
+                        // ORBIT
+                        if ( Group->Sat[i].DrawOrbit ) {
 glLineWidth( 5.0 );
-                                glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
+                            glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
 glColor4f( 0.6, 0.6, 0.6, 0.7);
 //glColor4f( 0.0, 0.0, 0.0, 0.8 );
-                                glBegin( GL_LINE_STRIP );
-                                    for (j=0; j<n; j++) glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
-                                glEnd();
+                            glBegin( GL_LINE_STRIP );
+                                for (j=0; j<n; j++) glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
+                            glEnd();
+                        }
+                        // GROUND PATH
+                        if ( Group->Sat[i].DrawGroundPathOfOrbit ) {
+                            glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf );
+glColor4f( 0.6, 0.6, 0.6, 0.7);
+                            glBegin( GL_LINE_STRIP );
+                            for (j=0; j<n; j++) {
+                                uu = Ugsm[j];
+                                Lgm_ForceMagnitude( &uu, 1.01 );
+                                glVertex3f( uu.x, uu.y, uu.z );
                             }
-                            // GROUND PATH
-                            if ( Group->Sat[i].DrawGroundPathOfOrbit ) {
-                                glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf );
+                            glEnd();
+                        }
+                        // LINES BETWEEN ORBIT AND GROUND PATH
+                        if ( Group->Sat[i].DrawOrbitToGroundLines ) {
+                            nMax = 25;
+                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
+                            glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
+glLineWidth( 1.0 );
+glColor4f( 0.0, 1.0, 1.0, 0.3);
+                            glBegin( GL_LINES );
+                                for (j=0; j<n; j += 1) {
+                                    uu = Ugsm[j];
+                                    Lgm_ForceMagnitude( &uu, 1.01 );
+                                    glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
+                                    glVertex3f( uu.x, uu.y, uu.z );
+                                }
+                            glEnd();
+                        }
+
+                        // ORBIT FIELD LINES
+                        if ( Group->Sat[i].DrawOrbitFieldLines || Group->Sat[i].DrawOrbitFLFootpoints ) {
+
+                            nMax = 25;
+                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
+glLineWidth( 2.0 );
+                            glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
+
+                            for (j=0; j<n; j += 1) {
+                                Height = 120.0;
+                                Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                
+                                Flag = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+                                FLL = mInfo->Stotal;
+                                printf("FLL = %g\n", FLL);
+
+                                if ( FLL > 0.0 ){
+                                    Lgm_TraceLine3( &v1[j], FLL, 100, 1.0, 1e-7, 0, mInfo );
+
+                                    if ( Group->Sat[i].DrawOrbitFieldLines ) {
+                                        glBegin( GL_LINE_STRIP );
+                                            for (jj=0; jj<mInfo->nPnts; jj++) {
+                                                Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
+                                                Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                                glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                            }
+                                        glEnd();
+                                    }
+                                }
+                            }
+
+                            if ( Group->Sat[i].DrawOrbitFLFootpoints ) {
+glLineWidth( 4.0 );
 glColor4f( 0.6, 0.6, 0.6, 0.7);
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) {
-                                        uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.01 );
-                                        glVertex3f( uu.x, uu.y, uu.z );
+                                        uu = v2[j];
+                                        //Lgm_ForceMagnitude( &uu, 1.001 );
+                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf*(1.0-(double)j/(double)nMax) );
+                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
+                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
                                     }
                                 glEnd();
-                            }
-                            // LINES BETWEEN ORBIT AND GROUND PATH
-                            if ( Group->Sat[i].DrawOrbitToGroundLines ) {
-                                nMax = 25;
-                                //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
-                                glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
-                                glBegin( GL_LINES );
-                                    for (j=0; j<n; j += 1) {
-                                        uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.01 );
-                                        glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
-                                        glVertex3f( uu.x, uu.y, uu.z );
-                                    }
-                                glEnd();
-                            }
-
-                        }
-                    }
-                }
-
-
-                /*
-                 *  DRAW STREAKS, ETC
-                 */
-                Group = g->Group;
-                for (i=0; i<Group->nSat; i++){
-                    if ( Group->Sat[i].Draw ) {
-
-                        if ( (Group->Sat[i].DrawStreak) || (Group->Sat[i].DrawGroundPathOfStreak) || (Group->Sat[i].DrawStreakToGroundLines) ){
-                            LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
-                            tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
-                            period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
-
-                            // init n to zero and start at current time
-                            n=0; dt = 0.0;
-
-                            // do first one to start
-                            tinc = period/1000.0; // start out with very small increment
-                            tsince = tsince0+dt;
-                            LgmSgp_SGP4( tsince, s );
-                            Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                            tJD = JD + dt/1440.0;
-                            Lgm_jd_to_ymdh( tJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-                            Lgm_Set_Coord_Transforms( tDate, tUT, c );
-                            Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
-                            aa = Ugsm[n]; Lgm_NormalizeVector( &aa );
-                            n++; dt -= tinc;
-
-                            // go until we've gone backwards OrbitFrac of an orbit
-                            while ( (dt >= -period*OrbitFrac) && (n<1000) ) {
-                                tsince = tsince0+dt;
-                                LgmSgp_SGP4( tsince, s );
-                                Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
-                                tJD = JD + dt/1440.0;
-                                Lgm_jd_to_ymdh( tJD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-                                Lgm_Set_Coord_Transforms( tDate, tUT, c );
-                                Lgm_Convert_Coords( &Ugei, &Ugsm[n], SatsConvertFlag, c );
-
-
-                                bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
-                                Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
-                                if (Theta > 1.0) tinc *= 0.61803398875;
-                                if (Theta < 0.5) tinc *= 1.61803398875;
-
-
-                                n++; dt -= tinc;
-                                aa = bb;
-                            }
-
-                            nMax = n;
-    //printf("nMax = %d\n", nMax);
-
-
-                            // STREAK
-                            if ( Group->Sat[i].DrawStreak ) {
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) {
-                                        glColor4f( Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf*(1.0-(double)j/(double)nMax) );
-                                        glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
+                                        uu = v1[j];
+                                        //Lgm_ForceMagnitude( &uu, 1.001 );
+                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
+                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
                                     }
                                 glEnd();
                             }
-                            // STREAK GROUND PATH
-                            if ( Group->Sat[i].DrawGroundPathOfStreak ) {
-                                glBegin( GL_LINE_STRIP );
-                                    for (j=0; j<n; j++) {
-                                        uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.001 );
-                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
-                                        glVertex3f( uu.x, uu.y, uu.z );
-                                    }
-                                glEnd();
-                            }
-                            // LINES BETWEEN STREAK AND GROUND PATH
-                            if ( Group->Sat[i].DrawStreakToGroundLines ) {
-                                glBegin( GL_LINES );
-                                    for (j=0; j<n; j++) {
-                                        uu = Ugsm[j];
-                                        Lgm_ForceMagnitude( &uu, 1.001 );
-                                        glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
-                                        glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
-                                        glVertex3f( uu.x, uu.y, uu.z );
-                                    }
-                                glEnd();
-                            }
-
+                            
                         }
+
                     }
                 }
-
             }
 
 
-            g = g->Next;
+            /*
+             *  DRAW STREAKS, ETC
+             */
+            Group = g->Group;
+            for (i=0; i<Group->nSat; i++){
+                if ( Group->Sat[i].Draw ) {
+
+                    if ( (Group->Sat[i].DrawStreak) || (Group->Sat[i].DrawGroundPathOfStreak) || (Group->Sat[i].DrawStreakToGroundLines) ){
+                        LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
+                        tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
+                        period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
+
+period *= Group->Sat[i].sPeriodFrac/100.0;
+
+                        // init n to zero and start at current time
+                        n=0; dt = 0.0;
+
+                        // do first one to start
+                        tinc = period/1000.0; // start out with very small increment
+                        tsince = tsince0+dt;
+                        LgmSgp_SGP4( tsince, s );
+                        Ugei[n].x = s->X/Re; Ugei[n].y = s->Y/Re; Ugei[n].z = s->Z/Re;
+                        tJD[n] = JD + dt/1440.0;
+                        Lgm_jd_to_ymdh( tJD[n], &tDate[n], &tYear, &tMonth, &tDay, &tUT[n] );
+                        Lgm_Set_Coord_Transforms( tDate[n], tUT[n], c );
+                        Lgm_Convert_Coords( &Ugei[n], &Ugsm[n], SatsConvertFlag, c );
+                        Lgm_Convert_Coords( &Ugei[n], &UGSM[n], GEI2000_TO_GSM, c );
+                        aa = Ugsm[n]; Lgm_NormalizeVector( &aa );
+                        n++; dt -= tinc;
+
+                        // go until we've gone backwards OrbitFrac of an orbit
+                        while ( (dt >= -period/2.0) && (n<10000) ) {
+                            tsince = tsince0+dt;
+                            LgmSgp_SGP4( tsince, s );
+                            Ugei[n].x = s->X/Re; Ugei[n].y = s->Y/Re; Ugei[n].z = s->Z/Re;
+                            tJD[n] = JD + dt/1440.0;
+                            Lgm_jd_to_ymdh( tJD[n], &tDate[n], &tYear, &tMonth, &tDay, &tUT[n] );
+                            Lgm_Set_Coord_Transforms( tDate[n], tUT[n], c );
+                            Lgm_Convert_Coords( &Ugei[n], &Ugsm[n], SatsConvertFlag, c );
+                            Lgm_Convert_Coords( &Ugei[n], &UGSM[n], GEI2000_TO_GSM, c );
+
+
+                            bb = Ugsm[n]; Lgm_NormalizeVector( &bb );
+                            Theta = DegPerRad * acos( fabs(Lgm_DotProduct( &aa, &bb )) );
+                            if (Theta > 1.0) tinc *= 0.61803398875;
+                            if (Theta < 0.5) tinc *= 1.61803398875;
+
+
+                            n++; dt -= tinc;
+                            aa = bb;
+                        }
+
+                        nMax = n;
+                        //printf("nMax = %d\n", nMax);
+
+
+                        // STREAK
+                        if ( Group->Sat[i].DrawStreak ) {
+                            glBegin( GL_LINE_STRIP );
+                                for (j=0; j<n; j++) {
+                                    glColor4f( Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf*(1.0-(double)j/(double)nMax) );
+                                    glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
+                                }
+                            glEnd();
+                        }
+                        // STREAK GROUND PATH
+                        if ( Group->Sat[i].DrawGroundPathOfStreak ) {
+                            glBegin( GL_LINE_STRIP );
+                                for (j=0; j<n; j++) {
+                                    uu = Ugsm[j];
+                                    Lgm_ForceMagnitude( &uu, 1.001 );
+                                    glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                    glVertex3f( uu.x, uu.y, uu.z );
+                                }
+                            glEnd();
+                        }
+                        // LINES BETWEEN STREAK AND GROUND PATH
+                        if ( Group->Sat[i].DrawStreakToGroundLines ) {
+                            glBegin( GL_LINES );
+                                for (j=0; j<n; j++) {
+                                    uu = Ugsm[j];
+                                    Lgm_ForceMagnitude( &uu, 1.001 );
+                                    glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
+                                    glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
+                                    glVertex3f( uu.x, uu.y, uu.z );
+                                }
+                            glEnd();
+                        }
+
+                        // STREAK FIELD LINES
+                        if ( Group->Sat[i].DrawStreakFieldLines || Group->Sat[i].DrawStreakFLFootpoints ) {
+
+                            //nMax = 25;
+                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
+                            //glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf );
+                            glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf );
+
+                            for (j=0; j<n; j += 1) {
+                                Height = 120.0;
+                                Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                Flag = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+                                FLL = mInfo->Stotal;
+                                printf("FLL = %g\n", FLL);
+
+                                if ( FLL > 0.0 ){
+                                    Lgm_TraceLine3( &v1[j], FLL, 100, 1.0, 1e-7, 0, mInfo );
+
+                                    if ( Group->Sat[i].DrawStreakFieldLines ) {
+                                        glLineWidth( 2.0 );
+                                        glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
+                                        glBegin( GL_LINE_STRIP );
+                                            for (jj=0; jj<mInfo->nPnts; jj++) {
+
+                                                //glVertex3f( mInfo->Px[jj], mInfo->Py[jj], mInfo->Pz[jj] );
+                                                Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
+                                                Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                                glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                            }
+                                        glEnd();
+                                    }
+                                }
+                            }
+
+                            if ( Group->Sat[i].DrawStreakFLFootpoints ) {
+                                glLineWidth( 4.0 );
+                                glBegin( GL_LINE_STRIP );
+                                    for (j=0; j<n; j++) {
+                                        uu = v2[j];
+                                        //Lgm_ForceMagnitude( &uu, 1.001 );
+                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                    }
+                                glEnd();
+                                glLineWidth( 4.0 );
+                                glBegin( GL_LINE_STRIP );
+                                    for (j=0; j<n; j++) {
+                                        uu = v1[j];
+                                        //Lgm_ForceMagnitude( &uu, 1.001 );
+                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                    }
+                                glEnd();
+                            }
+                            
+                        }
+
+                    }
+                }
+            }
+
         }
 
 
+        g = g->Next;
+    }
 
-        glDisable(GL_BLEND);
-        glEnable(GL_LIGHTING);
-        glDepthMask( GL_TRUE );
+
+
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glDepthMask( GL_TRUE );
 
     glEndList( );
 
     free(s);
     Lgm_free_ctrans( c ); // free the CTrans structure 
+    Lgm_FreeMagInfo( mInfo );
 
 }
 
@@ -3538,6 +3960,9 @@ static void realize( GtkWidget *widget, gpointer data) {
     CreateEarth( );
 
     // Create Earth + dipole field, etc..
+    CreateThemisFovs( );
+
+    // Create Earth + dipole field, etc..
     CreateMoon( );
 
     // Create a DL for stars.
@@ -3678,6 +4103,7 @@ void DrawScene( ) {
 
     if ( ShowEarth ) glCallList( EarthDL );
 
+    if ( ShowThemisFovs ) glCallList( ThemisFovsDL );
 
 
 //    CreateGeoMarkers();
@@ -4271,7 +4697,7 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
 
-    } else {
+    } else if ( LightingStyle == 1 ) {
 
         /*
          * Fixed illumination (light moves with viewer)
@@ -4288,7 +4714,24 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
 
-    }
+    } else {
+
+        /*
+         *  Solar illumination 2 (light fixed at position of sun but more ambient)
+         */
+        GLfloat ambient[]         = {0.7, 0.7, 0.7, 1.0};
+        GLfloat position[]        = {5000.0, 0.0, 0.0, 0.0};
+        GLfloat lmodel_ambient[]  = {0.7, 0.7, 0.7, 1.0};
+        position[0] = Sun.x; position[1] = Sun.y; position[2] = Sun.z;
+        glPushMatrix();
+        glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
+        glLightfv (GL_LIGHT0, GL_POSITION, position);
+//        LightPosition[0] = 5000.0; LightPosition[1] = LightPosition[2] = LightPosition[3] = 0.0;
+//        glLightfv (GL_LIGHT0, GL_POSITION, LightPosition );
+        glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+        glPopMatrix();
+
+    } 
 
 
     DrawScene();
@@ -4523,6 +4966,7 @@ static gboolean idle( GtkWidget *widget ) {
             ReCreateSatOrbits();
             ReCreateEarth( );
             ReCreateMoon( );
+            ReCreateThemisFovs();
         }
 
         expose_event( drawing_area, NULL, NULL );
@@ -4536,8 +4980,8 @@ static gboolean idle( GtkWidget *widget ) {
                     char PngFile[40];
                     gdk_window_get_geometry( widget->window, &x, &y, &width, &height, &depth );
                     pixbuf = gdk_pixbuf_get_from_drawable( NULL, GDK_DRAWABLE(widget->window), NULL, 0, 0, 0, 0, width, height);
-                    //sprintf( PngFile, "%04ld.png", cFrame );
-                    sprintf( PngFile, "Latest.png" );
+                    sprintf( PngFile, "%04ld.png", cFrame );
+                    //sprintf( PngFile, "Latest.png" );
 printf("Writing: %s\n", PngFile );
                     gdk_pixbuf_save( pixbuf, PngFile, "png", NULL, "compression", "0", NULL);
                     g_object_unref( pixbuf );
@@ -4937,6 +5381,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
 
                 ReCreateEarth( );
                 ReCreateMoon( );
+                if (ShowThemisFovs) ReCreateThemisFovs();
                 if (ShowStars) ReLoadStars( );
                 ReCreateSats();
                 ReCreateSatOrbits();
@@ -5004,6 +5449,7 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
 
                 ReCreateEarth( );
                 ReCreateMoon( );
+                if (ShowThemisFovs) ReCreateThemisFovs();
                 if (ShowStars) ReLoadStars( );
                 ReCreateSats();
                 ReCreateSatOrbits();
@@ -5015,7 +5461,282 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
 
 
 }
+static void TLE_TraceFieldLines( GtkWidget *widget, gpointer data) {
 
+    printf("HEre I am\n");
+
+
+}
+
+static void ChangeTLE( GtkWidget *widget, gpointer data) {
+    int     i;
+    double  val;
+
+    i   = GPOINTER_TO_INT( data );
+    val = gtk_spin_button_get_value( GTK_SPIN_BUTTON(widget) );
+
+    switch ( i ) {  
+        
+        case 0:
+                printf("Setting Name\n");
+                break;
+
+        case 1:
+                printf("Setting SatNum\n");
+                tle.SatNum = (int)val;
+                break;
+
+        case 2:
+                printf("Setting IntDesig\n");
+                break;
+
+        case 3:
+                printf("Setting Epoch\n");
+                tle.Epoch = val;
+                break;
+
+        case 4:
+                printf("Setting d1MeanMotion\n");
+                tle.d1MeanMotion = val;
+                break;
+
+        case 5:
+                printf("Setting d2MeanMotion\n");
+                tle.d2MeanMotion = val;
+                break;
+
+        case 6:
+                printf("Setting BSTAR\n");
+                tle.BSTAR = val;
+                break;
+
+        case 7:
+                printf("Setting ElemNum\n");
+                tle.ElemNum = (int)val;
+                break;
+
+        case 8:
+                printf("Setting Inc\n");
+                tle.Inc = val;
+                break;
+
+        case 9:
+                printf("Setting RAAN\n");
+                tle.RAAN = val;
+                break;
+
+        case 10:
+                printf("Setting Ecc\n");
+                tle.Ecc = val;
+                break;
+
+        case 11:
+                printf("Setting AoP\n");
+                tle.AoP = val;
+                break;
+
+        case 12:
+                printf("Setting MeanAnomaly\n");
+                tle.MeanAnomaly = val;
+                break;
+
+        case 13:
+                printf("Setting MeanMotion\n");
+                tle.MeanMotion = val;
+                break;
+
+        case 14:
+                printf("Setting RevNum\n");
+                tle.RevNum = (int)val;
+                break;
+
+    }
+
+    char Str[80], Str2[80];
+
+    //strcpy( tle.Line1, "1 23455U 94089A   97320.90946019  .00000140  00000-0  10191-3 0  2621");
+    for (i=0; i<69; i++ ) tle.Line1[i] = ' '; tle.Line1[69] = '\0';
+    tle.Line1[0] = '1';
+    tle.Line1[1] = ' ';
+
+    sprintf( Str, "%5ldU", tle.SatNum );
+    for (i=0; i<6; i++ ) tle.Line1[2+i] = Str[i];
+
+    sprintf( Str, "%-8s", tle.IntDesig );
+    for (i=0; i<8; i++ ) tle.Line1[9+i] = Str[i];
+
+
+    int iE = (int)tle.Epoch;
+    long int fE = (long int)((tle.Epoch - iE)*1.0e8 +.5);
+
+    sprintf( Str, "%05d", iE );
+    for (i=0; i<5; i++ ) tle.Line1[18+i] = Str[i];
+    tle.Line1[23] = '.';
+    sprintf( Str, "%08d", fE );
+    for (i=0; i<8; i++ ) tle.Line1[24+i] = Str[i];
+
+
+
+    sprintf( Str, "%.8lf", tle.d1MeanMotion );
+    if ( tle.d1MeanMotion >= 0.0 ) {
+        Str[0] = ' ';
+        strcpy( Str2, Str );
+    } else {
+        Str[0] = ' ';
+        Str[1] = '-';
+        strcpy( Str2, Str+1 );
+    }
+    for (i=0; i<10; i++ ) tle.Line1[33+i] = Str2[i];
+
+    tle.Line1[62] = '0';
+
+
+    BSTAR_to_STR( tle.d2MeanMotion, Str2 );
+    for (i=0; i<8; i++ ) tle.Line1[44+i] = Str2[i];
+
+    BSTAR_to_STR( tle.BSTAR, Str2 );
+    for (i=0; i<8; i++ ) tle.Line1[53+i] = Str2[i];
+
+
+
+    sprintf( Str, "%4d", tle.ElemNum );
+    for (i=0; i<4; i++ ) tle.Line1[64+i] = Str[i];
+
+
+//strcpy( tle.Line1, "1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927");
+//strcpy( tle.Line1, "1 23455U 94089A   97320.90946019  .00000140  00000-0  10191-3 0  2621");
+//strcpy( tle.Line1, "2 23455  99.0090 272.6745 0008546 223.1686 136.8816 14.11711747148495");
+//1 23455U 94089A   97320.90946019  .00000140  00000-0  10191-3 0  2621
+//2 23455  99.0090 272.6745 0008546 223.1686 136.8816 14.11711747148495
+
+    int sum = 0;
+    for (i=0; i<68; i++ ) {
+        if ( isdigit(tle.Line1[i]) ){ Str[0] = tle.Line1[i]; Str[1] = '\0';
+            sum += atoi( Str );
+        } else if ( tle.Line1[i] == '-' ) {
+            ++sum;
+        }
+        
+    }
+    printf( "sum = %d sum%10 = %d\n", sum, sum%10 );
+
+    tle.Line1[68] = '0' + sum%10;
+    tle.Line1[69] = '\0';
+
+
+
+
+    /*
+     *    01      Line Number of Element Data
+     *    03-07   Satellite Number
+     *    09-16   Inclination [Degrees]
+     *    18-25   Right Ascension of the Ascending Node [Degrees]
+     *    27-33   Eccentricity (decimal point assumed)
+     *    35-42   Argument of Perigee [Degrees]
+     *    44-51   Mean Anomaly [Degrees]
+     *    53-63   Mean Motion [Revs per day]
+     *    64-68   Revolution number at epoch [Revs]
+     *    69      Checksum (Modulo 10)
+     */
+    //strcpy( tle.Line2, "2 23455  99.0090 272.6745 0008546 223.1686 136.8816 14.11711747148495" );
+    printf("Sample Line2\n2 23455  99.0090 272.6745 0008546 223.1686 136.8816 14.11711747148495\n" );
+    for (i=0; i<69; i++ ) tle.Line2[i] = ' '; tle.Line2[69] = '\0';
+    tle.Line2[0] = '2';
+    tle.Line2[1] = ' ';
+    
+    sprintf( Str, "%5ldU", tle.SatNum );
+    for (i=0; i<6; i++ ) tle.Line2[2+i] = Str[i];
+
+    sprintf( Str, "%8.4lf", tle.Inc );
+    for (i=0; i<8; i++ ) tle.Line2[8+i] = Str[i];
+
+    sprintf( Str, "%8.4lf", tle.RAAN );
+    for (i=0; i<8; i++ ) tle.Line2[17+i] = Str[i];
+
+    sprintf( Str, "%8.7lf", tle.Ecc );
+    for (i=0; i<7; i++ ) tle.Line2[26+i] = Str[i+2];
+
+    sprintf( Str, "%8.4lf", tle.AoP );
+    for (i=0; i<8; i++ ) tle.Line2[34+i] = Str[i];
+
+    sprintf( Str, "%8.4lf", tle.MeanAnomaly );
+    for (i=0; i<8; i++ ) tle.Line2[43+i] = Str[i];
+
+    sprintf( Str, "%11.8lf", tle.MeanMotion );
+    for (i=0; i<11; i++ ) tle.Line2[52+i] = Str[i];
+
+    sprintf( Str, "%05d", tle.RevNum );
+    for (i=0; i<5; i++ ) tle.Line2[63+i] = Str[i];
+
+    sum = 0;
+    for (i=0; i<68; i++ ) {
+        if ( isdigit(tle.Line2[i]) ){ Str[0] = tle.Line2[i]; Str[1] = '\0';
+            sum += atoi( Str );
+        } else if ( tle.Line2[i] == '-' ) {
+            ++sum;
+        }
+        
+    }
+    printf( "sum = %d sum%10 = %d\n", sum, sum%10 );
+
+    tle.Line2[68] = '0' + sum%10;
+
+    strcpy( tle.Line0, "0 TLE" );
+
+
+
+    printf("Line0: |%s|\n", tle.Line0 );
+    printf("Line1: |%s|\n", tle.Line1 );
+    printf("Line2: |%s|\n", tle.Line2 );
+
+    FILE *fp_tle = fopen( "/home/mgh/SAT_GROUPS/TLE.txt", "w" );
+    fprintf( fp_tle, "%s\n", tle.Line0 );
+    fprintf( fp_tle, "%s\n", tle.Line1 );
+    fprintf( fp_tle, "%s\n", tle.Line2 );
+    fclose( fp_tle );
+
+
+
+
+    int     nTLEs;
+    _SgpTLE TLEs[1];
+    nTLEs = 0; // must set this
+    LgmSgp_ReadTlesFromStrings( tle.Line0, tle.Line1, tle.Line2, &nTLEs, &TLEs[0], 1 );
+
+    _GroupNode      *g;
+    _SpaceObjects   *Group;
+
+    g = SatSelectorInfo->SatGroupList;
+    while ( g != NULL ) {
+        Group = g->Group;
+
+        for (i=0; i<Group->nSat; i++){
+            if ( strcmp( Group->Sat[i].TLE.Name , "0 TLE" ) == 0 ) {
+                printf("Group->Sat[i].TLE.Name = %s\n", Group->Sat[i].TLE.Name);
+                printf("FOUND IT. i = %d\n", i);
+                Group->Sat[i].TLE = TLEs[0];;
+            }
+        }
+
+        g = g->Next;
+        
+    }
+
+    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line0 ); gtk_label_set_markup( GTK_LABEL(tle.Line0Label), Str ); 
+    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( GTK_LABEL(tle.Line1Label), Str ); 
+    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line2 ); gtk_label_set_markup( GTK_LABEL(tle.Line2Label), Str ); 
+
+
+
+
+//    ReLoadSpaceObjects();
+    ReCreateSats();
+    ReCreateSatOrbits();
+
+//    view_quat[i] = val;
+    expose_event( drawing_area, NULL, NULL );
+
+}
 
 static void ChangeViewQuat( GtkWidget *widget, gpointer data) {
     int     i;
@@ -5055,7 +5776,7 @@ static void ChangeStarsMaxMag( GtkWidget *widget, gpointer data) {
 
 static void ChangeLighting( GtkMenuItem  *menuitem, gpointer data ) {
     int i;
-    for (i=0; i< 2; i++){
+    for (i=0; i< 3; i++){
         if ( gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( RadioLightingStyle[i] ) ) ) break;
     }
     LightingStyle = GPOINTER_TO_INT( i );
@@ -6170,6 +6891,7 @@ static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
                 SatsConvertFlag   = GEI2000_TO_GSM;
                 AtmosConvertFlag  = GSM_TO_GSM;
                 ObsToGeoConvertFlag = GSM_TO_GEO;
+                GeoToObsConvertFlag = GEO_TO_GSM;
                 break;
         case 1: // SM
                 ObserverCoords    = SM_COORDS;
@@ -6177,6 +6899,7 @@ static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
                 SatsConvertFlag   = GEI2000_TO_SM;
                 AtmosConvertFlag  = GSM_TO_SM;
                 ObsToGeoConvertFlag = SM_TO_GEO;
+                GeoToObsConvertFlag = GEO_TO_SM;
                 break;
         case 2: // GSE
                 ObserverCoords    = GSE_COORDS;
@@ -6184,6 +6907,7 @@ static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
                 SatsConvertFlag   = GEI2000_TO_GSE;
                 AtmosConvertFlag  = GSM_TO_GSE;
                 ObsToGeoConvertFlag = GSE_TO_GEO;
+                GeoToObsConvertFlag = GEO_TO_GSE;
                 break;
         case 3: // GEI
                 ObserverCoords    = GEI2000_COORDS;
@@ -6191,6 +6915,7 @@ static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
                 SatsConvertFlag   = GEI2000_TO_GEI2000;
                 AtmosConvertFlag  = GSM_TO_GEI2000;
                 ObsToGeoConvertFlag = GEI2000_TO_GEO;
+                GeoToObsConvertFlag = GEO_TO_GEI2000;
                 break;
         case 4: // GEO
                 ObserverCoords    = GEO_COORDS;
@@ -6198,6 +6923,7 @@ static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
                 SatsConvertFlag   = GEI2000_TO_GEO;
                 AtmosConvertFlag  = GSM_TO_GEO;
                 ObsToGeoConvertFlag = GEO_TO_GEO;
+                GeoToObsConvertFlag = GEO_TO_GEO;
                 break;
     }
 
@@ -6294,7 +7020,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     GdkColor    color;
     GtkWidget   *frame, *treeview, *scrolledwindow, *filechooserbutton;
     GtkWidget   *window1, *vseparator, *hseparator, *alignment, *image;
-    GtkWidget   *vbox2, *table1, *table3, *label, *RowHbox, *hbox;
+    GtkWidget   *vbox2, *vbox3, *table1, *table3, *label, *RowHbox, *hbox;
     GtkWidget   *notebook, *checkbutton, *spinbutton, *button, *colorbutton;
     GSList      *RadioCoordSystemGroup = NULL;
     GSList      *RadioLightingGroup = NULL;
@@ -8058,13 +8784,434 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
 
 
 
+    /**********************
+     * TLE Generater Page *
+     **********************/
+    vbox2 = gtk_vbox_new( FALSE, 40 ); gtk_widget_show( vbox2 );
+    gtk_container_set_border_width(GTK_CONTAINER( vbox2 ), 20);
+
+    // Page title
+    label = gtk_label_new( _("<b><span size=\"small\">TLE</span></b>")); gtk_widget_show( label);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
+    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), vbox2, label );
+
+
+    
+    // Vbox with no spacing to hold the 3 line element strings
+    vbox3 = gtk_vbox_new( FALSE, 0 ); gtk_widget_show( vbox3 );
+    gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 60 );
+    gtk_box_pack_start( GTK_BOX(vbox2), vbox3, FALSE, TRUE, 10 );
+
+    sprintf( Str, "<b><big><tt><span>%s</span></tt></big></b>", tle.Line0 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line0Label = label;
+
+    sprintf( Str, "<b><big><tt><span>%s</span></tt></big></b>", tle.Line1 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line1Label = label;
+
+    sprintf( Str, "<b><big><tt><span>%s</span></tt></big></b>\n\n", tle.Line2 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line2Label = label;
+
+
+
+    ChangeTLE( NULL, GINT_TO_POINTER(-1) );
+
+    int r = 2;
+
+    table1 = gtk_table_new( 3, 3, FALSE );
+    gtk_widget_show( table1);
+    gtk_container_add( GTK_CONTAINER( vbox2), table1);
+
+    /*
+     * Section for Line 1 Entries
+     *  01  Line Number of Element Data
+     *  03-07   Satellite Number
+     *  08  Classification (U=Unclassified)
+     *
+     *  10-11   International Designator (Last two digits of launch year)
+     *  12-14   International Designator (Launch number of the year)
+     *  15-17   International Designator (Piece of the launch)
+     *
+     *  19-20   Epoch Year (Last two digits of year)
+     *  21-32   Epoch (Day of the year and fractional portion of the day)
+     *
+     *  34-43   First Time Derivative of the Mean Motion
+     *  45-52   Second Time Derivative of Mean Motion (decimal point assumed)
+     *  54-61   BSTAR drag term (decimal point assumed)
+     *  63  Ephemeris type
+     *  65-68   Element number
+     *  69  Checksum (Modulo 10)
+     *  (Letters, blanks, periods, plus signs = 0; minus signs = 1)
+     */
+    label = gtk_label_new( _("<b>Line 1 Entries:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 0, 1, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+    ++r;
+
+    // Satellite Number
+    label = gtk_label_new( _("<b>Satellite Number:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.SatNum, 0, 99999, 1, 1, 0);
+    GtkWidget *TleGenButton0 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 0);
+    gtk_widget_show( TleGenButton0 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton0, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton0), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton0 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 1 ) );
+    ++r;
+
+    // International Designator
+    label = gtk_label_new( _("<b>International Designator:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+//    spinbutton1_adj = gtk_adjustment_new(  22.3, -90.0, 90.0, 0.01, 0.10, 0);
+//    GtkWidget *TleGenButton1 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 5);
+//    gtk_widget_show( TleGenButton1 );
+//    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton1, FALSE, TRUE, 0);
+//    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton1), TRUE);
+//    g_signal_connect( G_OBJECT( TleGenButton1 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 2 ) );
+    ++r;
+
+    // Epoch
+    label = gtk_label_new( _("<b>Epoch:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.Epoch, 1000.0, 99999.0, 0.01, 0.10, 0);
+    GtkWidget *TleGenButton2 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 8);
+    gtk_widget_show( TleGenButton2 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton2, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton2), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton2 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 3 ) );
+    ++r;
+
+    // First Time Derivative of the Mean Motion
+    label = gtk_label_new( _("<b>d/dt of Mean Motion:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.d1MeanMotion, -0.5, 0.5, 0.01, 0.10, 0);
+    GtkWidget *TleGenButton3 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 8);
+    gtk_widget_show( TleGenButton3 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton3, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton3), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton3 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 4 ) );
+    ++r;
+
+    // Second Time Derivative of the Mean Motion
+    label = gtk_label_new( _("<b>d^2/dt^2 of Mean Motion:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.d2MeanMotion, -0.1, 0.1, 0.01, 0.10, 0);
+    GtkWidget *TleGenButton4 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 8);
+    gtk_widget_show( TleGenButton4 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton4, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton4), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton4 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 5 ) );
+    ++r;
+
+    // BSTAR
+    label = gtk_label_new( _("<b>BSTAR:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.BSTAR, 0.0, 1.0, 0.001e-3, 0.010e-3, 0);
+    GtkWidget *TleGenButton5 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.0001e-3, 12);
+    gtk_widget_show( TleGenButton5 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton5, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton5), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton5 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 6 ) );
+    ++r;
+
+
+    // Element Number
+    label = gtk_label_new( _("<b>Element Number:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.ElemNum, 0, 9999, 1, 1, 0);
+    GtkWidget *TleGenButton6 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 0);
+    gtk_widget_show( TleGenButton6 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton6, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton6), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton6 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 7 ) );
+    ++r;
 
 
 
 
+    /*
+     * Section for Line 2 Entries
+     *    01      Line Number of Element Data
+     *    03-07   Satellite Number
+     *    09-16   Inclination [Degrees]
+     *    18-25   Right Ascension of the Ascending Node [Degrees]
+     *    27-33   Eccentricity (decimal point assumed)
+     *    35-42   Argument of Perigee [Degrees]
+     *    44-51   Mean Anomaly [Degrees]
+     *    53-63   Mean Motion [Revs per day]
+     *    64-68   Revolution number at epoch [Revs]
+     *    69      Checksum (Modulo 10)
+     */
+    label = gtk_label_new( _("<b>Line 2 Entries:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 0, 1, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+    ++r;
+
+    // Satellite Number
+//    label = gtk_label_new( _("<b>Satellite Number:</b>")); gtk_widget_show( label);
+//    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+//    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+//    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+//    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+//
+//    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+//    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+//
+//    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+//    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+//
+//    spinbutton1_adj = gtk_adjustment_new(  99999, 0, 999999, 1, 1, 0);
+//    GtkWidget *TleGenButton7 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 0);
+//    gtk_widget_show( TleGenButton7 );
+//    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton7, FALSE, TRUE, 0);
+//    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton7), TRUE);
+//    //g_signal_connect( G_OBJECT( TleGenButton7 ), "value_changed", G_CALLBACK( ChangeViewQuat ), GINT_TO_POINTER( 0 ) );
+//    ++r;
+
+    // Inclination
+    label = gtk_label_new( _("<b>Inclination [Degrees]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.Inc, 0.0, 180, 1.0, 10.0, 0);
+    GtkWidget *TleGenButton8 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 4);
+    gtk_widget_show( TleGenButton8 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton8, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton8), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton8 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 8 ) );
+    ++r;
+
+    // RAAN
+    label = gtk_label_new( _("<b>RAAN [Degrees]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.RAAN, 0.0, 360.0, 1.0, 10.0, 0);
+    GtkWidget *TleGenButton9 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 4);
+    gtk_widget_show( TleGenButton9 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton9, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton9), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton9 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 9 ) );
+    ++r;
+
+    // Eccentricity
+    label = gtk_label_new( _("<b>Eccentricity:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.Ecc, 0.0, 0.9999999, 0.01, 0.10, 0);
+    GtkWidget *TleGenButton10 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 7);
+    gtk_widget_show( TleGenButton10 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton10, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton10), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton10 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 10 ) );
+    ++r;
+
+    // Arg. Of Perigee
+    label = gtk_label_new( _("<b>Arg. Of Perigee [Degrees]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.AoP, 0.0, 360.0, 1.0, 10.0, 0);
+    GtkWidget *TleGenButton11 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 4);
+    gtk_widget_show( TleGenButton11 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton11, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton11), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton11 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 11 ) );
+    ++r;
+
+    // Mean Anomaly
+    label = gtk_label_new( _("<b>Mean Anomaly [Degrees]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.MeanAnomaly, 0.0, 360.0, 1.0, 10.0, 0);
+    GtkWidget *TleGenButton12 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 4);
+    gtk_widget_show( TleGenButton12 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton12, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton12), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton12 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 12 ) );
+    ++r;
+
+    // Mean Motion
+    label = gtk_label_new( _("<b>Mean Motion [Revs/day]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.MeanMotion, 0.1, 20.0, 0.0001, 0.10, 0);
+    GtkWidget *TleGenButton13 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 8);
+    gtk_widget_show( TleGenButton13 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton13, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton13), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton13 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 13 ) );
+    ++r;
+
+    // Rev Number at Epoch
+    label = gtk_label_new( _("<b>Rev Number at Epoch [Revs]:</b>")); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 1, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 1, 0.5);
+
+    RowHbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( RowHbox);
+    gtk_table_attach( GTK_TABLE( table1), RowHbox, 2, 3, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( GTK_FILL), 0, 0);
+
+    hbox = gtk_hbox_new( FALSE, 2); gtk_widget_show( hbox);
+    gtk_box_pack_start( GTK_BOX( RowHbox), hbox, FALSE, TRUE, 10);
+
+    spinbutton1_adj = gtk_adjustment_new(  tle.RevNum, 0, 99999, 1, 1, 0);
+    GtkWidget *TleGenButton14 = gtk_spin_button_new( GTK_ADJUSTMENT( spinbutton1_adj), 0.001, 0);
+    gtk_widget_show( TleGenButton14 );
+    gtk_box_pack_start( GTK_BOX( hbox), TleGenButton14, FALSE, TRUE, 0);
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(TleGenButton14), TRUE);
+    g_signal_connect( G_OBJECT( TleGenButton14 ), "value_changed", G_CALLBACK( ChangeTLE ), GINT_TO_POINTER( 14 ) );
+    ++r;
 
 
 
+hbox = gtk_hbox_new( FALSE, 10); gtk_widget_show( hbox );
+button = gtk_button_new_with_mnemonic( _("Trace Field Lines") ); gtk_widget_show( button );
+gtk_box_pack_start( GTK_BOX(hbox), button, FALSE, TRUE, 10 );
+g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( TLE_TraceFieldLines ), GINT_TO_POINTER( -1 ) );
+gtk_box_pack_start( GTK_BOX(vbox2), hbox, FALSE, TRUE, 10 );
 
 
 
@@ -8075,8 +9222,8 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     /***********
      * General *
      ***********/
-    vbox2 = gtk_vbox_new (FALSE, 0); gtk_widget_show (vbox2);
-    gtk_container_set_border_width (GTK_CONTAINER (vbox2), 20);
+    vbox2 = gtk_vbox_new( FALSE, 0); gtk_widget_show( vbox2);
+    gtk_container_set_border_width( GTK_CONTAINER( vbox2), 20);
 
     // Page title
     label = gtk_label_new (_("<b><span size=\"small\">General</span></b>")); gtk_widget_show (label);
@@ -8145,6 +9292,13 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(RadioLightingStyle[0]), TRUE);
     g_signal_connect( G_OBJECT( RadioLightingStyle[0]), "toggled", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 0 ) );
 
+    RadioLightingStyle[2] = gtk_radio_button_new_with_mnemonic (NULL, _("Solar Illumination 2")); gtk_widget_show(RadioLightingStyle[2]);
+    gtk_box_pack_start (GTK_BOX (hbox), RadioLightingStyle[2], FALSE, FALSE, 0);
+    gtk_radio_button_set_group (GTK_RADIO_BUTTON(RadioLightingStyle[2]), RadioLightingGroup);
+    RadioLightingGroup = gtk_radio_button_get_group (GTK_RADIO_BUTTON(RadioLightingStyle[2]));
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(RadioLightingStyle[2]), FALSE);
+    g_signal_connect( G_OBJECT( RadioLightingStyle[2] ), "toggled", G_CALLBACK( ChangeLighting ), GINT_TO_POINTER( 2 ) );
+
     RadioLightingStyle[1] = gtk_radio_button_new_with_mnemonic (NULL, _("Fixed Illumination")); gtk_widget_show(RadioLightingStyle[1]);
     gtk_box_pack_start (GTK_BOX (hbox), RadioLightingStyle[1], FALSE, FALSE, 0);
     gtk_radio_button_set_group (GTK_RADIO_BUTTON(RadioLightingStyle[1]), RadioLightingGroup);
@@ -8192,15 +9346,15 @@ int main( int argc, char *argv[] ) {
 
 
 
-    StartYear  = 2012; StartMonth = 8; StartDay   = 31;
+    StartYear  = 2017; StartMonth = 1; StartDay   = 1;
 //StartYear  = 2009; StartMonth = 4; StartDay   = 20;
     StartDate  = StartYear*10000 + StartMonth*100 + StartDay;
-    StartHour  = 0; StartMin = 0; StartSec   = 0; StartMilliSec = 0;
+    StartHour  = 6; StartMin = 0; StartSec   = 0; StartMilliSec = 0;
 //StartHour  = 0; StartMin = 2; StartSec   = 30; StartMilliSec = 0;
     StartUT    = (double)StartHour + (double)StartMin/60.0 + (double)(StartSec+StartMilliSec/1000.0)/3600.0;
     StartJD    = Lgm_JD( StartYear, StartMonth, StartDay, StartUT, LGM_TIME_SYS_UTC, c );
 
-    EndYear  = 2015; EndMonth = 12; EndDay   = 31;
+    EndYear  = 2025; EndMonth = 12; EndDay   = 31;
     EndDate  = EndYear*10000 + EndMonth*100 + EndDay;
     EndHour  = 23; EndMin = 58; EndSec   = 30; EndMilliSec = 0;
     EndDate  = EndYear*10000 + EndMonth*100 + EndDay;
@@ -8303,6 +9457,30 @@ printf("nFramesLeft, nFrames = %ld %ld\n", nFramesLeft, nFrames);
         gInfo->DriftShellMaterial[i].diffuse[3] = 0.6;
 
     }
+
+
+    /*
+     * SeT default TLE params
+     */
+    strcpy( tle.Name, "AMPTE_CCE" );
+
+    tle.SatNum = 15199;
+    strcpy( tle.IntDesig, "84088A" );
+    tle.Epoch = 17078.89650569;
+    tle.d1MeanMotion = 0.00000110;
+    tle.d2MeanMotion = 0.0;
+    tle.BSTAR = 0.0;
+    tle.ElemNum = 262;
+
+    tle.Inc = 10.0;
+    tle.RAAN = 180.0;
+    tle.Ecc = 0.495323;
+    tle.AoP = 120.0;
+    tle.MeanAnomaly = 10.0000;
+    tle.MeanMotion = 01.33;
+    tle.RevNum = 331;
+
+
 
 
 
