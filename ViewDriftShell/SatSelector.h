@@ -24,7 +24,8 @@
 #include <stdlib.h>
 #include <Lgm/Lgm_Vec.h>
 #include <Lgm/Lgm_Sgp.h>
-#include "Objects.h"
+//#include "Objects.h"
+#include <Lgm_Objects.h>
 typedef struct _SpaceObjectItem {
 
     _SgpTLE TLE;
@@ -63,6 +64,26 @@ typedef struct _SpaceObjectItem {
 
     int     DrawSatToGroundLine;                // whether to draw a line from the sat to the ground 
     float   ssglRed, ssglGrn, ssglBlu, ssglAlf; // Color of ground path.
+
+
+
+    int     DrawSatFieldLines;          // controls drawing Field lines from sat position.
+    float   ssflRed, ssflGrn, ssflBlu, ssflAlf; // Color of field lines.
+
+    int     DrawSatFLFootpoints;        // controls drawing Footpoints from Sat position.
+    float   ssfpRed, ssfpGrn, ssfpBlu, ssfpAlf; // Color of footpoints.
+
+    int     DrawOrbitFieldLines;        // controls drawing Field lines from orbit positions.
+    float   oflRed, oflGrn, oflBlu, oflAlf; // Color of field lines.
+
+    int     DrawOrbitFLFootpoints;      // controls drawing Footpoints from orbit positions.
+    float   ofpRed, ofpGrn, ofpBlu, ofpAlf; // Color of footpoints.
+
+    int     DrawStreakFieldLines;        // controls drawing Field lines from Streak positions.
+    float   sflRed, sflGrn, sflBlu, sflAlf; // Color of field lines.
+
+    int     DrawStreakFLFootpoints;      // controls drawing Footpoints from Streak positions.
+    float   sfpRed, sfpGrn, sfpBlu, sfpAlf; // Color of footpoints.
 
 
     // not implemented yet...

@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Lgm/Lgm_Vec.h>
-#include "Objects.h"
+//#include "Objects.h"
+#include <Lgm_Objects.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
