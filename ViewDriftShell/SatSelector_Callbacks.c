@@ -144,6 +144,24 @@ void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data ) {
         case 13:
                 Group->DrawPosition = State;
                 break;
+        case 14:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatFieldLines = State;
+                break;
+        case 15:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatFLFootpoints = State;
+                break;
+        case 16:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitFieldLines = State;
+                break;
+        case 17:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitFLFootpoints = State;
+                break;
+        case 18:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakFieldLines = State;
+                break;
+        case 19:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakFLFootpoints = State;
+                break;
     }
 
     ReCreateSats();
