@@ -1669,7 +1669,7 @@ void LoadTextures(){
 
     glGenTextures( 1, &Texture_Spacecraft );
     glBindTexture( GL_TEXTURE_2D, Texture_Spacecraft );
-    sprintf( Filename, "%s/spacecraft2.png.png", LGM_IMAGE_DATA_DIR );
+    sprintf( Filename, "%s/spacecraft2.png", LGM_IMAGE_DATA_DIR );
     if ( ReadPng( Filename, &Width, &Height, &pImage ) ) {
         printf("PNG image %s: Width, Height = %d %d\n", Filename, Width, Height );
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pImage);
