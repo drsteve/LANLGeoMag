@@ -18,6 +18,17 @@
 #define MAIN
 #endif
 
+#ifndef LGM_IMAGE_DATA_DIR
+#warning "hard-coding LGM_IMAGE_DATA_DIR because it was not in config.h"
+#define LGM_IMAGE_DATA_DIR    "/usr/local/share/LanlGeoMag/Images"
+#endif
+
+#ifndef LGM_BLUEMARBLE_DATA_DIR
+#warning "hard-coding LGM_BLUEMARBLE_DATA_DIR because it was not in config.h"
+#define LGM_BLUEMARBLE_DATA_DIR    "/usr/local/share/LanlGeoMag/Images/BlueMarble/5400x2700"
+#endif
+
+
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
 #include "Vds_DriftShell.h"
@@ -1513,7 +1524,8 @@ void LoadTextures(){
     /*
      * Read Filename
      */
-    strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
+    sprintf( MapImageFilename, "%s/world.topo.bathy.200406.3x5400x2700.png", LGM_BLUEMARBLE_DATA_DIR );
+    //strcpy( MapImageFilename, "/data1/mgh/BlueMarble/5400x2700/world.topo.bathy.200406.3x5400x2700.png");
     PngImageOK = ReadPng( MapImageFilename, &Width, &Height, &pImage );
     printf("PNG image %s: Width, Height = %d %d\n", MapImageFilename, Width, Height );
 
