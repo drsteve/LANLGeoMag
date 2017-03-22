@@ -420,6 +420,19 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
     gtk_label_set_angle (GTK_LABEL (label), 90);
     ++Col;
 
+label = gtk_label_new (_("Sat Field Lines")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
+label = gtk_label_new (_("Sat FL Footpoints")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
+
 
     vseparator = gtk_vseparator_new (); gtk_widget_show (vseparator);
     gtk_table_attach (GTK_TABLE (table1), vseparator, Col, Col+1, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
@@ -443,6 +456,19 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     gtk_label_set_angle (GTK_LABEL (label), 90);
     ++Col;
+
+label = gtk_label_new (_("Orbit Field Lines")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
+label = gtk_label_new (_("Orbit FL Footpoints")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
 
     label = gtk_label_new (_("% of Orbit to Draw")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
@@ -474,6 +500,19 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     gtk_label_set_angle (GTK_LABEL (label), 90);
     ++Col;
+
+label = gtk_label_new (_("Streak Field Lines")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
+label = gtk_label_new (_("Streak FL Footpoints")); gtk_widget_show (label);
+gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
+gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+gtk_label_set_angle (GTK_LABEL (label), 90);
+++Col;
+
 
     label = gtk_label_new (_("% of Orbit to Draw")); gtk_widget_show (label);
     gtk_table_attach (GTK_TABLE (table1), label, Col, Col+1, 0, 1, (GtkAttachOptions) (0), (GtkAttachOptions) (GTK_FILL), 0, 0);
@@ -592,6 +631,21 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+2 ) );
         ++Col;
 
+// for Sat Field Lines
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawSatFieldLines );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+14 ) );
+++Col;
+
+
+// for Sat FL Footpoints
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawSatFLFootpoints );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+15 ) );
+++Col;
+
         vseparator = gtk_vseparator_new (); gtk_widget_show (vseparator);
         gtk_table_attach (GTK_TABLE (table1), vseparator, Col, Col+1, Row, Row+1, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (GTK_FILL), 0, 0);
         gtk_widget_set_size_request (vseparator, 2, -1);
@@ -619,8 +673,22 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+8 ) );
         ++Col;
 
+// for Orbit Field Lines
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbitFieldLines );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+16 ) );
+++Col;
+
+// for Orbit FL Footpoints
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbitFLFootpoints );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+17 ) );
+++Col;
+
         // for % Orbit to Draw
-        spinbutton_adj = gtk_adjustment_new (100, 0, 500, 1, 10, 0);
+        spinbutton_adj = gtk_adjustment_new (100, 1, 2000, 1, 10, 0);
         spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton_adj), 1, 0); gtk_widget_show (spinbutton);
         gtk_table_attach (GTK_TABLE (table1), spinbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
         gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
@@ -655,8 +723,23 @@ GtkWidget *CreateSatSelector( int nGroups, char *GroupNames[] ) {
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+11 ) );
         ++Col;
 
+// for Streak Field Lines
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreakFieldLines );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+18 ) );
+++Col;
+
+// for Streak FL Footpoints
+checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
+gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreakFLFootpoints );
+g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100+19 ) );
+++Col;
+
+
         // for % Orbit to Draw
-        spinbutton_adj = gtk_adjustment_new (25, 0, 100, 1, 10, 0);
+        spinbutton_adj = gtk_adjustment_new (25, 1, 2000, 1, 10, 0);
         spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton_adj), 1, 0); gtk_widget_show (spinbutton);
         gtk_table_attach (GTK_TABLE (table1), spinbutton, Col, Col+1, Row, Row+1, (GtkAttachOptions) (GTK_EXPAND), (GtkAttachOptions) (0), 0, 0);
         gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
