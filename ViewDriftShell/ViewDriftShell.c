@@ -5707,16 +5707,18 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
     printf("Line1: |%s|\n", tle.Line1 );
     printf("Line2: |%s|\n", tle.Line2 );
 
-    FILE *fp_tle = fopen( "/home/mgh/SAT_GROUPS/TLE.txt", "w" );
-    fprintf( fp_tle, "%s\n", tle.Line0 );
-    fprintf( fp_tle, "%s\n", tle.Line1 );
-    fprintf( fp_tle, "%s\n", tle.Line2 );
-    fclose( fp_tle );
-
+    FILE *fp_tle;
+    if ( (fp_tle = fopen( "/home/mgh/SAT_GROUPS/TLE.txt", "w" )) != NULL ) {
+        fprintf( fp_tle, "%s\n", tle.Line0 );
+        fprintf( fp_tle, "%s\n", tle.Line1 );
+        fprintf( fp_tle, "%s\n", tle.Line2 );
+        fclose( fp_tle );
+    }
 
 
 
     int     nTLEs;
+if (0==1){
     _SgpTLE TLEs[1];
     nTLEs = 0; // must set this
     LgmSgp_ReadTlesFromStrings( tle.Line0, tle.Line1, tle.Line2, &nTLEs, &TLEs[0], 1 );
@@ -5744,6 +5746,7 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
     sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( GTK_LABEL(tle.Line1Label), Str ); 
     sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line2 ); gtk_label_set_markup( GTK_LABEL(tle.Line2Label), Str ); 
 
+}
 
 
 
