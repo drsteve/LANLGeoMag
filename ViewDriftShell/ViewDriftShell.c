@@ -28,6 +28,11 @@
 #define LGM_BLUEMARBLE_DATA_DIR    "/usr/local/share/LanlGeoMag/Images/BlueMarble"
 #endif
 
+#ifndef LGM_STARS_DATA_DIR
+#warning "hard-coding LGM_STARS_DATA_DIR because it was not in config.h"
+#define LGM_STARS_DATA_DIR    "/usr/local/share/LanlGeoMag/Stars"
+#endif
+
 
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
@@ -2485,7 +2490,7 @@ void LoadStars( ) {
     char        Filename[256];
 
     
-    sprintf( Filename, "%s/Stars.txt", LGM_DATA_DIR );
+    sprintf( Filename, "%s/Stars.txt", LGM_STARS_DATA_DIR );
     if ( ( fp = fopen( Filename, "r") ) != NULL ) {
 
         StarsDL = glGenLists( 1 );

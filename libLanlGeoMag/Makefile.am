@@ -20,7 +20,7 @@ LGM_BLUEMARBLE_DATA_DIR = $(datarootdir)/LanlGeoMag/Images/BlueMarble
 LGM_IMAGE_DATA_DIR = $(datarootdir)/LanlGeoMag
 
 # Directory where other images (for ViewDriftSehll) will be installed
-LGM_STARS_DATA_DIR = $(datarootdir)/Stars
+LGM_STARS_DATA_DIR = $(datarootdir)/LanlGeoMag/Stars
 
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
@@ -70,7 +70,7 @@ if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/Images $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/. # should cover BlueMarble stuff also.
 	$(MKDIR_P) $(DESTDIR)$(LGM_STARS_DATA_DIR)
-	$(RSYNC_CMD) -arv $(srcdir)/Stars $(DESTDIR)$(LGM_STARS_DATA_DIR)/.
+	$(RSYNC_CMD) -arv $(srcdir)/Stars/* $(DESTDIR)$(LGM_STARS_DATA_DIR)/.
 endif
 
 uninstall-hook:
