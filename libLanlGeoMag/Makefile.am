@@ -13,6 +13,12 @@ LGM_INDEX_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 # Directory where JPL DE-related stuff will be installed
 LGM_DE_DATA_DIR = $(datarootdir)/LanlGeoMag/Data/
 
+# Directory where Blue Marble 5400x2700 images will be installed
+LGM_BLUEMARBLE_DATA_DIR = $(datarootdir)/LanlGeoMag/Images/BlueMarble/5400x2700
+
+# Directory where other images (for ViewDriftSehll) will be installed
+LGM_IMAGE_DATA_DIR = $(datarootdir)/LanlGeoMag/Images
+
 pkgconfigdir       = $(libdir)/pkgconfig
 pkgconfig_DATA     = lgm.pc
 
@@ -58,6 +64,10 @@ if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
 	$(RSYNC_CMD) -a $(srcdir)/DE_FILES $(DESTDIR)$(LGM_DE_DATA_DIR)/.
 	@echo Additional DE files should be placed in $(DESTDIR)$(LGM_DE_DATA_DIR)
+	$(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
+	$(RSYNC_CMD) -a $(srcdir)/Images $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/.
+	$(MKDIR_P) $(DESTDIR)$(LGM_BLUEMARBLE_DATA_DIR)
+	$(RSYNC_CMD) -a $(srcdir)/Images/BlueMarble/5400x2700 $(DESTDIR)$(LGM_BLUEMARBLE_DATA_DIR)/.
 endif
 
 uninstall-hook:
@@ -65,5 +75,6 @@ if ENABLE_INDICES
 	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
 	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
 	-rm -rf $(DESTDIR)$(LGM_DE_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
 endif
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag
