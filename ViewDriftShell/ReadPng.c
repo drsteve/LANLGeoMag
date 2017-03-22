@@ -10,7 +10,7 @@
 /*
  * The number of bytes to read off PNG image.  These first few bytes will be
  * used to verify that the image really is a PNG image. (We can use fewer than
- * 8 bytes, byte the validation is not as acurate. Dont use more than 8 bytes.)
+ * 8 bytes, but the validation is not as acurate. Dont use more than 8 bytes.)
  */
 #define PNG_HEADER_BYTES    8 
 
@@ -26,6 +26,10 @@ int ReadPng( char *Filename, int *Width, int *Height, GLubyte **qImage ) {
     GLubyte         *p, *pImage;
     FILE            *fp;
    
+
+    *Width   = 0;
+    *Height  = 0;
+    *qImage = NULL;
 
     if ( Filename == NULL ) {
         printf( "Filename is NULL\n" );
@@ -109,7 +113,7 @@ int ReadPng( char *Filename, int *Width, int *Height, GLubyte **qImage ) {
 
 
     /*
-     *  Retrive info about image.
+     *  Retrieve info about image.
      */
     png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
 
