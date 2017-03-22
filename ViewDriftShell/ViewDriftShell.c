@@ -8846,6 +8846,7 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_box_pack_start( GTK_BOX(vbox2), vbox3, FALSE, TRUE, 10 );
 
     sprintf( Str, "<b><big><tt><span>%s</span></tt></big></b>", tle.Line0 );
+sprintf( Str, "%s", tle.Line0 );
     label = gtk_label_new( Str ); gtk_widget_show( label);
     gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
 
