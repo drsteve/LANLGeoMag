@@ -261,6 +261,9 @@ GLuint  Texture_Sun;
 GLuint  Texture_TEMP;;
 GLuint  Texture_HiResEarthQuad;
 
+GLuint  Texture_Fd;
+GLuint  Texture_Fs;
+
 int     Logo_Width, Logo_Height;
 
 int FrameNumber = 0;
@@ -731,9 +734,13 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     /*
      * Alloc memory for the Lines array
      */
+    ++nLines;
     Lines = (char **)calloc( nLines, sizeof(char *) );
     i = 0;
     //printf( "Shader File: %s\n", Filename );
+    len = 17;
+    Lines[i] = (char *)calloc( len+1, sizeof(char) );
+    strcpy( Lines[i], "#version 130\n" ); ++i;
     while ( fgets( Str, 400, fp )  ) {
         p = strstr( Str, "//" ); if (p != NULL) *p = '\0'; // get rid of //-style comments
         p = index( Str, '\n' );  if (p != NULL) *p = '\0';
@@ -747,6 +754,7 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
         }
     }
     //printf("\n");
+    //printf("END\n");
 
     fclose(fp);
 
@@ -775,15 +783,17 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
 
 
 
-    void BuildShaders2() {
+void BuildShaders2() {
 
-        printf("\nLoading shaders...\n");
-        //ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex2.glsl",   GL_VERTEX_SHADER );
-        //ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment2.glsl", GL_FRAGMENT_SHADER );
-        ShadeVertex   = LoadShaderFromFile( "Shaders/CH14-WardBRDF.vert",   GL_VERTEX_SHADER );
-        ShadeFragment = LoadShaderFromFile( "Shaders/CH14-WardBRDF.frag", GL_FRAGMENT_SHADER );
+    printf("\nLoading shaders...\n");
+    //ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex.glsl",   GL_VERTEX_SHADER );
+ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated_vert.glsl",   GL_VERTEX_SHADER );
+    //ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment.glsl", GL_FRAGMENT_SHADER );
+ShadeFragment = LoadShaderFromFile( "Shaders/Illuminated_frag.glsl", GL_FRAGMENT_SHADER );
+    //ShadeVertex   = LoadShaderFromFile( "Shaders/CH14-WardBRDF.vert",   GL_VERTEX_SHADER );
+    //ShadeFragment = LoadShaderFromFile( "Shaders/CH14-WardBRDF.frag", GL_FRAGMENT_SHADER );
 
-        g_shaderMyTest = glCreateProgram();
+    g_shaderMyTest = glCreateProgram();
     glAttachShader( g_shaderMyTest, ShadeVertex );
     glAttachShader( g_shaderMyTest, ShadeFragment );
     glLinkProgram( g_shaderMyTest );
@@ -807,7 +817,6 @@ void BuildShaders() {
 
     ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex.glsl",   GL_VERTEX_SHADER );
     ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment.glsl", GL_FRAGMENT_SHADER );
-
 
 
     // Create g_shaderFrontInit program
@@ -1213,6 +1222,16 @@ gulong      PitchAngleAllHandler;
 gulong      PitchAngleHandler[90];
 GtkWidget   *PitchAngleCheckMenuItem[91];
 //int         ShowSun                 =  0;
+int         Show_GSM_Axes = 1;
+int         Show_SM_Axes  = 1;
+int         Show_GSE_Axes = 1;
+int         Show_GEI_Axes = 1;
+int         Show_GEO_Axes = 1;
+int         Show_GSM_Grid = 0;
+int         Show_SM_Grid  = 1;
+int         Show_GSE_Grid = 1;
+int         Show_GEI_Grid = 1;
+int         Show_GEO_Grid = 1;
 int         ShowStars               =  1;
 int         ShowEarth               =  1;
 int         ShowThemisFovs          =  1;
@@ -1507,6 +1526,9 @@ void LoadTextures(){
     int     Height;
     int     PngImageOK;
 
+    float   *FdImage;
+    float   *FsImage;
+
 
 
 
@@ -1730,6 +1752,41 @@ void LoadTextures(){
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     }
+
+printf("GL_SHADING_LANGUAGE_VERSION = %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION) );
+
+    /*
+     * Experimental...
+     * Textures for Illuminated Line Rendering
+     */
+    if ( GenIllumTextures( 256, &FdImage, &FsImage ) ) {
+
+        glGenTextures( 1, &Texture_Fd );
+        glBindTexture( GL_TEXTURE_2D, Texture_Fd );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FdImage );
+//        gluBuild2DMipmaps( GL_TEXTURE_2D, GL_R32F, 256, 256, GL_RED, GL_FLOAT, FdImage );
+//        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        free( FdImage );
+
+        glGenTextures( 1, &Texture_Fs );
+        glBindTexture( GL_TEXTURE_2D, Texture_Fs );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FsImage );
+ //       gluBuild2DMipmaps(GL_TEXTURE_2D, GL_R32F, 256, 256, GL_RED, GL_FLOAT, FsImage );
+//        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        free( FsImage );
+
+    }
+
+
+
 
 
     /*
@@ -2040,35 +2097,37 @@ void CreateEarth( ){
 
     // EqPlane grid
     double R, x, y, Phi;
-    EqPlaneGridDL = glGenLists( 1 );
-    glNewList( EqPlaneGridDL, GL_COMPILE );
-        glDisable(GL_LIGHTING);
-        glPushMatrix();
-        glColor4f( 0.5, 0.5, 0.5, 0.1 );
-        glLineWidth( 0.5 );
-        glEnable(GL_LINE_SMOOTH);
-        glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
-        for (R=1.0; R<=10.0; R += 1.0) {
-            glBegin(GL_LINE_LOOP);
-                for (Phi=0.0; Phi<2.0*M_PI; Phi += .01) {
-                    x = R*cos(Phi);
-                    y = R*sin(Phi);
+    if ( Show_GSM_Grid ) {
+        EqPlaneGridDL = glGenLists( 1 );
+        glNewList( EqPlaneGridDL, GL_COMPILE );
+            glDisable(GL_LIGHTING);
+            glPushMatrix();
+            glColor4f( 0.5, 0.5, 0.5, 0.1 );
+            glLineWidth( 0.5 );
+            glEnable(GL_LINE_SMOOTH);
+            glHint( GL_LINE_SMOOTH_HINT, GL_NICEST);
+            for (R=1.0; R<=10.0; R += 1.0) {
+                glBegin(GL_LINE_LOOP);
+                    for (Phi=0.0; Phi<2.0*M_PI; Phi += .01) {
+                        x = R*cos(Phi);
+                        y = R*sin(Phi);
+                        glVertex3f( x, y, 0.0 );
+                    }
+                glEnd();
+            }
+            glBegin(GL_LINES);
+                for (Phi=0.0; Phi<360.0; Phi += 15.0) {
+                    x = cos(Phi*M_PI/180.0);
+                    y = sin(Phi*M_PI/180.0);
                     glVertex3f( x, y, 0.0 );
+                    glVertex3f( 10.0*x, 10.0*y, 0.0 );
                 }
             glEnd();
-        }
-        glBegin(GL_LINES);
-            for (Phi=0.0; Phi<360.0; Phi += 15.0) {
-                x = cos(Phi*M_PI/180.0);
-                y = sin(Phi*M_PI/180.0);
-                glVertex3f( x, y, 0.0 );
-                glVertex3f( 10.0*x, 10.0*y, 0.0 );
-            }
-        glEnd();
-        glDisable(GL_LINE_SMOOTH);
-        glPopMatrix();
-        glEnable(GL_LIGHTING);
-    glEndList( );
+            glDisable(GL_LINE_SMOOTH);
+            glPopMatrix();
+            glEnable(GL_LIGHTING);
+        glEndList( );
+    }
 
 
 
@@ -4123,7 +4182,84 @@ void DrawScene( ) {
     /*
      * These are the various coordinate axes.
      */
+float c[4], CameraPos[3], LightPos[3];
+c[0] = 1.0;
+c[1] = 0.7;
+c[2] = 0.2;
+c[3] = 1.0;
+FILE *ffl;
+ffl = fopen("FL.txt", "r");
+double Px[1000];
+double Py[1000];
+double Pz[1000];
+int    fln, gap;
+fln  = 0;
+while( fscanf( ffl, "%lf %lf %lf %d", &Px[fln], &Py[fln], &Pz[fln], &gap ) != EOF ){
+    ++fln;
+}
+fclose(ffl);
+
+    GLint  PprevLoc        = glGetAttribLocation( g_shaderMyTest, "Pprev" );
+    GLint  PnextLoc        = glGetAttribLocation( g_shaderMyTest, "Pnext" );
+    GLint  LightPosLoc     = glGetUniformLocation( g_shaderMyTest, "LightPos" );
+    GLint  CameraPosLoc    = glGetUniformLocation( g_shaderMyTest, "CameraPos" );
+    GLint  FdTextureLoc    = glGetUniformLocation( g_shaderMyTest, "FdTexture" );
+    GLint  FsTextureLoc    = glGetUniformLocation( g_shaderMyTest, "FsTexture" );
+    GLint  LineColorLoc    = glGetUniformLocation( g_shaderMyTest, "LineColor" );
+    GLint  kaLoc           = glGetUniformLocation( g_shaderMyTest, "ka" );
+    GLint  kdLoc           = glGetUniformLocation( g_shaderMyTest, "kd" );
+    GLint  ksLoc           = glGetUniformLocation( g_shaderMyTest, "ks" );
+    GLint  nLoc            = glGetUniformLocation( g_shaderMyTest, "n" );
+
+    glUseProgram( g_shaderMyTest );
+    glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
+    glUniform1f( kaLoc, 0.1 );
+    glUniform1f( kdLoc, 0.7 );
+    glUniform1f( ksLoc, 1.0 );
+    glUniform1f( nLoc,  30.0 );
+
+    glActiveTexture( GL_TEXTURE0 + 0);
+    glBindTexture( GL_TEXTURE_2D, Texture_Fd );
+    glUniform1i( FdTextureLoc, 0 );
+
+    glActiveTexture( GL_TEXTURE0 + 0);
+    glBindTexture( GL_TEXTURE_2D, Texture_Fs );
+    glUniform1i( FsTextureLoc, 0 );
+
+
+CameraPos[0] = aInfo->Camera.x;
+CameraPos[1] = aInfo->Camera.y;
+CameraPos[2] = aInfo->Camera.z;
+LightPos[0] = LightPosition[0]*1000.0;
+LightPos[1] = LightPosition[1]*1000.0;
+LightPos[2] = LightPosition[2]*1000.0;
+glUniform3fv( CameraPosLoc, 1, CameraPos );
+glUniform3fv( LightPosLoc, 1, LightPos );
+printf("CameraPos = %g %g %g   LightPos = %g %g %g\n", CameraPos[0], CameraPos[1], CameraPos[2], LightPos[0], LightPos[1], LightPos[2]);
+
+
+    glDepthMask( GL_FALSE );
+    glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+//    glDisable( GL_TEXTURE_2D );
+
+    glLineWidth( 0.5 );
+    glBegin( GL_LINE_STRIP );
+        for (i=0+1; i<fln-1; ++i){
+            glVertexAttrib3f( PprevLoc, Px[i-1], Py[i-1], Pz[i-1] );
+            glVertexAttrib3f( PnextLoc, Px[i+1], Py[i+1], Pz[i+1] );
+            glVertex3f( Px[i], Py[i], Pz[i] );
+        }
+    glEnd();
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glDepthMask( GL_TRUE );
+//    glEnable( GL_TEXTURE_2D );
+
+    glUseProgram( 0 );
+
     glCallList( AxesDL );
+
 
 
 
@@ -4131,7 +4267,11 @@ void DrawScene( ) {
 
     if ( ShowEarth ) glCallList( EarthDL );
 
-    if ( ShowThemisFovs ) glCallList( ThemisFovsDL );
+    if ( ShowThemisFovs ) {
+        //glUseProgram( g_shaderMyTest );
+        glCallList( ThemisFovsDL );
+        //glUseProgram( 0 );
+    }
 
 
 //    CreateGeoMarkers();
@@ -4717,6 +4857,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         GLfloat position[]        = {5000.0, 0.0, 0.0, 0.0};
         GLfloat lmodel_ambient[]  = {0.3, 0.3, 0.3, 1.0};
         position[0] = Sun.x; position[1] = Sun.y; position[2] = Sun.z;
+        LightPosition[0] = position[0]; LightPosition[1] = position[1]; 
+        LightPosition[2] = position[2]; LightPosition[3] = position[3];
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
         glLightfv (GL_LIGHT0, GL_POSITION, position);
@@ -4736,7 +4878,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         position[0] = aInfo->Camera.x; position[1] = aInfo->Camera.y; position[2] = aInfo->Camera.z;
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
-        LightPosition[0] = position[0]; LightPosition[1] = position[1]; LightPosition[2] = position[2];
+        LightPosition[0] = position[0]; LightPosition[1] = position[1]; 
+        LightPosition[2] = position[2]; LightPosition[3] = position[3];
         //glLightfv (GL_LIGHT0, GL_POSITION, position);
         glLightfv (GL_LIGHT0, GL_POSITION, LightPosition);
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
@@ -4751,6 +4894,8 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         GLfloat position[]        = {5000.0, 0.0, 0.0, 0.0};
         GLfloat lmodel_ambient[]  = {0.7, 0.7, 0.7, 1.0};
         position[0] = Sun.x; position[1] = Sun.y; position[2] = Sun.z;
+        LightPosition[0] = position[0]; LightPosition[1] = position[1]; 
+        LightPosition[2] = position[2]; LightPosition[3] = position[3];
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
         glLightfv (GL_LIGHT0, GL_POSITION, position);
@@ -6910,6 +7055,52 @@ Lgm_free_ctrans( c );
 
 }
 
+static void SetCoordAxesAndGrids( GtkWidget  *widget, gpointer data ) {
+
+    int i = GPOINTER_TO_INT( data );
+    int State;
+
+    State = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( widget ) ); // get state of check item
+
+    switch (i) {
+
+        case 0: // GSM
+                Show_GSM_Axes = State;
+                break;
+        case 1: // SM
+                Show_SM_Axes = State;
+                break;
+        case 2: // GSE
+                Show_GSE_Axes = State;
+                break;
+        case 3: // GEI
+                Show_GEI_Axes = State;
+                break;
+        case 4: // GEO
+                Show_GEO_Axes = State;
+                break;
+        case 10: // GSM
+                Show_GSM_Grid = State;
+                break;
+        case 11: // SM
+                Show_SM_Grid = State;
+                break;
+        case 12: // GSE
+                Show_GSE_Grid = State;
+                break;
+        case 13: // GEI
+                Show_GEI_Grid = State;
+                break;
+        case 14: // GEO
+                Show_GEO_Grid = State;
+                break;
+
+    }
+
+    ReCreateEarth();
+
+}
+
 
 static void SetCoordSystem( GtkWidget  *widget, gpointer data ) {
 
@@ -7511,18 +7702,23 @@ GtkWidget *PitchAngleDisplayProperties(){
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), TRUE);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 0 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("SM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 1 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSE")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 2 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEI")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 3 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEO")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 4 ) );
 
 
 
@@ -7537,18 +7733,23 @@ GtkWidget *PitchAngleDisplayProperties(){
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), TRUE);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 10 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("SM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 11 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSE")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 12 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEI")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 13 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEO")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
+    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 14 ) );
 
 
     /*

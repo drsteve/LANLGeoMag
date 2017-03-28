@@ -8,7 +8,7 @@ CFLAGS =  -mfpmath=387 `pkg-config --cflags gtk+-2.0 gtkglext-1.0 lgm`
 
 FILES  =  support.o ReadPng.o trackball.o MakeTube.o Atmosphere.o Ellipsoid.o Sphere.o xvgifwr2.o \
 		  IridiumFlare.o ComputeZPSTransMatrix.o SatSelector_Interface.o  Vds_DriftShell.c\
-		  SatSelector_Callbacks.o SaveRasterFileDialog.o OpenMagEphemFile.o
+		  SatSelector_Callbacks.o SaveRasterFileDialog.o OpenMagEphemFile.o GenIllumTextures.o
 
 LIBS   = -g -lglut -lGL -lGLU -lGLEW -lpng `pkg-config --cflags --libs gtk+-2.0 gthread-2.0 gtkglext-1.0 lgm`
 CC     = gcc 
