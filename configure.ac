@@ -52,7 +52,7 @@ DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
-DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile, docs)
+DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile, Doc)
 
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
@@ -236,19 +236,33 @@ AC_ARG_WITH([pythondir],
     [pythondir="$withval"], [])
 AC_SUBST(pythondir)
 
-AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
-if test x"${HAVE_PERL}" == x"false"; then
-    AC_MSG_FAILURE([Unable to run perl])
+# Make PERL dependency optional
+AC_ARG_ENABLE([perl], [AS_HELP_STRING([--disable-perl],\
+    [Disables additional PERL functionality in LanlGeoMag])])
+AS_IF([test "x$enableval" != "xno"],
+    [ENABLE_PERL=1],
+    [ENABLE_PERL=0]
+)
+
+# Check for PERL if --with-perl specified
+if test x"${ENABLE_PERL}" == x"1"; then
+   AC_CHECK_PROG([HAVE_PERL], [perl], true, false)
+   if test x"${HAVE_PERL}" == x"false"; then
+       AC_MSG_FAILURE([Unable to run perl])
+   fi
 fi
 
-AX_PROG_PERL_MODULES( [ExtUtils::Embed], , [AC_MSG_FAILURE(
-		      Required Perl module ExtUtils::Embed not found)])
-dnl Get flags for embedded perl and make sure it works
-dnl Save old CFLAGS/LDFLAGS so can restore after the check
-PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
-PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
-#get out JUST the rpath bit, since this needs to go in LDFLAGS
-PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
+# Define the PERL flags if using PERL
+if test x"${HAVE_PERL}" == x"true"; then
+   AX_PROG_PERL_MODULES( [ExtUtils::Embed], , [AC_MSG_FAILURE(
+		      	 Required Perl module ExtUtils::Embed not found)])
+   dnl Get flags for embedded perl and make sure it works
+   dnl Save old CFLAGS/LDFLAGS so can restore after the check
+   PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
+   PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+   #get out JUST the rpath bit, since this needs to go in LDFLAGS
+   PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
+fi
 
 HDF5_LDFLAGS=`pkg-config --libs hdf5 2>/dev/null`
 HDF5_CFLAGS=`pkg-config --cflags hdf5 2>/dev/null`
@@ -256,16 +270,24 @@ HDF5_CFLAGS=`pkg-config --cflags hdf5 2>/dev/null`
 CHECK_LIBS=`pkg-config --libs check 2>/dev/null`
 CHECK_CFLAGS=`pkg-config --cflags check 2>/dev/null`
 
-
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
 CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}\ ${HDF5_CFLAGS}
 LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}\ ${HDF5_LDFLAGS}
-AC_CHECK_LIB([perl], [perl_alloc], [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])], [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
+
+# Check for the perl library after setting PERL_LDFLAGS
+if test x"${HAVE_PERL}" == x"true"; then
+   AC_CHECK_LIB([perl], [perl_alloc],\
+   [AC_DEFINE([HAVE_LIBPERL], [1], [libperl found])],\
+   [AC_MSG_FAILURE([No libperl found, are perl development files installed?])])
+fi
+
 CFLAGS=${OLD_CFLAGS}
 LDFLAGS=${OLD_LDFLAGS}\ ${PERL_RPATH}
 LIBS=${OLD_LIBS}
+PERL_CPPFLAGS=-DENABLE_PERL=${ENABLE_PERL}
+AC_SUBST(PERL_CPPFLAGS)
 AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
 AC_SUBST(HDF5_CFLAGS)
@@ -282,7 +304,6 @@ AC_CHECK_LIB([gsl], [gsl_spline_init], ,
     [AC_MSG_ERROR([could not find required version of GSL, are development libraries installed?])])
 
 # Check for openmp support
-dnl note the linker does not need an explicit -lgomp, -fopenmp handles it
 m4_ifdef([AC_OPENMP], [
 dnl use the nice macro if we have it
 AC_OPENMP
@@ -294,10 +315,10 @@ dnl don't have the nice macro, just try one quick flag...
 AC_ARG_ENABLE([openmp],
     [AS_HELP_STRING([--disable-openmp], [do not use OpenMP])])
 OLD_CFLAGS=${CFLAGS}
-CFLAGS=${CFLAGS}\ -fopenmp
+CFLAGS=${CFLAGS}\ -fopenmp -lgomp
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return _OPENMP;])], [
 USE_OPENMP=1
-OPENMP_CFLAGS="-fopenmp"
+OPENMP_CFLAGS="-fopenmp -lgomp"
 ], [
 USE_OPENMP=0])
 CFLAGS=${OLD_CFLAGS}])
