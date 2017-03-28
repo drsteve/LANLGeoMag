@@ -289,6 +289,7 @@ static float        myCgModelViewProjectionMatrix[16];
  * Define names for Shaders
  */
 GLuint g_shaderMyTest;
+GLuint g_shaderMyTest2;
 GLuint g_shaderFrontInit;
 GLuint g_shaderFrontPeel;
 GLuint g_shaderFrontBlend;
@@ -791,17 +792,19 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
 void BuildShaders2() {
 
     printf("\nLoading shaders...\n");
-    //ShadeVertex   = LoadShaderFromFile( "Shaders/shade_vertex.glsl",   GL_VERTEX_SHADER );
-ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated_vert.glsl",   GL_VERTEX_SHADER );
-    //ShadeFragment = LoadShaderFromFile( "Shaders/shade_fragment.glsl", GL_FRAGMENT_SHADER );
-ShadeFragment = LoadShaderFromFile( "Shaders/Illuminated_frag.glsl", GL_FRAGMENT_SHADER );
-    //ShadeVertex   = LoadShaderFromFile( "Shaders/CH14-WardBRDF.vert",   GL_VERTEX_SHADER );
-    //ShadeFragment = LoadShaderFromFile( "Shaders/CH14-WardBRDF.frag", GL_FRAGMENT_SHADER );
+    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated_vert.glsl",   GL_VERTEX_SHADER );
+    ShadeFragment = LoadShaderFromFile( "Shaders/Illuminated_frag.glsl", GL_FRAGMENT_SHADER );
 
     g_shaderMyTest = glCreateProgram();
     glAttachShader( g_shaderMyTest, ShadeVertex );
     glAttachShader( g_shaderMyTest, ShadeFragment );
     glLinkProgram( g_shaderMyTest );
+
+    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated2_vert.glsl",   GL_VERTEX_SHADER );
+    g_shaderMyTest2 = glCreateProgram();
+    glAttachShader( g_shaderMyTest2, ShadeVertex );
+    glAttachShader( g_shaderMyTest2, ShadeFragment );
+    glLinkProgram( g_shaderMyTest2 );
 
 }
 
@@ -3374,6 +3377,7 @@ void CreateSatOrbits() {
     long int            tDate[10001];
     int                 tYear, tMonth, tDay, Flag;
     double              Px[10001], Py[10001], Pz[10001];
+    double              Tx[10001], Ty[10001], Tz[10001];
     Lgm_Vector          Ugei[10001], UGSM[10001], Ugsm[10001], aa, bb, uu, v1[10001], v2[10001], v3[10001];
     Lgm_Vector          Wgsm, Wcoord;
     int                 i, j, jj, n, nMax;
@@ -3539,8 +3543,13 @@ glLineWidth( 2.0 );
                                             Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
                                             Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
                                             Px[jj] = Wcoord.x; Py[jj] = Wcoord.y; Pz[jj] = Wcoord.z;
+
+                                            Wgsm.x = mInfo->Bvec[jj].x; Wgsm.y = mInfo->Bvec[jj].y; Wgsm.z = mInfo->Bvec[jj].z;
+                                            Lgm_NormalizeVector( &Wgsm );
+                                            Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            Tx[jj] = Wcoord.x; Ty[jj] = Wcoord.y; Tz[jj] = Wcoord.z;
                                         }
-                                        DrawIlluminatedLines( Px, Py, Pz, mInfo->nPnts );
+                                        DrawIlluminatedLines2( Px, Py, Pz, Tx, Ty, Tz, mInfo->nPnts, Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf );
 
 
                                     }
@@ -4176,12 +4185,12 @@ static gboolean configure_event( GtkWidget *widget, GdkEventConfigure *event, gp
 
 }
 
-void DrawIlluminatedLines( double *Px, double *Py, double *Pz, int fln ){
+void DrawIlluminatedLines( double *Px, double *Py, double *Pz, int fln, double red, double grn, double blu, double alf ){
 
     int i;
     float c[4], CameraPos[3], LightPos[3];
 
-    c[0] = 0.1; c[1] = 0.5; c[2] = 1.0; c[3] = 1.0;
+    c[0] = red; c[1] = grn; c[2] = blu; c[3] = alf;
 
     GLint  PprevLoc        = glGetAttribLocation(  g_shaderMyTest, "Pprev" );
     GLint  PnextLoc        = glGetAttribLocation(  g_shaderMyTest, "Pnext" );
@@ -4233,6 +4242,73 @@ void DrawIlluminatedLines( double *Px, double *Py, double *Pz, int fln ){
         for (i=0+1; i<fln-1; ++i){
             glVertexAttrib3f( PprevLoc, Px[i-1], Py[i-1], Pz[i-1] );
             glVertexAttrib3f( PnextLoc, Px[i+1], Py[i+1], Pz[i+1] );
+            glVertex3f( Px[i], Py[i], Pz[i] );
+        }
+    glEnd();
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glDepthMask( GL_TRUE );
+    glDisable( GL_DEPTH_TEST );
+
+    glUseProgram( 0 );
+
+}
+
+void DrawIlluminatedLines2( double *Px, double *Py, double *Pz, double *Tx, double *Ty, double *Tz, int fln, double red, double grn, double blu, double alf ){
+
+    int i;
+    float c[4], CameraPos[3], LightPos[3];
+
+    c[0] = red; c[1] = grn; c[2] = blu; c[3] = alf;
+
+    GLint  TangLoc         = glGetAttribLocation(  g_shaderMyTest2, "Tang" );
+    GLint  LightPosLoc     = glGetUniformLocation( g_shaderMyTest2, "LightPos" );
+    GLint  CameraPosLoc    = glGetUniformLocation( g_shaderMyTest2, "CameraPos" );
+    GLint  FdTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FdTexture" );
+    GLint  FsTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FsTexture" );
+    GLint  LineColorLoc    = glGetUniformLocation( g_shaderMyTest2, "LineColor" );
+    GLint  kaLoc           = glGetUniformLocation( g_shaderMyTest2, "ka" );
+    GLint  kdLoc           = glGetUniformLocation( g_shaderMyTest2, "kd" );
+    GLint  ksLoc           = glGetUniformLocation( g_shaderMyTest2, "ks" );
+    GLint  nLoc            = glGetUniformLocation( g_shaderMyTest2, "n" );
+
+    glUseProgram( g_shaderMyTest2 );
+    glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
+    glUniform1f( kaLoc, 0.05 );
+    glUniform1f( kdLoc, 0.4 );
+    glUniform1f( ksLoc, 1.0 );
+    glUniform1f( nLoc,  30.0 );
+
+    glActiveTexture( GL_TEXTURE0 + 0);
+    glBindTexture( GL_TEXTURE_2D, Texture_Fd );
+    glUniform1i( FdTextureLoc, 0 );
+
+    glActiveTexture( GL_TEXTURE0 + 0);
+    glBindTexture( GL_TEXTURE_2D, Texture_Fs );
+    glUniform1i( FsTextureLoc, 0 );
+
+
+    CameraPos[0] = aInfo->Camera.x;
+    CameraPos[1] = aInfo->Camera.y;
+    CameraPos[2] = aInfo->Camera.z;
+    LightPos[0] = LightPosition[0]*1000.0;
+    LightPos[1] = LightPosition[1]*1000.0;
+    LightPos[2] = LightPosition[2]*1000.0;
+    glUniform3fv( CameraPosLoc, 1, CameraPos );
+    glUniform3fv( LightPosLoc, 1, LightPos );
+    //printf("CameraPos = %g %g %g   LightPos = %g %g %g\n", CameraPos[0], CameraPos[1], CameraPos[2], LightPos[0], LightPos[1], LightPos[2]);
+
+
+    glDepthMask( GL_FALSE );
+    glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable( GL_DEPTH_TEST );
+    glDisable(GL_BLEND);
+
+    glLineWidth( 1.0 );
+    glBegin( GL_LINE_STRIP );
+        for (i=0; i<fln; ++i){
+            glVertexAttrib3f( TangLoc, Tx[i], Ty[i], Tz[i] );
             glVertex3f( Px[i], Py[i], Pz[i] );
         }
     glEnd();
