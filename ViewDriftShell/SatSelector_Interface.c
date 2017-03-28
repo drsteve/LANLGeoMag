@@ -1,6 +1,5 @@
 #include "SatSelector.h"
 
-#define SAT_GRPS_DIR    "/home/mgh/SAT_GROUPS"
 
 void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data );
 void ChangeOrbitOptions( GtkWidget  *w, unsigned int *data );
@@ -28,6 +27,9 @@ int LoadSpaceObjects( ){
     char            Filename[1024];
     struct dirent **NameList;
     int             nFiles;
+    char            SAT_GRPS_DIR[2000];
+
+    sprintf( SAT_GRPS_DIR, "%s/SAT_GROUPS", getenv("HOME") );
     
     /*
      * Read in TLEs from the SatelliteGroups directory
