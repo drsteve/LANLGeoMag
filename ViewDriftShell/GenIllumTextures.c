@@ -112,7 +112,7 @@ double           Val, Val2, Min, Max, dVal;
 
 }
 
-int GenIllumTextures( int N, float **FdImage, float **FsImage ) {
+int GenIllumTextures( int N, double SpecularIndex, float **FdImage, float **FsImage ) {
 
     int     i, j;
     double  CosAlpha_Min, CosAlpha_Max, s1;
@@ -134,7 +134,7 @@ int GenIllumTextures( int N, float **FdImage, float **FsImage ) {
     FdData = (float *)calloc( N*N, sizeof( float) );
 
 
-    n = 30.0;
+    n = SpecularIndex;
 
     CosAlpha_Min = -1.0;
     CosAlpha_Max =  1.0;
