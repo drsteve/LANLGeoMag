@@ -10,46 +10,52 @@
  *
  *
  */
+
+#if ENABLE_PERL
 #include <EXTERN.h>
 #include <perl.h>
+#endif /* ENABLE_PERL */
+
 #include "Lgm/Lgm_CTrans.h"
+#include "time.h"
+
 
 /*
- *  Dates based on Months and Days
+ *  Allowed formats for PERL parser
  */
-#define ISO_ERROR           0       
+#define PERL_ERROR           0       
+#define PERL_YYYYMMDDTHHMMSS 1       // 4-digit years
+#define PERL_YYMMDDTHHMMSS   2       // 2-digit years
+#define PERL_YYYYDDDTHHMMSS  3       // 4-digit years
+#define PERL_YYDDDTHHMMSS    4       // 2-digit years
+#define PERL_YYYYWwwDTHHMMSS 5       // 4-digit years
+#define PERL_YYWwwDTHHMMSS   6       // 2-digit years
+#define PERL_YYYYMMDDTHHMM   7       // 4-digit years
+#define PERL_YYMMDDTHHMM     8       // 2-digit years
+#define PERL_YYYYWwwDTHHMM   9       // 4-digit years
+#define PERL_YYWwwDTHHMM     10      // 2-digit years
+#define PERL_YYYYMMDD        11      // 4-digit years (assumes UTC == 0)
+#define PERL_YYMMDD          12      // 2-digit years (assumes UTC == 0)
+#define PERL_YYYYDDD         13      // 4-digit years (assumes UTC == 0)
+#define PERL_YYDDD           14      // 2-digit years (assumes UTC == 0)
+#define PERL_YYYYWwwD        15      // 4-digit years (assumes UTC == 0)
+#define PERL_YYWwwD          16      // 2-digit years (assumes UTC == 0)
+#define PERL_YYYYMM          17      // 4-digit years (YYYY-MM only YYYYMM not allowed) (assumes UTC == 0)
+#define PERL_YYYYWww         19      // 4-digit years (assumes UTC == 0)
+#define PERL_YYWww           20      // 2-digit years (assumes UTC == 0)
+#define PERL_YYYY            21      // 4-digit year 
+#define PERL_YY              22      // 2-digit year 
 
-#define ISO_YYYYMMDDTHHMMSS 1       // 4-digit years
-#define ISO_YYMMDDTHHMMSS   2       // 2-digit years
-#define ISO_YYYYDDDTHHMMSS  3       // 4-digit years
-#define ISO_YYDDDTHHMMSS    4       // 2-digit years
-
-#define ISO_YYYYWwwDTHHMMSS 5       // 4-digit years
-#define ISO_YYWwwDTHHMMSS   6       // 2-digit years
-
-#define ISO_YYYYMMDDTHHMM   7       // 4-digit years
-#define ISO_YYMMDDTHHMM     8       // 2-digit years
-
-#define ISO_YYYYWwwDTHHMM   9       // 4-digit years
-#define ISO_YYWwwDTHHMM     10      // 2-digit years
-
-
-#define ISO_YYYYMMDD        11      // 4-digit years (assumes UTC == 0)
-#define ISO_YYMMDD          12      // 2-digit years (assumes UTC == 0)
-#define ISO_YYYYDDD         13      // 4-digit years (assumes UTC == 0)
-#define ISO_YYDDD           14      // 2-digit years (assumes UTC == 0)
-
-#define ISO_YYYYWwwD        15      // 4-digit years (assumes UTC == 0)
-#define ISO_YYWwwD          16      // 2-digit years (assumes UTC == 0)
-
-#define ISO_YYYYMM          17      // 4-digit years (YYYY-MM only YYYYMM not allowed) (assumes UTC == 0)
-//ALLOWED? #define ISO_YYMM            18      // 2-digit years (is this allowed?) (assumes UTC == 0)
-
-#define ISO_YYYYWww         19      // 4-digit years (assumes UTC == 0)
-#define ISO_YYWww           20      // 2-digit years (assumes UTC == 0)
-
-#define ISO_YYYY            21      // 4-digit year 
-#define ISO_YY              22      // 2-digit year 
+/*
+ *  Allowed formats for C parser
+ */
+#define C_ERROR           -9999  
+#define C_YYYYMMDDTHHMMSS 0       // YYYY-MM-DDThh:mm:ss
+#define C_YYYYDDDTHHMMSS  1       // YYYY-DDDThh:mm:ss
+#define C_YYYYWwwDTHHMMSS 2       // YYYY-Www-DThh:mm:ss
+#define C_YYYYMMDD        3       // YYYY-MM-DDThh:mm:ss
+#define C_YYYYDDD         4       // YYYY-DDDThh:mm:ss
+#define C_YYYYWwwD        5       // YYYY-Www-DThh:mm:ss
 
 /*
  * Notes.
@@ -79,16 +85,19 @@
  *  2-digit years could be used. But apparently the latest version od ISO 8601
  *  got rid of that.
  *  
- *
- *
- *
+ *  The C-parser is more restrictive than the PERL parser. The C parser
+ *  requires all punctuation ('-' and ':'). It also does not allow two-digit
+ *  years (YY) or incomplete time designations (e.g. no seconds, or no months)
  *
  */
 
-
+#if ENABLE_PERL
 static PerlInterpreter *my_perl;
+#endif /* ENABLE_PERL */
 
 int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) {
+
+#if ENABLE_PERL
 
     long int    Date;
     double      Offset, Time;
@@ -158,7 +167,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
             
 
                 /*
-                 *  ISO_YYYYMMDDTHHMMSS  
+                 *  PERL_YYYYMMDDTHHMMSS  
                  *
                  *  Match ISO strings of the form:
                  *
@@ -174,7 +183,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                 /*
-                 *  ISO_YYYYDDDTHHMMSS
+                 *  PERL_YYYYDDDTHHMMSS
                  *
                  *  Match ISO strings of the form:
                  *
@@ -193,7 +202,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYWwwDTHHMMSS
+                   *  PERL_YYYYWwwDTHHMMSS
                    *
                    *  Match ISO strings of the form:
                    *
@@ -210,7 +219,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYMMDDTHHMM
+                   *  PERL_YYYYMMDDTHHMM
                    *
                    *  Match ISO strings of the form:
                    *
@@ -227,7 +236,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYWwwDTHHMM
+                   *  PERL_YYYYWwwDTHHMM
                    *
                    *  Match ISO strings of the form:
                    *
@@ -244,7 +253,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYMMDD
+                   *  PERL_YYYYMMDD
                    *
                    *  Match ISO strings of the form:
                    *
@@ -263,7 +272,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYMM
+                   *  PERL_YYYYMM
                    *
                    *  Match ISO strings of the form:
                    *
@@ -272,7 +281,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                    *  Examples: 
                    *        1976-12
                    *        197612 <- this is not allowed in ISO 8601
-                   * (Keep this one before ISO_YYMMDD)
+                   * (Keep this one before PERL_YYMMDD)
                    */
                 strcat( Str, 
                   " } elsif ( $str =~ m/^(\\d{4})-(\\d{2})$/ ) { \n\
@@ -281,7 +290,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYDDD
+                   *  PERL_YYYYDDD
                    *
                    *  Match ISO strings of the form:
                    *
@@ -299,7 +308,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                 );
 
                   /*
-                   *  ISO_YYYYWwwD
+                   *  PERL_YYYYWwwD
                    *
                    *  Match ISO strings of the form:
                    *
@@ -316,7 +325,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                   /*
-                   *  ISO_YYYYWww
+                   *  PERL_YYYYWww
                    *  
                    *  Match ISO strings of the form:
                    *  
@@ -338,7 +347,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                 /*
-                 *  ISO_YYYY
+                 *  PERL_YYYY
                  *  
                  *  Match ISO strings of the form:
                  *  
@@ -354,7 +363,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                 /*
-                 *  ISO_YY
+                 *  PERL_YY
                  *  
                  *  Match ISO strings of the form:
                  *  
@@ -377,7 +386,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                 if ( AllowTruncatedReps ) {
 
                     /*
-                     *  ISO_YYMMDDTHHMMSS
+                     *  PERL_YYMMDDTHHMMSS
                      *
                      *  Match ISO strings of the form:
                      *
@@ -393,7 +402,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYDDDTHHMMSS
+                     *  PERL_YYDDDTHHMMSS
                      *
                      *  Match ISO strings of the form:
                      *
@@ -411,7 +420,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYWwwDTHHMMSS
+                     *  PERL_YYWwwDTHHMMSS
                      *
                      *  Match ISO strings of the form:
                      *
@@ -427,7 +436,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYMMDDTHHMM
+                     *  PERL_YYMMDDTHHMM
                      *
                      *  Match ISO strings of the form:
                      *
@@ -445,7 +454,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYWwwDTHHMM
+                     *  PERL_YYWwwDTHHMM
                      *
                      *  Match ISO strings of the form:
                      *
@@ -462,7 +471,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                                     $Year = ($1 > 50) ? $1+1900:$1+2000; $Week = $2; $DayOfWeek = $3; $Hour = $4; $Minute = $5; $Second = 0.0; $TZD = $6; $ISOFormat = 10;\n"
                     );
                     /*
-                     *  ISO_YYMMDD
+                     *  PERL_YYMMDD
                      *
                      *  Match ISO strings of the form:
                      *
@@ -480,7 +489,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYDDD
+                     *  PERL_YYDDD
                      *
                      *  Match ISO strings of the form:
                      *
@@ -498,7 +507,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYWwwD
+                     *  PERL_YYWwwD
                      *
                      *  Match ISO strings of the form:
                      *
@@ -515,7 +524,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
 
                     /*
-                     *  ISO_YYMM
+                     *  PERL_YYMM
                      *
                      *  Match ISO strings of the form:
                      *
@@ -531,7 +540,7 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
                     );
 
                     /*
-                     *  ISO_YYWww
+                     *  PERL_YYWww
                      *  
                      *  Match ISO strings of the form:
                      *  
@@ -589,15 +598,11 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
     perl_free(my_perl);
 
 
-
-
-
-
     // Assume time is UTC for now...
-    if ( (ISOFormat == ISO_YYYYWwwDTHHMMSS) || (ISOFormat == ISO_YYWwwDTHHMMSS)
-            || (ISOFormat == ISO_YYYYWwwDTHHMM) || (ISOFormat == ISO_YYWwwDTHHMM)
-            || (ISOFormat == ISO_YYYYWwwD) || (ISOFormat == ISO_YYWwwD)
-            || (ISOFormat == ISO_YYYYWww) || (ISOFormat == ISO_YYWww) ) {
+    if ( (ISOFormat == PERL_YYYYWwwDTHHMMSS) || (ISOFormat == PERL_YYWwwDTHHMMSS)
+            || (ISOFormat == PERL_YYYYWwwDTHHMM) || (ISOFormat == PERL_YYWwwDTHHMM)
+            || (ISOFormat == PERL_YYYYWwwD) || (ISOFormat == PERL_YYWwwD)
+            || (ISOFormat == PERL_YYYYWww) || (ISOFormat == PERL_YYWww) ) {
 
         d->wYear  = Year;
         d->Week   = Week;
@@ -630,8 +635,261 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
     }
 
+#else /* ENABLE_PERL */
 
+  // Use a simplified C ISO date/time parser if not using PERL
 
+  struct tm timeinfo;
+  char *ret_val = NULL;
+  const char *format[] = {
+  "%Y-%m-%dT%H:%M:%S%Z",
+  "%Y-%jT%H:%M:%S%Z",
+  "%Y-W%U-%uT%H:%M:%S%Z",
+  "%Y-%m-%d",
+  "%Y-%j",                       
+  "%Y-W%U-%u"};
+
+  int i;
+  int N = 6;                  // Number of date formats supported
+
+  long int Date;              // 8-digit date in the format YYYYMMDD
+  double Offset;              // Time zone designator offset from UTC
+  double Time;                // Decimal hours during day [0 to 23.999...]
+  int tyear, tmonth, tday;    // Temporary year, month, and day; only used for Lgm_DOY return
+  int TZDError=FALSE;         // Time zone designator parsing error flag
+  int MaxWeek;                // Maximum number of weeks in the specified year
+  int InvalidDate=FALSE;      // Invalid date flag
+  int IsLeapSecondDay;        // Flag to indicate if the day has a leap second included
+
+  int ISOFormat = -9999;      // ISO format type (defined above)
+  int Year = -9999;           // 4-digit year
+  int Month = -9999;          // 2-digit month [1-12]
+  int Day = -9999;            // 2-digit day of month [1-31]
+  int DayOfYear = -9999;      // 3-digit day of year [1-366]
+  int DayOfWeek = -9999;      // 1-digit day of week [1-7]
+  int Week = -9999;           // 2-digit week number [1-53]
+  int Hours = -9999;          // 2-digit hour [0-23]
+  int Minutes = -9999;        // 2-digit minute [0-59]
+  double Seconds = -9999;     // Decimal seconds
+  char *TZD_sgn_str;          // Time zone designator sign (+/-/Z)
+  int TZD_sgn = 0;            // Time zone designator integer (1, -1)
+  int TZD_hh = 0;             // Time zone offset hours
+  int TZD_mm = 0;             // Time zone offset minutes
+
+  int DateOnlyFlag = 0;       // 1 if format is date-only; 0 otherwise.
+
+  int scan_val;
+  Lgm_DateTime *d1;
+  d1 = calloc(1, sizeof(Lgm_DateTime));
+
+  // Use strptime only to determine if the string matches the expected format
+  // strptime() is not used for collecting the time structure because
+  // it does not handle fractional seconds and has problems with time zones
+  // strptime() has the advantage that it will accept formats with or without
+  // timezone information
+  
+  // Loop over formats and find the proper format
+  for(i=0; i<N; i++) {
+    
+    // Check for format
+    ret_val = strptime(TimeString, format[i], &timeinfo);
+    if (ret_val != NULL) {
+
+      // Define the ISO format flag
+      ISOFormat = i;
+      break;
+    }
+    
+  }
+
+  // Check for unsupported partial formats
+  // If the ISO format includes a T and any subsequent
+  // time information but matches the date only
+  // ISO formats then set the ISOFormat to the error code
+  if(ISOFormat > 2) {
+    if(strstr(TimeString, "T") != NULL) {
+      ISOFormat = -9999;
+    }
+  }
+
+  // Use sscanf() is to collect the appropriate time information
+  // based on the format
+  switch(ISOFormat) {
+
+  case -9999:  // No acceptable format found
+    printf("Unable to parse ISO time string.\n");
+    printf("No matching ISO format found\n");
+    break;
+
+    /*
+     *  Match ISO strings of the form:
+     *
+     *           YYYY-MM-DDThh:mm:ss[.ssssss](TZD or Z or nothing)
+     *
+     *  Examples: 
+     *        2010-10-31T12:34:56.789-06:00
+     *        2010-10-31T12:34:56.789Z
+     */
+  case 0:
+    scan_val = sscanf(TimeString, "%4d-%2d-%2dT%2d:%2d:%lf%m[Z+-]%2d:%2d",
+		      &Year, &Month, &Day, &Hours, &Minutes, &Seconds,
+		      &TZD_sgn_str, &TZD_hh, &TZD_mm);
+    break;
+
+    /*
+     *  Match ISO strings of the form:
+     *
+     *           YYYY-DDDThh:mm:ss[.ssssss](TZD or Z or nothing)
+     *
+     *  Examples: 
+     *        2010-297T12:34:56.789-06:00
+     *        1996-297T01:54:12.4534789+05:00
+     */
+  case 1:
+    scan_val = sscanf(TimeString, "%4d-%3dT%2d:%2d:%lf%m[Z+-]%2d:%2d",
+		      &Year, &DayOfYear, &Hours, &Minutes, &Seconds,
+		      &TZD_sgn_str, &TZD_hh, &TZD_mm);
+    break;
+
+    /*
+     *  Match ISO strings of the form:
+     *
+     *        YYYY-Www-DThh:mm:ss[.ssssss](TZD or Z or nothing)
+     *
+     *  Examples:  
+     *       1986-W13-2T09:45:32+00
+     */
+  case 2:
+    scan_val = sscanf(TimeString, "%4d-W%2d-%1dT%2d:%2d:%lf%m[Z+-]%2d:%2d",
+		      &Year, &Week, &DayOfWeek, &Hours, &Minutes, &Seconds,
+		      &TZD_sgn_str, &TZD_hh, &TZD_mm);
+    break;
+
+    /*
+     *  Match ISO strings of the form:
+     *
+     *        YYYY-MM-DD
+     *
+     *  Examples: 
+     *        1976-04-23
+     *        19760423
+     *        2006-04-23
+     *        20060423
+     */
+  case 3:
+    DateOnlyFlag = 1;
+    TZD_sgn_str = NULL;
+    scan_val = sscanf(TimeString, "%4d-%2d-%2d",
+		      &Year, &Month, &Day);
+    break;
+    
+    /*
+     *  Match ISO strings of the form:
+     *
+     *        YYYY-DDD
+     *
+     *  Examples: 
+     *        1976-142
+     *        2006-142
+     */
+  case 4:
+    DateOnlyFlag = 1;
+    TZD_sgn_str = NULL;
+    scan_val = sscanf(TimeString, "%4d-%3d",
+		      &Year, &DayOfYear);
+    break;
+
+    /*
+     *  Match ISO strings of the form:
+     *
+     *        YYYY-Www-D
+     *
+     *  Examples: 
+     *        1976-W12-6
+     */
+  case 5:
+    DateOnlyFlag = 1;
+    TZD_sgn_str = NULL;
+    scan_val = sscanf(TimeString, "%4d-W%2d-%1d",
+		      &Year, &Week, &DayOfWeek);
+    break;
+    
+  }
+
+    // Set time and timezone if only date is given
+    if(DateOnlyFlag) {
+
+      // Assume 00:00:00 UTC
+      Hours = 0;
+      Minutes = 0;
+      Seconds = 0.0;
+
+      // Set UTC timezone
+      TZD_sgn = 0;
+      TZD_hh = 0;
+      TZD_mm = 0;
+
+    }
+
+    // Fill the timezone information it none is given
+    if(TZD_sgn_str == NULL) {
+      
+      // Assume UTC
+      TZD_sgn = 1;
+      TZD_hh = 0;
+      TZD_mm = 0;
+
+    } else {
+
+      // Convert string to integer
+      if (!strcmp(TZD_sgn_str, "+")) {
+	TZD_sgn = 1;
+      } else if (!strcmp(TZD_sgn_str, "-")) {
+	TZD_sgn = -1;
+      } else if (!strcmp(TZD_sgn_str, "Z")) {
+	TZD_sgn = 1;
+      } else {
+	TZDError = 1;	
+      }
+
+    }
+
+    // Assume time is UTC for now...
+    if ((ISOFormat == C_YYYYWwwDTHHMMSS) || (ISOFormat == C_YYYYWwwD)) {
+
+      d->wYear = Year;
+      d->Week = Week;
+      d->Dow = DayOfWeek;
+      Lgm_ISO_YearWeekDow_to_Date( d->wYear, Week, DayOfWeek, &Date, &Year, &Month, &Day );
+      Lgm_Doy( Date, &Year, &Month, &Day, &DayOfYear );
+      Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+      MaxWeek = Lgm_MaxWeekNumber( d->wYear );
+      if ( Week > MaxWeek ) {
+	printf("IsoTimeStringToDateTime: Invalid Date.\n");
+	printf("Week number %d does not exist in year %d\n", d->Week, d->wYear);
+	InvalidDate = TRUE;
+      } 
+
+    } else {
+
+      d->Dow = Lgm_DayOfWeek( Year, Month, Day, d->DowStr );
+      d->Week = Lgm_ISO_WeekNumber( Year, Month, Day, &d->wYear );
+
+      if ( DayOfYear > 0 ){
+	Date = Year*1000 + DayOfYear;
+      } else {
+	Date = Year*10000 + Month*100 + Day;
+      }
+      if ( Lgm_IsValidDate( Date ) ) {
+	Lgm_Doy( Date, &Year, &Month, &Day, &DayOfYear );
+      } else {
+	printf( "Date is invalid\n" );
+	InvalidDate = TRUE;
+      }
+
+    }
+
+#endif /* ENABLE_PERL */
 
     // determine time zone offset
     Offset = (double)TZD_hh + (double)TZD_mm/60.0;
@@ -769,39 +1027,54 @@ int IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c ) 
 
     return( 1 );
 
-
 }
 
 
+// For testing purposes
 
-//int main (int argc, char **argv, char **env) {
-//
-//    int     Flag;
-//    char    TimeString[128];
-//
-//    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z");
-//    sprintf(TimeString, "2009-06-21                           0512:34.01Z");
-//    sprintf(TimeString, "2009-W52-7T2312:34.01Z");
-//    sprintf(TimeString, "2009-W52-1T2312:34.01Z");
-//    sprintf(TimeString, "2009-06-21T05:1234.01Z");
-//    sprintf(TimeString, "2009-0621T19:12:34.123456789-03:34");
+/* void test_iso_parse(char *TimeString) { */
 
-//    sprintf(TimeString, "2009-06-21T05:12:34.123456789Z"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "2009-06-21T05:12:34.123456789"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "20090621T0545Z"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "2010-11-03T16:15:02-06:00"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-//    sprintf(TimeString, "2010-11-03T16:15:02-06"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-//    sprintf(TimeString, "2010-11-03T16:15:02-6"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-//    sprintf(TimeString, "2010-11-03T16:15:02"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-//    sprintf(TimeString, "19850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
-//    sprintf(TimeString, "850412T101530"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
- //ME   sprintf(TimeString, argv[1]); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n\n", Flag ); 
+/*   int     Flag; */
+/*   Lgm_CTrans *c = Lgm_init_ctrans(0); */
+/*   Lgm_DateTime *d; */
+/*   d = calloc(1, sizeof(Lgm_DateTime)); */
 
-//    sprintf(TimeString, "2007-04-05T14:30"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "    2007-04-05T14:30Z      "); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "2007-04-05T14:30Z"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
-//    sprintf(TimeString, "2007-04-05T14:30B"); printf("TimeString = %s\n", TimeString ); Flag = IsoTimeStringToDateTime( TimeString ); printf( "Flag = %d\n", Flag ); 
+/*   printf("TimeString = %s\n", TimeString); */
+/*   Flag = IsoTimeStringToDateTime(TimeString, d, c); */
+/*   printf("Flag = %d\n\n", Flag); */
 
-//    return(0);
+/* } */
 
-//}
+/* int main (int argc, char **argv, char **env) { */
+
+/*    int     Flag; */
+/*    char    TimeString[128]; */
+/*    Lgm_CTrans *c = Lgm_init_ctrans(0); */
+/*    Lgm_DateTime *d; */
+/*    d = calloc(1, sizeof(Lgm_DateTime)); */
+
+/*    test_iso_parse("2009-06-21T05:12:34.123456789Z"); */
+/*    test_iso_parse("2009-06-21T05:12:34.123456789"); */
+/*    test_iso_parse("2010-11-03T16:15:02-06:00"); */
+/*    test_iso_parse("2010-11-03T16:15:02-06"); */
+/*    test_iso_parse("   2010-11-03T16:15:02   "); */
+/*    test_iso_parse("2010-11-03"); */
+/*    test_iso_parse("2016-179"); */
+/*    test_iso_parse("2016-179T13:01:03.234"); */
+/*    test_iso_parse("2016-W03-6"); */
+/*    test_iso_parse("2016-W03-1T03:59:59.353"); */
+
+/*    // Additional PERL only ISO formats */
+/* #if 0 //ENABLE_PERL */
+/*    test_iso_parse("20090621T0545Z"); */
+/*    test_iso_parse("19850412T101530"); */
+/*    test_iso_parse("850412T101530"); */
+/*    test_iso_parse("2007-04-05T14:30"); */
+/*    test_iso_parse("2007-04-05T14:30Z"); */
+/*    test_iso_parse("2007-04-05T14:30B"); */
+/*    test_iso_parse("    2007-04-05T14:30Z      "); */
+/* #endif */
+
+/*    return(0); */
+
+/* } */
