@@ -5,7 +5,7 @@ SUBDIRS = Lgm EopData .
 LGM_EOP_DATA_DIR   = $(datarootdir)/LanlGeoMag/EopData
 
 # Directory where TS07-related files will be installed
-LGM_TS07_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
+LGM_TS07_DATA_DIR = $(datarootdir)/LanlGeoMag/Data/TS07D_FILES
 
 # Directory where Index-related stuff will be installed
 LGM_INDEX_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
@@ -56,12 +56,12 @@ libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@ 
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32 @PERL_CPPFLAGS@
 
-EXTRA_DIST = TS07D_FILES DE_FILES Images
+EXTRA_DIST = TS07D_FILES DE_FILES Images Stars
 
 install-data-hook:
 if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_TS07_DATA_DIR)
-	$(RSYNC_CMD) -arv $(srcdir)/TS07D_FILES $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
+	$(RSYNC_CMD) -arv $(srcdir)/TS07D_FILES/* $(DESTDIR)$(LGM_TS07_DATA_DIR)/.
 	$(MKDIR_P) $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	@echo Qin-Denton index files should be placed in $(DESTDIR)$(LGM_INDEX_DATA_DIR)
 	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
