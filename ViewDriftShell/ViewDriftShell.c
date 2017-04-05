@@ -261,6 +261,7 @@ void DrawScene( );
 void CreateSphere( double r, int n);
 void CreateEllipsoid( double ra, double rb, int n);
 void IridiumFlare( double JD, _SgpTLE *TLE, Lgm_Vector *EarthToSun, int *Flag1, int *Flag2, int *Flag3, Lgm_Vector *g1, Lgm_Vector *g2, Lgm_Vector *g3, Lgm_Vector *P ) ;
+void IridiumFlare2( _SgpInfo *sgp, double tsince, Lgm_Vector *EarthToSun, int *Flag1, int *Flag2, int *Flag3, Lgm_Vector *g1, Lgm_Vector *g2, Lgm_Vector *g3, Lgm_Vector *P, Lgm_CTrans *c );
 
 
 /*
@@ -893,7 +894,7 @@ int         Show_SM_Axes  = 1;
 int         Show_GSE_Axes = 1;
 int         Show_GEI_Axes = 1;
 int         Show_GEO_Axes = 1;
-int         Show_GSM_Grid = 0;
+int         Show_GSM_Grid = 1;
 int         Show_SM_Grid  = 1;
 int         Show_GSE_Grid = 1;
 int         Show_GEI_Grid = 1;
@@ -2379,39 +2380,39 @@ int LoadTLEs( ){
         g = (double)rand()/(double)RAND_MAX;
         b = (double)rand()/(double)RAND_MAX;
         mag = sqrt(r*r+g*g+b*b); r /= mag; g /= mag; b /= mag;
-        SpaceObjects->Sat[i].sRed = r;
+        SpaceObjects->Sat[i].sRed = r; // s = streak color
         SpaceObjects->Sat[i].sGrn = g;
         SpaceObjects->Sat[i].sBlu = b;
         SpaceObjects->Sat[i].sAlf = 0.75;
 
-        SpaceObjects->Sat[i].sgpRed = 0.75*r;
+        SpaceObjects->Sat[i].sgpRed = 0.75*r; // sgp = streak-to-ground-path color
         SpaceObjects->Sat[i].sgpGrn = 0.75*g;
         SpaceObjects->Sat[i].sgpBlu = 0.75*b;
         SpaceObjects->Sat[i].sgpAlf = 0.75*0.75;
 
-        SpaceObjects->Sat[i].sglRed = 0.75*r;
+        SpaceObjects->Sat[i].sglRed = 0.75*r;  // sgl = streak-to-ground-line color
         SpaceObjects->Sat[i].sglGrn = 0.75*g;
         SpaceObjects->Sat[i].sglBlu = 0.75*b;
         SpaceObjects->Sat[i].sglAlf = 0.75*0.75;
 
         // Orbit Colors
-        SpaceObjects->Sat[i].oRed = 0.6;
+        SpaceObjects->Sat[i].oRed = 0.6; // o = orbit color
         SpaceObjects->Sat[i].oGrn = 0.6;
         SpaceObjects->Sat[i].oBlu = 0.6;
         SpaceObjects->Sat[i].oAlf = 0.7;
 
-        SpaceObjects->Sat[i].ogpRed = 1.0;
+        SpaceObjects->Sat[i].ogpRed = 1.0; // ogp = orbit-to-ground-path color
         SpaceObjects->Sat[i].ogpGrn = 0.0;
         SpaceObjects->Sat[i].ogpBlu = 0.0;
         SpaceObjects->Sat[i].ogpAlf = 1.0;
 
-        SpaceObjects->Sat[i].oglRed = 0.7;
+        SpaceObjects->Sat[i].oglRed = 0.7; // ogl = orbit-to-ground-line color
         SpaceObjects->Sat[i].oglGrn = 0.7;
         SpaceObjects->Sat[i].oglBlu = 0.7;
         SpaceObjects->Sat[i].oglAlf = 0.1;
 
         // Single Line
-        SpaceObjects->Sat[i].ssglRed = r;
+        SpaceObjects->Sat[i].ssglRed = r;   // ssgl = single-sat-to-ground-line color
         SpaceObjects->Sat[i].ssglGrn = g;
         SpaceObjects->Sat[i].ssglBlu = b;
         SpaceObjects->Sat[i].ssglAlf = 0.5*0.75;
@@ -3014,7 +3015,7 @@ void CreateSatOrbits() {
     double              tsince, tsince0, JD, dt, Height, FLL;
     double              tJD[10001], tUT[10001], period, tinc, OrbitFrac = 0.125, Theta;
     long int            tDate[10001], ns;
-    int                 tYear, tMonth, tDay, Flag;
+    int                 tYear, tMonth, tDay, Flag[10001];
     double              Px[10001], Py[10001], Pz[10001];
     double              Tx[10001], Ty[10001], Tz[10001];
     Lgm_Vector          Ugei[10001], UGSM[10001], Ugsm[10001], aa, bb, uu, v1[10001], v2[10001], v3[10001];
@@ -3171,7 +3172,7 @@ glLineWidth( 2.0 );
                                 Height = 120.0;
                                 Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
                                 
-                                Flag = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+                                Flag[j] = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
                                 FLL = mInfo->Stotal;
                                 //printf("FLL = %g\n", FLL);
 
@@ -3231,23 +3232,27 @@ glLineWidth( 4.0 );
 glColor4f( 0.6, 0.6, 0.6, 0.7);
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; ++j ) {
-                                        uu = v2[j];
-                                        //Lgm_ForceMagnitude( &uu, 1.001 );
-                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf*(1.0-(double)j/(double)nMax) );
-                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
-                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
-                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_N_LOBE) ) {
+                                            uu = v2[j];
+                                            //Lgm_ForceMagnitude( &uu, 1.001 );
+                                            //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf*(1.0-(double)j/(double)nMax) );
+                                            //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
+                                            Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                            Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        }
                                     }
                                 glEnd();
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; ++j ) {
-                                        uu = v1[j];
-                                        //Lgm_ForceMagnitude( &uu, 1.001 );
-                                        //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
-                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
-                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) ) {
+                                            uu = v1[j];
+                                            //Lgm_ForceMagnitude( &uu, 1.001 );
+                                            //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
+                                            Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                            Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        }
                                     }
                                 glEnd();
                             }
@@ -3351,58 +3356,100 @@ period *= Group->Sat[i].sPeriodFrac/100.0;
                         // STREAK FIELD LINES
                         if ( Group->Sat[i].DrawStreakFieldLines || Group->Sat[i].DrawStreakFLFootpoints ) {
 
-                            //nMax = 25;
+                            nMax = 25;
                             //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
                             //glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf );
+glLineWidth( 2.0 );
                             glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf );
 
                             for (j=0; j<n; j += 1) {
                                 Height = 120.0;
                                 Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                Flag = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+
+                                Flag[j] = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
                                 FLL = mInfo->Stotal;
                                 //printf("FLL = %g\n", FLL);
 
                                 if ( FLL > 0.0 ){
                                     Lgm_TraceLine3( &v1[j], FLL, 100, 1.0, 1e-7, 0, mInfo );
 
-                                    if ( Group->Sat[i].DrawStreakFieldLines ) {
+                                    if ( Group->Sat[i].DrawStreakFieldLines && (j%5==0) ) {
+
+                                        /*
                                         glLineWidth( 2.0 );
                                         glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
                                         glBegin( GL_LINE_STRIP );
                                             for (jj=0; jj<mInfo->nPnts; jj++) {
-
                                                 //glVertex3f( mInfo->Px[jj], mInfo->Py[jj], mInfo->Pz[jj] );
                                                 Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
                                                 Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
                                                 glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
                                             }
                                         glEnd();
+                                        */
+                                        for (jj=0; jj<mInfo->nPnts; ++jj ) {
+                                            Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
+                                            Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            Px[jj] = Wcoord.x; Py[jj] = Wcoord.y; Pz[jj] = Wcoord.z;
+
+                                            Wgsm.x = mInfo->Bvec[jj].x; Wgsm.y = mInfo->Bvec[jj].y; Wgsm.z = mInfo->Bvec[jj].z;
+                                            Lgm_NormalizeVector( &Wgsm );
+                                            Lgm_Convert_Coords( &Wgsm, &Wcoord2, AtmosConvertFlag, mInfo->c );
+                                            Tx[jj] = Wcoord2.x; Ty[jj] = Wcoord2.y; Tz[jj] = Wcoord2.z;
+                                        }
+                                        /*
+                                         * This doesnt do depth-sorting at all.
+                                         */
+                                        //DrawIlluminatedLines2( Px, Py, Pz, Tx, Ty, Tz, mInfo->nPnts, Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf );
+
+
+                                        /*
+                                         * Save each line segment in a larger array that we can depth sort.
+                                         */
+                                        for (jj=0; jj<mInfo->nPnts-1; ++jj ) {
+                                            if ( ns < MAX_SEGMENTS ) {
+                                                P1[ns].x = Px[jj];   P1[ns].y = Py[jj];   P1[ns].z = Pz[jj];
+                                                T1[ns].x = Tx[jj];   T1[ns].y = Ty[jj];   T1[ns].z = Tz[jj];
+                                                P2[ns].x = Px[jj+1]; P2[ns].y = Py[jj+1]; P2[ns].z = Pz[jj+1];
+                                                T2[ns].x = Tx[jj+1]; T2[ns].y = Ty[jj+1]; T2[ns].z = Tz[jj+1];
+                                                FC[ns].x = Group->Sat[i].sRed; FC[ns].y = Group->Sat[i].sGrn; FC[ns].z = Group->Sat[i].sBlu;
+                                                ++ns;
+                                            }
+                                        }
                                     }
                                 }
+
                             }
+
+
+
+
 
                             if ( Group->Sat[i].DrawStreakFLFootpoints ) {
                                 glLineWidth( 4.0 );
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) {
-                                        uu = v2[j];
-                                        //Lgm_ForceMagnitude( &uu, 1.001 );
-                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
-                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
-                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_N_LOBE) ) {
+                                            uu = v2[j];
+                                            //Lgm_ForceMagnitude( &uu, 1.001 );
+                                            glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                            Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                            Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        }
                                     }
                                 glEnd();
                                 glLineWidth( 4.0 );
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; j++) {
-                                        uu = v1[j];
-                                        //Lgm_ForceMagnitude( &uu, 1.001 );
-                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
-                                        Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                        Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
-                                        glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) ) {
+                                            uu = v1[j];
+                                            //Lgm_ForceMagnitude( &uu, 1.001 );
+                                            glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                            Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
+                                            Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
+                                            glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                        }
                                     }
                                 glEnd();
                             }
@@ -5746,11 +5793,11 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
 
 
     int     nTLEs;
-if (0==1){
     _SgpTLE TLEs[1];
     nTLEs = 0; // must set this
     LgmSgp_ReadTlesFromStrings( tle.Line0, tle.Line1, tle.Line2, &nTLEs, &TLEs[0], 1 );
 
+if (1==1){
     _GroupNode      *g;
     _SpaceObjects   *Group;
 
@@ -5769,12 +5816,18 @@ if (0==1){
         g = g->Next;
         
     }
-
-    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line0 ); gtk_label_set_markup( GTK_LABEL(tle.Line0Label), Str ); 
-    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( GTK_LABEL(tle.Line1Label), Str ); 
-    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line2 ); gtk_label_set_markup( GTK_LABEL(tle.Line2Label), Str ); 
-
 }
+
+//    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line0 ); gtk_label_set_markup( GTK_LABEL(tle.Line0Label), Str ); 
+//    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line0 ); gtk_label_set_markup( tle.Line0Label, Str ); 
+//    gtk_label_set_markup( tle.Line0Label, TLEs[0].Line0 ); 
+//    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( GTK_LABEL(tle.Line1Label), Str ); 
+    //sprintf( Str, "<b><tt>%s</tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( tle.Line1Label, Str ); 
+    gtk_label_set_markup( tle.Line0Label, TLEs[0].Line0 ); 
+    gtk_label_set_markup( tle.Line1Label, TLEs[0].Line1 ); 
+    gtk_label_set_markup( tle.Line2Label, TLEs[0].Line2 ); 
+//    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line2 ); gtk_label_set_markup( GTK_LABEL(tle.Line2Label), Str ); 
+
 
 
 
@@ -7035,62 +7088,97 @@ enum {
 };
 
 
-void PredictIridiumFlares( GtkWidget *widget, gpointer data) {
+void PredictIridiumFlares( GtkWidget *widget, gpointer data ) {
 
     int         Hours = GPOINTER_TO_INT( data );
     int         Flag1, Flag2, Flag3, i, tYear, tMonth, tDay;
     long int    tDate;
-    double      tUT;
+    double      tUT, tsince;
 
-    double 		th,ph, r, JD, sJD, eJD, JDinc, diff;
+    double 		th,ph, r, JD, sJD, eJD, JDinc, diff, Alt;
     Lgm_Vector 	u, uu, EarthToSun, g1, g2, g3, P;
     Lgm_CTrans  *tc = Lgm_init_ctrans( 0 );
+    _SgpInfo    sgp;
+
+
+    _GroupNode      *g;
+    _SpaceObjects   *Group;
+
+    g = SatSelectorInfo->SatGroupList;
 
 
     printf("PredictIridiumFlares: Hours = %d\n", Hours);
-    th =  35.888; ph = -106.306; r  = 0.000; Lgm_GEOD_to_WGS84( th, ph, r, &u );
+    th =  35.888; ph = -106.306; Alt = 0.000; Lgm_GEOD_to_WGS84( th, ph, Alt, &u );
 
     sJD = CurrentJD;
-    eJD = CurrentJD+Hours/24.0;
-    JDinc = (eJD > sJD) ? 10.0/86400.0 : -10.0/86400.0;
-    for ( JD = sJD; JD <= eJD; JD += JDinc ){
-        //printf("JD = %lf\n", JD);
-        Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
-        Lgm_Set_Coord_Transforms( tDate, tUT, tc );
-        Lgm_Convert_Coords( &u, &uu, GEO_TO_MOD, tc );
+    eJD = CurrentJD + Hours/24.0;
+    JDinc = (eJD > sJD) ? 1.0/86400.0 : -1.0/86400.0;
+
+JDinc = (eJD > sJD) ? 10.0/86400.0 : -10.0/86400.0;
 
 
-        for (i=0; i<SpaceObjects->nSat; i++){
-            if ( strstr( SpaceObjects->Sat[i].TLE.Name, "IRIDIUM" ) ) {
-                EarthToSun = tc->Sun; Lgm_ScaleVector( &EarthToSun, tc->earth_sun_dist );
-                IridiumFlare( JD, &SpaceObjects->Sat[i].TLE, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P);
-diff = Re*Lgm_VecDiffMag( &uu, &g1 );
-                if (Flag1){
-                    diff = Re*Lgm_VecDiffMag( &uu, &g1 );
-                    if ( diff < 40.0 ) {
-                        printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name );
-                        Lgm_Print_HMSd( tUT ); printf(" )\n");
+    g = SatSelectorInfo->SatGroupList;
+    while ( g != NULL ) {
+        Group = g->Group;
+
+
+        for (i=0; i<Group->nSat; i++){
+
+
+            if ( strstr( Group->Sat[i].TLE.Name, "IRIDIUM" ) ) {
+
+                LgmSgp_SGP4_Init( &sgp, &(Group->Sat[i].TLE) );
+
+                for ( JD = sJD; JD <= eJD; JD += JDinc ){
+                    //printf("JD = %lf\n", JD);
+                    Lgm_jd_to_ymdh( JD, &tDate, &tYear, &tMonth, &tDay, &tUT );
+                    //Lgm_Print_HMSd( tUT ); printf(" )\n");
+                    Lgm_Set_Coord_Transforms( tDate, tUT, tc );
+                    Lgm_Convert_Coords( &u, &uu, GEO_TO_MOD, tc );
+
+
+
+                    EarthToSun = tc->Sun; Lgm_ScaleVector( &EarthToSun, tc->earth_sun_dist );
+//printf("tc->earth_sun_dist = %g\n", tc->earth_sun_dist );
+//                    IridiumFlare( JD, &Group->Sat[i].TLE, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P );
+
+tsince = (JD - Group->Sat[i].TLE.JD)*1440.0;
+IridiumFlare2( &sgp, tsince, &EarthToSun, &Flag1, &Flag2, &Flag3, &g1, &g2, &g3, &P, tc );
+
+
+
+                    if ( Flag1 ){
+                        diff = Re*Lgm_VecDiffMag( &uu, &g1 );
+                        if ( diff < 40.0 ) {
+                            printf("g1 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, Group->Sat[i].TLE.Name );
+                            Lgm_Print_HMSd( tUT ); printf(" )\n");
+                        }
                     }
+
+                    if ( Flag2 ){
+                        diff = Re*Lgm_VecDiffMag( &uu, &g2 );
+                        if ( diff < 40.0 ) {
+                            printf("g2 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, Group->Sat[i].TLE.Name );
+                            Lgm_Print_HMSd( tUT ); printf(" )\n");
+                        }
+                    }
+
+                    if ( Flag3 ){
+                        diff = Re*Lgm_VecDiffMag( &uu, &g3 );
+                        if ( diff < 40.0 ) {
+                            printf("g3 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, Group->Sat[i].TLE.Name );
+                            Lgm_Print_HMSd( tUT ); printf(" )\n");
+                        }
+                    }
+
                 }
 
-                if (Flag2){
-                    diff = Re*Lgm_VecDiffMag( &uu, &g2 );
-                    if ( diff < 40.0 ) {
-                        printf("g2 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name );
-                        Lgm_Print_HMSd( tUT ); printf(" )\n");
-                    }
-                }
-
-                if (Flag3){
-                    diff = Re*Lgm_VecDiffMag( &uu, &g3 );
-                    if ( diff < 40.0 ) {
-                        printf("g3 diff: %g  Date = %8ld  UT = %g    Sat = %s  ( ", diff, tDate, tUT, SpaceObjects->Sat[i].TLE.Name );
-                        Lgm_Print_HMSd( tUT ); printf(" )\n");
-                    }
-                }
 
             }
         }
+
+        g = g->Next;
+
     }
 
     Lgm_free_ctrans( tc );
@@ -8037,15 +8125,28 @@ GtkWidget *PitchAngleDisplayProperties(){
     //SatSelectorInfo = New_SpaceObjects();
     //InitSatSelectorInfo();
 
+
+
     vbox2 = CreateSatSelector( nSatTypes, SatTypes );
 PUKE_SATSEL_VBOX = vbox2;
-    gtk_container_set_border_width (GTK_CONTAINER (vbox2), 20);
+    gtk_container_set_border_width( GTK_CONTAINER(vbox2), 20 );
+
+//    scrolledwindow = gtk_scrolled_window_new( NULL, NULL ); gtk_widget_show( scrolledwindow );
+//    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scrolledwindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
+//    gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW(scrolledwindow), GTK_SHADOW_IN );
+//    gtk_container_add( GTK_CONTAINER(scrolledwindow), vbox2 );
+
 
     // Page title
     label = gtk_label_new (_("<b><span size=\"small\">Satellites</span></b>")); gtk_widget_show (label);
     gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
     gtk_label_set_use_markup( GTK_LABEL(label), TRUE );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), vbox2, label );
+    //gtk_notebook_append_page( GTK_NOTEBOOK(notebook), scrolledwindow, label );
+
+
+
+
 
 
 
@@ -8151,7 +8252,7 @@ PUKE_SATSEL_VBOX = vbox2;
     label = gtk_label_new (_("Altitude (m):")); gtk_widget_show (label);
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 
-    spinbutton1_adj = gtk_adjustment_new (7500, 0, 30000, 1, 10, 0);
+    spinbutton1_adj = gtk_adjustment_new (2195, 0, 30000, 1, 10, 0);
     spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0); gtk_widget_show (spinbutton);
     gtk_box_pack_start (GTK_BOX (hbox), spinbutton, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
@@ -8900,11 +9001,10 @@ gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (InnerSpherenButton), TRUE);
     gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 60 );
     gtk_box_pack_start( GTK_BOX(vbox2), vbox3, FALSE, TRUE, 10 );
 
+/*
     sprintf( Str, "<b><big><tt><span>%s</span></tt></big></b>", tle.Line0 );
-sprintf( Str, "%s", tle.Line0 );
     label = gtk_label_new( Str ); gtk_widget_show( label);
     gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
-
     gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
     gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
@@ -8925,12 +9025,13 @@ sprintf( Str, "%s", tle.Line0 );
     gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
     gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
     tle.Line2Label = label;
+*/
 
 
 
     ChangeTLE( NULL, GINT_TO_POINTER(-1) );
 
-    int r = 2;
+    int r = 0;
 
     table1 = gtk_table_new( 3, 3, FALSE );
     gtk_widget_show( table1);
@@ -8957,6 +9058,39 @@ sprintf( Str, "%s", tle.Line0 );
      *  69  Checksum (Modulo 10)
      *  (Letters, blanks, periods, plus signs = 0; minus signs = 1)
      */
+    sprintf( Str, "<b><tt><span>%s</span></tt></b>", tle.Line0 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 0, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    //gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line0Label = label;
+    ++r;
+
+    sprintf( Str, "<b><tt><span>%s</span></tt></b>", tle.Line1 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 0, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    //gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line1Label = label;
+    ++r;
+
+    sprintf( Str, "<b><tt><span>%s</span></tt></b>\n\n", tle.Line2 );
+    label = gtk_label_new( Str ); gtk_widget_show( label);
+    gtk_table_attach( GTK_TABLE( table1), label, 0, 2, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
+    //gtk_box_pack_start( GTK_BOX(vbox3), label, FALSE, TRUE, 0);
+    gtk_label_set_use_markup( GTK_LABEL( label), TRUE);
+    gtk_label_set_justify( GTK_LABEL( label), GTK_JUSTIFY_CENTER);
+    gtk_misc_set_alignment( GTK_MISC( label), 0.0, 0.5);
+    tle.Line2Label = label;
+    ++r;
+
+
+
+
     label = gtk_label_new( _("<b>Line 1 Entries:</b>")); gtk_widget_show( label);
     gtk_table_attach( GTK_TABLE( table1), label, 0, 1, r, r+1,( GtkAttachOptions)( GTK_FILL),( GtkAttachOptions)( 0), 0, 0);
     gtk_label_set_use_markup( GTK_LABEL( label), TRUE);

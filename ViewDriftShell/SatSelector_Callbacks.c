@@ -31,22 +31,10 @@ void ChangeSatColor( GtkWidget  *button, gpointer data ) {
     switch ( ButtonNumber ) {
 
         case 0:
-                Group->SatRed = Color.red/65535.0;
-                Group->SatGrn = Color.green/65535.0;
-                Group->SatBlu = Color.blue/65535.0;
-                Group->SatAlf = Alpha/65535.0;
-                break;
-        case 1:
-                Group->RbRed = Color.red/65535.0;
-                Group->RbGrn = Color.green/65535.0;
-                Group->RbBlu = Color.blue/65535.0;
-                Group->RbAlf = Alpha/65535.0;
-                break;
-        case 2:
-                Group->DebRed = Color.red/65535.0;
-                Group->DebGrn = Color.green/65535.0;
-                Group->DebBlu = Color.blue/65535.0;
-                Group->DebAlf = Alpha/65535.0;
+                Group->SatRed_OverRide = Color.red/65535.0;
+                Group->SatGrn_OverRide = Color.green/65535.0;
+                Group->SatBlu_OverRide = Color.blue/65535.0;
+                Group->SatAlf_OverRide = Alpha/65535.0;
                 break;
 
     }
@@ -81,87 +69,131 @@ void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data ) {
     switch ( CheckButtonNumber ) {
 
         case 0:
-//                if ( State ) ReLoadSpaceObjects();
-//gtk_widget_destroy( PUKE_SATSEL_VBOX);
-
-
+                // Overall Draw Group Button
                 Group->DrawGroup = State;
                 break;
-        case 1:
+
+
+
+
+        case 10:
+                // Draw Label Button
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawLabel = State;
                 break;
-        case 2:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatToGroundLine = State;
-                break;
-        case 3:
-                Group->DrawSatellites = State;
-                // loop through all Sats in this group and set the Draw flags appropriately
-                for (i=0; i<Group->nSat; i++) {
-                    if ( !strstr(Group->Sat[i].TLE.Name, " R/B") && !strstr(Group->Sat[i].TLE.Name, " DEB") ) {
-                        Group->Sat[i].Draw = State;
-                    }
-                }
-                break;
-        case 4:
-                Group->DrawRocketBodies = State;
-                // loop through all Sats in this group and set the Draw flags appropriately
-                for (i=0; i<Group->nSat; i++) {
-                    if ( strstr(Group->Sat[i].TLE.Name, " R/B") ) {
-                        Group->Sat[i].Draw = State;
-                    }
-                }
-                break;
-        case 5:
-                Group->DrawDebris = State;
-                // loop through all Sats in this group and set the Draw flags appropriately
-                for (i=0; i<Group->nSat; i++) {
-                    if ( strstr(Group->Sat[i].TLE.Name, " DEB") ) {
-                        Group->Sat[i].Draw = State;
-                    }
-                }
-                break;
-        case 6:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbit = State;
-                break;
-        case 7:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawGroundPathOfOrbit = State;
-                break;
-        case 8:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitToGroundLines = State;
-                break;
-        case 9:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreak = State;
-                break;
-        case 10:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawGroundPathOfStreak = State;
-                break;
         case 11:
-                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakToGroundLines = State;
-                break;
-        case 12:
-                Group->DrawAsPointSprites = State;
-                break;
-        case 13:
+                // Draw Current Position Button
                 Group->DrawPosition = State;
                 break;
-        case 14:
+        case 12:
+                // Draw Sat to Ground Lines Button
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatToGroundLine = State;
+                break;
+        case 13:
+                // Draw Sat Field Lines Button
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatFieldLines = State;
                 break;
-        case 15:
+        case 14:
+                // Draw Sat Field Line Footpoints Button
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawSatFLFootpoints = State;
                 break;
+        case 15:
+                // Draw point sprites Button
+                Group->DrawAsPointSprites = State;
+                break;
         case 16:
+                // Override Group Colors
+                Group->OverRideSatColors = State;
+                break;
+
+
+
+        case 20:
+                // Draw Orbit
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbit = State;
+                break;
+        case 21:
+                // Draw Orbit Ground Path
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawGroundPathOfOrbit = State;
+                break;
+        case 22:
+                // Draw Orbit to Ground lines
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitToGroundLines = State;
+                break;
+        case 23:
+                // Draw Orbit Field Lines
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitFieldLines = State;
                 break;
-        case 17:
+        case 24:
+                // Draw Orbit Field Line Footpoints
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawOrbitFLFootpoints = State;
                 break;
-        case 18:
+        case 26:
+                // Override Group Colors
+                Group->OverRideOrbitColors = State;
+                break;
+
+
+        case 30:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreak = State;
+                break;
+        case 31:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawGroundPathOfStreak = State;
+                break;
+        case 32:
+                for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakToGroundLines = State;
+                break;
+        case 33:
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakFieldLines = State;
                 break;
-        case 19:
+        case 34:
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].DrawStreakFLFootpoints = State;
                 break;
+        case 36:
+                // Override Group Colors
+                Group->OverRideStreakColors = State;
+                break;
+
+
+
+
+
+
+
+//        case 3:
+//                Group->DrawSatellites = State;
+//                // loop through all Sats in this group and set the Draw flags appropriately
+//                for (i=0; i<Group->nSat; i++) {
+//                    if ( !strstr(Group->Sat[i].TLE.Name, " R/B") && !strstr(Group->Sat[i].TLE.Name, " DEB") ) {
+//                        Group->Sat[i].Draw = State;
+//                    }
+//                }
+//                break;
+//        case 4:
+//                Group->DrawRocketBodies = State;
+//                // loop through all Sats in this group and set the Draw flags appropriately
+//                for (i=0; i<Group->nSat; i++) {
+//                    if ( strstr(Group->Sat[i].TLE.Name, " R/B") ) {
+//                        Group->Sat[i].Draw = State;
+//                    }
+//                }
+//                break;
+//        case 5:
+//                Group->DrawDebris = State;
+//                // loop through all Sats in this group and set the Draw flags appropriately
+//                for (i=0; i<Group->nSat; i++) {
+//                    if ( strstr(Group->Sat[i].TLE.Name, " DEB") ) {
+//                        Group->Sat[i].Draw = State;
+//                    }
+//                }
+//                break;
+
+
+
+
+
+
+
+
     }
 
     ReCreateSats();
@@ -194,13 +226,13 @@ void ChangeOrbitOptions( GtkWidget  *w, unsigned int *data ) {
 
     switch ( SpinButtonNumber ) {
 
-        case 0:
+        case 25:
                 /*
                  *  Change oPeriodFrac value
                  */
                 for (i=0; i<Group->nSat; i++) Group->Sat[i].oPeriodFrac = Value;
                 break;
-        case 1:
+        case 35:
                 /*
                  *  Change sPeriodFrac value
                  */
