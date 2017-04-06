@@ -206,6 +206,7 @@ GtkWidget   *CreateSatSelector( int nGroups, char *GroupNames[] );
 void        ToggleOrbitOptions( GtkWidget  *w, unsigned int *data );
 void        ChangeOrbitOptions( GtkWidget  *w, unsigned int *data );
 void        ChangeSatColor( GtkWidget  *button, gpointer data );
+void        ChangeIllumFLParams( GtkWidget  *w, unsigned int *data );
 int         SatGroupFilter( const struct dirent *d );
 int         LoadSpaceObjects( );
 void        ReLoadSpaceObjects( );

@@ -1,5 +1,12 @@
 #include "SatSelector.h"
 
+extern float IllumFL_ka;
+extern float IllumFL_kd;
+extern float IllumFL_ks;
+extern double IllumFL_n;
+extern GLuint  Texture_Fd;
+extern GLuint  Texture_Fs;
+
 extern GtkWidget *PUKE_SATSEL_VBOX;
 
 
@@ -288,6 +295,90 @@ void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data ) {
     ReCreateSatOrbits();
     expose_event( drawing_area, NULL, NULL );
 }
+
+
+
+/*
+ * Callback for changing Illuminatehd Field Line mShader params, ka, kd, ks
+ */
+void ChangeIllumFLParams( GtkWidget  *w, unsigned int *data ) {
+
+    int     SpinButtonNumber;
+    double  Value;
+    float   *FdImage;
+    float   *FsImage;
+
+    SpinButtonNumber = GPOINTER_TO_INT( data );
+    Value = gtk_spin_button_get_value(  GTK_SPIN_BUTTON( w ) );
+
+
+    switch ( SpinButtonNumber ) {
+
+        case 1:
+                /*
+                 *  Change ka value
+                 */
+                IllumFL_ka = Value;
+                break;
+
+        case 2:
+                /*
+                 *  Change kd value
+                 */
+                IllumFL_kd = Value;
+                break;
+
+        case 3:
+                /*
+                 *  Change ks value
+                 */
+                IllumFL_ks = Value;
+                break;
+
+        case 4:
+                /*
+                 *  Change n value
+                 */
+                IllumFL_n = Value;
+                if ( GenIllumTextures( 256, IllumFL_n, &FdImage, &FsImage ) ) {
+
+                    glGenTextures( 1, &Texture_Fd );
+                    glBindTexture( GL_TEXTURE_2D, Texture_Fd );
+                    glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FdImage );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+                    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                    free( FdImage );
+
+                    glGenTextures( 1, &Texture_Fs );
+                    glBindTexture( GL_TEXTURE_2D, Texture_Fs );
+                    glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FsImage );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                    free( FsImage );
+
+                }
+                break;
+
+    }
+
+
+
+    ReCreateSats();
+    ReCreateSatOrbits();
+    DrawScene();
+    expose_event( drawing_area, NULL, NULL );
+
+        
+
+}
+
+
+
+
 
 /*
  * Callback for orbit spin  button options

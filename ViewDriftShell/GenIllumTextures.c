@@ -216,7 +216,7 @@ int GenIllumTextures( int N, double SpecularIndex, float **FdImage, float **FsIm
 
     *FdImage = FdData;
     *FsImage = FsData;
-printf("Here\n");
+printf("In GenIllumTextures: SpecularIndex = %g\n", SpecularIndex);
     LGM_ARRAY_2D_FREE( Image );
 
     return( 1 );

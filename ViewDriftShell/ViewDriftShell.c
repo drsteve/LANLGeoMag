@@ -41,6 +41,10 @@
 #include <quicksort.h>
 
 
+float  IllumFL_ka =  0.3;
+float  IllumFL_kd =  0.9;
+float  IllumFL_ks =  2.5;
+double IllumFL_n  =  128.0;
 
 typedef struct COLOR {
     float r, g, b, a;
@@ -50,7 +54,6 @@ typedef struct COLOR {
 /*
  * For illuminated Field Lines
  */
-double      SpecularIndex = 64.0;
 int         FL_Arrs_Alloced = 0;
 long int    nFL_Arr, MAX_SEGMENTS = 1000000;
 Lgm_Vector  *P1, *P2, *T1, *T2;
@@ -1431,13 +1434,11 @@ void LoadTextures(){
      * Experimental...
      * Textures for Illuminated Line Rendering
      */
-    if ( GenIllumTextures( 256, SpecularIndex, &FdImage, &FsImage ) ) {
+    if ( GenIllumTextures( 256, IllumFL_n, &FdImage, &FsImage ) ) {
 
         glGenTextures( 1, &Texture_Fd );
         glBindTexture( GL_TEXTURE_2D, Texture_Fd );
         glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FdImage );
-//        gluBuild2DMipmaps( GL_TEXTURE_2D, GL_R32F, 256, 256, GL_RED, GL_FLOAT, FdImage );
-//        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
@@ -1447,8 +1448,6 @@ void LoadTextures(){
         glGenTextures( 1, &Texture_Fs );
         glBindTexture( GL_TEXTURE_2D, Texture_Fs );
         glTexImage2D( GL_TEXTURE_2D, 0, GL_R32F, 256, 256, 0, GL_RED,  GL_FLOAT, FsImage );
- //       gluBuild2DMipmaps(GL_TEXTURE_2D, GL_R32F, 256, 256, GL_RED, GL_FLOAT, FsImage );
-//        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
@@ -4057,10 +4056,10 @@ void DrawIlluminatedLines( double *Px, double *Py, double *Pz, int fln, double r
 
     glUseProgram( g_shaderMyTest );
     glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
-    glUniform1f( kaLoc, 0.05 );
-    glUniform1f( kdLoc, 0.4 );
-    glUniform1f( ksLoc, 1.0 );
-    glUniform1f( nLoc,  (float)SpecularIndex );
+    glUniform1f( kaLoc, IllumFL_ka );
+    glUniform1f( kdLoc, IllumFL_kd );
+    glUniform1f( ksLoc, IllumFL_ks );
+    glUniform1f( nLoc,  (float)IllumFL_n );
 
     glActiveTexture( GL_TEXTURE0 + 0);
     glBindTexture( GL_TEXTURE_2D, Texture_Fd );
@@ -4125,10 +4124,10 @@ void DrawIlluminatedLines2( double *Px, double *Py, double *Pz, double *Tx, doub
 
     glUseProgram( g_shaderMyTest2 );
     glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
-    glUniform1f( kaLoc, 0.05 );
-    glUniform1f( kdLoc, 0.4 );
-    glUniform1f( ksLoc, 1.0 );
-    glUniform1f( nLoc,  (float)SpecularIndex );
+    glUniform1f( kaLoc, IllumFL_ka );
+    glUniform1f( kdLoc, IllumFL_kd );
+    glUniform1f( ksLoc, IllumFL_ks );
+    glUniform1f( nLoc,  (float)IllumFL_n );
 
     glActiveTexture( GL_TEXTURE0 + 0);
     glBindTexture( GL_TEXTURE_2D, Texture_Fd );
@@ -4219,10 +4218,11 @@ void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_
 
     glUseProgram( g_shaderMyTest2 );
 //    glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
-    glUniform1f( kaLoc, 0.2 );
-    glUniform1f( kdLoc, 0.4 );
-    glUniform1f( ksLoc, 1.5 );
-    glUniform1f( nLoc,  (float)SpecularIndex );
+    glUniform1f( kaLoc, IllumFL_ka );
+    glUniform1f( kdLoc, IllumFL_kd );
+    glUniform1f( ksLoc, IllumFL_ks );
+    glUniform1f( nLoc,  (float)IllumFL_n );
+printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
 
     glActiveTexture( GL_TEXTURE0 + 0);
     glBindTexture( GL_TEXTURE_2D, Texture_Fd );
