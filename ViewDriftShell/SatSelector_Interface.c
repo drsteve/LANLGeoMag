@@ -4,6 +4,7 @@ extern float IllumFL_ka;
 extern float IllumFL_kd;
 extern float IllumFL_ks;
 extern double IllumFL_n;
+extern double IllumFL_w;
 
 
 void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data );
@@ -1098,6 +1099,13 @@ Never really use these anymore...
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_n );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 4 ) );
+
+    spinbutton_adj = gtk_adjustment_new( IllumFL_w, 0.0, 10.0, 0.05, .1, 0);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 3); gtk_widget_show(spinbutton);
+    gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_w );
+    g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 5 ) );
 
 
     button = gtk_button_new_with_mnemonic (_("Delete Group")); gtk_widget_show (button);

@@ -4,6 +4,7 @@ extern float IllumFL_ka;
 extern float IllumFL_kd;
 extern float IllumFL_ks;
 extern double IllumFL_n;
+extern double IllumFL_w;
 extern GLuint  Texture_Fd;
 extern GLuint  Texture_Fs;
 
@@ -362,6 +363,14 @@ void ChangeIllumFLParams( GtkWidget  *w, unsigned int *data ) {
 
                 }
                 break;
+
+        case 5:
+                /*
+                 *  Change ks value
+                 */
+                IllumFL_w = Value;
+                break;
+
 
     }
 

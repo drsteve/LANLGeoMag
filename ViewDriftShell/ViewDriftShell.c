@@ -45,6 +45,7 @@ float  IllumFL_ka =  0.3;
 float  IllumFL_kd =  0.9;
 float  IllumFL_ks =  2.5;
 double IllumFL_n  =  128.0;
+double IllumFL_w  =  1.0; // linewidth
 
 typedef struct COLOR {
     float r, g, b, a;
@@ -1765,7 +1766,7 @@ void CreateEarth( ){
 
     // EqPlane grid
     double R, x, y, Phi;
-    if ( Show_GSM_Grid ) {
+//    if ( Show_GSM_Grid ) {
         EqPlaneGridDL = glGenLists( 1 );
         glNewList( EqPlaneGridDL, GL_COMPILE );
             glDisable(GL_LIGHTING);
@@ -1795,7 +1796,7 @@ void CreateEarth( ){
             glPopMatrix();
             glEnable(GL_LIGHTING);
         glEndList( );
-    }
+//    }
 
 
 
@@ -3159,7 +3160,10 @@ void CreateSatOrbits() {
             for (i=0; i<Group->nSat; i++){
                 if ( Group->Sat[i].Draw ) {
 
-                    if ( (Group->Sat[i].DrawOrbit) || (Group->Sat[i].DrawGroundPathOfOrbit) || (Group->Sat[i].DrawOrbitToGroundLines) ){
+                    if ( Group->Sat[i].DrawOrbit || Group->Sat[i].DrawGroundPathOfOrbit 
+                            || Group->Sat[i].DrawOrbitToGroundLines || Group->Sat[i].DrawOrbitFieldLines 
+                            || Group->Sat[i].DrawOrbitFLFootpoints ){
+
                         LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                         tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
                         period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
@@ -4252,7 +4256,7 @@ printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
     
     glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glLineWidth( 1.0 );
+    glLineWidth( (float)IllumFL_w );
     glBegin( GL_LINES );
         for ( j=nSegments-1; j>=0; --j ) {
 
@@ -4305,7 +4309,15 @@ void DrawScene( ) {
     /*
      * These are the various coordinate axes.
      */
-    glCallList( AxesDL );
+    if (   ( (ObserverCoords == GSM_COORDS) && ( Show_GSM_Axes ) ) 
+        || ( (ObserverCoords ==  SM_COORDS) && (  Show_SM_Axes ) )
+        || ( (ObserverCoords == GSE_COORDS) && ( Show_GSE_Axes ) )
+        || ( (ObserverCoords == GEI2000_COORDS) && ( Show_GEI_Axes ) )
+        || ( (ObserverCoords == GEO_COORDS) && ( Show_GEO_Axes ) ) ){
+
+        glCallList( AxesDL );
+
+    }
 
 
 
@@ -4805,7 +4817,15 @@ DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
 
     cairo_surface_destroy( cst );
 
-    glCallList( EqPlaneGridDL );
+    if (   ( (ObserverCoords == GSM_COORDS) && ( Show_GSM_Grid ) ) 
+        || ( (ObserverCoords ==  SM_COORDS) && (  Show_SM_Grid ) )
+        || ( (ObserverCoords == GSE_COORDS) && ( Show_GSE_Grid ) )
+        || ( (ObserverCoords == GEI2000_COORDS) && ( Show_GEI_Grid ) )
+        || ( (ObserverCoords == GEO_COORDS) && ( Show_GEO_Grid ) ) ){
+
+        glCallList( EqPlaneGridDL );
+
+    }
 
 
 
@@ -7110,7 +7130,7 @@ static void SetCoordAxesAndGrids( GtkWidget  *widget, gpointer data ) {
     int i = GPOINTER_TO_INT( data );
     int State;
 
-    State = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( widget ) ); // get state of check item
+        State = gtk_toggle_button_get_active(  GTK_RADIO_BUTTON( widget ) ); // get state of check item
 
     switch (i) {
 
@@ -7148,6 +7168,7 @@ static void SetCoordAxesAndGrids( GtkWidget  *widget, gpointer data ) {
     }
 
     ReCreateEarth();
+    expose_event( drawing_area, NULL, NULL );
 
 }
 
@@ -7782,24 +7803,28 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), TRUE);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 0 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GSM_Axes);
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 0 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("SM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 1 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_SM_Axes);
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 1 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSE")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 2 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GSE_Axes);
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 2 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEI")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 3 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GEI_Axes);
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 3 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEO")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 1, 2, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 4 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GEO_Axes);
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 4 ) );
 
 
 
@@ -7813,24 +7838,28 @@ GtkWidget *PitchAngleDisplayProperties(){
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 1, 2, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), TRUE);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 10 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GSM_Grid );
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 10 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("SM")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 2, 3, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 11 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_SM_Grid );
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 11 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GSE")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 3, 4, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 12 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GSE_Grid );
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 12 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEI")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 4, 5, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 13 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GEI_Grid );
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 13 ) );
 
     checkbutton = gtk_check_button_new_with_mnemonic (_("GEO")); gtk_widget_show (checkbutton);
     gtk_table_attach (GTK_TABLE (table1), checkbutton, 2, 3, 5, 6, (GtkAttachOptions) (GTK_FILL), (GtkAttachOptions) (0), 0, 0);
-    g_signal_connect( G_OBJECT( GTK_TOGGLE_BUTTON (checkbutton) ), "changed", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 14 ) );
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton), Show_GEO_Grid );
+    g_signal_connect( G_OBJECT(checkbutton), "toggled", G_CALLBACK( SetCoordAxesAndGrids ), GINT_TO_POINTER( 14 ) );
 
 
     /*
