@@ -66,6 +66,20 @@ int LoadSpaceObjects( ){
             Group->RbRed  = 1.0; Group->RbGrn  = 1.0; Group->RbBlu  = 1.0; Group->RbAlf  = 0.5*0.75;
             Group->DebRed = 1.0; Group->DebGrn = 1.0; Group->DebBlu = 1.0; Group->DebAlf = 0.5*0.75;
 
+            Group->oflRed_OverRide = Group->Sat[0].oflRed;
+            Group->oflGrn_OverRide = Group->Sat[0].oflGrn;
+            Group->oflBlu_OverRide = Group->Sat[0].oflBlu;
+            Group->oflAlf_OverRide = Group->Sat[0].oflAlf;
+
+            Group->ofpRed_OverRide = Group->Sat[0].ofpRed;
+            Group->ofpGrn_OverRide = Group->Sat[0].ofpGrn;
+            Group->ofpBlu_OverRide = Group->Sat[0].ofpBlu;
+            Group->ofpAlf_OverRide = Group->Sat[0].ofpAlf;
+
+            Group->OverRideSatColors    = FALSE;
+            Group->OverRideOrbitColors  = FALSE;
+            Group->OverRideStreakColors = FALSE;
+
             /*
              *  Fill in data for each item in the group
              */
@@ -113,21 +127,41 @@ int LoadSpaceObjects( ){
                 Group->Sat[j].sglBlu = 0.75*b;
                 Group->Sat[j].sglAlf = 0.75*0.75;
 
+                Group->Sat[j].sflRed = 0.6;
+                Group->Sat[j].sflGrn = 0.6;
+                Group->Sat[j].sflBlu = 0.6;
+                Group->Sat[j].sflAlf = 0.7;
+
+                Group->Sat[j].sfpRed = 0.6;
+                Group->Sat[j].sfpGrn = 0.6;
+                Group->Sat[j].sfpBlu = 0.6;
+                Group->Sat[j].sfpAlf = 0.7;
+
                 // Orbit Colors
-                Group->Sat[j].oRed = 0.8;
-                Group->Sat[j].oGrn = 0.8;
-                Group->Sat[j].oBlu = 0.8;
-                Group->Sat[j].oAlf = 0.20;
+                Group->Sat[j].oRed = 0.6;
+                Group->Sat[j].oGrn = 0.6;
+                Group->Sat[j].oBlu = 0.6;
+                Group->Sat[j].oAlf = 0.7;
 
-                Group->Sat[j].ogpRed = 0.2;
-                Group->Sat[j].ogpGrn = 0.2;
-                Group->Sat[j].ogpBlu = 0.2;
-                Group->Sat[j].ogpAlf = 0.8;
+                Group->Sat[j].ogpRed = 0.6;
+                Group->Sat[j].ogpGrn = 0.6;
+                Group->Sat[j].ogpBlu = 0.6;
+                Group->Sat[j].ogpAlf = 0.7;
 
-                Group->Sat[j].oglRed = 0.7;
-                Group->Sat[j].oglGrn = 0.7;
-                Group->Sat[j].oglBlu = 0.7;
-                Group->Sat[j].oglAlf = 0.1;
+                Group->Sat[j].oglRed = 0.6;
+                Group->Sat[j].oglGrn = 0.6;
+                Group->Sat[j].oglBlu = 0.6;
+                Group->Sat[j].oglAlf = 0.7;
+
+                Group->Sat[j].oflRed = 0.6;
+                Group->Sat[j].oflGrn = 0.6;
+                Group->Sat[j].oflBlu = 0.6;
+                Group->Sat[j].oflAlf = 0.7;
+
+                Group->Sat[j].ofpRed = 0.6;
+                Group->Sat[j].ofpGrn = 0.6;
+                Group->Sat[j].ofpBlu = 0.6;
+                Group->Sat[j].ofpAlf = 0.7;
 
                 // Single Line
                 Group->Sat[j].ssglRed = r;
@@ -136,6 +170,55 @@ int LoadSpaceObjects( ){
                 Group->Sat[j].ssglAlf = 0.5*0.75;
 
             }
+            Group->oRed_OverRide = Group->Sat[0].sRed;
+            Group->oGrn_OverRide = Group->Sat[0].sGrn;
+            Group->oBlu_OverRide = Group->Sat[0].sBlu;
+            Group->oAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->ogpRed_OverRide = Group->Sat[0].sRed;
+            Group->ogpGrn_OverRide = Group->Sat[0].sGrn;
+            Group->ogpBlu_OverRide = Group->Sat[0].sBlu;
+            Group->ogpAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->oglRed_OverRide = Group->Sat[0].sRed;
+            Group->oglGrn_OverRide = Group->Sat[0].sGrn;
+            Group->oglBlu_OverRide = Group->Sat[0].sBlu;
+            Group->oglAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->oflRed_OverRide = Group->Sat[0].sRed;
+            Group->oflGrn_OverRide = Group->Sat[0].sGrn;
+            Group->oflBlu_OverRide = Group->Sat[0].sBlu;
+            Group->oflAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->ofpRed_OverRide = Group->Sat[0].sRed;
+            Group->ofpGrn_OverRide = Group->Sat[0].sGrn;
+            Group->ofpBlu_OverRide = Group->Sat[0].sBlu;
+            Group->ofpAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->sRed_OverRide = Group->Sat[0].sRed;
+            Group->sGrn_OverRide = Group->Sat[0].sGrn;
+            Group->sBlu_OverRide = Group->Sat[0].sBlu;
+            Group->sAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->sgpRed_OverRide = Group->Sat[0].sRed;
+            Group->sgpGrn_OverRide = Group->Sat[0].sGrn;
+            Group->sgpBlu_OverRide = Group->Sat[0].sBlu;
+            Group->sgpAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->sglRed_OverRide = Group->Sat[0].sRed;
+            Group->sglGrn_OverRide = Group->Sat[0].sGrn;
+            Group->sglBlu_OverRide = Group->Sat[0].sBlu;
+            Group->sglAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->sflRed_OverRide = Group->Sat[0].sRed;
+            Group->sflGrn_OverRide = Group->Sat[0].sGrn;
+            Group->sflBlu_OverRide = Group->Sat[0].sBlu;
+            Group->sflAlf_OverRide = Group->Sat[0].sAlf;
+
+            Group->sfpRed_OverRide = Group->Sat[0].sRed;
+            Group->sfpGrn_OverRide = Group->Sat[0].sGrn;
+            Group->sfpBlu_OverRide = Group->Sat[0].sBlu;
+            Group->sfpAlf_OverRide = Group->Sat[0].sAlf;
 
             /*
              *  Add this group into the SatGroupList
@@ -692,7 +775,7 @@ Never really use these anymore...
         // Override Sat Colors
         checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
         gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreak );
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton),  Group->OverRideSatColors );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 16 ) );
         ++Col;
 
@@ -725,11 +808,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbit );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 20 ) );
 //        ++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->oRed_OverRide*65535; color.green = Group->oGrn_OverRide*65535; color.blue  = Group->oBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->oAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -743,11 +826,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawGroundPathOfOrbit );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 21 ) );
 //        ++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->ogpRed_OverRide*65535; color.green = Group->ogpGrn_OverRide*65535; color.blue  = Group->ogpBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->ogpAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -762,11 +845,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbitToGroundLines );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 22 ) );
 //        ++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->oglRed_OverRide*65535; color.green = Group->oglGrn_OverRide*65535; color.blue  = Group->oglBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->oglAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -781,11 +864,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbitFieldLines );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 23 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->oflRed_OverRide*65535; color.green = Group->oflGrn_OverRide*65535; color.blue  = Group->oflBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->oflAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -800,11 +883,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawOrbitFLFootpoints );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 24 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->ofpRed_OverRide*65535; color.green = Group->ofpGrn_OverRide*65535; color.blue  = Group->ofpBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->ofpAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -815,7 +898,7 @@ Never really use these anymore...
         // Override Orbit Colors
         checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
         gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreak );
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton),  Group->OverRideOrbitColors );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 26 ) );
         ++Col;
 
@@ -847,11 +930,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreak );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 30 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->sRed_OverRide*65535; color.green = Group->sGrn_OverRide*65535; color.blue  = Group->sBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->sAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -864,11 +947,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawGroundPathOfStreak );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 31 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->sgpRed_OverRide*65535; color.green = Group->sgpGrn_OverRide*65535; color.blue  = Group->sgpBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->sgpAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -881,11 +964,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreakToGroundLines );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 32 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->sglRed_OverRide*65535; color.green = Group->sglGrn_OverRide*65535; color.blue  = Group->sglBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->sglAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -898,11 +981,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreakFieldLines );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 33 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->sflRed_OverRide*65535; color.green = Group->sflGrn_OverRide*65535; color.blue  = Group->sflBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->sflAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -915,11 +998,11 @@ Never really use these anymore...
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreakFLFootpoints );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 34 ) );
         //++Col;
-        color.red   = Group->Sat[0].oRed*65535; color.green = Group->Sat[0].oGrn*65535; color.blue  = Group->Sat[0].oBlu*65535; 
+        color.red   = Group->sfpRed_OverRide*65535; color.green = Group->sfpGrn_OverRide*65535; color.blue  = Group->sfpBlu_OverRide*65535; 
         colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
         gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
-        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->RbAlf*65535 );
+        gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), Group->sfpAlf_OverRide*65535 );
         gtk_table_attach( GTK_TABLE(table1), colorbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0 );
         gtk_widget_set_size_request( colorbutton, 30, 25 );
         gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
@@ -931,7 +1014,7 @@ Never really use these anymore...
         // Override Streak Colors
         checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
         gtk_table_attach (GTK_TABLE (table1), checkbutton, Col, Col+1, Row+1, Row+2, (GtkAttachOptions) (0), (GtkAttachOptions) (0), 0, 0);
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), Group->Sat[0].DrawStreak );
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton),  Group->OverRideStreakColors );
         g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ToggleOrbitOptions ), GINT_TO_POINTER( i*100 + 36 ) );
         ++Col;
 

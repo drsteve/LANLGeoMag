@@ -41,13 +41,20 @@
 #include <quicksort.h>
 
 
+
+typedef struct COLOR {
+    float r, g, b, a;
+} COLOR;
+
+
 /*
  * For illuminated Field Lines
  */
 double      SpecularIndex = 64.0;
 int         FL_Arrs_Alloced = 0;
 long int    nFL_Arr, MAX_SEGMENTS = 1000000;
-Lgm_Vector  *P1, *P2, *T1, *T2, *FC;
+Lgm_Vector  *P1, *P2, *T1, *T2;
+COLOR       *FC1, *FC2;
 
 
 
@@ -2395,6 +2402,16 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].sglBlu = 0.75*b;
         SpaceObjects->Sat[i].sglAlf = 0.75*0.75;
 
+        SpaceObjects->Sat[i].sflRed = r; // ofl = streak field line color
+        SpaceObjects->Sat[i].sflGrn = g;
+        SpaceObjects->Sat[i].sflBlu = b;
+        SpaceObjects->Sat[i].sflAlf = 0.75;
+
+        SpaceObjects->Sat[i].sfpRed = r; // ofl = streak field line footpoint path color
+        SpaceObjects->Sat[i].sfpGrn = g;
+        SpaceObjects->Sat[i].sfpBlu = b;
+        SpaceObjects->Sat[i].sfpAlf = 0.75;
+
         // Orbit Colors
         SpaceObjects->Sat[i].oRed = 0.6; // o = orbit color
         SpaceObjects->Sat[i].oGrn = 0.6;
@@ -2411,6 +2428,17 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].oglBlu = 0.7;
         SpaceObjects->Sat[i].oglAlf = 0.1;
 
+        SpaceObjects->Sat[i].oflRed = r; // ofl = orbit field line color
+        SpaceObjects->Sat[i].oflGrn = g;
+        SpaceObjects->Sat[i].oflBlu = b;
+        SpaceObjects->Sat[i].oflAlf = 0.75;
+
+        SpaceObjects->Sat[i].ofpRed = r; // ofl = orbit field line footpoint path color
+        SpaceObjects->Sat[i].ofpGrn = g;
+        SpaceObjects->Sat[i].ofpBlu = b;
+        SpaceObjects->Sat[i].ofpAlf = 0.75;
+
+
         // Single Line
         SpaceObjects->Sat[i].ssglRed = r;   // ssgl = single-sat-to-ground-line color
         SpaceObjects->Sat[i].ssglGrn = g;
@@ -2418,6 +2446,56 @@ int LoadTLEs( ){
         SpaceObjects->Sat[i].ssglAlf = 0.5*0.75;
 
     }
+    SpaceObjects->oRed_OverRide = SpaceObjects->Sat[0].oRed;
+    SpaceObjects->oGrn_OverRide = SpaceObjects->Sat[0].oGrn;
+    SpaceObjects->oBlu_OverRide = SpaceObjects->Sat[0].oBlu;
+    SpaceObjects->oAlf_OverRide = SpaceObjects->Sat[0].oAlf;
+
+    SpaceObjects->ogpRed_OverRide = SpaceObjects->Sat[0].ogpRed;
+    SpaceObjects->ogpGrn_OverRide = SpaceObjects->Sat[0].ogpGrn;
+    SpaceObjects->ogpBlu_OverRide = SpaceObjects->Sat[0].ogpBlu;
+    SpaceObjects->ogpAlf_OverRide = SpaceObjects->Sat[0].ogpAlf;
+
+    SpaceObjects->oglRed_OverRide = SpaceObjects->Sat[0].oglRed;
+    SpaceObjects->oglGrn_OverRide = SpaceObjects->Sat[0].oglGrn;
+    SpaceObjects->oglBlu_OverRide = SpaceObjects->Sat[0].oglBlu;
+    SpaceObjects->oglAlf_OverRide = SpaceObjects->Sat[0].oglAlf;
+
+    SpaceObjects->oflRed_OverRide = SpaceObjects->Sat[0].oflRed;
+    SpaceObjects->oflGrn_OverRide = SpaceObjects->Sat[0].oflGrn;
+    SpaceObjects->oflBlu_OverRide = SpaceObjects->Sat[0].oflBlu;
+    SpaceObjects->oflAlf_OverRide = SpaceObjects->Sat[0].oflAlf;
+
+    SpaceObjects->ofpRed_OverRide = SpaceObjects->Sat[0].ofpRed;
+    SpaceObjects->ofpGrn_OverRide = SpaceObjects->Sat[0].ofpGrn;
+    SpaceObjects->ofpBlu_OverRide = SpaceObjects->Sat[0].ofpBlu;
+    SpaceObjects->ofpAlf_OverRide = SpaceObjects->Sat[0].ofpAlf;
+
+
+    SpaceObjects->sRed_OverRide = SpaceObjects->Sat[0].sRed;
+    SpaceObjects->sGrn_OverRide = SpaceObjects->Sat[0].sGrn;
+    SpaceObjects->sBlu_OverRide = SpaceObjects->Sat[0].sBlu;
+    SpaceObjects->sAlf_OverRide = SpaceObjects->Sat[0].sAlf;
+
+    SpaceObjects->sgpRed_OverRide = SpaceObjects->Sat[0].sgpRed;
+    SpaceObjects->sgpGrn_OverRide = SpaceObjects->Sat[0].sgpGrn;
+    SpaceObjects->sgpBlu_OverRide = SpaceObjects->Sat[0].sgpBlu;
+    SpaceObjects->sgpAlf_OverRide = SpaceObjects->Sat[0].sgpAlf;
+
+    SpaceObjects->sglRed_OverRide = SpaceObjects->Sat[0].sglRed;
+    SpaceObjects->sglGrn_OverRide = SpaceObjects->Sat[0].sglGrn;
+    SpaceObjects->sglBlu_OverRide = SpaceObjects->Sat[0].sglBlu;
+    SpaceObjects->sglAlf_OverRide = SpaceObjects->Sat[0].sglAlf;
+
+    SpaceObjects->sflRed_OverRide = SpaceObjects->Sat[0].sflRed;
+    SpaceObjects->sflGrn_OverRide = SpaceObjects->Sat[0].sflGrn;
+    SpaceObjects->sflBlu_OverRide = SpaceObjects->Sat[0].sflBlu;
+    SpaceObjects->sflAlf_OverRide = SpaceObjects->Sat[0].sflAlf;
+
+    SpaceObjects->sfpRed_OverRide = SpaceObjects->Sat[0].sfpRed;
+    SpaceObjects->sfpGrn_OverRide = SpaceObjects->Sat[0].sfpGrn;
+    SpaceObjects->sfpBlu_OverRide = SpaceObjects->Sat[0].sfpBlu;
+    SpaceObjects->sfpAlf_OverRide = SpaceObjects->Sat[0].sfpAlf;
 
     free( TLEs );
     return(1);
@@ -2670,7 +2748,12 @@ void CreateSats() {
                 /*
                  * Satellites
                  */
-                glColor4f( Group->SatRed, Group->SatGrn, Group->SatBlu, Group->SatAlf );
+                if ( Group->OverRideSatColors ) {
+                    glColor4f( Group->SatRed_OverRide, Group->SatGrn_OverRide, Group->SatBlu_OverRide, Group->SatAlf_OverRide );
+                } else {
+// shouldnt this be something like   glColor4f( Group->Sat[i].SatRed, Group->Sat[i].SatGrn, Group->Sat[i].SatBlu, Group->Sat[i].SatAlf ); ?
+                    glColor4f( Group->SatRed, Group->SatGrn, Group->SatBlu, Group->SatAlf );
+                }
                 if ( Group->DrawAsPointSprites ) {
                     float quadratic[] = {1.0, 0.0, 0.1 };
                     glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
@@ -2719,11 +2802,15 @@ void CreateSats() {
                     if (Group->Sat[i].DrawSatToGroundLine) {
                         tsince = (JD - Group->Sat[i].TLE.JD)*1440.0;
                         LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
+                        if ( Group->OverRideSatColors ) {
+                            glColor4f( Group->ssglRed_OverRide, Group->ssglGrn_OverRide, Group->ssglBlu_OverRide, Group->ssglAlf_OverRide );
+                        } else {
+                            glColor4f( Group->Sat[i].ssglRed, Group->Sat[i].ssglGrn, Group->Sat[i].ssglBlu, Group->Sat[i].ssglAlf );
+                        }
                         glBegin( GL_LINES );
                             LgmSgp_SGP4( tsince, s );
                             Ugei.x = s->X/Re; Ugei.y = s->Y/Re; Ugei.z = s->Z/Re;
                             Lgm_Convert_Coords( &Ugei, &Ugsm, SatsConvertFlag, c );
-                            glColor4f( Group->Sat[i].ssglRed, Group->Sat[i].ssglGrn, Group->Sat[i].ssglBlu, Group->Sat[i].ssglAlf );
                             glVertex3f( Ugsm.x, Ugsm.y, Ugsm.z );
                             Lgm_NormalizeVector( &Ugsm );
                             Lgm_ScaleVector( &Ugsm, 1.00 );
@@ -2856,7 +2943,7 @@ void CreateThemisFovs() {
     double  Ageo_to_asi[3][3];
     double  Aasi_to_geo[3][3];
 
-    int     N_THEMIS_ASI = 23;
+    int     N_THEMIS_ASI = 22; // 23 to add Victoria
 
     double  THEMIS_ASI_LAT[] = { 53.316, 58.155, 49.814, 56.536, 49.392, 
                                  62.828, 56.354, 50.163, 53.994, 59.984, 
@@ -3047,11 +3134,12 @@ void CreateSatOrbits() {
 
     ns = 0;
     if ( FL_Arrs_Alloced == 0 ) {
-        P1 = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        P2 = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        T1 = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        T2 = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        FC = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        P1  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        P2  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        T1  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        T2  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        FC1 = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
+        FC2 = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
         
         FL_Arrs_Alloced = 1;
     }
@@ -3123,18 +3211,26 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
 
                         // ORBIT
                         if ( Group->Sat[i].DrawOrbit ) {
-glLineWidth( 5.0 );
-                            glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
-glColor4f( 0.6, 0.6, 0.6, 0.7);
-//glColor4f( 0.0, 0.0, 0.0, 0.8 );
+                            glLineWidth( 5.0 );
+                            if ( Group->OverRideOrbitColors ) {
+                                glColor4f( Group->oRed_OverRide, Group->oGrn_OverRide, Group->oBlu_OverRide, Group->oAlf_OverRide );
+                            } else {
+                                glColor4f( Group->Sat[i].oRed, Group->Sat[i].oGrn, Group->Sat[i].oBlu, Group->Sat[i].oAlf );
+                            }
+                            //glColor4f( 0.6, 0.6, 0.6, 0.7);
+                            //glColor4f( 0.0, 0.0, 0.0, 0.8 );
                             glBegin( GL_LINE_STRIP );
                                 for (j=0; j<n; j++) glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                             glEnd();
                         }
                         // GROUND PATH
                         if ( Group->Sat[i].DrawGroundPathOfOrbit ) {
-                            glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf );
-glColor4f( 0.6, 0.6, 0.6, 0.7);
+                            if ( Group->OverRideOrbitColors ) {
+                                glColor4f( Group->ogpRed_OverRide, Group->ogpGrn_OverRide, Group->ogpBlu_OverRide, Group->ogpAlf_OverRide );
+                            } else {
+                                glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf );
+                            }
+                            //glColor4f( 0.6, 0.6, 0.6, 0.7);
                             glBegin( GL_LINE_STRIP );
                             for (j=0; j<n; j++) {
                                 uu = Ugsm[j];
@@ -3147,9 +3243,13 @@ glColor4f( 0.6, 0.6, 0.6, 0.7);
                         if ( Group->Sat[i].DrawOrbitToGroundLines ) {
                             nMax = 25;
                             //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
-                            glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
-glLineWidth( 1.0 );
-glColor4f( 0.0, 1.0, 1.0, 0.3);
+//glLineWidth( 1.0 );
+//glColor4f( 0.0, 1.0, 1.0, 0.3);
+                            if ( Group->OverRideOrbitColors ) {
+                                glColor4f( Group->oglRed_OverRide, Group->oglGrn_OverRide, Group->oglBlu_OverRide, Group->oglAlf_OverRide );
+                            } else {
+                                glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
+                            }
                             glBegin( GL_LINES );
                                 for (j=0; j<n; j += 1) {
                                     uu = Ugsm[j];
@@ -3165,8 +3265,8 @@ glColor4f( 0.0, 1.0, 1.0, 0.3);
 
                             nMax = 25;
                             //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
-glLineWidth( 2.0 );
-                            glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
+                            //glLineWidth( 2.0 );
+                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
 
                             for ( j=0; j<n; ++j ) {
                                 Height = 120.0;
@@ -3179,7 +3279,7 @@ glLineWidth( 2.0 );
                                 if ( FLL > 0.0 ){
                                     Lgm_TraceLine3( &v1[j], FLL, 200, 1.0, 1e-7, 0, mInfo );
 
-                                    if ( Group->Sat[i].DrawOrbitFieldLines && (j%5==0) ) {
+                                    if ( Group->Sat[i].DrawOrbitFieldLines && (j%4==0) ) {
 
                                         /*
                                         glBegin( GL_LINE_STRIP );
@@ -3211,11 +3311,17 @@ glLineWidth( 2.0 );
                                          */
                                         for (jj=0; jj<mInfo->nPnts-1; ++jj ) {
                                             if ( ns < MAX_SEGMENTS ) {
-                                                P1[ns].x = Px[jj];   P1[ns].y = Py[jj];   P1[ns].z = Pz[jj];
-                                                T1[ns].x = Tx[jj];   T1[ns].y = Ty[jj];   T1[ns].z = Tz[jj];
-                                                P2[ns].x = Px[jj+1]; P2[ns].y = Py[jj+1]; P2[ns].z = Pz[jj+1];
-                                                T2[ns].x = Tx[jj+1]; T2[ns].y = Ty[jj+1]; T2[ns].z = Tz[jj+1];
-                                                FC[ns].x = Group->Sat[i].sRed; FC[ns].y = Group->Sat[i].sGrn; FC[ns].z = Group->Sat[i].sBlu;
+                                                P1[ns].x  = Px[jj];   P1[ns].y = Py[jj];   P1[ns].z = Pz[jj];
+                                                T1[ns].x  = Tx[jj];   T1[ns].y = Ty[jj];   T1[ns].z = Tz[jj];
+                                                P2[ns].x  = Px[jj+1]; P2[ns].y = Py[jj+1]; P2[ns].z = Pz[jj+1];
+                                                T2[ns].x  = Tx[jj+1]; T2[ns].y = Ty[jj+1]; T2[ns].z = Tz[jj+1];
+                                                if ( Group->OverRideOrbitColors ) {
+                                                    FC1[ns].r = Group->oflRed_OverRide; FC1[ns].g = Group->oflGrn_OverRide; FC1[ns].b = Group->oflBlu_OverRide; FC1[ns].a = Group->oflAlf_OverRide;
+                                                    FC2[ns].r = Group->oflRed_OverRide; FC2[ns].g = Group->oflGrn_OverRide; FC2[ns].b = Group->oflBlu_OverRide; FC2[ns].a = Group->oflAlf_OverRide;
+                                                } else {
+                                                    FC1[ns].r = Group->Sat[i].sRed; FC1[ns].g = Group->Sat[i].sGrn; FC1[ns].b = Group->Sat[i].sBlu; FC1[ns].a = Group->Sat[i].sAlf;
+                                                    FC2[ns].r = Group->Sat[i].sRed; FC2[ns].g = Group->Sat[i].sGrn; FC2[ns].b = Group->Sat[i].sBlu; FC2[ns].a = Group->Sat[i].sAlf;
+                                                }
                                                 ++ns;
                                             }
                                         }
@@ -3228,8 +3334,13 @@ glLineWidth( 2.0 );
 
 
                             if ( Group->Sat[i].DrawOrbitFLFootpoints ) {
-glLineWidth( 4.0 );
-glColor4f( 0.6, 0.6, 0.6, 0.7);
+                                glLineWidth( 4.0 );
+                                //glColor4f( 0.6, 0.6, 0.6, 0.7);
+                                if ( Group->OverRideOrbitColors ) {
+                                    glColor4f( Group->ofpRed_OverRide, Group->ofpGrn_OverRide, Group->ofpBlu_OverRide, Group->ofpAlf_OverRide );
+                                } else {
+                                    glColor4f( Group->Sat[i].ofpRed, Group->Sat[i].ofpGrn, Group->Sat[i].ofpBlu, Group->Sat[i].ofpAlf );
+                                }
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; ++j ) {
                                         if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_N_LOBE) ) {
@@ -3324,7 +3435,11 @@ period *= Group->Sat[i].sPeriodFrac/100.0;
                         if ( Group->Sat[i].DrawStreak ) {
                             glBegin( GL_LINE_STRIP );
                                 for (j=0; j<n; j++) {
-                                    glColor4f( Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf*(1.0-(double)j/(double)nMax) );
+                                    if ( Group->OverRideStreakColors ) {
+                                        glColor4f( Group->sRed_OverRide, Group->sGrn_OverRide, Group->sBlu_OverRide, Group->sAlf_OverRide*(1.0-(double)j/(double)nMax) );
+                                    } else {
+                                        glColor4f( Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf*(1.0-(double)j/(double)nMax) );
+                                    }
                                     glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                                 }
                             glEnd();
@@ -3335,7 +3450,11 @@ period *= Group->Sat[i].sPeriodFrac/100.0;
                                 for (j=0; j<n; j++) {
                                     uu = Ugsm[j];
                                     Lgm_ForceMagnitude( &uu, 1.001 );
-                                    glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                    if ( Group->OverRideStreakColors ) {
+                                        glColor4f( Group->sgpRed_OverRide, Group->sgpGrn_OverRide, Group->sgpBlu_OverRide, Group->sgpAlf_OverRide*(1.0-(double)j/(double)nMax) );
+                                    } else {
+                                        glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                    }
                                     glVertex3f( uu.x, uu.y, uu.z );
                                 }
                             glEnd();
@@ -3346,7 +3465,11 @@ period *= Group->Sat[i].sPeriodFrac/100.0;
                                 for (j=0; j<n; j++) {
                                     uu = Ugsm[j];
                                     Lgm_ForceMagnitude( &uu, 1.001 );
-                                    glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
+                                    if ( Group->OverRideStreakColors ) {
+                                        glColor4f( Group->sglRed_OverRide, Group->sglGrn_OverRide, Group->sglBlu_OverRide, Group->sglAlf_OverRide*(1.0-(double)j/(double)nMax) );
+                                    } else {
+                                        glColor4f( Group->Sat[i].sglRed, Group->Sat[i].sglGrn, Group->Sat[i].sglBlu, Group->Sat[i].sglAlf*(1.0-(double)j/(double)nMax) );
+                                    }
                                     glVertex3f( Ugsm[j].x, Ugsm[j].y, Ugsm[j].z );
                                     glVertex3f( uu.x, uu.y, uu.z );
                                 }
@@ -3373,7 +3496,7 @@ glLineWidth( 2.0 );
                                 if ( FLL > 0.0 ){
                                     Lgm_TraceLine3( &v1[j], FLL, 100, 1.0, 1e-7, 0, mInfo );
 
-                                    if ( Group->Sat[i].DrawStreakFieldLines && (j%5==0) ) {
+                                    if ( Group->Sat[i].DrawStreakFieldLines && (j%4==0) ) {
 
                                         /*
                                         glLineWidth( 2.0 );
@@ -3412,7 +3535,13 @@ glLineWidth( 2.0 );
                                                 T1[ns].x = Tx[jj];   T1[ns].y = Ty[jj];   T1[ns].z = Tz[jj];
                                                 P2[ns].x = Px[jj+1]; P2[ns].y = Py[jj+1]; P2[ns].z = Pz[jj+1];
                                                 T2[ns].x = Tx[jj+1]; T2[ns].y = Ty[jj+1]; T2[ns].z = Tz[jj+1];
-                                                FC[ns].x = Group->Sat[i].sRed; FC[ns].y = Group->Sat[i].sGrn; FC[ns].z = Group->Sat[i].sBlu;
+                                                if ( Group->OverRideOrbitColors ) {
+                                                    FC1[ns].r = Group->sflRed_OverRide; FC1[ns].g = Group->sflGrn_OverRide; FC1[ns].b = Group->sflBlu_OverRide; FC1[ns].a = Group->sflAlf_OverRide;//*(1.0-(double)jj/(double)nMax);
+                                                    FC2[ns].r = Group->sflRed_OverRide; FC2[ns].g = Group->sflGrn_OverRide; FC2[ns].b = Group->sflBlu_OverRide; FC2[ns].a = Group->sflAlf_OverRide;//*(1.0-(double)(jj+1)/(double)nMax);
+                                                } else {
+                                                    FC1[ns].r = Group->Sat[i].sRed; FC1[ns].g = Group->Sat[i].sGrn; FC1[ns].b = Group->Sat[i].sBlu; FC1[ns].a = Group->Sat[i].sAlf;//*(1.0-(double)jj/(double)nMax);
+                                                    FC2[ns].r = Group->Sat[i].sRed; FC2[ns].g = Group->Sat[i].sGrn; FC2[ns].b = Group->Sat[i].sBlu; FC2[ns].a = Group->Sat[i].sAlf;//*(1.0-(double)(jj+1)/(double)nMax);
+                                                }
                                                 ++ns;
                                             }
                                         }
@@ -3432,7 +3561,11 @@ glLineWidth( 2.0 );
                                         if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_N_LOBE) ) {
                                             uu = v2[j];
                                             //Lgm_ForceMagnitude( &uu, 1.001 );
-                                            glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                            if ( Group->OverRideStreakColors ) {
+                                                glColor4f( Group->sfpRed_OverRide, Group->sfpGrn_OverRide, Group->sfpBlu_OverRide, Group->sfpAlf_OverRide*(1.0-(double)j/(double)nMax) );
+                                            } else {
+                                                glColor4f( Group->Sat[i].sfpRed, Group->Sat[i].sfpGrn, Group->Sat[i].sfpBlu, Group->Sat[i].sfpAlf*(1.0-(double)j/(double)nMax) );
+                                            }
                                             Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
                                             Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
                                             glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
@@ -3445,7 +3578,11 @@ glLineWidth( 2.0 );
                                         if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) ) {
                                             uu = v1[j];
                                             //Lgm_ForceMagnitude( &uu, 1.001 );
-                                            glColor4f( Group->Sat[i].sgpRed, Group->Sat[i].sgpGrn, Group->Sat[i].sgpBlu, Group->Sat[i].sgpAlf*(1.0-(double)j/(double)nMax) );
+                                            if ( Group->OverRideStreakColors ) {
+                                                glColor4f( Group->sfpRed_OverRide, Group->sfpGrn_OverRide, Group->sfpBlu_OverRide, Group->sfpAlf_OverRide*(1.0-(double)j/(double)nMax) );
+                                            } else {
+                                                glColor4f( Group->Sat[i].sfpRed, Group->Sat[i].sfpGrn, Group->Sat[i].sfpBlu, Group->Sat[i].sfpAlf*(1.0-(double)j/(double)nMax) );
+                                            }
                                             Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
                                             Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
                                             glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
@@ -4038,7 +4175,7 @@ void DrawIlluminatedLines2( double *Px, double *Py, double *Pz, double *Tx, doub
 /*
  * This one will attempt to do a full depth sort first.
  */
-void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_Vector *T2, Lgm_Vector *FC, long int nSegments, double alf ){
+void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_Vector *T2, COLOR *FC1, COLOR *FC2, long int nSegments ){
 
     long int i, j;
     float c[4], CameraPos[3], LightPos[3];
@@ -4066,11 +4203,6 @@ void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_
     }
     quicksort2uli( nSegments, Depth, Index );
 
-
-
-    // Need to make color an attribute variabnle if we want to pass per vertex.
-    // which we would need to do if we are depth sorting...
-    //c[0] = FC[0].x; c[1] = FC[0].y; c[2] = FC[0].z; c[3] = alf;
 
 
     GLint  TangLoc         = glGetAttribLocation(  g_shaderMyTest2, "Tang" );
@@ -4126,11 +4258,11 @@ void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_
 
             i = Index[j];
 
-            glVertexAttrib4f( VertColorLoc, FC[i].x, FC[i].y, FC[i].z, alf );
+            glVertexAttrib4f( VertColorLoc, FC1[i].r, FC1[i].g, FC1[i].b, FC1[i].a );
             glVertexAttrib3f( TangLoc, T1[i].x, T1[i].y, T1[i].z );
             glVertex3f( P1[i].x, P1[i].y, P1[i].z );
 
-            glVertexAttrib4f( VertColorLoc, FC[i].x, FC[i].y, FC[i].z, alf );
+            glVertexAttrib4f( VertColorLoc, FC2[i].r, FC2[i].g, FC2[i].b, FC2[i].a );
             glVertexAttrib3f( TangLoc, T2[i].x, T2[i].y, T2[i].z );
             glVertex3f( P2[i].x, P2[i].y, P2[i].z );
 
@@ -4584,7 +4716,7 @@ glFrontFace(GL_CCW);
  * Plot in depth order.
  */
 if ( FL_Arrs_Alloced && (nFL_Arr > 0 ) ) {
-DrawIlluminatedLines3( P1, P2, T1, T2, FC, nFL_Arr, 0.8 );
+DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
 }
 
 
@@ -5823,9 +5955,9 @@ if (1==1){
 //    gtk_label_set_markup( tle.Line0Label, TLEs[0].Line0 ); 
 //    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( GTK_LABEL(tle.Line1Label), Str ); 
     //sprintf( Str, "<b><tt>%s</tt></b>", TLEs[0].Line1 ); gtk_label_set_markup( tle.Line1Label, Str ); 
-    gtk_label_set_markup( tle.Line0Label, TLEs[0].Line0 ); 
-    gtk_label_set_markup( tle.Line1Label, TLEs[0].Line1 ); 
-    gtk_label_set_markup( tle.Line2Label, TLEs[0].Line2 ); 
+    gtk_label_set_markup( GTK_LABEL(tle.Line0Label), TLEs[0].Line0 ); 
+    gtk_label_set_markup( GTK_LABEL(tle.Line1Label), TLEs[0].Line1 ); 
+    gtk_label_set_markup( GTK_LABEL(tle.Line2Label), TLEs[0].Line2 ); 
 //    sprintf( Str, "<b><tt><big><span>%s</span></big></tt></b>", TLEs[0].Line2 ); gtk_label_set_markup( GTK_LABEL(tle.Line2Label), Str ); 
 
 

@@ -30,15 +30,103 @@ void ChangeSatColor( GtkWidget  *button, gpointer data ) {
 
     switch ( ButtonNumber ) {
 
-        case 0:
+        // For Sat or Single position group of buttons
+        case 11:
                 Group->SatRed_OverRide = Color.red/65535.0;
                 Group->SatGrn_OverRide = Color.green/65535.0;
                 Group->SatBlu_OverRide = Color.blue/65535.0;
                 Group->SatAlf_OverRide = Alpha/65535.0;
                 break;
+        case 12:
+                Group->ssglRed_OverRide = Color.red/65535.0;
+                Group->ssglGrn_OverRide = Color.green/65535.0;
+                Group->ssglBlu_OverRide = Color.blue/65535.0;
+                Group->ssglAlf_OverRide = Alpha/65535.0;
+                break;
+        case 13:
+                Group->ssflRed_OverRide = Color.red/65535.0;
+                Group->ssflGrn_OverRide = Color.green/65535.0;
+                Group->ssflBlu_OverRide = Color.blue/65535.0;
+                Group->ssflAlf_OverRide = Alpha/65535.0;
+                break;
+        case 14:
+                Group->ssfpRed_OverRide = Color.red/65535.0;
+                Group->ssfpGrn_OverRide = Color.green/65535.0;
+                Group->ssfpBlu_OverRide = Color.blue/65535.0;
+                Group->ssfpAlf_OverRide = Alpha/65535.0;
+                break;
+
+
+        // For Orbit group of buttons
+        case 20:
+                Group->oRed_OverRide = Color.red/65535.0;
+                Group->oGrn_OverRide = Color.green/65535.0;
+                Group->oBlu_OverRide = Color.blue/65535.0;
+                Group->oAlf_OverRide = Alpha/65535.0;
+                break;
+        case 21:
+                Group->ogpRed_OverRide = Color.red/65535.0;
+                Group->ogpGrn_OverRide = Color.green/65535.0;
+                Group->ogpBlu_OverRide = Color.blue/65535.0;
+                Group->ogpAlf_OverRide = Alpha/65535.0;
+                break;
+        case 22:
+                Group->oglRed_OverRide = Color.red/65535.0;
+                Group->oglGrn_OverRide = Color.green/65535.0;
+                Group->oglBlu_OverRide = Color.blue/65535.0;
+                Group->oglAlf_OverRide = Alpha/65535.0;
+                break;
+        case 23:
+                Group->oflRed_OverRide = Color.red/65535.0;
+                Group->oflGrn_OverRide = Color.green/65535.0;
+                Group->oflBlu_OverRide = Color.blue/65535.0;
+                Group->oflAlf_OverRide = Alpha/65535.0;
+                break;
+        case 24:
+                Group->ofpRed_OverRide = Color.red/65535.0;
+                Group->ofpGrn_OverRide = Color.green/65535.0;
+                Group->ofpBlu_OverRide = Color.blue/65535.0;
+                Group->ofpAlf_OverRide = Alpha/65535.0;
+                break;
+
+
+
+        // For Streak group of buttons
+        case 30:
+                Group->sRed_OverRide = Color.red/65535.0;
+                Group->sGrn_OverRide = Color.green/65535.0;
+                Group->sBlu_OverRide = Color.blue/65535.0;
+                Group->sAlf_OverRide = Alpha/65535.0;
+                break;
+        case 31:
+                Group->sglRed_OverRide = Color.red/65535.0;
+                Group->sglGrn_OverRide = Color.green/65535.0;
+                Group->sglBlu_OverRide = Color.blue/65535.0;
+                Group->sglAlf_OverRide = Alpha/65535.0;
+                break;
+        case 32:
+                Group->sflRed_OverRide = Color.red/65535.0;
+                Group->sflGrn_OverRide = Color.green/65535.0;
+                Group->sflBlu_OverRide = Color.blue/65535.0;
+                Group->sflAlf_OverRide = Alpha/65535.0;
+                break;
+        case 33:
+                Group->sfpRed_OverRide = Color.red/65535.0;
+                Group->sfpGrn_OverRide = Color.green/65535.0;
+                Group->sfpBlu_OverRide = Color.blue/65535.0;
+                Group->sfpAlf_OverRide = Alpha/65535.0;
+                break;
+        case 34:
+                Group->sfpRed_OverRide = Color.red/65535.0;
+                Group->sfpGrn_OverRide = Color.green/65535.0;
+                Group->sfpBlu_OverRide = Color.blue/65535.0;
+                Group->sfpAlf_OverRide = Alpha/65535.0;
+                break;
 
     }
             
+    ReCreateSats();
+    ReCreateSatOrbits();
     expose_event( drawing_area, NULL, NULL );
 
 }

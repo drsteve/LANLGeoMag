@@ -39,15 +39,15 @@ typedef struct _SpaceObjectItem {
 
 
 
-    int     DrawLabel;                  // whether to draw the label
+    int     DrawLabel;                          // whether to draw the label
 
     int     DrawSatToGroundLine;                // whether to draw a line from the sat to the ground 
     float   ssglRed, ssglGrn, ssglBlu, ssglAlf; // Color of ground path.
 
-    int     DrawSatFieldLines;          // controls drawing Field lines from sat position.
+    int     DrawSatFieldLines;                  // controls drawing Field lines from sat position.
     float   ssflRed, ssflGrn, ssflBlu, ssflAlf; // Color of field lines.
 
-    int     DrawSatFLFootpoints;        // controls drawing Footpoints from Sat position.
+    int     DrawSatFLFootpoints;                // controls drawing Footpoints from Sat position.
     float   ssfpRed, ssfpGrn, ssfpBlu, ssfpAlf; // Color of footpoints.
 
 
@@ -55,20 +55,20 @@ typedef struct _SpaceObjectItem {
 
 
 
-    int     DrawOrbit;                  // whether to draw full orbit
-    float   oRed, oGrn, oBlu, oAlf;     // Color of Orbit
-    double  oPeriodFrac;                // Fraction of an orbital period to show
-                                        // (centered on current position)
-    int     DrawGroundPathOfOrbit;      // whether to draw ground path of orbit
+    int     DrawOrbit;                      // whether to draw full orbit
+    float   oRed, oGrn, oBlu, oAlf;         // Color of Orbit
+    double  oPeriodFrac;                    // Fraction of an orbital period to show
+                                            // (centered on current position)
+    int     DrawGroundPathOfOrbit;          // whether to draw ground path of orbit
     float   ogpRed, ogpGrn, ogpBlu, ogpAlf; // Color of ground path.
 
     int     DrawOrbitToGroundLines;         // whether to draw lines from the sat to the ground 
     float   oglRed, oglGrn, oglBlu, oglAlf; // Color of ground path.
 
-    int     DrawOrbitFieldLines;        // controls drawing Field lines from orbit positions.
+    int     DrawOrbitFieldLines;            // controls drawing Field lines from orbit positions.
     float   oflRed, oflGrn, oflBlu, oflAlf; // Color of field lines.
 
-    int     DrawOrbitFLFootpoints;      // controls drawing Footpoints from orbit positions.
+    int     DrawOrbitFLFootpoints;          // controls drawing Footpoints from orbit positions.
     float   ofpRed, ofpGrn, ofpBlu, ofpAlf; // Color of footpoints.
 
 
@@ -77,9 +77,9 @@ typedef struct _SpaceObjectItem {
 
 
 
-    int     DrawStreak;                 // whether to draw streaks
-    float   sRed, sGrn, sBlu, sAlf;     // Color of Streak
-    double  sPeriodFrac;                // Fraction of an orbital period to show as a streak
+    int     DrawStreak;                     // whether to draw streaks
+    float   sRed, sGrn, sBlu, sAlf;         // Color of Streak
+    double  sPeriodFrac;                    // Fraction of an orbital period to show as a streak
 
     int     DrawGroundPathOfStreak;         // whether to draw ground path of orbit
     float   sgpRed, sgpGrn, sgpBlu, sgpAlf; // Color of ground path.
@@ -88,10 +88,10 @@ typedef struct _SpaceObjectItem {
     float   sglRed, sglGrn, sglBlu, sglAlf; // Color of ground path.
 
 
-    int     DrawStreakFieldLines;        // controls drawing Field lines from Streak positions.
+    int     DrawStreakFieldLines;           // controls drawing Field lines from Streak positions.
     float   sflRed, sflGrn, sflBlu, sflAlf; // Color of field lines.
 
-    int     DrawStreakFLFootpoints;      // controls drawing Footpoints from Streak positions.
+    int     DrawStreakFLFootpoints;         // controls drawing Footpoints from Streak positions.
     float   sfpRed, sfpGrn, sfpBlu, sfpAlf; // Color of footpoints.
 
 
@@ -137,22 +137,22 @@ typedef struct _SpaceObjects {
 
 
     // OverRide Colors (per-group)
-    float   SatRed_OverRide,  SatGrn_OverRide,  SatBlu_OverRide,  SatAlf_OverRide;
-    float   ssglRed_OverRide, ssglGrn_OverRide, ssglBlu_OverRide, ssglAlf_OverRide; // Color of ground path.0l-0
-    float   ssflRed_OverRide, ssflGrn_OverRide, ssflBlu_OverRide, ssflAlf_OverRide; // Color of ground path.0l-0
-    float   ssfpRed_OverRide, ssfpGrn_OverRide, ssfpBlu_OverRide, ssfpAlf_OverRide; // Color of ground path.0l-0
+    float   SatRed_OverRide,  SatGrn_OverRide,  SatBlu_OverRide,  SatAlf_OverRide;  // Sat
+    float   ssglRed_OverRide, ssglGrn_OverRide, ssglBlu_OverRide, ssglAlf_OverRide; // Single Sat to ground line
+    float   ssflRed_OverRide, ssflGrn_OverRide, ssflBlu_OverRide, ssflAlf_OverRide; // Single Field Line
+    float   ssfpRed_OverRide, ssfpGrn_OverRide, ssfpBlu_OverRide, ssfpAlf_OverRide; // Single Footpoint
 
-    float   oRed_OverRide,   oGrn_OverRide,   oBlu_OverRide,   oAlf_OverRide;
-    float   ogpRed_OverRide, ogpGrn_OverRide, ogpBlu_OverRide, ogpAlf_OverRide; // Color of ground path.0l-0
-    float   oglRed_OverRide, oglGrn_OverRide, oglBlu_OverRide, oglAlf_OverRide; // Color of ground path.0l-0
-    float   oflRed_OverRide, oflGrn_OverRide, oflBlu_OverRide, oflAlf_OverRide; // Color of ground path.0l-0
-    float   ofpRed_OverRide, ofpGrn_OverRide, ofpBlu_OverRide, ofpAlf_OverRide; // Color of ground path.0l-0
+    float   oRed_OverRide,   oGrn_OverRide,   oBlu_OverRide,   oAlf_OverRide;       // Orbit
+    float   ogpRed_OverRide, ogpGrn_OverRide, ogpBlu_OverRide, ogpAlf_OverRide;     // Orbit ground path
+    float   oglRed_OverRide, oglGrn_OverRide, oglBlu_OverRide, oglAlf_OverRide;     // Orbit to ground lines
+    float   oflRed_OverRide, oflGrn_OverRide, oflBlu_OverRide, oflAlf_OverRide;     // Orbit Field Lines
+    float   ofpRed_OverRide, ofpGrn_OverRide, ofpBlu_OverRide, ofpAlf_OverRide;     // Orbit Footpoint Path
      
-    float   sRed_OverRide,   sGrn_OverRide,   sBlu_OverRide,   sAlf_OverRide;
-    float   sgpRed_OverRide, sgpGrn_OverRide, sgpBlu_OverRide, sgpAlf_OverRide; // Color of ground path.0l-0
-    float   sglRed_OverRide, sglGrn_OverRide, sglBlu_OverRide, sglAlf_OverRide; // Color of ground path.0l-0
-    float   sflRed_OverRide, sflGrn_OverRide, sflBlu_OverRide, sflAlf_OverRide; // Color of ground path.0l-0
-    float   sfpRed_OverRide, sfpGrn_OverRide, sfpBlu_OverRide, sfpAlf_OverRide; // Color of ground path.0l-0
+    float   sRed_OverRide,   sGrn_OverRide,   sBlu_OverRide,   sAlf_OverRide;       // Streak
+    float   sgpRed_OverRide, sgpGrn_OverRide, sgpBlu_OverRide, sgpAlf_OverRide;     // Streak ground path
+    float   sglRed_OverRide, sglGrn_OverRide, sglBlu_OverRide, sglAlf_OverRide;     // Streak to ground lines
+    float   sflRed_OverRide, sflGrn_OverRide, sflBlu_OverRide, sflAlf_OverRide;     // Streak Field Lines
+    float   sfpRed_OverRide, sfpGrn_OverRide, sfpBlu_OverRide, sfpAlf_OverRide;     // Streak Footpoint Path
      
 
 
