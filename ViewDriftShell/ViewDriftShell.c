@@ -4254,7 +4254,7 @@ printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
     glDisable(GL_LIGHTING);
     glEnable(GL_LINE_SMOOTH);
     
-    glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable (GL_BLEND); glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glLineWidth( (float)IllumFL_w );
     glBegin( GL_LINES );
@@ -4425,11 +4425,11 @@ if (LightingStyle == 2){
 
 
 
-glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
-glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
-glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
-glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
-glCallList( ObjInfo->MiscFieldLines );
+//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
+//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
+//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
+//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
+//glCallList( ObjInfo->MiscFieldLines );
 
 
 
@@ -4439,7 +4439,7 @@ glCallList( ObjInfo->MiscFieldLines );
          * We want to show all of the PAs
          */
 
-ShowFullFieldLine = 1;
+//ShowFullFieldLine = 1;
         if ( ShowFullFieldLine ){
             for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
@@ -8266,7 +8266,7 @@ GtkWidget *PitchAngleDisplayProperties(){
         g_signal_connect( G_OBJECT( gInfo->DriftShellSpecularColorButton[i] ), "color-set", G_CALLBACK( ChangeMaterialColor ), GINT_TO_POINTER(100+(i)*3+2) );
         ++col;
 
-        spinbutton1_adj = gtk_adjustment_new( 0.15, 0, 1, 0.01, 0.1, 0 );
+        spinbutton1_adj = gtk_adjustment_new( 0.15, 0.0, 512.0, 0.01, 0.1, 0 );
         gInfo->DriftShellShininessButton[i]  = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton1_adj), 1, 2); gtk_widget_show( gInfo->DriftShellShininessButton[i]  );
         gtk_widget_set_size_request( gInfo->DriftShellShininessButton[i], 30, 20);
         gtk_table_attach( GTK_TABLE(table1), gInfo->DriftShellShininessButton[i] , col, col+1, 3+i, 4+i, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(GTK_SHRINK), 0, 0 );

@@ -111,7 +111,7 @@ static char doc[] =
 
 "The %B variable will also get substituted by the list of birds given in the -b option.  Here is an example using time-variables.\n\n"
 
-"\t./MagEphemFromTLE -S 20020901 -E 20020930 setup.ker \n"
+"\t./MagEphemFromTLE -S 20020901 -E 20020930 TLE_FILE.txt \n"
 "\t\t/home/jsmith/MagEphemStuff/%YYYY/%YYYY%MM%DD_1989-046_MagEphem.txt.  \n"
 "\n"
 

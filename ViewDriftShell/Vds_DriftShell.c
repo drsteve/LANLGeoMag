@@ -208,7 +208,7 @@ void CreateFieldLinesAndDriftShells( char *Filename, Vds_ObjectInfo *ObjInfo ){
     ReadMagEphemInfoStruct( Filename, &ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo );
     printf( "\t     Date/Time: %ld/%g\n", ObjInfo->MagEphemInfo->Date, ObjInfo->MagEphemInfo->UTC );
     printf( "\t# Pitch Angles: %d\n", ObjInfo->MagEphemInfo->nAlpha );
-if (0==1){
+if (1==1){
 //return;
 
 printf("%d %d %d\n", ObjInfo->nPitchAngles, ObjInfo->MagEphemInfo->nShellPoints[0], ObjInfo->MagEphemInfo->nFieldPnts[0][0]);
@@ -257,6 +257,8 @@ int kk;
     MakeFieldLines( 80, ObjInfo ); // FIX -- The 80 should be user setable.
     MakeDriftShellMesh( ObjInfo ); // FIX -- Should be able to control number of points.
 }
+
+
 
 }
 
@@ -744,6 +746,8 @@ MakeTube( ObjInfo->x_gsm[i][ns], ObjInfo->y_gsm[i][ns], ObjInfo->z_gsm[i][ns], O
 
 
                 // Field Lines
+//printf("ObjInfo->nFieldPoints[i] = %d\n", ObjInfo->nFieldPoints[i]);
+//exit(0);
                 MakeTube( ObjInfo->x3_gsm[i][ns], ObjInfo->y3_gsm[i][ns], ObjInfo->z3_gsm[i][ns], ObjInfo->nFieldPoints[i], 12, 0.0375/2.0 );
 
 

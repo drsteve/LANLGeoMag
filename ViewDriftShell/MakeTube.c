@@ -253,6 +253,8 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
 
 //	fp = fopen("Line.pov", "w");
 //	fprintf(fp, "mesh{\n");
+//printf("NumCurvePoints = %d\n", NumCurvePoints );
+//printf("NumCirclePoints = %d\n", NumCirclePoints );
     glBegin( GL_TRIANGLES );
 	for (i=0; i < NumCurvePoints-1; ++i){
 		for (j=0; j<NumCirclePoints; ++j){
@@ -274,6 +276,7 @@ void MakeTube(double *X, double *Y, double *Z, int NumCurvePoints, int NumCircle
             glNormal3f( n1[0], n1[1], n1[2] ); glVertex3f( v1[0], v1[1], v1[2] );  
             glNormal3f( n2[0], n2[1], n2[2] ); glVertex3f( v2[0], v2[1], v2[2] );  
             glNormal3f( n3[0], n3[1], n3[2] ); glVertex3f( v3[0], v3[1], v3[2] );  
+//printf("v1[0], v1[1], v1[2] = %g %g %g\n", v1[0], v1[1], v1[2] );
 
 //			fprintf(fp, "smooth_triangle { <%f, %f, %f>, <%f, %f, %f>,", v1[0], v1[1], v1[2], n1[0], n1[1], n1[2]);
 //			fprintf(fp, " <%f, %f, %f>, <%f, %f, %f>,", v2[0], v2[1], v2[2], n2[0], n2[1], n2[2]);
