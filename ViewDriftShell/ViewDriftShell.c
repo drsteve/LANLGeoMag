@@ -377,6 +377,21 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
     DipoleTiltAngle = mInfo->c->psi*DegPerRad;;
 
+/*
+ *  Convert the dipole offset components to SM coords.
+ *  We may not wnat this in there....
+ */
+u.x = mInfo->c->ED_x0; u.y = mInfo->c->ED_y0; u.z = mInfo->c->ED_z0;
+Lgm_Convert_Coords( &u, &DipoleOffset_sm, GEO_TO_SM, mInfo->c );
+
+
+
+// Set Position of sun
+u.x = 1.0, u.y = u.z = 0.0;
+Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
+Sun        = v;
+aInfo->Sun = v; // This is the struct for the Atmosphere stuff
+//printf(" Sun = %g %g %g\n", v.x, v.y, v.z);
 
 
     /*
@@ -468,16 +483,16 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
      *  Convert the dipole offset components to SM coords.
      *  We may not wnat this in there....
      */
-    u.x = mInfo->c->ED_x0; u.y = mInfo->c->ED_y0; u.z = mInfo->c->ED_z0;
-    Lgm_Convert_Coords( &u, &DipoleOffset_sm, GEO_TO_SM, mInfo->c );
+////    u.x = mInfo->c->ED_x0; u.y = mInfo->c->ED_y0; u.z = mInfo->c->ED_z0;
+////    Lgm_Convert_Coords( &u, &DipoleOffset_sm, GEO_TO_SM, mInfo->c );
 
 
 
     // Set Position of sun
-    u.x = 1.0, u.y = u.z = 0.0;
-    Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
-    Sun        = v;
-    aInfo->Sun = v; // This is the struct for the Atmosphere stuff
+////    u.x = 1.0, u.y = u.z = 0.0;
+////    Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
+////    Sun        = v;
+////    aInfo->Sun = v; // This is the struct for the Atmosphere stuff
     //printf(" Sun = %g %g %g\n", v.x, v.y, v.z);
 
 
@@ -922,7 +937,7 @@ int         ShowIridiumSatToGround  =  0;
 int         ShowIridiumSatToSun     =  0;
 int         ShowPitchAngle[90];
 int         ShowPitchAngle2[90];
-int         LightingStyle           =  0;
+int         LightingStyle           =  2;
 
 int         nSatTypes = 12;
 int         ShowSatellites[12];
@@ -1165,8 +1180,9 @@ static float view_scale          = 4.0;
 
 
 int IdleRunning = FALSE;
-int AnimateView = TRUE;
-int AnimateTime = TIME_REALTIMEPLAY;
+int AnimateView = FALSE;
+//int AnimateTime = TIME_REALTIMEPLAY;
+int AnimateTime = TIME_STOP;
 
 static void toggle_animation (GtkWidget *widget);
 static void AdjustIdle( GtkWidget *widget );
@@ -1702,6 +1718,7 @@ void CreateEarth( ){
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
         glEnable( GL_TEXTURE_2D );
         glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
+printf("CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
         glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
         CreateEllipsoid( 1.0, (double)(WGS84_B/WGS84_A), 80 );
         glDisable( GL_TEXTURE_2D );
@@ -3122,6 +3139,8 @@ void CreateSatOrbits() {
     JD = CurrentJD;
 
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
+mInfo->fKp = 5.0;
+mInfo->Kp = 5;
 
     SatOrbitsDL = glGenLists( 1 );
     glNewList( SatOrbitsDL, GL_COMPILE );
@@ -4393,44 +4412,6 @@ CHECK COORDS!
 
 
 
-if (LightingStyle == 2){
-//  cgGLBindProgram(myCgVertexProgram);
-//  checkForCgError("binding vertex program");
-//  cgGLEnableProfile(myCgVertexProfile);
-//  checkForCgError("enabling vertex profile");
-//  cgGLBindProgram(myCgFragmentProgram);
-//  checkForCgError("binding fragment program");
-//  cgGLEnableProfile(myCgFragmentProfile);
-//  checkForCgError("enabling fragment profile");
-}
-/*
-*/
-
-//    glUseProgram( g_shaderMyTest );
-//    GLint   SurfaceColorLoc = glGetUniformLocation( g_shaderMyTest, "SurfaceColor" );
-//    GLint   PLoc            = glGetUniformLocation( g_shaderMyTest, "P" );
-//    GLint   ALoc            = glGetUniformLocation( g_shaderMyTest, "A" );
-//    GLint   ScaleLoc        = glGetUniformLocation( g_shaderMyTest, "Scale" );
-//    GLint   LightDirLoc     = glGetUniformLocation( g_shaderMyTest, "LightDir" );
-//    GLint   ViewPositionLoc = glGetUniformLocation( g_shaderMyTest, "ViewPosition" );
-//    GLfloat SurfaceColor[4], ViewPosition[3];
-//
-//ViewPosition[0] = aInfo->Camera.x;
-//ViewPosition[1] = aInfo->Camera.y;
-//ViewPosition[2] = aInfo->Camera.z;
-//glUniform3fv( ViewPositionLoc, 1, LightPosition );
-//glUniform3fv( LightDirLoc, 1, LightPosition );
-
-
-
-
-
-//glMaterialfv( GL_FRONT, GL_AMBIENT,   mat_blue_plastic.ambient);
-//glMaterialfv( GL_FRONT, GL_DIFFUSE,   mat_blue_plastic.diffuse);
-//glMaterialfv( GL_FRONT, GL_SPECULAR,  mat_blue_plastic.specular);
-//glMaterialf(  GL_FRONT, GL_SHININESS, mat_blue_plastic.shininess * 128.0);
-//glCallList( ObjInfo->MiscFieldLines );
-
 
 
 
@@ -4446,11 +4427,6 @@ if (LightingStyle == 2){
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
                 glMaterialfv( GL_FRONT, GL_SPECULAR,  gInfo->FieldLineMaterial[i].specular );
                 glMaterialf(  GL_FRONT, GL_SHININESS, gInfo->FieldLineMaterial[i].shininess*128.0 );
-//SurfaceColor[0] = gInfo->FieldLineMaterial[i].diffuse[0];
-//SurfaceColor[1] = gInfo->FieldLineMaterial[i].diffuse[1];
-//SurfaceColor[2] = gInfo->FieldLineMaterial[i].diffuse[2];
-//SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
-//glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
                 glCallList( ObjInfo->DriftShellList2 + i );
             }
         } else {
@@ -4459,11 +4435,6 @@ if (LightingStyle == 2){
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
                 glMaterialfv( GL_FRONT, GL_SPECULAR,  gInfo->FieldLineMaterial[i].specular );
                 glMaterialf(  GL_FRONT, GL_SHININESS, gInfo->FieldLineMaterial[i].shininess*128.0 );
-//SurfaceColor[0] = gInfo->FieldLineMaterial[i].diffuse[0];
-//SurfaceColor[1] = gInfo->FieldLineMaterial[i].diffuse[1];
-//SurfaceColor[2] = gInfo->FieldLineMaterial[i].diffuse[2];
-//SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
-//glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
                 glCallList( ObjInfo->DriftShellList3 + i );
             }
         }
@@ -4480,11 +4451,6 @@ if (LightingStyle == 2){
                 glMaterialfv( GL_FRONT, GL_AMBIENT,   gInfo->FieldLineMaterial[i].ambient );
                 glMaterialfv( GL_FRONT, GL_SPECULAR,  gInfo->FieldLineMaterial[i].specular );
                 glMaterialf(  GL_FRONT, GL_SHININESS, gInfo->FieldLineMaterial[i].shininess*128.0 );
-//SurfaceColor[0] = gInfo->FieldLineMaterial[i].diffuse[0];
-//SurfaceColor[1] = gInfo->FieldLineMaterial[i].diffuse[1];
-//SurfaceColor[2] = gInfo->FieldLineMaterial[i].diffuse[2];
-//SurfaceColor[3] = gInfo->FieldLineMaterial[i].diffuse[3];
-//glUniform4fv( SurfaceColorLoc, 1, SurfaceColor );
                 if ( ShowFullFieldLine ){
                     glCallList( ObjInfo->DriftShellList2 + i );
                 } else {
@@ -4495,7 +4461,6 @@ if (LightingStyle == 2){
 
     }
 
-//    glUseProgram(0);
 
 
 
@@ -4617,27 +4582,6 @@ if (LightingStyle == 2){
 //glCallList( TopSideDL );
 //glCallList( MeridPlane1DL );
 //glCallList( MeridPlane2DL );
-
-
-
-
-
-
-
-
-
-
-
-
-if (LightingStyle == 2){
-//cgGLDisableProfile(myCgVertexProfile);
-//checkForCgError("disabling vertex profile");
-//cgGLDisableProfile(myCgFragmentProfile);
-//checkForCgError("disabling fragment profile");
-}
-
-
-
 
 
     if ( ShowAtmosphere ){
@@ -4826,8 +4770,6 @@ DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
         glCallList( EqPlaneGridDL );
 
     }
-
-
 
 
 }
@@ -5165,7 +5107,7 @@ static gboolean motion_notify_event( GtkWidget *widget, GdkEventMotion *event, g
 static gboolean idle( GtkWidget *widget ) {
 
     static int  AllowSave = TRUE;
-    double      oJD;
+    double      oJD, SignedTimeInc;
     char        Str[256];
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
 
@@ -5187,6 +5129,10 @@ static gboolean idle( GtkWidget *widget ) {
          || (AnimateTime == TIME_REALTIMEPLAY) ) {
 
 
+        if ( (AnimateTime == TIME_STEP_BACKWARD) || (AnimateTime == TIME_PLAY_BACKWARD) ) SignedTimeInc = -TimeInc;
+        else SignedTimeInc = TimeInc;
+printf("MIKE MIKE MIKE: SignedTimeInc = %g\n", SignedTimeInc);
+
         ++cFrame;
         oJD = CurrentJD;
         if ( AnimateTime == TIME_REALTIMEPLAY ) {
@@ -5194,7 +5140,7 @@ static gboolean idle( GtkWidget *widget ) {
             CurrentJD = Lgm_GetCurrentJD( c );
         } else {
             --nFramesLeft;
-            CurrentJD += TimeInc/86400.0;
+            CurrentJD += SignedTimeInc/86400.0;
         }
 
         if ( oJD != CurrentJD ){
@@ -5594,6 +5540,7 @@ void TimeAction( GtkWidget *widget, gpointer data ) {
     switch ( k ) {
         case TIME_RESET_BACKWARD_TO_START:
         case TIME_RESET_FOREWARD_TO_END:
+printf("AAAAA    CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
 
                 if ( k == TIME_RESET_BACKWARD_TO_START ) {
                     printf("Reset Current Time to Start Time...\n");
@@ -5616,10 +5563,14 @@ void TimeAction( GtkWidget *widget, gpointer data ) {
 if (k== TIME_RESET_BACKWARD_TO_START)
 printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
                 UpdateTimeDepQuants( CurrentDate, CurrentUT );
+                UpdateTimeDepQuants( CurrentDate, CurrentUT );
 
                 cFrame = 0;
-                if ( CurrentJD >= EndJD ) { nFramesLeft = 0;
-                } else {                    nFramesLeft = (long int)((EndJD - CurrentJD) / (TimeInc/86400.0) +1.5); }
+                if ( CurrentJD >= EndJD ) { 
+                    nFramesLeft = 0;
+                } else {
+                    nFramesLeft = (long int)((EndJD - CurrentJD) / (TimeInc/86400.0) +1.5); 
+                }
                 nFrames = cFrame + nFramesLeft;
 
                 ReCreateEarth( );
@@ -5628,7 +5579,6 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 if (ShowStars) ReLoadStars( );
                 ReCreateSats();
                 ReCreateSatOrbits();
-                printf("A\n"); expose_event( drawing_area, NULL, NULL );
 
                 sprintf(Str, "Current Time: %4d/%02d/%02d  %02d:%02d:%02d.%03d\n  UT = %.8lf  JD = %.8lf", CurrentYear, CurrentMonth, CurrentDay,
                                                     CurrentHour, CurrentMin, CurrentSec, CurrentMilliSec, CurrentUT, CurrentJD );
@@ -5638,6 +5588,8 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 //sprintf(Str, "Current Frame: %ld / %ld", cFrame, nFrames);
                 sprintf(Str, "Frames Done: %ld    Frames Remaining: %ld    (Total: %ld)", cFrame, nFramesLeft, nFrames);
                 gtk_label_set_text( GTK_LABEL(cFramesLabel), Str );
+                printf("A\n"); expose_event( drawing_area, NULL, NULL );
+printf("BBBBB    CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
 
                 break;
 
@@ -5652,6 +5604,10 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 break;
 
         case TIME_STEP_BACKWARD:
+                StepTime    = TRUE;
+                RunTime     = FALSE;
+                AnimateTime = TIME_STEP_BACKWARD;
+                AdjustIdle( drawing_area );
                 printf("Step Current Time back by TimeInc seconds...\n");
 
                 break;
@@ -9723,23 +9679,11 @@ int main( int argc, char *argv[] ) {
      */
     ObjInfo = Vds_InitObjectInfo();
 
+
+
     /*
-     * Create the FLs and DSs from data in a file.
+     * Set default time, parameters
      */
-    CreateFieldLinesAndDriftShells( "test.dat", ObjInfo );
-
-
-
-
-
-
-    aInfo = New_aInfo();
-    InitAtmosphere();
-
-    InitSatSelectorInfo();
-
-
-
     StartYear  = 2017; StartMonth = 1; StartDay   = 1;
 //StartYear  = 2009; StartMonth = 4; StartDay   = 20;
     StartDate  = StartYear*10000 + StartMonth*100 + StartDay;
@@ -9770,6 +9714,31 @@ int main( int argc, char *argv[] ) {
     DumpFrames  = FALSE;
 
     mInfo  = Lgm_InitMagInfo( );
+
+
+
+    /*
+     * Create the FLs and DSs from data in a file.
+     */
+    CreateFieldLinesAndDriftShells( "test.dat", ObjInfo );
+
+
+    /*
+     * Create Atmosphere 
+     */
+    aInfo = New_aInfo();
+    InitAtmosphere();
+
+
+
+
+    /*
+     * Create Sat Selector page
+     */
+    InitSatSelectorInfo();
+
+
+
     UpdateTimeDepQuants( CurrentDate, CurrentUT );
 
 
@@ -9891,6 +9860,9 @@ int main( int argc, char *argv[] ) {
 
 
     PitchAngleDisplayProperties();
+    UpdateTimeDepQuants( CurrentDate, CurrentUT );
+    ReCreateEarth( );
+    ReCreateMoon( );
 
     gtk_main( );
 

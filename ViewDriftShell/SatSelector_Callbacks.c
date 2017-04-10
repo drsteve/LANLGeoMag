@@ -107,22 +107,22 @@ void ChangeSatColor( GtkWidget  *button, gpointer data ) {
                 Group->sAlf_OverRide = Alpha/65535.0;
                 break;
         case 31:
+                Group->sgpRed_OverRide = Color.red/65535.0;
+                Group->sgpGrn_OverRide = Color.green/65535.0;
+                Group->sgpBlu_OverRide = Color.blue/65535.0;
+                Group->sgpAlf_OverRide = Alpha/65535.0;
+                break;
+        case 32:
                 Group->sglRed_OverRide = Color.red/65535.0;
                 Group->sglGrn_OverRide = Color.green/65535.0;
                 Group->sglBlu_OverRide = Color.blue/65535.0;
                 Group->sglAlf_OverRide = Alpha/65535.0;
                 break;
-        case 32:
+        case 33:
                 Group->sflRed_OverRide = Color.red/65535.0;
                 Group->sflGrn_OverRide = Color.green/65535.0;
                 Group->sflBlu_OverRide = Color.blue/65535.0;
                 Group->sflAlf_OverRide = Alpha/65535.0;
-                break;
-        case 33:
-                Group->sfpRed_OverRide = Color.red/65535.0;
-                Group->sfpGrn_OverRide = Color.green/65535.0;
-                Group->sfpBlu_OverRide = Color.blue/65535.0;
-                Group->sfpAlf_OverRide = Alpha/65535.0;
                 break;
         case 34:
                 Group->sfpRed_OverRide = Color.red/65535.0;

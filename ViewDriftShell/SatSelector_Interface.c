@@ -1072,50 +1072,57 @@ Never really use these anymore...
     hbox1 = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox1);
     gtk_box_pack_start (GTK_BOX (vbox1), hbox1, TRUE, TRUE, 0);
 
+
+    label = gtk_label_new (_("Illum FL Params, ka:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     spinbutton_adj = gtk_adjustment_new( IllumFL_ka, 0.0, 5.0, 0.05, .1, 0);
-    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 3); gtk_widget_show(spinbutton);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 2); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_ka );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 1 ) );
 
+    label = gtk_label_new (_("kd:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     spinbutton_adj = gtk_adjustment_new( IllumFL_kd, 0.0, 5.0, 0.05, .1, 0);
-    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 3); gtk_widget_show(spinbutton);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 2); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_kd );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 2 ) );
 
+    label = gtk_label_new (_("ks:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     spinbutton_adj = gtk_adjustment_new( IllumFL_ks, 0.0, 5.0, 0.05, .1, 0);
-    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 3); gtk_widget_show(spinbutton);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 2); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_ks );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 3 ) );
 
+    label = gtk_label_new (_("n:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     spinbutton_adj = gtk_adjustment_new( IllumFL_n, 0.0, 256.0, 0.1, 1.0, 0);
-    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 5); gtk_widget_show(spinbutton);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 1); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_n );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 4 ) );
 
+    label = gtk_label_new (_("w:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
     spinbutton_adj = gtk_adjustment_new( IllumFL_w, 0.0, 10.0, 0.05, .1, 0);
-    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 3); gtk_widget_show(spinbutton);
+    spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 2); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_w );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 5 ) );
 
-
-    button = gtk_button_new_with_mnemonic (_("Delete Group")); gtk_widget_show (button);
-    gtk_box_pack_end (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
-
-    button = gtk_button_new_with_mnemonic (_("Edit Group")); gtk_widget_show (button);
-    gtk_box_pack_end (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
-
-    button = gtk_button_new_with_mnemonic (_("Create Group")); gtk_widget_show (button);
-    gtk_box_pack_end (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
 
 
     return vbox1;
