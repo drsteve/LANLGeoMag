@@ -23,15 +23,35 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->InternalModel = LGM_IGRF;
 
     MagInfo->c     = Lgm_init_ctrans( 0 );
-    MagInfo->fKp   = 2.0;
-    MagInfo->Kp    = 2;
-    MagInfo->P     = 2.1; // SW pressure in nPa
     MagInfo->nFunc = 0;
-    MagInfo->Dst   = -5.0;
 
     MagInfo->B0    = 1.00;   // Should nominally be 1.0 See page 30 of Schultz and Lanzerotti, [1974]
     MagInfo->B1    = 0.8100; // See page 30 of Schultz and Lanzerotti, [1974]
     MagInfo->B2    = 0.4065; // See page 30 of Schultz and Lanzerotti, [1974]
+
+
+
+    /*
+     * QinDenton Defaults
+     * Make sure we have at least something for default values here.
+     */
+    MagInfo->Dst   =  -5.0; // nT
+    MagInfo->fKp   =   2.0; // dimensionless
+    MagInfo->Kp    =     2; // dimensionless
+    MagInfo->P     =   2.1; // Pressure in nPa
+    MagInfo->By    =   5.0; // IMF By in nT why are there two of these? (Maybe QinDenton codes introduced the new set?)
+    MagInfo->Bz    =  -5.0; // IMF Bz in nT
+    MagInfo->W[0]  =  0.44; // W1 these are avg values at status flag 2 (Table 3, Qin et al.)
+    MagInfo->W[1]  =  0.42; // W2
+    MagInfo->W[2]  =  0.66; // W3
+    MagInfo->W[3]  =  0.48; // W4
+    MagInfo->W[4]  =  0.49; // W5
+    MagInfo->W[5]  =  0.91; // W6
+    MagInfo->G1    =   6.0; // G1
+    MagInfo->G2    =  10.0; // G2
+    MagInfo->G3    =  60.0; // G3
+
+
 
     MagInfo->SavePoints = 0;
     MagInfo->Hmax       = 1.0;
