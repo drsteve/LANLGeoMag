@@ -37,14 +37,24 @@
 #include "ViewDriftShell.h"
 #include <Lgm_DynamicMemory.h>
 #include "Vds_DriftShell.h"
+#include <Lgm_QinDenton.h>
 #include <Lgm_Objects.h>
 #include <quicksort.h>
+#include <omp.h>
+
+int    g_imageWidth = 1024;
+int    g_imageHeight = 768;
+double g_imageRat;
 
 
-float  IllumFL_ka =  0.3;
-float  IllumFL_kd =  0.9;
-float  IllumFL_ks =  2.5;
-double IllumFL_n  =  128.0;
+// For scattered mesh field
+Lgm_KdTree *KdTree;
+
+
+float  IllumFL_ka =  0.1;
+float  IllumFL_kd =  0.6;
+float  IllumFL_ks =  2.0;
+double IllumFL_n  =  150.0;
 double IllumFL_w  =  1.0; // linewidth
 
 typedef struct COLOR {
@@ -57,8 +67,11 @@ typedef struct COLOR {
  */
 int         FL_Arrs_Alloced = 0;
 long int    nFL_Arr, MAX_SEGMENTS = 1000000;
+long int    *SegIndex; // for depth sorting line segments
+double      *SegDepth; // for depth sorting line segments
 Lgm_Vector  *P1, *P2, *T1, *T2;
 COLOR       *FC1, *FC2;
+int         *FL_FLAG;
 
 
 
@@ -162,6 +175,10 @@ Vds_ObjectInfo  *ObjInfo;
 
 void SolidCone( Lgm_Vector *u, double Fov, GLint slices, GLint stacks);
 void CreateCutEllipsoid( double ra, double rb, int n);
+int  Locate( double *t, int n, double T );
+int  Interp3DCurve( double *t, Lgm_Vector *u, int n,     double T, Lgm_Vector *U );
+int  GenIllumTextures( int N, double SpecularIndex, float **FdImage, float **FsImage );
+
 
 /*
  *  Menu Bar stuff
@@ -304,20 +321,23 @@ static float        LightModelTwoSide[] = {GL_TRUE};
 static float        LightModelOneSide[] = {GL_FALSE};
 
 //static float        myModelMatrix[16];
-static float        myCgViewMatrix[16];
-static float        myGlViewMatrix[16];
+//static float        myCgViewMatrix[16];
+//static float        myGlViewMatrix[16];
 //static float        myModelViewMatrix[16];
-static float        myGlProjectionMatrix[16];
-static float        myCgProjectionMatrix[16];
-static float        myCgModelViewProjectionMatrix[16];
+//static float        myGlProjectionMatrix[16];
+//static float        myCgProjectionMatrix[16];
+//static float        myCgModelViewProjectionMatrix[16];
 
 /*
  * Define names for Shaders
  */
-GLuint g_shaderMyTest;
-GLuint g_shaderMyTest2;
+GLuint ShaderIllumLines;
+GLuint ShaderIllumLines2;
+
+
 GLuint ShadeVertex;
 GLuint ShadeFragment;
+
 
 
 GLuint g_quadDisplayList;
@@ -356,6 +376,259 @@ void GoNormalScreen( gpointer callback_data, guint callback_action, GtkWidget *m
 
 
 
+/*
+ * Stuff for Dual Depth Peeling
+ */
+
+#define MAX_DEPTH 1.0
+GLenum Ddp_DrawBuffers[] = { GL_COLOR_ATTACHMENT0_EXT,
+                             GL_COLOR_ATTACHMENT1_EXT,
+                             GL_COLOR_ATTACHMENT2_EXT,
+                             GL_COLOR_ATTACHMENT3_EXT,
+                             GL_COLOR_ATTACHMENT4_EXT,
+                             GL_COLOR_ATTACHMENT5_EXT,
+                             GL_COLOR_ATTACHMENT6_EXT  };
+
+typedef struct DualDepthPeelInfo {
+
+
+    GLuint ShaderDualDepthPeelInit;
+    GLuint ShaderDualDepthPeelPeel;
+    GLuint ShaderDualDepthPeelBlend;
+    GLuint ShaderDualDepthPeelFinal;
+
+    GLuint Ddp_BackBlender_FboId;
+    GLuint Ddp_PeelingSingle_FboId;
+    GLuint Ddp_Depth_TexId[2];
+    GLuint Ddp_FrontBlender_TexId[2];
+    GLuint Ddp_BackTemp_TexId[2];
+    GLuint Ddp_BackBlender_TexId;
+
+    int     Ddp_NumPasses;
+    int     Ddp_UseOcclusionQuery;
+    GLuint  Ddp_QueryId;
+
+} DualDepthPeelInfo;
+
+// global
+DualDepthPeelInfo *dInfo;
+
+DualDepthPeelInfo *Init_DualDepthPeelInfo( ) {
+    DualDepthPeelInfo *d;
+    d = (DualDepthPeelInfo *)calloc( 1, sizeof(DualDepthPeelInfo) );
+
+    return( d );
+}
+
+void Free_DualDepthPeelInfo( DualDepthPeelInfo *d ) {
+    free( d );
+}
+
+
+void InitDualPeelingRenderTargets( DualDepthPeelInfo *dInfo ) {
+
+    int i;
+
+    glGenTextures( 2, dInfo->Ddp_Depth_TexId );
+    glGenTextures( 2, dInfo->Ddp_FrontBlender_TexId );
+    glGenTextures( 2, dInfo->Ddp_BackTemp_TexId );
+    glGenFramebuffersEXT( 1, &dInfo->Ddp_PeelingSingle_FboId );
+
+    for ( i = 0; i < 2; i++ ) {
+
+        glBindTexture( GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_Depth_TexId[i] );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_FLOAT_RG32_NV, g_imageWidth, g_imageHeight, 0, GL_RGB, GL_FLOAT, 0 );
+
+        glBindTexture( GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_FrontBlender_TexId[i] );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, g_imageWidth, g_imageHeight, 0, GL_RGBA, GL_FLOAT, 0 );
+
+        glBindTexture( GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackTemp_TexId[i] );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, g_imageWidth, g_imageHeight, 0, GL_RGBA, GL_FLOAT, 0 );
+
+    }
+
+    glGenTextures( 1, &dInfo->Ddp_BackBlender_TexId );
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackBlender_TexId );
+    glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, g_imageWidth, g_imageHeight, 0, GL_RGB, GL_FLOAT, 0 );
+
+    glGenFramebuffersEXT( 1, &dInfo->Ddp_BackBlender_FboId );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, dInfo->Ddp_BackBlender_FboId );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackBlender_TexId, 0 );
+
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, dInfo->Ddp_PeelingSingle_FboId );
+
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_Depth_TexId[0], 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_FrontBlender_TexId[0], 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackTemp_TexId[0], 0 );
+
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT3_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_Depth_TexId[1], 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT4_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_FrontBlender_TexId[1], 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT5_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackTemp_TexId[1], 0 );
+
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT6_EXT, GL_TEXTURE_RECTANGLE_ARB, dInfo->Ddp_BackBlender_TexId, 0 );
+
+}
+
+void DeleteDualPeelingRenderTargets( DualDepthPeelInfo *dInfo ) {
+
+    glDeleteFramebuffersEXT( 1, &dInfo->Ddp_BackBlender_FboId );
+    glDeleteFramebuffersEXT( 1, &dInfo->Ddp_PeelingSingle_FboId );
+    glDeleteTextures( 2, dInfo->Ddp_Depth_TexId );
+    glDeleteTextures( 2, dInfo->Ddp_FrontBlender_TexId );
+    glDeleteTextures( 2, dInfo->Ddp_BackTemp_TexId );
+    glDeleteTextures( 1, &dInfo->Ddp_BackBlender_TexId );
+
+}
+
+
+
+void RenderDualPeeling( DualDepthPeelInfo *dInfo ) {
+
+    int     CurrId, Pass, PrevId, BufId;
+    GLuint  SampleCount;
+
+    dInfo->Ddp_UseOcclusionQuery = 0;
+
+    glDisable( GL_DEPTH_TEST );
+    glEnable( GL_BLEND );
+
+    // ---------------------------------------------------------------------
+    // 1. Initialize Min-Max Depth Buffer
+    // ---------------------------------------------------------------------
+
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, dInfo->Ddp_PeelingSingle_FboId );
+
+    // Render targets 1 and 2 store the front and back colors
+    // Clear to 0.0 and use MAX blending to filter written color
+    // At most one front color and one back color can be written every pass
+    glDrawBuffers( 2, &Ddp_DrawBuffers[1] );
+    glClearColor( 0, 0, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    // Render target 0 stores (-minDepth, maxDepth, alphaMultiplier)
+    glDrawBuffer( Ddp_DrawBuffers[0] );
+    glClearColor( -MAX_DEPTH, -MAX_DEPTH, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
+    glBlendEquationEXT( GL_MAX_EXT );
+
+    glUseProgram( dInfo->ShaderDualDepthPeelInit );
+    DrawScene( );
+    glUseProgram( 0 );
+
+
+    // ---------------------------------------------------------------------
+    // 2. Dual Depth Peeling + Blending
+    // ---------------------------------------------------------------------
+
+    // Since we cannot blend the back colors in the geometry passes,
+    // we use another render target to do the alpha blending
+    //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Ddp_BackBlender_FboId);
+    glDrawBuffer( Ddp_DrawBuffers[6] );
+// DEFINE g_backgroundColor[]
+//glClearColor( g_backgroundColor[0], g_backgroundColor[1], g_backgroundColor[2], 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    CurrId = 0;
+
+    for ( Pass = 1; dInfo->Ddp_UseOcclusionQuery || Pass < dInfo->Ddp_NumPasses; Pass++ ) {
+
+        CurrId = Pass % 2;
+        PrevId = 1 - CurrId;
+        BufId  = CurrId * 3;
+
+//glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, dInfo->Ddp_Peeling_FboId[CurrId]);
+
+        glDrawBuffers( 2, &Ddp_DrawBuffers[BufId+1] );
+        glClearColor( 0, 0, 0, 0 );
+        glClear( GL_COLOR_BUFFER_BIT );
+
+        glDrawBuffer( Ddp_DrawBuffers[BufId+0] );
+        glClearColor( -MAX_DEPTH, -MAX_DEPTH, 0, 0 );
+        glClear( GL_COLOR_BUFFER_BIT );
+
+        // Render target 0: RG32F MAX blending
+        // Render target 1: RGBA MAX blending
+        // Render target 2: RGBA MAX blending
+        glDrawBuffers( 3, &Ddp_DrawBuffers[BufId+0] );
+        glBlendEquationEXT( GL_MAX_EXT );
+
+        glUseProgram( dInfo->ShaderDualDepthPeelPeel );
+//g_shaderDualPeel.bindTextureRECT( "DepthBlenderTex", dInfo->Ddp_Depth_TexId[PrevId], 0 );
+//g_shaderDualPeel.bindTextureRECT( "FrontBlenderTex", dInfo->Ddp_FrontBlender_TexId[PrevId], 1 );
+// do we really wantm the entire thing to be same alpha? No!
+// Need to modify the shader to getm rid of this.
+//g_shaderDualPeel.setUniform( "Alpha", (float*)&g_opacity, 1 );
+        DrawScene();
+        glUseProgram( 0 );
+
+
+        // Full screen pass to alpha-blend the back color
+        glDrawBuffer( Ddp_DrawBuffers[6] );
+
+        glBlendEquationEXT( GL_FUNC_ADD );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+        // NEEDED?
+        if ( dInfo->Ddp_UseOcclusionQuery ) {
+            glBeginQuery( GL_SAMPLES_PASSED_ARB, dInfo->Ddp_QueryId );
+        }
+
+        glUseProgram( dInfo->ShaderDualDepthPeelBlend );
+//g_shaderDualBlend.bindTextureRECT( "TempTex", dInfo->Ddp_BackTemp_TexId[CurrId], 0 );
+// DEFINE g_quadDisplayList
+//glCallList( g_quadDisplayList );
+        glUseProgram( 0 );
+
+
+        // NEEDED?
+        if ( dInfo->Ddp_UseOcclusionQuery ) {
+            glEndQuery( GL_SAMPLES_PASSED_ARB );
+            glGetQueryObjectuiv( dInfo->Ddp_QueryId, GL_QUERY_RESULT_ARB, &SampleCount );
+            if ( SampleCount == 0 ) {
+                break;
+            }
+        }
+    }
+
+    glDisable( GL_BLEND );
+
+    // ---------------------------------------------------------------------
+    // 3. Final Pass
+    // ---------------------------------------------------------------------
+
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
+    glDrawBuffer( GL_BACK );
+
+    glUseProgram( dInfo->ShaderDualDepthPeelFinal );
+// DEFINE THE TEXTURES
+//g_shaderDualFinal.bindTextureRECT("DepthBlenderTex", Ddp_Depth_TexId[CurrId], 0);
+//g_shaderDualFinal.bindTextureRECT("FrontBlenderTex", Ddp_FrontBlender_TexId[CurrId], 1);
+//g_shaderDualFinal.bindTextureRECT("BackBlenderTex", Ddp_BackBlender_TexId, 2);
+
+// DEFINE g_quadDisplayList
+//glCallList( g_quadDisplayList );
+    glUseProgram( 0 );
+
+}
+
+
+
 
 
 
@@ -377,21 +650,21 @@ void UpdateTimeDepQuants( long int CurrentDate, double CurrentUT ) {
     Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
     DipoleTiltAngle = mInfo->c->psi*DegPerRad;;
 
-/*
- *  Convert the dipole offset components to SM coords.
- *  We may not wnat this in there....
- */
-u.x = mInfo->c->ED_x0; u.y = mInfo->c->ED_y0; u.z = mInfo->c->ED_z0;
-Lgm_Convert_Coords( &u, &DipoleOffset_sm, GEO_TO_SM, mInfo->c );
+    /*
+     *  Convert the dipole offset components to SM coords.
+     *  We may not wnat this in there....
+     */
+    u.x = mInfo->c->ED_x0; u.y = mInfo->c->ED_y0; u.z = mInfo->c->ED_z0;
+    Lgm_Convert_Coords( &u, &DipoleOffset_sm, GEO_TO_SM, mInfo->c );
 
 
 
-// Set Position of sun
-u.x = 1.0, u.y = u.z = 0.0;
-Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
-Sun        = v;
-aInfo->Sun = v; // This is the struct for the Atmosphere stuff
-//printf(" Sun = %g %g %g\n", v.x, v.y, v.z);
+    // Set Position of sun
+    u.x = 1.0, u.y = u.z = 0.0;
+    Lgm_Convert_Coords( &u, &v, AtmosConvertFlag, mInfo->c );
+    Sun        = v;
+    aInfo->Sun = v; // This is the struct for the Atmosphere stuff
+    //printf(" Sun = %g %g %g\n", v.x, v.y, v.z);
 
 
     /*
@@ -405,8 +678,8 @@ aInfo->Sun = v; // This is the struct for the Atmosphere stuff
      *
      */
 
-// we need to make sure the various matrices are defined no that we have
-// overhauled the Ctrans lib...
+    // we need to make sure the various matrices are defined no that we have
+    // overhauled the Ctrans lib...
     if        ( ObserverCoords == GEO_COORDS ) {
 
         Lgm_MatrixToQuat( IdentityMatrix, Q );
@@ -421,8 +694,8 @@ aInfo->Sun = v; // This is the struct for the Atmosphere stuff
 
     } else if ( ObserverCoords == GSM_COORDS ) {
 
-//Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
-//FIX ME
+        //Lgm_Set_Coord_Transforms( CurrentDate, CurrentUT, mInfo->c );
+        //FIX ME
         //Lgm_MatrixToQuat( mInfo->c->Agsm_to_wgs84, Q );
         Lgm_MatrixToQuat( mInfo->c->Awgs84_to_gsm, Q );
 
@@ -499,32 +772,32 @@ aInfo->Sun = v; // This is the struct for the Atmosphere stuff
 }
 
 // transpose
-static void TransposeMatrix(float src[16], float dest[16] ) {
-    int i, j;
-    for (i=0; i<4; i++) {
-        for (j=0; j<4; j++) {
-            *(dest  +i*4 +j ) = *(src + j*4+i);
-        }
-    }
-}
+//static void TransposeMatrix(float src[16], float dest[16] ) {
+//    int i, j;
+//    for (i=0; i<4; i++) {
+//        for (j=0; j<4; j++) {
+//            *(dest  +i*4 +j ) = *(src + j*4+i);
+//        }
+//    }
+//}
 
 // Simple 4x4 matrix by 4x4 matrix multiply.
-static void multMatrix(float dst[16], const float src1[16], const float src2[16]) {
-
-  float tmp[16];
-  int i, j;
-
-  for (i=0; i<4; i++) {
-    for (j=0; j<4; j++) {
-      tmp[i*4+j] = src1[i*4+0] * src2[0*4+j] +
-                   src1[i*4+1] * src2[1*4+j] +
-                   src1[i*4+2] * src2[2*4+j] +
-                   src1[i*4+3] * src2[3*4+j];
-    }
-  }
-  /* Copy result to dst (so dst can also be src1 or src2). */
-  for (i=0; i<16; i++) dst[i] = tmp[i];
-}
+//static void multMatrix(float dst[16], const float src1[16], const float src2[16]) {
+//
+//  float tmp[16];
+//  int i, j;
+//
+//  for (i=0; i<4; i++) {
+//    for (j=0; j<4; j++) {
+//      tmp[i*4+j] = src1[i*4+0] * src2[0*4+j] +
+//                   src1[i*4+1] * src2[1*4+j] +
+//                   src1[i*4+2] * src2[2*4+j] +
+//                   src1[i*4+3] * src2[3*4+j];
+//    }
+//  }
+//  /* Copy result to dst (so dst can also be src1 or src2). */
+//  for (i=0; i<16; i++) dst[i] = tmp[i];
+//}
 
 
 /*
@@ -673,10 +946,6 @@ void SetViewMatrix( double Camera_x, double Camera_y, double Camera_z,
 
 
 
-#define CHECK_GL_ERRORS {}
-int g_imageWidth = 1024;
-int g_imageHeight = 768;
-double g_imageRat;
 
 
 
@@ -690,7 +959,7 @@ float g_black[3] = {0.0};
 float *g_backgroundColor = g_black;
 
 
-GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
+GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType ) {
 
     GLuint  shader;
     GLint   r;
@@ -709,17 +978,7 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     nLines = 0;
     Str = (char *)malloc( 4097*sizeof(char) );
     while ( fgets( Str, 400, fp )  ) {
-        /*
-         * Get rid of // style comments -- they seem to cause a problem -- dont know why
-         * Also get rid of blank lines.
-         */
-        p = strstr( Str, "//" ); if (p != NULL) *p = '\0'; // get rid of //-style comments
-        p = index( Str, '\n' );  if (p != NULL) *p = '\0';
-        p = index( Str, '\r' );  if (p != NULL) *p = '\0';
-        len = strlen( Str );
-        if (len > 0 ) {
             ++nLines;
-        }
     }
     rewind( fp ); // rewind fp back to start
 
@@ -727,29 +986,22 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
     /*
      * Alloc memory for the Lines array
      */
-    ++nLines;
     Lines = (char **)calloc( nLines, sizeof(char *) );
     i = 0;
     //printf( "Shader File: %s\n", Filename );
-    len = 17;
-    Lines[i] = (char *)calloc( len+1, sizeof(char) );
-    strcpy( Lines[i], "#version 130\n" ); ++i;
     while ( fgets( Str, 400, fp )  ) {
-        p = strstr( Str, "//" ); if (p != NULL) *p = '\0'; // get rid of //-style comments
-        p = index( Str, '\n' );  if (p != NULL) *p = '\0';
-        p = index( Str, '\r' );  if (p != NULL) *p = '\0';
         len = strlen( Str );
-        if (len > 0 ) {
-            Lines[i] = (char *)calloc( len+1, sizeof(char) );
-            strcpy( Lines[i], Str );
-            //printf("Lines[%2d] = \"%s\"\n", i, Lines[i]);
-            ++i;
-        }
+        Lines[i] = (char *)calloc( len+1, sizeof(char) );
+        strcpy( Lines[i], Str );
+        //printf("Lines[%2d] = \"%s\"\n", i, Lines[i]);
+        ++i;
     }
     //printf("\n");
     //printf("END\n");
-
     fclose(fp);
+
+
+
 
     shader = glCreateShader( ShaderType );
     glShaderSource( shader, nLines, (const  char **)Lines, (int *)NULL );
@@ -776,23 +1028,76 @@ GLuint LoadShaderFromFile( char *Filename, GLenum ShaderType) {
 
 
 
+/*
+ * NOTE!
+ * NOTE!
+ * NOTE!
+ * We need to install the shaders somewhere where they can be found
+ * This will only work if you run it in the src directory...
+ */
 void BuildShaders2() {
 
     printf("\nLoading shaders...\n");
-    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated_vert.glsl",   GL_VERTEX_SHADER );
+
+    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated_vert.glsl", GL_VERTEX_SHADER );
     ShadeFragment = LoadShaderFromFile( "Shaders/Illuminated_frag.glsl", GL_FRAGMENT_SHADER );
+    ShaderIllumLines = glCreateProgram();
+    glAttachShader( ShaderIllumLines, ShadeVertex );
+    glAttachShader( ShaderIllumLines, ShadeFragment );
+    glLinkProgram( ShaderIllumLines );
 
-    g_shaderMyTest = glCreateProgram();
-    glAttachShader( g_shaderMyTest, ShadeVertex );
-    glAttachShader( g_shaderMyTest, ShadeFragment );
-    glLinkProgram( g_shaderMyTest );
 
-    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated2_vert.glsl",   GL_VERTEX_SHADER );
+    /*
+     * Illuminated Field Line Shader
+     */
+    ShadeVertex   = LoadShaderFromFile( "Shaders/Illuminated2_vert.glsl", GL_VERTEX_SHADER );
     ShadeFragment = LoadShaderFromFile( "Shaders/Illuminated2_frag.glsl", GL_FRAGMENT_SHADER );
-    g_shaderMyTest2 = glCreateProgram();
-    glAttachShader( g_shaderMyTest2, ShadeVertex );
-    glAttachShader( g_shaderMyTest2, ShadeFragment );
-    glLinkProgram( g_shaderMyTest2 );
+    ShaderIllumLines2 = glCreateProgram();
+    glAttachShader( ShaderIllumLines2, ShadeVertex );
+    glAttachShader( ShaderIllumLines2, ShadeFragment );
+    glLinkProgram( ShaderIllumLines2 );
+
+
+    /*
+     * Dual Depth Peeling Shaders for first pass
+     */
+    ShadeVertex   = LoadShaderFromFile( "Shaders/dual_peeling_init_vertex.glsl", GL_VERTEX_SHADER );
+    ShadeFragment = LoadShaderFromFile( "Shaders/dual_peeling_init_fragment.glsl", GL_FRAGMENT_SHADER );
+    dInfo->ShaderDualDepthPeelInit = glCreateProgram();
+    glAttachShader( dInfo->ShaderDualDepthPeelInit, ShadeVertex );
+    glAttachShader( dInfo->ShaderDualDepthPeelInit, ShadeFragment );
+    glLinkProgram( dInfo->ShaderDualDepthPeelInit );
+
+    /*
+     * Dual Depth Peeling Shaders for first pass
+     */
+    ShadeVertex   = LoadShaderFromFile( "Shaders/dual_peeling_peel_vertex.glsl", GL_VERTEX_SHADER );
+    ShadeFragment = LoadShaderFromFile( "Shaders/dual_peeling_peel_fragment.glsl", GL_FRAGMENT_SHADER );
+    dInfo->ShaderDualDepthPeelPeel = glCreateProgram();
+    glAttachShader( dInfo->ShaderDualDepthPeelPeel, ShadeVertex );
+    glAttachShader( dInfo->ShaderDualDepthPeelPeel, ShadeFragment );
+    glLinkProgram( dInfo->ShaderDualDepthPeelPeel );
+
+    /*
+     * Dual Depth Peeling Shaders for blend pass
+     */
+    ShadeVertex   = LoadShaderFromFile( "Shaders/dual_peeling_blend_vertex.glsl", GL_VERTEX_SHADER );
+    ShadeFragment = LoadShaderFromFile( "Shaders/dual_peeling_blend_fragment.glsl", GL_FRAGMENT_SHADER );
+    dInfo->ShaderDualDepthPeelBlend = glCreateProgram();
+    glAttachShader( dInfo->ShaderDualDepthPeelBlend, ShadeVertex );
+    glAttachShader( dInfo->ShaderDualDepthPeelBlend, ShadeFragment );
+    glLinkProgram( dInfo->ShaderDualDepthPeelBlend );
+
+    /*
+     * Dual Depth Peeling Shaders for final pass
+     */
+    ShadeVertex   = LoadShaderFromFile( "Shaders/dual_peeling_final_vertex.glsl", GL_VERTEX_SHADER );
+    ShadeFragment = LoadShaderFromFile( "Shaders/dual_peeling_final_fragment.glsl", GL_FRAGMENT_SHADER );
+    dInfo->ShaderDualDepthPeelFinal = glCreateProgram();
+    glAttachShader( dInfo->ShaderDualDepthPeelFinal, ShadeVertex );
+    glAttachShader( dInfo->ShaderDualDepthPeelFinal, ShadeFragment );
+    glLinkProgram( dInfo->ShaderDualDepthPeelFinal );
+
 
 }
 
@@ -964,7 +1269,7 @@ static GLuint EqPlaneDL        = 0;  // Display List
 static GLuint EqPlaneGridDL    = 0;  // Display List
 static GLuint MeridPlane1DL     = 0;  // Display List
 static GLuint MeridPlane2DL     = 0;  // Display List
-static GLuint HiResEarthQuadDL = 0;  // Display List
+//static GLuint HiResEarthQuadDL = 0;  // Display List
 
 
 
@@ -1015,12 +1320,6 @@ typedef struct _GuiInfo {
 GuiInfo *gInfo;
 
 
-static MaterialProp mat_emerald_glass = {
-  {0.0215, 0.1745, 0.0215, 0.5},
-  {0.07568, 0.61424, 0.07568, 1.0},
-  {0.633, 0.727811, 0.633, 1.0},
-  0.6
-};
 
 static MaterialProp mat_emerald = {
   {0.0215, 0.1745, 0.0215, 1.0},
@@ -1112,18 +1411,6 @@ static MaterialProp mat_earth2 = {
   {0.3, 0.3, 0.3, 1.0},
   0.25
 };
-static MaterialProp mat_EqPlane = {
-  {1.0, 1.0, 1.0, 0.7},
-  {1.0, 1.0, 1.0, 0.7},
-  {0.0, 0.0, 0.0, 1.0},
-  0.25
-};
-static MaterialProp mat_MeridPlane1 = {
-  {1.0, 1.0, 1.0, 0.7},
-  {1.0, 1.0, 1.0, 0.7},
-  {0.0, 0.0, 0.0, 1.0},
-  0.25
-};
 
 
 static MaterialProp mat_red_plastic = {
@@ -1161,13 +1448,6 @@ static MaterialProp mat_yellow_plastic = {
   0.25
 };
 
-static MaterialProp mat_orange_clear_plastic = {
-  {0.0, 0.0, 0.0, 1.0},
-  {1.0, 0.7, 0.12, 0.4},
-  {0.50196078, 0.50196078, 0.50196078, 1.0},
-  0.25
-};
-
 
 
 static MaterialProp *mat_current = &mat_silver;
@@ -1184,7 +1464,7 @@ int AnimateView = FALSE;
 //int AnimateTime = TIME_REALTIMEPLAY;
 int AnimateTime = TIME_STOP;
 
-static void toggle_animation (GtkWidget *widget);
+//static void toggle_animation (GtkWidget *widget);
 static void AdjustIdle( GtkWidget *widget );
 
 void MakeFullScreenQuad() {
@@ -1718,7 +1998,7 @@ void CreateEarth( ){
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
         glEnable( GL_TEXTURE_2D );
         glRotatef( RotAngle, RotAxis.x, RotAxis.y, RotAxis.z );
-printf("CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
+        //printf("CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
         glRotatef( 180.0, 0.0, 0.0, 1.0); // rotates image around so that 0deg. glon is in the +x direction
         CreateEllipsoid( 1.0, (double)(WGS84_B/WGS84_A), 80 );
         glDisable( GL_TEXTURE_2D );
@@ -2840,6 +3120,19 @@ void CreateSats() {
         }
 
 
+
+        // draw a Field Line from object to ground
+//        Height = 120.0;
+//        Lgm_Set_Coord_Transforms( tDate, tUT, mInfo->c );
+//        
+//        Flag = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+//        FLL = mInfo->Stotal;
+
+
+
+
+
+
         // draw lines from sat to ground due to iridium flares
         glEnable(GL_LINE_SMOOTH);
         glLineWidth( 3.0 );
@@ -2973,6 +3266,8 @@ void CreateThemisFovs() {
                                  226.230, 214.842, 214.786, 204.404, 199.562, 256.33, 252.8667, 236.6344 };
 
     int     TREX_STATION[]   = { 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
+    //int     TREX_STATION[]   = { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
+    // This includes The Pas as a TREX station (its currently not though)
 
     
     double      tUT;
@@ -3116,20 +3411,22 @@ void ReCreateSats( ) {
 
 void CreateSatOrbits() {
 
-    double              tsince, tsince0, JD, dt, Height, FLL;
-    double              tJD[10001], tUT[10001], period, tinc, OrbitFrac = 0.125, Theta;
+    double              tsince, tsince0, JDtmp, JD, dt, Height, FLL[10001], DeltaS[10001];
+    double              tJD[10001], tUT[10001], period, tinc, Theta, ds;
     long int            tDate[10001], ns;
     int                 tYear, tMonth, tDay, Flag[10001];
     double              Px[10001], Py[10001], Pz[10001];
     double              Tx[10001], Ty[10001], Tz[10001];
-    Lgm_Vector          Ugei[10001], UGSM[10001], Ugsm[10001], aa, bb, uu, v1[10001], v2[10001], v3[10001];
+    Lgm_Vector          Ugei[10001], UGSM[10001], Ugsm2[10001], Ugsm[10001], aa, bb, uu, v1[10001], v2[10001], v3[10001];
     Lgm_Vector          Wgsm, Wcoord, Wcoord2;
-    int                 i, j, jj, n, nMax;
+    int                 i, j, jj, n, nMax, nsteps;
     Lgm_CTrans          *c = Lgm_init_ctrans( 0 );
     _GroupNode          *g;
     _SpaceObjects       *Group;
     _SgpInfo            *s = (_SgpInfo *)calloc( 1, sizeof(_SgpInfo) );
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
+    long int            nTotalFieldLines;
+    Lgm_QinDentonOne    p;
 
     /*
      * All the TLEs have their own epoch times in them. And the propagator (sgp4)
@@ -3142,6 +3439,18 @@ void CreateSatOrbits() {
 mInfo->fKp = 5.0;
 mInfo->Kp = 5;
 
+
+
+Lgm_Set_KdTree( KdTree, 16, 1e6, mInfo );
+Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA4, mInfo );
+
+Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_TS04, mInfo );
+
+
+    nTotalFieldLines = 0;
+
+
+
     SatOrbitsDL = glGenLists( 1 );
     glNewList( SatOrbitsDL, GL_COMPILE );
     glDepthMask( GL_FALSE );
@@ -3153,12 +3462,17 @@ mInfo->Kp = 5;
 
     ns = 0;
     if ( FL_Arrs_Alloced == 0 ) {
-        P1  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        P2  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        T1  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        T2  = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
-        FC1 = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
-        FC2 = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
+        P1      = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        P2      = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        T1      = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        T2      = (Lgm_Vector *)calloc( MAX_SEGMENTS, sizeof(Lgm_Vector));
+        FC1     = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
+        FC2     = (COLOR *)calloc( MAX_SEGMENTS, sizeof(COLOR));
+        FL_FLAG = (int *)calloc( MAX_SEGMENTS, sizeof(int) );
+
+        SegDepth = (double *)calloc( MAX_SEGMENTS, sizeof(double) );
+        if (SegDepth == NULL ) printf("Error allocating memory\n");
+        SegIndex = (long int *)calloc( MAX_SEGMENTS, sizeof(long int) );
         
         FL_Arrs_Alloced = 1;
     }
@@ -3186,7 +3500,7 @@ mInfo->Kp = 5;
                         LgmSgp_SGP4_Init( s, &Group->Sat[i].TLE );
                         tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
                         period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
-period *= Group->Sat[i].oPeriodFrac/100.0;
+                        period *= Group->Sat[i].oPeriodFrac/100.0;
 
                         // init n to zero and start half an orbit ahead of current time.
                         n=0; dt = period/2.0;
@@ -3230,9 +3544,54 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                         }
 //printf("n = %d\n", n);
 
+                        // Tick marks and line for orbit
+                        double TT, TTinc, TTa, TTb, TTl;
+                        Lgm_Vector Ugsm_interped;
+                        Lgm_Vector Ugsm_interped_a, Ugsm_interped_b, Ugsm_tang, Ugsm_perp, Ua, Ub, Uc;
 
-                        // ORBIT
                         if ( Group->Sat[i].DrawOrbit ) {
+
+
+                            // ORBITS TICK MARKS
+                            if ( period <  120.0 ) {
+                                TTinc = 5.0/1440.0;
+                                TTa = ((long int)(tJD[n-1]*1440.0+0.5))/1440.0;
+                                TTb = ((long int)(tJD[0]*1440.0))/1440.0;
+                                TTl = 0.025;
+                            } else {
+                                TTinc = 1.0/24.0;
+                                TTa = ((long int)(tJD[n-1]*24.0+0.5))/24.0;
+                                TTb = ((long int)(tJD[0]*24.0))/24.0;
+                                TTl = 0.1;
+                            }
+
+                            glLineWidth( 2.0 );
+                            glBegin( GL_LINES );
+                            for (TT = TTa; TT<=TTb; TT+=TTinc ){
+                                Interp3DCurve( tJD, Ugsm, n, TT, &Ugsm_interped );
+                                Interp3DCurve( tJD, Ugsm, n, TT-0.1*TTinc, &Ugsm_interped_a );
+                                Interp3DCurve( tJD, Ugsm, n, TT+0.1*TTinc, &Ugsm_interped_b );
+
+                                Lgm_VecSub( &Ugsm_tang, &Ugsm_interped_b, &Ugsm_interped_a );
+                                Lgm_CrossProduct( &Ugsm_interped, &Ugsm_tang, &Ugsm_perp );
+                                Lgm_ForceMagnitude( &Ugsm_perp, TTl );
+                                Lgm_VecSub( &Ua, &Ugsm_interped, &Ugsm_perp );
+                                Lgm_VecAdd( &Ub, &Ugsm_interped, &Ugsm_perp );
+                                glVertex3f( Ua.x, Ua.y, Ua.z );
+                                glVertex3f( Ub.x, Ub.y, Ub.z );
+
+                                Lgm_VecSub( &Uc, &Ub, &Ua );
+                                Lgm_CrossProduct( &Uc, &Ugsm_tang, &Ugsm_perp );
+                                Lgm_ForceMagnitude( &Ugsm_perp, TTl );
+                                Lgm_VecSub( &Ua, &Ugsm_interped, &Ugsm_perp );
+                                Lgm_VecAdd( &Ub, &Ugsm_interped, &Ugsm_perp );
+                                glVertex3f( Ua.x, Ua.y, Ua.z );
+                                glVertex3f( Ub.x, Ub.y, Ub.z );
+
+                            }
+                            glEnd();
+
+                            // ORBIT
                             glLineWidth( 5.0 );
                             if ( Group->OverRideOrbitColors ) {
                                 glColor4f( Group->oRed_OverRide, Group->oGrn_OverRide, Group->oBlu_OverRide, Group->oAlf_OverRide );
@@ -3282,36 +3641,58 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                             glEnd();
                         }
 
-                        // ORBIT FIELD LINES
+                        /*
+                         * ORBIT FIELD LINES
+                         */
                         if ( Group->Sat[i].DrawOrbitFieldLines || Group->Sat[i].DrawOrbitFLFootpoints ) {
 
                             nMax = 25;
-                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf*(double)n/(double)nMax );
-                            //glLineWidth( 2.0 );
-                            //glColor4f( Group->Sat[i].oglRed, Group->Sat[i].oglGrn, Group->Sat[i].oglBlu, Group->Sat[i].oglAlf );
+                            Height = 120.0;
+                            //Lgm_MagModelInfo *mInfoCpy;
 
+                            //#pragma omp parallel private(mInfoCpy,jj,Wgsm,Wcoord,Px,Py,Pz,Wcoord2,Tx,Ty,Tz)
+                            //#pragma omp for schedule(dynamic, 1)
                             for ( j=0; j<n; ++j ) {
-                                Height = 120.0;
+                                //mInfoCpy = Lgm_CopyMagInfo( mInfo );
                                 Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
-                                
-                                Flag[j] = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
-                                FLL = mInfo->Stotal;
-                                //printf("FLL = %g\n", FLL);
 
-                                if ( FLL > 0.0 ){
-                                    Lgm_TraceLine3( &v1[j], FLL, 200, 1.0, 1e-7, 0, mInfo );
+                                JDtmp = Lgm_Date_to_JD( tDate[j], tUT[j], mInfo->c );
+                                Lgm_get_QinDenton_at_JD( JDtmp, &p, 1, 0 );
+                                Lgm_set_QinDenton( &p, mInfo );
+
+                                Flag[j] = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
+                                FLL[j] = mInfo->Stotal;
+                                DeltaS[j] = fabs( mInfo->Ssouth - mInfo->Smin );
+
+                                if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) || (Flag[j] == LGM_OPEN_N_LOBE) || (Flag[j] == LGM_OPEN_IMF) ) {
+
+                                    // Lets set number of steps to ben 200 to start
+                                    nsteps = 200;
+                                    // compute ds required to give us nsteps
+                                    ds = FLL[j]/(double)nsteps; 
+                                    // if its too big, adjust nsteps
+                                    if ( ds > 0.25 ) {
+                                        // figure out how many steps we need to keep it <0.25
+                                        nsteps = FLL[j]/0.25;
+                                    }
+                                    // make sure we dont overflow arrays
+                                    if (nsteps > 10000) nsteps = 10000;
+
+                                    if ( Flag[j] == LGM_CLOSED ) {
+                                        Lgm_TraceLine3( &v1[j], FLL[j], nsteps, 1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_S_LOBE ) {
+                                        Lgm_TraceLine3( &v1[j], FLL[j], nsteps, 1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_N_LOBE ) {
+                                        Lgm_TraceLine3( &v2[j], FLL[j], nsteps, -1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_IMF ) {
+                                        Lgm_TraceLine3( &v2[j], FLL[j], nsteps, -1.0, 1e-7, 0, mInfo ); 
+                                    }
+
+                                    ++nTotalFieldLines;
+
 
                                     if ( Group->Sat[i].DrawOrbitFieldLines && (j%4==0) ) {
 
-                                        /*
-                                        glBegin( GL_LINE_STRIP );
-                                            for (jj=0; jj<mInfo->nPnts; jj++) {
-                                                Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
-                                                Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
-                                                glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
-                                            }
-                                        glEnd();
-                                        */
                                         for (jj=0; jj<mInfo->nPnts; ++jj ) {
                                             Wgsm.x = mInfo->Px[jj]; Wgsm.y = mInfo->Py[jj]; Wgsm.z = mInfo->Pz[jj];
                                             Lgm_Convert_Coords( &Wgsm, &Wcoord, AtmosConvertFlag, mInfo->c );
@@ -3322,11 +3703,6 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                             Lgm_Convert_Coords( &Wgsm, &Wcoord2, AtmosConvertFlag, mInfo->c );
                                             Tx[jj] = Wcoord2.x; Ty[jj] = Wcoord2.y; Tz[jj] = Wcoord2.z;
                                         }
-                                        /*
-                                         * This doesnt do depth-sorting at all.
-                                         */
-                                        //DrawIlluminatedLines2( Px, Py, Pz, Tx, Ty, Tz, mInfo->nPnts, Group->Sat[i].sRed, Group->Sat[i].sGrn, Group->Sat[i].sBlu, Group->Sat[i].sAlf );
-
 
                                         /*
                                          * Save each line segment in a larger array that we can depth sort.
@@ -3344,13 +3720,20 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                                     FC1[ns].r = Group->Sat[i].sRed; FC1[ns].g = Group->Sat[i].sGrn; FC1[ns].b = Group->Sat[i].sBlu; FC1[ns].a = Group->Sat[i].sAlf;
                                                     FC2[ns].r = Group->Sat[i].sRed; FC2[ns].g = Group->Sat[i].sGrn; FC2[ns].b = Group->Sat[i].sBlu; FC2[ns].a = Group->Sat[i].sAlf;
                                                 }
+                                                FL_FLAG[ns] = Flag[j];
                                                 ++ns;
                                             }
                                         }
+
+
+
                                             
-                                    }
-                                }
-                            }
+                                    } // if ( Group->Sat[i].DrawOrbitFieldLines && (j%4==0) )
+                                } 
+
+                                //Lgm_FreeMagInfo( mInfoCpy );
+
+                            } // loop over j
 
 
 
@@ -3370,12 +3753,50 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                             //Lgm_ForceMagnitude( &uu, 1.001 );
                                             //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, Group->Sat[i].ogpAlf*(1.0-(double)j/(double)nMax) );
                                             //glColor4f( Group->Sat[i].ogpRed, Group->Sat[i].ogpGrn, Group->Sat[i].ogpBlu, 1.0 );
+if ( DeltaS[j] < 0.15 ) {
+    glColor4f( 0.0, 1.0, 0.0, 1.0 );
+} else if ( DeltaS[j] < 0.25 ) {
+    glColor4f( 0.5, 0.5, 0.0, 1.0 );
+} else if ( DeltaS[j] < 0.5 ) {
+    glColor4f( 0.5, 0.0, 0.0, 1.0 );
+} else {
+    glColor4f( 0.5, 0.5, 0.5, 1.0 );
+}
                                             Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
                                             Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
                                             glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                            Ugsm2[j] = Wcoord;
                                         }
                                     }
                                 glEnd();
+                                // Tick marks for south footpoint path
+                                glLineWidth( 2.0 );
+                                if ( Group->OverRideOrbitColors ) {
+                                    glColor4f( Group->ofpRed_OverRide, Group->ofpGrn_OverRide, Group->ofpBlu_OverRide, Group->ofpAlf_OverRide );
+                                } else {
+                                    glColor4f( Group->Sat[i].ofpRed, Group->Sat[i].ofpGrn, Group->Sat[i].ofpBlu, Group->Sat[i].ofpAlf );
+                                }
+                                glBegin( GL_LINES );
+                                for (TT = TTa; TT<=TTb; TT+=TTinc ){
+                                    Interp3DCurve( tJD, Ugsm2, n, TT, &Ugsm_interped );
+                                    Interp3DCurve( tJD, Ugsm2, n, TT-0.01*TTinc, &Ugsm_interped_a );
+                                    Interp3DCurve( tJD, Ugsm2, n, TT+0.01*TTinc, &Ugsm_interped_b );
+
+                                    Lgm_VecSub( &Ugsm_tang, &Ugsm_interped_b, &Ugsm_interped_a );
+                                    Lgm_CrossProduct( &Ugsm_interped, &Ugsm_tang, &Ugsm_perp );
+                                    Lgm_ForceMagnitude( &Ugsm_perp, 0.01 );
+                                    Lgm_VecSub( &Ua, &Ugsm_interped, &Ugsm_perp );
+                                    Lgm_VecAdd( &Ub, &Ugsm_interped, &Ugsm_perp );
+                                    glVertex3f( Ua.x, Ua.y, Ua.z );
+                                    glVertex3f( Ub.x, Ub.y, Ub.z );
+
+                                }
+                                glEnd();
+
+
+
+
+
                                 glBegin( GL_LINE_STRIP );
                                     for (j=0; j<n; ++j ) {
                                         if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) ) {
@@ -3385,9 +3806,35 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                                             Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
                                             Lgm_Convert_Coords( &uu, &Wcoord, AtmosConvertFlag, mInfo->c );
                                             glVertex3f( Wcoord.x, Wcoord.y, Wcoord.z );
+                                            Ugsm2[j] = Wcoord;
                                         }
                                     }
                                 glEnd();
+
+                                // Tick marks for south footpoint path
+                                glLineWidth( 2.0 );
+                                glBegin( GL_LINES );
+                                for (TT = TTa; TT<=TTb; TT+=TTinc ){
+                                    Interp3DCurve( tJD, Ugsm2, n, TT, &Ugsm_interped );
+                                    Interp3DCurve( tJD, Ugsm2, n, TT-0.01*TTinc, &Ugsm_interped_a );
+                                    Interp3DCurve( tJD, Ugsm2, n, TT+0.01*TTinc, &Ugsm_interped_b );
+
+                                    Lgm_VecSub( &Ugsm_tang, &Ugsm_interped_b, &Ugsm_interped_a );
+                                    Lgm_CrossProduct( &Ugsm_interped, &Ugsm_tang, &Ugsm_perp );
+                                    Lgm_ForceMagnitude( &Ugsm_perp, 0.01 );
+                                    Lgm_VecSub( &Ua, &Ugsm_interped, &Ugsm_perp );
+                                    Lgm_VecAdd( &Ub, &Ugsm_interped, &Ugsm_perp );
+                                    glVertex3f( Ua.x, Ua.y, Ua.z );
+                                    glVertex3f( Ub.x, Ub.y, Ub.z );
+
+                                }
+                                glEnd();
+
+
+
+
+
+
                             }
                             
                         }
@@ -3409,7 +3856,7 @@ period *= Group->Sat[i].oPeriodFrac/100.0;
                         tsince0 = (JD - Group->Sat[i].TLE.JD)*1440.0;
                         period = 1440.0/Group->Sat[i].TLE.MeanMotion; // orbit period in minutes
 
-period *= Group->Sat[i].sPeriodFrac/100.0;
+                        period *= Group->Sat[i].sPeriodFrac/100.0;
 
                         // init n to zero and start at current time
                         n=0; dt = 0.0;
@@ -3511,13 +3958,39 @@ glLineWidth( 2.0 );
                                 Height = 120.0;
                                 Lgm_Set_Coord_Transforms( tDate[j], tUT[j], mInfo->c );
 
+                                JDtmp = Lgm_Date_to_JD( tDate[j], tUT[j], mInfo->c );
+                                Lgm_get_QinDenton_at_JD( JDtmp, &p, 1, 0 );
+                                Lgm_set_QinDenton( &p, mInfo );
+
                                 Flag[j] = Lgm_Trace( &UGSM[j], &v1[j], &v2[j], &v3[j], Height, 1e-7, 1e-7, mInfo );
-                                FLL = mInfo->Stotal;
-                                //printf("FLL = %g\n", FLL);
+                                FLL[j] = mInfo->Stotal;
+                                printf("FLL[%d] = %g\n", j, FLL[j]);
 
-                                if ( FLL > 0.0 ){
-                                    Lgm_TraceLine3( &v1[j], FLL, 100, 1.0, 1e-7, 0, mInfo );
+                                if ( (Flag[j] == LGM_CLOSED) || (Flag[j] == LGM_OPEN_S_LOBE) || (Flag[j] == LGM_OPEN_N_LOBE) || (Flag[j] == LGM_OPEN_IMF) ) {
 
+                                    // Lets set number of steps to ben 200 to start
+                                    nsteps = 200;
+                                    // compute ds required to give us nsteps
+                                    ds = FLL[j]/(double)nsteps; 
+                                    // if its too big, adjust nsteps
+                                    if ( ds > 0.25 ) {
+                                        // figure out how many steps we need to keep it <0.25
+                                        nsteps = FLL[j]/0.25;
+                                    }
+                                    // make sure we dont overflow arrays
+                                    if (nsteps > 10000) nsteps = 10000;
+
+                                    if ( Flag[j] == LGM_CLOSED ) {
+                                        Lgm_TraceLine3( &v1[j], FLL[j], nsteps, 1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_S_LOBE ) {
+                                        Lgm_TraceLine3( &v1[j], FLL[j], nsteps, 1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_N_LOBE ) {
+                                        Lgm_TraceLine3( &v2[j], FLL[j], nsteps, -1.0, 1e-7, 0, mInfo ); 
+                                    } else if ( Flag[j] == LGM_OPEN_IMF ) {
+                                        Lgm_TraceLine3( &v2[j], FLL[j], nsteps, -1.0, 1e-7, 0, mInfo ); 
+                                    }
+
+//                                    if ( Group->Sat[i].DrawStreakFieldLines && (j%4==0) ) {
                                     if ( Group->Sat[i].DrawStreakFieldLines && (j%4==0) ) {
 
                                         /*
@@ -3564,6 +4037,7 @@ glLineWidth( 2.0 );
                                                     FC1[ns].r = Group->Sat[i].sRed; FC1[ns].g = Group->Sat[i].sGrn; FC1[ns].b = Group->Sat[i].sBlu; FC1[ns].a = Group->Sat[i].sAlf;//*(1.0-(double)jj/(double)nMax);
                                                     FC2[ns].r = Group->Sat[i].sRed; FC2[ns].g = Group->Sat[i].sGrn; FC2[ns].b = Group->Sat[i].sBlu; FC2[ns].a = Group->Sat[i].sAlf;//*(1.0-(double)(jj+1)/(double)nMax);
                                                 }
+                                                FL_FLAG[ns] = Flag[j];
                                                 ++ns;
                                             }
                                         }
@@ -3627,6 +4101,8 @@ glLineWidth( 2.0 );
 
     nFL_Arr = ns;
 
+    printf( "nTotalFieldLines = %ld\n", nTotalFieldLines );
+
 
 
     glDisable(GL_BLEND);
@@ -3637,7 +4113,10 @@ glLineWidth( 2.0 );
 
     free(s);
     Lgm_free_ctrans( c ); // free the CTrans structure 
+
+
     Lgm_FreeMagInfo( mInfo );
+
 
 }
 
@@ -4032,7 +4511,7 @@ static gboolean configure_event( GtkWidget *widget, GdkEventConfigure *event, gp
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity( );
     Aspect = ( w > h ) ? w/h : h/w;
-    gluPerspective( FieldOfView, Aspect, 0.01, 100.0 );
+    gluPerspective( FieldOfView, Aspect, 0.01, 200.0 );
 
     // set viewport
     glViewport (0, 0, w, h);
@@ -4065,19 +4544,19 @@ void DrawIlluminatedLines( double *Px, double *Py, double *Pz, int fln, double r
 
     c[0] = red; c[1] = grn; c[2] = blu; c[3] = alf;
 
-    GLint  PprevLoc        = glGetAttribLocation(  g_shaderMyTest, "Pprev" );
-    GLint  PnextLoc        = glGetAttribLocation(  g_shaderMyTest, "Pnext" );
-    GLint  LightPosLoc     = glGetUniformLocation( g_shaderMyTest, "LightPos" );
-    GLint  CameraPosLoc    = glGetUniformLocation( g_shaderMyTest, "CameraPos" );
-    GLint  FdTextureLoc    = glGetUniformLocation( g_shaderMyTest, "FdTexture" );
-    GLint  FsTextureLoc    = glGetUniformLocation( g_shaderMyTest, "FsTexture" );
-    GLint  LineColorLoc    = glGetUniformLocation( g_shaderMyTest, "LineColor" );
-    GLint  kaLoc           = glGetUniformLocation( g_shaderMyTest, "ka" );
-    GLint  kdLoc           = glGetUniformLocation( g_shaderMyTest, "kd" );
-    GLint  ksLoc           = glGetUniformLocation( g_shaderMyTest, "ks" );
-    GLint  nLoc            = glGetUniformLocation( g_shaderMyTest, "n" );
+    GLint  PprevLoc        = glGetAttribLocation(  ShaderIllumLines, "Pprev" );
+    GLint  PnextLoc        = glGetAttribLocation(  ShaderIllumLines, "Pnext" );
+    GLint  LightPosLoc     = glGetUniformLocation( ShaderIllumLines, "LightPos" );
+    GLint  CameraPosLoc    = glGetUniformLocation( ShaderIllumLines, "CameraPos" );
+    GLint  FdTextureLoc    = glGetUniformLocation( ShaderIllumLines, "FdTexture" );
+    GLint  FsTextureLoc    = glGetUniformLocation( ShaderIllumLines, "FsTexture" );
+    GLint  LineColorLoc    = glGetUniformLocation( ShaderIllumLines, "LineColor" );
+    GLint  kaLoc           = glGetUniformLocation( ShaderIllumLines, "ka" );
+    GLint  kdLoc           = glGetUniformLocation( ShaderIllumLines, "kd" );
+    GLint  ksLoc           = glGetUniformLocation( ShaderIllumLines, "ks" );
+    GLint  nLoc            = glGetUniformLocation( ShaderIllumLines, "n" );
 
-    glUseProgram( g_shaderMyTest );
+    glUseProgram( ShaderIllumLines );
     glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
     glUniform1f( kaLoc, IllumFL_ka );
     glUniform1f( kdLoc, IllumFL_kd );
@@ -4134,18 +4613,18 @@ void DrawIlluminatedLines2( double *Px, double *Py, double *Pz, double *Tx, doub
 
     c[0] = red; c[1] = grn; c[2] = blu; c[3] = alf;
 
-    GLint  TangLoc         = glGetAttribLocation(  g_shaderMyTest2, "Tang" );
-    GLint  LightPosLoc     = glGetUniformLocation( g_shaderMyTest2, "LightPos" );
-    GLint  CameraPosLoc    = glGetUniformLocation( g_shaderMyTest2, "CameraPos" );
-    GLint  FdTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FdTexture" );
-    GLint  FsTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FsTexture" );
-    GLint  LineColorLoc    = glGetUniformLocation( g_shaderMyTest2, "LineColor" );
-    GLint  kaLoc           = glGetUniformLocation( g_shaderMyTest2, "ka" );
-    GLint  kdLoc           = glGetUniformLocation( g_shaderMyTest2, "kd" );
-    GLint  ksLoc           = glGetUniformLocation( g_shaderMyTest2, "ks" );
-    GLint  nLoc            = glGetUniformLocation( g_shaderMyTest2, "n" );
+    GLint  TangLoc         = glGetAttribLocation(  ShaderIllumLines2, "Tang" );
+    GLint  LightPosLoc     = glGetUniformLocation( ShaderIllumLines2, "LightPos" );
+    GLint  CameraPosLoc    = glGetUniformLocation( ShaderIllumLines2, "CameraPos" );
+    GLint  FdTextureLoc    = glGetUniformLocation( ShaderIllumLines2, "FdTexture" );
+    GLint  FsTextureLoc    = glGetUniformLocation( ShaderIllumLines2, "FsTexture" );
+    GLint  LineColorLoc    = glGetUniformLocation( ShaderIllumLines2, "LineColor" );
+    GLint  kaLoc           = glGetUniformLocation( ShaderIllumLines2, "ka" );
+    GLint  kdLoc           = glGetUniformLocation( ShaderIllumLines2, "kd" );
+    GLint  ksLoc           = glGetUniformLocation( ShaderIllumLines2, "ks" );
+    GLint  nLoc            = glGetUniformLocation( ShaderIllumLines2, "n" );
 
-    glUseProgram( g_shaderMyTest2 );
+    glUseProgram( ShaderIllumLines2 );
     glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
     glUniform1f( kaLoc, IllumFL_ka );
     glUniform1f( kdLoc, IllumFL_kd );
@@ -4200,10 +4679,10 @@ void DrawIlluminatedLines2( double *Px, double *Py, double *Pz, double *Tx, doub
 void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_Vector *T2, COLOR *FC1, COLOR *FC2, long int nSegments ){
 
     long int i, j;
-    float c[4], CameraPos[3], LightPos[3];
+    //float c[4], CameraPos[3], LightPos[3];
+    float CameraPos[3], LightPos[3];
     Lgm_Vector M;
-    double *Depth, dx, dy, dz;
-    unsigned long int *Index;
+    double dx, dy, dz;
 
 
     /*
@@ -4211,41 +4690,39 @@ void DrawIlluminatedLines3( Lgm_Vector *P1, Lgm_Vector *P2, Lgm_Vector *T1, Lgm_
      *  midpoint of line segment.  Use distance squared instead of distance top
      *  avoid a sqrt(). It'll sort the same anyway.
      */
-    Depth = (double *)calloc( nSegments, sizeof(double) );
-    Index = (unsigned long int *)calloc( nSegments, sizeof(unsigned long int) );
     for ( j=0; j<nSegments; ++j ) {
 
         M.x = 0.5*(P2[j].x + P1[j].x); M.y = 0.5*(P2[j].y + P1[j].y); M.z = 0.5*(P2[j].z + P1[j].z);
         dx  = aInfo->Camera.x - M.x;
         dy  = aInfo->Camera.y - M.y;
         dz  = aInfo->Camera.z - M.z;
-        Depth[j] = dx*dx + dy*dy +dz*dz; // actually depth^2
-        Index[j] = j;
+        SegDepth[j] = dx*dx + dy*dy +dz*dz; // actually depth^2
+        SegIndex[j] = j;
 
     }
-    quicksort2uli( nSegments, Depth, Index );
+    quicksort2uli( nSegments, SegDepth, SegIndex );
+    printf( "Sorted %d segments.\n", nSegments );
 
 
 
-    GLint  TangLoc         = glGetAttribLocation(  g_shaderMyTest2, "Tang" );
-    GLint  VertColorLoc    = glGetAttribLocation(  g_shaderMyTest2, "VertColor" );
-    GLint  LightPosLoc     = glGetUniformLocation( g_shaderMyTest2, "LightPos" );
-    GLint  CameraPosLoc    = glGetUniformLocation( g_shaderMyTest2, "CameraPos" );
-    GLint  FdTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FdTexture" );
-    GLint  FsTextureLoc    = glGetUniformLocation( g_shaderMyTest2, "FsTexture" );
-//    GLint  LineColorLoc    = glGetUniformLocation( g_shaderMyTest2, "LineColor" );
-    GLint  kaLoc           = glGetUniformLocation( g_shaderMyTest2, "ka" );
-    GLint  kdLoc           = glGetUniformLocation( g_shaderMyTest2, "kd" );
-    GLint  ksLoc           = glGetUniformLocation( g_shaderMyTest2, "ks" );
-    GLint  nLoc            = glGetUniformLocation( g_shaderMyTest2, "n" );
+    GLint  TangLoc         = glGetAttribLocation(  ShaderIllumLines2, "Tang" );
+    GLint  VertColorLoc    = glGetAttribLocation(  ShaderIllumLines2, "VertColor" );
+    GLint  LightPosLoc     = glGetUniformLocation( ShaderIllumLines2, "LightPos" );
+    GLint  CameraPosLoc    = glGetUniformLocation( ShaderIllumLines2, "CameraPos" );
+    GLint  FdTextureLoc    = glGetUniformLocation( ShaderIllumLines2, "FdTexture" );
+    GLint  FsTextureLoc    = glGetUniformLocation( ShaderIllumLines2, "FsTexture" );
+//    GLint  LineColorLoc    = glGetUniformLocation( ShaderIllumLines2, "LineColor" );
+    GLint  kaLoc           = glGetUniformLocation( ShaderIllumLines2, "ka" );
+    GLint  kdLoc           = glGetUniformLocation( ShaderIllumLines2, "kd" );
+    GLint  ksLoc           = glGetUniformLocation( ShaderIllumLines2, "ks" );
+    GLint  nLoc            = glGetUniformLocation( ShaderIllumLines2, "n" );
 
-    glUseProgram( g_shaderMyTest2 );
+    glUseProgram( ShaderIllumLines2 );
 //    glUniform4f( LineColorLoc, c[0], c[1], c[2], c[3] );
     glUniform1f( kaLoc, IllumFL_ka );
     glUniform1f( kdLoc, IllumFL_kd );
     glUniform1f( ksLoc, IllumFL_ks );
     glUniform1f( nLoc,  (float)IllumFL_n );
-printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
 
     glActiveTexture( GL_TEXTURE0 + 0);
     glBindTexture( GL_TEXTURE_2D, Texture_Fd );
@@ -4279,15 +4756,88 @@ printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
     glBegin( GL_LINES );
         for ( j=nSegments-1; j>=0; --j ) {
 
-            i = Index[j];
+            i = SegIndex[j];
 
-            glVertexAttrib4f( VertColorLoc, FC1[i].r, FC1[i].g, FC1[i].b, FC1[i].a );
-            glVertexAttrib3f( TangLoc, T1[i].x, T1[i].y, T1[i].z );
-            glVertex3f( P1[i].x, P1[i].y, P1[i].z );
 
-            glVertexAttrib4f( VertColorLoc, FC2[i].r, FC2[i].g, FC2[i].b, FC2[i].a );
-            glVertexAttrib3f( TangLoc, T2[i].x, T2[i].y, T2[i].z );
-            glVertex3f( P2[i].x, P2[i].y, P2[i].z );
+            if ( ( SatSelectorInfo->DrawOpenNorthFLs && (FL_FLAG[i] == LGM_OPEN_N_LOBE) )
+                    || ( SatSelectorInfo->DrawOpenSouthFLs && (FL_FLAG[i] == LGM_OPEN_S_LOBE) )
+                    || ( SatSelectorInfo->DrawClosedFLs    && (FL_FLAG[i] == LGM_CLOSED) )
+                    || ( SatSelectorInfo->DrawImfFLs       && (FL_FLAG[i] == LGM_OPEN_IMF) ) ) {
+
+                if ( SatSelectorInfo->OverRideFLColors ) {
+                    glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLColors_Red, 
+                                                    SatSelectorInfo->OverRideFLColors_Grn, 
+                                                    SatSelectorInfo->OverRideFLColors_Blu, 
+                                                    SatSelectorInfo->OverRideFLColors_Alf );
+                } else if ( SatSelectorInfo->OverRideFLTypeColors ) {
+                    if ( FL_FLAG[i] == LGM_CLOSED ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLClosedColors_Red,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Grn,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Blu,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_N_LOBE ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLOpenNorthColors_Red,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Grn,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Blu,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_S_LOBE ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLOpenSouthColors_Red,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Grn,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Blu,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_IMF ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLImfColors_Red,
+                                                        SatSelectorInfo->OverRideFLImfColors_Grn,
+                                                        SatSelectorInfo->OverRideFLImfColors_Blu,
+                                                        SatSelectorInfo->OverRideFLImfColors_Alf );
+                    } 
+                } else {
+                    glVertexAttrib4f( VertColorLoc, FC1[i].r, FC1[i].g, FC1[i].b, FC1[i].a );
+                }
+
+                glVertexAttrib3f( TangLoc, T1[i].x, T1[i].y, T1[i].z );
+                glVertex3f( P1[i].x, P1[i].y, P1[i].z );
+
+
+
+
+
+
+
+                if ( SatSelectorInfo->OverRideFLColors ) {
+                    glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLColors_Red, 
+                                                    SatSelectorInfo->OverRideFLColors_Grn, 
+                                                    SatSelectorInfo->OverRideFLColors_Blu, 
+                                                    SatSelectorInfo->OverRideFLColors_Alf );
+                } else if ( SatSelectorInfo->OverRideFLTypeColors ) {
+                    if ( FL_FLAG[i] == LGM_CLOSED ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLClosedColors_Red,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Grn,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Blu,
+                                                        SatSelectorInfo->OverRideFLClosedColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_N_LOBE ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLOpenNorthColors_Red,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Grn,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Blu,
+                                                        SatSelectorInfo->OverRideFLOpenNorthColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_S_LOBE ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLOpenSouthColors_Red,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Grn,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Blu,
+                                                        SatSelectorInfo->OverRideFLOpenSouthColors_Alf );
+                    } else if ( FL_FLAG[i] == LGM_OPEN_IMF ) {
+                        glVertexAttrib4f( VertColorLoc, SatSelectorInfo->OverRideFLImfColors_Red,
+                                                        SatSelectorInfo->OverRideFLImfColors_Grn,
+                                                        SatSelectorInfo->OverRideFLImfColors_Blu,
+                                                        SatSelectorInfo->OverRideFLImfColors_Alf );
+                    } 
+                } else {
+                    glVertexAttrib4f( VertColorLoc, FC2[i].r, FC2[i].g, FC2[i].b, FC2[i].a );
+                }
+                glVertexAttrib3f( TangLoc, T2[i].x, T2[i].y, T2[i].z );
+                glVertex3f( P2[i].x, P2[i].y, P2[i].z );
+
+            }
 
         }
     glEnd();
@@ -4297,9 +4847,6 @@ printf("Draw3: IllumFL_n = %g\n", IllumFL_n);
     glEnable(GL_LIGHTING);
 
     glUseProgram( 0 );
-
-    free( Depth );
-    free( Index );
 
 }
 
@@ -4314,14 +4861,6 @@ void DrawScene( ) {
     long int    QuadsNeeded[9];
     GLuint      QuadsNeededDL[9];
     GLuint      QuadsNeededTexId[9];
-
-//gluLookAt( aInfo->Camera.x, aInfo->Camera.y, aInfo->Camera.z, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0 );
-//GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ )
-
-
-    /* Render Objects */
-//    glUseProgram( g_shaderMyTest );
-
 
 
 
@@ -4342,51 +4881,15 @@ void DrawScene( ) {
 
 
 
-//    glUseProgram( 0 );
-
-    if ( ShowEarth ) glCallList( EarthDL );
-
-    if ( ShowThemisFovs ) {
-        //glUseProgram( g_shaderMyTest );
-        glCallList( ThemisFovsDL );
-        //glUseProgram( 0 );
-    }
+    if ( ShowEarth )      glCallList( EarthDL );
+    if ( ShowThemisFovs ) glCallList( ThemisFovsDL );
 
 
 //    CreateGeoMarkers();
 //    glCallList( GeoMarkersDL );
 
-
-
-
-//20100305
-//glUseProgram( g_shaderMyTest );
-glCallList( DipoleAxisDL );
-//glUseProgram( 0 );
-//20100305
-glCallList( SunDirectionDL );
-//20100305    glCallList( EqPlaneGridDL );
-//glCallList( EqPlaneDL );
-
-
-/*
-Lgm_Vector Ugeo, Ugsm, RotAxis9;
-double Glon, Agsm_to_ins[3][3], Ains_to_gsm[3][3], RotAngle9;
-double Qins_to_gsm[4], Qgsm_to_ins[4];
-Glon = 0.0*M_PI/180.0;
-Ugeo.x=6.6*cos(Glon); Ugeo.y=6.6*sin(Glon); Ugeo.z = 0.0;
-Lgm_Convert_Coords( &Ugeo, &Ugsm, GEO_TO_GSM, mInfo->c );
-ComputeZPSTransMatrix( &Ugeo, CurrentDate, CurrentUT, Agsm_to_ins, Ains_to_gsm, Qins_to_gsm, Qgsm_to_ins );
-Lgm_QuatToAxisAngle( Qins_to_gsm, &RotAngle9, &RotAxis9 );
-
-glPushMatrix();
-glRotatef( RotAngle9, RotAxis9.x, RotAxis9.y, RotAxis9.z );
-glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); // This implements coord trans from Observer coords -> GSM
-//glTranslatef( Ugsm.x, Ugsm.y, Ugsm.z );
-glCallList( ZPSAxesDL );
-glPopMatrix();
-*/
-
+    glCallList( DipoleAxisDL );
+    glCallList( SunDirectionDL );
 
     /*
      * Show stars
@@ -4405,7 +4908,9 @@ CHECK COORDS!
 
 
     glPushMatrix();
-    glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); // This implements coord trans from Observer coords -> GSM
+
+    // This implements coord trans from Observer coords -> GSM
+    glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); 
 
 
 
@@ -4419,8 +4924,6 @@ CHECK COORDS!
         /*
          * We want to show all of the PAs
          */
-
-//ShowFullFieldLine = 1;
         if ( ShowFullFieldLine ){
             for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
@@ -4444,7 +4947,6 @@ CHECK COORDS!
         /*
          * We want to show a subset of Pitch Angles
          */
-
         for (i=0; i<ObjInfo->MagEphemInfo->nAlpha; i++ ) {
             if ( ShowPitchAngle[i] ) {
                 glMaterialfv( GL_FRONT, GL_DIFFUSE,   gInfo->FieldLineMaterial[i].diffuse );
@@ -4469,8 +4971,8 @@ CHECK COORDS!
      * Convert Camera Position (in Observer Coords) to GEO
      */
     Lgm_Convert_Coords( &aInfo->Camera, &Camera_geo, ObsToGeoConvertFlag, mInfo->c );
-//    ra = Lgm_Magnitude( &Camera_geo );                  // radius
-    th = DegPerRad*acos( Camera_geo.z/aInfo->Rcam );             // co-latitude
+    //ra = Lgm_Magnitude( &Camera_geo );                // radius
+    th = DegPerRad*acos( Camera_geo.z/aInfo->Rcam );    // co-latitude
     ph = DegPerRad*atan2( Camera_geo.y, Camera_geo.x ); // longitude
 
 
@@ -4575,13 +5077,10 @@ CHECK COORDS!
     glPopMatrix();
 
 
-
-
-
-
-//glCallList( TopSideDL );
-//glCallList( MeridPlane1DL );
-//glCallList( MeridPlane2DL );
+    // These were for GITM stuff
+    //glCallList( TopSideDL );
+    //glCallList( MeridPlane1DL );
+    //glCallList( MeridPlane2DL );
 
 
     if ( ShowAtmosphere ){
@@ -4606,7 +5105,7 @@ CHECK COORDS!
 
         glDisable( GL_BLEND );
         glDisable( GL_CULL_FACE );
-//        glDisable( GL_DEPTH_TEST );
+        //glDisable( GL_DEPTH_TEST );
 
     }
 
@@ -4623,7 +5122,7 @@ CHECK COORDS!
     glPushMatrix();
     glRotatef( RotAngle3, RotAxis3.x, RotAxis3.y, RotAxis3.z ); // This implements coord trans from Observer coords -> GSM
 
-    //glUseProgram( g_shaderMyTest );
+    //glUseProgram( ShaderIllumLines );
 
 glFrontFace(GL_CW);
     glLightModelfv( GL_LIGHT_MODEL_TWO_SIDE, LightModelTwoSide);
@@ -4668,12 +5167,13 @@ glFrontFace(GL_CCW);
     glCallList( SatOrbitsDL );
     DrawSatLabels();
 
-/*
- * Plot in depth order.
- */
-if ( FL_Arrs_Alloced && (nFL_Arr > 0 ) ) {
-DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
-}
+    /*
+     * Plot in depth order.
+     * NOTE: Dont need to depth sort in DrawIlluminatedLines3() if using DualDepthPeeling Shaders
+     */
+    if ( FL_Arrs_Alloced && (nFL_Arr > 0 ) ) {
+        DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
+    }
 
 
     int w = g_imageWidth;
@@ -4777,11 +5277,11 @@ DrawIlluminatedLines3( P1, P2, T1, T2, FC1, FC2, nFL_Arr );
 
 
 
-gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) {
+gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data ) {
 
     int             i;
     double          qq[4];
-    double          TBQ[4]; // TB stands for trackball
+    double          TBQ[4]; // Quaternion for "TrackBall" rotations
     Lgm_Vector      vv;
 
     GdkGLContext    *glcontext = gtk_widget_get_gl_context (widget);
@@ -4806,8 +5306,6 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     add_quats( view_quat_diff, view_quat, view_quat );
     add_quats( view_quat_diff3, view_quat3, view_quat3 );
 
-//printf("view_quat = %g %g %g %g\n", view_quat[0], view_quat[1], view_quat[2], view_quat[3] );
-//printf("view_quat3 = %g %g %g %g\n", view_quat3[0], view_quat3[1], view_quat3[2], view_quat3[3] );
 
     /*
      * Compute the location of the Camera. It was originally at +Z, but its
@@ -4856,14 +5354,17 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
     TBQ[0] = view_quat3[0]; TBQ[1] = view_quat3[1]; TBQ[2] = view_quat3[2]; TBQ[3] = view_quat3[3];
     Lgm_QuatToAxisAngle(  TBQ, &RotAngle5,  &RotAxis5 );
 
-    glRotatef( RotAngle5, RotAxis5.x, RotAxis5.y, RotAxis5.z ); // This is the panning-type rotation
-    glRotatef( -RotAngle4, RotAxis4.x, RotAxis4.y, RotAxis4.z ); // This is the spinning type rotation
-    glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z ); // Position things properly rel. to "camera" or "eye"
+    // This is the panning-type rotation
+    glRotatef( RotAngle5, RotAxis5.x, RotAxis5.y, RotAxis5.z ); 
+
+    // This is the spinning type rotation
+    glRotatef( -RotAngle4, RotAxis4.x, RotAxis4.y, RotAxis4.z ); 
+
+    // Position things properly rel. to "camera" or "eye"
+    glTranslatef( -aInfo->Camera.x, -aInfo->Camera.y, -aInfo->Camera.z ); 
 
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
-//glClearColor( 1.0, 1.0, 1.0, 1.0 );
-//glClearColor( 0.8, 0.8, 0.8, 0.8 );
 
     if ( LightingStyle == 0 ) {
 
@@ -4879,8 +5380,6 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
         glLightfv (GL_LIGHT0, GL_POSITION, position);
-//        LightPosition[0] = 5000.0; LightPosition[1] = LightPosition[2] = LightPosition[3] = 0.0;
-//        glLightfv (GL_LIGHT0, GL_POSITION, LightPosition );
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
 
@@ -4897,7 +5396,6 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
         LightPosition[0] = position[0]; LightPosition[1] = position[1]; 
         LightPosition[2] = position[2]; LightPosition[3] = position[3];
-        //glLightfv (GL_LIGHT0, GL_POSITION, position);
         glLightfv (GL_LIGHT0, GL_POSITION, LightPosition);
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
@@ -4916,8 +5414,6 @@ gboolean expose_event( GtkWidget *widget, GdkEventExpose *event, gpointer data) 
         glPushMatrix();
         glLightfv( GL_LIGHT0, GL_AMBIENT, ambient);
         glLightfv (GL_LIGHT0, GL_POSITION, position);
-//        LightPosition[0] = 5000.0; LightPosition[1] = LightPosition[2] = LightPosition[3] = 0.0;
-//        glLightfv (GL_LIGHT0, GL_POSITION, LightPosition );
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
         glPopMatrix();
 
@@ -5131,7 +5627,6 @@ static gboolean idle( GtkWidget *widget ) {
 
         if ( (AnimateTime == TIME_STEP_BACKWARD) || (AnimateTime == TIME_PLAY_BACKWARD) ) SignedTimeInc = -TimeInc;
         else SignedTimeInc = TimeInc;
-printf("MIKE MIKE MIKE: SignedTimeInc = %g\n", SignedTimeInc);
 
         ++cFrame;
         oJD = CurrentJD;
@@ -5312,27 +5807,27 @@ static void AdjustIdle( GtkWidget *widget ){
 
 
 /* Toggle animation.*/
-static void toggle_animation( GtkWidget *widget ) {
-
-
-    if ( !AnimateView ) {
-        // view animation rotations to zero
-        view_quat_diff[0] = 0.0;
-        view_quat_diff[1] = 0.0;
-        view_quat_diff[2] = 0.0;
-        view_quat_diff[3] = 1.0;
-    }
-
-    if ( AnimateView || AnimateTime ) {
-        // keep idle going if either view or time is being animated
-        idle_add( widget );
-    } else {
-        // remove idle calls if neither view nor time is being animated
-        idle_remove( widget );
-        printf("FOO\n"); gdk_window_invalidate_rect( widget->window, &widget->allocation, FALSE );
-    }
-
-}
+//static void toggle_animation( GtkWidget *widget ) {
+//
+//
+//    if ( !AnimateView ) {
+//        // view animation rotations to zero
+//        view_quat_diff[0] = 0.0;
+//        view_quat_diff[1] = 0.0;
+//        view_quat_diff[2] = 0.0;
+//        view_quat_diff[3] = 1.0;
+//    }
+//
+//    if ( AnimateView || AnimateTime ) {
+//        // keep idle going if either view or time is being animated
+//        idle_add( widget );
+//    } else {
+//        // remove idle calls if neither view nor time is being animated
+//        idle_remove( widget );
+//        printf("FOO\n"); gdk_window_invalidate_rect( widget->window, &widget->allocation, FALSE );
+//    }
+//
+//}
 
 
 void  ChangeMapImage( GtkFileChooser *chooser,  gpointer user_data){
@@ -5540,7 +6035,6 @@ void TimeAction( GtkWidget *widget, gpointer data ) {
     switch ( k ) {
         case TIME_RESET_BACKWARD_TO_START:
         case TIME_RESET_FOREWARD_TO_END:
-printf("AAAAA    CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
 
                 if ( k == TIME_RESET_BACKWARD_TO_START ) {
                     printf("Reset Current Time to Start Time...\n");
@@ -5560,8 +6054,8 @@ printf("AAAAA    CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g
 
                 RunTime     = FALSE;
                 AnimateTime = TIME_STOP;
-if (k== TIME_RESET_BACKWARD_TO_START)
-printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
+                //if (k== TIME_RESET_BACKWARD_TO_START)
+                //printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT);
                 UpdateTimeDepQuants( CurrentDate, CurrentUT );
                 UpdateTimeDepQuants( CurrentDate, CurrentUT );
 
@@ -5589,7 +6083,6 @@ printf("Back to Start CurrentDate, CurrentUT = %ld %g\n", CurrentDate, CurrentUT
                 sprintf(Str, "Frames Done: %ld    Frames Remaining: %ld    (Total: %ld)", cFrame, nFramesLeft, nFrames);
                 gtk_label_set_text( GTK_LABEL(cFramesLabel), Str );
                 printf("A\n"); expose_event( drawing_area, NULL, NULL );
-printf("BBBBB    CreateEarth: RotAngle, RotAxis.x, RotAxis.y, RotAxis.z  = %g %g %g %g\n", RotAngle, RotAxis.x, RotAxis.y, RotAxis.z);
 
                 break;
 
@@ -5772,7 +6265,7 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
     sprintf( Str, "%05d", iE );
     for (i=0; i<5; i++ ) tle.Line1[18+i] = Str[i];
     tle.Line1[23] = '.';
-    sprintf( Str, "%08d", fE );
+    sprintf( Str, "%08ld", fE );
     for (i=0; i<8; i++ ) tle.Line1[24+i] = Str[i];
 
 
@@ -5818,7 +6311,7 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
         }
         
     }
-    printf( "sum = %d sum%10 = %d\n", sum, sum%10 );
+    printf( "sum = %d sum%%10 = %d\n", sum, sum%10 );
 
     tle.Line1[68] = '0' + sum%10;
     tle.Line1[69] = '\0';
@@ -5877,7 +6370,7 @@ static void ChangeTLE( GtkWidget *widget, gpointer data) {
         }
         
     }
-    printf( "sum = %d sum%10 = %d\n", sum, sum%10 );
+    printf( "sum = %d sum%%10 = %d\n", sum, sum%10 );
 
     tle.Line2[68] = '0' + sum%10;
 
@@ -6189,17 +6682,17 @@ static void change_material (GtkMenuItem  *menuitem, MaterialProp *mat) {
 
 
 /* For popup menu. */
-static gboolean button_press_event_popup_menu (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-
-    if (event->button == 3) {
-        /* Popup menu. */
-        gtk_menu_popup (GTK_MENU (widget), NULL, NULL, NULL, NULL, event->button, event->time);
-        return TRUE;
-    }
-
-    return FALSE;
-
-}
+//static gboolean button_press_event_popup_menu (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+//
+//    if (event->button == 3) {
+//        /* Popup menu. */
+//        gtk_menu_popup (GTK_MENU (widget), NULL, NULL, NULL, NULL, event->button, event->time);
+//        return TRUE;
+//    }
+//
+//    return FALSE;
+//
+//}
 
 
 
@@ -6914,6 +7407,7 @@ static void ChangeMaterialColor( GtkMenuItem  *menuitem, gpointer data ) {
     j = k-i*3;
 
 
+    button = gInfo->DriftShellDiffuseColorButton[0];
 
 
     if (Flag){
@@ -7086,7 +7580,7 @@ static void SetCoordAxesAndGrids( GtkWidget  *widget, gpointer data ) {
     int i = GPOINTER_TO_INT( data );
     int State;
 
-        State = gtk_toggle_button_get_active(  GTK_RADIO_BUTTON( widget ) ); // get state of check item
+    State = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( widget ) ); // get state of check item
 
     switch (i) {
 
@@ -7204,7 +7698,7 @@ void PredictIridiumFlares( GtkWidget *widget, gpointer data ) {
     long int    tDate;
     double      tUT, tsince;
 
-    double 		th,ph, r, JD, sJD, eJD, JDinc, diff, Alt;
+    double 		th,ph, JD, sJD, eJD, JDinc, diff, Alt;
     Lgm_Vector 	u, uu, EarthToSun, g1, g2, g3, P;
     Lgm_CTrans  *tc = Lgm_init_ctrans( 0 );
     _SgpInfo    sgp;
@@ -7311,6 +7805,7 @@ GtkWidget *PitchAngleDisplayProperties(){
     GtkCellRenderer     *renderer;
     GtkTreeViewColumn   *column;
     GtkTreeModel        *model;
+    GtkListStore        *ListStore;
 //    GtkWidget           *grid1;
 
 
@@ -8448,7 +8943,8 @@ PUKE_SATSEL_VBOX = vbox2;
     gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_SHADOW_IN);
 
     /* create list store model */
-    model = gtk_list_store_new( IRIDIUM_FLARE_NUM_COLUMNS,
+    //model = gtk_list_store_new( IRIDIUM_FLARE_NUM_COLUMNS,
+    ListStore = gtk_list_store_new( IRIDIUM_FLARE_NUM_COLUMNS,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
                                             G_TYPE_DOUBLE,
@@ -8459,7 +8955,8 @@ PUKE_SATSEL_VBOX = vbox2;
                                             G_TYPE_STRING);
 
     /* create tree view */
-    treeview = gtk_tree_view_new_with_model (model);
+    //treeview = gtk_tree_view_new_with_model( model );
+    treeview = gtk_tree_view_new_with_model( GTK_TREE_MODEL(ListStore) );
     gtk_tree_view_set_rules_hint( GTK_TREE_VIEW (treeview), TRUE );
     gtk_tree_view_set_search_column( GTK_TREE_VIEW (treeview), IRIDIUM_FLARE_COLUMN_DATE );
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW (treeview), TRUE);
@@ -9673,11 +10170,20 @@ int main( int argc, char *argv[] ) {
     Lgm_CTrans *c = Lgm_init_ctrans( 0 );
     char       Command[2048];
 
+
+    /*
+     * Initialize Dual Depth Peeling info struct.
+     */
+    dInfo = Init_DualDepthPeelInfo();
+
+
+
     
     /*
      * Initialize the ObjInfo structure
      */
     ObjInfo = Vds_InitObjectInfo();
+
 
 
 
@@ -9736,7 +10242,44 @@ int main( int argc, char *argv[] ) {
      * Create Sat Selector page
      */
     InitSatSelectorInfo();
+    SatSelectorInfo->OverRideFLColors = 0;
+    SatSelectorInfo->OverRideFLColors_Red = 124.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Grn =  53.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Blu =  33.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Alf = 222.0/256.0;
 
+    SatSelectorInfo->DrawOpenNorthFLs = 1;
+    SatSelectorInfo->DrawOpenSouthFLs = 1;
+    SatSelectorInfo->DrawClosedFLs    = 1;
+    SatSelectorInfo->DrawImfFLs       = 1;
+
+    SatSelectorInfo->OverRideFLTypeColors = 0;
+    SatSelectorInfo->OverRideFLClosedColors_Red = 124.0/256.0;
+    SatSelectorInfo->OverRideFLClosedColors_Grn =  53.0/256.0;
+    SatSelectorInfo->OverRideFLClosedColors_Blu =  33.0/256.0;
+    SatSelectorInfo->OverRideFLClosedColors_Alf = 222.0/256.0;
+
+    SatSelectorInfo->OverRideFLOpenNorthColors_Red =  33.0/256.0;
+    SatSelectorInfo->OverRideFLOpenNorthColors_Grn = 124.0/256.0;
+    SatSelectorInfo->OverRideFLOpenNorthColors_Blu =  62.0/256.0;
+    SatSelectorInfo->OverRideFLOpenNorthColors_Alf = 222.0/256.0;
+
+    SatSelectorInfo->OverRideFLOpenSouthColors_Red =  33.0/256.0;
+    SatSelectorInfo->OverRideFLOpenSouthColors_Grn =  53.0/256.0;
+    SatSelectorInfo->OverRideFLOpenSouthColors_Blu = 124.0/256.0;
+    SatSelectorInfo->OverRideFLOpenSouthColors_Alf = 222.0/256.0;
+
+    SatSelectorInfo->OverRideFLImfColors_Red = 148.0/256.0;
+    SatSelectorInfo->OverRideFLImfColors_Grn = 124.0/256.0;
+    SatSelectorInfo->OverRideFLImfColors_Blu =  17.0/256.0;
+    SatSelectorInfo->OverRideFLImfColors_Alf = 222.0/256.0;
+
+
+
+    SatSelectorInfo->OverRideFLColors_Red = 124.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Grn =  53.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Blu =  33.0/256.0;
+    SatSelectorInfo->OverRideFLColors_Alf = 222.0/256.0;
 
 
     UpdateTimeDepQuants( CurrentDate, CurrentUT );
@@ -9843,7 +10386,7 @@ int main( int argc, char *argv[] ) {
 
 
     sprintf( Command, "mkdir -p %s/SAT_GROUPS", getenv("HOME") );
-    system( Command );
+    if ( system( Command ) < 0 ){ printf("Problem executing command: %s\n", Command ); }
 
 
 
@@ -9864,7 +10407,62 @@ int main( int argc, char *argv[] ) {
     ReCreateEarth( );
     ReCreateMoon( );
 
+
+
+
+
+
+/*
+ * Lets try out the bats-r-us fields
+ * Dont need E here.
+ */
+Lgm_Vector u0;
+double **u, **B, **EandB;
+double R, xx, yy, zz, Bx, By, Bz, ux, uy, uz, pressure;
+FILE *fp = fopen( "bats_r_us_5.txt", "r");
+long int nb;
+
+LGM_ARRAY_2D( u, 3, 10000000, double );
+LGM_ARRAY_2D( B, 10000000, 3, double );
+LGM_ARRAY_2D( EandB, 10000000, 6, double );
+
+nb = 0;
+while ( fscanf( fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &xx, &yy, &zz, &Bx, &By, &Bz, &ux, &uy, &uz, &pressure ) != EOF ) {
+
+    u0.x = xx; u0.y = yy; u0.z = zz;
+    R = Lgm_Magnitude( &u0 );
+
+    if ( (R>=2.5)&&(R<=300.0) ) {
+        u[0][nb]  =  xx; u[1][nb]  = yy;  u[2][nb]  = zz;
+        B[nb][0]  = Bx;  B[nb][1]  = By;  B[nb][2]  = Bz;
+        EandB[nb][0] = Bx; EandB[nb][1] = By; EandB[nb][2] = Bz; EandB[nb][3] = 0.0; EandB[nb][4] = 0.0; EandB[nb][5] = 0.0;
+        ++nb;
+    }
+
+
+}
+fclose(fp);
+printf("Number of points in Mesh: %ld\n", nb);
+
+
+KdTree = Lgm_KdTree_Init( u, (void **)EandB, nb, 3 );
+Lgm_Set_KdTree( KdTree, 12, 1e6, mInfo );
+Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_SCATTERED_DATA4, mInfo );
+Lgm_B_FromScatteredData_SetRbf( mInfo, 1.0/36.0, LGM_RBF_MULTIQUADRIC );
+Lgm_B_FromScatteredData_SetUp( mInfo );
+//Lgm_B_FromScatteredData4_SetUp( mInfo );
+
+//LGM_ARRAY_2D_FREE( u );
+//LGM_ARRAY_2D_FREE( B );
+//LGM_ARRAY_2D_FREE( EandB );
+
+
+
+
+
     gtk_main( );
+
+    Lgm_B_FromScatteredData_TearDown( mInfo );
 
     Lgm_FreeMagInfo( mInfo );
 

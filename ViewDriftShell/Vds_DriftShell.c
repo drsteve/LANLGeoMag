@@ -792,9 +792,9 @@ void ReGenerateFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 void GenerateMiscFieldLineLists( Vds_ObjectInfo *ObjInfo ){
 
     double  x, y, z;
-    int     i, j, ns, Gap, Flag, Type;
+    int     i, j, Gap, Type;
     char    Line[128];
-    char    Line2[128];
+    //char    Line2[128];
     FILE    *fp;
 
     fp = fopen( "/home/mgh//git/LanlGeoMag/Examples/Trace/FieldLines.txt", "r" );
@@ -804,8 +804,8 @@ LGM_ARRAY_2D( ObjInfo->x5_gsm,   2000, 2000, double );
 LGM_ARRAY_2D( ObjInfo->y5_gsm,   2000, 2000, double );
 LGM_ARRAY_2D( ObjInfo->z5_gsm,   2000, 2000, double );
 
-    j = -1; i = 0; Flag = 0;
-    while ( fgets( Line, 80, fp ) != EOF ) {
+    j = -1; i = 0; 
+    while ( fgets( Line, 80, fp ) != NULL ) {
 
         if ( Line[0] == '\0' ) {
             break;

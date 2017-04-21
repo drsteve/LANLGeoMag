@@ -1116,12 +1116,150 @@ Never really use these anymore...
     label = gtk_label_new (_("w:")); gtk_widget_show (label);
     gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
-    spinbutton_adj = gtk_adjustment_new( IllumFL_w, 0.0, 10.0, 0.05, .1, 0);
+    spinbutton_adj = gtk_adjustment_new( IllumFL_w, 0.0, 30.0, 0.05, .1, 0);
     spinbutton = gtk_spin_button_new( GTK_ADJUSTMENT(spinbutton_adj), 1, 2); gtk_widget_show(spinbutton);
     gtk_box_pack_start( GTK_BOX(hbox1), spinbutton, FALSE, FALSE, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON(spinbutton), TRUE );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(spinbutton), IllumFL_w );
     g_signal_connect( G_OBJECT( spinbutton ), "value-changed", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 5 ) );
+
+
+    label = gtk_label_new (_("OverRide All Colors:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->OverRideFLColors );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 20 ) );
+
+
+    color.red   = SatSelectorInfo->OverRideFLColors_Red*65535;
+    color.green = SatSelectorInfo->OverRideFLColors_Grn*65535;
+    color.blue  = SatSelectorInfo->OverRideFLColors_Blu*65535;
+    colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
+    gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), SatSelectorInfo->OverRideFLColors_Alf*65535 );
+    gtk_box_pack_start( GTK_BOX(hbox1), colorbutton, FALSE, FALSE, 0 );
+    gtk_widget_set_size_request( colorbutton, 30, 20 );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    g_signal_connect( G_OBJECT(colorbutton), "color-set", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 10 ) );
+
+
+    /*
+     * Additional set of buttons
+     */
+    hbox1 = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox1);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox1, TRUE, TRUE, 0);
+
+    label = gtk_label_new (_("Draw FLs:  Closed:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->DrawOpenNorthFLs );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 21 ) );
+
+    label = gtk_label_new (_("N Lobe:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->DrawOpenNorthFLs );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 22 ) );
+
+    label = gtk_label_new (_("S Lobe:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->DrawOpenNorthFLs );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 23 ) );
+
+    label = gtk_label_new (_("IMF:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->DrawOpenNorthFLs );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 24 ) );
+
+
+
+    /*
+     * Additional set of buttons
+     */
+    hbox1 = gtk_hbox_new (FALSE, 0); gtk_widget_show (hbox1);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox1, TRUE, TRUE, 0);
+
+    label = gtk_label_new (_("OverRide FL Type Colors:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    checkbutton = gtk_check_button_new_with_mnemonic (""); gtk_widget_show (checkbutton);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(checkbutton), SatSelectorInfo->OverRideFLTypeColors );
+    gtk_box_pack_start( GTK_BOX(hbox1), checkbutton, FALSE, FALSE, 0 );
+    g_signal_connect( G_OBJECT( checkbutton ), "toggled", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 25 ) );
+
+
+    label = gtk_label_new (_("Closed:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    color.red   = SatSelectorInfo->OverRideFLClosedColors_Red*65535;
+    color.green = SatSelectorInfo->OverRideFLClosedColors_Grn*65535;
+    color.blue  = SatSelectorInfo->OverRideFLClosedColors_Blu*65535;
+    colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
+    gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), SatSelectorInfo->OverRideFLClosedColors_Alf*65535 );
+    gtk_box_pack_start( GTK_BOX(hbox1), colorbutton, FALSE, FALSE, 0 );
+    gtk_widget_set_size_request( colorbutton, 30, 20 );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    g_signal_connect( G_OBJECT(colorbutton), "color-set", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 11 ) );
+
+    label = gtk_label_new (_("N Lobe:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    color.red   = SatSelectorInfo->OverRideFLOpenNorthColors_Red*65535;
+    color.green = SatSelectorInfo->OverRideFLOpenNorthColors_Grn*65535;
+    color.blue  = SatSelectorInfo->OverRideFLOpenNorthColors_Blu*65535;
+    colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
+    gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), SatSelectorInfo->OverRideFLOpenNorthColors_Alf*65535 );
+    gtk_box_pack_start( GTK_BOX(hbox1), colorbutton, FALSE, FALSE, 0 );
+    gtk_widget_set_size_request( colorbutton, 30, 20 );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    g_signal_connect( G_OBJECT(colorbutton), "color-set", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 12 ) );
+
+    label = gtk_label_new (_("S Lobe:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    color.red   = SatSelectorInfo->OverRideFLOpenSouthColors_Red*65535;
+    color.green = SatSelectorInfo->OverRideFLOpenSouthColors_Grn*65535;
+    color.blue  = SatSelectorInfo->OverRideFLOpenSouthColors_Blu*65535;
+    colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
+    gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), SatSelectorInfo->OverRideFLOpenSouthColors_Alf*65535 );
+    gtk_box_pack_start( GTK_BOX(hbox1), colorbutton, FALSE, FALSE, 0 );
+    gtk_widget_set_size_request( colorbutton, 30, 20 );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    g_signal_connect( G_OBJECT(colorbutton), "color-set", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 13 ) );
+
+    label = gtk_label_new (_("IMF:")); gtk_widget_show (label);
+    gtk_box_pack_start( GTK_BOX(hbox1), label, FALSE, FALSE, 0 );
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 1);
+    color.red   = SatSelectorInfo->OverRideFLImfColors_Red*65535;
+    color.green = SatSelectorInfo->OverRideFLImfColors_Grn*65535;
+    color.blue  = SatSelectorInfo->OverRideFLImfColors_Blu*65535;
+    colorbutton = gtk_color_button_new(); gtk_widget_show(colorbutton);
+    gtk_color_button_set_color( GTK_COLOR_BUTTON(colorbutton), &color );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    gtk_color_button_set_alpha( GTK_COLOR_BUTTON(colorbutton), SatSelectorInfo->OverRideFLImfColors_Alf*65535 );
+    gtk_box_pack_start( GTK_BOX(hbox1), colorbutton, FALSE, FALSE, 0 );
+    gtk_widget_set_size_request( colorbutton, 30, 20 );
+    gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON(colorbutton), TRUE );
+    g_signal_connect( G_OBJECT(colorbutton), "color-set", G_CALLBACK( ChangeIllumFLParams ), GINT_TO_POINTER( 14 ) );
 
 
 

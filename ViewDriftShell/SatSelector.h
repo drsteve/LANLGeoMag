@@ -109,7 +109,10 @@ typedef struct _SpaceObjectItem {
 
 
 
-    int         UsePointSprites;        // if FALSE, use dots
+    int     UsePointSprites;        // if FALSE, use dots
+
+
+
 
 
 } _SpaceObjectItem;
@@ -190,6 +193,38 @@ typedef struct _SatSelectorInfo {
 
     _GroupNode  *SatGroupList;
     int          nSatGroups;
+
+    // OverRide colors for Field Lines
+    int         OverRideFLColors;
+    float       OverRideFLColors_Red;
+    float       OverRideFLColors_Grn;
+    float       OverRideFLColors_Blu;
+    float       OverRideFLColors_Alf;
+
+    // OverRide drawing of FL types
+    int         DrawOpenNorthFLs;
+    int         DrawOpenSouthFLs;
+    int         DrawClosedFLs;
+    int         DrawImfFLs;
+
+    // OverRide colors by FL types
+    int         OverRideFLTypeColors;
+    float       OverRideFLClosedColors_Red;
+    float       OverRideFLClosedColors_Grn;
+    float       OverRideFLClosedColors_Blu;
+    float       OverRideFLClosedColors_Alf;
+    float       OverRideFLOpenNorthColors_Red;
+    float       OverRideFLOpenNorthColors_Grn;
+    float       OverRideFLOpenNorthColors_Blu;
+    float       OverRideFLOpenNorthColors_Alf;
+    float       OverRideFLOpenSouthColors_Red;
+    float       OverRideFLOpenSouthColors_Grn;
+    float       OverRideFLOpenSouthColors_Blu;
+    float       OverRideFLOpenSouthColors_Alf;
+    float       OverRideFLImfColors_Red;
+    float       OverRideFLImfColors_Grn;
+    float       OverRideFLImfColors_Blu;
+    float       OverRideFLImfColors_Alf;
 
 } _SatSelectorInfo;
 

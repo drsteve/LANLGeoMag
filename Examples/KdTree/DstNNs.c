@@ -8,7 +8,7 @@
 #include <stdio.h>
 int main( ) {
     Lgm_ElapsedTimeInfo t;
-    double              *q, **u, **B, Dst[500000], DstIndex, dum1, dum2, dum3;
+    double              *q, **u, **B, *Dst, DstIndex, dum1, dum2, dum3;
     double              Time, JD, JDs, JDe, UTC, x, y, z, r, dist, *Dist, delta;
     long int            Date, KeepList[10000], nKeepList, Id;
     unsigned long int   n, *Idx, nSearches, Id_Old;
@@ -24,30 +24,32 @@ int main( ) {
     t.ColorizeText = TRUE;
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
 
+    Dst = (double *)calloc( 5000000, sizeof(double));
 
 
     /*
      * Read in Dst data from 1976 -> 2011
      */
-    Date = 19760101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 19580101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
+    Date = 19760101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 20110101; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
+    Date = 19760102; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
     n = 0;
     for ( JD=JDs; JD<=JDe; JD += 1.0 ) {
         Date = Lgm_JD_to_Date( JD, &ny, &nm, &nd, &UTC );
-        sprintf( Filename, "/home/mgh/Data/Dst/%4d/Dst_%ld.dat", ny, Date );
-        if ( (fp = fopen( Filename, "r" ) ) != NULL ) {
-            //printf("reading: %s\n", Filename );
-            while ( fscanf( fp, "%lf %lf %lf %lf %lf\n", &Time, &dum1, &dum2, &dum3, &DstIndex ) != EOF ){
-                Dst[n] = DstIndex;
-                if ((Time > 0.0)&&(Time < 1.0)&&(Date == 20011124)) printf("n = %ld\n", n);
-                if ( n == 120228 ) printf("Date = %ld\n", Date);
-                if ( n == 250434 ) printf("Date = %ld\n", Date);
-                ++n;
-            }
-            fclose( fp );
+        sprintf( Filename, "/home/mghenderson/Data/Dst/%4d/Dst_%ld.dat", ny, Date );
+        printf("reading: %s\n", Filename );
+        //if ( (fp = fopen( Filename, "r" ) ) != NULL ) {
+        //    while ( fscanf( fp, "%lf %lf %lf %lf %lf\n", &Time, &dum1, &dum2, &dum3, &DstIndex ) != EOF ){
+        //        Dst[n] = DstIndex;
+        //        if ((Time > 0.0)&&(Time < 1.0)&&(Date == 20011124)) printf("n = %ld\n", n);
+        //        if ( n == 120228 ) printf("Date = %ld\n", Date);
+        //        if ( n == 250434 ) printf("Date = %ld\n", Date);
+        //        ++n;
+        //    }
+        //    fclose( fp );
 
-        }
+        //}
     }
     printf("n = %ld\n", n);
 
@@ -163,6 +165,7 @@ if (nKeepList > 4) nKeepList = 4;
 
     Lgm_free_ctrans( c ); // free the structure
 
+    free( Dst );
 
     return(0);
 

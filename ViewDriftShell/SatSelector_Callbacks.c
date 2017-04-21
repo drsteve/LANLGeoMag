@@ -1,10 +1,7 @@
 #include "SatSelector.h"
 
 extern float IllumFL_ka;
-extern float IllumFL_kd;
-extern float IllumFL_ks;
-extern double IllumFL_n;
-extern double IllumFL_w;
+extern float IllumFL_kd; extern float IllumFL_ks; extern double IllumFL_n; extern double IllumFL_w;
 extern GLuint  Texture_Fd;
 extern GLuint  Texture_Fs;
 
@@ -300,20 +297,41 @@ void ToggleOrbitOptions( GtkWidget  *w, unsigned int *data ) {
 
 
 /*
- * Callback for changing Illuminatehd Field Line mShader params, ka, kd, ks
+ * Callback for changing Illuminatehd Field Line Shader params, ka, kd, ks
  */
 void ChangeIllumFLParams( GtkWidget  *w, unsigned int *data ) {
 
-    int     SpinButtonNumber;
-    double  Value;
-    float   *FdImage;
-    float   *FsImage;
+    int         WidgetNumber, State;
+    double      Value;
+    GdkColor    Color;
+    guint16     Alpha;
+    float       *FdImage;
+    float       *FsImage;
 
-    SpinButtonNumber = GPOINTER_TO_INT( data );
-    Value = gtk_spin_button_get_value(  GTK_SPIN_BUTTON( w ) );
+    WidgetNumber = GPOINTER_TO_INT( data );
+    if ( ( WidgetNumber > 0 ) && ( WidgetNumber <= 9 ) ) {
+
+        /*
+         * Its onem of the Spin Buttons  (1-9 currently reserved for spin buttons.)
+         */
+        Value = gtk_spin_button_get_value(  GTK_SPIN_BUTTON( w ) );
+
+    }  else if ( ( WidgetNumber >= 10 ) && ( WidgetNumber < 20 ) ) {
+
+        /*
+         *  Get color (10-19 reserved for color buttons)
+         */
+        gtk_color_button_get_color( GTK_COLOR_BUTTON(w), &Color );
+        Alpha = gtk_color_button_get_alpha( GTK_COLOR_BUTTON(w) );
+
+    } else {
+
+         State = gtk_toggle_button_get_active(  GTK_TOGGLE_BUTTON( w ) );
+
+    }
 
 
-    switch ( SpinButtonNumber ) {
+    switch ( WidgetNumber ) {
 
         case 1:
                 /*
@@ -372,12 +390,105 @@ void ChangeIllumFLParams( GtkWidget  *w, unsigned int *data ) {
                 break;
 
 
+        case 10:
+                /*
+                 *  OverRide color -- i.e. make all segements the same.
+                 */
+                SatSelectorInfo->OverRideFLColors_Red = Color.red/65535.0;
+                SatSelectorInfo->OverRideFLColors_Grn = Color.green/65535.0;
+                SatSelectorInfo->OverRideFLColors_Blu = Color.blue/65535.0;
+                SatSelectorInfo->OverRideFLColors_Alf = Alpha/65535.0;
+                break;
+
+        case 11:
+                /*
+                 *  OverRide color for Closed FLs
+                 */
+                SatSelectorInfo->OverRideFLClosedColors_Red = Color.red/65535.0;
+                SatSelectorInfo->OverRideFLClosedColors_Grn = Color.green/65535.0;
+                SatSelectorInfo->OverRideFLClosedColors_Blu = Color.blue/65535.0;
+                SatSelectorInfo->OverRideFLClosedColors_Alf = Alpha/65535.0;
+                break;
+
+        case 12:
+                /*
+                 *  OverRide color for North Lobe FLs
+                 */
+                SatSelectorInfo->OverRideFLOpenNorthColors_Red = Color.red/65535.0;
+                SatSelectorInfo->OverRideFLOpenNorthColors_Grn = Color.green/65535.0;
+                SatSelectorInfo->OverRideFLOpenNorthColors_Blu = Color.blue/65535.0;
+                SatSelectorInfo->OverRideFLOpenNorthColors_Alf = Alpha/65535.0;
+                break;
+
+        case 13:
+                /*
+                 *  OverRide color for South Lobe FLs
+                 */
+                SatSelectorInfo->OverRideFLOpenSouthColors_Red = Color.red/65535.0;
+                SatSelectorInfo->OverRideFLOpenSouthColors_Grn = Color.green/65535.0;
+                SatSelectorInfo->OverRideFLOpenSouthColors_Blu = Color.blue/65535.0;
+                SatSelectorInfo->OverRideFLOpenSouthColors_Alf = Alpha/65535.0;
+                break;
+
+        case 14:
+                /*
+                 *  OverRide color for IMF FLs
+                 */
+                SatSelectorInfo->OverRideFLImfColors_Red = Color.red/65535.0;
+                SatSelectorInfo->OverRideFLImfColors_Grn = Color.green/65535.0;
+                SatSelectorInfo->OverRideFLImfColors_Blu = Color.blue/65535.0;
+                SatSelectorInfo->OverRideFLImfColors_Alf = Alpha/65535.0;
+                break;
+
+        case 20:
+                /*
+                 *  Toggle OverRideFLColors
+                 */
+                SatSelectorInfo->OverRideFLColors = State;
+                break;
+
+        case 21:
+                /*
+                 *  Toggle DrawClosedFLs
+                 */
+                SatSelectorInfo->DrawClosedFLs = State;
+                break;
+
+        case 22:
+                /*
+                 *  Toggle DrawOpenNorthFLs
+                 */
+                SatSelectorInfo->DrawOpenNorthFLs = State;
+                break;
+
+        case 23:
+                /*
+                 *  Toggle DrawOpenSOuthFLs
+                 */
+                SatSelectorInfo->DrawOpenSouthFLs = State;
+                break;
+
+        case 24:
+                /*
+                 *  Toggle DrawImfFLs
+                 */
+                SatSelectorInfo->DrawImfFLs = State;
+                break;
+
+        case 25:
+                /*
+                 *  Toggle DrawImfFLs
+                 */
+                SatSelectorInfo->OverRideFLTypeColors = State;
+                break;
+
+
     }
 
 
 
-    ReCreateSats();
-    ReCreateSatOrbits();
+    //ReCreateSats();
+    //ReCreateSatOrbits();
     DrawScene();
     expose_event( drawing_area, NULL, NULL );
 
