@@ -73,6 +73,8 @@
  *      - Pmin. Position of Bmin along the field line. In Re relative to GSM coord system. (Same as v3.)
  *      - Smin. Distance from southern footpoint to Pmin along the FL. (in Re).
  *      - Stotal. Distance from southern footpoint to northern footpoint along the FL. (in Re).
+ *      - Snorth. Distance from u to northern footpoint location.
+ *      - Ssouth. Distance from u to southern footpoint location.
  *      - Bvecmin. The GSM components of the magnetic field vector at Pmin. Units are nT.
  *      - Bmin. The magnitude of Bvecmin. Units of nT.
  *      - Ellipsoid_Footprint_Pn. GSM position of northern footpoint. (Same as v2.)
@@ -227,10 +229,12 @@ Info->Hmax = 0.10;
     
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
     Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
+double MIKEA = Info->Trace_s;
     Info->v2_final = *v2;
 
 
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
+double MIKEB = Info->Trace_s;
     Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
     Info->v1_final = *v1;
 
@@ -283,6 +287,9 @@ Info->Hmax = 0.10;
 
     } else if ( flag1 ) {
 
+        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length to the bounding box
+        Info->Trace_s = Info->Stotal;
+
         Info->Ellipsoid_Footprint_Ps = *v1;
         Info->Bfield( v1, &Bvec, Info );
         Info->Ellipsoid_Footprint_Bvecs = Bvec;
@@ -309,6 +316,9 @@ Info->Hmax = 0.10;
 
 
     } else if ( flag2 ) {
+
+        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length to the bounding box
+        Info->Trace_s = Info->Stotal;
 
         Info->Ellipsoid_Footprint_Pn = *v2;
         Info->Bfield( v2, &Bvec, Info );
@@ -344,6 +354,11 @@ Info->Hmax = 0.10;
 	    /*
 	     *  IMF
  	     */
+        Info->v1_final = *v1;
+        Info->v2_final = *v2;
+        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length within bounding box
+        Info->Trace_s = Info->Stotal;
+
 	    return( LGM_OPEN_IMF );
 
     }
