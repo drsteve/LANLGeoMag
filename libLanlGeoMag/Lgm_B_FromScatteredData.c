@@ -1431,7 +1431,7 @@ if (Kgot < 1) printf("AHA   Kgot = %d   Info->KdTree_kNN_MaxDist2 = %g\n", Kgot,
          */
         if ( rbf == NULL ) {
 
-            //printf("Did not find key - computing new rbf coeffs\n\n");
+            //printf("Did not find key - computing new rbf coeffs. Kgot = %d\n\n", Kgot );
 
             n_data = Kgot;
 
@@ -1455,6 +1455,8 @@ if (Kgot < 1) printf("AHA   Kgot = %d   Info->KdTree_kNN_MaxDist2 = %g\n", Kgot,
                 v_data[i].z = Info->KdTree_kNN[i].Position[2];
 
                 bbb = (double *)Info->KdTree_kNN[i].Object;
+//printf("i=%d\n", i);
+//printf("bbb[0]=%g\n", bbb[0]);
                 B_data[i].x = bbb[0];
                 B_data[i].y = bbb[1];
                 B_data[i].z = bbb[2];
