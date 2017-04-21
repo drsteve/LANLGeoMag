@@ -90,6 +90,20 @@ typedef struct LgmTsyg2004_Info {
      */
     int         Region;
 
+    /*
+     * variables to compute field using our own dipole model.
+     */
+    double FINT;
+    double FEXT;
+    double BBX;
+    double BBY;
+    double BBZ;
+    double OIMFX;
+    double OIMFY;
+    double OIMFZ;
+
+
+
 
 
 } LgmTsyg2004_Info;

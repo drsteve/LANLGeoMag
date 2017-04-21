@@ -349,7 +349,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
      *        FIRST OF ALL, CONSIDER THE CASES (1) AND (2):
      *
      */
-    if (SIGMA < S0+DSIG) {    //  CASES (1) OR (2); CALCULATE THE MODEL FIELD
+    if (SIGMA < S0+DSIG) {      //  CASES (1) OR (2); CALCULATE THE MODEL FIELD
                                 //  (WITH THE POTENTIAL "PENETRATED" INTERCONNECTION FIELD):
 
 
@@ -429,10 +429,10 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         if ( (IOPGEN == 0) || (IOPGEN == 5) ) {
             *HXIMF = 0.0;
             *HYIMF = BYIMF;
-            *HZIMF = BZIMF;    //  THESE ARE COMPONENTS OF THE PENETRATED FIELD PER UNIT OF THE PENETRATION COEFFICIENT.
-                    //  IN OTHER WORDS, THESE ARE DERIVATIVES OF THE PENETRATION FIELD COMPONENTS WITH RESPECT
-                    //  TO THE PENETRATION COEFFICIENT.   WE ASSUME THAT ONLY TRANSVERSE COMPONENT OF THE
-                    //  FIELD PENETRATES INSIDE.
+            *HZIMF = BZIMF;     //  THESE ARE COMPONENTS OF THE PENETRATED FIELD PER UNIT OF THE PENETRATION COEFFICIENT.
+                                //  IN OTHER WORDS, THESE ARE DERIVATIVES OF THE PENETRATION FIELD COMPONENTS WITH RESPECT
+                                //  TO THE PENETRATION COEFFICIENT.   WE ASSUME THAT ONLY TRANSVERSE COMPONENT OF THE
+                                //  FIELD PENETRATES INSIDE.
         } else {
             *HXIMF = 0.0;
             *HYIMF = 0.0;
@@ -471,16 +471,37 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
 
         if (SIGMA < S0-DSIG) {          //  (X,Y,Z) IS INSIDE THE MAGNETOSPHERE
 
-            tInfo->Region = LGM_TS04_MAGNETOSPHERE;
 
+            /*
+             * Here, we are inside the magnetopause. Just return the field as is.
+             */
             *BX = BBX;
             *BY = BBY;
             *BZ = BBZ;
 
+            tInfo->Region = LGM_TS04_MAGNETOSPHERE;
+            tInfo->BBX    = BBX;
+            tInfo->BBY    = BBY;
+            tInfo->BBZ    = BBZ;
+
         } else {                        //  THIS IS THE MOST COMPLEX CASE: WE ARE INSIDE
                                         //  THE INTERPOLATION REGION
 
-            tInfo->Region = LGM_TS04_BOUNDARY;
+            /*
+             * MGH - Here, we are outside the magnetopause, but inside the "boundary layer" where we transition to the IMF. 
+             * We want to compute a blended version which interpolates between isnide and outside. 
+             * The FINT and FEXT vary between 1 and 0 and 0 and 1 as we move across the "boundary layer".
+             * The problem here is that this interp should use the full fields (i.e. dipole included) to do the interp.
+             * There is therefore a call to DIPOLE(). Note that it gets subtracted too -- because this code is only supposed to 
+             * return the external field -- it'll get added back later.
+             * BUT, an issue is that the DIPOLE used here may be differentm than the one we add back on later.
+             *
+             * Plus, the way its done here uses too many calls to dipole.
+             *
+             * Instead, lets return all the peices in tInfo to do the interp outside.
+             */
+
+
             FINT = 0.5*(1.-(SIGMA-S0)/DSIG);
             FEXT = 0.5*(1.+(SIGMA-S0)/DSIG);
 
@@ -488,20 +509,34 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
             *BX = (BBX+QX)*FINT + OIMFX*FEXT - QX;
             *BY = (BBY+QY)*FINT + OIMFY*FEXT - QY;
             *BZ = (BBZ+QZ)*FINT + OIMFZ*FEXT - QZ;
+            
+            tInfo->Region = LGM_TS04_BOUNDARY;
+            tInfo->FINT   = FINT;
+            tInfo->FEXT   = FEXT;
+            tInfo->BBX    = BBX;
+            tInfo->BBY    = BBY;
+            tInfo->BBZ    = BBZ;
+            tInfo->OIMFX  = OIMFX;
+            tInfo->OIMFY  = OIMFY;
+            tInfo->OIMFZ  = OIMFZ;
+
 
         }
 
 
     } else {    // THE CASES (1) AND (2) ARE EXHAUSTED; THE ONLY REMAINING
-                // POSSIBILITY IS NOW THE CASE (3):
+                // POSSIBILITY IS NOW THECASE (3):
 
-        tInfo->Region = LGM_TS04_IMF;
         DIPOLE( PS, X, Y, Z, &QX, &QY, &QZ, tInfo );
         *BX = OIMFX - QX;
         *BY = OIMFY - QY;
         *BZ = OIMFZ - QZ;
 
-        
+        tInfo->Region = LGM_TS04_IMF;
+        tInfo->OIMFX  = OIMFX;
+        tInfo->OIMFY  = OIMFY;
+        tInfo->OIMFZ  = OIMFZ;
+
     }
 
 //printf("P = %g %g %g   Region = %d\n", X, Y, Z, tInfo->Region );
