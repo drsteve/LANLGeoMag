@@ -313,6 +313,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
 	         */
 	        //v->x = v->y = v->z = 0.0;
             *v = P;
+            Info->Trace_s = Sa;
 	        return(0);
 
 	    } else if ( F < 0.0 ) {
