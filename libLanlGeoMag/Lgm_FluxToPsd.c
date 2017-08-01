@@ -640,11 +640,11 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
                         f->AofK[k] = DegPerRad*asin( SinA );
                     } else {
                         f->AofK[k] = LGM_FILL_VALUE;
-                        printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see K's this low).\n", AlphaEq);
+                        printf("Particles with Eq. PA of %g mirror below us. (I.e. S/C does not see Ks this low).\n", AlphaEq);
                     }
                 } else {
                     f->AofK[k] = LGM_FILL_VALUE;
-                    printf("Particles mirror below LC height. (I.e. S/C does not see K's this high).\n");
+                    printf("Particles with K of %g mirror below LC height. (I.e. S/C does not see Ks this high).\n", f->K[k]);
                 }
                 //printf("f->K[k] = %g   AlphaEq = %g SinA = %g f->AofK[k] = %g\n", f->K[k], AlphaEq, SinA, f->AofK[k]);
 
