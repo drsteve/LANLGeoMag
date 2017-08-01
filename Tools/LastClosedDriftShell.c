@@ -166,6 +166,7 @@ int main( int argc, char *argv[] ){
     double           K[500], LS[500], Kin[500], Bm[500];
     double           Inc, FootpointHeight, LT;
     int              Force, UseEop;
+    int              UseTS07=0;
     long int         StartDate, EndDate, Date, currDate;
     int              nK, i, Quality, nFLsInDriftShell, ans, aa, Year, Month, Day;
     char             Str[128], NewStr[2048];
@@ -254,6 +255,9 @@ int main( int argc, char *argv[] ){
         LstarInfo->mInfo->Bfield = Lgm_B_igrf;
     } else if ( !strcmp( ExtModel, "TS04" ) ){
         LstarInfo->mInfo->Bfield = Lgm_B_TS04;
+    } else if ( !strcmp( ExtModel, "TS07" ) ){
+        LstarInfo->mInfo->Bfield = Lgm_B_TS07;
+        UseTS07=1;
     } else if ( !strcmp( ExtModel, "T89c" ) ){
         LstarInfo->mInfo->Bfield = Lgm_B_T89c;
     } else if ( !strcmp( ExtModel, "T96" ) ){
@@ -418,10 +422,13 @@ int main( int argc, char *argv[] ){
             //set date specific stuff
             Date = Lgm_JD_to_Date( JD, &Year, &Month, &Day, &UTC );
             Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c);
-        
-            Lgm_get_QinDenton_at_JD( JD, &qd, 1, 1 );
-            Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
-
+            
+            if (!UseTS07) {
+                Lgm_get_QinDenton_at_JD( JD, &qd, 1, 1 );
+                Lgm_set_QinDenton( &qd, LstarInfo->mInfo );
+            } else {
+                Lgm_SetCoeffs_TS07( Date, UTC, &LstarInfo->mInfo->TS07_Info );
+            }
         
             /*
              * Compute L*s, Is, Bms, etc...
