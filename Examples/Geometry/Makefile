@@ -1,8 +1,8 @@
 # Very simple makefile illustrating how to use pkg-config to compile
 
 
-Geodetic: SphereRay.c
-	gcc SphereRay.c -Wall -O2 `pkg-config --cflags --libs lgm` -o SphereRay
+Geodetic: EllipsoidRay.c
+	gcc EllipsoidRay.c -Wall -O2 `pkg-config --cflags --libs lgm` -o EllipsoidRay
 
 clean:
-	rm SphereRay
+	rm EllipsoidRay

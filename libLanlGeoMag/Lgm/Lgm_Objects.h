@@ -134,6 +134,7 @@ typedef struct RayType {
 //int Lgm_BoxIntersect( BoxType *Box, RayType *Ray, double t0, double t1 );
 //int Lgm_SphereIntersect( SphereType *Sphere, RayType *Ray, double *tmin, double *tmax, double *t );
 int Lgm_EllipsoidIntersect( EllipsoidType *Ellipsoid, RayType *Ray, double *tmin, double *tmax, double *t );
+double Lgm_EllipsoidVolume( EllipsoidType *Ellipsoid);
 
 #endif
 
