@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 #include "Lgm/Lgm_Objects.h"
 
 /*
@@ -94,5 +95,35 @@ double Lgm_EllipsoidVolume( EllipsoidType *Ellipsoid){
     double area;
 
     return((4./3.)*M_PI*Ellipsoid->Radius2_a*Ellipsoid->Radius_b);
+}
+
+
+/*
+ * Define an Ellipsoid strcture.
+ *
+ * Ellipsoid has equation:
+ *
+ *      x^2/r_a^2 + y^2/r_a^2 + z^2/r_b^2 = 1
+ *
+ * I.e. its flattened in the z direction (E.g., if we're using it for the
+ * spheroid of the Earth, r_a is the eq. radius and r_b is the polar radius.)
+ *
+ */
+EllipsoidType *Lgm_CreateEllipsoid( Lgm_Vector *Origin, double a, double b){
+    EllipsoidType *Ellipsoid;
+    Ellipsoid = (EllipsoidType *) calloc( 1, sizeof(*Ellipsoid) );
+    Ellipsoid->Radius_a = a;
+    Ellipsoid->Radius2_a = a*a;
+    Ellipsoid->Radius_b = b;
+    Ellipsoid->Radius2_b = b*b;
+
+    return( Ellipsoid );
+}
+
+/*
+ * Free an EllipsoidType
+ */
+void Lgm_FreeEllipsoid( EllipsoidType *Ellipsoid ) {
+    free(Ellipsoid);
 }
 

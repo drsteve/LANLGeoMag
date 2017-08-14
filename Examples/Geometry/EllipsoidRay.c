@@ -14,16 +14,13 @@ int main(void) {
     double tmin = 0, tmax = 1000, t, volume;
 
     Lgm_Vector *vec1, *vec2, *vec3;
+    EllipsoidType *ellipsoid;
 
-    EllipsoidType ellipsoid;
     RayType ray;
     // make a sphere at the origin
     vec1 = Lgm_CreateVector(0, 0, 0);
-    ellipsoid.Origin = *vec1;
-    ellipsoid.Radius_a = 2.0;
-    ellipsoid.Radius_b = 2.0;
-    ellipsoid.Radius2_a = ellipsoid.Radius_a * ellipsoid.Radius_a;
-    ellipsoid.Radius2_b = ellipsoid.Radius_b * ellipsoid.Radius_b;
+    ellipsoid = Lgm_CreateEllipsoid(vec1, 2.0, 2.0);
+
     // make a ray pointing at the origin
     vec2 = Lgm_CreateVector(10, 0, 0);
     vec3 = Lgm_CreateVector(-1, 0, 0);
@@ -35,7 +32,7 @@ int main(void) {
     printf("Ray direction: %lf  %lf  %lf\n", ray.Direction.x, ray.Direction.y, ray.Direction.z);
 
 
-    intersect = Lgm_EllipsoidIntersect(&ellipsoid, &ray, &tmin, &tmax, &t);
+    intersect = Lgm_EllipsoidIntersect(ellipsoid, &ray, &tmin, &tmax, &t);
 
     if (intersect) {
         printf("The ray did intersect the ellipsoid, %lf  from the ray origin\n", t);
@@ -47,14 +44,14 @@ int main(void) {
         printf("The ray did not intersect the ellipsoid, %lf\n", t);
 
 
-    volume = Lgm_EllipsoidVolume(&ellipsoid);
+    volume = Lgm_EllipsoidVolume(ellipsoid);
 
     printf("\n\nThe Ellipsoid has an area of %lf\n", volume);
 
     Lgm_FreeVector(vec1);
     Lgm_FreeVector(vec2);
     Lgm_FreeVector(vec3);
-
+    Lgm_FreeEllipsoid(ellipsoid);
 
     return (0);
 }
