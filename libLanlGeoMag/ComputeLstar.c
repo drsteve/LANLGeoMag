@@ -1980,10 +1980,10 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         } else {
             return(-8);
         }
-        if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
+        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
         sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
         LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
-        if (LstarInfo->VerbosityLevel > 1) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
+        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
         //Only continue if bracket 1 is closed FL
         //Get L*
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
@@ -2059,7 +2059,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 }
             }
         }
-        if (LstarInfo->VerbosityLevel > 1) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
+        if (LstarInfo->VerbosityLevel > 0) printf("Found valid outer bracket. Pouter_GSM, Pmin_GSM = (%g, %g, %g), (%g, %g, %g)\n", Pouter.x, Pouter.y, Pouter.z, LstarInfo_brac2->mInfo->Pmin.x, LstarInfo_brac2->mInfo->Pmin.y, LstarInfo_brac2->mInfo->Pmin.z);
     }
 
     //if brackets are okay, we've moved on without changing anything except setting initial LCDS value as L* at inner bracket
@@ -2110,15 +2110,16 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                     if ( LstarInfo_test->nMinima[k] < 1 ) {printf("Less than one minimum defined on field line: Exit due to impossibility."); exit(-1); }
                 }
 
-                if (LstarInfo->VerbosityLevel > 1) printf("Current LCDS, K, PtestSM is %g, %g, (%g, %g, %g)\n", LCDS, *K, PtestSM.x, PtestSM.y, PtestSM.z);
+                if (LstarInfo->VerbosityLevel > 0) printf("Current LCDS, K, alpha, PtestSM is %g, %g, %g, (%g, %g, %g)\n", 
+                        LCDS, *K, Alpha, PtestSM.x, PtestSM.y, PtestSM.z);
                 LstarInfo->mInfo->Bm = LstarInfo_test->mInfo->Bm;
                 LstarInfo->DriftOrbitType = LstarInfo_test->DriftOrbitType;
             } else {
                 Pouter = Ptest;
                 Lgm_Convert_Coords( &Ptest, &PtestSM, GSM_TO_SM, LstarInfo_test->mInfo->c );
                 if (LstarInfo->VerbosityLevel > 0) {
-                    printf("Failed DS trace for alpha = %g at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
-                        LstarInfo_test->PitchAngle, Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
+                    printf("Failed DS trace for alpha = %g (K=%g) at test point (%g %g %g GSM; %g %g %g SM; TFlag = %d), moving outer bracket to current location\n",
+                        LstarInfo_test->PitchAngle, *K, Ptest.x, Ptest.y, Ptest.z, PtestSM.x, PtestSM.y, PtestSM.z, TFlag);
                     }
             }
         } else {
