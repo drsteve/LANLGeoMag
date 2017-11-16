@@ -39,7 +39,7 @@ echo "__isa_bits is" "%{__isa_bits}"
 
 %build
 #./configure --prefix=/usr --disable-doxygen-html --disable-doxygen-pdf
-%configure --libdir=${RPM_BUILD_ROOT}%{_libdir} --prefix=${RPM_BUILD_ROOT}/usr --enable-doxygen-doc --enable-doxygen-pdf
+%configure --libdir=${RPM_BUILD_ROOT}%{_libdir} --prefix=${RPM_BUILD_ROOT}/usr --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
 make -j
 
 %install

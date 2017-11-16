@@ -2,6 +2,8 @@
 
 	* configure.ac: releasing version 1.5.16.
 
+	* lanlgeomag.spec.in: added --disable-perl for building RPMs.
+
 	* libLanlGeoMag/Makefile.am (EXTRA_DIST): took the Images
 	directory out of this list because it makes the tarball
 	distribution too big.
