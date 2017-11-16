@@ -1,3 +1,11 @@
+2017-11-16  Mark Galassi  <markgalassi@lanl.gov>
+
+	* configure.ac: releasing version 1.5.16.
+
+	* libLanlGeoMag/Makefile.am (EXTRA_DIST): took the Images
+	directory out of this list because it makes the tarball
+	distribution too big.
+
 2011-07-08  Mike Henderson <mghenderson@lanl.gov>
     * configure.ac: added LGM_INDEX_DATA_DIR to locate where to find index data (e.g. Kp, Dst, AE). 
 
