@@ -568,7 +568,7 @@ int main( int argc, char *argv[] ){
                     // We need to compute the AlphaOfK array.
 //                    Lgm_Make_UTC( d->Date, d->Time, &UTC_DateTime, c );
 
-                    Lgm_get_QinDenton_at_JD( d.JD, &QinDen, 0 );
+                    Lgm_get_QinDenton_at_JD( d.JD, &QinDen, 0 , 0);
                     Lgm_set_QinDenton( &QinDen, mInfo );
                     Lgm_Set_Coord_Transforms( d.Date, d.Time, mInfo->c );
                     Lgm_Setup_AlphaOfK( &d, &v, mInfo );
@@ -602,7 +602,7 @@ int main( int argc, char *argv[] ){
                     Lgm_F2P_SetFlux( J_DIFF, Flux_Energy, Flux_nEnergy, Flux_Alpha, Flux_nAlpha, f2p );
 
                     //  Compute Phase Space Density at the constant Mu's and K's
-                    Lgm_F2P_GetPsdAtConstMusAndKs( Mu, nMu, K, nK, f2p );
+                    Lgm_F2P_GetPsdAtConstMusAndKs( Mu, nMu, K, nK, mInfo, f2p );
 
 
                     for ( iii=0; iii<nMu; iii++ ){
