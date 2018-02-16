@@ -10,7 +10,7 @@ See Mike Henderson about LanlGeoMag and Brian Larsen about the python wrappers
 @version: V1: 06-Dec-2010 (BAL)
 """
 # put modules here that you want to be accessible through 'from spacepy import *'
-__all__ = ['Lstar', 'Closed_Field', 'Lgm_T89', 'Lgm_OP77']
+__all__ = ['Lstar', 'Closed_Field', 'Lgm_T89', 'Lgm_T89c', 'Lgm_OP77']
 
 # Expose definitions from modules in this package.
 from lgmpy.Closed_Field import Closed_Field
