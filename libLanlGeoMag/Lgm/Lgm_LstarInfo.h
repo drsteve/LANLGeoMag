@@ -19,6 +19,8 @@
 #define LGM_DRIFT_ORBIT_OPEN                3
 #define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
 
+#define LGM_SHABANSKY_IGNORE        0
+#define LGM_SHABANSKY_HALVE_I       1
 
 #define LGM_LSTARINFO_MAX_FL        300
 #define LGM_LSTARINFO_MAX_MINIMA    300
@@ -28,6 +30,7 @@ typedef struct Lgm_LstarInfo {
 
     int         nFLsInDriftShell;   //!< Number of Field Lines to use when constructing Drift Shell.
     int         LstarQuality;       //!< Quality factor to use [0,8] -- higher gives more precise results.
+    int         ShabanskyHandling;  //!< Set how Lstar calculations are to handle Shabansky orbits
 
     double      KineticEnergy;      //!< Particle kinetic energy (only for energy dep. quantities.)
     double      Mass;               //!< Particle mass

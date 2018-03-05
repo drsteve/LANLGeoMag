@@ -467,6 +467,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     LstarInfo->VerbosityLevel = 2;
     LstarInfo->LSimpleMax     = 10.0;
     LstarInfo->ISearchMethod  = 1;
+    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
@@ -1071,23 +1072,8 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                 printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
             }
 
-// CRAP
 //for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 2 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
-            if ( (Type > 1) && (0==1) ){
-                if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
-                }
-
-                FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-
-                PredMinusActualMlat = pred_mlat - mlat;
-                if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
-                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
-                }
-
-            } else {
+            if (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_IGNORE) {
 
                 PredMinusActualMlat = pred_mlat - mlat;
                 if (LstarInfo->VerbosityLevel > 1) {
@@ -1096,18 +1082,30 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                     printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
                 }
 
+            } else if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
+                }
+
+                FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+                //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
+                PredMinusActualMlat = pred_mlat - mlat;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                }
 
             }
-
-
-
-
-
-
-
-
-
-
+            //else if (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_REJECT) {
+            //    //We should exit from the search if we want to treat Shabansky orbits as undefined drift shells
+            //    LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+            //
+            //    if (LstarInfo->VerbosityLevel >1) { printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
+            //    FoundShellLine = 0;
+            //    return(-3);
+            //    
+            //}
 
 
 
@@ -1224,7 +1222,7 @@ LstarInfo->FindShellPmin = TRUE;
          * Compute the gradient of I, Sb and Vgc
          */
         if ( LstarInfo->ComputeVgc ) {
-            // Lgm_Grad_I() and other rotuines may modify mInfo in undesirable ways, so give it a copy.
+            // Lgm_Grad_I() and other routines may modify mInfo in undesirable ways, so give it a copy.
             mInfo2 = Lgm_CopyMagInfo( LstarInfo->mInfo );
 
             mInfo2->FirstCall = TRUE;

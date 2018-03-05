@@ -59,6 +59,7 @@ static struct argp_option Options[] = {
     {"LT",              'L',    "LT",                         0,        "Local time for LCDS search plane. Default is 0 (midnight)."      },
     {"StartDate",       'S',    "yyyymmdd",                   0,        "StartDate "                              },
     {"EndDate",         'E',    "yyyymmdd",                   0,        "EndDate "                                },
+    {"ShabanskyHandling", 'B',    "ShabanskyHandlingStrategy",  0,      "Handling strategy for Shabansky orbits. 0 (default) is ignore; 1 halves target I in Shabansky region."},
     {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
     {"verbose",         'v',    "verbosity",                  0,        "Produce verbose output"                  },
@@ -78,6 +79,7 @@ struct Arguments {
     int         Quality;
     int         nFLsInDriftShell;
     int         Force;
+    int         ShabanskyHandling;
     double      LT;
     double      FootPointHeight;
     double      Delta;
@@ -115,6 +117,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'F':
             arguments->Force = 1;
+            break;
+        case 'B':
+            arguments->ShabanskyHandling = atoi( arg );
             break;
         case 'f':
             sscanf( arg, "%lf", &arguments->FootPointHeight );
@@ -184,20 +189,21 @@ int main( int argc, char *argv[] ){
    /*
      * Default option values.
      */
-    arguments.StartK           = 0.001;  // start at 90.0 Deg.
-    arguments.EndK             = 3.0;    // stop at 2.5 Deg.
-    arguments.nK               = 18;     // 18 pitch angles
-    arguments.silent           = 0;
-    arguments.verbose          = 0;
-    arguments.Quality          = 3;
-    arguments.nFLsInDriftShell = 24;
-    arguments.Delta            = 30;
-    arguments.Force            = 0;
-    arguments.LT               = 0.0;
-    arguments.UseEop           = 0;
-    arguments.StartDate        = -1;
-    arguments.EndDate          = -1;
-    arguments.FootPointHeight  = 100.0; // km
+    arguments.StartK            = 0.001;  // start at 90.0 Deg.
+    arguments.EndK              = 3.0;    // stop at 2.5 Deg.
+    arguments.nK                = 18;     // 18 pitch angles
+    arguments.silent            = 0;
+    arguments.verbose           = 0;
+    arguments.Quality           = 3;
+    arguments.nFLsInDriftShell  = 24;
+    arguments.ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    arguments.Delta             = 30;
+    arguments.Force             = 0;
+    arguments.LT                = 0.0;
+    arguments.UseEop            = 0;
+    arguments.StartDate         = -1;
+    arguments.EndDate           = -1;
+    arguments.FootPointHeight   = 100.0; // km
     strcpy( arguments.IntModel, "IGRF" );
     strcpy( arguments.ExtModel, "T89" );
 
@@ -236,6 +242,7 @@ int main( int argc, char *argv[] ){
     strcpy( ExtModel,  arguments.ExtModel );
 
     // Settings for Lstar calcs
+    LstarInfo->ShabanskyHandling = arguments.ShabanskyHandling;
     LstarInfo->ISearchMethod = 2; // 1= Original ROEDERER METHOD (fing Bm along ray first); 2= Find Bm by tracing from footpoint along FL.
     LstarInfo->VerbosityLevel = arguments.verbose;
     LstarInfo->mInfo->VerbosityLevel = arguments.verbose;
@@ -303,8 +310,8 @@ int main( int argc, char *argv[] ){
         fp = fopen(Filename, "w");
     
         // Bracket Position in GSM
-        brac1 = -3.5;
-        brac2 = -13.0;
+        brac1 = -3.0;
+        brac2 = -15.0;
     
     
         /*
@@ -449,8 +456,9 @@ int main( int argc, char *argv[] ){
                 for (aa=0; aa<nK; ++aa) {
                     // make a local copy of LstarInfo structure -- needed for multi-threading
                     LstarInfo3 = Lgm_CopyLstarInfo( LstarInfo );
+                    //LstarInfo3 = LstarInfo;
                     //LstarInfo3->PitchAngle = Alpha[aa];
-                    //printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
+                    if (arguments.verbose >= 1) printf("Date, UTC, aa, Alpha, tol = %ld, %g, %d, %g, %g\n", Date, UTC, aa, LstarInfo3->PitchAngle, tol);
         
                     ans = Lgm_LCDS( Date, UTC, brac1, brac2, Kin[aa], LT, tol, Quality, nFLsInDriftShell, &K[aa], LstarInfo3 );
                     if (LstarInfo3->DriftOrbitType == 1) printf("K: %g; Drift Orbit Type: Closed; L* = %g \n", Kin[aa], LstarInfo3->LS);
