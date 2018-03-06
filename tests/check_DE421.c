@@ -131,7 +131,9 @@ START_TEST(test_DE421) {
     Lgm_free_ctrans( c ); // free the structure
     Lgm_FreeJPLephemInfo( jpl ); // free the structure
 
-    return(0);
+    fail_unless( Passed, "DE421 test failed. LANLGeoMag does not match the test file from JPL.\n" );
+   
+    return;
     } END_TEST
 
 int target( int targ ) {
