@@ -56,6 +56,8 @@ AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
 if DX_COND_html
 #and make sure html is build when doing a make all
 #(for some reason this bit doesn't honor DESTDIR without doing it explicitly)
+README: README.md
+
 all-local: @DX_DOCDIR@/html
 
 install-data-local:
