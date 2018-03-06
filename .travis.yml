@@ -7,6 +7,6 @@ before_install:
   - sudo apt-get install -qq libperl-dev libgsl0-dev libhdf5-serial-dev
 
 script:
-  - cd drsteve/LANLGeoMag
+  - autoreconf -i
   - ./configure
   - make check TESTS="check_Sgp4"
