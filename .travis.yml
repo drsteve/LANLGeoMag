@@ -1,7 +1,12 @@
 language: c
 
+compiler: gcc
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq libperl-dev libgsl0-dev libhdf5-serial-dev
 
-script: ./configure && make check TESTS="check_Sgp4"
+script:
+  - cd drsteve/LANLGeoMag
+  - ./configure
+  - make check TESTS="check_Sgp4"
