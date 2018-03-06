@@ -9,4 +9,4 @@ before_install:
 script:
   - autoreconf -i
   - ./configure
-  - make check TESTS="check_Sgp4"
+  - make check TESTS="check_Sgp4 check_libLanlGeoMag check_PolyRoots"
