@@ -9,6 +9,7 @@
 
 
 int getSys( char *sys );
+int testDiff( Lgm_Vector Utest, Lgm_Vector Utarg, double tol );
 
 
 START_TEST(test_CoordTrans) {
@@ -80,7 +81,7 @@ START_TEST(test_CoordTrans) {
     printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 km [=1cm])\n", nPass, nFail);
     Lgm_free_ctrans( c ); // free the structure
 
-    fail_unless( Passed, "CoordTrans test failed. Have the leap-seconds changed?\n" );
+    ck_assert_msg( Passed, "CoordTrans test failed. Have the leap-seconds changed?\n" );
 
     return;
     } END_TEST
@@ -91,9 +92,9 @@ START_TEST(test_CoordRoundtrip) {
     Lgm_CTrans        *c = Lgm_init_ctrans( 0 ); 
     Lgm_Vector        Utarg, Umid, Umid2, Utest, Udiff;
     int               nTests, nPass, nFail, transflag, ntest, Passed=FALSE;
-    int               n=0, sysIn[5]={1,3,4,5,7}, sysMid[5]={2,6,6,4,1};
+    int               n=0, sysIn[6]={1,3,4,5,7,11}, sysMid[6]={2,6,6,4,1,8};
     long int          Date;
-    double            UTC, del;
+    double            UTC, del, tol=1e-10;
 
     Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c);
 
@@ -103,15 +104,15 @@ START_TEST(test_CoordRoundtrip) {
     nFail = 0;
     Passed = TRUE;
 
-    Date = 20000101;    // Jan 1, 2000
+    Date = 20120501;    // May 1, 2021
     UTC  = 0.0+0.0/60.0;         // Universal Time Coordinated (in decimal hours)
 
-    Utarg.x = -25.275; Utarg.y = 9.735; Utarg.z = 0.000; // Set a vector in GSM coordinates
-    Utarg.x =   5.271; Utarg.y = 3.535; Utarg.z = 1.362; // Set a vector in GSM coordinates
-    Utarg.x =   4.427; Utarg.y = 0.773; Utarg.z = 3.608; // Set a vector in GSM coordinates
+    Utarg.x =   4.427; Utarg.y = 0.773; Utarg.z = 3.608; // Set a vector in input coordinates
 
+
+    // **** Test 1 **** //
     printf("\nCoordinate roundtrip tests:\n");
-    printf("Test %d. %d -> %d -> %d\n", ntest, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    printf("Test %d. %d -> %d -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
     // Set up all the necessary variables to do transformations for this Date and UTC
     Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
@@ -122,12 +123,12 @@ START_TEST(test_CoordRoundtrip) {
     transflag = sysMid[ntest]*100 + sysIn[ntest];
     Lgm_Convert_Coords( &Umid, &Utest, transflag, c );
     printf("Roundtrip from system %d to %d to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest]);
-    nFail = nFail + (testDiff(Utest, Utarg, Umid));
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
     ntest++;
 
 
     // **** Test 2 **** //
-    printf("Test %d. %d -> %d -> %d\n", ntest, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    printf("Test %d. %d -> %d -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
     // Set up all the necessary variables to do transformations for this Date and UTC
     Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
@@ -138,12 +139,12 @@ START_TEST(test_CoordRoundtrip) {
     transflag = sysMid[ntest]*100 + sysIn[ntest];
     Lgm_Convert_Coords( &Umid, &Utest, transflag, c );
     printf("Roundtrip from system %d to %d to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest]);
-    nFail = nFail + (testDiff(Utest, Utarg, Umid));
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
     ntest++;
 
 
     // **** Test 3 (multiple roundtrips) **** //
-    printf("Test %d. %d -> %d -> %d -> %d -> %d\n", ntest, sysIn[ntest], sysMid[ntest], sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    printf("Test %d. %d -> %d -> %d -> %d -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest], sysMid[ntest], sysIn[ntest]);
     // Set up all the necessary variables to do transformations for this Date and UTC
     Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
@@ -158,11 +159,11 @@ START_TEST(test_CoordRoundtrip) {
     transflag = sysMid[ntest]*100 + sysIn[ntest];
     Lgm_Convert_Coords( &Umid, &Utest, transflag, c );
     printf("Roundtrip from system %d to %d to %d to %d to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest], sysMid[ntest], sysIn[ntest]);
-    nFail = nFail + (testDiff(Utest, Utarg, Umid));
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
     ntest++;
 
     // **** Test 4 (via multiple) **** //
-    printf("Test %d. %d -> %d -> 1 -> %d\n", ntest, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    printf("Test %d. %d -> %d -> 1 -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
     // Set up all the necessary variables to do transformations for this Date and UTC
     Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
@@ -175,11 +176,11 @@ START_TEST(test_CoordRoundtrip) {
     transflag = 100 + sysIn[ntest];
     Lgm_Convert_Coords( &Umid2, &Utest, transflag, c );
     printf("Roundtrip from system %d to %d to 1 to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest]);
-    nFail = nFail + (testDiff(Utest, Utarg, Umid));
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
     ntest++;
 
     // **** Test 5 **** //
-    printf("Test %d. %d -> %d -> %d\n", ntest, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    printf("Test %d. %d -> %d -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
     // Set up all the necessary variables to do transformations for this Date and UTC
     Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
@@ -190,21 +191,162 @@ START_TEST(test_CoordRoundtrip) {
     transflag = sysMid[ntest]*100 + sysIn[ntest];
     Lgm_Convert_Coords( &Umid, &Utest, transflag, c );
     printf("Roundtrip from system %d to %d to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest]);
-    nFail = nFail + (testDiff(Utest, Utarg, Umid));
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
     ntest++;
 
+    // **** Test 6 **** //
+    printf("Test %d. %d -> %d -> 2 -> %d\n", ntest+1, sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM low accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( Date, UTC, c );
 
+    // Do the transformation to intermediate system and back out
+    transflag = sysIn[ntest]*100 + sysMid[ntest];
+    Lgm_Convert_Coords( &Utarg, &Umid, transflag, c );
+    transflag = sysMid[ntest]*100 + 2;
+    Lgm_Convert_Coords( &Umid, &Umid2, transflag, c );
+    transflag = 200 + sysIn[ntest];
+    Lgm_Convert_Coords( &Umid2, &Utest, transflag, c );
+    printf("Roundtrip from system %d to %d to 2 to %d\n", sysIn[ntest], sysMid[ntest], sysIn[ntest]);
+    nFail = nFail + (testDiff(Utest, Utarg, tol));
+    ntest++;
+    
+
+    // **** Tests complete *** //
     if (nFail>0) Passed = FALSE;
-    printf("Result: %d tests pass; %d tests fail \n", nPass, nFail);
+    printf("Result: %d tests pass; %d tests fail \n", ntest-nFail, nFail);
     Lgm_free_ctrans( c ); // free the structure
 
-    fail_unless( Passed, "CoordRoundtrip test failed.\n" );
+    ck_assert_msg( Passed, "CoordRoundtrip test failed.\n" );
 
     return;
     } END_TEST
 
 
-int testDiff(Lgm_Vector Utest, Lgm_Vector Utarg, Lgm_Vector Umid) {
+START_TEST(test_CoordGSE_equiv) {
+    Lgm_CTrans        *c = Lgm_init_ctrans( 0 ); 
+    Lgm_Vector        Ufrom, Utest1, Utest2, Udiff;
+    int               nTests, nPass, nFail, ntest, Passed=FALSE;
+    int               n=0, sysFrom[3]={2,6,9};
+    long int          Date;
+    double            UTC, del, tol=1e-9;
+
+    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c);
+
+    /* step through test cases one line at a time */
+    ntest = 0;
+    nPass = 0;
+    nFail = 0;
+    Passed = TRUE;
+
+    Ufrom.x =   5.271324; Ufrom.y = 3.535221; Ufrom.z = 1.362777; // Set a vector in input coordinates
+
+    printf("\nGSE/GSE2000 tests (equivalence at J2000):\n");
+
+    // **** Test 1 **** //
+    printf("Test %d. Equivalence of GSE and GSE2000 at J2000 (DE)\n", ntest+1);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( 20000101, 12.0, c );
+
+    // Do the transformations from input system to both target systems
+    Lgm_Convert_Coords( &Ufrom, &Utest1, MOD_TO_GSE, c );
+    Lgm_Convert_Coords( &Ufrom, &Utest2, MOD_TO_GSE2000, c );
+    nFail = nFail + (testDiff(Utest1, Utest2, tol));
+    ntest++;
+
+    // **** Test 2 **** //
+    printf("Test %d. Equivalence of GSE and GSE2000 at J2000 (HA)\n", ntest+1);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( 20000101, 12.0, c );
+
+    // Do the transformation to intermediate system and back out
+    Lgm_Convert_Coords( &Ufrom, &Utest1, MOD_TO_GSE, c );
+    Lgm_Convert_Coords( &Ufrom, &Utest2, MOD_TO_GSE2000, c );
+    nFail = nFail + (testDiff(Utest1, Utest2, tol));
+    ntest++;
+
+    // **** Test 3 **** //
+    printf("Test %d. Equivalence of GSE and GSE2000 at J2000 (LA)\n", ntest+1);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM low accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( 20000101, 12.0, c );
+
+    // Do the transformation to intermediate system and back out
+    Lgm_Convert_Coords( &Ufrom, &Utest1, MOD_TO_GSE, c );
+    Lgm_Convert_Coords( &Ufrom, &Utest2, MOD_TO_GSE2000, c );
+    nFail = nFail + (testDiff(Utest1, Utest2, tol));
+    ntest++;
+
+
+    // **** Tests complete *** //
+    if (nFail>0) Passed = FALSE;
+    printf("Result: %d tests pass; %d tests fail \n", ntest-nFail, nFail);
+    Lgm_free_ctrans( c ); // free the structure
+
+    ck_assert_msg( Passed, "GSE test failed. GSE and GSE2000 do not appear equivalent at J2000.\n" );
+
+    return;
+    } END_TEST
+
+
+START_TEST(test_CoordGSE_fail) {
+    Lgm_CTrans        *c = Lgm_init_ctrans( 0 ); 
+    Lgm_Vector        Ufrom, Utest1, Utest2, Udiff;
+    int               nTests, nPass, nFail, ntest, Passed=FALSE;
+    int               n=0, sysFrom[3]={2,6,9};
+    long int          Date;
+    double            UTC, del, tol=1e-9;
+
+    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c);
+
+    /* step through test cases one line at a time */
+    ntest = 0;
+    nPass = 0;
+    nFail = 0;
+    Passed = TRUE;
+
+    Ufrom.x =   5.271324; Ufrom.y = 3.535221; Ufrom.z = 1.362777; // Set a vector in input coordinates
+
+    printf("\nGSE/GSE2000 tests (non-equiv. away from J2000):\n");
+
+    // **** Test **** //
+    printf("Test %d. Non-equivalence of GSE and GSE2000 at arbitrary time (DE)\n", ntest+1);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( 19940611, 1.0, c );
+
+    // Do the transformations from input system to both target systems
+    Lgm_Convert_Coords( &Ufrom, &Utest1, MOD_TO_GSE, c );
+    Lgm_Convert_Coords( &Ufrom, &Utest2, MOD_TO_GSE2000, c );
+    nFail = nFail + (testDiff(Utest1, Utest2, tol));
+    ntest++;
+
+    // **** Test 2 **** //
+    printf("Test %d. Non-equivalence of GSE and GSE2000 at J2000 (HA)\n", ntest+1);
+    // Set up all the necessary variables to do transformations for this Date and UTC
+    Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    Lgm_Set_Coord_Transforms( 20061120, 15.0, c );
+
+    // Do the transformation to intermediate system and back out
+    Lgm_Convert_Coords( &Ufrom, &Utest1, MOD_TO_GSE, c );
+    Lgm_Convert_Coords( &Ufrom, &Utest2, MOD_TO_GSE2000, c );
+    nFail = nFail + (testDiff(Utest1, Utest2, tol));
+    ntest++;
+
+
+    // **** Tests complete *** //
+    printf("Result: %d tests pass; %d tests fail \n", nFail, ntest-nFail);
+    Lgm_free_ctrans( c ); // free the structure
+
+    ck_assert( nFail>0 );
+
+    return;
+    } END_TEST
+
+
+int testDiff(Lgm_Vector Utest, Lgm_Vector Utarg, double tol) {
     Lgm_Vector  Udiff;
     double      del;
     int         Fail = FALSE;
@@ -218,12 +360,12 @@ int testDiff(Lgm_Vector Utest, Lgm_Vector Utarg, Lgm_Vector Umid) {
     printf("Y: In (%g), Out(%g), Diff (%g)\n", Utarg.y, Utest.y, Udiff.y);
     printf("Z: In (%g), Out(%g), Diff (%g)\n", Utarg.z, Utest.z, Udiff.z);
 
-    if (fabs(del) <= 1.0e-9) {
-        printf("Test passed\n");
+    if ((fabs(del) <= tol) && (fabs(Udiff.x) <= tol)  && (fabs(Udiff.y) <= tol)  && (fabs(Udiff.z) <= tol)){
+        printf("Test passed\n\n");
         }
     else {
         Fail = TRUE;
-        printf("Test failed (diff: %g %g %g   %g)\n", Udiff.x, Udiff.y, Udiff.z, fabs(del));
+        printf("Test failed (diff: %g %g %g   %g)\n\n", Udiff.x, Udiff.y, Udiff.z, fabs(del));
     }
 
     return Fail;
@@ -268,6 +410,8 @@ Suite *CT_suite(void) {
 
   tcase_add_test(tc_CoordTrans, test_CoordTrans);
   tcase_add_test(tc_CoordTrans, test_CoordRoundtrip);
+  tcase_add_test(tc_CoordTrans, test_CoordGSE_equiv);
+  tcase_add_test(tc_CoordTrans, test_CoordGSE_fail);
 
   suite_add_tcase(s, tc_CoordTrans);
 
