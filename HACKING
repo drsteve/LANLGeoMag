@@ -4,10 +4,12 @@ Instructions for developers who use the source code repository
 GIT repository
 ==============
 
-Initial checkout:
+The source repository can be obtained (read-only) at:
 git clone https://github.com/drsteve/LANLGeoMag.git
 
+For write access, fork the repository and clone from your fork.
 Further information can be found in the github help.
+
 Then:
 
 cd LanlGeoMag
@@ -21,6 +23,8 @@ git add [files]
 git commit 
 git pull
 git push
+
+Then send a pull request with your changes.
 
 
 Prerequisites
