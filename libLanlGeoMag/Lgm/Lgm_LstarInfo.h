@@ -21,6 +21,7 @@
 
 #define LGM_SHABANSKY_IGNORE        0
 #define LGM_SHABANSKY_HALVE_I       1
+#define LGM_SHABANSKY_REJECT        2
 
 #define LGM_LSTARINFO_MAX_FL        300
 #define LGM_LSTARINFO_MAX_MINIMA    300

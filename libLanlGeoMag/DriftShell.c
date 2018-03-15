@@ -938,7 +938,7 @@ int FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm
             bfi.func    = &RadBmFunc;
             bfi.Val     = Bm;
             Flag = Lgm_Brent( MinBracket[i].a, MinBracket[i].b, MinBracket[i].c, &bfi, tol, r, &D );
-            if (LstarInfo->VerbosityLevel > 0) { printf( "%sFindBmRadius: Minima found at r = %g   D = %g %s\n", LstarInfo->PreStr, *r, D, LstarInfo->PostStr  ); }
+            if (LstarInfo->VerbosityLevel > 1) { printf( "%sFindBmRadius: Minima found at r = %g   D = %g %s\n", LstarInfo->PreStr, *r, D, LstarInfo->PostStr  ); }
             if ( Flag ) {
                 if ( fabs(D) < tol ) {
                     // value found.
