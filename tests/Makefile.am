@@ -1,8 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
 lgm_includes=$(top_srcdir)/libLanlGeoMag/Lgm/
-check_PROGRAMS = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime
-TESTS          = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime
+check_PROGRAMS = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
+TESTS          = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
 
 check_libLanlGeoMag_SOURCES = check_libLanlGeoMag.c $(lgm_includes)/Lgm_CTrans.h
 check_libLanlGeoMag_CFLAGS = @CHECK_CFLAGS@
@@ -15,6 +15,10 @@ check_IsoTimeStringToDateTime_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLan
 check_McIlwain_L_SOURCES = check_McIlwain_L.c $(lgm_includes)/Lgm_CTrans.h
 check_McIlwain_L_CFLAGS = @CHECK_CFLAGS@
 check_McIlwain_L_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
+
+check_Lstar_SOURCES = check_Lstar.c $(lgm_includes)/Lgm_CTrans.h
+check_Lstar_CFLAGS = @CHECK_CFLAGS@
+check_Lstar_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
 
 check_PolyRoots_SOURCES = check_PolyRoots.c $(lgm_includes)/Lgm_CTrans.h
 check_PolyRoots_CFLAGS = @CHECK_CFLAGS@
