@@ -468,6 +468,7 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     LstarInfo->LSimpleMax     = 10.0;
     LstarInfo->ISearchMethod  = 1;
     LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    LstarInfo->LstarMoment    = LGM_LSTAR_MOMENT_CDIP_2010;
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
@@ -581,6 +582,20 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     PreStr = LstarInfo->PreStr;
     PostStr = LstarInfo->PostStr;
     double PredMinusActualMlat = 0.0;
+
+    switch(LstarInfo->LstarMoment) {
+        case LGM_LSTAR_MOMENT_CDIP :
+            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd;
+            break;
+        case LGM_LSTAR_MOMENT_CDIP_2010 :
+            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_2010;
+            break;
+        case LGM_LSTAR_MOMENT_MCILWAIN :
+            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_McIllwain;
+            break;
+        default :
+            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_2010;
+    }
 
 
     /*
@@ -783,17 +798,13 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
                 if (LstarInfo->VerbosityLevel > 1) {
-                    // sort this out. FIX User should decide what M they want to use.
-                    //M = LstarInfo->mInfo->c->M_cd;
-                    //M = LstarInfo->mInfo->c->M_cd_McIllwain;
-                    M = LstarInfo->mInfo->c->M_cd_2010;
                     printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     printf("\t\t%sCurrent Dipole Moment, M_cd:             %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_McIllwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIllwain, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_2010:      %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
-                    printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, M, PostStr);
-                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, M ), PostStr );
-                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, M ), PostStr );
+                    printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, LstarInfo->Mused, PostStr);
+                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
+                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
                 }
 
             } else {
@@ -1485,9 +1496,9 @@ FIX
 
 
     Phi1 = MagFlux( LstarInfo );
-    LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_2010 /Phi1;
+    LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->Mused/Phi1;
     Phi2 = MagFlux2( LstarInfo );
-    LstarInfo->LS = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_2010 /Phi2;
+    LstarInfo->LS = -2.0*M_PI*LstarInfo->Mused /Phi2;
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
 
 
@@ -1609,16 +1620,9 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 
     r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
 
-    return( -result*LstarInfo->mInfo->c->M_cd_2010/r );
+    return( -result*LstarInfo->Mused/r );
 
 }
-
-
-
-
-
-
-
 
 
 
