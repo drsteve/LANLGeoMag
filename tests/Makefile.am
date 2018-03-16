@@ -17,7 +17,7 @@ check_McIlwain_L_CFLAGS = @CHECK_CFLAGS@
 check_McIlwain_L_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
 
 check_Lstar_SOURCES = check_Lstar.c $(lgm_includes)/Lgm_CTrans.h
-check_Lstar_CFLAGS = @CHECK_CFLAGS@
+check_Lstar_CFLAGS = @CHECK_CFLAGS@ -fopenmp
 check_Lstar_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
 
 check_PolyRoots_SOURCES = check_PolyRoots.c $(lgm_includes)/Lgm_CTrans.h

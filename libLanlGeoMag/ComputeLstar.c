@@ -90,7 +90,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
         if ( nMinima > 1 ) {
             if ( nMinima >=  LGM_LSTARINFO_MAX_MINIMA-1 ) {
-                printf("\t\tThis Field line has multiple minima (at least %d minima detected). Probably on a bizzare field line (TS04 model?)\n", nMinima );
+                printf("\t\tThis Field line has multiple minima (at least %d minima detected). Probably on a bizarre field line (TS04 model?)\n", nMinima );
             } else {
                 printf("\t\tThis Field line has multiple minima (%d minima detected). Probably on Shabansky orbit!\n", nMinima );
             }
@@ -222,16 +222,14 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
         s->LstarQuality = Quality;
     }
 
-    if ( ( nFLsInDriftShell < 0 ) || ( nFLsInDriftShell > 240 ) ) {
-        printf("%sLgm_SetLstarTolerances: nFLsInDriftShell value (of %d) not in range [0, 240]. Setting to 24.%s\n", s->PreStr, nFLsInDriftShell, s->PostStr );
+    if ( ( nFLsInDriftShell < 6 ) || ( nFLsInDriftShell > 240 ) ) {
+        printf("%sLgm_SetLstarTolerances: nFLsInDriftShell value (of %d) not in range [6, 240]. Setting to 24.%s\n", s->PreStr, nFLsInDriftShell, s->PostStr );
         s->nFLsInDriftShell = 24;
     } else {
         s->nFLsInDriftShell = nFLsInDriftShell;
     }
 
     // These tend to be critical to keep things working smoothly.
-//    s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
-//    s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
     s->mInfo->Lgm_FindBmRadius_Tol       = 1e-10;
     s->mInfo->Lgm_TraceToMirrorPoint_Tol = 1e-10;
 
@@ -441,14 +439,10 @@ Lgm_LstarInfo *InitLstarInfo( int VerbosityLevel ) {
 
     Lgm_LstarInfo	*LstarInfo;
 
-
     /*
      *  Allocate memory for LstarInfo structure
      */
     LstarInfo = (Lgm_LstarInfo *) calloc( 1, sizeof( *LstarInfo));
-
-
-
 
     /*
      *  Allocate memory for mInfo structure inside the LstarInfo structure.
@@ -456,6 +450,11 @@ Lgm_LstarInfo *InitLstarInfo( int VerbosityLevel ) {
     LstarInfo->mInfo = Lgm_InitMagInfo( );
 
     Lgm_InitLstarInfoDefaults(LstarInfo);
+    if ( (VerbosityLevel >= 0) && (VerbosityLevel <=8) ){
+        LstarInfo->VerbosityLevel = VerbosityLevel;
+    } else {
+        printf( "InitLstarInfo: Verbosity not in range [0,9] (Got %d). Using default value (%d)).\n", VerbosityLevel, LstarInfo->VerbosityLevel );
+    }
     return(LstarInfo);
 }
 
@@ -577,12 +576,12 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     double	MirrorMLT_Old[3*LGM_LSTARINFO_MAX_FL], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], res;
     char    *PreStr, *PostStr;
     Lgm_MagModelInfo    *mInfo2;
-//    FILE	*fp;
 
     PreStr = LstarInfo->PreStr;
     PostStr = LstarInfo->PostStr;
     double PredMinusActualMlat = 0.0;
 
+    // set dipole moment to use for Lstar calc (in normalization only)
     switch(LstarInfo->LstarMoment) {
         case LGM_LSTAR_MOMENT_CDIP :
             LstarInfo->Mused = LstarInfo->mInfo->c->M_cd;
@@ -591,7 +590,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_2010;
             break;
         case LGM_LSTAR_MOMENT_MCILWAIN :
-            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_McIllwain;
+            LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_McIlwain;
             break;
         default :
             LstarInfo->Mused = LstarInfo->mInfo->c->M_cd_2010;
@@ -630,11 +629,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         LstarInfo->Sb0     = LstarInfo->mInfo->Sb0; // Equatorial value of Sb Integral.
         LstarInfo->d2B_ds2 = LstarInfo->mInfo->d2B_ds2; // second derivative of B wrt s at equator.
         LstarInfo->RofC    = LstarInfo->mInfo->d2B_ds2; // radius of curvature at Bmin point.
-        if (LstarInfo->mInfo->Bm==0) {
-            //if Bm not set, calculate
-            sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-            LstarInfo->mInfo->Bm = LstarInfo->mInfo->Bmin/sa2;
-        }
+
+        sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+        LstarInfo->mInfo->Bm = LstarInfo->mInfo->Bmin/sa2; // set Bmirror for supplied location, pitch angle, field model, etc.
 
 	if (LstarInfo->VerbosityLevel > 1) {
             printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
@@ -800,7 +797,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
                     printf("\t\t%sCurrent Dipole Moment, M_cd:             %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
-                    printf("\t\t%sReference Dipole Moment, M_cd_McIllwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIllwain, PostStr);
+                    printf("\t\t%sReference Dipole Moment, M_cd_McIlwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIlwain, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_2010:      %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
                     printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, LstarInfo->Mused, PostStr);
                     printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
@@ -930,109 +927,103 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 	        if ( Count == 0 ) {
 
-                /*
-                 *  First time through -- lets use the predicted range.
-                 */
-                //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
-                if (delta > 20.0) delta = 20.0;
+                    /*
+                     *  First time through -- lets use the predicted range.
+                     */
+                    //mlat0 = ((pred_mlat-delta) <  0.0) ?  0.0 : (pred_mlat-delta);
+                    if (delta > 20.0) delta = 20.0;
 
-                mlat0 = pred_mlat-delta;
-                mlat_try = pred_mlat;
-                mlat1 = pred_mlat+delta;
+                    mlat0 = pred_mlat-delta;
+                    mlat_try = pred_mlat;
+                    mlat1 = pred_mlat+delta;
 
-    	    } else if ( Count == 1 ) {
+    	        } else if ( Count == 1 ) {
 
-                /*
-                 * Perhaps our bracket was no good -- too narrow. Enlarge it.
-                 * Try double what we had.
-                 */
-                delta *= 2;
-                if (delta < 1.0) delta = 1.0;
-                mlat0 = pred_mlat-delta;
-                mlat_try = pred_mlat;
-                mlat1 = pred_mlat+delta;
+                    /*
+                     * Perhaps our bracket was no good -- too narrow. Enlarge it.
+                     * Try double what we had.
+                     */
+                    delta *= 2;
+                    if (delta < 1.0) delta = 1.0;
+                    mlat0 = pred_mlat-delta;
+                    mlat_try = pred_mlat;
+                    mlat1 = pred_mlat+delta;
 
-                if ( LstarInfo->nImI0 > 2 ) {
-                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
-                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
-                    //FitLineAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-                    if (LstarInfo->VerbosityLevel > 1){
-                        printf("\t\t\t1> Fitting to available values. Predicted mlat: %g\n", res );
+                    if ( LstarInfo->nImI0 > 2 ) {
+                        for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                        //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                        //FitLineAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                        FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                        if (LstarInfo->VerbosityLevel > 1){
+                            printf("\t\t\t1> Fitting to available values. Predicted mlat: %g\n", res );
+                        }
+                        if ( fabs(res) < 90.0 ){
+                            mlat_try = res;
+                            mlat0 = res-1.0;
+                            mlat1 = res+1.0;
+                        }
                     }
-                    if ( fabs(res) < 90.0 ){
-                        mlat_try = res;
-                        mlat0 = res-1.0;
-                        mlat1 = res+1.0;
-                    }
-                }
 
-
-            } else if ( Count == 2 ) {
+                } else if ( Count == 2 ) {
 
 	            /*
 	             * Hmmm... This ones stuborn! Lets be more conservative now.
 	            * Try +1/-5 around the returned mlat
 	            */
 
-                //if ( FoundShellLine == -3 ) {
-                //    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
-                //    mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
-                //} else {
-                //    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
-                //    mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
-               //// }
-                mlat_try = pred_mlat;
-                mlat0 = mlat_try-5.0;
-                mlat1 = mlat_try+1.0;
+                    //if ( FoundShellLine == -3 ) {
+                    //    mlat0 = ((mlat-5.0) >  -10.0) ?  -10.0 : (mlat-5.0);
+                    //    mlat1 = ((mlat+1.0) > 90.0) ? 90.0 : (mlat+1.0);
+                    //} else {
+                    //    mlat0 = ((mlat-1.0) >  -10.0) ?  -10.0 : (mlat-1.0);
+                    //    mlat1 = ((mlat+5.0) > 90.0) ? 90.0 : (mlat+5.0);
+                    /// }
+                    mlat_try = pred_mlat;
+                    mlat0 = mlat_try-5.0;
+                    mlat1 = mlat_try+1.0;
 
-                if ( LstarInfo->nImI0 > 3 ) {
-                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
-                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
-                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-                    if (LstarInfo->VerbosityLevel > 1){ 
-                        printf("\t\t\t2> Fitting to available values. Predicted mlat: %g\n", res ); 
+                    if ( LstarInfo->nImI0 > 3 ) {
+                        for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                        //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                        FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                        if (LstarInfo->VerbosityLevel > 1){ 
+                            printf("\t\t\t2> Fitting to available values. Predicted mlat: %g\n", res ); 
+                        }
+                        if ( fabs(res) < 90.0 ){
+                            mlat_try = res;
+                            mlat0 = res-5.0;
+                            mlat1 = res+5.0;
+                        }
                     }
-                    if ( fabs(res) < 90.0 ){
-                        mlat_try = res;
-                        mlat0 = res-5.0;
-                        mlat1 = res+5.0;
+
+    	        } else {
+
+                    /*
+                     * OK, there may not be a good line -- i.e. drift shell may not be closed.
+                     * To make sure, lets try 0->90 deg.
+                     */
+                    mlat0 = 0.0;
+//                    mlat0 = -60.0;
+                    mlat_try = pred_mlat;
+                    mlat1 = 90.0;
+//                    mlat1 = 45.0; //what is a good alternate here? 75? 80? 85?
+
+
+                    if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
+                        for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
+                        //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
+                        FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
+                        if (LstarInfo->VerbosityLevel > 1){
+                            printf("\t\t\t3> Fitting to available values. Predicted mlat: %g\n", res );
+                        }
+                        if ( fabs(res) < 90.0 ){
+                            mlat_try = res;
+                            mlat0 = res-45.0;
+                            mlat1 = res+45.0;
+                        }
                     }
+
                 }
-
-
-    	    } else {
-
-                /*
-                 * OK, there may not be a good line -- i.e. drift shell may not be closed.
-                 * To make sure, lets try 0->90 deg.
-                 */
-                mlat0 = 0.0;
-                mlat_try = pred_mlat;
-//                mlat0 = -60.0;
-                mlat1 = 90.0;
-//mlat1 = 45.0;
-//mlat1 = 23.855537644144878;
-
-
-
-//printf("?? LstarInfo->nImI0 = %d\n", LstarInfo->nImI0);
-                if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
-                    for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
-                    //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
-                    FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
-                    if (LstarInfo->VerbosityLevel > 1){
-                        printf("\t\t\t3> Fitting to available values. Predicted mlat: %g\n", res );
-                    }
-                    if ( fabs(res) < 90.0 ){
-                        mlat_try = res;
-                        mlat0 = res-45.0;
-                        mlat1 = res+45.0;
-                    }
-                }
-
-
-            }
 
 
             if (LstarInfo->VerbosityLevel > 1) {
@@ -1055,11 +1046,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi1, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
                     printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
                     if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
                     else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
                     printf("\n\n\n" );
@@ -1077,14 +1068,14 @@ LstarInfo->mInfo->Hmax = 0.05;
 //printf("LstarInfo->mInfo->Pm_South (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Pn[k], &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Pn[k] (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
-if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
-}
-Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
-if (LstarInfo->VerbosityLevel > 1) {
-    printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
-}
-LstarInfo->Spherical_Footprint_Ps[k] = v2;
+            if (LstarInfo->VerbosityLevel > 1) {
+                printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
+            }
+            Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+            if (LstarInfo->VerbosityLevel > 1) {
+                printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+            }
+            LstarInfo->Spherical_Footprint_Ps[k] = v2;
 //Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
 //printf("LstarInfo->Spherical_Footprint_Ps[k] (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
 
@@ -1121,11 +1112,11 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                     printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi1, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
                     printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
                     printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
                     printf("\n\n\n" );
                 }
@@ -1146,11 +1137,6 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
             }
 
 
-
-
-
-
-
             if ( FoundShellLine > 0 ) {
                 done2 = TRUE;
             } else if ( Count > 2 ) {
@@ -1162,11 +1148,11 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
                     printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi1, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
                     printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
                     printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
                     printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
                     if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
                     else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
                     printf("\n\n\n" );
@@ -1175,7 +1161,7 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
             } else {
                 ++Count;
             }
-	    }
+	} //end of while loop
 
 
         if (LstarInfo->VerbosityLevel > 2) { printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout); }
@@ -1189,9 +1175,6 @@ LstarInfo->Spherical_Footprint_Ps[k] = v2;
          *  equator, we may have initially confused the north and south mirror
          *  points. We end up sorting the confusion out, but we really need to make
          *  sure that as we proceed, we refer to the correct values.
-         *
-         *
-         *
          */
 //        u = LstarInfo->mInfo->Pm_North;
 //        Lgm_Convert_Coords( &u, &v, GSM_TO_SM, LstarInfo->mInfo->c );
@@ -1251,11 +1234,11 @@ printf("hitShabansky: %d\n", hitShabansky);
                 printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
                 printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
                 printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi1, PostStr );
+                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
                 printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
                 printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
                 printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
                 if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
                 else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
                 printf("\n\n\n" );
@@ -1321,14 +1304,14 @@ M = ELECTRON_MASS; // kg
 
             /*
              * Note: Kinetic energy is difference between total E and rest Energy
-             * In non-rel. limit, the factor g=2. So ration of Non Rel to Rel velocity is
+             * In non-rel. limit, the factor g=2. So ratio of Non Rel to Rel velocity is
              * (2Eta+2)/(Eta+2)
              */
             double Eta = K/(M*CC*CC);
             double g = K*(2.0+Eta)/(1.0+Eta);
 
 
-            double q = 1.0;            // units of elementary charge
+            double q = 1.0;     // units of elementary charge
             q *= 1.6021e-19;    // Coulombs
             Sb *= 6371e3;       // m
             double f = g/(q*Sb*B)/1000.0;
@@ -1499,7 +1482,7 @@ FIX
     LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->Mused/Phi1;
     Phi2 = MagFlux2( LstarInfo );
     LstarInfo->LS = -2.0*M_PI*LstarInfo->Mused /Phi2;
-    LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2;
+    LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2;
 
 
 
@@ -1521,11 +1504,11 @@ printf("hitShabansky: %d\n", hitShabansky);
         printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-        printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi1, PostStr );
+        printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
         printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-        printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIllwain /Phi2, PostStr );
+        printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
         if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n", PreStr, PostStr );
         else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n", PreStr, PostStr );
         else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
@@ -2043,10 +2026,12 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         } else {
             return(-8);
         }
-        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
-        sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-        LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
-        if (LstarInfo->VerbosityLevel > 0) printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
+        if (LstarInfo->VerbosityLevel > 0) {
+            printf("[Inner bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
+            sa = sin( LstarInfo_brac1->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+            LstarInfo_brac1->mInfo->Bm = LstarInfo_brac1->mInfo->Bmin/sa2;
+            printf("[Inner bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac1->mInfo->Bm, LstarInfo_brac1->mInfo->Bmin);
+        }
         //Only continue if bracket 1 is closed FL
         //Get L*
         LS_Flag = Lstar( &v3, LstarInfo_brac1);
@@ -2090,10 +2075,13 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
         else {
             Alpha = LGM_FILL_VALUE;
         }
+        if (LstarInfo->VerbosityLevel > 0) {
+            printf("[Outer bracket] Alpha (of K) is %g (%g)\n", Alpha, Kin);
+            sa = sin( LstarInfo_brac2->PitchAngle*RadPerDeg ); sa2 = sa*sa;
+            LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
+            printf("[Outer bracket] Bm, Bmin = is %g, %g\n", LstarInfo_brac2->mInfo->Bm, LstarInfo_brac2->mInfo->Bmin);
+        }
         LstarInfo_brac2->PitchAngle = Alpha;
-        sa = sin( LstarInfo_brac2->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-
-        LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
         LS_Flag = Lstar( &v3, LstarInfo_brac2);
         if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
             //move outer bracket out and try again
@@ -2110,9 +2098,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 Alpha = LGM_FILL_VALUE;
             }
             LstarInfo_brac2->PitchAngle = Alpha;
-            sa = sin( LstarInfo_brac2->PitchAngle*RadPerDeg ); sa2 = sa*sa;
             if ( Lgm_Trace( &Pouter, &v1, &v2, &v3, 120.0, 0.01, TRACE_TOL, LstarInfo_brac2->mInfo ) == LGM_CLOSED ) {
-                LstarInfo_brac2->mInfo->Bm = LstarInfo_brac2->mInfo->Bmin/sa2;
                 LS_Flag = Lstar( &v3, LstarInfo_brac2);
                 if (LstarInfo_brac2->LS != LGM_FILL_VALUE) {
                     FreeLstarInfo( LstarInfo_brac1 );
@@ -2153,11 +2139,9 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 Alpha = LGM_FILL_VALUE;
             }
             LstarInfo_test->PitchAngle = Alpha;
-            sa = sin( LstarInfo_test->PitchAngle*RadPerDeg ); sa2 = sa*sa;
 
             //If test point is closed FL then check for undefined L*.
             //Get L*
-            LstarInfo_test->mInfo->Bm = LstarInfo_test->mInfo->Bmin/sa2;
             LS_Flag = Lstar( &v3, LstarInfo_test);
             if ( (LS_Flag > 0) || (LstarInfo_test->LS != LGM_FILL_VALUE) ){
                 //Drift shell defined

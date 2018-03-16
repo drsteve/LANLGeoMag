@@ -1,12 +1,13 @@
 #include <check.h>
 #include "../libLanlGeoMag/Lgm/Lgm_LstarInfo.h"
+#include "../libLanlGeoMag/Lgm/Lgm_MagEphemInfo.h"
 
 
 Lgm_LstarInfo *LstarInfo;
 
 
 void Lstar_Setup(void) {
-    LstarInfo = InitLstarInfo(0);
+    LstarInfo = InitLstarInfo(1);
     return;
 }
 
@@ -41,21 +42,8 @@ START_TEST(test_Lstar_CDIP){
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, LstarInfo->mInfo );
     quality = 3;
     Lgm_SetLstarTolerances( quality, 48, LstarInfo );
-    LstarInfo->VerbosityLevel = 1;
-    LstarInfo->mInfo->VerbosityLevel = 0;
-
-    /*
-     *  Blocal at given location.
-     */
-    LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo->mInfo->Bm = Blocal/sa2;
-    printf("Bm = %g\n", LstarInfo->mInfo->Bm);
-
 
     Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
 
     LstarDiff = fabs(LstarInfo->LS - Psm.y);
 
@@ -93,16 +81,6 @@ START_TEST(test_Lstar_CDIPapprox){
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, LstarInfo->mInfo );
     quality = 3;
     Lgm_SetLstarTolerances( quality, 36, LstarInfo );
-    LstarInfo->VerbosityLevel = 1;
-    LstarInfo->mInfo->VerbosityLevel = 0;
-
-    /*
-     *  Blocal at given location.
-     */
-    LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo->mInfo->Bm = Blocal/sa2;
 
     Lstar( &P, LstarInfo );
 
@@ -139,24 +117,14 @@ START_TEST(test_Lstar_CDIPalpha){
     LstarInfo->LstarMoment = LGM_LSTAR_MOMENT_CDIP_2010;
     Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, LstarInfo->mInfo );
     Lgm_SetLstarTolerances( 5, 24, LstarInfo );
-    LstarInfo->VerbosityLevel = 1;
-    LstarInfo->mInfo->VerbosityLevel = 0;
 
     // run 1
     LstarInfo->PitchAngle = 87.5;
-    LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo->mInfo->Bm = Blocal/sa2;
     Lstar( &P, LstarInfo );
     ans1 = LstarInfo->LS;
 
     // run 2
     LstarInfo->PitchAngle = 37.5;
-    LstarInfo->mInfo->Bfield( &P, &Bvec, LstarInfo->mInfo );
-    Blocal = Lgm_Magnitude( &Bvec );
-    sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-    LstarInfo->mInfo->Bm = Blocal/sa2;
     Lstar( &P, LstarInfo );
     ans2 = LstarInfo->LS;
 
@@ -165,6 +133,65 @@ START_TEST(test_Lstar_CDIPalpha){
     tol = pow(20.0, (double) -quality );
 
     ck_assert_msg((LstarDiff<tol), "Roederer L differs in CDIP for different pitch angles. %g - %g = %g\n", ans2, ans1, LstarDiff);
+
+
+    return;
+
+}END_TEST
+
+
+START_TEST(test_Lstar_CDIPalpha2){
+    /*
+     *  Should get same result from Lstar and ComputeLstarVersusPA
+     */
+
+    double           UTC, Blocal, sa, sa2, LstarDiff, ans2, tol;
+    double           PAs[2] = {87.5, 37.5};
+    long int         Date;
+    int              Kp, quality=3;
+    Lgm_Vector       Psm, P, Bvec;
+    Lgm_MagEphemInfo *MagEphemInfo = Lgm_InitMagEphemInfo(1, 2);
+
+    // Date, UTC, position
+    Date       = 19991122;
+    UTC        = 19.0;
+    Psm.x = 0.0; Psm.y = 6.6; Psm.z = 0.0;
+
+    /*
+     * Calculate using Lstar directly
+     */
+    Lgm_Set_Coord_Transforms( Date, UTC, LstarInfo->mInfo->c );
+
+    // Position in SM
+    Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, LstarInfo->mInfo->c );
+
+    // set up Lstar calcs
+    LstarInfo->LstarMoment = LGM_LSTAR_MOMENT_CDIP_2010;
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_NULL, LstarInfo->mInfo );
+    Lgm_SetLstarTolerances( quality, 72, LstarInfo );
+
+    // Get Lstar
+    LstarInfo->PitchAngle = PAs[1];
+    Lstar( &P, LstarInfo );
+    ans2 = LstarInfo->LS;
+
+    /*
+     * Calculate using Lgm_ComputeLstarVersusPA
+     */
+
+    Lgm_SetMagEphemLstarQuality( quality, 72, MagEphemInfo );
+    MagEphemInfo->LstarInfo->LstarMoment = LGM_LSTAR_MOMENT_CDIP_2010;
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_NULL, MagEphemInfo->LstarInfo->mInfo );
+
+    Lgm_ComputeLstarVersusPA( Date, UTC, &P, 2, PAs, FALSE, MagEphemInfo );
+
+    printf("Lstar (from Lstar) = %g\nLstar (from ComputeLstarVersusPA) = %g\n", ans2, MagEphemInfo->Lstar[1]);
+
+    // compare
+    LstarDiff = fabs(ans2 - MagEphemInfo->Lstar[1]);
+    tol = pow(20.0, (double) -quality );
+
+    ck_assert_msg((LstarDiff<tol), "Roederer L differs between Lstar and ComputeLstarVersusPA. %g - %g = %g\n", ans2, MagEphemInfo->Lstar[1], LstarDiff);
 
 
     return;
@@ -182,6 +209,7 @@ Suite *Lstar_suite(void) {
   tcase_add_test(tc_Lstar, test_Lstar_CDIP);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPapprox);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha);
+  tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha2);
 
   suite_add_tcase(s, tc_Lstar);
 
