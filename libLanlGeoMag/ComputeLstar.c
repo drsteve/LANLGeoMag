@@ -65,6 +65,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
      */
     nMinima = 0;
     nMaxima = 0;
+    nBounceRegions=0;
     Diff = LGM_FILL_VALUE;
     for ( i=1; i<m->nPnts; i++ ){
         
@@ -104,7 +105,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
         if ( nMaxima > 1 ) {
             if ( nMinima >= LGM_LSTARINFO_MAX_MINIMA-1 ) {
-                printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizzare field line (TS04 model?)\n", nMaxima );
+                printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizarre field line (TS04 model?)\n", nMaxima );
             } else {
                 printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
             }
@@ -136,7 +137,6 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
     } else if ( (nMinima == 2) && (nMaxima == 1) && (iMinima[0] < iMaxima[0]) && (iMinima[1] > iMaxima[0]) ) { // typical expected case for Shab.
 
-        nBounceRegions = 0;
         if ( Maxima[0] < m->Bm ) {
 
             // can only bounce in 1 region.
@@ -152,7 +152,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
         Type = ( nBounceRegions > 0 ) ?  nBounceRegions : -8;
 
-    } else if ( nMinima > LGM_LSTARINFO_MAX_MINIMA-5 ) { // way too many minima -- bad/bizzare FL (TS04 seems to give these?)
+    } else if ( nMinima > LGM_LSTARINFO_MAX_MINIMA-5 ) { // way too many minima -- bad/bizarre FL (TS04 seems to give these?)
 
         Type = -1;
 
@@ -162,9 +162,9 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
          *  OK, there are more than 2 minima.  Loop over them and determine how
          *  many separate regions on the FL we can mirror on.  If there is only
          *  one, then we should be a Type 1 Shabansky orbit (i.e. no
-         *  biffurcation, but still have multiple minima).
+         *  bifurcation, but still have multiple minima).
          *  Count up how many cases we have where;
-         *     1) a maxima exceeds the Bm values.
+         *     1) a maximum exceeds the Bm values.
          *     2) minima that drop below Bm on either side.
          *  The number of mirroring regions should be this number plus one.
          */
@@ -175,7 +175,7 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
             }
         }
 
-Type = nBounceRegions;
+    Type = nBounceRegions;
 
     }
 
@@ -190,7 +190,6 @@ Type = nBounceRegions;
 //}
 
     
-//if (Type > 0 ) printf("Type = %d\n", Type);
 
     return( Type );
 
@@ -568,8 +567,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
     Lgm_Vector	u, v, w, v1, v2, v3, Bvec, uu;
-    int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn, hitShabansky=FALSE;
+    int		i, j, k, nk, nLines, koffset, tkk, nfp, nnn, doExit=FALSE;
     int		done2, Count, FoundShellLine, nIts, Type, retEarthTrace;
+    int         nShabI  = 0, nShabII = 0;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
     double	I=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r, sa, sa2;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[3*LGM_LSTARINFO_MAX_FL], MirrorMlat[3*LGM_LSTARINFO_MAX_FL], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
@@ -661,7 +661,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 *  Shabansky drift orbit type bifurcations.)
 *
 */
-//// DAMN!!!!!!!!!!!!!!!!!!!1
 //This wont work!
 //you need to trace the FL with TraceLine for ClassifyFL() to work!!!!!!!!!!!!!
 //        Type = ClassifyFL( 0, LstarInfo );
@@ -697,8 +696,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\t\t%sMag. Field Strength, Bm at Pm_North (nT):  %g     (LstarInfo->mInfo->Bm = %g    dSb = %g)%s\n",
                             PreStr, B, LstarInfo->mInfo->Bm, dSb, PostStr);
                 }
-
-
 
 
                 /*
@@ -740,16 +737,10 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         /*
                          *  Do interped I integral.
                          */
-//                        epsabs = LstarInfo->mInfo->Lgm_I_Integrator_epsabs;
-//                        epsrel = LstarInfo->mInfo->Lgm_I_Integrator_epsrel;
-//                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs /= 10.0;
-//                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel /= 10.0;
                         I = Iinv_interped( LstarInfo->mInfo  );
                         if (LstarInfo->VerbosityLevel > 1) {
                             printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
                         }
-//                        LstarInfo->mInfo->Lgm_I_Integrator_epsabs = epsabs;
-//                        LstarInfo->mInfo->Lgm_I_Integrator_epsrel = epsrel;
 
                         /*
                          *  Do interped Sb integral if desired. Note this is
@@ -766,18 +757,10 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                                 printf("\t\t  %sSb Integral, (interped):      %g%s\n",  PreStr, LstarInfo->SbIntegral0, PostStr );
                             }
                         }
-
-
-
                         FreeSpline( LstarInfo->mInfo );
-
                     } else {
-
                         I = LGM_FILL_VALUE;
-
                     }
-
-
 
                 } else {
 
@@ -791,8 +774,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 }
                 LstarInfo->I0 = I; // save initial I in LstarInfo structure.
                 Ifound = I;
-
-
 
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
@@ -827,9 +808,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
 
 
-
-
-
     /*
      *  If we get here, then the field line going through our starting point is
      *  closed and we could find the required mirror points.
@@ -857,13 +835,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
 
     MLT0 = atan2( u.y, u.x )*DegPerRad/15.0 + 12.0;
     if (LstarInfo->VerbosityLevel > 2) printf("\t\t%smlat = %g%s\n", PreStr, mlat, PostStr );
-    LstarInfo->nPnts = 0;
     pred_delta_mlat  = 0.0;
     for (k=0; k<3*LGM_LSTARINFO_MAX_FL; ++k){
 	    MirrorMLT[k]  = 0.0;
 	    MirrorMlat[k] = 0.0;
     }
-
 
 
     nLines = LstarInfo->nFLsInDriftShell;
@@ -952,7 +928,6 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     if ( LstarInfo->nImI0 > 2 ) {
                         for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
                         //FitQuadAndFindZero2( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, 4, &res );
-                        //FitLineAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                         FitQuadAndFindZero( LstarInfo->MLATarr, LstarInfo->ImI0arr, LstarInfo->Earr, LstarInfo->nImI0, &res );
                         if (LstarInfo->VerbosityLevel > 1){
                             printf("\t\t\t1> Fitting to available values. Predicted mlat: %g\n", res );
@@ -1002,12 +977,10 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                      * OK, there may not be a good line -- i.e. drift shell may not be closed.
                      * To make sure, lets try 0->90 deg.
                      */
-                    mlat0 = 0.0;
-//                    mlat0 = -60.0;
+                    mlat0 = 0.0; //mlat0 = -60.0;
                     mlat_try = pred_mlat;
                     mlat1 = 90.0;
 //                    mlat1 = 45.0; //what is a good alternate here? 75? 80? 85?
-
 
                     if ( (LstarInfo->nImI0 > 3) && (LstarInfo->nImI0%4 == 0) ){
                         for (i=0; i<LstarInfo->nImI0; i++) LstarInfo->Earr[i] = 1.0;
@@ -1033,135 +1006,122 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             }
 
             FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-
-
-            v = LstarInfo->mInfo->Pm_North;
-            LstarInfo->mInfo->Hmax = 0.1;
-            retEarthTrace = Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1, 1e-9, LstarInfo->mInfo );
-            if ( !retEarthTrace ){
-                for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
-                if (LstarInfo->VerbosityLevel > 0) {
-                    printf("Unable to trace to Earth (Error code: %d)\n", retEarthTrace);
-            
-                    printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
-                    printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
-                    if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
-                    else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
-                    printf("\n\n\n" );
-                }
-                return(-4);    
-            }
-
-
-LstarInfo->Spherical_Footprint_Pn[k] = w;
-LstarInfo->mInfo->Hmax = 0.05;
-//Lgm_Vector testvec;
-//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_North, &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
-//printf("LstarInfo->mInfo->Pm_North (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
-//Lgm_Convert_Coords( &LstarInfo->mInfo->Pm_South, &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
-//printf("LstarInfo->mInfo->Pm_South (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
-//Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Pn[k], &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
-//printf("LstarInfo->Spherical_Footprint_Pn[k] (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
-            if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
-            }
-            Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
-            if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
-            }
-            LstarInfo->Spherical_Footprint_Ps[k] = v2;
-//Lgm_Convert_Coords( &LstarInfo->Spherical_Footprint_Ps[k], &testvec, GSM_TO_SM, LstarInfo->mInfo->c );
-//printf("LstarInfo->Spherical_Footprint_Ps[k] (SM Coords) = %g %g %g\n", testvec.x, testvec.y, testvec.z );
-
-            Type = ClassifyFL( k, LstarInfo );
-            if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
-            }
-
-//for ( i=0; i<LGM_LSTARINFO_MAX_FL; ++i ) if ( LstarInfo->nMinima[i] > 2 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
-            if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
-                hitShabansky = TRUE;
-                printf("Encountered multiple minima: Ignoring. \n");
-                if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
-                }
-
-                FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
-                //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
-                PredMinusActualMlat = pred_mlat - mlat;
-                if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
-                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
-                }
-
-            }
-            else if ((Type>1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_REJECT)) {
-                //We should exit from the search if we want to treat Shabansky orbits as undefined drift shells
-                LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
-            
-                if (LstarInfo->VerbosityLevel >0) { printf(" \t%sMultiple minima encountered - assigning drift shell as OPEN_SHABANSKY: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
-                FoundShellLine = 0;
-                if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
-                    printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
-                    printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
-                    printf("\n\n\n" );
-                }
+            if (FoundShellLine > 0) {
+                // Found valid FL for drift shell
                 done2 = TRUE;
-                return(-3);
-                
-            } else {
-                if (Type >1) {
-                    hitShabansky=TRUE;
-                    if ((LstarInfo->ShabanskyHandling==LGM_SHABANSKY_IGNORE) && (LstarInfo->VerbosityLevel > 0)) printf("Encountered multiple minima: Ignoring. \n");
+
+                v = LstarInfo->mInfo->Pm_North;
+                LstarInfo->mInfo->Hmax = 0.1;
+                retEarthTrace = Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1, 1e-9, LstarInfo->mInfo );
+                if ( !retEarthTrace ){
+                    for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
+                    break;//return(-4);    
                 }
-                PredMinusActualMlat = pred_mlat - mlat;
+    
+    
+                LstarInfo->Spherical_Footprint_Pn[k] = w;
+                LstarInfo->mInfo->Hmax = 0.05;
+    
                 if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                    printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I, PostStr );
-                    printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                    printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
                 }
-            }
+                Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+                }
+                LstarInfo->Spherical_Footprint_Ps[k] = v2;
+    
+                // Check for multiple minima and bounce regions -- but only if we have a valid FL with correct (I,Bm)
+                Type = ClassifyFL( k, LstarInfo );
+                LstarInfo->nBounceRegions[k] = Type;
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
+                }
+    
+                if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
+                    if (LstarInfo->VerbosityLevel > 0) {
+                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
+                    }
+    
+                    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, LstarInfo );
+                    //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
+                    PredMinusActualMlat = pred_mlat - mlat;
+                    if (LstarInfo->VerbosityLevel > 1) {
+                        printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                        printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                    }
+    
+                } else {
+                    if (Type > 1) {
+                        if ((LstarInfo->ShabanskyHandling==LGM_SHABANSKY_IGNORE) && (LstarInfo->VerbosityLevel > 0)) printf("Encountered multiple bounce regions: Ignoring. \n");
+                        if ((LstarInfo->ShabanskyHandling==LGM_SHABANSKY_REJECT) && (LstarInfo->VerbosityLevel > 0)) printf("Encountered multiple bounce regions: Should reject this and quit. Type = %d \n", Type);
+                    }
+                    PredMinusActualMlat = pred_mlat - mlat;
+                    if (LstarInfo->VerbosityLevel > 1) {
+                        printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I, PostStr );
+                        printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                    }
+                }
 
-
-            if ( FoundShellLine > 0 ) {
-                done2 = TRUE;
             } else if ( Count > 2 ) {
+                // Tried to find valid FL more than three times
                 done2 =  TRUE;
-                if (LstarInfo->VerbosityLevel >1) { printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
+                if (LstarInfo->VerbosityLevel >0) { printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
                 FoundShellLine = 0;
-
-                if (LstarInfo->VerbosityLevel > 0) {
-                    printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
-                    printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
-                    printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
-                    printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                    printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
-                    if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
-                    else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
-                    printf("\n\n\n" );
-                }
-                return(-3);
+                break;//return(-3);
             } else {
                 ++Count;
             }
 	} //end of while loop
+
+        /*
+         *  Test for open drift path and exit gracefully if required
+         */
+        if ( (k > 0) && (FoundShellLine <= 0) ) {
+            // After initial FL, failed to find matching I,Bm
+            doExit = TRUE;
+        } else if ( (k > 0) && (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_REJECT) ) {
+            // After initial FL, found I,Bm in bifurcated drift orbit. Desired behavior is bailing out.
+            doExit = TRUE;
+        }
+        if (doExit) {
+            for ( i=0; i<LstarInfo->nPnts; ++i ) {
+                 if  ( LstarInfo->nMinima[i] > 1 ) {
+                     if ( LstarInfo->nBounceRegions[i] > 1 ) {
+                         nShabII++;
+                     } else {
+                         nShabI++;
+                     }
+                 }
+            }
+
+            if (nShabII > 0) {
+                LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II;
+            } else if (nShabI > 0) {
+                LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I;
+            } else {
+                LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
+            }
+
+            // All open drift shell types should bail out here.
+            if (LstarInfo->VerbosityLevel > 0) {
+                printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
+                printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
+                printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
+                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
+                printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
+                printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
+                printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
+                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
+                if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
+                else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I)    printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY_I%s\n", PreStr, PostStr );
+                else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY_II%s\n", PreStr, PostStr );
+                printf("\n\n\n" );
+            }
+            return(-4); //TODO: set return code based on failure mode
+        }
 
 
         if (LstarInfo->VerbosityLevel > 2) { printf("\t\t%sActual mlat = %g  MLT = %g   r = %g Ifound = %g\t Count = %d%s", PreStr, mlat, MLT, r, Ifound, Count, PostStr ); fflush(stdout); }
@@ -1226,24 +1186,7 @@ LstarInfo->mInfo->Hmax = 0.05;
          */
         LstarInfo->mInfo->Hmax = 0.1;
         if ( !Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1.0, 1e-7, LstarInfo->mInfo ) ){
-            if ( LstarInfo->LS < 0.0 ) {
-                for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
-            }
-printf("hitShabansky: %d\n", hitShabansky);
-            if (LstarInfo->VerbosityLevel > 0) {
-                printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
-                printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi1, PostStr );
-                printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS_dip_approx, PostStr );
-                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi1, PostStr );
-                printf("\n\t\t%sL*, Full Field.%s\n", PreStr, PostStr );
-                printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
-                printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
-                printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
-                if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
-                else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
-                printf("\n\n\n" );
-            }
-            return(-4);
+            break;//return(-4);
         }
         LstarInfo->Spherical_Footprint_Pn[k] = w;
 
@@ -1283,7 +1226,7 @@ LstarInfo->FindShellPmin = TRUE;
             mInfo2->Lgm_Sb_Integrator_epsabs = 0.0;
             mInfo2->Lgm_Sb_Integrator_epsrel = 1e-3;
             double Sb = SbIntegral( mInfo2 );
-Sb = 1.0;
+Sb = 1.0; //TODO: why is this hardcoded?
 
             Lgm_Grad_I( &LstarInfo->Pmin[k], &LstarInfo->GradI[k], mInfo2 );
 
@@ -1296,10 +1239,10 @@ Sb = 1.0;
             Lgm_FreeMagInfo( mInfo2 );
 
             double K = LstarInfo->KineticEnergy;       // keV
-K = 1000.0; //keV
+K = 1000.0; //keV //TODO: why is this hardcoded?
             K *= 1e3*LGM_e;                        // Joules
             double M = LstarInfo->Mass;                // kg
-M = ELECTRON_MASS; // kg
+M = ELECTRON_MASS; // kg //TODO: why is this hardcoded?
 
 
             /*
@@ -1329,6 +1272,7 @@ M = ELECTRON_MASS; // kg
 
             Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
             LstarInfo->Spherical_Footprint_Ps[k] = v2;
+
 //FILE *fppp;
 //double AlphaEq;
 //fppp = fopen("FL.txt","a");
@@ -1339,8 +1283,6 @@ M = ELECTRON_MASS; // kg
 //}
 //fclose(fppp);
 
-//Type = ClassifyFL( k, LstarInfo );
-//printf("k, Type = %d %d\n", k, Type);
             LstarInfo->nMinMax = k;
 
             nnn = LstarInfo->mInfo->nPnts; smax = LstarInfo->mInfo->s[nnn-1];
@@ -1356,11 +1298,8 @@ M = ELECTRON_MASS; // kg
             }
             LstarInfo->nFieldPnts[k] = tkk;
 
-
-
             LstarInfo->Spherical_Footprint_Ss[k] = LstarInfo->s_gsm[k][0];
             LstarInfo->Spherical_Footprint_Sn[k] = smax;
-
 
             /*
              * Find true footpoints (i.e. relative to ellipsoid), we may want to do an additional trace here...
@@ -1397,18 +1336,11 @@ M = ELECTRON_MASS; // kg
                 LstarInfo->Mirror_Sn[k] += LstarInfo->mInfo->Trace_s;
             }
 
-
-
-
-
         }
 
-
-
         ++k;
-
-    } // end MLT for loop
-    LstarInfo->nPnts = k;
+        LstarInfo->nPnts = k;
+    } // end MLT for loop, if we get this far we've found a FL with the right I,Bm at each requested MLT
 
 
     /*
@@ -1467,17 +1399,14 @@ FIX
      */
 //    gsl_set_error_handler_off(); // Turn off gsl default error handler
     LstarInfo->acc = gsl_interp_accel_alloc( );
-//    LstarInfo->pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->nSplnPnts );
     LstarInfo->pspline = gsl_interp_alloc( gsl_interp_cspline_periodic, LstarInfo->nSplnPnts );
-//    LstarInfo->pspline = gsl_interp_alloc( gsl_interp_linear, LstarInfo->nSplnPnts );
-    //printf ("spline uses '%s' interpolation.\n", gsl_interp_name( LstarInfo->pspline ));
     gsl_interp_init( LstarInfo->pspline, LstarInfo->xa, LstarInfo->ya, LstarInfo->nSplnPnts );
 
-//for(i=0; i<LstarInfo->m; i++){
-//printf("HERE 2: LstarInfo->xa[%d] = %g  LstarInfo->ya[%d] = %g    \n", i, LstarInfo->xa[i], i, LstarInfo->ya[i] );
-//}
 
 
+    /*
+     * Now calculate Lstar
+     */
     Phi1 = MagFlux( LstarInfo );
     LstarInfo->LS_dip_approx = -2.0*M_PI*LstarInfo->Mused/Phi1;
     Phi2 = MagFlux2( LstarInfo );
@@ -1485,20 +1414,25 @@ FIX
     LstarInfo->LS_McIlwain_M = -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2;
 
 
-
-
     /*
-     *  Determine the type of the orbit. We will not be here if we bailed early.. So LGM_DRIFT_ORBIT_OPEN_SHABANSKY
-     *  cant be determined here ... 
+     *  Determine the type of the orbit. If we got here our drift orbit should be closed...
      */
     LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
-    for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
-    if (hitShabansky) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
-    if ( LstarInfo->LS < 0.0 ) {
-        LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
-        for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
+    for ( i=0; i<LstarInfo->nPnts; ++i ) {
+    //nMinima just counts minima. number of bounce regions is tracked separately (as return type of ClassifyFL) 
+        if  ( LstarInfo->nMinima[i] > 1 ) {
+            if ( LstarInfo->nBounceRegions[i] > 1 ) {
+                nShabII++;
+            } else {
+                nShabI++;
+            }
+        }
     }
-printf("hitShabansky: %d\n", hitShabansky);
+    if (nShabII > 0) {
+        LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_II;
+    } else if (nShabI > 0) {
+        LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_I;
+    }
 
     if (LstarInfo->VerbosityLevel > 0) {
         printf("\n\t\t%sL*, Dipole Approximation.\n%s", PreStr, PostStr );
@@ -1509,10 +1443,9 @@ printf("hitShabansky: %d\n", hitShabansky);
         printf("\t\t%s  Magnetic Flux:                         %.15lf%s\n", PreStr, Phi2, PostStr );
         printf("\t\t%s  L*:                                    %.15lf%s\n", PreStr, LstarInfo->LS, PostStr );
         printf("\t\t%s  L* (Using McIlwain M):                 %.15lf%s\n", PreStr, -2.0*M_PI*LstarInfo->mInfo->c->M_cd_McIlwain /Phi2, PostStr );
-        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )          printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY) printf("\n\t\t%sDrift Orbit Type: SHABANSKY%s\n", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN )            printf("\n\t\t%sDrift Orbit Type: OPEN%s\n", PreStr, PostStr );
-        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_OPEN_SHABANSKY)   printf("\n\t\t%sDrift Orbit Type: OPEN_SHABANSKY%s\n", PreStr, PostStr );
+        if      ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED )             printf("\n\t\t%sDrift Orbit Type: CLOSED%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_I)  printf("\n\t\t%sDrift Orbit Type: SHABANSKY_I%s\n", PreStr, PostStr );
+        else if ( LstarInfo->DriftOrbitType == LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_II) printf("\n\t\t%sDrift Orbit Type: SHABANSKY_II%s\n", PreStr, PostStr );
         printf("\n\n\n" );
     }
 

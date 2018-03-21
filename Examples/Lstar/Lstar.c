@@ -11,6 +11,7 @@ int main( int argc, char *argv[] ){
     double           UTC, alpha, a;
     long int         Date;
     int              nAlpha, Kp;
+    int              ZeroOneTwo = 1, ThreeFourFive=1, SixSevenEight=1;
     Lgm_Vector       Psm, P, v1, v2, v3;
     Lgm_LstarInfo *LstarInfo = InitLstarInfo(0);
 
@@ -35,23 +36,23 @@ int main( int argc, char *argv[] ){
     LstarInfo->mInfo->InternalModel = LGM_IGRF;
     LstarInfo->mInfo->Kp = 4;
 
-//    /*
-//     * Compute L*s, Is, Bms, Footprints, etc...
-//     * These quantities are stored in the MagEphemInfo Structure
-//     */
-//    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
-//    Lstar( &P, LstarInfo );
-//    printf("L* = %g\n", LstarInfo->LS);
-//
-//    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
-//    Lstar( &P, LstarInfo );
-//    printf("L* = %g\n", LstarInfo->LS);
-//
-//    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
-//    Lstar( &P, LstarInfo );
-//    printf("L* = %g\n", LstarInfo->LS);
+    /*
+     * Compute L*s, Is, Bms, Footprints, etc...
+     * These quantities are stored in the MagEphemInfo Structure
+     */
+    if (ZeroOneTwo) {
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
 
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
 
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    }
 
 
     Date       = 20130601;
@@ -62,49 +63,51 @@ int main( int argc, char *argv[] ){
     Psm.x = -4.286861; Psm.y = 3.207236; Psm.z = 1.710963;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, LstarInfo->mInfo->c );
 
-    // Set of Shabansky orbits that don't trigger a modified I (or if they do, don't notify)
-    LstarInfo->PitchAngle = 25.0;
-    LstarInfo->mInfo->Kp = 7;
-    LstarInfo->mInfo->Bm = 0; //reset Bmirror in LstarInfo
+    if (ThreeFourFive) {
+        // Set of Shabansky orbits that don't trigger a modified I (or if they do, don't notify)
+        LstarInfo->PitchAngle = 25.0;
+        LstarInfo->mInfo->Kp = 7;
+        LstarInfo->mInfo->Bm = 0; //reset Bmirror in LstarInfo
+    
+        /*
+         * Compute L*s, Is, Bms, Footprints, etc...
+         * These quantities are stored in the MagEphemInfo Structure
+         */
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    }
 
-    /*
-     * Compute L*s, Is, Bms, Footprints, etc...
-     * These quantities are stored in the MagEphemInfo Structure
-     */
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
-
-    // Set of open (?) Shabansky orbits that that aren't correctly labeled
-    LstarInfo->PitchAngle = 30.0;
-    LstarInfo->mInfo->Kp = 7;
-    LstarInfo->mInfo->Bm = 0; //reset Bmirror in LstarInfo
-
-    /*
-     * Compute L*s, Is, Bms, Footprints, etc...
-     * These quantities are stored in the MagEphemInfo Structure
-     */
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
-    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
-    Lstar( &P, LstarInfo );
-    printf("L* = %g\n", LstarInfo->LS);
-
+    if (SixSevenEight) {
+        // Set of open (?) Shabansky orbits that that aren't correctly labeled
+        LstarInfo->PitchAngle = 30.0;
+        LstarInfo->mInfo->Kp = 7;
+        LstarInfo->mInfo->Bm = 0; //reset Bmirror in LstarInfo
+    
+        /*
+         * Compute L*s, Is, Bms, Footprints, etc...
+         * These quantities are stored in the MagEphemInfo Structure
+         */
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    
+        LstarInfo->ShabanskyHandling = LGM_SHABANSKY_REJECT;
+        Lstar( &P, LstarInfo );
+        printf("L* = %g\n", LstarInfo->LS);
+    }
 
 
     FreeLstarInfo( LstarInfo );

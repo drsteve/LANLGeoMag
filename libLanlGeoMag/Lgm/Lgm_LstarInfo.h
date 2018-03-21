@@ -14,10 +14,16 @@
 #define RE              (6378.135e3)        /* Earth Radius, m */
 #define CC              (2.99792458e8)      /* Speed of Light, m/s */
 
-#define LGM_DRIFT_ORBIT_CLOSED              1
-#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY    2
-#define LGM_DRIFT_ORBIT_OPEN                3
-#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
+#define LGM_DRIFT_ORBIT_CLOSED                1
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY      2
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_I    21
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_II   22
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_III  23
+#define LGM_DRIFT_ORBIT_OPEN                  3
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY        4
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I      41
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II     42
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_III    43
 
 #define LGM_SHABANSKY_IGNORE        0
 #define LGM_SHABANSKY_HALVE_I       1
@@ -109,7 +115,8 @@ typedef struct Lgm_LstarInfo {
     int                 DriftOrbitType;         // e.g. Open, Closed, Shabansky
     int                 nMinMax;                // Number of valid FLs represented in nMinima[] and nMaxima[] (we may have bailed early)
     int                 nMinima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of minima on FL
-    int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints
+    int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints)
+    int                 nBounceRegions[ LGM_LSTARINFO_MAX_MINIMA ];    // # of bounce regions on FL (as particle may not be confined in a minimum)
 
     int                 nSplnPnts;
     double              xa [ 3*LGM_LSTARINFO_MAX_FL ], ya[ 3*LGM_LSTARINFO_MAX_FL ], y2[ 3*LGM_LSTARINFO_MAX_FL ];
