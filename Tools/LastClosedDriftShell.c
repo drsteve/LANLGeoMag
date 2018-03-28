@@ -372,7 +372,7 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"LCDS_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
             for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS K=%g\", ", Kin[i] );
-            fprintf(fp, "\"LCDS %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf(fp, "\"LCDS K=%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
@@ -412,7 +412,7 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"Bm_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
             for (i=0; i<nK-1; i++) fprintf(fp, "\"Bm K=%g\", ", Kin[i] );
-            fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf(fp, "\"Bm K=%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 10000.0,\n");
@@ -436,6 +436,7 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 50,\n");
+            fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
             fprintf( fp, "#\n");
         }
         fprintf( fp, "# } end JSON\n");
