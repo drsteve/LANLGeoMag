@@ -228,6 +228,11 @@ int main( int argc, char *argv[] ){
     } else {
         Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
     }
+//HACK:
+nK=3;
+Kin[0] = 0.05;
+Kin[1] = 0.11;
+Kin[2] = 0.2;
 
     /*
      *  Set other options
@@ -452,8 +457,9 @@ int main( int argc, char *argv[] ){
         Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo );
     
         //loop over date/time at given cadence
-        if (JD <= LGM_FILL_VALUE) {
+        if (JD <= LGM_FILL_VALUE) { //check stuff for first day...
             JD = (JD < sJD) ? sJD : jDate;
+            jDate_end = (eJD < jDate_end) ? eJD : jDate_end;
         }
         for ( JD; JD < jDate_end; JD += t_cadence ) {
             //set date specific stuff
