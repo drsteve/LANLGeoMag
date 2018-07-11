@@ -1,0 +1,8 @@
+Examples/TLE:
+
+Sample C and Python codes for working with two line elements
+
+ - TLEs.txt : sample two line elements from the CRRES satellite
+ - FindTLEforGivenTime.py : Python script to select the correct TLE for a requested time [requires SpacePy]
+ - EphemfromTLE.py: Python script using lgmpy (and FindTLEforGivenTime) to calculate the position of an object using TLEs/SGP4
+ - TwoLineElements.c : C program demonstrating use of LGM C routines to calculate the position of an object using TLEs/SGP4
