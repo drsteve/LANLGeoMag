@@ -23,10 +23,10 @@ void Lgm_SetMagEphemLstarQuality( int Quality, int nFLsInDriftShell, Lgm_MagEphe
         MagEphemInfo->LstarQuality = 3;
     }
 
-    if ( (nFLsInDriftShell >= 6) && (Quality <= 240) ){
+    if ( (nFLsInDriftShell >= 6) && (nFLsInDriftShell <= 240) ){
         MagEphemInfo->nFLsInDriftShell = nFLsInDriftShell;
     } else {
-        printf( "Lgm_MagEphemSetLstarQuality: nFLsInDriftShell not in range [0,240] (Got %d). Setting to 24).\n", nFLsInDriftShell );
+        printf( "Lgm_MagEphemSetLstarQuality: nFLsInDriftShell not in range [6,240] (Got %d). Setting to 24).\n", nFLsInDriftShell );
         MagEphemInfo->nFLsInDriftShell = 24;
     }
 

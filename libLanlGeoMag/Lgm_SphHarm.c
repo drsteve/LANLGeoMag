@@ -133,7 +133,7 @@ void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c ) {
 
     /*
      *  Compute cos(theta), sin(theta), cos(phi), sin(phi)
-     *  Precompute the Cos(m*phi) and Sin(m*phi) using recurance relations
+     *  Precompute the cos(m*phi) and sin(m*phi) using recurrence relations
      */
     st = sin( v->y ); ct = cos( v->y);
     sp = sin( v->z ); cp = cos( v->z );
@@ -286,7 +286,7 @@ void Lgm_InitSphHarm( int Model, double g[14][14], double h[14][14], int N, int 
          *  Compute dipole moments.
          */
         c->M_cd = H0;
-        c->M_cd_McIllwain = 31165.3;
+        c->M_cd_McIlwain = 31165.3;
         c->M_cd_2010      = 29950.1686985232;
 
         c->CD_gcolat = M_PI - acos(g[1][0]/H0);
