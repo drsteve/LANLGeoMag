@@ -1,8 +1,16 @@
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: linux
+      dist: xenial
+
 language: c
 
 compiler: gcc
 
 before_install:
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
   - sudo apt-get update -qq
   - sudo apt-get install -qq libperl-dev libgsl0-dev libhdf5-serial-dev
 
