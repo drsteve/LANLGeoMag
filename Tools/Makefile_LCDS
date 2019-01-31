@@ -1,0 +1,13 @@
+#Makefile for building LastClosedDriftShell outside the Tools directory build system
+#This avoids the need to have cspice and builds a direct binary executable rather than
+#an executable bash script that runs a hidden executable.
+CFLAGS = `pkg-config --cflags lgm`
+LIBS = `pkg-config --libs lgm`
+
+all: LCDS
+
+LastClosedDriftShell: LastClosedDriftShell.c
+	gcc LastClosedDriftShell.c $(CFLAGS) $(LIBS) -o LastClosedDriftShell
+
+clean:
+	-rm LastClosedDriftShell LastClosed*.o
