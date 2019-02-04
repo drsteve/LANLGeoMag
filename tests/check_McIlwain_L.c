@@ -278,6 +278,122 @@ START_TEST(test_MCILWAIN_05) {
 }
 END_TEST
 
+START_TEST(test_MCILWAIN_06) {
+
+    int                 Passed = FALSE;
+    long int            Date;
+    double              L, I, Bm, M, UTC, Bmin, Blocal;
+    double              L_expected=-9e99, I_expected=-9e99, Bm_expected=-9e99, M_expected=-9e99, Bmin_expected=-9e99, Blocal_expected=-9e99;
+    Lgm_Vector          u, v;
+    FILE                *fp_expected;
+    FILE                *fp_got;
+
+    if ( (fp_expected = fopen( "check_McIlwain_L_06.expected", "r" )) != NULL ) {
+
+        fscanf( fp_expected, "%lf", &L_expected );
+        fscanf( fp_expected, "%lf", &I_expected );
+        fscanf( fp_expected, "%lf", &Bm_expected );
+        fscanf( fp_expected, "%lf", &M_expected );
+        fscanf( fp_expected, "%lf", &Blocal_expected );
+        fscanf( fp_expected, "%lf", &Bmin_expected );
+        fclose( fp_expected );
+    } else {
+        printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_06.expected\n" );
+    }
+
+
+    Date = 20090101; UTC  = 0.0;
+    Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
+    u.x = -4.0; u.y = 0.0; u.z = 1.0;
+    Lgm_Convert_Coords( &u, &v, GSM_TO_GSM, mInfo->c );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
+    L = Lgm_McIlwain_L( Date, UTC, &v, 90.0, 1, &I, &Bm, &M, mInfo );
+    Blocal = mInfo->Blocal;
+    Bmin = mInfo-> Bmin;
+
+    if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) && (fabs( Blocal-Blocal_expected ) < 1e-7) && (fabs( Bmin-Bmin_expected ) < 1e-7)) Passed = TRUE;
+    if ( !Passed ){
+
+        printf("\nTest 06, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
+        printf("                   Expected: %.15g   %.15g   %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected, Blocal_expected, Bmin_expected);
+        printf("                        Got: %.15g   %.15g   %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M, Blocal, Bmin);
+    }
+
+    if ( (fp_got = fopen( "check_McIlwain_L_06.got", "w" )) != NULL ) {
+        fprintf( fp_got, "%.15lf\n", L );
+        fprintf( fp_got, "%.15lf\n", I );
+        fprintf( fp_got, "%.15lf\n", Bm );
+        fprintf( fp_got, "%.15lf\n", M );
+        fprintf( fp_got, "%.15lf\n", Blocal );
+        fprintf( fp_got, "%.15lf\n", Bmin );
+        fclose( fp_got );
+    } else {
+        printf("Could not open file: check_McIlwain_L_06.got\\n");
+    }
+
+    fflush(stdout);
+    fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_06.expected check_McIlwain_L_06.got\n" );
+
+
+    return;
+}
+END_TEST
+
+START_TEST(test_MCILWAIN_07) {
+
+    int                 Passed = FALSE;
+    long int            Date;
+    double              L, I, Bm, M, UTC;
+    double              L_expected=-9e99, I_expected=-9e99, Bm_expected=-9e99, M_expected=-9e99;
+    Lgm_Vector          u, v;
+    FILE                *fp_expected;
+    FILE                *fp_got;
+
+    if ( (fp_expected = fopen( "check_McIlwain_L_07.expected", "r" )) != NULL ) {
+
+        fscanf( fp_expected, "%lf", &L_expected );
+        fscanf( fp_expected, "%lf", &I_expected );
+        fscanf( fp_expected, "%lf", &Bm_expected );
+        fscanf( fp_expected, "%lf", &M_expected );
+        fclose( fp_expected );
+    } else {
+        printf("Lgm_McIlwain_L(): Cant open file: check_McIlwain_L_07.expected\n" );
+    }
+
+
+    Date = 20090101; UTC  = 0.0;
+    Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
+    u.x = -4.0; u.y = 0.0; u.z = 1.0;
+    Lgm_Convert_Coords( &u, &v, SM_TO_GSM, mInfo->c );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
+    L = Lgm_McIlwain_L( Date, UTC, &v, 90.0, 1, &I, &Bm, &M, mInfo );
+
+    if (    (fabs( L-L_expected ) < 1e-7) && (fabs( I-I_expected ) < 1e-7) && (fabs( Bm-Bm_expected ) < 1e-7) && (fabs( M-M_expected ) < 1e-7) ) Passed = TRUE;
+    if ( !Passed ){
+
+        printf("\nTest 07, Lgm_McIlwain_L(): %15s    %15s    %15s    %15s\n", "       L       ", "       I       ", "       Bm       ", "       M       ");
+        printf("                   Expected: %.15g   %.15g   %.15g   %.15g\n", L_expected,  I_expected, Bm_expected, M_expected );
+        printf("                        Got: %.15g   %.15g   %.15g   %.15g\n\n\n", L,  I, Bm, M);
+    }
+
+    if ( (fp_got = fopen( "check_McIlwain_L_07.got", "w" )) != NULL ) {
+        fprintf( fp_got, "%.15lf\n", L );
+        fprintf( fp_got, "%.15lf\n", I );
+        fprintf( fp_got, "%.15lf\n", Bm );
+        fprintf( fp_got, "%.15lf\n", M );
+        fclose( fp_got );
+    } else {
+        printf("Could not open file: check_McIlwain_L_07.got\\n");
+    }
+
+    fflush(stdout);
+    fail_unless( Passed, "Lgm_McIlwain_L(): Regression test failed. Compare 'expected' and 'got' files: check_McIlwain_L_07.expected check_McIlwain_L_07.got\n" );
+
+
+    return;
+}
+END_TEST
+
 Suite *McIlwain_L_suite(void) {
 
   Suite *s = suite_create("MCILWAIN_L_TESTS");
@@ -290,6 +406,8 @@ Suite *McIlwain_L_suite(void) {
   tcase_add_test(tc_McIlwain_L, test_MCILWAIN_03);
   tcase_add_test(tc_McIlwain_L, test_MCILWAIN_04);
   tcase_add_test(tc_McIlwain_L, test_MCILWAIN_05);
+  tcase_add_test(tc_McIlwain_L, test_MCILWAIN_06);
+  tcase_add_test(tc_McIlwain_L, test_MCILWAIN_07);
 
   suite_add_tcase(s, tc_McIlwain_L);
 

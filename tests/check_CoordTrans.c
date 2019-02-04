@@ -87,6 +87,81 @@ START_TEST(test_CoordTrans) {
     } END_TEST
 
 
+START_TEST(test_CoordTransNoEph) {
+    /* Coordinate transformations without using the JPL DE421*/
+    Lgm_CTrans        *c = Lgm_init_ctrans( 0 ); 
+    Lgm_Vector        Utarg, Ucent, Utest, Udiff;
+    int               nTests, line, nPass, nFail, transflag, Passed=FALSE;
+    double            del;
+    char              buff[262], sysIn[10], sysOut[10];
+    char              IsoDate[80];
+    long long         TT2000;
+    FILE              *testfile, *outfile;
+    Lgm_DateTime      d;
+
+    int makeNew = 1;
+
+    /* read test file */
+    testfile = fopen("check_CoordTransNoEph.expected","r");
+    if (makeNew) outfile = fopen("check_CoordTransNoEph.got", "w");
+
+    /* step through test cases one line at a time */
+    line = 0;
+    nTests = 0;
+    nPass = 0;
+    nFail = 0;
+    Passed = TRUE;
+    while( fgets(buff,260,testfile) != NULL) {
+        //if (line>=15) exit(0);
+        if (buff[0]!='#') {
+            // read line
+            sscanf(buff,"%s %lld %s %s %lf %lf %lf %lf %lf %lf", &IsoDate[0], &TT2000, &sysIn[0], &sysOut[0], 
+                                                                 &Ucent.x, &Ucent.y, &Ucent.z, &Utarg.x, &Utarg.y, &Utarg.z);
+            line++;
+
+            // Set up all the necessary variables to do transformations for this Date and UTC
+            IsoTimeStringToDateTime( IsoDate, &d, c );
+            Lgm_Set_Coord_Transforms( d.Date, d.Time, c );
+            //printf("IsoDate = %s; d.Date, d.time = %ld, %lf \n", IsoDate, d.Date, d.Time);
+            //get transformed coordinate
+            transflag = getSys(sysIn)*100 + getSys(sysOut);
+            Lgm_Convert_Coords( &Ucent, &Utest, transflag, c );
+
+            //then test difference
+            Udiff.x = Utest.x - Utarg.x;
+            Udiff.y = Utest.y - Utarg.y;
+            Udiff.z = Utest.z - Utarg.z;
+            del = Lgm_Magnitude(&Udiff);
+            nTests++;
+            if (fabs(del) <= 1.0e-5) {
+                nPass++;
+                printf("Test %d passed\n", nTests);
+                }
+            else {
+                nFail++;
+                printf("*****  warning : difference >= 1.0e-5 km (1 cm)  *****\n");
+                printf("Test %d failed (diff: %g %g %g   %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
+                }
+            if (makeNew) fprintf(outfile, "%s %lld %s %s %lf %lf %lf %lf %lf %lf\n", IsoDate, TT2000, sysIn, sysOut, Ucent.x, Ucent.y, Ucent.z, Utest.x, Utest.y, Utest.z);
+
+            }
+        else {
+            if (makeNew) fprintf(outfile, "%s", buff);
+            }
+        }
+    if (nFail>0) Passed = FALSE;
+    fclose(testfile);
+    if (makeNew) fclose(outfile);
+    printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 km [=1cm])\n", nPass, nFail);
+    fflush(stdout); // get all that status info out before ck_assert
+    Lgm_free_ctrans( c ); // free the structure
+
+    ck_assert_msg( Passed, "CoordTransNoEph test failed. Have the leap-seconds changed?\n" );
+
+    return;
+    } END_TEST
+
+
 START_TEST(test_CoordRoundtrip) {
 
     Lgm_CTrans        *c = Lgm_init_ctrans( 0 ); 
@@ -398,6 +473,9 @@ int getSys( char *sys ) {
     else if (!strcmp(sys, "EDMAG")) {
         out = EDMAG_COORDS;
         }
+    else if (!strcmp(sys, "WGS84")) {
+        out = WGS84_COORDS;
+        }
     return(out);
     }
 
@@ -409,6 +487,7 @@ Suite *CT_suite(void) {
   TCase *tc_CoordTrans = tcase_create("Coordinate Transformations");
 
   tcase_add_test(tc_CoordTrans, test_CoordTrans);
+  tcase_add_test(tc_CoordTrans, test_CoordTransNoEph);
   tcase_add_test(tc_CoordTrans, test_CoordRoundtrip);
   tcase_add_test(tc_CoordTrans, test_CoordGSE_equiv);
   tcase_add_test(tc_CoordTrans, test_CoordGSE_fail);
