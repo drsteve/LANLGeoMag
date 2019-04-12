@@ -1,12 +1,16 @@
 ## Process this file with automake to produce Makefile.in
 
 lgm_includes=$(top_srcdir)/libLanlGeoMag/Lgm/
-check_PROGRAMS = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Magmodels check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
-TESTS          = check_libLanlGeoMag check_McIlwain_L check_PolyRoots check_Magmodels check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
+check_PROGRAMS = check_libLanlGeoMag check_ClosedField check_McIlwain_L check_PolyRoots check_Magmodels check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
+TESTS          = check_libLanlGeoMag check_ClosedField check_McIlwain_L check_PolyRoots check_Magmodels check_Sgp4 check_DE421 check_CoordTrans check_IsoTimeStringToDateTime check_Lstar
 
 check_libLanlGeoMag_SOURCES = check_libLanlGeoMag.c $(lgm_includes)/Lgm_CTrans.h
 check_libLanlGeoMag_CFLAGS = @CHECK_CFLAGS@
 check_libLanlGeoMag_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
+
+check_ClosedField_SOURCES = check_ClosedField.c $(lgm_includes)/Lgm_CTrans.h $(lgm_includes)/Lgm_MagModelInfo.h
+check_ClosedField_CFLAGS = @CHECK_CFLAGS@
+check_ClosedField_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @PERL_LDFLAGS@ @CHECK_LIBS@
 
 check_IsoTimeStringToDateTime_SOURCES = check_IsoTimeStringToDateTime.c $(lgm_includes)/Lgm_CTrans.h
 check_IsoTimeStringToDateTime_CFLAGS = @CHECK_CFLAGS@
@@ -40,4 +44,4 @@ check_CoordTrans_SOURCES = check_CoordTrans.c $(lgm_includes)/Lgm_CTrans.h $(lgm
 check_CoordTrans_CFLAGS = @CHECK_CFLAGS@
 check_CoordTrans_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @PERL_LDFLAGS@ @CHECK_LIBS@
 
-EXTRA_DIST = check_McIlwain_L_01.expected check_McIlwain_L_02.expected check_McIlwain_L_03.expected check_McIlwain_L_04.expected check_McIlwain_L_05.expected check_McIlwain_L_06.expected check_McIlwain_L_07.expected check_PolyRoots_01.expected check_PolyRoots_02.expected check_PolyRoots_03.expected check_PolyRoots_04.expected check_Sgp4_01.expected testpo.421 check_CoordTrans.expected check_CoordTransNoEph.expected check_Magmodels_01.expected
+EXTRA_DIST = check_McIlwain_L_01.expected check_McIlwain_L_02.expected check_McIlwain_L_03.expected check_McIlwain_L_04.expected check_McIlwain_L_05.expected check_McIlwain_L_06.expected check_McIlwain_L_07.expected check_PolyRoots_01.expected check_PolyRoots_02.expected check_PolyRoots_03.expected check_PolyRoots_04.expected check_Sgp4_01.expected testpo.421 check_CoordTrans.expected check_CoordTransNoEph.expected check_Magmodels_01.expected check_ClosedField_01.expected
