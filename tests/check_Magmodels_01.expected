@@ -10,18 +10,22 @@
 #        "DIMENSION": [1], 
 #        "START_COLUMN": 1
 #    }, 
-#    "Kp": {
+#    "IntModel": {
 #        "DIMENSION": [1], 
 #        "START_COLUMN": 2
 #    }, 
+#    "Kp": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 3
+#    }, 
 #    "Result": {
 #        "DIMENSION": [3], 
-#        "START_COLUMN": 6, 
+#        "START_COLUMN": 7, 
 #        "units": "nT"
 #    }, 
 #    "TestPosition": {
 #        "DIMENSION": [3], 
-#        "START_COLUMN": 3, 
+#        "START_COLUMN": 4, 
 #        "units": "km"
 #    }
 #}
