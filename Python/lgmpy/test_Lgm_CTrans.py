@@ -155,11 +155,11 @@ class Lgm_CTransTests(unittest.TestCase):
         dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2000, 1, 1))
         self.assertAlmostEqual(dt, -0.45114989442541137)
         dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2010, 1, 1))
-        self.assertAlmostEqual(dt, -0.44636634840305872)
+        self.assertAlmostEqual(dt, -0.4463861347030587)
         dt = Lgm_CTrans.getDipoleTilt(datetime.datetime(2010, 6, 1))
-        self.assertAlmostEqual(dt, 0.32433439111559559)
+        self.assertAlmostEqual(dt, 0.3243285731455956)
         dt = Lgm_CTrans.getDipoleTilt([datetime.datetime(2010, 6, 1)]*2)
-        numpy.testing.assert_allclose(dt, [0.32433439111559559, 0.32433439111559559])
+        numpy.testing.assert_allclose(dt, [0.3243285731455956, 0.3243285731455956])
 
 
 if __name__ == '__main__':

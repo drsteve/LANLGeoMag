@@ -421,6 +421,69 @@ START_TEST(test_CoordGSE_fail) {
     } END_TEST
 
 
+START_TEST(test_CoordDipoleTilt) {
+    /* Dipole tilt*/
+    Lgm_CTrans        *c = Lgm_init_ctrans( 0 );
+    int               nTests, line, nPass, nFail, Passed=FALSE;
+    double            TiltTest, TiltExpected, del;
+    char              buff[262];
+    char              IsoDate[80];
+    FILE              *testfile, *outfile;
+    Lgm_DateTime      d;
+
+    int makeNew = 1;
+
+    /* read test file */
+    testfile = fopen("check_CoordDipoleTilt.expected","r");
+    if (makeNew) outfile = fopen("check_CoordDipoleTilt.got", "w");
+
+    /* step through test cases one line at a time */
+    line = 0;
+    nTests = 0;
+    nPass = 0;
+    nFail = 0;
+    Passed = TRUE;
+    while( fgets(buff,260,testfile) != NULL) {
+        //if (line>=15) exit(0);
+        if (buff[0]!='#') {
+            // read line
+            sscanf(buff,"%s %lf", IsoDate, &TiltExpected);
+            line++;
+
+            // Set up all the necessary variables to do transformations for this Date and UTC
+            IsoTimeStringToDateTime( IsoDate, &d, c );
+            //printf("IsoDate = %s; d.Date, d.time = %ld, %lf \n", IsoDate, d.Date, d.Time);
+	    TiltTest = Lgm_Dipole_Tilt(d.Date, d.Time);
+            del = TiltTest - TiltExpected;
+            nTests++;
+            if (fabs(del) <= 1.0e-5) {
+                nPass++;
+                printf("Test %d passed\n", nTests);
+                }
+            else {
+                nFail++;
+                printf("*****  warning : difference >= 1.0e-5 r  *****\n");
+                printf("Test %d failed (diff: %g)\n", nTests, del);
+                }
+            if (makeNew) fprintf(outfile, "%s %lf\n", IsoDate, TiltTest);
+            }
+        else {
+            if (makeNew) fprintf(outfile, "%s", buff);
+            }
+        }
+    if (nFail>0) Passed = FALSE;
+    fclose(testfile);
+    if (makeNew) fclose(outfile);
+    printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5)\n", nPass, nFail);
+    fflush(stdout); // get all that status info out before ck_assert
+    Lgm_free_ctrans( c ); // free the structure
+
+    ck_assert_msg( Passed, "CoordDipoleTilt test failed.\n" );
+
+    return;
+    } END_TEST
+
+
 int testDiff(Lgm_Vector Utest, Lgm_Vector Utarg, double tol) {
     Lgm_Vector  Udiff;
     double      del;
@@ -491,6 +554,7 @@ Suite *CT_suite(void) {
   tcase_add_test(tc_CoordTrans, test_CoordRoundtrip);
   tcase_add_test(tc_CoordTrans, test_CoordGSE_equiv);
   tcase_add_test(tc_CoordTrans, test_CoordGSE_fail);
+  tcase_add_test(tc_CoordTrans, test_CoordDipoleTilt);
 
   suite_add_tcase(s, tc_CoordTrans);
 

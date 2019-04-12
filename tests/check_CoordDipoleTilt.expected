@@ -1,0 +1,17 @@
+#{
+#    "CreationDate": "2019-04-12",
+#    "LanlGeoMagRevision": "122e2a8b179210d7d5d7e7d332bb03fa24bc9a10",
+#    "SunVector": "LOW_ACCURACY",
+#    "DateTime": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 0
+#    }, 
+#    "Result": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 1, 
+#        "units": "radians"
+#    },
+#}
+2000-01-01T00:00:00.000000 -0.45114989442541137
+2010-01-01T00:00:00.000000 -0.4463861347030587
+2010-06-01T00:00:00.000000 0.3243285731455956
