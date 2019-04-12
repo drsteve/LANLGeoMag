@@ -3,6 +3,7 @@
 
 /*
  *  Regression tests for Tsyganenko model calculations
+ *  Also includes some other models so the name is a bit off.
  */
 
 
@@ -67,6 +68,9 @@ START_TEST(test_Tsyganenko_01) {
 	    }
 	    if (!strncmp(extModel, "T89", 10)) {
 	        Lgm_Set_Lgm_B_T89(mInfo);
+	    }
+	    else if (!strncmp(extModel, "OP77", 10)) {
+	        Lgm_Set_Lgm_B_OP77(mInfo);
 	    }
 	    else {
 	        nFail++;
