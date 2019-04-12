@@ -48,6 +48,7 @@ START_TEST(test_Magmodels_01) {
 		   &IsoDate[0], &extModel[0], &intModel[0], &Kp, 
                    &Pos.x, &Pos.y, &Pos.z, &Bexpect.x, &Bexpect.y, &Bexpect.z);
 
+	    nTests++;
 	    Lgm_InitMagInfoDefaults( mInfo );
             IsoTimeStringToDateTime( IsoDate, &d, mInfo->c );
             Lgm_Set_Coord_Transforms( d.Date, d.Time, mInfo->c );
@@ -80,7 +81,7 @@ START_TEST(test_Magmodels_01) {
 	    retVal = mInfo->Bfield(&Pos, &Btest, mInfo);
 	    if (retVal != 1) {
 	        nFail++;
-	        printf("Test %d odd return from Lgm_B_T89\n", nTests);
+	        printf("Test %d odd return from Bfield\n", nTests);
 	        continue;
 		}
             //printf("IsoDate = %s; d.Date, d.time = %ld, %lf \n", IsoDate, d.Date, d.Time);
@@ -88,7 +89,6 @@ START_TEST(test_Magmodels_01) {
             Udiff.y = Btest.y - Bexpect.y;
             Udiff.z = Btest.z - Bexpect.z;
             del = Lgm_Magnitude(&Udiff);
-            nTests++;
             if (fabs(del) <= 1.0e-5) {
                 nPass++;
                 printf("Test %d passed\n", nTests);
