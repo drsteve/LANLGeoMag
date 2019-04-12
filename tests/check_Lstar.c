@@ -199,6 +199,134 @@ START_TEST(test_Lstar_CDIPalpha2){
 }END_TEST
 
 
+START_TEST(test_Lstar_Regressions) {
+    /* Regression tests against previous L* results */
+    Lgm_Vector        Pos, PosGSM;
+    int               nTests, nPass, nFail, transflag, SubtestPassed, \
+                      Passed=FALSE;
+    double            del, Kp, PA, HiltonExpect, HiltonTest, McIlwainExpect, \
+                      McIlwainTest, RoedererExpect, RoedererTest, I, Bm, M;
+    char              buff[262], extModel[10], intModel[10];
+    char              IsoDate[80];
+    FILE              *testfile, *outfile;
+    Lgm_DateTime      d;
+
+    int makeNew = 1;
+
+    /* read test file */
+    testfile = fopen("check_Lstar.expected","r");
+    if (makeNew) outfile = fopen("check_Lstar.got", "w");
+
+    /* step through test cases one line at a time */
+    nTests = 0;
+    nPass = 0;
+    nFail = 0;
+    Passed = TRUE;
+    while( fgets(buff,260,testfile) != NULL) {
+        if (buff[0]!='#') {
+	    SubtestPassed = TRUE;
+            // read line
+            sscanf(buff,
+		   "%s %s %s %lf "
+		   "%lf %lf %lf "
+		   "%lf %lf %lf %lf",
+		   IsoDate, extModel, intModel, &Kp, 
+                   &Pos.x, &Pos.y, &Pos.z,
+		   &PA, &HiltonExpect, &McIlwainExpect, &RoedererExpect);
+            IsoTimeStringToDateTime( IsoDate, &d, LstarInfo->mInfo->c );
+            //printf("IsoDate = %s; d.Date, d.Time = %ld, %lf \n", IsoDate, d.Date, d.Time);
+            Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
+	    //Assume input is SM (since it is in Python tests)
+	    Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
+            nTests++;
+	    if (!strncmp(intModel, "IGRF", 10)) {
+	        Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
+	    }
+	    else if (!strncmp(intModel, "CDIP", 10)) {
+	        Lgm_Set_Lgm_B_cdip_InternalModel( LstarInfo->mInfo );
+	    }
+	    else if (!strncmp(intModel, "EDIP", 10)) {
+	        Lgm_Set_Lgm_B_edip_InternalModel( LstarInfo->mInfo );
+	    }
+	    else {
+	        nFail++;
+	        printf("Test %d bad internal model %s\n", nTests, intModel);
+		continue;
+	    }
+	    if (!strncmp(extModel, "T89", 10)) {
+	        Lgm_Set_Lgm_B_T89(LstarInfo->mInfo);
+	    }
+	    else if (!strncmp(extModel, "OP77", 10)) {
+	        Lgm_Set_Lgm_B_OP77(LstarInfo->mInfo);
+	    }
+	    else if (!strncmp(extModel, "NULL", 10)) {
+	        LstarInfo->mInfo->ExternalModel = LGM_EXTMODEL_NULL;
+	    }
+	    else {
+	        nFail++;
+	        printf("Test %d bad external model %s\n", nTests, extModel);
+		continue;
+	    }
+	    LstarInfo->mInfo->Kp = Kp;
+	    LstarInfo->PitchAngle = PA;
+	    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
+	    //	    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+	    Lstar(&PosGSM, LstarInfo);
+	    RoedererTest = LstarInfo->LS;
+	    McIlwainTest = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+					  PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+	    HiltonTest = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+					PA, 1, &I, &Bm, &M, LstarInfo->mInfo);
+	    del = HiltonTest - HiltonExpect;
+	    if (fabs(del) > 1.0e-5) {
+	        SubtestPassed = FALSE;
+                printf("*****  warning : Hilton difference >= 1.0e-5 *****\n");
+                printf("Test %d failed (diff: %g)\n", nTests, del);
+            }
+	    del = McIlwainTest - McIlwainExpect;
+	    if (fabs(del) > 1.0e-5) {
+	        SubtestPassed = FALSE;
+                printf("*****  warning : McIlwain difference >= 1.0e-5 *****\n");
+                printf("Test %d failed (diff: %g)\n", nTests, del);
+            }
+	    del = RoedererTest - RoedererExpect;
+	    if (fabs(del) > 1.0e-5) {
+	        SubtestPassed = FALSE;
+                printf("*****  warning : Roederer difference >= 1.0e-5 *****\n");
+                printf("Test %d failed (diff: %g)\n", nTests, del);
+            }
+	    if (SubtestPassed) {
+	        nPass++;
+                printf("Test %d passed\n", nTests);
+            }
+	    else {
+	        nFail++;
+	    }
+            if (makeNew) fprintf(
+		   outfile,
+		   "%s %s %s %lf "
+		   "%lf %lf %lf "
+		   "%lf %lf %lf %lf\n",
+		   IsoDate, extModel, intModel, Kp,
+		   Pos.x, Pos.y, Pos.z,
+		   PA, HiltonTest, McIlwainTest, RoedererTest);
+            }
+        else {
+            if (makeNew) fprintf(outfile, "%s", buff);
+            }
+        }
+    if (nFail>0) Passed = FALSE;
+    fclose(testfile);
+    if (makeNew) fclose(outfile);
+    printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5)\n", nPass, nFail);
+    fflush(stdout);
+
+    ck_assert_msg( Passed, "LstarRegressions tests failed.\n" );
+
+}
+END_TEST
+
+
 Suite *Lstar_suite(void) {
 
   Suite *s = suite_create("ROEDERER_L_TESTS");
@@ -210,6 +338,7 @@ Suite *Lstar_suite(void) {
   tcase_add_test(tc_Lstar, test_Lstar_CDIPapprox);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha2);
+  tcase_add_test(tc_Lstar, test_Lstar_Regressions);
 
   suite_add_tcase(s, tc_Lstar);
 

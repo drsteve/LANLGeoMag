@@ -412,16 +412,16 @@ def get_Lstar(pos, date, alpha = 90.,
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
         # Compute L*
         if Lsimple < LstarThresh:
-            Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
+            Ls_vec = Lgm_Vector.Lgm_Vector(Pgsm.x, Pgsm.y, Pgsm.z)
 
             LS_Flag = Lgm_Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
 
             lstarinf = MagEphemInfo.LstarInfo.contents #shortcut
-            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I[0]),
+            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I0),
                                                 c_double(MagEphemInfo.Bm[i]),
                                                 c_double(lstarinf.mInfo.contents.c.contents.M_cd))
             ans[pa]['LHilton'] = MagEphemInfo.LHilton.contents.value
-            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(lstarinf.I[0]),
+            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(lstarinf.I0),
                                                 c_double(MagEphemInfo.Bm[i]),
                                                 c_double(lstarinf.mInfo.contents.c.contents.M_cd))
             ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
