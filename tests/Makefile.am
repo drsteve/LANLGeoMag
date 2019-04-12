@@ -28,7 +28,7 @@ check_Sgp4_SOURCES = check_Sgp4.c $(lgm_includes)/Lgm_CTrans.h
 check_Sgp4_CFLAGS = @CHECK_CFLAGS@
 check_Sgp4_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @CHECK_LIBS@
 
-check_Magmodels_SOURCES = check_Magmodels.c $(lgm_includes)/Lgm_CTrans.h
+check_Magmodels_SOURCES = check_Magmodels.c $(lgm_includes)/Lgm_CTrans.h $(lgm_includes)/Lgm_MagModelInfo.h
 check_Magmodels_CFLAGS = @CHECK_CFLAGS@
 check_Magmodels_LDADD = $(top_builddir)/libLanlGeoMag/.libs/libLanlGeoMag.a @PERL_LDFLAGS@ @CHECK_LIBS@
 
