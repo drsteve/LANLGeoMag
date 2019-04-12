@@ -2,25 +2,24 @@
 #include "../libLanlGeoMag/Lgm/Lgm_MagModelInfo.h"
 
 /*
- *  Regression tests for Tsyganenko model calculations
- *  Also includes some other models so the name is a bit off.
+ *  Regression tests for magnetic field model calculations
  */
 
 
 Lgm_MagModelInfo    *mInfo;
 
-void Tsyganenko_Setup(void) {
+void Magmodels_Setup(void) {
     mInfo = Lgm_InitMagInfo();
     return;
 }
 
-void Tsyganenko_TearDown(void) {
+void Magmodels_TearDown(void) {
     Lgm_FreeMagInfo( mInfo );
     return;
 }
 
 
-START_TEST(test_Tsyganenko_01) {
+START_TEST(test_Magmodels_01) {
     Lgm_Vector        Bexpect, Pos, Btest, Udiff;
     int               nTests, nPass, nFail, transflag, Passed=FALSE;
     int               retVal;
@@ -34,8 +33,8 @@ START_TEST(test_Tsyganenko_01) {
     int makeNew = 1;
 
     /* read test file */
-    testfile = fopen("check_Tsyganenko.expected","r");
-    if (makeNew) outfile = fopen("check_Tsyganenko.got", "w");
+    testfile = fopen("check_Magmodels_01.expected","r");
+    if (makeNew) outfile = fopen("check_Magmodels_01.got", "w");
 
     /* step through test cases one line at a time */
     nTests = 0;
@@ -112,22 +111,22 @@ START_TEST(test_Tsyganenko_01) {
     printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 nT)\n", nPass, nFail);
     fflush(stdout);
 
-    ck_assert_msg( Passed, "Tsyganenko tests failed.\n" );
+    ck_assert_msg( Passed, "Magmodels tests failed.\n" );
 
 }
 END_TEST
 
 
-Suite *Tsyganenko_suite(void) {
+Suite *Magmodels_suite(void) {
 
-  Suite *s = suite_create("TSYGANENKO_TESTS");
+  Suite *s = suite_create("MAGMODELS_TESTS");
 
-  TCase *tc_Tsyganenko = tcase_create("Tsyganenko Models");
-  tcase_add_checked_fixture(tc_Tsyganenko, Tsyganenko_Setup, Tsyganenko_TearDown);
+  TCase *tc_Magmodels = tcase_create("Magmodels Models");
+  tcase_add_checked_fixture(tc_Magmodels, Magmodels_Setup, Magmodels_TearDown);
 
-  tcase_add_test(tc_Tsyganenko, test_Tsyganenko_01);
+  tcase_add_test(tc_Magmodels, test_Magmodels_01);
 
-  suite_add_tcase(s, tc_Tsyganenko);
+  suite_add_tcase(s, tc_Magmodels);
 
   return s;
 
@@ -136,7 +135,7 @@ Suite *Tsyganenko_suite(void) {
 int main(void) {
 
     int      number_failed;
-    Suite   *s  = Tsyganenko_suite();
+    Suite   *s  = Magmodels_suite();
     SRunner *sr = srunner_create(s);
 
     printf("\n\n");
