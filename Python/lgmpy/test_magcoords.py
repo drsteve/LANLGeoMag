@@ -130,6 +130,13 @@ class magcoords_Tests(unittest.TestCase):
         numpy.testing.assert_allclose([1,2,3],
                             magcoords.coordTrans(expected, datetime.datetime(2012, 3, 4), 'GSE', 'GEO'))
 
+    def test_Lvalues_lstar(self):
+        """Test Hilton/McIlwain for the values used in L* tests"""
+        #testLgm_B_T89_1
+        L = magcoords.Lvalue([-4.2, 1, 1], datetime.datetime(2010, 10, 12),
+                             alpha=90, Kp=4, method='McIlwain',
+                             coord_system='SM', Bfield='Lgm_B_T89')['L']
+        self.assertEqual(5.0308451893, L)
 
 
 if __name__ == '__main__':
