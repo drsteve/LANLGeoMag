@@ -271,12 +271,12 @@ START_TEST(test_Lstar_Regressions) {
 	    LstarInfo->PitchAngle = PA;
 	    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
 	    //	    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
-	    Lstar(&PosGSM, LstarInfo);
-	    RoedererTest = LstarInfo->LS;
 	    McIlwainTest = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
 					  PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
 	    HiltonTest = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
 					PA, 1, &I, &Bm, &M, LstarInfo->mInfo);
+	    Lstar(&PosGSM, LstarInfo);
+	    RoedererTest = LstarInfo->LS;
 	    del = HiltonTest - HiltonExpect;
 	    if (fabs(del) > 1.0e-5) {
 	        SubtestPassed = FALSE;
