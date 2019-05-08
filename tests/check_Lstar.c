@@ -199,6 +199,44 @@ START_TEST(test_Lstar_CDIPalpha2){
 }END_TEST
 
 
+START_TEST(test_Lstar_McIlwain) {
+    /*Compare McIlwain L before and after L* */
+    Lgm_Vector        Pos, PosGSM;
+    int               Passed=TRUE;
+    double            del, PA,
+                      McIlwainBefore, McIlwainAfter,
+                      I, Bm, M;
+    char              IsoDate[80] = "20101012T00:00:00.000000";
+    Lgm_DateTime      d;
+    Pos.x = -4.2;
+    Pos.y = 1;
+    Pos.z = 1;
+    PA = 90;
+    IsoTimeStringToDateTime( IsoDate, &d, LstarInfo->mInfo->c );
+    Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
+    Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
+    Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
+    Lgm_Set_Lgm_B_T89(LstarInfo->mInfo);
+    LstarInfo->mInfo->Kp = 4;
+    LstarInfo->PitchAngle = PA;
+    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
+    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    McIlwainBefore = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+				    PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+    Lstar(&PosGSM, LstarInfo);
+    McIlwainAfter = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+				    PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+    del = McIlwainAfter - McIlwainBefore;
+    if (fabs(del) > 1.0e-7) {
+        printf("*****  warning : before/after difference >= 1.0e-7 *****\n");
+        printf("Test failed (diff: %g)\n", del);
+	Passed=FALSE;
+    }
+    fflush(stdout);
+    ck_assert_msg( Passed, "McIlwain before/after tests failed.\n" );
+}END_TEST
+
+
 START_TEST(test_Lstar_Regressions) {
     /* Regression tests against previous L* results */
     Lgm_Vector        Pos, PosGSM;
@@ -338,6 +376,7 @@ Suite *Lstar_suite(void) {
   tcase_add_test(tc_Lstar, test_Lstar_CDIPapprox);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha2);
+  tcase_add_test(tc_Lstar, test_Lstar_McIlwain);
   tcase_add_test(tc_Lstar, test_Lstar_Regressions);
 
   suite_add_tcase(s, tc_Lstar);
