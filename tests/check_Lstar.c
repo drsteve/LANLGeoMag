@@ -205,7 +205,7 @@ START_TEST(test_Lstar_McIlwain) {
     int               Passed=TRUE;
     double            del, PA,
                       McIlwainBefore, McIlwainAfter,
-                      I, Bm, M;
+                      I, Bm, M, RoedererBefore, RoedererAfter;
     char              IsoDate[80] = "20101012T00:00:00.000000";
     Lgm_DateTime      d;
     Pos.x = -4.2;
@@ -213,6 +213,8 @@ START_TEST(test_Lstar_McIlwain) {
     Pos.z = 1;
     PA = 90;
     IsoTimeStringToDateTime( IsoDate, &d, LstarInfo->mInfo->c );
+
+    /*McIlwain L before/after L* */
     Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
     Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
     Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
@@ -228,12 +230,81 @@ START_TEST(test_Lstar_McIlwain) {
 				    PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
     del = McIlwainAfter - McIlwainBefore;
     if (fabs(del) > 1.0e-7) {
-        printf("*****  warning : before/after difference >= 1.0e-7 *****\n");
+        printf("*****  warning : McIlwain before/after L* difference >= 1.0e-7 *****\n");
         printf("Test failed (diff: %g)\n", del);
 	Passed=FALSE;
     }
+
+    /*McIlwain twice in a row*/
+    FreeLstarInfo(LstarInfo); /*Clean up from previous*/
+    LstarInfo = InitLstarInfo(1);
+    Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
+    Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
+    Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
+    Lgm_Set_Lgm_B_T89(LstarInfo->mInfo);
+    LstarInfo->mInfo->Kp = 4;
+    LstarInfo->PitchAngle = PA;
+    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
+    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    McIlwainBefore = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+				    PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+    McIlwainAfter = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+				    PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+    del = McIlwainAfter - McIlwainBefore;
+    if (fabs(del) > 1.0e-7) {
+        printf("*****  warning : McIlwain twice difference >= 1.0e-7 *****\n");
+        printf("Test failed (diff: %g)\n", del);
+	Passed=FALSE;
+    }
+
+    /*L* twice in a row*/
+    FreeLstarInfo(LstarInfo); /*Clean up from previous*/
+    LstarInfo = InitLstarInfo(1);
+    Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
+    Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
+    Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
+    Lgm_Set_Lgm_B_T89(LstarInfo->mInfo);
+    LstarInfo->mInfo->Kp = 4;
+    LstarInfo->PitchAngle = PA;
+    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
+    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    Lstar(&PosGSM, LstarInfo);
+    RoedererBefore = LstarInfo->LS;
+    Lstar(&PosGSM, LstarInfo);
+    RoedererAfter = LstarInfo->LS;
+    del = RoedererAfter - RoedererBefore;
+    if (fabs(del) > 1.0e-7) {
+        printf("*****  warning : L* twice difference >= 1.0e-7 *****\n");
+        printf("Test failed (diff: %g)\n", del);
+	Passed=FALSE;
+    }
+
+    /*L* twice with McIlwain between*/
+    FreeLstarInfo(LstarInfo); /*Clean up from previous*/
+    LstarInfo = InitLstarInfo(1);
+    Lgm_Set_Coord_Transforms( d.Date, d.Time, LstarInfo->mInfo->c );
+    Lgm_Convert_Coords(&Pos, &PosGSM, SM_TO_GSM, LstarInfo->mInfo->c );
+    Lgm_Set_Lgm_B_IGRF_InternalModel( LstarInfo->mInfo );
+    Lgm_Set_Lgm_B_T89(LstarInfo->mInfo);
+    LstarInfo->mInfo->Kp = 4;
+    LstarInfo->PitchAngle = PA;
+    Lgm_SetLstarTolerances( 1, 24, LstarInfo );
+    LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    Lstar(&PosGSM, LstarInfo);
+    RoedererBefore = LstarInfo->LS;
+    McIlwainAfter = Lgm_McIlwain_L(d.Date, d.Time, &PosGSM,
+                                   PA, 0, &I, &Bm, &M, LstarInfo->mInfo);
+    Lstar(&PosGSM, LstarInfo);
+    RoedererAfter = LstarInfo->LS;
+    del = RoedererAfter - RoedererBefore;
+    if (fabs(del) > 1.0e-7) {
+        printf("*****  warning : L* before/after McIlwain difference >= 1.0e-7 *****\n");
+        printf("Test failed (diff: %g)\n", del);
+	Passed=FALSE;
+    }
+
     fflush(stdout);
-    ck_assert_msg( Passed, "McIlwain before/after tests failed.\n" );
+    ck_assert_msg( Passed, "Lstar before/after tests failed.\n" );
 }END_TEST
 
 
