@@ -619,7 +619,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      */
     u = *vin;
     LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
-    LstarInfo->mInfo-Blocal = Lgm_Magnitude( &Bvec );
+    LstarInfo->mInfo->Blocal = Lgm_Magnitude( &Bvec );
     if (LstarInfo->VerbosityLevel > 1) {
         printf("\n\t\t%sInitial Position, U_gsm (Re):            < %g, %g, %g >%s\n", PreStr, u.x, u.y, u.z, PostStr);
         printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, LstarInfo->mInfo->Blocal, PostStr);
