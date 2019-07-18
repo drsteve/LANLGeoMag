@@ -136,7 +136,7 @@ class magcoords_Tests(unittest.TestCase):
         L = magcoords.Lvalue([-4.2, 1, 1], datetime.datetime(2010, 10, 12),
                              alpha=90, Kp=4, method='McIlwain',
                              coord_system='SM', Bfield='Lgm_B_T89')['L']
-        self.assertEqual(5.0308451893, L)
+        self.assertAlmostEqual(5.0293407729574, L, places=7)
 
 
 if __name__ == '__main__':
