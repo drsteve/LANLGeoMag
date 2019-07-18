@@ -38,7 +38,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
 #        self.assertAlmostEqual(5.030723190000001, ans[90]['LHilton'], places=4)
 #        self.assertAlmostEqual(5.0308451893, ans[90]['LMcIlwain'], places=4)
-        self.assertAlmostEqual(4.5845052598, ans[90]['Lstar'][0], places=4)
+        self.assertAlmostEqual(4.4572962598000005, ans[90]['Lstar'][0], places=4)
 #        self.assertAlmostEqual(5.81634438101, ans[90]['Lsimple'][0], places=4)
 
     def testLgm_B_T89_2(self):
@@ -46,7 +46,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1)
         self.assertAlmostEqual(5.181803906000000, ans[90]['LHilton'], places=4)
         self.assertAlmostEqual(5.181976407000001, ans[90]['LMcIlwain'], places=4)
-        self.assertAlmostEqual(4.600643183400000, ans[90]['Lstar'][0], places=4)
+        self.assertAlmostEqual(4.3583051834, ans[90]['Lstar'][0], places=4)
         self.assertAlmostEqual(5.46286608758, ans[90]['Lsimple'][0], places=4)
 
     def testLgm_B_OP77_1(self):
@@ -54,7 +54,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
         self.assertAlmostEqual(4.862572936599999, ans[90]['LHilton'], places=4)
         self.assertAlmostEqual(4.862654030000000, ans[90]['LMcIlwain'], places=4)
-        self.assertAlmostEqual(4.607683093099999, ans[90]['Lstar'][0], places=4)
+        self.assertAlmostEqual(4.571419493099999, ans[90]['Lstar'][0], places=4)
         self.assertAlmostEqual(6.29150825380, ans[90]['Lsimple'][0], places=4)
 
     def testLgm_B_OP77_2(self):
@@ -63,7 +63,7 @@ class Lstar_Tests(unittest.TestCase):
         ans = Lstar.get_Lstar([-4.2, 1, 1], self.date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1)
         self.assertAlmostEqual(4.862572936599999, ans[90]['LHilton'], places=4)
         self.assertAlmostEqual(4.862654030000000, ans[90]['LMcIlwain'], places=4)
-        self.assertAlmostEqual(4.607683093099999, ans[90]['Lstar'][0], places=4)
+        self.assertAlmostEqual(4.571419493099999, ans[90]['Lstar'][0], places=4)
         self.assertAlmostEqual(6.29150825, ans[90]['Lsimple'][0], places=4)
 
     def testCentredDipole90(self):
