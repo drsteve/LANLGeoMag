@@ -130,12 +130,28 @@ to build RPMs.  RPMs are not yet working because we still have
 Ctypesgen
 =========
 The Python wrappers require ctypesgen. For simplicity, we bundle our own
-version. Here's how to make that bundle:
-svn checkout http://ctypesgen.googlecode.com/svn/trunk/ ctypesgen-read-only
-Copy entire contents to Python/ctypesgen in the lanlgeomag directory, and
-check them in. We should refer to this license (3-clause BSD) in the
-lanlgeomag docs.
+version from https://github.com/olsonse/ctypesgen
 
+There's a nice discussion at
+https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
+
+If you aren't hacking on the ctypes code itself, there's no need to read
+any of this. But if you need to update the bundled ctypes, first set up
+the repositories:
+
+git remote add ctypesgen https://github.com/olsonse/ctypesgen.git
+
+To start this process from scratch (i.e. before we had anything pulled in):
+git fetch ctypesgen
+git read-tree --prefix=Python/ctypesgen/ -u ctypesgen/master
+
+But to update ctypesgen now that it's been incorporated:
+git fetch ctypesgen
+git merge -s subtree --squash ctypesgen/master
+git rev-parse ctypesgen/master #To get SHA1
+git commit -m "Update ctypesgen to (SHA1)"
+
+We should refer to this license (3-clause BSD) in the lanlgeomag docs.
 
 
 make dist

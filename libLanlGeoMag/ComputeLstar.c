@@ -618,11 +618,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
      *  Do Initial field Line to get Bm and I
      */
     u = *vin;
+    LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
+    LstarInfo->mInfo->Blocal = Lgm_Magnitude( &Bvec );
     if (LstarInfo->VerbosityLevel > 1) {
         printf("\n\t\t%sInitial Position, U_gsm (Re):            < %g, %g, %g >%s\n", PreStr, u.x, u.y, u.z, PostStr);
-	    LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
-	    B = Lgm_Magnitude( &Bvec );
-        printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, B, PostStr);
+        printf("\t\t%sMag. Field Strength, B at U_gsm (nT):    %g%s\n", PreStr, LstarInfo->mInfo->Blocal, PostStr);
     }
     if ( Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo ) == LGM_CLOSED ) {
 
@@ -631,7 +631,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         LstarInfo->RofC    = LstarInfo->mInfo->d2B_ds2; // radius of curvature at Bmin point.
 
         sa = sin( LstarInfo->PitchAngle*RadPerDeg ); sa2 = sa*sa;
-        LstarInfo->mInfo->Bm = LstarInfo->mInfo->Bmin/sa2; // set Bmirror for supplied location, pitch angle, field model, etc.
+        LstarInfo->mInfo->Bm = LstarInfo->mInfo->Blocal/sa2; // set Bmirror for supplied location, pitch angle, field model, etc.
 
 	if (LstarInfo->VerbosityLevel > 1) {
             printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
