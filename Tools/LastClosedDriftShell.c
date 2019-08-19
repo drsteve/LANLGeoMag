@@ -228,6 +228,11 @@ int main( int argc, char *argv[] ){
     } else {
         Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
     }
+//HACK:
+nK=3;
+Kin[0] = 0.05;
+Kin[1] = 0.11;
+Kin[2] = 0.2;
 
     /*
      *  Set other options
@@ -372,7 +377,7 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"LCDS_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
             for (i=0; i<nK-1; i++) fprintf(fp, "\"LCDS K=%g\", ", Kin[i] );
-            fprintf(fp, "\"LCDS %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf(fp, "\"LCDS K=%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 1000.0,\n");
@@ -412,7 +417,7 @@ int main( int argc, char *argv[] ){
             fprintf(fp, "\"Bm_%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                     \"ELEMENT_LABELS\": [ ");
             for (i=0; i<nK-1; i++) fprintf(fp, "\"Bm K=%g\", ", Kin[i] );
-            fprintf(fp, "\"K %g!Eo!N\" ],\n", Kin[i] ); 
+            fprintf(fp, "\"Bm K=%g\" ],\n", Kin[i] ); 
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0.0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 10000.0,\n");
@@ -436,6 +441,7 @@ int main( int argc, char *argv[] ){
             fprintf( fp, "#                           \"DEPEND_1\": \"K\",\n");
             fprintf( fp, "#                          \"VALID_MIN\": 0,\n");
             fprintf( fp, "#                          \"VALID_MAX\": 50,\n");
+            fprintf( fp, "#                         \"FILL_VALUE\": -1e31 }\n");
             fprintf( fp, "#\n");
         }
         fprintf( fp, "# } end JSON\n");
@@ -451,8 +457,9 @@ int main( int argc, char *argv[] ){
         Lgm_SetLstarTolerances( Quality, nFLsInDriftShell, LstarInfo );
     
         //loop over date/time at given cadence
-        if (JD <= LGM_FILL_VALUE) {
+        if (JD <= LGM_FILL_VALUE) { //check stuff for first day...
             JD = (JD < sJD) ? sJD : jDate;
+            jDate_end = (eJD < jDate_end) ? eJD : jDate_end;
         }
         for ( JD; JD < jDate_end; JD += t_cadence ) {
             //set date specific stuff
