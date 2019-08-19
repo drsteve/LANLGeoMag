@@ -1550,22 +1550,29 @@ double MagFlux( Lgm_LstarInfo *LstarInfo ) {
 double LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) {
 
 
-    double	cl, sl, st, ct, sp, cp, Br, Bx, By, Bz, f;
+    double	r, cl, sl, st, ct, sp, cp, Br, Bx, By, Bz, f;
     double	MLT, phi;
     Lgm_Vector	u, w, Bvec;
     Lgm_LstarInfo  *LstarInfo;
+
+
 
     /*
      *  Get pointer to our auxilliary data structure.
      */
     LstarInfo = (Lgm_LstarInfo *)qpInfo;
 
+    // Must calculate the field at the right altitude. This should be the same
+    // altitude (above a *spherical* Earth) that the mlat intersection of the
+    // drift shell was computed for.
+    r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
+
     MLT = LstarInfo->Phi*DegPerRad/15.0;
     phi = 15.0*(MLT-12.0)*RadPerDeg;
     cl = cos( Lambda ); sl = sin( Lambda );
-    u.x = cl*cos( phi );
-    u.y = cl*sin( phi );
-    u.z = sl;
+    u.x = r*cl*cos( phi );
+    u.y = r*cl*sin( phi );
+    u.z = r*sl;
     Lgm_Convert_Coords( &u, &w, SM_TO_GSM, LstarInfo->mInfo->c );
 
 
@@ -1576,7 +1583,7 @@ double LambdaIntegrand( double Lambda, _qpInfo *qpInfo ) {
     st = sin( M_PI/2.0 - Lambda ); ct = cos( M_PI/2.0 - Lambda ); sp = sin( phi ); cp = cos( phi );
     Br = st*cp*Bx + st*sp*By + ct*Bz;
 
-    f = Br*cos( Lambda );
+    f = Br*r*r*cos( Lambda );
 
     return( f );
 
@@ -1712,9 +1719,10 @@ double MagFlux2( Lgm_LstarInfo *LstarInfo ) {
 */
 
 
-    r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
+//    r = 1.0 + LstarInfo->mInfo->Lgm_LossConeHeight/WGS84_A;
+//    return( result/r );
 
-    return( result/r );
+    return( result );
 
 }
 
