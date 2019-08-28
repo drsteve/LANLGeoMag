@@ -105,7 +105,7 @@
  */
 int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info ) {
 
-    int		    i, reset, flag1, flag2, InitiallyBelowTargetHeight, done;
+    int		    i, reset, flag1, flag2, flag3, InitiallyBelowTargetHeight, done;
     double	    sgn=1.0, R, Rtarget, Rinitial, Rplus, H, Hinitial;
     Lgm_Vector	w, Bvec;
     double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, Hdid, Hnext, Htry;
@@ -252,7 +252,13 @@ double MIKEB = Info->Trace_s;
 	     */
         //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
         //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
-        Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
+/*	Change made by Greg Cunningham on April 19, 2019, to check the result of Lgm_TraceToMinBSurf to make sure it returns a closed field line */
+        flag3 = Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
+        if (flag3 != LGM_CLOSED)
+                {
+                printf("Major problem in Lgm_Trace(): northern and southern footpoints found, but TraceToMinBSurf does not return LGM_CLOSED, rather returns %d. Returning %d.\n", flag3, flag3);
+                return(flag3);
+                }
         Info->v3_final = *v3;
         Info->Pmin = *v3;
         //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
