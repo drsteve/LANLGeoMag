@@ -77,7 +77,7 @@
 #define LGM_EDIP        	1
 #define LGM_IGRF        	2
 #define LGM_DUNGEY      	3
-#define LGM_JENSENCAIN1960      4 // added by Greg Cunningham on April 19, 2019 (had actually been in Greg's version of LanlGeoMag since 2016)
+#define LGM_JENSENCAIN1960      4
 
 #define LGM_MAX_INTERP_PNTS 10000
 
