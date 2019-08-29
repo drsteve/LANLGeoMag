@@ -375,7 +375,7 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                     m->Bfield = Lgm_B_edip;
                                 } else if ( InternalModel == LGM_DUNGEY ) {
                                     m->Bfield = Lgm_B_Dungey;
-                                } else if ( InternalModel == LGM_JENSENCAIN1960 ) {	// Added by Greg Cunningham on April 19, 2019
+                                } else if ( InternalModel == LGM_JENSENCAIN1960 ) {
                                     m->Bfield = Lgm_B_JensenCain1960;	
                                 } else {
                                     m->Bfield = Lgm_B_igrf;
