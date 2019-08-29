@@ -252,10 +252,11 @@ double MIKEB = Info->Trace_s;
 	     */
         //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
         //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
-/*	Change made by Greg Cunningham on April 19, 2019, to check the result of Lgm_TraceToMinBSurf to make sure it returns a closed field line */
+        /*
+         * Check the result of Lgm_TraceToMinBSurf to make sure it returns a closed field line
+         */
         flag3 = Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
-        if (flag3 != LGM_CLOSED)
-                {
+        if (flag3 != LGM_CLOSED) {
                 printf("Major problem in Lgm_Trace(): northern and southern footpoints found, but TraceToMinBSurf does not return LGM_CLOSED, rather returns %d. Returning %d.\n", flag3, flag3);
                 return(flag3);
                 }
