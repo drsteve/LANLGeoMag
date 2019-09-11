@@ -2,7 +2,7 @@
 
 static const double RGAS = 831.4;
 
-#define ZETA(ZZ,ZL,p) ( (ZZ-ZL)*(p->RE+ZL)/(p->RE+ZZ) )
+#define ZETA(ZZ,ZL,p) ( (ZZ-ZL)*(p->Rref+ZL)/(p->Rref+ZZ) )
 
 /*----------------------------------------------------------------------
  *    SUBROUTINE GTD7(IYD,SEC,ALT,GLAT,GLONG,STL,F107A,F107,AP,MASS,D,T)
@@ -174,7 +174,7 @@ V1 =1;
      */
     XLAT = GLAT;
     if ( p->SW[2] == 0 ) XLAT = 45.0;
-    GLATF( XLAT, &p->GSURF, &p->RE );
+    GLATF( XLAT, &p->GSURF, &p->Rref );
 
     XMM = p->PDM[5][3];
 
@@ -516,7 +516,7 @@ void GHP7( int IYD, double SEC, double ALT, double GLAT, double GLONG, double ST
         if ( (fabs(DIFF) < TEST) || (L == LTEST) ) break;
         XM = D[6]/(XN*1.66E-24);
         if ( p->IMR == 1 ) XM *= 1.0e3;
-        g  = 1.0 + Z/p->RE; g2 = g*g;
+        g  = 1.0 + Z/p->Rref; g2 = g*g;
         G  = p->GSURF/g2;
         SH = RGAS*T[2]/(XM*G);
         // New altitude estimate using scale height
@@ -1224,7 +1224,7 @@ void METERS( int METER, Lgm_Msis00Info *p ) {
 double SCALH( double ALT, double XM, double TEMP, Lgm_Msis00Info *p ) {
     double  q, q2, G;
 //    static double   RGAS = 831.4;
-    q = 1.0+ALT/p->RE; q2 = q*q;
+    q = 1.0+ALT/p->Rref; q2 = q*q;
     G = p->GSURF/q2;
     return( RGAS*TEMP/(G*XM) );
 }
@@ -1672,7 +1672,7 @@ double  fDENSU, Z, ZG2, TT, TA, g, g2, DTA, Z1, Z2, T1, T2, ZG, ZGDIF;
 double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
 
 
-    //ZETA(ZZ, ZL) = (ZZ-ZL)*(p->RE+ZL)/(p->RE+ZZ);
+    //ZETA(ZZ, ZL) = (ZZ-ZL)*(p->Rref+ZL)/(p->Rref+ZZ);
     //////printf("DB %g %g %g %g %g %g %g %g %g %g %g\n", ALT, DLB, TINF, TLB, XM, ALPHA, ZLB, S2, MN1, ZN1, TN1 );
     fDENSU = 1.0;
 
@@ -1693,7 +1693,7 @@ double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
     if ( ALT < p->ZA ) {
         // CALCULATE TEMPERATURE BELOW ZA
         // Temperature gradient at ZA from Bates profile
-        g       = (p->RE+ZLB)/(p->RE+p->ZA); g2 = g*g;
+        g       = (p->Rref+ZLB)/(p->Rref+p->ZA); g2 = g*g;
         DTA     = (TINF-TA)*S2*g2;
         TGN1[1] = DTA ;
         TN1[1]  = TA;
@@ -1716,7 +1716,7 @@ double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
 
         // End node derivatives
         YD1 = -TGN1[1]/(T1*T1)*ZGDIF;
-        g   = (p->RE+Z2)/(p->RE+Z1); g2 = g*g;
+        g   = (p->Rref+Z2)/(p->Rref+Z1); g2 = g*g;
         YD2 = -TGN1[2]/(T2*T2)*ZGDIF*g2;
 
         // Calculate spline coefficients
@@ -1734,7 +1734,7 @@ double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
     if ( XM != 0.0 ) {
 
         // CALCULATE DENSITY ABOVE ZA
-        g     = 1.0 + ZLB/p->RE; g2 = g*g;
+        g     = 1.0 + ZLB/p->Rref; g2 = g*g;
         GLB   = p->GSURF/g2;
         GAMMA = XM*GLB/(S2*RGAS*TINF);
         EXPL  = exp(-S2*GAMMA*ZG2);
@@ -1747,7 +1747,7 @@ double  YD1, YD2, X, Y, GLB, GAMMA, EXPL, DENSA, GAMM, YI;
         if ( ALT < p->ZA ) {
 
             // CALCULATE DENSITY BELOW ZA
-            g    = 1.0 + Z1/p->RE; g2 = g*g;
+            g    = 1.0 + Z1/p->Rref; g2 = g*g;
             GLB  = p->GSURF/g2;
             GAMM = XM*GLB*ZGDIF/RGAS;
 
@@ -1784,7 +1784,7 @@ double DENSM( double ALT, double D0, double XM, double *TZ, int MN3, double *ZN3
     double  YD2, Y2OUT[11], X, Y, GLB, GAMM, YI, EXPL;
 
     // changed this fortran statement function to a macro
-    //ZETA(ZZ,ZL) = (ZZ-ZL)*(p->RE+ZL)/(p->RE+ZZ);
+    //ZETA(ZZ,ZL) = (ZZ-ZL)*(p->Rref+ZL)/(p->Rref+ZZ);
     fDENSM = D0;
 
     if ( ALT <= ZN2[1] ) {
@@ -1807,7 +1807,7 @@ double DENSM( double ALT, double D0, double XM, double *TZ, int MN3, double *ZN3
 
 
         YD1 = -TGN2[1]/(T1*T1)*ZGDIF;
-        g = (p->RE+Z2)/(p->RE+Z1); g2 = g*g;
+        g = (p->Rref+Z2)/(p->Rref+Z1); g2 = g*g;
         YD2 = -TGN2[2]/(T2*T2)*ZGDIF*g2;
 
         // Calculate spline coefficients
@@ -1820,7 +1820,7 @@ double DENSM( double ALT, double D0, double XM, double *TZ, int MN3, double *ZN3
 
         if ( XM != 0.0 ) {
             // CALCULATE STRATOSPHERE/MESOSPHERE DENSITY 
-            g    = 1.+Z1/p->RE; g2 = g*g;
+            g    = 1.+Z1/p->Rref; g2 = g*g;
             GLB  = p->GSURF/g2;
             GAMM = XM*GLB*ZGDIF/RGAS;
 
@@ -1851,7 +1851,7 @@ double DENSM( double ALT, double D0, double XM, double *TZ, int MN3, double *ZN3
             }
 
             YD1 = -TGN3[1]/(T1*T1)*ZGDIF;
-            g   = (p->RE+Z2)/(p->RE+Z1); g2 = g*g;
+            g   = (p->Rref+Z2)/(p->Rref+Z1); g2 = g*g;
             YD2 = -TGN3[2]/(T2*T2)*ZGDIF*g2;
 
             // Calculate spline coefficients
@@ -1863,7 +1863,7 @@ double DENSM( double ALT, double D0, double XM, double *TZ, int MN3, double *ZN3
             *TZ = 1.0/Y;
             if( XM != 0.0 ) {
                 // CALCULATE TROPOSPHERIC/STRATOSPHERE DENSITY 
-                g    = 1.0 + Z1/p->RE; g2 = g*g;
+                g    = 1.0 + Z1/p->Rref; g2 = g*g;
                 GLB  = p->GSURF/g2;
                 GAMM = XM*GLB*ZGDIF/RGAS;
 
