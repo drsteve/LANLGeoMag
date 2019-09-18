@@ -1083,7 +1083,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                             printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
                         }
                     }  else { // redo old unpartitioned one (set RelaxTolerance to 2. This will force acceptance of anything that is a "converged but not to I value."
-printf("1. HERE\n");
+//printf("1. HERE\n");
                         FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 2, LstarInfo );
                     }
 
@@ -1138,12 +1138,12 @@ mlat0 -= 1.0;
 mlat1 += 1.0;
                     if (LstarInfo->VerbosityLevel > 0) {
                         printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
-printf("mlat0, mlat1 = %g %g\n", mlat0, mlat1);
+//printf("mlat0, mlat1 = %g %g\n", mlat0, mlat1);
                     }
     
                     FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
                     if (FoundShellLine > 0) {
-printf("2a. HERE\n");
+//printf("2a. HERE\n");
                         //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
                         PredMinusActualMlat = pred_mlat - mlat;
                         if (LstarInfo->VerbosityLevel > 1) {
@@ -1153,7 +1153,7 @@ printf("2a. HERE\n");
                         }
 
                     }  else { // redo old unpartitioned one (set RelaxTolerance to 2. This will force acceptance of anything that is a "converged but not to I value."
-printf("2b. HERE\n");
+//printf("2b. HERE\n");
                         FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 2, LstarInfo );
                     }
     
