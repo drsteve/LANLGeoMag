@@ -4,10 +4,15 @@
 #include <gsl/gsl_multifit.h>
 #define MAX_ITS 100
 
+
+
+#define   TRACE_TOL  1e-7
+
 typedef struct BracketType {
     double  a, b, c;
     double  Ia, Ib, Ic;
     double  Da, Db, Dc;
+    int     Erra, Errb, Errc;
     double  mlat_min, Dmin;
     int     FoundZeroBracket;
 } BracketType;
@@ -50,14 +55,15 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
  *            \return 0 - no field line could be found
  *
  */
-int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo) {
+int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, int RelaxTolerance, Lgm_LstarInfo *LstarInfo) {
     Lgm_Vector      u, w, Pm_North, Pmirror, v1, v2, v3;
-    double          F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, I, r, Phi, cl, sl;
+    double          F, F0, F1, rat, a, b, c, d, d0, d1, Da, Db, Dc, De, ff, I, r, Phi, cl, sl;
     double          SS, Sn, Ss, mlat_min=0.0, Dmin=9e99, e, D, D0, D1, D2, Sign, Dbest, mlatbest, res;
     int             done, FirstHalf, nIts, FoundZeroBracket;
     int             i, Flag, nbFits;
     BracketType     Bracket;
     double          BRACKET_EPS;
+    int             ErrorStatus;
     int FoundValidI = 0;
 
     *Iterations = 0;
@@ -100,6 +106,7 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      *              d) Switch to bisection root finder using the new bracketed
      *              zero.
      *
+     *
      */
     Dmin = 9e99;
 
@@ -117,6 +124,12 @@ int FindShellLine(  double I0, double *Ifound, double Bm, double MLT, double *ml
      * Attempt to bracket the zero in I-I0. Note that this may not be easy if
      * the curve doesnt drop very substantially below the zero point. This is
      * often the case for large eq. pitch angles.
+     *
+     * A related problem (worse for large pitch angle) is this: We may actually
+     * be close to the FL that we are looking for, but in order to compute I,
+     * we must have Bmin < Bmirror. If this is not the case, we wont even get
+     * an I. We need to be careful of ths!
+     *
      */
     Bracket.Dmin = 9e99;
     Flag = BracketZero( I0, Ifound, Bm, MLT, mlat, rad, mlat0, mlat1, mlat2, &Bracket, LstarInfo );
@@ -224,7 +237,8 @@ mlatbest = mlat_min;
                 b = res;
                 c = res+2.0;
 
-                I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, LstarInfo );
+                I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, &ErrorStatus, LstarInfo );
+//if I is valid
                 if ( fabs(I) < 1e98 ) {
                     D0 = I-I0;
                     LstarInfo->MLATarr[LstarInfo->nImI0] = b;
@@ -267,7 +281,8 @@ mlatbest = mlat_min;
                 if ( !FoundZeroBracket ) {
 
 
-                    I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, LstarInfo );
+                    I  = ComputeI_FromMltMlat( Bm, MLT, a, &r, I0, &ErrorStatus, LstarInfo );
+//if I is valid
                     if ( fabs(I) < 1e98 ) {
                         LstarInfo->MLATarr[LstarInfo->nImI0] = a;
                         LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
@@ -307,7 +322,8 @@ mlatbest = mlat_min;
 
                     if ( !FoundZeroBracket ) {
 
-                        I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, LstarInfo );
+                        I  = ComputeI_FromMltMlat( Bm, MLT, c, &r, I0, &ErrorStatus, LstarInfo );
+//if I is valid
                         if ( fabs(I) < 1e98 ) {
                             LstarInfo->MLATarr[LstarInfo->nImI0] = c;
                             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
@@ -415,7 +431,8 @@ mlatbest = mlat_min;
                 FirstHalf = FALSE;
                 e = b + F1*d1;
             }
-            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, &ErrorStatus, LstarInfo );
+//return value ignored?
             LstarInfo->MLATarr[LstarInfo->nImI0] = e;
             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
@@ -478,10 +495,22 @@ mlatbest = mlat_min;
                  * bracket.
                  */
                 done = TRUE;
-                if ( fabs(De) < 0.001 ) {
+                ff = fabs(De)/I;
+                if ( RelaxTolerance && ff < 0.3 ) {
+                    /*
+                     * The RelaxTolerance flag is set (probably trying to do a
+                     * I/2 partioning due to Shabansky detection.) Lets not get
+                     * too greedy, since I/2 isnt likely totally correct
+                     * anyway!
+                     */
+                    FoundValidI = TRUE;     // lets just take what we get here....
+                    *mlat = mlat_min;       // Use the best value we got
+                } else if ( !RelaxTolerance && ff < 0.05 ) {
                     FoundValidI = TRUE;     // lets just take what we get here....
                     *mlat = mlat_min;       // Use the best value we got
                 } else {
+//printf("HERE\n");
+                    *mlat = mlat_min;
                     FoundValidI = -4;
                 }
             } else if ( De < Db ) {
@@ -584,7 +613,8 @@ mlatbest = mlat_min;
             }
 
 
-            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, LstarInfo );
+            I = ComputeI_FromMltMlat( Bm, MLT, e, &r, I0, &ErrorStatus, LstarInfo );
+//return value ignored?
             LstarInfo->MLATarr[LstarInfo->nImI0] = e;
             LstarInfo->ImI0arr[LstarInfo->nImI0++] = I-I0;
             De = I-I0;
@@ -642,15 +672,41 @@ mlatbest = mlat_min;
                  * bracket.
                  */
                 done = TRUE;
-                if ( fabs(De) < 0.001 ) {
+                ff = fabs(De)/I;
+                if ( RelaxTolerance == 2 ) {
                     FoundValidI = TRUE;     // lets just take what we get here....
                     *mlat = mlat_min;       // Use the best value we got
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but (I-I0) = %g  |I-I0|/I = %g I GIVE UP. ACCEPTING RESULT ANYWAY (Prob have the right mlat, but wrong I0?) (Relaxed Tolerance = 2)\n", fabs(a-b), De, fabs(De)/I0 );
+                        printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
+                    }
+                } else if ( (RelaxTolerance == 1) && (ff < 0.3) ) {
+                    /*
+                     * The RelaxTolerance flag is set (probably trying to do a
+                     * I/2 partioning due to Shabansky detection.) Lets not get
+                     * too greedy, since I/2 isnt likely totally correct
+                     * anyway!
+                     */
+                    FoundValidI = TRUE;     // lets just take what we get here....
+                    *mlat = mlat_min;       // Use the best value we got
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but (I-I0) = %g  |I-I0|/I = %g ACCEPTING RESULT since |I-I0|/I < 0.1 (Relaxed Tolerance)\n", fabs(a-b), De, fabs(De)/I0 );
+                        printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
+                    }
+                } else if ( (RelaxTolerance == 0) && (ff < 0.05) ) {
+                    FoundValidI = TRUE;     // lets just take what we get here....
+                    *mlat = mlat_min;       // Use the best value we got
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but (I-I0) = %g  |I-I0|/I = %g ACCEPTING RESULT since |I-I0|/I < 0.01\n", fabs(a-b), De, fabs(De)/I0 );
+                        printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
+                    }
                 } else {
+                    *mlat = mlat_min;
                     FoundValidI = -4;
-                }
-                if (LstarInfo->VerbosityLevel > 1){
-                    printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but |I-I0| = %g\n", fabs(a-b), De );
-                    printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
+                    if (LstarInfo->VerbosityLevel > 1){
+                        printf( "\t\t\t> Converged to something (but not I?): fabs(a-b) = %g, but (I-I0) = %g  |I-I0|/I = %g \n", fabs(a-b), De, fabs(De)/I0 );
+                        printf( "\t\t\t> Bracket: a, b, c = %g %g %g    Da, Db, Dc = %g %g %g\n", a, b, c, Da, Db, Dc );
+                    }
                 }
             } else if ( De > 0.0 ) {
                 if ( Da > 0.0 ) {
@@ -1158,7 +1214,7 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
         f[i].y   = yin[i];
         f[i].dy  = dyin[i];
         f[i].key = fabs(yin[i]);
-        //printf("|y|, y, x, = %g %g %g\n", fabs(yin[i]), yin[i], xin[i] );
+        printf("|y|, y, x, = %g %g %g\n", fabs(yin[i]), yin[i], xin[i] );
     }
     elt_qsort( f, n );
 
@@ -1233,24 +1289,161 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
 
 }
 
+double ComputeBmin( double MLT, double mlat, Lgm_LstarInfo *LstarInfo ){
 
+    double  rr, Phi, SinPhi, CosPhi, cl, sl, Bmin;
+    Lgm_Vector  Bvec, v1, v2, v3, u, w;
+    int         TraceFlag;
+    
+
+    rr = 1.0 + 100.0/Re;
+    Phi = 15.0*(MLT-12.0)*RadPerDeg;
+    SinPhi = sin(Phi); CosPhi = cos(Phi);
+
+    cl = cos( mlat * RadPerDeg ); sl = sin( mlat * RadPerDeg );
+    w.x = rr*cl*CosPhi; w.y = rr*cl*SinPhi; w.z = rr*sl;
+    Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
+    TraceFlag = Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
+    LstarInfo->mInfo->Bfield( &v3, &Bvec, LstarInfo->mInfo );
+    Bmin = Lgm_Magnitude( &Bvec );
+
+    return( Bmin );
+
+}
 
 
 /*
  * This routine is designed to find a bracket on the D=0 root. Here, D = I-I0.
  * A zero bracket is defined by having D change signs -- then there must (or
  * probably) is a root in between.
+ *
+ * This is not as trivial as you would think...
+ *
+ *
  */
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo ){
 
     double      I, r, D, D0, D1, D2, Dmin, mlat_min, mmm;
     int         FoundZeroBracket, nDefined, done;
+    int         ErrorStatus;
+    double      mlat_a, mlat_b, mlat_t;
+    double      dB_a, dB_b, dB_t;
     BracketType Bracket0;
 
     Dmin = Bracket->Dmin;
 //    Dmin = 9e99;
 
     nDefined = 0;
+
+
+    /*
+     * Let us first check that mlat2 > mlat1 > mlat0 
+     */
+    if ( mlat0 > mlat1 ) { return( -1 ); }
+    if ( mlat0 > mlat2 ) { return( -1 ); }
+    if ( mlat1 > mlat2 ) { return( -1 ); }
+
+
+
+    /*
+     * A major problem will occur if our bracket has FLs inside that yield Bmin
+     * > Bmirror.  Lets, elaborate on this....
+     *
+     *  Lets say we are looking for a small I value that results from a high
+     *  pitch angle (e.g. 86.4deg.)
+     *
+     *  Then, it is quite possible to find a FL that has a Bmin value that is
+     *  greater then the Bmirror values we are trying to find.  This is a
+     *  problem because it will never work -- except possibly if you are in the
+     *  local high-point of a shabansky-type FL. But forget than for now.
+     *  We have to protect our bracket from having these.
+     *
+     *  ComputeI_FromMltMlat() will return -10 in the ErrorStatus when Bmin >
+     *  Bmirror. So, if we get -10 at the endpoints thats bad -- we need to
+     *  adjust until we dont. But we also dont want to miss out on a region of
+     *  potential solutions. In other words, we need to go slow.
+     *
+     *  Note that in a reasonable world (magnetosphere?), getting the dreaded
+     *  -10 error means we are not high enough in latitude to get Bmin's that
+     *  are small enough.  But lets not be silly about it and just keep
+     *  computing I's. All we need is the mlat where Bmin <= Bmirror in order
+     *  to get a valid endpoint for our potential bracket. And we can do that
+     *  as a simple search usingm Lgm_TraceToBmin()
+     *
+     */
+
+    
+    /*
+     * Check the 3 mlat's to ensure we dont get -10.
+     */
+    mlat_a = mlat0; dB_a = Bm - ComputeBmin( MLT, mlat_a, LstarInfo ); //printf("mlat_a, dB_a = %g %g\n", mlat_a, dB_a );
+    if ( dB_a < 0.0 ) {
+
+        // Set starting point to lower value
+        mlat_t = mlat_a; dB_t = dB_a;
+
+        done = FALSE;
+        while ( !done ) {
+
+            // Step up until we cross zero
+            mlat_t += 0.1; dB_t = Bm - ComputeBmin( MLT, mlat_t, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
+
+            if ( dB_t < 0.0 ) {
+                // Havent found the crossing yet -- advance the lower value
+                mlat_a = mlat_t; dB_a = dB_t;
+            } else if ( dB_t >= 0.0 ) {
+                // Found the crossing! We have a bracket on zero for dB. -- set upper bracket
+                done = TRUE;
+                mlat_b = mlat_t; dB_b = dB_t;
+            }
+
+        }
+
+        /*
+         * Now use bisection
+         */
+        done = FALSE;
+        while ( !done ) {
+
+            //Try halfway point.
+            mlat_t = 0.5*(mlat_a+mlat_b); dB_t = Bm - ComputeBmin( MLT, mlat_t, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
+
+            if ( dB_t < 0.0 ) {
+                // Still negative -- advance the lower value
+                mlat_a = mlat_t; dB_a = dB_t;
+            } else {
+                // positive -- advance the upper value
+                mlat_b = mlat_t; dB_b = dB_t;
+            }
+
+            if ( fabs( mlat_b - mlat_a ) < 1e-5 ) {
+                done = TRUE;
+            }
+    
+        }
+        
+        // Use the one on the positive side
+        mlat0 = mlat_b;
+    }
+
+
+    // We may have gone beyond the other points -- check and correct
+    if ( ( mlat0 >= mlat1 ) && ( mlat0 < mlat2 ) ) {
+        // We've exceeded the center point but not the upper point.
+        mlat1 = 0.5*(mlat0 + mlat2);
+    }
+    if ( ( mlat0 >= mlat1 ) && ( mlat0 >= mlat2 ) ) {
+        // We've exceeded the center point but not the upper point.
+        mlat2 = mlat0 + 5.0; // ???? reasoanble  ????
+        mlat1 = 0.5*(mlat0 + mlat2);
+    }
+
+
+
+
+
+
+
 
 
 
@@ -1263,8 +1456,10 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat1)
      *
      */
-    I = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, &ErrorStatus, LstarInfo );
     Bracket->b = mlat1; Bracket->Ib = (I < 1e6) ? I : -1e31; Bracket->Db = Bracket->Ib - I0;
+    Bracket->Errb = ErrorStatus;
+    //printf("ErrorStatus = %d\n", ErrorStatus );
     if ( Bracket->Ib > 0.0 ) {
         // Cache I(mlat) point for possible future fitting.
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->b;
@@ -1293,8 +1488,11 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat0)
      *
      */
-    I = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, &ErrorStatus, LstarInfo );
     Bracket->a = mlat0; Bracket->Ia = (I < 1e6) ? I : -1e31; Bracket->Da = Bracket->Ia - I0;
+    Bracket->Erra = ErrorStatus;
+    //printf("ErrorStatus = %d\n", ErrorStatus );
+
     if ( Bracket->Ia > 0.0 ) {
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->a;
         LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Da;
@@ -1337,8 +1535,10 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
      *     I(mlat2)
      *
      */
-    I = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+    I = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, &ErrorStatus, LstarInfo );
     Bracket->c = mlat2; Bracket->Ic = (I < 1e6) ? I : -1e31; Bracket->Dc = Bracket->Ic - I0;
+    Bracket->Errc = ErrorStatus;
+    //printf("ErrorStatus = %d\n", ErrorStatus );
     if ( Bracket->Ic > 0.0 ) {
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->c;
         LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Dc;
@@ -1357,9 +1557,11 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
 
     }
 
-    //printf("\n\t\t\t> BracketZero: mlat0 = %g   I-I0 = %g\n", Bracket->a, Bracket->Da );
-    //printf("\t\t\t> BracketZero: mlat1 = %g   I-I0 = %g\n", Bracket->b, Bracket->Db );
-    //printf("\t\t\t> BracketZero: mlat2 = %g   I-I0 = %g\n\n", Bracket->c, Bracket->Dc );
+    if (LstarInfo->VerbosityLevel > 1){
+        printf("\n\t\t\t> BracketZero: mlat0 = %g   I-I0 = %g\n", Bracket->a, Bracket->Da );
+        printf("\t\t\t> BracketZero: mlat1 = %g   I-I0 = %g\n", Bracket->b, Bracket->Db );
+        printf("\t\t\t> BracketZero: mlat2 = %g   I-I0 = %g\n\n", Bracket->c, Bracket->Dc );
+    }
 
     /*
      * We already checked the [a,b] pair for a zero bracket above.
@@ -1501,7 +1703,8 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
         while (!done) {
 
             mmm = (Bracket->a + Bracket->b)/2.0;
-            I   = ComputeI_FromMltMlat( Bm, MLT, mmm, &r, I0, LstarInfo );
+            I   = ComputeI_FromMltMlat( Bm, MLT, mmm, &r, I0, &ErrorStatus, LstarInfo );
+//if Ib is valid
             if ( I < 1e6 ) {
                 D = I-I0;
                 LstarInfo->MLATarr[LstarInfo->nImI0]   = mmm;
@@ -1570,7 +1773,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
  * Compute I-I0 at best-guess mlat. If the caller predicted well, then this
  * may be dead on, so try it first.
  */
-//I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, LstarInfo );
+//I  = ComputeI_FromMltMlat( Bm, MLT, mlat1, &r, I0, &ErrorStatus, LstarInfo );
 //if ( fabs(I) > 1e99 ) {
 //    printf("\t\t\t> BracketZero: I undefined at mlat1 = %g\n", mlat1 );
 //    return(-5);
@@ -1615,7 +1818,8 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
          *  I.e. we need a smaller I which (usually) is a smaller mlat. So try
          *  mlat0 next.
          */
-        I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, &ErrorStatus, LstarInfo );
+//if I is bad
         if ( fabs(I) > 1e99 ) return(-5);
         D0 = I-I0;
         LstarInfo->MLATarr[LstarInfo->nImI0] = mlat0;
@@ -1650,7 +1854,8 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
              *
              * Still no bracket. Evaluate the other side.
              */
-            I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, &ErrorStatus, LstarInfo );
+// if I is bad
             if ( fabs(I) > 1e99 ) return(-5);
             D2 = I-I0;
             LstarInfo->MLATarr[LstarInfo->nImI0] = mlat2;
@@ -1695,7 +1900,8 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
          *  Then we would like to have the other side of the bracket be > 0.0.
          *  I.e. we need a bigger I which (usually) is a bigger mlat.
          */
-        I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, LstarInfo );
+        I  = ComputeI_FromMltMlat( Bm, MLT, mlat2, &r, I0, &ErrorStatus, LstarInfo );
+// if I is bad
         if ( fabs(I) > 1e99 ) return(-5);
         D2 = I-I0;
         LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat2;
@@ -1728,7 +1934,8 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
             /*
              * Still no bracket. Evaluate the other side.
              */
-            I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, LstarInfo );
+            I  = ComputeI_FromMltMlat( Bm, MLT, mlat0, &r, I0, &ErrorStatus, LstarInfo );
+// if I is bad
             if ( fabs(I) > 1e99 ) return(-5);
             D0 = I-I0;
             LstarInfo->MLATarr[LstarInfo->nImI0]   = mlat0;
