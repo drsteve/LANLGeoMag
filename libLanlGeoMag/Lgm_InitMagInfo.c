@@ -84,7 +84,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_MagStep_BS_reject      = FALSE;
     MagInfo->Lgm_MagStep_BS_prev_reject = FALSE;
     MagInfo->Lgm_MagStep_BS_atol        = 1e-5;
-    MagInfo->Lgm_MagStep_BS_rtol        = 1e-5;
+    MagInfo->Lgm_MagStep_BS_rtol        = 0.0;
 
     /*
      *  Some inits for MagStep_RK5
@@ -123,6 +123,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_TraceToEarth_Tol = 1e-7;
     MagInfo->Lgm_TraceToBmin_Tol  = 1e-7;
     MagInfo->Lgm_TraceLine_Tol    = 1e-7;
+
+    MagInfo->Lgm_n_V_integrand_Calls = 0;
+    MagInfo->Lgm_V_Integrator_epsrel = 0.0;
+    MagInfo->Lgm_V_Integrator_epsabs = 1e-3;
+    MagInfo->Lgm_V_Integrator = DQAGS;
 
 
 
@@ -188,6 +193,16 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->RBF_Type            = LGM_RBF_MULTIQUADRIC;
     MagInfo->RBF_Eps             = 1.0/(4.0*4.0);
     
+    MagInfo->KdTree              = NULL;
+    MagInfo->KdTree_Alloced      = FALSE;
+    MagInfo->KdTree_kNN_InterpMethod = 0;
+    MagInfo->KdTree_kNN_k        = 12;
+    MagInfo->KdTree_kNN_MaxDist2 = 1e6;
+
+    MagInfo->KdTree_kNN          = NULL;
+    MagInfo->KdTree_kNN_Alloced  = FALSE;
+
+    MagInfo->KdTreeCopy          = FALSE;
 
 
     /*
@@ -206,6 +221,20 @@ void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
     Lgm_DeAllocate_TS07( &(Info->TS07_Info) );
     Lgm_free_ctrans( Info->c );
 
+    if ( Info->KdTree_Alloced ) {
+
+        if ( Info->KdTreeCopy ) {
+            Lgm_KdTree_FreeLite( Info->KdTree );
+        } else {
+            Lgm_KdTree_Free( Info->KdTree );
+        }
+        Info->KdTree_Alloced = FALSE;
+
+    }
+
+    if ( Info->KdTree_kNN_Alloced ) {
+        LGM_ARRAY_1D_FREE( Info->KdTree_kNN );
+    }
 
 
 //    Lgm_FreeFastPow( Info->f );
@@ -264,7 +293,6 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
     //t->spline = (gsl_spline *)NULL;
 
     // octree stuff is also not copied correctly...
-
     if ( s->Octree_Alloced ) {
         //t->Octree         = Lgm_CopyOctree( s->Octree );
         t->Octree         = s->Octree;
@@ -273,6 +301,31 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
         t->Octree         = NULL;
         t->Octree_Alloced = FALSE;
     }
+
+
+
+    /* Do a "CopyLite" on the KdTree if its alloced -- this make a new independent copy with the exception of the tree data. The tree data is 
+     * not copied, we just copy the pointer. To guard against freein this, we flag that this is a copy.
+     */
+//printf("s->KdTree_Alloced = %d\n", s->KdTree_Alloced);
+//printf("s->KdTree = %s\n", s->KdTree);
+    if ( s->KdTree_Alloced ) {
+        t->KdTree         = Lgm_KdTree_CopyLite( s->KdTree );
+        t->KdTree_Alloced = TRUE;
+        t->KdTreeCopy     = TRUE;
+    } else {
+        t->KdTree         = NULL;
+        t->KdTree_Alloced = FALSE;
+        t->KdTreeCopy     = FALSE;
+    }
+
+    // dont copy the pointerj here.
+    t->KdTree_kNN         = NULL;
+    t->KdTree_kNN_Alloced = 0;
+
+    // Make sure the RBF hash tables are reset.
+    t->rbf_ht_alloced = FALSE;
+
 
 
     /*
@@ -339,13 +392,6 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                         strcpy( m->IntMagModelStr4, "Comments: Centered dipole + a uniform -Bz component. Not very realistic, but L* can be computed analytically, so it makes a good test for L* numerics." );
                         break;
 
-        case LGM_JENSENCAIN1960:
-                        strcpy( m->IntMagModelStr1, "DUNGEY" );
-                        strcpy( m->IntMagModelStr2, "Dungey Field Model" );
-                        strcpy( m->IntMagModelStr3, "Reference: See Jensen DC, and Cain, JC (1962), An interim geomagnetic field, J. Geophys. Res., 67, 3568–3569" );
-                        strcpy( m->IntMagModelStr4, "Comments: Low-order approximation to IGRF valid for 1960. Used to bin some trapped particle measurements after Starfish." );
-                        break;
-
         case LGM_IGRF:
         default:
                         strcpy( m->IntMagModelStr1, "IGRF12" );
@@ -375,8 +421,6 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                     m->Bfield = Lgm_B_edip;
                                 } else if ( InternalModel == LGM_DUNGEY ) {
                                     m->Bfield = Lgm_B_Dungey;
-                                } else if ( InternalModel == LGM_JENSENCAIN1960 ) {
-                                    m->Bfield = Lgm_B_JensenCain1960;	
                                 } else {
                                     m->Bfield = Lgm_B_igrf;
                                 }
@@ -534,6 +578,15 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 strcpy( m->ExtMagModelStr1, "ScatteredData5" );
                                 strcpy( m->ExtMagModelStr2, "ScatteredData5" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
+                                break;
+        case LGM_EXTMODEL_SCATTERED_DATA6:
+                                m->Bfield = Lgm_B_FromScatteredData6;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData6" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData6" );
                                 strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
                                 strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
