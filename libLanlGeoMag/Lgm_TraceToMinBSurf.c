@@ -30,6 +30,25 @@
 #include <stdlib.h>
 #include "Lgm/Lgm_MagModelInfo.h"
 
+/*
+ *  TODO:
+ *  TODO:
+ *  TODO:
+ *  TODO: In Lgm_Trace(), we now do a pre-trace with one mof the TraceLine()
+ *  routiners in order to get an approximation to the global Bmin. Then
+ *  Lgm_TraceToMinBSurf() is called which will converge on the nearest min --
+ *  i.e. the global min. 
+ *
+ *  The problem with this is that running the Lgm_TraceToMinBSurf() routine
+ *  standalone for such FLs will likely give different results (not always, but
+ *  sometimes.)
+ *
+ *  The solution is to take that "pre-trace" stuff out of Lgm_Trace() and put
+ *  it here so calls to Lgm_Trace() and Lgm_TraceToMinBSurf() yield the same
+ *  results no matter what input position you start at.
+ */
+
+
 int Lgm_TraceToMinBSurf( Lgm_Vector *u, Lgm_Vector *v, double Htry, double tol, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector	u_scale;
