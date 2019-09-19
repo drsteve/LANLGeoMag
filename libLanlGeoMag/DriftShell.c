@@ -237,6 +237,7 @@ mlatbest = mlat_min;
                 b = res;
                 c = res+2.0;
 
+
                 I  = ComputeI_FromMltMlat( Bm, MLT, b, &r, I0, &ErrorStatus, LstarInfo );
 //if I is valid
                 if ( fabs(I) < 1e98 ) {
@@ -1289,14 +1290,16 @@ int FitQuadAndFindZero2( double *xin, double *yin, double *dyin, int n, int nmax
 
 }
 
-double ComputeBmin( double MLT, double mlat, Lgm_LstarInfo *LstarInfo ){
+/*
+ * This finds Bmin on the current field line.
+ */
+double ComputeBmin( double MLT, double mlat, double rr, Lgm_LstarInfo *LstarInfo ){
 
-    double  rr, Phi, SinPhi, CosPhi, cl, sl, Bmin;
+    double  Phi, SinPhi, CosPhi, cl, sl, Bmin;
     Lgm_Vector  Bvec, v1, v2, v3, u, w;
     int         TraceFlag;
     
 
-    rr = 1.0 + 100.0/Re;
     Phi = 15.0*(MLT-12.0)*RadPerDeg;
     SinPhi = sin(Phi); CosPhi = cos(Phi);
 
@@ -1323,7 +1326,7 @@ double ComputeBmin( double MLT, double mlat, Lgm_LstarInfo *LstarInfo ){
  */
 int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, BracketType *Bracket, Lgm_LstarInfo *LstarInfo ){
 
-    double      I, r, D, D0, D1, D2, Dmin, mlat_min, mmm;
+    double      I, rr, r, D, D0, D1, D2, Dmin, mlat_min, mmm;
     int         FoundZeroBracket, nDefined, done;
     int         ErrorStatus;
     double      mlat_a, mlat_b, mlat_t;
@@ -1376,68 +1379,84 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
     /*
      * Check the 3 mlat's to ensure we dont get -10.
      */
-    mlat_a = mlat0; dB_a = Bm - ComputeBmin( MLT, mlat_a, LstarInfo ); //printf("mlat_a, dB_a = %g %g\n", mlat_a, dB_a );
-    if ( dB_a < 0.0 ) {
+    //if  ( LstarInfo->ISearchMethod  == 1 ) {
+    //    // For this method, we are tracing FLs from the radius we found the Bmirror at.
+    //    rr = *rad;
+    //} else if ( LstarInfo->ISearchMethod  == 2 ) {
+    //    // For this method, we are tracing FLs from the ionosphere.
+    //    rr = 1.0 + 100.0/Re;
+   // }
 
-        // Set starting point to lower value
-        mlat_t = mlat_a; dB_t = dB_a;
+    /*
+     * Check the 3 mlat's to ensure we dont get -10.
+     */
+    if ( LstarInfo->ISearchMethod  == 2 ) {
+        // For this method, we are tracing FLs from the ionosphere.
+        // For the method1, the search is more nonlinear and this seems to confuse things especially near 90deg pitch angles...
+        rr = 1.0 + 100.0/Re;
+        mlat_a = mlat0; dB_a = Bm - ComputeBmin( MLT, mlat_a, rr, LstarInfo ); //printf("mlat_a, dB_a = %g %g\n", mlat_a, dB_a );
+        if ( dB_a < 0.0 ) {
 
-        done = FALSE;
-        while ( !done ) {
+            // Set starting point to lower value
+            mlat_t = mlat_a; dB_t = dB_a;
 
-            // Step up until we cross zero
-            mlat_t += 0.1; dB_t = Bm - ComputeBmin( MLT, mlat_t, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
+            done = FALSE;
+            while ( !done ) {
 
-            if ( dB_t < 0.0 ) {
-                // Havent found the crossing yet -- advance the lower value
-                mlat_a = mlat_t; dB_a = dB_t;
-            } else if ( dB_t >= 0.0 ) {
-                // Found the crossing! We have a bracket on zero for dB. -- set upper bracket
-                done = TRUE;
-                mlat_b = mlat_t; dB_b = dB_t;
+                // Step up until we cross zero
+                mlat_t += 0.1; dB_t = Bm - ComputeBmin( MLT, mlat_t, rr, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
+
+                if ( dB_t < 0.0 ) {
+                    // Havent found the crossing yet -- advance the lower value
+                    mlat_a = mlat_t; dB_a = dB_t;
+                } else if ( dB_t >= 0.0 ) {
+                    // Found the crossing! We have a bracket on zero for dB. -- set upper bracket
+                    done = TRUE;
+                    mlat_b = mlat_t; dB_b = dB_t;
+                }
+
             }
 
-        }
+            /*
+             * Now use bisection
+             */
+            done = FALSE;
+            while ( !done ) {
 
-        /*
-         * Now use bisection
-         */
-        done = FALSE;
-        while ( !done ) {
+                //Try halfway point.
+                mlat_t = 0.5*(mlat_a+mlat_b); dB_t = Bm - ComputeBmin( MLT, mlat_t, rr, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
 
-            //Try halfway point.
-            mlat_t = 0.5*(mlat_a+mlat_b); dB_t = Bm - ComputeBmin( MLT, mlat_t, LstarInfo ); //printf("mlat_t, dB_t = %g %g\n", mlat_t, dB_t );
+                if ( dB_t < 0.0 ) {
+                    // Still negative -- advance the lower value
+                    mlat_a = mlat_t; dB_a = dB_t;
+                } else {
+                    // positive -- advance the upper value
+                    mlat_b = mlat_t; dB_b = dB_t;
+                }
 
-            if ( dB_t < 0.0 ) {
-                // Still negative -- advance the lower value
-                mlat_a = mlat_t; dB_a = dB_t;
-            } else {
-                // positive -- advance the upper value
-                mlat_b = mlat_t; dB_b = dB_t;
-            }
-
-            if ( fabs( mlat_b - mlat_a ) < 1e-5 ) {
-                done = TRUE;
-            }
-    
-        }
+                if ( fabs( mlat_b - mlat_a ) < 1e-5 ) {
+                    done = TRUE;
+                }
         
-        // Use the one on the positive side
-        mlat0 = mlat_b;
-    }
+            }
+            
+            // Use the one on the positive side
+            mlat0 = mlat_b;
+        }
 
 
-    // We may have gone beyond the other points -- check and correct
-    if ( ( mlat0 >= mlat1 ) && ( mlat0 < mlat2 ) ) {
-        // We've exceeded the center point but not the upper point.
-        mlat1 = 0.5*(mlat0 + mlat2);
-    }
-    if ( ( mlat0 >= mlat1 ) && ( mlat0 >= mlat2 ) ) {
-        // We've exceeded the center point but not the upper point.
-        mlat2 = mlat0 + 5.0; // ???? reasoanble  ????
-        mlat1 = 0.5*(mlat0 + mlat2);
-    }
+        // We may have gone beyond the other points -- check and correct
+        if ( ( mlat0 >= mlat1 ) && ( mlat0 < mlat2 ) ) {
+            // We've exceeded the center point but not the upper point.
+            mlat1 = 0.5*(mlat0 + mlat2);
+        }
+        if ( ( mlat0 >= mlat1 ) && ( mlat0 >= mlat2 ) ) {
+            // We've exceeded the center point but not the upper point.
+            mlat2 = mlat0 + 5.0; // ???? reasoanble  ????
+            mlat1 = 0.5*(mlat0 + mlat2);
+        }
 
+    }
 
 
 
@@ -1460,7 +1479,7 @@ int BracketZero( double I0, double *Ifound, double Bm, double MLT, double *mlat,
     Bracket->b = mlat1; Bracket->Ib = (I < 1e6) ? I : -1e31; Bracket->Db = Bracket->Ib - I0;
     Bracket->Errb = ErrorStatus;
     //printf("ErrorStatus = %d\n", ErrorStatus );
-    if ( Bracket->Ib > 0.0 ) {
+    if ( Bracket->Ib >= 0.0 ) {
         // Cache I(mlat) point for possible future fitting.
         LstarInfo->MLATarr[LstarInfo->nImI0]   = Bracket->b;
         LstarInfo->ImI0arr[LstarInfo->nImI0++] = Bracket->Db;
