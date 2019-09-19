@@ -79,7 +79,9 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
             if (Positions[d][j] > t->Max[d] ) t->Max[d] = Positions[d][j];
             t->Data[j].Position[d] = Positions[d][j];
         }
-        t->Data[j].Object = Objects[j];
+        if ( Objects ) {
+            t->Data[j].Object = Objects[j];
+        }
         //double *bbb;
         //bbb = (double *)Objects[j];
         //printf("bbb = %g %g %g\n", bbb[0], bbb[1], bbb[2]);
