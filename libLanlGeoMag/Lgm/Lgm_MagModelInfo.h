@@ -807,7 +807,7 @@ int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info);
 /*
  * routines/functions for field integrals, invariants, etc.
  */
-double      FluxTubeVolume( Lgm_MagModelInfo *fInfo );
+double      Lgm_FluxTubeVolume( Lgm_MagModelInfo *fInfo );
 double      V_integrand( double s, _qpInfo *qpInfo );
 double      Iinv( Lgm_MagModelInfo *fInfo );
 double      I_integrand( double s, _qpInfo *qpInfo );
