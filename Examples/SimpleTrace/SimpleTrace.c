@@ -58,7 +58,7 @@ int main(){
         /*
          * Trace from given SM position
          */
-        MLT = 37.75;
+        MLT = 13.75;
         printf("mlat, MLT = %g %g\n", mlat, MLT);
         r = 1.0 + 100.0/Re;
         Phi = 15.0*(MLT-12.0)*RadPerDeg;
