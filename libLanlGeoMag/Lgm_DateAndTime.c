@@ -825,6 +825,7 @@ void Lgm_TT_to_UTC( Lgm_DateTime *TT, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
 
     Lgm_DateTime TAI;
     double       Time;
+    int          y, m, d;
 
 //printf("\tLgm_TT_to_UTC: TT =  "); Lgm_Print_DateTime( *TT, 4, 8 ); printf("\n");
 
@@ -842,6 +843,8 @@ void Lgm_TT_to_UTC( Lgm_DateTime *TT, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
     // Keep the time we had rather than getting it back from Lgm_JD_to_Date(). This limits roundoff error
     UTC->Time = Lgm_hour24( UTC->Time );
     UTC->T    = (UTC->JD - 2451545.0)/36525.0;
+
+    Lgm_Doy( UTC->Date, &y, &m, &d, &UTC->Doy );
 //printf("\tLgm_TT_to_UTC: UTC =  "); Lgm_Print_DateTime( *UTC, 4, 8 ); printf("\n");
     UTC->TimeSystem = LGM_TIME_SYS_UTC;
 
@@ -861,11 +864,11 @@ void Lgm_UTC_to_TDB( Lgm_DateTime *UTC, Lgm_DateTime *TDB, Lgm_CTrans *c ) {
 
 void Lgm_TDB_to_UTC( Lgm_DateTime *TDB, Lgm_DateTime *UTC, Lgm_CTrans *c ) {
     Lgm_DateTime TT;
-//printf("\tLgm_TDB_to_UTC: TDB: "); Lgm_Print_DateTime( *TDB, 4, 8 ); printf("\n");
+//printf("\tLgm_TDB_to_UTC: TDB: "); Lgm_Print_DateTime( TDB, 4, 8 ); printf("\n");
     Lgm_TDB_to_TT( TDB, &TT, c );
-//printf("\tLgm_TDB_to_UTC: TT:  "); Lgm_Print_DateTime( TT, 4, 8 ); printf("\n");
+//printf("\tLgm_TDB_to_UTC: TT:  "); Lgm_Print_DateTime( &TT, 4, 8 ); printf("\n");
     Lgm_TT_to_UTC( &TT, UTC, c );
-//printf("\tLgm_TDB_to_UTC: UTC: "); Lgm_Print_DateTime( *UTC, 4, 8 ); printf("\n");
+//printf("\tLgm_TDB_to_UTC: UTC: "); Lgm_Print_DateTime( UTC, 4, 8 ); printf("\n");
     UTC->TimeSystem = LGM_TIME_SYS_UTC;
     return;
 }
