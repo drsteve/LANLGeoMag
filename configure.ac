@@ -1,7 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-
 AC_INIT([LanlGeoMag], [1.5.16], [mghenderson@lanl.gov])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AC_CONFIG_HEADERS([config.h])
@@ -380,7 +379,8 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/EopData/GetEopFiles
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
-		         Tools/Makefile
-		         Python/Makefile
+                 Tools/Makefile
+                 Python/Makefile
+                 Doc/LanlGeoMag.tag
                  ])
 AC_OUTPUT

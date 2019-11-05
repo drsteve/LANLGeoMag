@@ -1,3 +1,15 @@
+2019-11-05  Mark Galassi  <mark@galassi.org>
+
+	* Doxyfile: added USE_MATHJAX, the compact latex option, and the
+	amsmath package, which is needed for the \text{'} that comes up
+	occasionally in the doxygen docs.
+
+	* Doc/LanlGeoMag.tag.in, configure.ac: the LanlGeoMag.tag file was
+	required for "make dist" but did not exist.  I have added it,
+	built from a .in file so it can have a version number in it.
+	Modified configure.ac to generate Doc/LanlGeoMag.tag from
+	Doc/LanlGeoMag.tag.in
+
 2017-11-16  Mark Galassi  <markgalassi@lanl.gov>
 
 	* configure.ac: releasing version 1.5.16.
@@ -9,7 +21,8 @@
 	distribution too big.
 
 2011-07-08  Mike Henderson <mghenderson@lanl.gov>
-    * configure.ac: added LGM_INDEX_DATA_DIR to locate where to find index data (e.g. Kp, Dst, AE). 
+	* configure.ac: added LGM_INDEX_DATA_DIR to locate where to find
+	index data (e.g. Kp, Dst, AE).
 
 2011-04-25  Mark Galassi  <markgalassi@lanl.gov>
 	* configure.ac, lanlgeomag.spec.in: started maintaining a .spec.in
