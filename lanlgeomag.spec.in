@@ -3,16 +3,17 @@
 %define name		@PACKAGE@
 %define version 	@VERSION@
 %define release		@PKG_RELEASE@
-## make sure you define _topdir as $HOME/rpmbuild in your .rpmmacros
-#%global buildroot	%{_topdir}/BUILDROOT
 
 Summary:		lanlgeomag -- lanlgeomag software collection
 License:		Copyright (C) 2010, LANS LLC, all rights reserved.
 Name: 			%{name}
 Version: 		%{version}
 Release: 		%{release}%{?dist}
+BuildRequires:          texlive-latex
+BuildRequires:          gsl
+BuildRequires:          doxygen
 Provides:               lanlgeomag
-Requires:               perl
+#Requires:               perl
 Requires:               check
 Requires:               gsl
 Requires:               hdf5
@@ -38,34 +39,20 @@ echo "__isa_bits is" "%{__isa_bits}"
 %setup -q
 
 %build
-#./configure --prefix=/usr --disable-doxygen-html --disable-doxygen-pdf
-%configure --libdir=${RPM_BUILD_ROOT}%{_libdir} --prefix=${RPM_BUILD_ROOT}/usr --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
+%configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
 make -j
 
 %install
-#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
-#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT
-echo _topdir is %{_topdir}
-echo RPM_BUILD_ROOT is $RPM_BUILD_ROOT
-echo buildroot is %{buildroot}
-echo _builddir is %{_builddir}
-#make prefix=${RPM_BUILD_ROOT}/usr install
 %makeinstall
-#make install 
-#make install-man
-#make doxygen-doc
-#mkdir -p %{buildroot}/share/doc/%{name}
-#cp -p doxygen-doc/lanlgeomag.pdf %{buildroot}/share/doc/%{name}
 
 %clean
-/bin/rm -rf $RPM_BUILD_ROOT
+#/bin/rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-#%doc README HACKING NEWS COPYING
-/usr/include/Lgm/*
-/usr/lib64/libLanlGeoMag*
-/usr/lib64/pkgconfig/lgm.pc
-/usr/lib/python2.6/site-packages/lgmpy/*
-/usr/share/LanlGeoMag/*
-/usr/share/doc/lanlgeomag/*
+%doc README HACKING NEWS COPYING
+%{_includedir}/Lgm/*
+%{_libdir}/libLanlGeoMag*
+%{_libdir}/pkgconfig/lgm.pc
+#/usr/lib/python2.6/site-packages/lgmpy/*
+%{_datadir}/*

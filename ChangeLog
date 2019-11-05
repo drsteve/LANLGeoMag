@@ -1,5 +1,16 @@
 2019-11-05  Mark Galassi  <mark@galassi.org>
 
+	* Makefile.am (EXTRA_DIST): re-added the Images directory that was
+	commented out.  This is necessary for a "make install" from the
+	tarball to work.
+
+	* lanlgeomag.spec.in: added some Requires and BuildRequires, and
+	took out the requirement for Perl since we configure with
+	--disable-perl.  Also started using appropriate RPM macros.
+
+	* configure.ac: updated THE_PKG_RELEASE to 7; this affects the RPM
+	package release number.
+
 	* Doxyfile: added USE_MATHJAX, the compact latex option, and the
 	amsmath package, which is needed for the \text{'} that comes up
 	occasionally in the doxygen docs.
