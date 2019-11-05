@@ -18,15 +18,51 @@ Requires:               check
 Requires:               gsl
 Requires:               hdf5
 Source: 		%{name}-%{version}.tar.gz
-Prefix: 		/usr
 Group: 			Applications/Science
 Provides:		lanlgeomag
 Buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 
 %description
-LANLGeoMag is a C-based library of magnetic-field models and tools for computing quantities relevant to geophysical and geospace research that rely on these models. 
-More generally, the library provides functionality to perform high precision transforms between time standards and coordinate systems.
+LANLGeoMag is a C-based library of magnetic-field models and tools for \
+computing quantities relevant to geophysical and geospace research that rely \
+on these models. More generally, the library provides functionality to perform \
+high precision transforms between time standards and coordinate systems.
+
+%package devel
+Summary: Development libraries and headers for lanlgeomag
+Requires: lanlgeomag
+
+%description devel
+Development libraries and headers for lanlgeomag
+
+%package data
+Summary: Data files for lanlgeomag
+Requires: lanlgeomag
+
+%description data
+Data files for lanlgeomag
+
+%package doc
+Summary: Doc files for lanlgeomag
+Requires: lanlgeomag
+
+%description doc
+Doc files for lanlgeomag
+
+%package python
+Summary: Python bindings for lanlgeomag
+Requires: lanlgeomag
+
+%description python
+Python bindings for lanlgeomag
+
+# %package images
+# Summary: Image files for lanlgeomag
+# Requires: lanlgeomag
+
+# %description images
+# Image files for lanlgeomag
 
 %prep
 mkdir -p %{_topdir}/BUILD %{_topdir}/BUILDROOT
@@ -39,8 +75,10 @@ echo "__isa_bits is" "%{__isa_bits}"
 %setup -q
 
 %build
+echo "python_sitelib:"
+echo %{python_sitelib}
 %configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
-make -j
+make %{?_smp_mflags}
 
 %install
 %makeinstall
@@ -51,8 +89,36 @@ make -j
 %files
 %defattr(-,root,root)
 %doc README HACKING NEWS COPYING
-%{_includedir}/Lgm/*
-%{_libdir}/libLanlGeoMag*
+%defattr(-,root,root,-)
+%{_libdir}/*.so.*
 %{_libdir}/pkgconfig/lgm.pc
-#/usr/lib/python2.6/site-packages/lgmpy/*
+
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/*
+%{_libdir}/*.so*
+%{_libdir}/*.*a
+%{_docdir}/*
+
+%files data
+%defattr(-,root,root,-)
 %{_datadir}/*
+# /usr/share/LanlGeoMag/EopData/*
+# /usr/share/LanlGeoMag/Data/*
+
+%files doc
+%defattr(-,root,root,-)
+/usr/share/doc/lanlgeomag/*
+
+#files python
+#defattr(-,root,root,-)
+
+#{python_sitelib}/*
+
+
+#{_includedir}/Lgm/*
+#{_libdir}/libLanlGeoMag*
+#{_libdir}/pkgconfig/lgm.pc
+#/usr/lib/python2.6/site-packages/lgmpy/*
+#{_datadir}/*
