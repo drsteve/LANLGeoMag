@@ -14,11 +14,24 @@
 #define RE              (6378.135e3)        /* Earth Radius, m */
 #define CC              (2.99792458e8)      /* Speed of Light, m/s */
 
-#define LGM_DRIFT_ORBIT_CLOSED              1
-#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY    2
-#define LGM_DRIFT_ORBIT_OPEN                3
-#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY      4
+#define LGM_DRIFT_ORBIT_CLOSED                1
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY      2
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_I    21
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_II   22
+#define LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_III  23
+#define LGM_DRIFT_ORBIT_OPEN                  3
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY        4
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I      41
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II     42
+#define LGM_DRIFT_ORBIT_OPEN_SHABANSKY_III    43
 
+#define LGM_SHABANSKY_IGNORE        0
+#define LGM_SHABANSKY_HALVE_I       1
+#define LGM_SHABANSKY_REJECT        2
+
+#define LGM_LSTAR_MOMENT_CDIP       0
+#define LGM_LSTAR_MOMENT_CDIP_2010  1
+#define LGM_LSTAR_MOMENT_MCILWAIN   2
 
 #define LGM_LSTARINFO_MAX_FL        300
 #define LGM_LSTARINFO_MAX_MINIMA    300
@@ -28,6 +41,8 @@ typedef struct Lgm_LstarInfo {
 
     int         nFLsInDriftShell;   //!< Number of Field Lines to use when constructing Drift Shell.
     int         LstarQuality;       //!< Quality factor to use [0,8] -- higher gives more precise results.
+    int         ShabanskyHandling;  //!< Set how Lstar calculations are to handle Shabansky orbits
+    int         LstarMoment;        //!< Select dipole magnetic moment to use in conversion of Phi to Lstar
 
     double      KineticEnergy;      //!< Particle kinetic energy (only for energy dep. quantities.)
     double      Mass;               //!< Particle mass
@@ -100,12 +115,14 @@ typedef struct Lgm_LstarInfo {
     int                 DriftOrbitType;         // e.g. Open, Closed, Shabansky
     int                 nMinMax;                // Number of valid FLs represented in nMinima[] and nMaxima[] (we may have bailed early)
     int                 nMinima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of minima on FL
-    int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints
+    int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints)
+    int                 nBounceRegions[ LGM_LSTARINFO_MAX_MINIMA ];    // # of bounce regions on FL (as particle may not be confined in a minimum)
 
     int                 nSplnPnts;
     double              xa [ 3*LGM_LSTARINFO_MAX_FL ], ya[ 3*LGM_LSTARINFO_MAX_FL ], y2[ 3*LGM_LSTARINFO_MAX_FL ];
 
-    double	            Phi;
+    double	        Phi;
+    double              Mused;   // Magnetic moment to use in Lstar
 
     gsl_interp_accel    *acc;
     gsl_interp          *pspline;

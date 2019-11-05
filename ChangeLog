@@ -35,6 +35,35 @@
 	directory out of this list because it makes the tarball
 	distribution too big.
 
+2018-03-09  Steve Morley <smorley@lanl.gov>
+        * Release: v1.5.16
+
+        * tests: revised and expanded test suite, github repo set to use Travis
+        CI
+
+        * Lgm_QinDenton: updated defaults, changed handling of missing data
+        files
+
+        * Lgm_Ellipsoid: added shapes, intersections, etc.
+
+        * Tools: Command line utils for Magnetic Ephemeris files and Last 
+        Closed Drift Shell calculation
+
+        * ViewDriftShell: Updates to improve portability and UI
+
+        * ComputeLstar: Behavior in Shabansky orbits now set by flag in 
+        LstarInfo struct
+
+        * Lgm_CTrans: Added JPL DE421 to obtain Sun vector (now have DE, high 
+        accuracy and low accuracy)
+
+        * TS07: TS07 magnetic field model fully enabled. Requires coefficient
+        files in same location/format as IRBEMlib.
+
+        * Other: More changes since this file was last updated than can be 
+        encapsulated here. OSS release and GitHub hosting means that commit 
+        history is now publicly available.
+
 2011-07-08  Mike Henderson <mghenderson@lanl.gov>
 	* configure.ac: added LGM_INDEX_DATA_DIR to locate where to find
 	index data (e.g. Kp, Dst, AE).

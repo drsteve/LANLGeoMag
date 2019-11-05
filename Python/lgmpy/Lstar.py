@@ -28,7 +28,7 @@ import spacepy.toolbox as tb
 import Lgm_Wrap
 from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
     Lgm_SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
-    LFromIBmM_Hilton, LFromIBmM_McIlwain, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children, \
+    Lgm_McIlwain_L, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children, \
     Lgm_ComputeLstarVersusPA, Lgm_B_TS04, Lgm_B_T96, Lgm_QinDentonOne, Lgm_set_QinDenton, Lgm_get_QinDenton_at_JD
 from Lgm_Wrap import Lstar as Lgm_Lstar
 import Lgm_Vector
@@ -412,18 +412,24 @@ def get_Lstar(pos, date, alpha = 90.,
         MagEphemInfo.Bm[i] = MagEphemInfo.LstarInfo.contents.mInfo.contents.Bm
         # Compute L*
         if Lsimple < LstarThresh:
-            Ls_vec = Lgm_Vector.Lgm_Vector(*minB)
+            Ls_vec = Lgm_Vector.Lgm_Vector(Pgsm.x, Pgsm.y, Pgsm.z)
 
             LS_Flag = Lgm_Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
 
             lstarinf = MagEphemInfo.LstarInfo.contents #shortcut
-            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I[0]),
-                                                c_double(MagEphemInfo.Bm[i]),
-                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            #Returned from McIlwain_L but not used here
+            Ijunk = c_double()
+            Bmjunk = c_double()
+            Mjunk = c_double()
+            MagEphemInfo.LHilton.contents.value = Lgm_McIlwain_L(
+                MagEphemInfo.Date, MagEphemInfo.UTC, pointer(MagEphemInfo.P),
+                pa, 1,  pointer(Ijunk), pointer(Bmjunk), pointer(Mjunk),
+                lstarinf.mInfo)
             ans[pa]['LHilton'] = MagEphemInfo.LHilton.contents.value
-            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(lstarinf.I[0]),
-                                                c_double(MagEphemInfo.Bm[i]),
-                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            MagEphemInfo.LMcIlwain.contents.value = Lgm_McIlwain_L(
+                MagEphemInfo.Date, MagEphemInfo.UTC, pointer(MagEphemInfo.P),
+                pa, 0,  pointer(Ijunk), pointer(Bmjunk), pointer(Mjunk),
+                lstarinf.mInfo)
             ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})
@@ -846,13 +852,19 @@ def get_Lstar_General(pos, date, alpha = 90.,
             LS_Flag = Lgm_Lstar( pointer(Ls_vec), MagEphemInfo.LstarInfo)
 
             lstarinf = MagEphemInfo.LstarInfo.contents #shortcut
-            MagEphemInfo.LHilton.contents.value = LFromIBmM_Hilton(c_double(lstarinf.I[0]),
-                                                c_double(MagEphemInfo.Bm[i]),
-                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            #Returned from McIlwain_L but not used here
+            Ijunk = c_double()
+            Bmjunk = c_double()
+            Mjunk = c_double()
+            MagEphemInfo.LHilton.contents.value = Lgm_McIlwain_L(
+                MagEphemInfo.Date, MagEphemInfo.UTC, pointer(MagEphemInfo.P),
+                pa, 1,  pointer(Ijunk), pointer(Bmjunk), pointer(Mjunk),
+                lstarinf.mInfo)
             ans[pa]['LHilton'] = MagEphemInfo.LHilton.contents.value
-            MagEphemInfo.LMcIlwain.contents.value = LFromIBmM_McIlwain(c_double(lstarinf.I[0]),
-                                                c_double(MagEphemInfo.Bm[i]),
-                                                c_double(lstarinf.mInfo.contents.c.contents.M_cd))
+            MagEphemInfo.LMcIlwain.contents.value = Lgm_McIlwain_L(
+                MagEphemInfo.Date, MagEphemInfo.UTC, pointer(MagEphemInfo.P),
+                pa, 0,  pointer(Ijunk), pointer(Bmjunk), pointer(Mjunk),
+                lstarinf.mInfo)
             ans[pa]['LMcIlwain'] = MagEphemInfo.LMcIlwain.contents.value
             if LS_Flag == -2: # mirror below southern hemisphere mirror alt
                 ans[pa]['Lstar'] = datamodel.dmarray([numpy.nan], attrs={'info':'S_LOSS'})

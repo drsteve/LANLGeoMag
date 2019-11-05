@@ -339,6 +339,13 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                         strcpy( m->IntMagModelStr4, "Comments: Centered dipole + a uniform -Bz component. Not very realistic, but L* can be computed analytically, so it makes a good test for L* numerics." );
                         break;
 
+        case LGM_JENSENCAIN1960:
+                        strcpy( m->IntMagModelStr1, "DUNGEY" );
+                        strcpy( m->IntMagModelStr2, "Dungey Field Model" );
+                        strcpy( m->IntMagModelStr3, "Reference: See Jensen DC, and Cain, JC (1962), An interim geomagnetic field, J. Geophys. Res., 67, 3568–3569" );
+                        strcpy( m->IntMagModelStr4, "Comments: Low-order approximation to IGRF valid for 1960. Used to bin some trapped particle measurements after Starfish." );
+                        break;
+
         case LGM_IGRF:
         default:
                         strcpy( m->IntMagModelStr1, "IGRF12" );
@@ -368,6 +375,8 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                     m->Bfield = Lgm_B_edip;
                                 } else if ( InternalModel == LGM_DUNGEY ) {
                                     m->Bfield = Lgm_B_Dungey;
+                                } else if ( InternalModel == LGM_JENSENCAIN1960 ) {
+                                    m->Bfield = Lgm_B_JensenCain1960;	
                                 } else {
                                     m->Bfield = Lgm_B_igrf;
                                 }

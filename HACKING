@@ -4,10 +4,12 @@ Instructions for developers who use the source code repository
 GIT repository
 ==============
 
-Initial checkout:
+The source repository can be obtained (read-only) at:
 git clone https://github.com/drsteve/LANLGeoMag.git
 
+For write access, fork the repository and clone from your fork.
 Further information can be found in the github help.
+
 Then:
 
 cd LanlGeoMag
@@ -21,6 +23,8 @@ git add [files]
 git commit 
 git pull
 git push
+
+Then send a pull request with your changes.
 
 
 Prerequisites
@@ -126,14 +130,49 @@ to build RPMs.  RPMs are not yet working because we still have
 Ctypesgen
 =========
 The Python wrappers require ctypesgen. For simplicity, we bundle our own
-version. Here's how to make that bundle:
-svn checkout http://ctypesgen.googlecode.com/svn/trunk/ ctypesgen-read-only
-Copy entire contents to Python/ctypesgen in the lanlgeomag directory, and
-check them in. We should refer to this license (3-clause BSD) in the
-lanlgeomag docs.
+version from https://github.com/olsonse/ctypesgen
 
+There's a nice discussion at
+https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
+
+If you aren't hacking on the ctypes code itself, there's no need to read
+any of this. But if you need to update the bundled ctypes, first set up
+the repositories:
+
+git remote add ctypesgen https://github.com/olsonse/ctypesgen.git
+
+To start this process from scratch (i.e. before we had anything pulled in):
+git fetch ctypesgen
+git read-tree --prefix=Python/ctypesgen/ -u ctypesgen/master
+
+But to update ctypesgen now that it's been incorporated:
+git fetch ctypesgen
+git merge -s subtree --squash ctypesgen/master
+git rev-parse ctypesgen/master #To get SHA1
+git commit -m "Update ctypesgen to (SHA1)"
+
+We should refer to this license (3-clause BSD) in the lanlgeomag docs.
 
 
 make dist
 ===========
 It seems you need to make with --enable-doxygen-doc on the ./configure cmd line....
+
+Unit tests
+==========
+The unit tests test against the version of the library as built (not
+installed). But the data directories are compiled in as at install
+time. So you need to do a build of the library with those locations
+specified in order to test. The directory layout in the source tree
+doesn't match the expected directory layout post-install. Long-term
+either there should be configure options/environment variables to
+specify every directory separately (at build time or runtime), or the
+layout of these directories in the source should match the expected
+installed layout. For now we patch up with symlinks.
+
+make clean
+ln -s ./libLanlGeoMag/ LanlGeoMag
+./configure --datadir="`pwd`"
+make
+JPL_EPHEM_PATH="`pwd`/libLanlGeoMag/DE_FILES/" make check
+rm ./LanlGeoMag

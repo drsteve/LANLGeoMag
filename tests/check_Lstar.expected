@@ -1,0 +1,47 @@
+#{
+#    "CreationDate": "2019-04-12",
+#    "LanlGeoMagRevision": "122e2a8b179210d7d5d7e7d332bb03fa24bc9a10",
+#    "SunVector": "LOW_ACCURACY",
+#    "PA": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 7
+#    },
+#    "DateTime": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 0
+#    }, 
+#    "ExtModel": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 1
+#    }, 
+#    "Hilton": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 8
+#    },
+#    "IntModel": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 2
+#    },
+#    "Kp": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 3
+#    },
+#    "McIlwain": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 9
+#    },
+#    "Roederer": {
+#        "DIMENSION": [1], 
+#        "START_COLUMN": 10
+#    },
+#    "TestPosition": {
+#        "DIMENSION": [3], 
+#        "START_COLUMN": 4, 
+#        "units": "km"
+#    }
+#}
+2010-10-12T00:00:00.000000 T89 IGRF 4. -4.2 1.0 1.0 90. 5.030729110000001 5.0308511193 4.4572962598000005
+2010-10-12T00:00:00.000000 T89 IGRF 5. -4.2 1.0 1.0 90. 5.181867081 5.182039616000001 4.3583051834
+2010-10-12T00:00:00.000000 OP77 IGRF 4. -4.2 1.0 1.0 90. 4.8625353534999975 4.86261644 4.571419493099999
+2010-10-12T00:00:00.000000 OP77 IGRF 5. -4.2 1.0 1.0 90. 4.862535358299999 4.862616435 4.571419493099999
+2010-10-12T00:00:00.000000 NULL CDIP 2. -3.0 0.0 0.0 90. 3.04107 3.04107 2.981669622000000

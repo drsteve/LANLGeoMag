@@ -143,7 +143,7 @@ START_TEST(test_PolyRoots_03) {
     double          z2_r_expected, z2_i_expected;
     double          z3_r_expected, z3_i_expected;
     double          z4_r_expected, z4_i_expected;
-    double complex  z1, z2, z3, z4;
+    double complex  z1, z2, z3, z4, ztmp;
     double complex  Residual1, Residual2, Residual3, Residual4;
     FILE            *fp_expected;
     FILE            *fp_got;
@@ -163,6 +163,21 @@ START_TEST(test_PolyRoots_03) {
 
     b = -37.0; c = -1.0; d = 7.0; e = 60.0;
     nReal = Lgm_QuarticRoots( b, c, d, e, &z1, &z2, &z3, &z4 );
+    /*
+     * The roots dshould be:
+     * 37.020721858115365 0.000000000000000
+     * 1.233413878980077 0.000000000000000
+     * -0.627067868547723 -0.959579313119009
+     * -0.627067868547723 0.959579313119009
+     * On some machines the last two get swapped.
+     * Do a swap on them if cimag(z4) < cimag(z3)
+     */
+    if ( cimag(z4) < cimag(z3) ) {
+        ztmp = z4;
+        z4 = z3;
+        z3 = ztmp;
+    }
+
     Residual1 = z1*z1*z1*z1 + b*z1*z1*z1 + c*z1*z1 + d*z1 + e;
     Residual2 = z2*z2*z2*z2 + b*z2*z2*z2 + c*z2*z2 + d*z2 + e;
     Residual3 = z3*z3*z3*z3 + b*z3*z3*z3 + c*z3*z3 + d*z3 + e;

@@ -2832,7 +2832,7 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 	j = computeInequalityParameters(wxl, p2.aStar, vpar, &inequalityParamsLC);
 	j = computeInequalityParameters(wxh, p2.aStar, vpar, &inequalityParamsUC);
 
-	for (i=-5; i<=5; i++) {
+	for (i=-20; i<=20; i++) {
 
  		p2.nCyclotronLow=(int) i; p2.nCyclotronHigh=(int) i; 
 //printf("iCyclotron number=%d\n", i);
@@ -3958,9 +3958,10 @@ int findSingleIntervalInTheta(struct inequalityParameters *params, double dw, in
 
 int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double xleft, double xright, double *result, int VerbosityLevel ) {
 
-	int	nIntervals, nSubIntervals, i;
-	double	x,sum,dx, epsabs=0.0, epsrel=0.1,abserr;
+	int	nIntervals, nSubIntervals, i, i2;
+	double	x,sum,dx, epsabs=0.0, epsrel=0.1,abserr, thisf;
 	size_t 	neval;
+	//gsl_error_handler_t *gslHandler;
 
 /*	Approach #1: use a simple Riemann sum
 	nIntervals = 100;
@@ -3990,9 +3991,32 @@ int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double 
 	F.function = f;
 	F.params = args;
 	*result=0.0;
-	gsl_integration_qag(&F, xleft, xright, epsabs, epsrel, (size_t) nSubIntervals, GSL_INTEG_GAUSS21, w, result, &abserr);
+/*	Turn GSL's default error handling (which aborts upon seeing an error) off so that I can handle the error by dumping out the values */
+	//gslHandler = (gsl_error_handler_t *) gsl_set_error_handler_off();
+	i2 = (int) gsl_integration_qag(&F, xleft, xright, epsabs, epsrel, (size_t) nSubIntervals, GSL_INTEG_GAUSS21, w, result, &abserr);
+	if (i2 != 0)
+		{
+		nIntervals = 100;
+	
+		dx = (xright-xleft)/((double) nIntervals);
+		sum = 0.0;
+		for (i=0; i<nIntervals; i++)
+			{
+			x = xleft+((i+0.5)*dx);
+			thisf = f(x,args);
+			sum += dx*thisf;
+			}
+		if ((fabs(*result/sum)<0.5) || (fabs(*result/sum)>2.0))
+			{
+			printf("GSL error in gsl_integration_qag: return flag=%d, xleft=%g, xright=%g, epsrel=%g, w->size=%d, result=%g, abserr=%g. Simple Riemann sum with 100 uniform samples produces %g, which is being returned but is more than 2s different than GSL result\n", i2, xleft, xright, epsrel, w->size, *result, abserr, sum);
+			}
+		*result = sum;
+		}
+/*	Turn GSL's default error handling (which aborts upon seeing an error) back on*/
+	//gslHandler = (gsl_error_handler_t *) gsl_set_error_handler(NULL);
 //	printf("Number of evaluations needed by adaptive Gauss-Kronrod 21-point quadrature to achieve %g relative accuracy is %d, abserr is %g and integral is %g\n", epsrel, w->size, abserr, *result);
+	i = w->size;
 	gsl_integration_workspace_free(w);
 
-	return(w->size);
+	return(i);
 }
