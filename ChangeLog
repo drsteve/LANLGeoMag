@@ -1,5 +1,9 @@
 2019-11-05  Mark Galassi  <mark@galassi.org>
 
+	* libLanlGeoMag/Makefile.am: took out again the Images/ directory
+	because it makes tarballs and RPMs too big (on the order of 300meg
+	instead of 50meg).
+
 	* Makefile.am (EXTRA_DIST): re-added the Images directory that was
 	commented out.  This is necessary for a "make install" from the
 	tarball to work.

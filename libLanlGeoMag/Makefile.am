@@ -56,8 +56,8 @@ libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@ 
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32 @PERL_CPPFLAGS@
 
-EXTRA_DIST = TS07D_FILES DE_FILES Images Stars
-#EXTRA_DIST = TS07D_FILES DE_FILES Stars
+#EXTRA_DIST = TS07D_FILES DE_FILES Images Stars
+EXTRA_DIST = TS07D_FILES DE_FILES Stars
 
 install-data-hook:
 if ENABLE_INDICES
@@ -68,11 +68,11 @@ if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/DE_FILES $(DESTDIR)$(LGM_DE_DATA_DIR)/.
 	@echo Additional DE files should be placed in $(DESTDIR)$(LGM_DE_DATA_DIR)
-	$(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
-	$(RSYNC_CMD) -arv $(srcdir)/Images/* $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/. # should cover BlueMarble stuff also.
 	$(MKDIR_P) $(DESTDIR)$(LGM_STARS_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/Stars/* $(DESTDIR)$(LGM_STARS_DATA_DIR)/.
 endif
+#	# $(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
+#	# $(RSYNC_CMD) -arv $(srcdir)/Images/* $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/. # should cover BlueMarble stuff also.
 
 uninstall-hook:
 if ENABLE_INDICES
