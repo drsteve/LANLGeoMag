@@ -1038,51 +1038,49 @@ void Lgm_InitIGRF( double g[14][14], double h[14][14], int N, int Flag, Lgm_CTra
     if ( (fabs(Year - c->Lgm_IGRF_OldYear) > 0.0) || Flag ) {
 
 
-        if ((Year >= IGRF_epoch[0])&&(Year <= IGRF_epoch[IGRF_nModels-1])) {
+      if (Year < IGRF_epoch[IGRF_nModels-1]) {
 
-            /*
-             *   Interpolation.  
-             *   Use linear for now. 
-             *   Rational or Polynomial function extrapolation would be better.
-             *
-             */
-            j = IGRF_nModels-1;
-            while ( Year < IGRF_epoch[j] ){ --j; }
-            j0 = j;
-            j1 = j+1;
-
-        } else {
-
-
-            /*
-             * extrapolation 
-             */
-            if (Year > IGRF_epoch[IGRF_nModels-1]){
-                j0 = IGRF_nModels-2; j1 = IGRF_nModels-1;
-            } else {
-                j0 = 0; j1 = 1;
-            }
-
+        /*
+         *   Interpolation/Extrapolation the past.
+         *   Use linear for now.
+         *   Rational or Polynomial function extrapolation would be better.
+         *
+         */
+        if(Year >= IGRF_epoch[0]) {
+          j = IGRF_nModels-1;
+          while ( Year < IGRF_epoch[j] ){ --j; }
+          j0 = j;
+          j1 = j+1;
+        } else { /* extrapolate to the past */
+          j0 = 0; j1 = 1;
         }
 
-        if ( j1 >= IGRF_nModels ){
-            j1 = IGRF_nModels-1;
-            j0 = j1-1;
-        }
-
+        y0 = IGRF_epoch[j0];   y1 = IGRF_epoch[j1];
         for (n=0; n<=N; ++n){
-            for (m=0; m<=n; ++m){
-                g0 = IGRF_g[j0][n][m]; g1 = IGRF_g[j1][n][m];
-                h0 = IGRF_h[j0][n][m]; h1 = IGRF_h[j1][n][m];
+          for (m=0; m<=n; ++m){
+            g0 = IGRF_g[j0][n][m]; g1 = IGRF_g[j1][n][m];
+            h0 = IGRF_h[j0][n][m]; h1 = IGRF_h[j1][n][m];
 
-                y0 = IGRF_epoch[j0];   y1 = IGRF_epoch[j1];
-                gs = (g1-g0)/(y1-y0);  hs = (h1-h0)/(y1-y0);
+            gs = (g1-g0)/(y1-y0);  hs = (h1-h0)/(y1-y0);
             
-                g[n][m] = gs*(Year - y0) + g0;
-                h[n][m] = hs*(Year - y0) + h0;
-            }
+            g[n][m] = gs*(Year - y0) + g0;
+            h[n][m] = hs*(Year - y0) + h0;
+          }
         }
 
+      } else {
+        /*
+         * extrapolation using IGRF SV
+         */
+        j0 = IGRF_nModels-1;
+        y0 = IGRF_epoch[j0];
+        for (n=0; n<=N; ++n){
+          for (m=0; m<=n; ++m){
+            g[n][m] = IGRF_g_SV[n][m]*(Year - y0) + IGRF_g[j0][n][m];
+            h[n][m] = IGRF_h_SV[n][m]*(Year - y0) + IGRF_h[j0][n][m];
+          }
+        }
+      }
 
         /*
          *   Compute the various IGRF dependent things like position of CD 
