@@ -5,7 +5,7 @@ collection of utility routines uses around lgmpy
 """
 import numpy as np
 
-import Lgm_Vector
+from . import Lgm_Vector
 
 
 all = ['pos2Lgm_Vector']

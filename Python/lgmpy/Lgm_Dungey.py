@@ -55,18 +55,18 @@ class Lgm_Dungey(MagData.MagData):
         try:
             if coord_system != 'GSM':
                 pos = magcoords.coordTrans(pos, time, coord_system,'GSM')
-                #raise(NotImplementedError('Different coord systems are not yet ready to use') )
+                #raise NotImplementedError('Different coord systems are not yet ready to use')
             else:
                 pass
             self._Vpos = pos2Lgm_Vector(pos)
             assert self._Vpos
         except AssertionError:
-            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+            raise TypeError('pos must be a Lgm_Vector or list of Lgm_vectors')
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
             not isinstance(time, list):
-            raise(TypeError('time must be a datetime or list of datetime') )
+            raise TypeError('time must be a datetime or list of datetime')
 
         if INTERNAL_MODEL not in (LGM_CDIP,
                                   LGM_EDIP,
@@ -76,7 +76,7 @@ class Lgm_Dungey(MagData.MagData):
                                   'LGM_EDIP',
                                   'LGM_IGRF',
                                   'LGM_DUNGEY'):
-            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, LGM_DUNGEY, or LGM_IGRF') )
+            raise ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, LGM_DUNGEY, or LGM_IGRF')
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
@@ -88,10 +88,10 @@ class Lgm_Dungey(MagData.MagData):
         # either they are all one element or they are compatible lists no 1/2 way
         try:
             if len(self._Vpos) != len(self['Epoch']):
-                raise(ValueError('Inputs must be the same length, scalars or lists'))
+                raise ValueError('Inputs must be the same length, scalars or lists')
         except TypeError:
             if isinstance(self._Vpos, list) and not isinstance(self['Epoch'], list):
-                raise(ValueError('Inputs must be the same length, scalars or lists'))
+                raise ValueError('Inputs must be the same length, scalars or lists')
 
         self['B'] = self.calc_B()
 
@@ -105,7 +105,7 @@ class Lgm_Dungey(MagData.MagData):
                 B = Lgm_Vector.Lgm_Vector()
                 retval = Lgm_B_Dungey(pointer(v1), pointer(B), pointer(self._mmi))
                 if retval != 1:
-                    raise(RuntimeWarning('Odd return from Lgm_B_Dungey.c') )
+                    raise RuntimeWarning('Odd return from Lgm_B_Dungey.c')
                 ans.append(B)
             return ans
         except TypeError:
@@ -115,7 +115,7 @@ class Lgm_Dungey(MagData.MagData):
             B = Lgm_Vector.Lgm_Vector()
             retval = Lgm_B_Dungey(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
             if retval != 1:
-                raise(RuntimeWarning('Odd return from Lgm_B_Dungey.c') )
+                raise RuntimeWarning('Odd return from Lgm_B_Dungey.c')
             return B
 
 

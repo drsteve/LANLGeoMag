@@ -9,7 +9,7 @@ Lgm_MagModelInfo module, this contains the necessary code Mag Model Info
 """
 from ctypes import pointer
 
-from Lgm_Wrap import Lgm_MagModelInfo, Lgm_InitMagInfoDefaults, Lgm_FreeMagInfo_children
+from .Lgm_Wrap import Lgm_MagModelInfo, Lgm_InitMagInfoDefaults, Lgm_FreeMagInfo_children
 
 
 class Lgm_MagModelInfo(Lgm_MagModelInfo):

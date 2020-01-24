@@ -98,12 +98,12 @@ class Lgm_CTransTests(unittest.TestCase):
     def test_dateToDateLong(self):
         """dateToDateLong should give known results for known input"""
         d1 = datetime.datetime(2000, 12, 12)
-        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1))
-        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong([d1]))
-        self.assertEqual([20001212L, 20001212L], Lgm_CTrans.dateToDateLong([d1, d1]))
-        self.assertEqual([20001212L, 20001212L],
+        self.assertEqual(20001212, Lgm_CTrans.dateToDateLong(d1))
+        self.assertEqual(20001212, Lgm_CTrans.dateToDateLong([d1]))
+        self.assertEqual([20001212, 20001212], Lgm_CTrans.dateToDateLong([d1, d1]))
+        self.assertEqual([20001212, 20001212],
             Lgm_CTrans.dateToDateLong(numpy.array([d1, d1])).tolist())
-        self.assertEqual(20001212L, Lgm_CTrans.dateToDateLong(d1.date()))
+        self.assertEqual(20001212, Lgm_CTrans.dateToDateLong(d1.date()))
 
     def test_dateLongToDate(self):
         """dateLongToDate should give known output"""

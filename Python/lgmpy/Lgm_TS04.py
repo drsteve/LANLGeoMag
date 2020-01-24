@@ -31,12 +31,12 @@ class Lgm_TS04_QD(MagData.MagData):
         self.verbose = verbose
 
         if not isinstance(pos, (Lgm_Vector.Lgm_Vector, list, np.ndarray)):
-            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+            raise TypeError('pos must be a Lgm_Vector or list of Lgm_vectors')
         self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, (datetime.datetime, list)):
-            raise(TypeError('time must be a datetime or list of datetime') )
+            raise TypeError('time must be a datetime or list of datetime')
 
         if INTERNAL_MODEL not in (LGM_CDIP,
                                   LGM_EDIP,
@@ -44,13 +44,13 @@ class Lgm_TS04_QD(MagData.MagData):
             INTERNAL_MODEL not in ('LGM_CDIP',
                                   'LGM_EDIP',
                                   'LGM_IGRF'):
-            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
+            raise ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF')
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
         if coord_system != 'GSM':
-            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+            raise NotImplementedError('Different coord systems are not yet ready to use')
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
@@ -85,7 +85,7 @@ class Lgm_TS04_QD(MagData.MagData):
         retval = Lgm_B_TS04(pointer(self._Vpos), pointer(B), pointer(self._mmi))
 #        retval = Lgm_B_TS04_opt(pointer(self._Vpos), pointer(B), pointer(self._mmi))
         if retval != 1:
-            raise(RuntimeWarning('Odd return from Lgm_TS04') )
+            raise RuntimeWarning('Odd return from Lgm_TS04')
         ans.append(B)
         return ans
             
@@ -136,13 +136,13 @@ class Lgm_TS04(MagData.MagData):
 
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
             not isinstance(pos, list):
-            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+            raise TypeError('pos must be a Lgm_Vector or list of Lgm_vectors')
         self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
             not isinstance(time, list):
-            raise(TypeError('time must be a datetime or list of datetime') )
+            raise TypeError('time must be a datetime or list of datetime')
 
         if INTERNAL_MODEL not in (LGM_CDIP,
                                   LGM_EDIP,
@@ -150,13 +150,13 @@ class Lgm_TS04(MagData.MagData):
             INTERNAL_MODEL not in ('LGM_CDIP',
                                   'LGM_EDIP',
                                   'LGM_IGRF'):
-            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
+            raise ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF')
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
         if coord_system != 'GSM':
-            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+            raise NotImplementedError('Different coord systems are not yet ready to use')
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
 
@@ -187,7 +187,7 @@ class Lgm_TS04(MagData.MagData):
         #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
         retval = Lgm_B_TS04(pointer(self._Vpos), pointer(B), pointer(self._mmi))
         if retval != 1:
-            raise(RuntimeWarning('Odd return from Lgm_T89') )
+            raise RuntimeWarning('Odd return from Lgm_T89')
         ans.append(B)
         return ans
 
