@@ -14,15 +14,14 @@ from ctypes import pointer, c_double
 import numpy as np
 from spacepy import datamodel
 
+from .Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Set_CTrans_Options, Lgm_Convert_Coords, Lgm_McIlwain_L
+from .Lgm_Wrap import LGM_EPH_DE, LGM_PN_IAU76
+from .Lgm_Wrap import GEI2000_COORDS, MOD_COORDS, TOD_COORDS, TEME_COORDS, PEF_COORDS, GEO_COORDS 
+from .Lgm_Wrap import GSE_COORDS, GSM_COORDS, SM_COORDS, EDMAG_COORDS, CDMAG_COORDS, GSE2000_COORDS 
+from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
+from .Lstar import Lstar_Data
 
-from lgmpy.Lgm_Wrap import Lgm_Set_Coord_Transforms, Lgm_Set_CTrans_Options, Lgm_Convert_Coords, Lgm_McIlwain_L
-from Lgm_Wrap import LGM_EPH_DE, LGM_PN_IAU76
-from Lgm_Wrap import GEI2000_COORDS, MOD_COORDS, TOD_COORDS, TEME_COORDS, PEF_COORDS, GEO_COORDS 
-from Lgm_Wrap import GSE_COORDS, GSM_COORDS, SM_COORDS, EDMAG_COORDS, CDMAG_COORDS, GSE2000_COORDS 
-from lgmpy import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
-from lgmpy.Lstar import Lstar_Data
-
-from _Bfield_dict import Bfield_dict
+from ._Bfield_dict import Bfield_dict
 
 trans_dict = {'GEI2000':  GEI2000_COORDS,
               'EME2000':  GEI2000_COORDS,
@@ -120,7 +119,7 @@ def coordTrans(pos_in, time_in, in_sys, out_sys, de_eph=False):
         utc = Lgm_CTrans.dateToFPHours(time_in)
         Lgm_Set_Coord_Transforms( datelong, utc, pointer(ct)) # don't need pointer as it is one
     except AttributeError:
-        raise(TypeError("Date must be a datetime object"))
+        raise TypeError("Date must be a datetime object")
 
     try:
         conv_val = trans_dict[in_sys]*100 + trans_dict[out_sys]
@@ -218,13 +217,13 @@ def Lvalue(*args, **kwargs):
     try:
         Bfield_dict[kwargs['Bfield']](pointer(mInfo))
     except KeyError:
-        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
+        raise NotImplementedError("Only Bfield=%s currently supported" % list(Bfield_dict.keys()))
     try:
         datelong = Lgm_CTrans.dateToDateLong(args[1])
         utc = Lgm_CTrans.dateToFPHours(args[1])
         Lgm_Set_Coord_Transforms( datelong, utc, mInfo.c) # dont need pointer as it is one
     except AttributeError:
-        raise(TypeError("Date must be a datetime object"))
+        raise TypeError("Date must be a datetime object")
     #else:
         #ans['Epoch'] = datamodel.dmarray([args[1]])
 

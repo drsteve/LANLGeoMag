@@ -15,9 +15,9 @@ import itertools
 import spacepy.datamodel as dm
 import numpy
 
-import Lgm_MagModelInfo
-import Lgm_Vector
-from Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children, Lgm_Convert_Coords, \
+from . import Lgm_MagModelInfo
+from . import Lgm_Vector
+from .Lgm_Wrap import Lgm_CTrans, Lgm_ctransDefaults, Lgm_free_ctrans_children, Lgm_Convert_Coords, \
                 GSM_TO_WGS84, WGS84_TO_EDMAG, Lgm_Set_Coord_Transforms, Lgm_EDMAG_to_R_MLAT_MLON_MLT, \
                 Lgm_Dipole_Tilt
 
@@ -41,13 +41,13 @@ class Lgm_Coords(list):
     """
     def __init__(self, inval, system='GSM', units='Re'):
         if len(inval) != 3 and not isinstance(inval, list):
-            raise(NotImplementedError('So far only one 3 element list is supported as input' ) )
+            raise NotImplementedError('So far only one 3 element list is supported as input' )
         if units != 'Re':
-            raise(NotImplementedError('Only Re units supported so far' ) )
+            raise NotImplementedError('Only Re units supported so far' )
         if inval[0] < 1 and inval[1] < 1 and inval[2] < 1:
-            raise(ValueError('Invalid position'))
+            raise ValueError('Invalid position')
         if system != 'GSM':
-            raise(NotImplementedError('Only GSM coordinated supported so far' ) )
+            raise NotImplementedError('Only GSM coordinated supported so far' )
 
         self.system = system
         self[:] = inval
@@ -80,12 +80,12 @@ def dateToDateLong(inval):
     Parameters
     ----------
     inval : datetime, ndarray
-        datetime object to change to a long (or an array of datetimes to change)
+        datetime object to change to an int (or an array of datetimes to change)
 
     Returns
     -------
-    out : long, list
-        long or list of longs corresponding to the datetime
+    out : int, list
+        int or list of ints corresponding to the datetime
 
     Examples
     --------
@@ -96,12 +96,12 @@ def dateToDateLong(inval):
     """
     try:
         if isinstance(inval, numpy.ndarray):
-            retval = numpy.array([long(val.strftime('%Y%m%d')) for val in inval])
+            retval = numpy.array([int(val.strftime('%Y%m%d')) for val in inval])
         else:
-            retval = [long(val.strftime('%Y%m%d')) for val in inval]
+            retval = [int(val.strftime('%Y%m%d')) for val in inval]
         if len(retval)==1: retval=retval[0]
     except: #not iterable
-        retval = long(inval.strftime('%Y%m%d'))
+        retval = int(inval.strftime('%Y%m%d'))
     return retval
 
 def dateLongToDate(inval):
@@ -156,9 +156,8 @@ def dateToFPHours(inval):
     12.5
     """
     try:
-        lst = [val.hour + val.minute/60 +
-                                val.second/60/60 +
-                                val.microsecond/60/60/1000000 for val in inval]
+        lst = [val.hour + val.minute/60 + val.second/60/60 +
+               val.microsecond/60/60/1000000 for val in inval]
         if isinstance(inval, numpy.ndarray):
             retval = numpy.array(lst)
         else:
@@ -206,14 +205,14 @@ def GSMtoMLT(gsm, dt):
         dt_ = numpy.asanyarray(dt)
     if gsm_.ndim == 2:
         if gsm_.shape[1] != 3:
-            raise(ValueError("Invalid vector shape"))
+            raise ValueError("Invalid vector shape")
         if gsm_.shape[0] != dt_.size:
             if dt_.size == 1:
                 dt_ = dm.dmarray([dt_]*gsm_.shape[0])
             else:
-                raise(ValueError("Array size mismatch"))
+                raise ValueError("Array size mismatch")
         ans = dm.dmarray(numpy.empty(len(dt_)), dtype=numpy.double, attrs={'coord_system': 'EDMAG'})
-        for ii, (gsm_val, dt_val) in enumerate(itertools.izip(gsm_, dt_)):
+        for ii, (gsm_val, dt_val) in enumerate(zip(gsm_, dt_)):
             ans[ii] = doConv(gsm_val, dt_val)
     else:
         if dt_.size==1:

@@ -13,15 +13,15 @@ perform tracing to see if a file line is closed
 from ctypes import pointer
 import math, numpy
 
-from Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_BAD_TRACE
-from Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
-from Lgm_Wrap import Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
-from Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
-import Lgm_Vector
-import Lgm_MagModelInfo
-import Lgm_CTrans
-import magcoords
-from _Bfield_dict import Bfield_dict
+from .Lgm_Wrap import Lgm_Trace, LGM_OPEN_IMF, LGM_CLOSED, LGM_OPEN_N_LOBE, LGM_BAD_TRACE
+from .Lgm_Wrap import LGM_OPEN_S_LOBE, LGM_INSIDE_EARTH, LGM_TARGET_HEIGHT_UNREACHABLE
+from .Lgm_Wrap import Lgm_Set_Lgm_B_OP77, Lgm_Set_Coord_Transforms, Lgm_Set_Lgm_B_T89
+from .Lgm_Wrap import Lgm_Convert_Coords, GSM_TO_SM, WGS84_A
+from . import Lgm_Vector
+from . import Lgm_MagModelInfo
+from . import Lgm_CTrans
+from . import magcoords
+from ._Bfield_dict import Bfield_dict
 
 def _simpleL(position, MagModelInfo):
     """
@@ -116,13 +116,13 @@ def Closed_Field(*args, **kwargs):
         try:
             mmi = MagEphemInfo.LstarInfo.contents.mInfo.contents
         except AttributeError:
-            raise(RuntimeError('Incorrect arguments specified'))
+            raise RuntimeError('Incorrect arguments specified')
         dum = [MagEphemInfo.P.x, MagEphemInfo.P.y, MagEphemInfo.P.z]
         position = Lgm_Vector.Lgm_Vector(*dum)
     elif len(args) == 2:
         # input checking
         if kwargs['coord_system'] != 'GSM':
-        #    raise(NotImplementedError('Different coord systems are not yet ready to use') )
+        #    raise NotImplementedError('Different coord systems are not yet ready to use')
             pos = magcoords.coordTrans(args[0], args[1], kwargs['coord_system'],'GSM')
         else:
             pos = args[0]
@@ -133,7 +133,7 @@ def Closed_Field(*args, **kwargs):
         try:
             Bfield_dict[kwargs['bfield']](pointer(mmi))
         except KeyError:
-            raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
+            raise NotImplementedError("Only Bfield=%s currently supported" % list(Bfield_dict.keys()))
 
         datelong = Lgm_CTrans.dateToDateLong(args[1])
         utc = Lgm_CTrans.dateToFPHours(args[1])
@@ -142,9 +142,9 @@ def Closed_Field(*args, **kwargs):
         try:
             position = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError('position must be an iterable') )
+            raise TypeError('position must be an iterable')
     else:
-        raise(RuntimeError('Incorrect number of arguments specified'))
+        raise RuntimeError('Incorrect number of arguments specified')
 
     ans = Lgm_Trace(pointer(position),
             pointer(southern),

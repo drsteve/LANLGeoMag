@@ -25,17 +25,17 @@ from spacepy import datamodel
 import spacepy.datamodel as dm
 import spacepy.toolbox as tb
 
-import Lgm_Wrap
-from Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
+from . import Lgm_Wrap
+from .Lgm_Wrap import Lgm_Set_Coord_Transforms, SM_TO_GSM, Lgm_Convert_Coords, \
     Lgm_SetLstarTolerances, RadPerDeg, GSM_TO_WGS84, WGS84_TO_EDMAG,\
     Lgm_McIlwain_L, Lgm_EDMAG_to_R_MLAT_MLON_MLT, Lgm_FreeMagEphemInfo_Children, \
     Lgm_ComputeLstarVersusPA, Lgm_B_TS04, Lgm_B_T96, Lgm_QinDentonOne, Lgm_set_QinDenton, Lgm_get_QinDenton_at_JD
-from Lgm_Wrap import Lstar as Lgm_Lstar
-import Lgm_Vector
-import Lgm_CTrans
-import Lgm_MagEphemInfo
-import Closed_Field
-from _Bfield_dict import Bfield_dict
+from .Lgm_Wrap import Lstar as Lgm_Lstar
+from . import Lgm_Vector
+from . import Lgm_CTrans
+from . import Lgm_MagEphemInfo
+from . import Closed_Field
+from ._Bfield_dict import Bfield_dict
 
 __author__ = 'Brian Larsen, Steve Morley, Mike Henderson - LANL'
 
@@ -261,7 +261,7 @@ def get_Lstar(pos, date, alpha = 90.,
         datelong = Lgm_CTrans.dateToDateLong(date)
         utc = Lgm_CTrans.dateToFPHours(date)
     except AttributeError:
-        raise(TypeError("Date must be a datetime object"))
+        raise TypeError("Date must be a datetime object")
     else:
         ans['Epoch'] = datamodel.dmarray([date])
 
@@ -283,19 +283,19 @@ def get_Lstar(pos, date, alpha = 90.,
         try:
             Pgsm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike")
         ans['position']['GSM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
     elif coord_system == 'SM':
         try:
             Psm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike")
         Pgsm = Lgm_Vector.Lgm_Vector()
         Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mmi.c )
         ans['position']['SM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
-        raise(NotImplementedError("Only GSM or SM input currently supported"))
+        raise NotImplementedError("Only GSM or SM input currently supported")
 
     Pwgs = Lgm_Vector.Lgm_Vector()
     Pmlt = Lgm_Vector.Lgm_Vector()
@@ -328,7 +328,7 @@ def get_Lstar(pos, date, alpha = 90.,
     try:
         Bfield_dict[Bfield](MagEphemInfo.LstarInfo.contents.mInfo)
     except KeyError:
-        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
+        raise NotImplementedError("Only Bfield=%s currently supported" % list(Bfield_dict.keys()))
 
     # Save Date, UTC to MagEphemInfo structure ** is this needed?
     MagEphemInfo.Date   = datelong
@@ -690,7 +690,7 @@ def get_Lstar_General(pos, date, alpha = 90.,
         datelong = Lgm_CTrans.dateToDateLong(date)
         utc = Lgm_CTrans.dateToFPHours(date)
     except AttributeError:
-        raise(TypeError("Date must be a datetime object"))
+        raise TypeError("Date must be a datetime object")
     else:
         ans['Epoch'] = datamodel.dmarray([date])
 
@@ -712,19 +712,19 @@ def get_Lstar_General(pos, date, alpha = 90.,
         try:
             Pgsm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike")
         ans['position']['GSM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
     elif coord_system == 'SM':
         try:
             Psm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike")
         Pgsm = Lgm_Vector.Lgm_Vector()
         Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mmi.c )
         ans['position']['SM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
-        raise(NotImplementedError("Only GSM or SM input currently supported"))
+        raise NotImplementedError("Only GSM or SM input currently supported")
 
     Pwgs = Lgm_Vector.Lgm_Vector()
     Pmlt = Lgm_Vector.Lgm_Vector()
@@ -756,7 +756,7 @@ def get_Lstar_General(pos, date, alpha = 90.,
 #    try:
 #        Bfield_dict[Bfield](MagEphemInfo.LstarInfo.contents.mInfo)
 #    except KeyError:
-#        raise(NotImplementedError("Only Bfield=%s currently supported" % Bfield_dict.keys()))
+#        raise NotImplementedError("Only Bfield=%s currently supported" % list(Bfield_dict.keys()))
 
     # step through the params dict and populate MagEphemInfo
     for key in params:
@@ -960,7 +960,7 @@ def get_Lstar2(pos, date, alpha = 90.,
         datelong = Lgm_CTrans.dateToDateLong(date)
         utc = Lgm_CTrans.dateToFPHours(date)
     except AttributeError:
-        raise(TypeError("Date must be a datetime object"))
+        raise TypeError("Date must be a datetime object")
     else:
         ans['Epoch'] = datamodel.dmarray([date])
 
@@ -993,7 +993,7 @@ def get_Lstar2(pos, date, alpha = 90.,
     
     MagEphemInfo.nAlpha = len(Alpha)
     #if len(Alpha) > 1 and Bfield == 'Lgm_B_TS04':
-    #    raise(NotImplementedError('TS04 is not thread safe!! Can only do 1 PA at a time'))
+    #    raise NotImplementedError('TS04 is not thread safe!! Can only do 1 PA at a time')
 
     for i in range(len(Alpha)):
         MagEphemInfo.Alpha[i] = Alpha[i]
@@ -1003,19 +1003,19 @@ def get_Lstar2(pos, date, alpha = 90.,
         try:
             Pgsm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike" )
         ans['position']['GSM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
     elif coord_system == 'SM':
         try:
             Psm = Lgm_Vector.Lgm_Vector(*pos)
         except TypeError:
-            raise(TypeError("Position must be listlike" ) )
+            raise TypeError("Position must be listlike" )
         Pgsm = Lgm_Vector.Lgm_Vector()
         Lgm_Convert_Coords( pointer(Psm), pointer(Pgsm), SM_TO_GSM, mmi.c )
         ans['position']['SM'] = datamodel.dmarray(pos, attrs={'units':'Re'})
         ans['position']['GSM'] = datamodel.dmarray(Pgsm.tolist(), attrs={'units':'Re'})
     else:
-        raise(NotImplementedError("Only GSM or SM input currently supported"))
+        raise NotImplementedError("Only GSM or SM input currently supported")
     
 ## void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAlpha, 
 ##                                 double *Alpha, int Quality, int Colorize, Lgm_MagEphemInfo *MagEphemInfo ) {
@@ -1081,28 +1081,28 @@ if __name__ == '__main__':
     date = datetime.datetime(2010, 10, 12)
     ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
     print('Lgm_B_T89 Kp=4')
-    print ans[90]['LHilton']
-    print ans[90]['LMcIlwain']
-    print ans[90]['Lstar']
-    print ans[90]['Lsimple']
+    print(ans[90]['LHilton'])
+    print(ans[90]['LMcIlwain'])
+    print(ans[90]['Lstar'])
+    print(ans[90]['Lsimple'])
 
     ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_T89', LstarQuality = 1, extended_out=True)
     print('Lgm_B_T89 Kp=5')
-    print ans[90]['LHilton']
-    print ans[90]['LMcIlwain']
-    print ans[90]['Lstar']
-    print ans[90]['Lsimple']
+    print(ans[90]['LHilton'])
+    print(ans[90]['LMcIlwain'])
+    print(ans[90]['Lstar'])
+    print(ans[90]['Lsimple'])
 
     ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 4, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
     print('Lgm_B_OP77 Kp=4')
-    print ans[90]['LHilton']
-    print ans[90]['LMcIlwain']
-    print ans[90]['Lstar']
-    print ans[90]['Lsimple']
+    print(ans[90]['LHilton'])
+    print(ans[90]['LMcIlwain'])
+    print(ans[90]['Lstar'])
+    print(ans[90]['Lsimple'])
 
     ans = get_Lstar([-4.2, 1, 1], date, alpha = 90, Kp = 5, coord_system='SM', Bfield = 'Lgm_B_OP77', LstarQuality = 1, extended_out=True)
     print('Lgm_B_OP77 Kp=6')
-    print ans[90]['LHilton']
-    print ans[90]['LMcIlwain']
-    print ans[90]['Lstar']
-    print ans[90]['Lsimple']
+    print(ans[90]['LHilton'])
+    print(ans[90]['LMcIlwain'])
+    print(ans[90]['Lstar'])
+    print(ans[90]['Lsimple'])

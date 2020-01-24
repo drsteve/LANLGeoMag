@@ -11,13 +11,13 @@ from ctypes import pointer
 
 import numpy as np
 
-import MagData
-from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
+from . import MagData
+from .Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
     Lgm_B_T89, Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel
-import Lgm_Vector
-import Lgm_CTrans
-import Lgm_MagModelInfo
-from utils import pos2Lgm_Vector
+from . import Lgm_Vector
+from . import Lgm_CTrans
+from . import Lgm_MagModelInfo
+from .utils import pos2Lgm_Vector
 
 class Lgm_T89(MagData.MagData):
     """
@@ -53,21 +53,21 @@ class Lgm_T89(MagData.MagData):
 
         if not isinstance(pos, Lgm_Vector.Lgm_Vector) and \
             not isinstance(pos, list):
-            raise(TypeError('pos must be a Lgm_Vector or list of Lgm_vectors') )
+            raise TypeError('pos must be a Lgm_Vector or list of Lgm_vectors')
         self._Vpos = pos2Lgm_Vector(pos)
 
         # time must be a datetime
         if not isinstance(time, datetime.datetime) and \
             not isinstance(time, list):
-            raise(TypeError('time must be a datetime or list of datetime') )
+            raise TypeError('time must be a datetime or list of datetime')
 
         try:
             for val in Kp:
                 if val < 0 or val > 5:
-                    raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
+                    raise ValueError('T89 is only defined for integer Kp from 0 to 5')
         except TypeError:
             if Kp < 0 or Kp > 5:
-                raise(ValueError('T89 is only defined for integer Kp from 0 to 5') )
+                raise ValueError('T89 is only defined for integer Kp from 0 to 5')
 
         if INTERNAL_MODEL not in (LGM_CDIP,
                                   LGM_EDIP,
@@ -75,13 +75,13 @@ class Lgm_T89(MagData.MagData):
             INTERNAL_MODEL not in ('LGM_CDIP',
                                   'LGM_EDIP',
                                   'LGM_IGRF'):
-            raise(ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF') )
+            raise ValueError('INTERNAL_MODEL must be LGM_CDIP, LGM_EDIP, or LGM_IGRF')
         if isinstance(INTERNAL_MODEL, str):
             INTERNAL_MODEL = eval(INTERNAL_MODEL)
         self.attrs['internal_model'] = INTERNAL_MODEL
 
         if coord_system != 'GSM':
-            raise(NotImplementedError('Different coord systems are not yet ready to use') )
+            raise NotImplementedError('Different coord systems are not yet ready to use')
 
         self._mmi = Lgm_MagModelInfo.Lgm_MagModelInfo()
         
@@ -98,11 +98,11 @@ class Lgm_T89(MagData.MagData):
             if len(self._Vpos) != len(self['Kp']) or \
                 len(self._Vpos) != len(self['Epoch']) or \
                 len(self['Epoch']) != len(self['Kp']):
-                raise(ValueError('Inputs must be the same length, scalars or lists'))
+                raise ValueError('Inputs must be the same length, scalars or lists')
         except TypeError:
             if isinstance(self._Vpos, list) and not isinstance(self['Kp'], list) \
                 and not isinstance(self['Epoch'], list):
-                    raise(ValueError('Inputs must be the same length, scalars or lists'))
+                    raise ValueError('Inputs must be the same length, scalars or lists')
 
         #self.data = T89_Data(pos, time, Kp, coord_system, INTERNAL_MODEL)
         self['B'] = self.calc_B()
@@ -120,7 +120,7 @@ class Lgm_T89(MagData.MagData):
                 self._mmi.Kp = v3
                 retval = Lgm_B_T89(pointer(v1), pointer(B), pointer(self._mmi))
                 if retval != 1:
-                    raise(RuntimeWarning('Odd return from Lgm_T89') )
+                    raise RuntimeWarning('Odd return from Lgm_T89')
                 ans.append(B)
             return ans
         except TypeError:
@@ -131,7 +131,7 @@ class Lgm_T89(MagData.MagData):
             self._mmi.Kp = self['Kp']
             retval = Lgm_B_T89(pointer(self._Vpos), pointer(B), pointer(self._mmi) )
             if retval != 1:
-                raise(RuntimeWarning('Odd return from Lgm_T89') )
+                raise RuntimeWarning('Odd return from Lgm_T89')
             return B
 
 

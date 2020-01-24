@@ -11,13 +11,13 @@ All the operations are done in the underlying C library (even though that is
 silly for much of this).
 
 """
-import itertools
+import sys
 import copy
 from ctypes import pointer, c_double
 
 import numpy as np
 
-from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
+from .Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
     Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords, Lgm_Slerp, \
     Lgm_InitSlerp
@@ -25,6 +25,10 @@ from Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVecto
 __author__ = 'Brian Larsen (Python), Mike Henderson (C) - LANL'
 
 class Lgm_Vector(Lgm_Vector):
+    if sys.version_info.major<3:
+        _typetup = (int, float, long)
+    else:
+        _typetup = (int, float)
     def __eq__(self, other):
         """
         if the components of a Vector are equal the vectors are equal
@@ -42,11 +46,11 @@ class Lgm_Vector(Lgm_Vector):
             try:
                 other = Lgm_Vector(other[0], other[1], other[2])
             except:
-                raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+                raise TypeError('Bad type: %s in __eq__ comparison' % (type(other)) )
             else:
                 return self == other
         else:
-            raise(TypeError('Bad type: %s in __eq__ comparison' % (type(other)) ))
+            raise TypeError('Bad type: %s in __eq__ comparison' % (type(other)) )
 
     def __gt__(self, other):
         """
@@ -163,13 +167,13 @@ class Lgm_Vector(Lgm_Vector):
             o_vec = Lgm_Vector(0, 0, 0)
             Lgm_VecAdd(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
-        elif isinstance(other, (int, float, long)):
+        elif isinstance(other, self._typetup):
             x = self.x + other
             y = self.y + other
             z = self.z + other
             return  Lgm_Vector(x, y, z)
         else:
-            raise(ArithmeticError("Cannot add type %s to a Lgm_Vector" % (type(other))))
+            raise ArithmeticError("Cannot add type %s to a Lgm_Vector" % (type(other)))
 
     def __sub__(self, other):
         """
@@ -191,13 +195,13 @@ class Lgm_Vector(Lgm_Vector):
             o_vec = Lgm_Vector(0, 0, 0)
             Lgm_VecSub(pointer(o_vec), pointer(self), pointer(other))
             return o_vec
-        elif isinstance(other, (int, float, long)):
+        elif isinstance(other, self._typetup):
             x = self.x - other
             y = self.y - other
             z = self.z - other
             return  Lgm_Vector(x, y, z)
         else:
-            raise(ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other))))
+            raise ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other)))
 
     def __mul__(self, other):
         """
@@ -217,13 +221,13 @@ class Lgm_Vector(Lgm_Vector):
         """
         if isinstance(other, Lgm_Vector): # another vector
             return self.crossProduct(other)
-        elif isinstance(other, (int, float, long)):
+        elif isinstance(other, self._typetup):
             x = self.x * other
             y = self.y * other
             z = self.z * other
             return Lgm_Vector(x, y, z)
         else:
-            raise(ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other))))
+            raise ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other)))
 
     def __div__(self, other):
         """
@@ -241,13 +245,13 @@ class Lgm_Vector(Lgm_Vector):
 
         @version: V1: 22-Dec-2010 (BAL)
         """
-        if isinstance(other, (int, float, long)):
+        if isinstance(other, self._typetup):
             x = self.x / other
             y = self.y / other
             z = self.z / other
             return Lgm_Vector(x, y, z)
         else:
-            raise(ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other))))
+            raise ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other)))
 
     def tolist(self):
         """
@@ -498,10 +502,10 @@ def SphToCart(lat, lon, rad):
         Lgm_SphToCartCoords(lat, lon, rad, pointer(vec1))
         return vec1
     except AssertionError:
-        raise(ValueError('All input must be the same length and type'))
+        raise ValueError('All input must be the same length and type')
     else:
         ans = []
-        for v1, v2, v3 in itertools.izip(lat, lon, rad):
+        for v1, v2, v3 in zip(lat, lon, rad):
             Lgm_SphToCartCoords(v1, v2, v3, pointer(vec1))
             ans.append(copy.copy(vec1))
         return ans
@@ -543,10 +547,10 @@ def CartToSph(x, y, z):
         Lgm_CartToSphCoords(pointer(vec1), pointer(lat), pointer(lon), pointer(rad))
         return lat.value, lon.value, rad.value
     except AssertionError:
-        raise(ValueError('All input must be the same length and type'))
+        raise ValueError('All input must be the same length and type')
     else:
         ans = []
-        for v1, v2, v3 in itertools.izip(x, y, z):
+        for v1, v2, v3 in zip(x, y, z):
             vec1 = Lgm_Vector(v1, v2, v3)
             Lgm_CartToSphCoords(pointer(vec1), pointer(lat), pointer(lon), pointer(rad))
             ans.append(copy.copy([lat.value, lon.value, rad.value]))
