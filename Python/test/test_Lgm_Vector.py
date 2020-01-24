@@ -274,7 +274,9 @@ class Lgm_VectorTestsWrap(unittest.TestCase):
         # test an input check
         self.assertRaises(ValueError, Lgm_Vector.SphToCart, [1]*2, [2]*3, [3]*2)
         # test putting in lists
-        ans_tst = Lgm_Vector.SphToCart(zip(*invals)[0], zip(*invals)[1], zip(*invals)[2] )
+        ans_tst = Lgm_Vector.SphToCart(list(zip(*invals))[0],
+                                       list(zip(*invals))[1],
+                                       list(zip(*invals))[2])
         for i, v1 in enumerate(ans_tst):
             for j, v2 in enumerate(v1.tolist()):
                 self.assertAlmostEqual(ans[i][j], ans_tst[i].tolist()[j])

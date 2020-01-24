@@ -11,6 +11,7 @@ All the operations are done in the underlying C library (even though that is
 silly for much of this).
 
 """
+from __future__ import division
 import sys
 import copy
 from ctypes import pointer, c_double
@@ -251,7 +252,33 @@ class Lgm_Vector(Lgm_Vector):
             z = self.z / other
             return Lgm_Vector(x, y, z)
         else:
-            raise ArithmeticError("Cannot subtract %s from a Lgm_Vector" % (type(other)))
+            raise ArithmeticError("Cannot divide an Lgm_Vector by type %s" % (type(other)))
+
+    __truediv__ = __div__
+
+    def __floordiv__(self, other):
+        """
+        divide a scalar into each component
+
+        @param other: scalar to divide into vector
+        @type other: (int, long, float)
+
+        @return: new vector
+        @rtype: Lgm_Vector
+
+        @author: Brian Larsen
+        @organization: LANL
+        @contact: balarsen@lanl.gov
+
+        @version: V1: 22-Dec-2010 (BAL)
+        """
+        if isinstance(other, self._typetup):
+            x = self.x // other
+            y = self.y // other
+            z = self.z // other
+            return Lgm_Vector(x, y, z)
+        else:
+            raise ArithmeticError("Cannot divide an Lgm_Vector by type %s" % (type(other)))
 
     def tolist(self):
         """
