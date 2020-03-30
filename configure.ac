@@ -17,7 +17,7 @@ AC_PROG_MKDIR_P
 AC_PROG_LIBTOOL
 #LT_INIT
 
-
+PKG_INSTALLDIR
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h math.h])

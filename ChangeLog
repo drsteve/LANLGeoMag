@@ -1,5 +1,10 @@
 2020-03-30  Mark Galassi  <mark@galassi.org>
 
+	* libLanlGeoMag/Makefile.am (pkgconfigdir): changed to be
+	$(prefix)/lib/pkgconfig since libdir is sometimes set (for example
+	during debian builds) to $(prefix)/lib/x86_64_bla_bla/ and this is
+	not OK for the pkgconfig file lgm.pc
+
 	* Makefile.am (EXTRA_DIST): added README.md -- with this last
 	touch "make distcheck" works!
 
