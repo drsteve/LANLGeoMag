@@ -49,10 +49,14 @@ DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(OFF)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
+DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile, Doc)
 
+dnl we need an overall test of whether doxyen was enabled in the first
+dnl place
+AC_DEFUN([DX_TEST_OVERALL], [test "DX_DOXYGEN_FEATURE" = 1])
+AM_CONDITIONAL(DX_OVERALL, DX_TEST_OVERALL])
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
@@ -236,11 +240,11 @@ AC_ARG_WITH([pythondir],
 AC_SUBST(pythondir)
 
 # Make PERL dependency optional
-AC_ARG_ENABLE([perl], [AS_HELP_STRING([--disable-perl],\
-    [Disables additional PERL functionality in LanlGeoMag])])
-AS_IF([test "x$enableval" != "xno"],
-    [ENABLE_PERL=1],
-    [ENABLE_PERL=0]
+AC_ARG_ENABLE([perl], [AS_HELP_STRING([--enable-perl],\
+    [Enables additional PERL functionality in LanlGeoMag])])
+AS_IF([test "x$enableval" != "xyes"],
+    [ENABLE_PERL=0],
+    [ENABLE_PERL=1]
 )
 
 # Check for PERL if --with-perl specified

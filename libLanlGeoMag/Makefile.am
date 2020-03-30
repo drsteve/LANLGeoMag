@@ -76,9 +76,34 @@ endif
 
 uninstall-hook:
 if ENABLE_INDICES
-	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
-	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
-	-rm -rf $(DESTDIR)$(LGM_DE_DATA_DIR)
-	-rm -rf $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
 endif
+	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
+	-chmod -R 777 $(DESTDIR)$(LGM_TS07_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
+	-chmod -R 777 $(DESTDIR)$(LGM_DE_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_DE_DATA_DIR)
+	-chmod -R 777 $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
+	-chmod -R 777 $(DESTDIR)$(LGM_STARS_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_STARS_DATA_DIR)
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag
+    # 	echo "WILDCARD: "
+    # 	echo $(wildcard \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamhr_?_??.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamebhr?.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/TAIL_PAR.zip \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/Coeffs/????_???/2008_???_??_??.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/DE_FILES/jpl_de421.h5 \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Stars/Stars.txt)
+    # 	for fname in $(wildcard \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamhr_?_??.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamebhr?.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/TAIL_PAR.zip \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/TS07D_FILES/Coeffs/????_???/2008_???_??_??.par \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Data/DE_FILES/jpl_de421.h5 \
+    # $(DESTDIR)$(prefix)/share/LanlGeoMag/Stars/Stars.txt); \
+    # 	do \
+    # 	    echo "fname: $${fname}"; \
+    # 	    chmod 644 $${fname}; \
+    # 	    /bin/rm -f $${fname}; \
+    # 	done

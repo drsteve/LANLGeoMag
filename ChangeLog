@@ -1,3 +1,19 @@
+2020-03-30  Mark Galassi  <mark@galassi.org>
+
+	* Makefile.am (EXTRA_DIST): added README.md -- with this last
+	touch "make distcheck" works!
+
+	* libLanlGeoMag/Makefile.am (uninstall-hook): fixed permissions so
+	that we can correctly remove these files.
+
+	* configure.ac: made the default to disable perl so that one can
+	use make distcheck.
+
+	* configure.ac, Makefile.am: adjusted the way doxygen is handled
+	so that "make dist" works (it was broken before).  Also added a
+	rule to make README from README.md so that the GNU coding
+	standards are satisfied.
+
 2019-11-05  Mark Galassi  <mark@galassi.org>
 
 	* libLanlGeoMag/Makefile.am: took out again the Images/ directory
