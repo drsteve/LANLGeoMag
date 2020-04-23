@@ -312,10 +312,18 @@ double Lgm_hour24(double hour) {
     }
 }
 
+
+/*
+ * \brief
+ *  This routine solve's Kepler's equation for eccentric anomaly
+ *
+ */
 double Lgm_kepler(double M, double e) {
     int 	n=0;
     double 	E, Eold, eps = 1.0e-8;
 
+    // M is mean anomaly (radians), e is eccentricity of orbit
+    // E is the eccentric anomaly (radians)
     E = M + e*sin(M);
     do{
 	    Eold = E;
