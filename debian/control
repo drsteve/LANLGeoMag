@@ -1,0 +1,25 @@
+Source: lanlgeomag
+Priority: optional
+Maintainer: Mark Galassi <markgalassi@lanl.gov>
+Build-Depends: debhelper (>= 10), autotools-dev
+Standards-Version: 4.1.2
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: https://anonscm.debian.org/git/collab-maint/lanlgeomag.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/lanlgeomag.git
+
+Package: lanlgeomag-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: lanlgeomag (= ${binary:Version}), ${misc:Depends}
+Description: geomagnetic coordinate library, development files
+ Mike Henderson's geomagnetic coordinate transformation library,
+ development files
+
+Package: lanlgeomag
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: geomagnetic coordinate library
+ Mike Henderson's geomagnetic coordinate transformation library

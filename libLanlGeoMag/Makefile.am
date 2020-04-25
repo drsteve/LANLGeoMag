@@ -22,7 +22,7 @@ LGM_IMAGE_DATA_DIR = $(datarootdir)/LanlGeoMag/Images
 # Directory where other images (for ViewDriftSehll) will be installed
 LGM_STARS_DATA_DIR = $(datarootdir)/LanlGeoMag/Stars
 
-pkgconfigdir       = $(prefix)/lib/pkgconfig
+pkgconfigdir       = $(prefix)/share/pkgconfig
 pkgconfig_DATA     = lgm.pc
 
 

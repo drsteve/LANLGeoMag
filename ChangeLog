@@ -1,3 +1,11 @@
+2020-04-25  Mark Galassi  <markgalassi@lanl.gov>
+
+	* libLanlGeoMag/Makefile.am (pkgconfigdir): chaged from
+	$(prefix)/lib/pkgconfig to $(prefix)/share/pkgconfig.
+
+	* Makefile.am (DEBIAN_EXTRA_DIST, EXTRA_DIST): added debian
+	distribution files.
+
 2020-03-30  Mark Galassi  <mark@galassi.org>
 
 	* libLanlGeoMag/Makefile.am (pkgconfigdir): changed to be

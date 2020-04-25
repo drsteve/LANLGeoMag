@@ -54,8 +54,20 @@ include doxygen_include.am
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
+DEBIAN_EXTRA_DIST = debian/rules \
+    debian/lanlgeomag.install \
+    debian/copyright \
+    debian/compat \
+    debian/changelog \
+    debian/control \
+    debian/lanlgeomag-dev.dirs \
+    debian/source/format \
+    debian/files \
+    debian/lanlgeomag.dirs \
+    debian/lanlgeomag-dev.install
+
 EXTRA_DIST = README.md lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
-	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed
+	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed  $(DEBIAN_EXTRA_DIST)
 
 ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
