@@ -1,7 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-
 AC_INIT([LanlGeoMag], [1.5.16], [mghenderson@lanl.gov])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AC_CONFIG_HEADERS([config.h])
@@ -18,7 +17,7 @@ AC_PROG_MKDIR_P
 AC_PROG_LIBTOOL
 #LT_INIT
 
-
+PKG_INSTALLDIR
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h math.h])
@@ -26,7 +25,7 @@ AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.
 
 
 AC_PREREQ([2.59])
-THE_PKG_RELEASE=1
+THE_PKG_RELEASE=7 dnl this affects the RPM package release #
 PKG_RELEASE=$THE_PKG_RELEASE
 AC_SUBST([PKG_RELEASE])
 
@@ -50,10 +49,14 @@ DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(OFF)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
+DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile, Doc)
 
+dnl we need an overall test of whether doxyen was enabled in the first
+dnl place
+AC_DEFUN([DX_TEST_OVERALL], [test "DX_DOXYGEN_FEATURE" = 1])
+AM_CONDITIONAL(DX_OVERALL, DX_TEST_OVERALL])
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
@@ -237,11 +240,11 @@ AC_ARG_WITH([pythondir],
 AC_SUBST(pythondir)
 
 # Make PERL dependency optional
-AC_ARG_ENABLE([perl], [AS_HELP_STRING([--disable-perl],\
-    [Disables additional PERL functionality in LanlGeoMag])])
-AS_IF([test "x$enableval" != "xno"],
-    [ENABLE_PERL=1],
-    [ENABLE_PERL=0]
+AC_ARG_ENABLE([perl], [AS_HELP_STRING([--enable-perl],\
+    [Enables additional PERL functionality in LanlGeoMag])])
+AS_IF([test "x$enableval" != "xyes"],
+    [ENABLE_PERL=0],
+    [ENABLE_PERL=1]
 )
 
 # Check for PERL if --with-perl specified
@@ -380,7 +383,8 @@ AC_CONFIG_FILES([Makefile
                  libLanlGeoMag/EopData/GetEopFiles
                  libLanlGeoMag/lgm.pc
                  lanlgeomag.spec
-		         Tools/Makefile
-		         Python/Makefile
+                 Tools/Makefile
+                 Python/Makefile
+                 Doc/LanlGeoMag.tag
                  ])
 AC_OUTPUT
