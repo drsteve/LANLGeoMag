@@ -58,26 +58,24 @@ class Lgm_OP77Tests(unittest.TestCase):
         super(Lgm_OP77Tests, self).setUp()
         self.pos = [-6.6, 0, 0]
         self.dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
+        self.ans = np.array([-18.350502, -1.857488, 85.610065])
+
     def tearDown(self):
         super(Lgm_OP77Tests, self).tearDown()
 
     def test_OP77_1(self):
         """First simple in/out tests of OP77 (regression)"""
-        ans = np.array([-18.3504757805, -1.8574883465, 85.6099901369])
         B = Lgm_OP77.Lgm_OP77(self.pos, self.dt)
-        np.testing.assert_allclose(ans, np.array(B['B'].tolist()),
+        np.testing.assert_allclose(self.ans, np.array(B['B'].tolist()),
                                    rtol=1e-8, atol=1e-5)
 
     def test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""
-        ans = [-18.3504757805, -1.8574883465, 85.6099901369]
         a = Lgm_OP77.Lgm_OP77([self.pos]*2, [self.dt]*2)
         B = a.calc_B()
         B = [val.tolist() for val in B]
         Bv = list(itertools.chain.from_iterable(B))
-        Av = list(itertools.chain.from_iterable([ans]*2))
-        for i, val in enumerate(Bv):
-            self.assertAlmostEqual(Av[i], val, 5)
+        np.testing.assert_allclose(np.tile(self.ans, 2), Bv, atol=1e-5)
         self.assertEqual(len(B), 2)
 
     def test_pos_checking(self):

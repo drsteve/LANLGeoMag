@@ -60,20 +60,21 @@ class Lgm_T89Tests(unittest.TestCase):
         self.pos = [-6.6, 0, 0]
         self.kp = 0
         self.dt = datetime.datetime(2005, 8, 31, 9, 0, 0)
+        self.ans = [[-18.927103, -1.857488, 80.052164],
+                    [-20.78416, -1.857488, 74.281026],
+                    [-22.513859, -1.857488, 70.183396],
+                    [-26.367951, -1.857488, 64.303916],
+                    ]
+
     def tearDown(self):
         super(Lgm_T89Tests, self).tearDown()
 
     def test_T89_1(self):
         """First simple in/out tests of T89 (compared to C)"""
-        ans = [[-18.927076539382270, -1.857488346594122, 80.052089573497625],
-            [-20.784132182565948, -1.857488346594122, 74.280950924408401],
-            [-22.513829891596075, -1.857488346594122, 70.183320782457827],
-            [-26.367918458616543, -1.857488346594122, 64.303840068519463], ]
         for i, kp in enumerate(range(4)):
             B = Lgm_T89.Lgm_T89(self.pos, self.dt, kp)
-            self.assertAlmostEqual(ans[i][0], B['B'].x, 5)
-            self.assertAlmostEqual(ans[i][1], B['B'].y, 5)
-            self.assertAlmostEqual(ans[i][2], B['B'].z, 5)
+            out = [B['B'].x, B['B'].y, B['B'].z]
+            numpy.testing.assert_allclose(self.ans[i], out, atol=1e-5)
 
     def test_kp_checking(self):
         """for T89 Kp is between 0 and 5 inclusive"""
@@ -85,30 +86,24 @@ class Lgm_T89Tests(unittest.TestCase):
 
     def test_list_in(self):
         """Make sure that list inputs work correctly (regression)"""
-        ans = [[-18.927076539382270, -1.857488346594122, 80.052089573497625],
-            [-20.784132182565948, -1.857488346594122, 74.280950924408401],
-            [-22.513829891596075, -1.857488346594122, 70.183320782457827],
-            [-26.367918458616543, -1.857488346594122, 64.303840068519463]]
         for i, kp in enumerate(range(4)):
             a = Lgm_T89.Lgm_T89([self.pos]*2, [self.dt]*2, [kp]*2)
             B = a.calc_B()
             B = [val.tolist() for val in B]
             Bv = list(itertools.chain.from_iterable(B))
-            Av = list(itertools.chain.from_iterable([ans[i]]*2))
-            for i, val in enumerate(Bv):
-                self.assertAlmostEqual(Av[i], val, 5)
+            numpy.testing.assert_allclose(numpy.tile(self.ans[i], 2), Bv, atol=1e-5)
         self.assertEqual(len(B), 2)
 
     def test_pos_checking(self):
-        """Lgm_T89 pos agrument has checking"""
+        """Lgm_T89 pos argument has checking"""
         self.assertRaises(TypeError, Lgm_T89.Lgm_T89, 'bad', self.dt, self.kp)
 
     def test_time_checking(self):
-        """Lgm_T89 time agrument has checking"""
+        """Lgm_T89 time argument has checking"""
         self.assertRaises(TypeError, Lgm_T89.Lgm_T89, self.pos, 'bad', self.kp)
 
     def test_internal_model(self):
-        """Lgm_T89 internal_model agrument has checking"""
+        """Lgm_T89 internal_model argument has checking"""
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
                           self.kp, INTERNAL_MODEL=4)
         self.assertRaises(ValueError, Lgm_T89.Lgm_T89, self.pos, self.dt,
@@ -128,9 +123,9 @@ class Lgm_T89Tests(unittest.TestCase):
         #        Date = 20090101; UTC  = 0.0; mInfo->Kp = 2; 
         #        u.x = 3.0; u.y = 4.0; u.z = 3.0
         ans = {}
-        ans['IGRF'] = [-123.994265, -73.755273, 77.986302]
-        ans['CDIP'] = [-123.603699, -75.262705, 77.740849]
-        ans['EDIP'] = [-122.127613, -75.432215, 79.463218]
+        ans['IGRF'] = [-123.994193, -73.755223, 77.986257]
+        ans['CDIP'] = [-123.603627, -75.262655, 77.740804]
+        ans['EDIP'] = [-122.127541, -75.432165, 79.463172]
         pos = [3.0, 4.0, 3.0]
         dt = datetime.datetime(2009, 1, 1, 0)
         kp = 2
