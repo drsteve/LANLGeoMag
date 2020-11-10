@@ -28,14 +28,13 @@ class magcoords_Tests(unittest.TestCase):
 
     def test_end2end(self):
         """quick functional tests (regression)"""
-        ans = [-3.607999564981572, 1.3877763423443373e-17, -1.726945030766233]
-        numpy.testing.assert_allclose(ans,
-                            magcoords.coordTrans([-4,0,0], datetime.datetime(2009,1,1),
-                            'SM','GSM'), atol=1e-8)
-        ans = [-4., 0., 0.]
-        numpy.testing.assert_allclose(ans,
-                            magcoords.coordTrans([-3.607999564981572, 1.3877763423443373e-17,
-            -1.726945030766233], datetime.datetime(2009,1,1),'GSM','SM'), atol=1e-8)
+        initial = [-4, 0, 0]
+        expect1 = [-3.607999564981572, 1.3877763423443373e-17, -1.726945030766233]
+        ans = magcoords.coordTrans(initial, datetime.datetime(2009,1,1), 'SM','GSM')
+        numpy.testing.assert_allclose(expect1, ans, atol=1e-7)
+        numpy.testing.assert_allclose(initial, magcoords.coordTrans(expect1,
+                                                                datetime.datetime(2009,1,1),
+                                                                'GSM','SM'), atol=1e-7)
         #Use SphToCart/CartToSph to convert between the C values (always
         #cartesian even in WGS84) and the Python ones (WGS84 is spherical)
         ans = [-0.8908435824709999, 0.09890080939498999, -0.443414412792]
@@ -51,8 +50,8 @@ class magcoords_Tests(unittest.TestCase):
         """quick functional tests with JPL DE421"""
         #Straight from the C
         cases = ["2015-03-08T19:18:31.786778 479114378970778386 GEI2000 GSE -72417.672749 -51921.225510 -29798.643397 -58063.063795 -73566.510184 -6688.896414",
-                 "2015-03-11T11:58:40.170326 479347187354325578 GSE2000 SM -20164.747998 -52414.140552 -20241.497772 -20870.283837 -46078.983969 -31697.569507",
-                 "2015-03-12T04:25:43.605928 479406410789928239 SM GSM 75645.819112 -40422.353445 -35182.256254 81628.221639 -40422.353445 -17231.208208"]
+                 "2015-03-11T11:58:40.170326 479347187354325578 GSE2000 SM -20164.747998 -52414.140552 -20241.497772 -20868.064112 -46078.015440 -31700.438751",
+                 "2015-03-12T04:25:43.605928 479406410789928239 SM GSM 75645.819112 -40422.353445 -35182.256254 81628.244132 -40422.353445 -17231.101651"]
         for c in cases:
             dt, tt, fromsys, tosys, xin, yin, zin, xout, yout, zout = c.split()
             dt = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f')
@@ -77,12 +76,12 @@ class magcoords_Tests(unittest.TestCase):
     def test_Lvalue_extended_out(self):
         """Lvalue has an extended out (regression)"""
         ans = {
-         'Blocal': 628.07992515195,
-         'Bmin': 21.678823206256,
-         'Bmirr': 628.07992515195,
+         'Blocal': 628.0795581977945,
+         'Bmin': 21.678758255389177,
+         'Bmirr': 628.0795581977945,
          'I': 10.9312487946278,
          'L': 7.96706218379283,
-         'M': 29966.8851195941,
+         'M': 29966.867395109486,
          'MLon': 180.0,
          'MLT': 0.0,
          }
@@ -136,7 +135,7 @@ class magcoords_Tests(unittest.TestCase):
         L = magcoords.Lvalue([-4.2, 1, 1], datetime.datetime(2010, 10, 12),
                              alpha=90, Kp=4, method='McIlwain',
                              coord_system='SM', Bfield='Lgm_B_T89')['L']
-        self.assertAlmostEqual(5.0293407729574, L, places=7)
+        self.assertAlmostEqual(5.029340343510258, L, places=7)
 
 
 if __name__ == '__main__':
