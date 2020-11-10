@@ -52,14 +52,15 @@ class Closed_FieldTests(unittest.TestCase):
             = Closed_Field([1,2,2], self.date, extended_out=True)
         self.assertEqual(ans, 'LGM_CLOSED')
         numpy.testing.assert_allclose(north_fp,
-                [-0.0620421299, 0.39455411901, 0.9306480813], rtol=1e-5)
+                [-0.062047, 0.394557, 0.930652], rtol=1e-5)
         numpy.testing.assert_allclose(south_fp,
                 [0.7666220541, 0.3352533669, -0.571429965], rtol=1e-5)
         numpy.testing.assert_allclose(minB,
                 [2.279625676, 2.809834544, 1.1244815844], rtol=1e-5)
+
         #This value isn't tested in the C
         #So this is essentially a regression test on _simpleL
-        self.assertAlmostEqual(L, 3.7371417478198037, places=5)
+        self.assertAlmostEqual(L, 3.7371333751962075, places=5)
 
 
 if __name__ == '__main__':
