@@ -13,14 +13,14 @@ from ctypes import pointer
 
 import numpy as np
 
-from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
+from .Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, \
     Lgm_B_Dungey, LGM_EXTMODEL_NULL, LGM_DUNGEY
-import magcoords
-import MagData
-import Lgm_Vector
-import Lgm_CTrans
-import Lgm_MagModelInfo
-from utils import pos2Lgm_Vector
+from . import magcoords
+from . import MagData
+from . import Lgm_Vector
+from . import Lgm_CTrans
+from . import Lgm_MagModelInfo
+from .utils import pos2Lgm_Vector
 
 class Lgm_Dungey(MagData.MagData):
     """

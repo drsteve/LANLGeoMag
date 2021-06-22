@@ -12,16 +12,15 @@ import ctypes
 
 import numpy as np
 
-import MagData
-from Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_TS04, \
-                    Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel, \
-                    Lgm_get_QinDenton_at_JD, Lgm_Date_to_JD
+from . import MagData
+from .Lgm_Wrap import LGM_CDIP, LGM_EDIP, LGM_IGRF, Lgm_Set_Coord_Transforms, Lgm_B_TS04, \
+                      Lgm_Set_Lgm_B_cdip_InternalModel, Lgm_Set_Lgm_B_edip_InternalModel, Lgm_Set_Lgm_B_IGRF_InternalModel, \
+                      Lgm_get_QinDenton_at_JD, Lgm_Date_to_JD, Lgm_QinDentonOne, Lgm_set_QinDenton
 
-import lgmpy
-import Lgm_Vector
-import Lgm_CTrans
-import Lgm_MagModelInfo
-from utils import pos2Lgm_Vector
+from . import Lgm_Vector
+from . import Lgm_CTrans
+from . import Lgm_MagModelInfo
+from .utils import pos2Lgm_Vector
 
 class Lgm_TS04_QD(MagData.MagData):
     #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
@@ -77,9 +76,9 @@ class Lgm_TS04_QD(MagData.MagData):
         # Lgm_get_QinDenton_at_JD( JD, &p, 1 );
         # JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
         JD = Lgm_Date_to_JD(date, utc, pointer(self._mmi.c))
-        qd_one = lgmpy.Lgm_Wrap.Lgm_QinDentonOne()
+        qd_one = Lgm_QinDentonOne()
         Lgm_get_QinDenton_at_JD( JD, pointer(qd_one), self.verbose)
-        lgmpy.Lgm_Wrap.Lgm_set_QinDenton(pointer(qd_one), pointer(self._mmi.c))
+        Lgm_set_QinDenton(pointer(qd_one), pointer(self._mmi.c))
 
         #int Lgm_B_TS04_opt( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
         retval = Lgm_B_TS04(pointer(self._Vpos), pointer(B), pointer(self._mmi))
