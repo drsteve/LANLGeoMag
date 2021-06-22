@@ -258,7 +258,7 @@ class Lgm_Vector(Lgm_Vector):
 
     def __floordiv__(self, other):
         """
-        divide a scalar into each component
+        floor divide a scalar into each component
 
         @param other: scalar to divide into vector
         @type other: (int, long, float)
@@ -266,11 +266,8 @@ class Lgm_Vector(Lgm_Vector):
         @return: new vector
         @rtype: Lgm_Vector
 
-        @author: Brian Larsen
+        @author: Steve Morley
         @organization: LANL
-        @contact: balarsen@lanl.gov
-
-        @version: V1: 22-Dec-2010 (BAL)
         """
         if isinstance(other, self._typetup):
             x = self.x // other
