@@ -9,7 +9,7 @@ Brian Larsen - LANL
 """
 from ctypes import pointer
 
-from Lgm_Wrap import Lgm_QinDenton, Lgm_init_QinDentonDefaults, Lgm_destroy_QinDenton_children
+from .Lgm_Wrap import Lgm_QinDenton, Lgm_init_QinDentonDefaults, Lgm_destroy_QinDenton_children
 
 
 class Lgm_QinDenton(Lgm_QinDenton):

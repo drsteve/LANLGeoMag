@@ -8,6 +8,7 @@ It is still just a a partial solution
 
 
 """
+from __future__ import division
 import itertools
 from ctypes import pointer, c_double
 

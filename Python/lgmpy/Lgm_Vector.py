@@ -21,7 +21,7 @@ import numpy as np
 from .Lgm_Wrap import Lgm_Vector, Lgm_VecSub, Lgm_ScaleVector, Lgm_NormalizeVector, \
     Lgm_CrossProduct, Lgm_Magnitude, Lgm_ForceMagnitude, Lgm_DotProduct, \
     Lgm_VecDiffMag, Lgm_VecAdd, Lgm_SphToCartCoords, Lgm_CartToSphCoords, Lgm_Slerp, \
-    Lgm_InitSlerp
+    Lgm_InitSlerp, Lgm_SlerpInfo
 
 __author__ = 'Brian Larsen (Python), Mike Henderson (C) - LANL'
 

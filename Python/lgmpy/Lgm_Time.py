@@ -9,8 +9,8 @@ This should be either managed within classes or used as the backend to Spacepy's
 
 import datetime as dt
 from ctypes import pointer, c_int, c_double
-from lgmpy import Lgm_CTrans, Lgm_Vector, magcoords
-from lgmpy.Lgm_Wrap import Lgm_JD, LGM_TIME_SYS_UTC, Lgm_init_ctrans, \
+from . import Lgm_CTrans, Lgm_Vector, magcoords
+from .Lgm_Wrap import Lgm_Date_to_JD, LGM_TIME_SYS_UTC, Lgm_init_ctrans, \
     Lgm_Convert_Coords, Lgm_Set_Coord_Transforms
 try:
     import spacepy.time as spt
@@ -58,4 +58,5 @@ def Lgm2jd(datelong, utc, cTrans=None):
         c = pointer(Lgm_CTrans.Lgm_CTrans())
     else:
         c = cTrans
-    JD = Lgm_JD(c_date.year, c_date.month, c_date.day, utc, LGM_TIME_SYS_UTC, c)
+    JD = Lgm_Date_to_JD(datelong, utc, c)
+    return JD
