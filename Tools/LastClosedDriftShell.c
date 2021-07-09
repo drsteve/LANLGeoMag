@@ -58,8 +58,8 @@ static struct argp_option Options[] = {
     {"nFLsInDriftShell",'n',    "nFLsInDriftShell",           0,        "Number of Field Lines to use in construction of drift shell. Use values in the range [6,240]. Default is 24." },
     {"Delta",           'd',    "delta",                      0,        "Cadence of LCDS calculation [minutes]. Default is 30."      },
     {"LT",              'L',    "LT",                         0,        "Local time for LCDS search plane. Default is 0 (midnight)."      },
-    {"StartDate",       'S',    "yyyymmdd",                   0,        "StartDate "                              },
-    {"EndDate",         'E',    "yyyymmdd",                   0,        "EndDate "                                },
+    {"StartDate",       'S',    "YYYY-MM-DD[Thh:mm:ss]",      0,        "StartDate (ISO8601)"                              },
+    {"EndDate",         'E',    "YYYY-MM-DD[Thh:mm:ss]",      0,        "EndDate (ISO8601)"                                },
     {"ShabanskyHandling",'B',   "ShabanskyHandlingStrategy",  0,        "Handling strategy for Shabansky orbits. 0 (default) is ignore; 1 halves target I in Shabansky region; 2 rejects any shell with multiple bounce regions."},
     {"UseEop",          'e',    0,                            0,        "Use Earth Orientation Parameters when computing ephemerii" },
     {"Force",           'F',    0,                            0,        "Overwrite output file even if it already exists" },
@@ -228,11 +228,6 @@ int main( int argc, char *argv[] ){
     } else {
         Lgm_GeometricSeq( arguments.StartK,  arguments.EndK,   nK,   Kin );
     }
-//HACK:
-nK=3;
-Kin[0] = 0.05;
-Kin[1] = 0.11;
-Kin[2] = 0.2;
 
     /*
      *  Set other options
