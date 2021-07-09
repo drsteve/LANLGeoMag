@@ -77,7 +77,7 @@
 #define LGM_EDIP        	1
 #define LGM_IGRF        	2
 #define LGM_DUNGEY      	3
-#define LGM_JENSENCAIN1960      4
+#define LGM_JENSENCAIN1960  4
 
 #define LGM_MAX_INTERP_PNTS 10000
 
@@ -102,6 +102,9 @@
 #define LGM_EXTMODEL_SCATTERED_DATA5    13
 #define LGM_EXTMODEL_TU82               14
 #define LGM_EXTMODEL_OP88               15
+
+#define LGM_EXTMODEL_SCATTERED_DATA6    23
+
 
 
 
@@ -376,6 +379,7 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_I_Integrator_epsrel;        // Quadpack epsrel tolerance for I_integrator
     double      Lgm_I_Integrator_epsabs;        // Quadpack epsabs tolerance for I_integrator
 
+
     /*
      *  These variables are needed to make Sb_integrand() reentrant/thread-safe.
      *  They basically used to be static declarations.
@@ -391,6 +395,15 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_Sb_Integrator_epsabs;       // Quadpack epsabs tolerance for Sb_integrator
 
 
+
+    /*
+     * Variables to control FluxTubeVolume integration
+     */
+    int         Lgm_n_V_integrand_Calls;
+    int         Lgm_V_Integrator;
+
+    double      Lgm_V_Integrator_epsrel;        // Quadpack epsrel tolerance for V_integrator
+    double      Lgm_V_Integrator_epsabs;        // Quadpack epsabs tolerance for V_integrator
 
 
     /*
@@ -444,12 +457,20 @@ typedef struct Lgm_MagModelInfo {
     double          KdTree_kNN_MaxDist2;
     Lgm_KdTreeData *KdTree_kNN;
     int             KdTree_kNN_Alloced; // number of elements allocated. (0 if unallocated).
+    int             KdTreeCopy;         // If set, then we assume the pointer
+                                        // to the tree data is a copy and we
+                                        // should not free it when calling
+                                        // Lgm_FreeMagInfo().
 
 
     /*
      *  hash table, etc.  used in Lgm_B_FromScatteredData*()
      */
     Lgm_DFI_RBF_Info   *rbf_ht;             // hash table (uthash)
+    double             dfi_rbf_ht_size;     // hash table size in MB
+    double             dfi_rbf_ht_maxsize;  // hash table max size in MB
+    CircularBuffer     RBF_DFI_CB;
+
 
     Lgm_Vec_RBF_Info   *vec_rbf_ht;         // hash table (uthash)
     double             vec_rbf_ht_size;     // hash table size in MB
@@ -760,12 +781,15 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 int Lgm_B_FromScatteredData4( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+int Lgm_B_FromScatteredData6( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData4_TearDown( Lgm_MagModelInfo *Info ); // unify the structs to avoid having this
 
 void Lgm_B_FromScatteredData5_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData5_TearDown( Lgm_MagModelInfo *Info ); // I dont like this proliferation of routines here..
+void Lgm_B_FromScatteredData6_SetUp( Lgm_MagModelInfo *Info );
+void Lgm_B_FromScatteredData6_TearDown( Lgm_MagModelInfo *Info ); // I dont like this proliferation of routines here..
 
 
 /*
@@ -783,6 +807,8 @@ int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info);
 /*
  * routines/functions for field integrals, invariants, etc.
  */
+double      FluxTubeVolume( Lgm_MagModelInfo *fInfo );
+double      V_integrand( double s, _qpInfo *qpInfo );
 double      Iinv( Lgm_MagModelInfo *fInfo );
 double      I_integrand( double s, _qpInfo *qpInfo );
 double      Iinv_interped( Lgm_MagModelInfo *fInfo );

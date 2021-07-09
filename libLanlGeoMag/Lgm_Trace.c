@@ -105,7 +105,7 @@
  */
 int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info ) {
 
-    int		    i, reset, flag1, flag2, flag3, InitiallyBelowTargetHeight, done;
+    int		    i, reset, flag1, flag2, InitiallyBelowTargetHeight, done;
     double	    sgn=1.0, R, Rtarget, Rinitial, Rplus, H, Hinitial;
     Lgm_Vector	w, Bvec;
     double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, Hdid, Hnext, Htry;
@@ -114,6 +114,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     Lgm_Vector  u_scale, P, gpp;
 
 
+u_scale.x =  u_scale.y = u_scale.z = 1.0;
 
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
@@ -135,6 +136,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
 
         // must be inside the Earth, which is no good -- bail with
         // LGM_INSIDE_EARTH error code
+        if ( Info->VerbosityLevel > 2 ) { printf("Initial point is inside the Earth\n"); }
         return( LGM_INSIDE_EARTH );
 
     } else if ( Rinitial < WGS84_A ) {
@@ -148,6 +150,7 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
         if ( GeodHeight < 0.0 )  {
 
             // inside the Earth, which is no good -- bail with error
+            if ( Info->VerbosityLevel > 2 ) { printf("Initial point is inside the Earth\n"); }
             return( LGM_INSIDE_EARTH );
 
         }
@@ -228,6 +231,9 @@ Info->Hmax = 0.10;
 
     
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
+if (Info->VerbosityLevel == -100){
+printf("u = %g %g %g    v2, Height, sgn, TOL1 = %g %g %g, %g, %g, %g\n", u->x, u->y, u->z, v2->x, v2->y, v2->z, Height, sgn, TOL1);
+}
     Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
 double MIKEA = Info->Trace_s;
     Info->v2_final = *v2;
@@ -247,37 +253,81 @@ double MIKEB = Info->Trace_s;
 
     if ( flag1 && flag2 ) {
 
+ /*
+  *    Pre-trace the FL to find the true global Bmin. This is necessary for FLs
+  *    that have multiple minima on the -- probably wasteful otherwise.
+  *    We could also add code to detect number of minima here.
+  *    
+  *    1. Copy the Info structure so we dont mess anything up.
+  *    2. Start from the southern footpoint (v1) and tracev up to north (we know the distance.)
+  *    3. save the various info as well as how far we are in s.
+  */
+  double tSS, tBmin, s_approx;
+  Lgm_Vector u_approx;
+  int        ii, iBmin;
+  Lgm_MagModelInfo *Info2 = Lgm_CopyMagInfo( Info );
+
+//printf("Info2->s[%d] = %g\n", iBmin, Info2->s[iBmin]);
+  tSS = Info->Snorth + Info->Ssouth;
+  Lgm_TraceLine3( v1, tSS, 500, 1.0, 1e-7, FALSE, Info2 );
+  tBmin = 9e99;
+  iBmin = -1;
+  for (ii=0; ii<Info2->nPnts; ii++){
+    if (Info2->Bmag[ii] <= tBmin) {
+        tBmin = Info2->Bmag[ii];
+        iBmin = ii;
+    }
+  }
+  if ( (iBmin >= 0) && (iBmin < Info2->nPnts) ){
+    u_approx.x = Info2->Px[iBmin];
+    u_approx.y = Info2->Py[iBmin];
+    u_approx.z = Info2->Pz[iBmin];
+    s_approx   = Info2->s[iBmin];  // distancev along FL from v1 to approximate global Bmin.
+  } else {
+    u_approx = *u;
+    s_approx = 0.0;
+  }
+//printf("u_approx = %g %g %g\n", u_approx.x, u_approx.y, u_approx.z);
+//printf("Info2->s[%d] = %g\n", iBmin, Info2->s[iBmin]);
+//printf("Info2->Bmag[%d] = %g\n", iBmin-1, Info2->Bmag[iBmin-1]);
+//printf("Info2->Bmag[%d] = %g\n", iBmin, Info2->Bmag[iBmin]);
+//printf("Info2->Bmag[%d] = %g\n", iBmin+1, Info2->Bmag[iBmin+1]);
+  Lgm_FreeMagInfo( Info2 );
+
+  // We should probably put in a test here to see if the final point from
+  // TraceLine3() is different than what the other routines gives.
+  // This could be the basis for dynamically setting the tolerances.
+
+
+
+  
+
 	    /*
 	     *  Closed FL -- attempt to trace to Eq Plane.
 	     */
-        //Lgm_TraceToMinBSurf( v1, v3, TOL1, TOL2, Info );
-        //Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info );
-        /*
-         * Check the result of Lgm_TraceToMinBSurf to make sure it returns a closed field line
-         */
-        flag3 = Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
-        if (flag3 != LGM_CLOSED) {
-                printf("Major problem in Lgm_Trace(): northern and southern footpoints found, but TraceToMinBSurf does not return LGM_CLOSED, rather returns %d. Returning %d.\n", flag3, flag3);
-                return(flag3);
-                }
+        //Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
+        Lgm_TraceToMinBSurf( &u_approx, v3, 0.1, TOL2, Info );
         Info->v3_final = *v3;
         Info->Pmin = *v3;
         //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
         Info->Bfield( v3, &Bvec, Info );
         Info->Bvecmin = Bvec;
         Info->Bmin = Lgm_Magnitude( &Bvec );
-        //printf("Bmin = %.15lf\n",  Info->Bmin );
+//        printf("Bmin = %.15lf\n",  Info->Bmin );
+//        printf("Info->Trace_s = %.15lf\n",  Info->Trace_s );
+//printf("s_approx - Info->Trace_s = %g\n", s_approx - Info->Trace_s);
+//exit(0);
 
         /*
          * Various FL arc lengths...
          *  Snorth - distance from S/C to northern footpoint (set above)
          *  Ssouth - distance from S/C to southern footpoint (set above)
          *  Stotal - Total FL length ( Snorth + Ssouth ) (only compute for closed FL)
-         *  Smin   - distance from southern footpoint to S/C (Ssouth - what we
-         *           got from Lgm_TraceToMinBSurf() because we started at S/C)
+         *  Smin   - Distance from southern footpoint to Pmin along the FL. (in Re).
          */
-        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length
-        Info->Smin   = Info->Ssouth - Info->Trace_s;  // length from south foot to S/C
+        Info->Stotal = Info->Snorth + Info->Ssouth;   // Total FL length
+        //Info->Smin   = Info->Ssouth - Info->Trace_s;  // length from south foot to Pmin
+Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
         Info->Trace_s = Info->Stotal;
 //printf("Info->Ssouth, Info->Trace_s = %g %g\n", Info->Ssouth, Info->Trace_s);
         
@@ -363,8 +413,8 @@ double MIKEB = Info->Trace_s;
  	     */
         Info->v1_final = *v1;
         Info->v2_final = *v2;
-        Info->Stotal = Info->Snorth + Info->Ssouth; // Total FL length within bounding box
-        Info->Trace_s = Info->Stotal;
+        Info->Stotal   = Info->Snorth + Info->Ssouth; // Total FL length within bounding box
+        Info->Trace_s  = Info->Stotal;
 
 	    return( LGM_OPEN_IMF );
 

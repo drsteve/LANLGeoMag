@@ -12,7 +12,7 @@ int main( ) {
     double              Time, JD, JDs, JDe, UTC, x, y, z, r, dist, *Dist, delta;
     long int            Date, KeepList[10000], nKeepList, Id;
     unsigned long int   n, *Idx, nSearches, Id_Old;
-    char                Filename[256];
+    char                Filename[256], IsoDateTime[40];
     Lgm_KdTree          *KdTree;
     Lgm_KdTreeData      *kNN;
     int                 K, Kgot, i, j, jj, d, D, k, ny, nm, nd, Keep;
@@ -30,26 +30,25 @@ int main( ) {
     /*
      * Read in Dst data from 1976 -> 2011
      */
-    Date = 19580101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 19760101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
     Date = 20110101; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
-    Date = 19760102; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
     n = 0;
     for ( JD=JDs; JD<=JDe; JD += 1.0 ) {
         Date = Lgm_JD_to_Date( JD, &ny, &nm, &nd, &UTC );
         sprintf( Filename, "/home/mghenderson/Data/Dst/%4d/Dst_%ld.dat", ny, Date );
         printf("reading: %s\n", Filename );
-        //if ( (fp = fopen( Filename, "r" ) ) != NULL ) {
-        //    while ( fscanf( fp, "%lf %lf %lf %lf %lf\n", &Time, &dum1, &dum2, &dum3, &DstIndex ) != EOF ){
-        //        Dst[n] = DstIndex;
-        //        if ((Time > 0.0)&&(Time < 1.0)&&(Date == 20011124)) printf("n = %ld\n", n);
-        //        if ( n == 120228 ) printf("Date = %ld\n", Date);
-        //        if ( n == 250434 ) printf("Date = %ld\n", Date);
-        //        ++n;
-        //    }
-        //    fclose( fp );
+        if ( (fp = fopen( Filename, "r" ) ) != NULL ) {
+            while ( fscanf( fp, "%19s %ld %lf %lf", IsoDateTime, &Date, &Time, &DstIndex ) != EOF ){
+//printf("IsoDateTime = %s\n", IsoDateTime);
+                Dst[n] = DstIndex;
+                //if ((Time > 0.0)&&(Time < 1.0)&&(Date == 20011124)) printf("n = %ld\n", n);
+                //if ( n == 120228 ) printf("Date = %ld\n", Date);
+                //if ( n == 250434 ) printf("Date = %ld\n", Date);
+                ++n;
+            }
+            fclose( fp );
 
-        //}
+        }
     }
     printf("n = %ld\n", n);
 
@@ -59,14 +58,19 @@ int main( ) {
      */
     D = 96*2;
     LGM_ARRAY_2D( u, D, n, double );
+long int nj =0;
     for ( j=0; j<n-2*D; j++ ) {
+//printf("j=%d\n", j);
         for ( d=0; d<D; d++ ) {
             u[d][j] = Dst[j+d];
         }
+        ++nj;
     }
+printf("nj = %ld\n", nj);
     printf("Creating %d dimensional KdTree with %ld points\n", D, n);
     Lgm_ElapsedTimeInit( &t, 255, 150, 0 );
-    KdTree = Lgm_KdTree_Init( u, (void **)B, n, D );
+    //KdTree = Lgm_KdTree_Init( u, (void **)B, n, D );
+    KdTree = Lgm_KdTree_Init( u, (void **)B, nj, D );
     Lgm_PrintElapsedTime( &t );
 
 

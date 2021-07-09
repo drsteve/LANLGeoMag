@@ -1,3 +1,4 @@
+#include <gsl/gsl_eigen.h>
 /*! \file Lgm_DFI_RBF.c
  *  \brief Routines to perform Divergence-Free-Interpolation of vector field data (for example, B defined on meshes).
  *
@@ -229,6 +230,7 @@
 
 #include "Lgm/Lgm_RBF.h"
 
+//#define LGM_DFI_RBF_SOLVER  LGM_SVD
 //#define LGM_DFI_RBF_SOLVER  LGM_CHOLESKY_DECOMP
 #define LGM_DFI_RBF_SOLVER  LGM_PLU_DECOMP
 
@@ -623,18 +625,23 @@ Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lg
         rbf->LookUpKey[i] = I_data[i];
         rbf->v[i] = v[i];
     }
-    // This subtraction doesntm seem to work out very well...
-//    rbf->Bx0 = B[0].x;
-//    rbf->By0 = B[0].y;
-//    rbf->Bz0 = B[0].z;
+    // This subtraction doesnt seem to work out very well...
+    rbf->Bx0 = B[0].x;
+    rbf->By0 = B[0].y;
+    rbf->Bz0 = B[0].z;
 
 double Bbkg;
 for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].x; rbf->Bx0 = Bbkg/(double)n;
 for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].y; rbf->By0 = Bbkg/(double)n;
 for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].z; rbf->Bz0 = Bbkg/(double)n;
-    rbf->Bx0 = 0.0;
-    rbf->By0 = 0.0;
-    rbf->Bz0 = 0.0;
+/*
+*/
+//    rbf->Bx0 = B[0].x;
+//    rbf->By0 = B[0].y;
+//    rbf->Bz0 = B[0].z;
+//rbf->Bx0 = 0.0;
+//rbf->By0 = 0.0;
+//rbf->Bz0 = 0.0;
     
     /*
      * Fill d array. (Subtract off the field at the nearest point v[0] -- See
@@ -660,6 +667,7 @@ for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].z; rbf->Bz0 = Bbkg/(double)n;
 
             // Get Phi( v_i - v_j )
             Lgm_DFI_RBF_Phi( &v[i], &v[j], Phi, rbf );
+            //printf("v%d = %g %g %g   v%d = %g %g %g   Phi = %g %g %g  %g %g %g  %g %g %g\n", i, v[i].x, v[i].y, v[i].z, j, v[j].x, v[j].y, v[j].z, Phi[0][0], Phi[0][1], Phi[0][2], Phi[1][0], Phi[1][1], Phi[1][2], Phi[2][0], Phi[2][1], Phi[2][2]);
 
             for ( p=0; p<3; p++ ){ // subarray row
                 for ( q=0; q<3; q++ ){  // subarray column
@@ -682,8 +690,27 @@ for ( Bbkg = 0.0, i=0; i<n; i++ ) Bbkg += B[i].z; rbf->Bz0 = Bbkg/(double)n;
         }
         printf("\n");
     }
-    */
+    printf("\n\n");
 
+
+gsl_vector_complex *eval = gsl_vector_complex_alloc (n3);
+gsl_matrix_complex *evec = gsl_matrix_complex_alloc (n3, n3);
+
+gsl_eigen_nonsymmv_workspace *w = gsl_eigen_nonsymmv_alloc (n3);
+gsl_eigen_nonsymmv( A, eval, evec, w );
+gsl_eigen_nonsymmv_free (w);
+
+for (i=0; i<n3; ++i){
+    gsl_complex eval_i = gsl_vector_complex_get (eval, i);
+    printf ("eigenvalue = %g + %gi\n", GSL_REAL(eval_i), GSL_IMAG(eval_i));
+}
+printf("\n\n");
+
+gsl_matrix_complex_free(evec);
+gsl_vector_complex_free(eval);
+
+
+    */
 
 
 
