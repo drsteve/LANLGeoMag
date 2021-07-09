@@ -7,7 +7,7 @@ CFLAGS    := `pkg-config --cflags lgm` $(CDF_INC) -g `pkg-config --cflags hdf5 2
 CC        = gcc -Wno-unused-variable
 FILES     = MagEphemFromFile
 
-all: $(FILES) DreamAssim FluxToPSD
+all: $(FILES)
 
 -include extra_flags
 

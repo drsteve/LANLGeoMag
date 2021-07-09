@@ -11,11 +11,8 @@ f2p: f2p.c
 f2p_v2: f2p_v2.c DumpSvg.c
 	gcc f2p_v2.c DumpSvg.c `pkg-config --cflags --libs lgm` -o f2p_v2
 
-PSD_Versus_EA: PSD_Versus_EA.c DumpSvg.c
-	gcc PSD_Versus_EA.c DumpSvg.c `pkg-config --cflags --libs lgm` -o PSD_Versus_EA
-
 FluxToPSD: FluxToPSD.c DumpSvg.c
-	h5cc FluxToPSD.c DumpSvg.c `pkg-config --cflags --libs lgm` -o FluxToPSD
+	h5cc FluxToPSD.c DumpSvg.c CDFUtils.c `pkg-config --cflags --libs lgm` -lcdf -o FluxToPSD
 
 clean:
-	rm f2p f2p_v2 FluxToPSD
+	-rm -f f2p f2p_v2 FluxToPSD
