@@ -20,7 +20,6 @@ from .Lgm_Wrap import LGM_EPH_DE, LGM_PN_IAU76
 from .Lgm_Wrap import GEI2000_COORDS, MOD_COORDS, TOD_COORDS, TEME_COORDS, PEF_COORDS, GEO_COORDS 
 from .Lgm_Wrap import GSE_COORDS, GSM_COORDS, SM_COORDS, EDMAG_COORDS, CDMAG_COORDS, GSE2000_COORDS 
 from . import Lgm_Vector, Lgm_CTrans, Lgm_MagModelInfo
-from .Lstar import Lstar_Data
 
 from ._Bfield_dict import Bfield_dict
 
