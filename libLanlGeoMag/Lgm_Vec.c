@@ -141,9 +141,7 @@ double Lgm_NormalizeVector(Lgm_Vector *a) {
  * multiply the given vector by a scalar value
  */
 void Lgm_ScaleVector(Lgm_Vector *a, double value) {
-    a->x *= value;
-    a->y *= value;
-    a->z *= value;
+    Lgm_VecMultiplyScalar(&a, value);
 }
 
 
@@ -175,6 +173,15 @@ void Lgm_VecAdd(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b ) {
     c->x = a->x + b->x;
     c->y = a->y + b->y;
     c->z = a->z + b->z;
+}
+
+/*
+ * Elementwise multiplication of two vectors (e.g., c.x = a.x * b.x, etc.)
+ */
+void Lgm_VecMult(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b) {
+    c->x = a->x * b->x;
+    c->y = a->y * b->y;
+    c->z = a->z * b->z;
 }
 
 /* 

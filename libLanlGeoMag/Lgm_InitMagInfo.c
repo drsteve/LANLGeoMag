@@ -467,11 +467,8 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                 strcpy( m->ExtMagModelStr2, "Tsyganenko Sitnov 2004 Magnetic Field Model" );
                                 strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A., and M. I. Sitnov (2005), Modeling the dynamics of the inner magnetosphere during strong geomagnetic storms, J. Geophys. Res., 110, A03208, doi:10.1029/2004JA010798.");
                                 strcpy( m->ExtMagModelStr4, "Comments: Also known as TS05.");
-
-
-
-
                                 break;
+
         case LGM_EXTMODEL_TS07:
                                 m->Bfield = Lgm_B_TS07;
                                 m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
@@ -479,6 +476,14 @@ void Lgm_MagModelInfo_Set_MagModel( int InternalModel, int ExternalModel, Lgm_Ma
                                 strcpy( m->ExtMagModelStr2, "Tsyganenko Sitnov 2007 Magnetic Field Model" );
                                 strcpy( m->ExtMagModelStr3, "Reference: Tsyganenko, N. A., and M. I. Sitnov (2007), Magnetospheric configurations from a high-resolution data-based magnetic field model, J. Geophys. Res., 112, A06225, doi:10.1029/2007JA012260." );
                                 strcpy( m->ExtMagModelStr4, "Comments: Coefficients are time-dependent. Coefficient files are required for this model to work properly.");
+                                break;
+
+        case LGM_EXTMODEL_TA16:
+                                m->Bfield = Lgm_B_TA16;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "TA16" );
+                                strcpy( m->ExtMagModelStr2, "Tsyganenko Andreeva 2016 RBF Magnetic Field Model" );
+                                strcpy( m->ExtMagModelStr3, "References: Tsyganenko, N. A., and V. A. Andreeva (2016; doi: 10.1002/2016JA023217) and V. A. Andreeva and N. A. Tsyganenko (2016; doi: 10.1002/2015JA022242)" );
                                 break;
 
         case LGM_EXTMODEL_OP77:

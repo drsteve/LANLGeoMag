@@ -12,6 +12,7 @@
 #include "Lgm_Tsyg2001.h"
 #include "Lgm_Tsyg2004.h"
 #include "Lgm_Tsyg2007.h"
+#include "Lgm_TA2016.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 //#include "Lgm/Lgm_FastPowPoly.h"
@@ -102,6 +103,7 @@
 #define LGM_EXTMODEL_SCATTERED_DATA5    13
 #define LGM_EXTMODEL_TU82               14
 #define LGM_EXTMODEL_OP88               15
+#define LGM_EXTMODEL_TA16               16
 
 
 
@@ -521,6 +523,11 @@ typedef struct Lgm_MagModelInfo {
      */
     LgmTsyg2007_Info    TS07_Info;
 
+    /*
+     *  Info structure for TA16
+     */
+    LgmTA16_Info    TA16_Info;
+
 
     /*
      *  hash table used in Lgm_FastPow()
@@ -736,7 +743,12 @@ void Lgm_DeAllocate_TS07( LgmTsyg2007_Info *tInfo );
 int Lgm_B_TS07( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Tsyg_TS07( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS, double X, double Y, double Z, double *BX, double *BY, double *BZ, LgmTsyg2007_Info *tInfo );
 
-
+/*
+ * TA16
+ *
+ * Function Prototypes for TA16 model
+ */
+int Lgm_B_TA16( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 
 /*
  *  T01S
