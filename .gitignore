@@ -1,3 +1,8 @@
+#Ignore extensionless tests/check_* so can ignore the compiled tests
+#This pair of rules is first so that the "do not ignore anything with extension"
+#is overridden by more specific ignore rules later
+/tests/check_*
+!/tests/check_*.*
 *~
 *callgrind*
 *.pyc
@@ -39,6 +44,7 @@ INSTALL
 Python/Makefile
 *.dSYM
 .DS_Store
+/Python/Lgm_Wrap.py
 /Python/Lgm_Wrap_gen.py
 /Python/ctypesgen.log
 /Tools/LastClosedDriftShell
@@ -53,3 +59,7 @@ Python/Makefile
 /libLanlGeoMag/lgm.pc
 /libLanlGeoMag/libLanlGeoMag.la
 /INSTALL
+/tests/check_*.got
+/tests/check_*.log
+/tests/check_*.trs
+/tests/test-suite.log

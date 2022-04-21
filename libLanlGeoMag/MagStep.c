@@ -20,26 +20,24 @@
 #define FMIN(a,b)  (((a)<(b))?(a):(b))
 
 int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
-          double Htry, double *Hdid, double *Hnext,
-          double sgn, double *s, int *reset,
-          int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
+    double Htry, double *Hdid, double *Hnext,
+    double sgn, double *s, int *reset,
+    int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
     Lgm_Vector u0;
     double  eps;
+    int status = 1;
 
     u0 = *u;
     if (        Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_BS ) {
 
-//printf("Info->Lgm_MagStep_BS_Eps = %g\b", Info->Lgm_MagStep_BS_Eps);
-//exit(0);
-//Info->Lgm_MagStep_BS_Eps = 1e-7;
         eps = Info->Lgm_MagStep_BS_Eps;
-        Lgm_MagStep_BS( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
+        status = Lgm_MagStep_BS( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
 
     } else if ( Info->Lgm_MagStep_Integrator == LGM_MAGSTEP_ODE_RK5 ) {
 
         eps = Info->Lgm_MagStep_RK5_Eps;
-        Lgm_MagStep_RK5( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
+        status = Lgm_MagStep_RK5( u, u_scale, Htry, Hdid, Hnext, eps, sgn, s, reset, Mag, Info );
 
     } else {
 
@@ -49,7 +47,7 @@ int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
     }
 
 
-    return(1);
+    return(status);
 
 
 }
@@ -343,7 +341,7 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
     scale[0] = u_scale->x; scale[1] = u_scale->y; scale[2] = u_scale->z;
 
     if ( fabs(htry) < 1e-16 ) {
-        printf("Lgm_MagStep(): Requested stepsize is very small (returning with -1). htry = %g\n", htry );
+        printf("%s(): Requested stepsize is very small (returning with -1). htry = %g\n", __func__, htry );
         return(-1);
     }
 
@@ -381,14 +379,14 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
     u0 = *u;
     if ( (*Mag)(&u0, &b0, Info) == 0 ) {
         // bail if B-field eval had issues.
-        printf("Lgm_MagStep(): B-field evaluation at u0 = %g %g %g returned with errors (returning with -1)\n", u0.x, u0.y, u0.z );
+        printf("%s(): B-field evaluation at u0 = %g %g %g returned with errors (returning with -1)\n", __func__, u0.x, u0.y, u0.z );
         return(-1);
     }
     ++(Info->Lgm_nMagEvals);
     Bmag = Lgm_NormalizeVector(&b0);
     if ( Bmag < 1e-16 ) {
         // bail if B-field magnitude is too small
-        printf("Lgm_MagStep(): Bmag too small at u0 = %g %g %g (Bmag = %g; Bx,y,z = %g, %g, %g) (returning with -1).\n", u0.x, u0.y, u0.z, Bmag, b0.x, b0.y, b0.z );
+        printf("%s(): Bmag too small at u0 = %g %g %g (Bmag = %g; Bx,y,z = %g, %g, %g) (returning with -1).\n", __func__, u0.x, u0.y, u0.z, Bmag, b0.x, b0.y, b0.z );
 //printf("Line %d\n", __LINE__ );
 //exit(-1);
         return(-1);
@@ -528,9 +526,6 @@ Info->Lgm_MagStep_BS_last_step = FALSE;
 
 
     
-
-
-
 
 
     // Determine optimal order for next step.

@@ -9,7 +9,11 @@ License:		Copyright (C) 2010, LANS LLC, all rights reserved.
 Name: 			%{name}
 Version: 		%{version}
 Release: 		%{release}%{?dist}
+BuildRequires:          texlive-latex
+BuildRequires:          gsl
+BuildRequires:          doxygen
 Provides:               lanlgeomag
+#Requires:               perl
 Requires:               check
 Requires:               gsl
 Requires:               hdf5
@@ -49,6 +53,13 @@ Requires: lanlgeomag
 %description data
 Data files for lanlgeomag
 
+%package doc
+Summary: Doc files for lanlgeomag
+Requires: lanlgeomag
+
+%description doc
+Doc files for lanlgeomag
+
 %package python
 Summary: Python bindings for lanlgeomag
 Requires: lanlgeomag
@@ -70,7 +81,6 @@ Python bindings for lanlgeomag
 echo "python_sitelib:"
 echo %{python_sitelib}
 #configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl --without-python
-#configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
 %configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
 make %{?_smp_mflags}
 
@@ -78,13 +88,19 @@ make %{?_smp_mflags}
 %makeinstall
 
 %clean
-/bin/rm -rf $RPM_BUILD_ROOT
+#/bin/rm -rf $RPM_BUILD_ROOT
 
 %files
+%defattr(-,root,root)
+%doc README HACKING NEWS COPYING
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_libdir}/pkgconfig/lgm.pc
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> edf9e734890fa771335b29f4e91321c0a80d3655
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*
@@ -94,6 +110,7 @@ make %{?_smp_mflags}
 
 %files data
 %defattr(-,root,root,-)
+<<<<<<< HEAD
 /usr/share/LanlGeoMag/EopData/*
 /usr/share/LanlGeoMag/Data/*
 
@@ -107,3 +124,24 @@ make %{?_smp_mflags}
 # %defattr(-,root,root,-)
 # /usr/share/LanlGeoMag/Images/*
 # /usr/share/LanlGeoMag/Stars/*
+=======
+%{_datadir}/*
+# /usr/share/LanlGeoMag/EopData/*
+# /usr/share/LanlGeoMag/Data/*
+
+%files doc
+%defattr(-,root,root,-)
+/usr/share/doc/lanlgeomag/*
+
+#files python
+#defattr(-,root,root,-)
+
+#{python_sitelib}/*
+
+
+#{_includedir}/Lgm/*
+#{_libdir}/libLanlGeoMag*
+#{_libdir}/pkgconfig/lgm.pc
+#/usr/lib/python2.6/site-packages/lgmpy/*
+#{_datadir}/*
+>>>>>>> edf9e734890fa771335b29f4e91321c0a80d3655

@@ -10,9 +10,11 @@ endif
 #SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) Python
 
-if DX_COND_pdf
-    MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
-    uninst_pdf = $(pdfdir)
+if DX_OVERALL
+    if DX_COND_pdf
+        MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
+        uninst_pdf = $(pdfdir)
+    endif
 endif
 if DX_COND_ps
     MAYBE_PS = @DX_DOCDIR@/@DX_PROJECT@.ps
@@ -25,7 +27,12 @@ endif
 if ENABLE_DOCS
     MAYBE_STATIC_PDF = Doc/LanlGeoMag_Documentation.pdf
 endif
-dist_pdf_DATA = $(MAYBE_PDF) $(MAYBE_STATIC_PDF)
+if DX_COND_pdf
+    dist_pdf_DATA = $(MAYBE_STATIC_PDF)
+else
+    dist_pdf_DATA = $(MAYBE_STATIC_PDF)
+endif
+
 nodist_ps_DATA = $(MAYBE_PS)
 if DX_COND_doc
 dist_noinst_DATA = @DX_DOCDIR@/@DX_PROJECT@.tag
@@ -48,24 +55,22 @@ include doxygen_include.am
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
-EXTRA_DIST = lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
+EXTRA_DIST = README.md lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
 	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed
 
 ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+
+README: README.md
+	pandoc -f markdown -t plain --wrap=none $< -o $@
+
+CLEANFILES = README
 
 if DX_COND_html
 #and make sure html is build when doing a make all
 #(for some reason this bit doesn't honor DESTDIR without doing it explicitly)
 all-local: @DX_DOCDIR@/html
 
-install-data-local:
-	$(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/
-	$(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(DESTDIR)$(htmldir)/html/
-	if [ -d @DX_DOCDIR@/html/search ]; then \
-	    $(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/search; \
-	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(DESTDIR)$(htmldir)/html/search; \
-	fi
 
 uninstall-local:
 	-rm -rf $(htmldir)/html/
@@ -80,6 +85,14 @@ uninst_ps = $(psdir)
 uninst_pdf = $(pdfdir)
 
 install-data-local:
+if DX_OVERALL
+if DX_COND_html
+	$(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/
+	$(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(DESTDIR)$(htmldir)/html/
+	if [ -d @DX_DOCDIR@/html/search ]; then \
+	    $(MKDIR_P) -m 755 $(DESTDIR)$(htmldir)/html/search; \
+	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(DESTDIR)$(htmldir)/html/search; \
+	fi
 	if [ -f @DX_DOCDIR@/html/index.html ]; then \
 	    $(MKDIR_P) -m 755 $(htmldir)/html/; \
 	    $(INSTALL_DATA) @DX_DOCDIR@/html/*.* $(htmldir)/html/; \
@@ -88,22 +101,31 @@ install-data-local:
 	    $(MKDIR_P) -m 755 $(htmldir)/html/search; \
 	    $(INSTALL_DATA) @DX_DOCDIR@/html/search/*.* $(htmldir)/html/search; \
 	fi
+endif				# DX_COND_html
 	if [ -f @DX_DOCDIR@/@DX_PROJECT@.ps ]; then \
 	    $(MKDIR_P) -m 755 $(psdir); \
 	    $(INSTALL_DATA) @DX_DOCDIR@/@DX_PROJECT@.ps $(psdir); \
 	fi
-	if [ -f @DX_DOCDIR@/@DX_PROJECT@.pdf ]; then \
+	if [ -f $(MAYBE_PDF) ]; then \
 	    $(MKDIR_P) -m 755 $(pdfdir); \
-	    $(INSTALL_DATA) @DX_DOCDIR@/@DX_PROJECT@.pdf $(pdfdir); \
+	    $(INSTALL_DATA) $(MAYBE_PDF) $(pdfdir); \
 	fi
-
+endif				# DX_OVERALL
 uninstall-local:
 	-rm -rf $(htmldir)/html/
 	-rm -f $(psdir)/@DX_PROJECT@.ps
-	-rm -f $(pdfdir)/@DX_PROJECT@.pdf
+	-rm -f $(pdfdir)/`basename $(MAYBE_PDF)`
 endif ENABLE_DOCS
 endif !DX_COND_doc
 
 #remove any doc directories we've made
 uninstall-hook:
 	-rmdir $(uninst_ps) $(uninst_pdf) $(uninst_html) $(docdir)
+
+# CLEANFILES += \
+#     ./share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamhr_?_??.par \
+#     ./share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/tailamebhr?.par \
+#     ./share/LanlGeoMag/Data/TS07D_FILES/TAIL_PAR/TAIL_PAR.zip \
+#     ./share/LanlGeoMag/Data/TS07D_FILES/Coeffs/????_???/2008_???_??_??.par \
+#     ./share/LanlGeoMag/Data/DE_FILES/jpl_de421.h5 \
+#     ./share/LanlGeoMag/Stars/Stars.txt

@@ -48,15 +48,18 @@ class Closed_FieldTests(unittest.TestCase):
 
     def test_extended_out(self):
         """Closed_Field extended_out flag should have known behaviour (regression)"""
-        data = Closed_Field([1,2,2], self.date, extended_out = True)
-        self.assertEqual(data[0], 'LGM_CLOSED')
-        numpy.testing.assert_allclose(data[1],
-                [-0.062054,  0.394555,  0.930685], rtol=1e-4)
-        numpy.testing.assert_allclose(data[2],
-                [ 0.76665,  0.33534, -0.57132], rtol=1e-4)
-        numpy.testing.assert_allclose(data[3],
-                [ 2.27943481,  2.80962393,  1.12454726], rtol=1e-4)
-        self.assertAlmostEqual(data[4], 3.737398946245622, places=5)
+        ans, north_fp, south_fp, minB, L \
+            = Closed_Field([1,2,2], self.date, extended_out=True)
+        self.assertEqual(ans, 'LGM_CLOSED')
+        numpy.testing.assert_allclose(north_fp,
+                [-0.0620421299, 0.39455411901, 0.9306480813], rtol=1e-5)
+        numpy.testing.assert_allclose(south_fp,
+                [0.7666220541, 0.3352533669, -0.571429965], rtol=1e-5)
+        numpy.testing.assert_allclose(minB,
+                [2.279625676, 2.809834544, 1.1244815844], rtol=1e-5)
+        #This value isn't tested in the C
+        #So this is essentially a regression test on _simpleL
+        self.assertAlmostEqual(L, 3.7371417478198037, places=5)
 
 
 if __name__ == '__main__':
