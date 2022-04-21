@@ -68,10 +68,6 @@ if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/DE_FILES $(DESTDIR)$(LGM_DE_DATA_DIR)/.
 	@echo Additional DE files should be placed in $(DESTDIR)$(LGM_DE_DATA_DIR)
-	$(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
-	$(RSYNC_CMD) -arv $(srcdir)/Images/* $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/. # should cover BlueMarble stuff also.
-	$(MKDIR_P) $(DESTDIR)$(LGM_STARS_DATA_DIR)
-	$(RSYNC_CMD) -arv $(srcdir)/Stars/* $(DESTDIR)$(LGM_STARS_DATA_DIR)/.
 endif
 
 uninstall-hook:

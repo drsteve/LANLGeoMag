@@ -7,7 +7,8 @@ endif
 if HAVE_PYTHON
     MAYBE_PY = Python
 endif
-SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
+#SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
+SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) Python
 
 if DX_COND_pdf
     MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf

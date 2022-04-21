@@ -3,8 +3,6 @@
 %define name		@PACKAGE@
 %define version 	@VERSION@
 %define release		@PKG_RELEASE@
-## make sure you define _topdir as $HOME/rpmbuild in your .rpmmacros
-#%global buildroot	%{_topdir}/BUILDROOT
 
 Summary:		lanlgeomag -- lanlgeomag software collection
 License:		Copyright (C) 2010, LANS LLC, all rights reserved.
@@ -12,60 +10,100 @@ Name: 			%{name}
 Version: 		%{version}
 Release: 		%{release}%{?dist}
 Provides:               lanlgeomag
-Requires:               perl
 Requires:               check
 Requires:               gsl
 Requires:               hdf5
 Source: 		%{name}-%{version}.tar.gz
-Prefix: 		/usr
 Group: 			Applications/Science
 Provides:		lanlgeomag
 Buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 
+# # python main version
+# %define py_ver         %(echo `python -c "import sys; sys.stdout.write(sys.version[:3])"`)
+
+# # directories
+# %define py_prefix      %(echo `python -c "import sys; sys.stdout.write(sys.prefix)"`)
+# %define py_libdir      %{py_prefix}/lib/python%{py_ver}
+# # %define py_incdir      /usr/include/python%{py_ver}
+# # %define py_sitedir     %{py_libdir}/site-packages
+# # %define py_dyndir      %{py_libdir}/lib-dynload
+
 %description
-LANLGeoMag is a C-based library of magnetic-field models and tools for computing quantities relevant to geophysical and geospace research that rely on these models. 
-More generally, the library provides functionality to perform high precision transforms between time standards and coordinate systems.
+LANLGeoMag is a C-based library of magnetic-field models and tools for \
+computing quantities relevant to geophysical and geospace research that rely \
+on these models. More generally, the library provides functionality to perform \
+high precision transforms between time standards and coordinate systems.
+
+%package devel
+Summary: Development libraries and headers for lanlgeomag
+Requires: lanlgeomag
+
+%description devel
+Development libraries and headers for lanlgeomag
+
+%package data
+Summary: Data files for lanlgeomag
+Requires: lanlgeomag
+
+%description data
+Data files for lanlgeomag
+
+%package python
+Summary: Python bindings for lanlgeomag
+Requires: lanlgeomag
+
+%description python
+Python bindings for lanlgeomag
+
+# %package images
+# Summary: Image files for lanlgeomag
+# Requires: lanlgeomag
+
+# %description images
+# Image files for lanlgeomag
 
 %prep
-mkdir -p %{_topdir}/BUILD %{_topdir}/BUILDROOT
-echo "name is" "%{name}"
-echo "version is" "%{version}"
-echo "_isa is" "%{_isa}"
-echo "_arch is" "%{_arch}"
-echo "__isa_name is" "%{__isa_name}"
-echo "__isa_bits is" "%{__isa_bits}"
 %setup -q
 
 %build
-#./configure --prefix=/usr --disable-doxygen-html --disable-doxygen-pdf
-%configure --libdir=${RPM_BUILD_ROOT}%{_libdir} --prefix=${RPM_BUILD_ROOT}/usr --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
-make -j
+echo "python_sitelib:"
+echo %{python_sitelib}
+#configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl --without-python
+#configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
+%configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
+make %{?_smp_mflags}
 
 %install
-#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
-#export RPM_BUILD_ROOT=%{_topdir}/BUILDROOT
-echo _topdir is %{_topdir}
-echo RPM_BUILD_ROOT is $RPM_BUILD_ROOT
-echo buildroot is %{buildroot}
-echo _builddir is %{_builddir}
-#make prefix=${RPM_BUILD_ROOT}/usr install
 %makeinstall
-#make install 
-#make install-man
-#make doxygen-doc
-#mkdir -p %{buildroot}/share/doc/%{name}
-#cp -p doxygen-doc/lanlgeomag.pdf %{buildroot}/share/doc/%{name}
 
 %clean
 /bin/rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,root,root)
-#%doc README HACKING NEWS COPYING
-/usr/include/Lgm/*
-/usr/lib64/libLanlGeoMag*
-/usr/lib64/pkgconfig/lgm.pc
-/usr/lib/python2.6/site-packages/lgmpy/*
-/usr/share/LanlGeoMag/*
-/usr/share/doc/lanlgeomag/*
+%defattr(-,root,root,-)
+%{_libdir}/*.so.*
+%{_libdir}/pkgconfig/lgm.pc
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/*
+%{_libdir}/*.so*
+%{_libdir}/*.*a
+%{_docdir}/*
+
+%files data
+%defattr(-,root,root,-)
+/usr/share/LanlGeoMag/EopData/*
+/usr/share/LanlGeoMag/Data/*
+
+%files python
+%defattr(-,root,root,-)
+
+/usr/lib/python%{py_ver}/*
+
+
+# %files images
+# %defattr(-,root,root,-)
+# /usr/share/LanlGeoMag/Images/*
+# /usr/share/LanlGeoMag/Stars/*
