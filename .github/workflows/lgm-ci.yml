@@ -31,4 +31,8 @@ jobs:
         make
     - name: unit_tests
       run: |
-        make check
+        cd tests
+        make check_Sgp4
+        make check_CoordTrans
+        ./check_Sgp4
+        ./check_CoordTrans

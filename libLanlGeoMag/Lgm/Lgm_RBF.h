@@ -1,10 +1,10 @@
 #ifndef LGM_RBF
 #define LGM_RBF
 
-#include "Lgm/Lgm_Vec.h"
-#include "Lgm/Lgm_RBF.h"
-#include "Lgm/Lgm_DynamicMemory.h"
-#include "Lgm/uthash.h"
+#include "Lgm_Vec.h"
+#include "Lgm_RBF.h"
+#include "Lgm_DynamicMemory.h"
+#include "uthash.h"
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_vector.h>

@@ -3,10 +3,10 @@
 #include <math.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_poly.h>
-#include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_QuadPack.h"
-#include "Lgm/Lgm_PolyRoots.h"
-#include "Lgm/Lgm_Constants.h"
+#include "Lgm_CTrans.h"
+#include "Lgm_QuadPack.h"
+#include "Lgm_PolyRoots.h"
+#include "Lgm_Constants.h"
 
 
 #ifndef M_CDIP

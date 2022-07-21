@@ -16,9 +16,9 @@
 
 #include <stddef.h>
 
-#include "Lgm/Lgm_MagModelInfo.h"
-#include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_Octree.h"
+#include "Lgm_MagModelInfo.h"
+#include "Lgm_CTrans.h"
+#include "Lgm_Octree.h"
 
 #include <gsl/gsl_spline.h>
 

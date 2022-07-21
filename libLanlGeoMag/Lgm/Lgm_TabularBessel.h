@@ -1,7 +1,7 @@
 #ifndef LGM_TABULARBESSEL
 #define LGM_TABULARBESSEL
 
-#include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm_DynamicMemory.h"
 #include <math.h>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_spline.h>
