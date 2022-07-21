@@ -141,7 +141,7 @@ double Lgm_NormalizeVector(Lgm_Vector *a) {
  * multiply the given vector by a scalar value
  */
 void Lgm_ScaleVector(Lgm_Vector *a, double value) {
-    Lgm_VecMultiplyScalar(&a, value);
+    Lgm_VecMultiplyScalar(a, value);
 }
 
 
