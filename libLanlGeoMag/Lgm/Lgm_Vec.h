@@ -32,6 +32,7 @@ void 	    Lgm_MatTimesVec(double A[3][3], Lgm_Vector *, Lgm_Vector *);
 void        Lgm_MatTimesMat( double A[3][3], double B[3][3], double R[3][3] );
 void        Lgm_VecSub(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b );
 void        Lgm_VecAdd(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b );
+void        Lgm_VecMult(Lgm_Vector *c, Lgm_Vector *a, Lgm_Vector *b );
 double      Lgm_VecDiffMag(Lgm_Vector *a, Lgm_Vector *b );
 void        Lgm_Transpose( double A[3][3], double B[3][3] );
 void        Lgm_SphToCartCoords( double Lat, double Lon, double r, Lgm_Vector *c );
