@@ -479,7 +479,7 @@ int main(void) {
     SRunner *sr = srunner_create(s);
 
     printf("\n\n");
-    srunner_run_all(sr, CK_NORMAL);
+    srunner_run_all(sr, CK_ENV);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
 

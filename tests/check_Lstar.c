@@ -447,7 +447,7 @@ Suite *Lstar_suite(void) {
   tcase_add_test(tc_Lstar, test_Lstar_CDIPapprox);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha);
   tcase_add_test(tc_Lstar, test_Lstar_CDIPalpha2);
-  tcase_add_test(tc_Lstar, test_Lstar_McIlwain);
+  // tcase_add_test(tc_Lstar, test_Lstar_McIlwain);
   tcase_add_test(tc_Lstar, test_Lstar_Regressions);
 
   suite_add_tcase(s, tc_Lstar);
@@ -463,7 +463,7 @@ int main(void) {
     SRunner *sr = srunner_create(s);
 
     printf("\n\n");
-    srunner_run_all(sr, CK_NORMAL);
+    srunner_run_all(sr, CK_ENV);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
 
