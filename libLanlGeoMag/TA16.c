@@ -1,4 +1,6 @@
-/* Fortran 2008 port of TA16; S.K. Morley, Nov. 2021
+/* Clang port of TA16 model
+ * Originally ported from F77 to F2008 by S.K. Morley, Nov. 2021
+ * This port by S.K. Morley, July 2022
  * A data-based RBF model driven by interplanetary and ground-based data
  * Ported from version dated 10/19/2016, including the correction of Nov. 2021
  * which was found during the porting process.
@@ -13,11 +15,18 @@
  * NOTE: THE MODEL IS VALID ONLY UP TO Xgsw=-15 Re and should NOT be used tailward of that distance
  *------------------------------------------------------------------------------------------------------
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_TA2016.h"
+#ifndef LGM_INDEX_DATA_DIR
+#warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"
+#define LGM_INDEX_DATA_DIR    /usr/local/share/LanlGeoMag/Data
+#endif
 
 static double Lgm_TA16_As[22] = {
     12.544, -0.194, 0.305, 0.0573, 2.178,
@@ -39,27 +48,90 @@ void Lgm_Init_TA16(LgmTA16_Info *ta){
     LGM_ARRAY_1D( ta->ZSP,   ta->lenL, double );
     LGM_ARRAY_1D( ta->ZCP,   ta->lenL, double );
     LGM_ARRAY_1D( ta->RHBR,   ta->lenL, double );
-    ta->AAlloced = TRUE;
+    ta->ArraysAlloced = TRUE;
+    Lgm_GetData_TA16(ta);
+    TA2016_SetGrid(ta);
     return;
 }
 
+void Lgm_DeAllocate_TA16( LgmTA16_Info *t ){
 
-int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *Info) {
+    if ( t->ArraysAlloced == TRUE ) {
+        LGM_ARRAY_1D_FREE( t->A );
+        LGM_ARRAY_1D_FREE( t->XX );
+        LGM_ARRAY_1D_FREE( t->YY );
+        LGM_ARRAY_1D_FREE( t->ZZ );
+        LGM_ARRAY_1D_FREE( t->ST );
+        LGM_ARRAY_1D_FREE( t->RHO );
+        LGM_ARRAY_1D_FREE( t->ZSP );
+        LGM_ARRAY_1D_FREE( t->ZCP );
+        LGM_ARRAY_1D_FREE( t->RHBR );
+        t->ArraysAlloced = FALSE;
+    }
+}
+
+int Lgm_Copy_TA16_Info(LgmTA16_Info *targ, LgmTA16_Info *src) {
+    int i;
+    if ( src == NULL) {
+        printf("Lgm_Copy_TA16_Info: Error, source structure is NULL\n");
+        return(-1);
+    }
+    memcpy(targ, src, sizeof(LgmTA16_Info));
+    LGM_ARRAY_1D( targ->A,   targ->lenA, double );
+    LGM_ARRAY_1D( targ->XX,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->YY,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZZ,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->ST,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->RHO, targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZSP, targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZCP, targ->lenL, double );
+    LGM_ARRAY_1D( targ->RHBR,targ->lenL, double );
+    targ->ArraysAlloced = TRUE;
+    for (i=0; i<targ->lenA+1; i++) {
+      targ->A[i] = src->A[i];
+    }
+    for (i=0; i<targ->lenL+1; i++) {
+      targ->XX[i] = src->XX[i];
+      targ->YY[i] = src->YY[i];
+      targ->ZZ[i] = src->ZZ[i];
+      targ->ST[i] = src->ST[i];
+      targ->RHO[i] = src->RHO[i];
+      targ->ZSP[i] = src->ZSP[i];
+      targ->ZCP[i] = src->ZCP[i];
+      targ->RHBR[i] = src->RHBR[i];
+    }
+    return(1);
+}
+
+
+int Lgm_GetData_TA16(LgmTA16_Info *ta) {
     FILE *fp; 
-    char line[64];
+    char line[64], Filename[1024];
     int idx=1, maxidx=23329;
 
-    if ((fp = fopen("TA16_RBF.par", "r")) != NULL) {
-        while (fgets(line, sizeof(line), fp) != NULL) {
-            if ( line[0] != '/') {
-                sscanf(line, "%lf", Info->A[idx]);
-                ++idx;
-            }
+    sprintf(Filename, "%s/../Data/TA16_RBF.par", LGM_EOP_DATA_DIR);
+    if ((fp = fopen(Filename, "r")) != NULL) {
+        for (idx; idx<maxidx; ++idx) {
+            fscanf(fp, "%lf", &ta->A[idx]);
         }
     }
     fclose(fp);
     return(1);
 }
+
+
+int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
+    if ( !(ta->SetupDone) ){
+        Lgm_Init_TA16( ta );
+    }
+    // TODO: read model parameters from file.
+    // can we calculate from Qin-Denton??
+    ta->Pdyn = 3.;
+    ta->SymHc_avg = -46.;
+    ta->Xind_avg = 1.;
+    ta->By_avg = 3.;
+}
+
 
 int TA2016_SetGrid(LgmTA16_Info *Info) {
     // initialize the TA2016 coefficient set, grid, etc.
@@ -131,14 +203,14 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
           if (Rho1 > 1.0e-5) {  // WE ARE NOT ON THE X-AXIS - NO SINGULARITIES TO WORRY ABOUT
             SP = ZZZZ/Rho1;
             CP = YYYY/Rho1;
-          } else {                   // WE ARE ON THE X-AXIS
-            if (XXXX > 0.0) {     //   IF ON THE DAYSIDE, NO PROBLEM EITHER
+          } else {              // WE ARE ON THE X-AXIS
+            if (XXXX > 0.0) {   // IF ON THE DAYSIDE, NO PROBLEM EITHER
               SP = 0.0;
               CP = 1.0;
-            } else {                 // WE ARE ON THE TAIL AXIS; TO AVOID SINGULARITY:
-              RM = 1000.0;             //  ASSIGN RM=1000 (A CONVENTIONAL SUBSTITUTE VALUE)
+            } else {            // WE ARE ON THE TAIL AXIS; TO AVOID SINGULARITY:
+              RM = 1000.0;      // ASSIGN RM=1000 (A CONVENTIONAL SUBSTITUTE VALUE)
               // Raise an error here? Or set bad values and a warning?
-              return;               //  AND EXIT
+              return(-1);       //  AND EXIT
             }
           }
   
@@ -150,9 +222,8 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
   
           B0 = Lgm_TA16_As[6];
           F1 = pow(sqrt(0.5*(1.0+CTT))+Lgm_TA16_As[5]*2.0*STT*CTT*(1.0-exp(-T)), B0);
-          R0 = pow(Lgm_TA16_As[0]*(PD_TR+PM), Lgm_TA16_As[1]);
+          R0 = Lgm_TA16_As[0]*pow(PD_TR+PM, Lgm_TA16_As[1]);
           RM = R0*F1+CN*exp(DN*pow(PSIN, EN))+CS*exp(DS*pow(PSIS, ES));    // POSITION OF THE MODEL MAGNETOPAUSE
-  
           if (R <= RM) {
             L = L+1;              //  COUNTER OF THE RBF CENTERS
             Info->XX[L] = XXXX;
@@ -162,37 +233,35 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
             Info->RHO[L] = R*sinXco;
             Info->ZSP[L] = ZZZZ*sinXlo;
             Info->ZCP[L] = ZZZZ*cosXlo;
-            Info->RHBR[L] = pow(RH/R*(1.0-(1.0+pow(R/RH, Alpha))), 1.0/Alpha);
+            Info->RHBR[L] = RH/R*(1.0 - pow(1.0 + pow(R/RH, Alpha), 1.0/Alpha));
           }
         }  // End loop over K
       }  // End loop over I
   
       RLAST = R;
-      R = R*(Nlat-0.5+M_PI/4.0)/(Nlat-0.5-M_PI/4.0);  // INCREMENT R BY A FIXED FACTOR
-      if (R > RHighGrid) exit(-1);                         // CENTERS CREATED ONLY INSIDE R=RHIGH
+      R = R*(Nlat-0.5+M_PI/4.0)/(Nlat-0.5-M_PI/4.0);  // Increment R by a fixed factor
+      if (R > RHighGrid) break;                       // RBF centers only inside R=RHIGH
     }  // End loop over J
   Info->SetupDone = TRUE ;
 }
 
 
-int TA2016(Lgm_Vector *posGSM, double *PARMOD, double diptilt, Lgm_Vector *BvecGSM, LgmTA16_Info *Info) {
-    double posGSM;
-    double PARMOD;
-    double PS;
+int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *BvecGSM, LgmTA16_Info *Info) {
     int I;
     Lgm_Vector posSM, BvecSM;
     Lgm_Vector DP, DM, Parr, Marr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
     Lgm_Vector TCM, TCP;
     Lgm_Vector CTarr, CParr, STarr, SParr;
-    double cPS, sPS, tPS, CM, CP;
+    double diptilt, PS, cPS, sPS, tPS, CM, CP;
     double Pdyn, SymV, Xind, ByIMF, FPD;
     double ACP, ACT, AP, ASP,AST, AT, sDT, cDTM1;
     double DCMXY, DCMXZ, DCMYZ, DCPXY, DCPXZ, DCPYZ, DELTA_ZR, DTHETA;
     double D=4.0;
     int x=1, y=2, z=3;
-  
-    cPS = cos(PS);  // cos(dipole tilt)
-    sPS = sin(PS);  // sin(dipole tilt)
+
+    diptilt = ctrans->psi;
+    cPS = cos(diptilt);  // cos(dipole tilt)
+    sPS = sin(diptilt);  // sin(dipole tilt)
     tPS = sPS/cPS;  // tan(dipole tilt)
   
     posSM.x = posGSM->x*cPS - posGSM->z*sPS;  //  RBF EXPANSIONS ARE IN SM COORDINATES
@@ -212,10 +281,10 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, double diptilt, Lgm_Vector *BvecG
       Parr.z = Info->ZZ[I];
       Marr.x = Parr.x;
       Marr.y = Parr.y;
-      Marr.z = Parr.z;
+      Marr.z = -Parr.z;
     
-      DELTA_ZR = RHBR(I)*tPS;
-      DTHETA = -asin(DELTA_ZR)*ST(I);
+      DELTA_ZR = Info->RHBR[I]*tPS;
+      DTHETA = -asin(DELTA_ZR)*Info->ST[I];
       sDT = sin(DTHETA);
       cDTM1 = cos(DTHETA)-1.0;
       DP.x = Parr.x*cDTM1+sDT*Info->ZCP[I];
@@ -225,16 +294,19 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, double diptilt, Lgm_Vector *BvecG
       DM.y = Marr.y*cDTM1-sDT*Info->ZSP[I];
       DM.z = Marr.z*cDTM1-Info->RHO[I]*sDT;
     
-      CP = sqrt(pow(posSM.x-Parr.x-DP.x, 2) + pow(posSM.y-Parr.y-DP.y, 2) + pow(posSM.z-Parr.z-DP.z, 2) + D*D);    // RBF Ch_i+
-      CM = sqrt(pow(posSM.x-Marr.x-DM.x, 2) + pow(posSM.y-Marr.y-DM.y, 2) + pow(posSM.z-Marr.z-DM.z, 2) + D*D);    // RBF Ch_i-
+      CP = sqrt(pow(posSM.x-Parr.x-DP.x, 2) +
+                pow(posSM.y-Parr.y-DP.y, 2) +
+                pow(posSM.z-Parr.z-DP.z, 2) + D*D);    // RBF Ch_i+
+      CM = sqrt(pow(posSM.x-Marr.x-DM.x, 2) +
+                pow(posSM.y-Marr.y-DM.y, 2) +
+                pow(posSM.z-Marr.z-DM.z, 2) + D*D);    // RBF Ch_i-
 
       Lgm_VecSub(&DCP, &posSM, &Parr);
       Lgm_VecSub(&DCP, &DCP, &DP);
       Lgm_VecDivideScalar(&DCP, CP);
       Lgm_VecSub(&DCM, &posSM, &Marr);
-      Lgm_VecSub(&DCM, &DCP, &DM);
+      Lgm_VecSub(&DCM, &DCM, &DM);
       Lgm_VecDivideScalar(&DCM, CM);
-
       Lgm_VecMult(&DCPsq, &DCP, &DCP);
       Lgm_VecDivideScalar(&DCPsq, CP);
       DCPsq.x = 1.0/CP - DCPsq.x;
@@ -269,7 +341,7 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, double diptilt, Lgm_Vector *BvecG
       Lgm_VecAdd(&CTarr, &TCP, &TCM); 
       Lgm_VecMultiplyScalar(&CTarr, cPS);
       Lgm_VecSub(&STarr, &TCP, &TCM); 
-      Lgm_VecMultiplyScalar(&CTarr, sPS);
+      Lgm_VecMultiplyScalar(&STarr, sPS);
       Lgm_VecSub(&CParr, &PCP, &PCM); 
       Lgm_VecMultiplyScalar(&CParr, cPS);
       Lgm_VecAdd(&SParr, &PCP, &PCM); 
@@ -286,7 +358,7 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, double diptilt, Lgm_Vector *BvecG
       BvecSM.y = BvecSM.y + CTarr.y*ACT + STarr.y*AST + (TCP.y-TCM.y)*AT + CParr.y*ACP + SParr.y*ASP + (PCP.y+PCM.y)*AP;
       BvecSM.z = BvecSM.z + CTarr.z*ACT + STarr.z*AST + (TCP.z-TCM.z)*AT + CParr.z*ACP + SParr.z*ASP + (PCP.z+PCM.z)*AP;
     }
-    BvecGSM = SM_to_GSM(BvecSM, cPS, sPS);
+    Lgm_Convert_Coords(&BvecSM, BvecGSM, SM_TO_GSM, ctrans);
     return(1);
 }
 
@@ -296,7 +368,11 @@ int Lgm_B_TA16( Lgm_Vector *rGSM, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double          PARMOD[11];
     int             retval;
 
-    retval = TA2016(rGSM, PARMOD, Info->c->psi, &B, &Info->TA16_Info);
+    PARMOD[1] = Info->TA16_Info.Pdyn;
+    PARMOD[2] = Info->TA16_Info.SymHc_avg;
+    PARMOD[3] = Info->TA16_Info.Xind_avg;
+    PARMOD[4] = Info->TA16_Info.By_avg;
+    retval = TA2016(rGSM, PARMOD, &Info->c, B, &Info->TA16_Info);
     switch ( Info->InternalModel ){
         case LGM_CDIP:
                         Lgm_B_cdip(rGSM, &Bint, Info);
@@ -313,9 +389,7 @@ int Lgm_B_TA16( Lgm_Vector *rGSM, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     }
 
     // Add requested internal field model to obtain total field
-    B->x = Bint.x + Bext.x;
-    B->y = Bint.y + Bext.y;
-    B->z = Bint.z + Bext.z;
+    Lgm_VecAdd(B, &Bint, &Bext);
 
     ++Info->nFunc;  // increment counter of function calls
 

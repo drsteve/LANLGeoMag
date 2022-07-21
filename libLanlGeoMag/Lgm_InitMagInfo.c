@@ -204,6 +204,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
 void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
 
     Lgm_DeAllocate_TS07( &(Info->TS07_Info) );
+    Lgm_DeAllocate_TA16( &(Info->TA16_Info) );
     Lgm_free_ctrans( Info->c );
 
 
@@ -648,6 +649,10 @@ void Lgm_Set_Lgm_B_TS04(Lgm_MagModelInfo *MagInfo) {
 
 void Lgm_Set_Lgm_B_TS07(Lgm_MagModelInfo *MagInfo) {
     MagInfo->Bfield = Lgm_B_TS07;
+}
+
+void Lgm_Set_Lgm_B_TA16(Lgm_MagModelInfo *MagInfo) {
+    MagInfo->Bfield = Lgm_B_TA16;
 }
 
 void Lgm_Set_Lgm_B_T96(Lgm_MagModelInfo *MagInfo) {
