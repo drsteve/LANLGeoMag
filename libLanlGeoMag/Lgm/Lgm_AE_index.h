@@ -1,4 +1,4 @@
-#include "Lgm/Lgm_CTrans.h"
+#include "Lgm_CTrans.h"
 
 /* This is where I store the date */
 Lgm_DateTime AEdatetime[4096] ;

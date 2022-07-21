@@ -1,9 +1,9 @@
 #ifndef LGM_QINDENTON_H
 #define LGM_QINDENTON_H
 #include <math.h>
-#include <Lgm/Lgm_MagModelInfo.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
+#include "Lgm_MagModelInfo.h"
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_spline.h"
 
 
 #ifndef M_2PI

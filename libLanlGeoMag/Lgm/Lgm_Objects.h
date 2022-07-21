@@ -6,7 +6,7 @@
 #ifndef FALSE
 #define FALSE 0
 #endif
-#include "Lgm/Lgm_Vec.h"
+#include "Lgm_Vec.h"
 
 /* 
  *  structure to hold a sphere's parameters 

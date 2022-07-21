@@ -2,9 +2,9 @@
 #define LGM_VEL_STEP_INFO_H
 
 #include <math.h>
-#include "Lgm/Lgm_Vec.h"
-#include "Lgm/Lgm_QuadPack.h"
-#include "Lgm/Lgm_Constants.h"
+#include "Lgm_Vec.h"
+#include "Lgm_QuadPack.h"
+#include "Lgm_Constants.h"
 
 
 #ifndef TRUE
