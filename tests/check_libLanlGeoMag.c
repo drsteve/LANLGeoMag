@@ -152,7 +152,7 @@ int main(void) {
     printf("    properly catches errors (e.g. like invalid \n");
     printf("    dates etc.)\n\n");
     printf("\n======================================================\n\n");
-    srunner_run_all(sr, CK_NORMAL);
+    srunner_run_all(sr, CK_ENV);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
 

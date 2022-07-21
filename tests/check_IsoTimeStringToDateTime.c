@@ -691,15 +691,19 @@ Suite *ParseTimeStr_suite(void) {
   tcase_add_test(tc_ParseTimeStr, test_ISO_03);
   tcase_add_test(tc_ParseTimeStr, test_ISO_04);
   tcase_add_test(tc_ParseTimeStr, test_ISO_05);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_06);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_07);
+  #if ENABLE_PERL
+    tcase_add_test(tc_ParseTimeStr, test_ISO_06);
+    tcase_add_test(tc_ParseTimeStr, test_ISO_07);
+  #endif
   tcase_add_test(tc_ParseTimeStr, test_ISO_08);
   tcase_add_test(tc_ParseTimeStr, test_ISO_09);
   tcase_add_test(tc_ParseTimeStr, test_ISO_10);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_11);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_12);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_13);
-  tcase_add_test(tc_ParseTimeStr, test_ISO_14);
+  #if ENABLE_PERL
+    tcase_add_test(tc_ParseTimeStr, test_ISO_11);
+    tcase_add_test(tc_ParseTimeStr, test_ISO_12);
+    tcase_add_test(tc_ParseTimeStr, test_ISO_13);
+    tcase_add_test(tc_ParseTimeStr, test_ISO_14);
+  #endif
   suite_add_tcase(s, tc_ParseTimeStr);
 
   return s;
@@ -713,7 +717,7 @@ int main(void) {
     SRunner *sr = srunner_create(s);
 
     printf("\n\n");
-    srunner_run_all(sr, CK_NORMAL);
+    srunner_run_all(sr, CK_ENV);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
 
