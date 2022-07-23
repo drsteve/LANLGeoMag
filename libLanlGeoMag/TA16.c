@@ -1,4 +1,4 @@
-/* Clang port of TA16 model
+/* Clang port of TA16 model with LANLGeoMag hooks
  * Originally ported from F77 to F2008 by S.K. Morley, Nov. 2021
  * This port by S.K. Morley, July 2022
  * A data-based RBF model driven by interplanetary and ground-based data
@@ -20,8 +20,11 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
+#include <time.h>
 #include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_QinDenton.h"
 #include "Lgm/Lgm_TA2016.h"
 #ifndef LGM_INDEX_DATA_DIR
 #warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"
@@ -37,6 +40,8 @@ static double Lgm_TA16_As[22] = {
 
 void Lgm_Init_TA16(LgmTA16_Info *ta){
     ta->SetupDone = FALSE;
+    ta->readTAparams = TRUE;  //TRUE to read from Tsyganenko's files
+                              // FALSE to estimate from QD data
     ta->lenA = 23329;  //23328 parameter values, 1-based indexing
     ta->lenL = 1297;  // max val of L in fortran code is 1296
     LGM_ARRAY_1D( ta->A,   ta->lenA, double );
@@ -109,7 +114,7 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
     char line[64], Filename[1024];
     int idx=1, maxidx=23329;
 
-    sprintf(Filename, "%s/../Data/TA16_RBF.par", LGM_EOP_DATA_DIR);
+    sprintf(Filename, "%s/TA_DATA/TA16_RBF.par", LGM_INDEX_DATA_DIR);
     if ((fp = fopen(Filename, "r")) != NULL) {
         for (idx; idx<maxidx; ++idx) {
             fscanf(fp, "%lf", &ta->A[idx]);
@@ -121,15 +126,118 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
 
 
 int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
+    double symh, bt, bz2, by2;
+    double *symhc, *newell_norm, *clock;
+    int idx, ncols;
+    FILE *fp;
+    char *Path, TA16_path[2048], datafile[2048], tmpstr[1300];
+    int inyear, inmonth, inday, indoy;
+    int year, month, day, doy, hour, minute;
+    double bx_av, by_av, bz_av, vx, vy, vz, nden, temp;
+    int IMFflag, SWflag;
+    double tilt, pdyn, newe_avg, boyn_avg, symhc_avg;
+    double lineutc;
+    double fivemin=5./60.0-2.78e-10;  //five minutes minus a microsecond
     if ( !(ta->SetupDone) ){
         Lgm_Init_TA16( ta );
     }
+    Lgm_Doy( Date, &inyear, &inmonth, &inday, &indoy );
+
+    // Set default values
+    ta->Pdyn = 3.;  // Instantaneous Pdyn
+    symh = -29.354176;  // when corrected gives -46nT (6dp)
+    // Sym-Hc is pressure corrected. Input is 30-minute
+    // avg. of Sym-Hc centered on observation time
+    ta->SymHc_avg = 0.8 * symh - 13*sqrt(ta->Pdyn);
+    ta->Xind_avg = 1.;  //Avg. of coupling param based on Newell, over previous 30 minutes
+    ta->By_avg = 3.;  // Avg. over previous 30 minutes of By
     // TODO: read model parameters from file.
-    // can we calculate from Qin-Denton??
-    ta->Pdyn = 3.;
-    ta->SymHc_avg = -46.;
-    ta->Xind_avg = 1.;
-    ta->By_avg = 3.;
+
+    // If flag set, calculate from Qin-Denton...
+    if ( !(ta->readTAparams) ){
+      Lgm_QinDenton *qin=Lgm_init_QinDenton(0);
+      Lgm_read_QinDenton(Date, qin);
+      // Init array for pressure corrected sym-h
+      symhc = (double *)calloc( qin->nPnts, sizeof(double) );
+      newell_norm = (double *)calloc( qin->nPnts, sizeof(double) );
+      for (idx=0; idx<qin->nPnts; idx++) {
+          bz2 = qin->BzIMF[idx]*qin->BzIMF[idx];
+          by2 = qin->ByIMF[idx]*qin->ByIMF[idx];
+          bt = sqrt(bz2 + by2);  //QD files don't have Bx, so just use transverse
+          symhc[idx] = 0.8 * qin->Dst[idx] - 13*sqrt(qin->Pdyn[idx]);
+          newell_norm[idx] = 1.0e-4 * pow(qin->V_SW[idx], 4.0/3.0) *
+                                      pow(bt, 2.0/3.0) *
+                                      pow(sin(clock[idx]/2.0), 8.0/3.0);
+          //TODO: take window averages for given time
+      }
+      // Clean up
+      Lgm_destroy_QinDenton(qin);
+      free(symhc);
+      free(newell_norm);
+    } else {
+      // check that data location is set and load TA annual file
+      // use nearest point...
+      Path = getenv("TA16_DATA_PATH");
+      if (Path ==NULL) {  // setting path
+          strcpy( TA16_path, LGM_INDEX_DATA_DIR );
+          strcat( TA16_path, "/TA_DATA" );
+      } else {
+        if ( access( TA16_path, F_OK ) < 0 ) {
+            printf("Lgm_SetCoeffs_TA16: Warning, TA16 Data directory not found at %s. Use TA16_DATA_PATH environment variable to set path.\n", TA16_path );
+            exit(-1);
+        } else{
+          strcpy( TA16_path, Path );
+        }
+      }  // done setting path
+
+      // Now load data filea
+      // IYEAR       i4       4-digit year
+      // IDAY        i4       Day of year (IDAY=1 is January 1)
+      // IHOUR       i3       UT hour (0 - 23)
+      // MIN         i3       UT minute (0 - 59)
+      // <Bx IMF>    f8.2     nT, in GSW coordinates, average over 30-min trailing interval
+      // <By IMF>    f8.2     nT, in GSW coordinates, average over 30-min trailing interval
+      // <Bz IMF>    f8.2     nT, in GSW coordinates, average over 30-min trailing interval
+      // Vx          f8.1     solar wind Vx in GSE coordinates, km/s
+      // Vy          f8.1     solar wind Vy in GSE coordinates, km/s
+      // Vz          f8.1     solar wind Vz in GSE coordinates, km/s
+      // Np          f7.2     solar wind proton density, cm^-3
+      // T           f9.0     solar wind proton temperature, degs K
+      // Sym-H       f7.1     Sym-H index, nT
+      // IMF flag    i5       equals 1 for actually measured or 2 for linearly interpolated IMF
+      // SW flag     i5       equals 1 for actually measured or 2 for linearly interpolated solar wind parameters
+      // Tilt        f8.4     geodipole tilt angle (radians!) in GSW coordinate system
+      // Pdyn        f7.2     solar wind flow ram pressure, nPa
+      // <N-index>   f8.4     average over 30-min trailing interval, see Eq.(1) in TA16_Model_description.pdf 
+      // <B-index>   f8.4     average over 30-min trailing interval, see Eq.(2) in TA16_Model_description.pdf
+      // <SymHc>     f7.1     sliding average over 30-min interval, centered on the current time moment
+      sprintf( datafile, "%s/%ld_OMNI_5m_with_RBF_TA16_drivers.dat", TA16_path, Date/10000);
+      if ( (fp = fopen( datafile, "r" )) != NULL ) {
+        // to start with, just loop over... should we actually
+        // be interpolating linearly between values?
+        while ( fgets( &tmpstr, 1300, fp ) != NULL ) {
+            ncols = sscanf( tmpstr, "%d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %lf %lf %lf %lf %lf",
+                            &year, &doy, &hour, &minute, &bx_av, &by_av, &bz_av,
+                            &vx, &vy, &vz, &nden, &temp, &symh, &IMFflag, &SWflag,
+                            &tilt, &pdyn, &newe_avg, &boyn_avg, &symhc_avg);
+            lineutc = (double)hour + (double)minute/60.0;
+            if ( (abs(doy - indoy) == 0) && (fabs(lineutc - UTC) < fivemin) ) {
+                //nearest time, so fill ta structure
+                printf("Using %s", tmpstr);
+                ta->Pdyn = pdyn;
+                ta->Xind_avg = newe_avg;
+                ta->By_avg = by_av;
+                ta->SymHc_avg = symhc_avg;
+                break;
+            }
+        }
+      } else {//end IF for file opened successfully
+        printf("Lgm_SetCoeffs_TA16(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, datafile );
+        exit(-1);
+      }
+    }  // done loading TA files
+    // TODO: make sure I have fallbacks to default values
+
 }
 
 
@@ -372,7 +480,7 @@ int Lgm_B_TA16( Lgm_Vector *rGSM, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     PARMOD[2] = Info->TA16_Info.SymHc_avg;
     PARMOD[3] = Info->TA16_Info.Xind_avg;
     PARMOD[4] = Info->TA16_Info.By_avg;
-    retval = TA2016(rGSM, PARMOD, &Info->c, B, &Info->TA16_Info);
+    retval = TA2016(rGSM, PARMOD, Info->c, &Bext, &Info->TA16_Info);
     switch ( Info->InternalModel ){
         case LGM_CDIP:
                         Lgm_B_cdip(rGSM, &Bint, Info);
