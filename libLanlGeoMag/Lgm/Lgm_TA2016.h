@@ -12,6 +12,7 @@ typedef struct LgmTA16_Info {
 
     int     SetupDone;
     int     ArraysAlloced;
+    int     readTAparams;
     int     lenA;
     int     lenL;
     double  *A;

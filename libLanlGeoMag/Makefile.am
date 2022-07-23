@@ -13,6 +13,9 @@ LGM_INDEX_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 # Directory where JPL DE-related stuff will be installed
 LGM_DE_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
 
+# Directory where TA15/16-related stuff will be installed
+LGM_TA_DATA_DIR = $(datarootdir)/LanlGeoMag/Data
+
 # Directory where Blue Marble 5400x2700 images will be installed
 LGM_BLUEMARBLE_DATA_DIR = $(datarootdir)/LanlGeoMag/Images/BlueMarble
 
@@ -56,7 +59,7 @@ libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@
 libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@ 
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32 @PERL_CPPFLAGS@
 
-EXTRA_DIST = TS07D_FILES DE_FILES Images Stars
+EXTRA_DIST = TS07D_FILES DE_FILES TA_DATA Images Stars
 
 install-data-hook:
 if ENABLE_INDICES
@@ -67,6 +70,9 @@ if ENABLE_INDICES
 	$(MKDIR_P) $(DESTDIR)$(LGM_DE_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/DE_FILES $(DESTDIR)$(LGM_DE_DATA_DIR)/.
 	@echo Additional DE files should be placed in $(DESTDIR)$(LGM_DE_DATA_DIR)
+	$(MKDIR_P) $(DESTDIR)$(LGM_TA_DATA_DIR)
+	$(RSYNC_CMD) -arv $(srcdir)/TA_DATA $(DESTDIR)$(LGM_TA_DATA_DIR)/.
+	@echo Additional TA16 files should be placed in $(DESTDIR)$(LGM_TA_DATA_DIR)
 	$(MKDIR_P) $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
 	$(RSYNC_CMD) -arv $(srcdir)/Images/* $(DESTDIR)$(LGM_IMAGE_DATA_DIR)/. # should cover BlueMarble stuff also.
 	$(MKDIR_P) $(DESTDIR)$(LGM_STARS_DATA_DIR)
@@ -78,6 +84,7 @@ if ENABLE_INDICES
 	-rmdir $(DESTDIR)$(LGM_INDEX_DATA_DIR) #don't delete user data
 	-rm -rf $(DESTDIR)$(LGM_TS07_DATA_DIR)
 	-rm -rf $(DESTDIR)$(LGM_DE_DATA_DIR)
+	-rm -rf $(DESTDIR)$(LGM_TA_DATA_DIR)
 	-rm -rf $(DESTDIR)$(LGM_IMAGE_DATA_DIR)
 endif
 	-rmdir $(DESTDIR)$(datarootdir)/LanlGeoMag
