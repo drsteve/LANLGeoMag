@@ -9,7 +9,7 @@ int main(){
     Lgm_Vector          B, ugsm;
     Lgm_MagModelInfo    *mInfo;
 
-    Date = 20080102;
+    Date = 20010102;
     UTC  = 0.04; //22.0;
 
     mInfo = Lgm_InitMagInfo( );
