@@ -135,7 +135,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
     int inyear, inmonth, inday, indoy;
     int year, month, day, doy, hour, minute;
     double bx_av, by_av, bz_av, vx, vy, vz, nden, temp;
-    int IMFflag, SWflag;
+    int IMFflag, SWflag, match;
     double tilt, pdyn, newe_avg, boyn_avg, symhc_avg;
     double lineutc;
     double fivemin=5./60.0;  //five minutes
@@ -145,6 +145,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
     Lgm_Doy( Date, &inyear, &inmonth, &inday, &indoy );
 
     // Set default values
+    match = 0;
     ta->Pdyn = 3.;  // Instantaneous Pdyn
     symh = -29.354176;  // when corrected gives -46nT (6dp)
     // Sym-Hc is pressure corrected. Input is 30-minute
@@ -220,6 +221,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
       if ( (fp = fopen( datafile, "r" )) != NULL ) {
         // to start with, just loop over... should we actually
         // be interpolating linearly between values?
+printf( "Datafile is %s \n", datafile);
         while ( fgets( &tmpstr, 1300, fp ) != NULL ) {
             ncols = sscanf( tmpstr, "%d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %lf %lf %lf %lf %lf",
                             &year, &doy, &hour, &minute, &bx_av, &by_av, &bz_av,
@@ -227,22 +229,26 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
                             &tilt, &pdyn, &newe_avg, &boyn_avg, &symhc_avg);
             lineutc = (double)hour + (double)minute/60.0;
             if ( (abs(doy - indoy) == 0) && (fabs(lineutc - UTC) < fivemin/2.0) ) {
-                //nearest time, so fill ta structure
+                //nearest time, so fill ta structurea
+                match = 1;
                 if (ta->verbosity > 0) printf("Date/Time: %ld %lf\nUsing %s", Date, UTC, tmpstr);
                 ta->Pdyn = pdyn;
                 ta->Xind_avg = newe_avg;
                 ta->By_avg = by_av;
                 ta->SymHc_avg = symhc_avg;
+              printf("match. abs(doy - indoy), lineutc, UTC = %ld, %g, %g\n", abs(doy - indoy), lineutc, UTC);
+      printf( "pdyn, newe_avgm by_av, symhc_avg\n", pdyn, newe_avg, by_av, symhc_avg );
                 break;
             }
         }
       } else {//end IF for file opened successfully
-        printf("Lgm_SetCoeffs_TA16(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, datafile );
+        // defaults were set above, so warn and return
+        printf("Lgm_SetCoeffs_TA16(): Line %d in file %s. Could not open file %s. Using default values.\n", __LINE__, __FILE__, datafile );
         return(0);
       }
+    if (!(match)) printf("Lgm_SetCoeffs_TA16: Warning, No nearby times found in %s. Using default values.\n", datafile );
     }  // done loading TA files
-    // TODO: make sure I have fallbacks to default values
-
+    return(-1);
 }
 
 

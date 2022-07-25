@@ -36,4 +36,10 @@ jobs:
     - name: diagnostics
       if: failure()
       run: |
+        cat tests/check_ClosedField.log
+        cat tests/check_CoordTrans.log
+        cat tests/check_DE421.log
+        cat tests/check_IsoTimeStringToDateTime.log
+        cat tests/check_Lstar.log
+        cat tests/check_MagModels.log
         cat tests/check_libLanlGeoMag.log
