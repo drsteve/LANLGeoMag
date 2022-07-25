@@ -481,6 +481,15 @@ int Lgm_B_TA16( Lgm_Vector *rGSM, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
     double          PARMOD[11];
     int             retval;
 
+    if (rGSM->x < -15.0) {
+        // Model is only valid to 15 Re tailward.
+        printf("Lgm_B_TA16: Error, requested position is invalid\n");
+        B->x = LGM_FILL_VALUE;
+        B->y = LGM_FILL_VALUE;
+        B->z = LGM_FILL_VALUE;
+        return(-1);
+    }
+
     PARMOD[1] = Info->TA16_Info.Pdyn;
     PARMOD[2] = Info->TA16_Info.SymHc_avg;
     PARMOD[3] = Info->TA16_Info.Xind_avg;
