@@ -9,7 +9,7 @@
  * Define a structure to hold all of the info needed in TA16
  */
 typedef struct LgmTA16_Info {
-
+    int     verbosity;
     int     SetupDone;
     int     ArraysAlloced;
     int     readTAparams;
@@ -44,7 +44,7 @@ typedef struct LgmTA16_Info {
 /*
  *  Function declarations
  */
-void Lgm_Init_TA16( LgmTA16_Info *ta );
+void Lgm_Init_TA16( LgmTA16_Info *ta, int verbose );
 
 void Lgm_DeAllocate_TA16( LgmTA16_Info *t );
 

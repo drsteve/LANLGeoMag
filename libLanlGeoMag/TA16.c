@@ -38,7 +38,8 @@ static double Lgm_TA16_As[22] = {
     1.103, -0.907, 1.450};
 
 
-void Lgm_Init_TA16(LgmTA16_Info *ta){
+void Lgm_Init_TA16(LgmTA16_Info *ta, int verbose){
+    ta->verbosity = verbose;
     ta->SetupDone = FALSE;
     ta->readTAparams = TRUE;  //TRUE to read from Tsyganenko's files
                               // FALSE to estimate from QD data
@@ -137,9 +138,9 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
     int IMFflag, SWflag;
     double tilt, pdyn, newe_avg, boyn_avg, symhc_avg;
     double lineutc;
-    double fivemin=5./60.0-2.78e-10;  //five minutes minus a microsecond
+    double fivemin=5./60.0;  //five minutes
     if ( !(ta->SetupDone) ){
-        Lgm_Init_TA16( ta );
+        Lgm_Init_TA16( ta, 0 );
     }
     Lgm_Doy( Date, &inyear, &inmonth, &inday, &indoy );
 
@@ -155,6 +156,10 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
 
     // If flag set, calculate from Qin-Denton...
     if ( !(ta->readTAparams) ){
+      // NOT CURRENTLY IMPLEMENTED - just use the defaults set above and skip to the end
+      printf( "Lgm_SetCoeffs_TA16: Calculating input parameters from QD data is not currently supported. Setting default values.\n");
+      return(0);
+
       Lgm_QinDenton *qin=Lgm_init_QinDenton(0);
       Lgm_read_QinDenton(Date, qin);
       // Init array for pressure corrected sym-h
@@ -221,9 +226,9 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
                             &vx, &vy, &vz, &nden, &temp, &symh, &IMFflag, &SWflag,
                             &tilt, &pdyn, &newe_avg, &boyn_avg, &symhc_avg);
             lineutc = (double)hour + (double)minute/60.0;
-            if ( (abs(doy - indoy) == 0) && (fabs(lineutc - UTC) < fivemin) ) {
+            if ( (abs(doy - indoy) == 0) && (fabs(lineutc - UTC) < fivemin/2.0) ) {
                 //nearest time, so fill ta structure
-                printf("Using %s", tmpstr);
+                if (ta->verbosity > 0) printf("Date/Time: %ld %lf\nUsing %s", Date, UTC, tmpstr);
                 ta->Pdyn = pdyn;
                 ta->Xind_avg = newe_avg;
                 ta->By_avg = by_av;
@@ -233,7 +238,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
         }
       } else {//end IF for file opened successfully
         printf("Lgm_SetCoeffs_TA16(): Line %d in file %s. Could not open file %s\n", __LINE__, __FILE__, datafile );
-        exit(-1);
+        return(0);
       }
     }  // done loading TA files
     // TODO: make sure I have fallbacks to default values
