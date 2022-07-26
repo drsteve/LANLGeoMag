@@ -221,7 +221,6 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
       if ( (fp = fopen( datafile, "r" )) != NULL ) {
         // to start with, just loop over... should we actually
         // be interpolating linearly between values?
-printf( "Datafile is %s \n", datafile);
         while ( fgets( &tmpstr, 1300, fp ) != NULL ) {
             ncols = sscanf( tmpstr, "%d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %lf %lf %lf %lf %lf",
                             &year, &doy, &hour, &minute, &bx_av, &by_av, &bz_av,
@@ -236,8 +235,6 @@ printf( "Datafile is %s \n", datafile);
                 ta->Xind_avg = newe_avg;
                 ta->By_avg = by_av;
                 ta->SymHc_avg = symhc_avg;
-              printf("match. abs(doy - indoy), lineutc, UTC = %ld, %g, %g\n", abs(doy - indoy), lineutc, UTC);
-      printf( "pdyn, newe_avgm by_av, symhc_avg\n", pdyn, newe_avg, by_av, symhc_avg );
                 break;
             }
         }
