@@ -2,6 +2,20 @@
 #include <Lgm_MagModelInfo.h>
 
 
+int print_header(){
+    // Set header line for console output
+    printf("%13s", "SymhHc (nT)");
+    printf("%13s", "Ugsmx (Re)");
+    printf("%13s", "Ugsmy (Re)");
+    printf("%13s", "Ugsmz (Re)");
+    printf("%13s", "Bgsmx (nT)");
+    printf("%13s", "Bgsmy (nT)");
+    printf("%13s", "Bgsmz (nT)");
+    printf("%13s", "Bmag (nT)\n");
+    return(1);
+}
+
+
 int main(){
 
     long int            Date;
@@ -9,8 +23,8 @@ int main(){
     Lgm_Vector          B, ugsm;
     Lgm_MagModelInfo    *mInfo;
 
-    Date = 20010102;
-    UTC  = 0.04; //22.0;
+    Date = 20080102;
+    UTC  = 0.04;
 
     mInfo = Lgm_InitMagInfo( );
 
@@ -19,7 +33,7 @@ int main(){
      */
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TA16, mInfo );
 
-    Lgm_Init_TA16( &mInfo->TA16_Info, 1 );  // use verbose output
+    Lgm_Init_TA16( &mInfo->TA16_Info, 0 );  // set to 1 to use verbose output
 
     for (int offset=0; offset<6; offset++) {
         Date += offset;
@@ -37,17 +51,14 @@ int main(){
         ugsm.z = 0.5;
 
         mInfo->Bfield( &ugsm, &B, mInfo );
-
-        // Set header line for console output
-        printf("%13s", "SymhHc (nT)");
-        printf("%13s", "Ugsmx (Re)");
-        printf("%13s", "Ugsmy (Re)");
-        printf("%13s", "Ugsmz (Re)");
-        printf("%13s", "Bgsmx (nT)");
-        printf("%13s", "Bgsmy (nT)");
-        printf("%13s", "Bgsmz (nT)");
-        printf("%13s", "Bmag (nT)\n");
+        print_header();
         printf( "%13g", mInfo->TA16_Info.SymHc_avg);
+        printf( "%13g%13g%13g", ugsm.x, ugsm.y, ugsm.z );
+        printf( "%13g%13g%13g", B.x, B.y, B.z );
+        printf( " %13.2lf\n", Lgm_Magnitude( &B ) );
+        // compare with dipole
+        Lgm_B_cdip(&ugsm, &B, mInfo);
+        printf( " Cent. Dipole");
         printf( "%13g%13g%13g", ugsm.x, ugsm.y, ugsm.z );
         printf( "%13g%13g%13g", B.x, B.y, B.z );
         printf( " %13.2lf\n", Lgm_Magnitude( &B ) );
