@@ -1,7 +1,9 @@
+MAYBE_PY = Python
 #Don't forget: probably need to do stuff with EXTRA_DIST
 LGMSRCDIR = $(top_srcdir)/libLanlGeoMag/
 lgmpydir = $(pythondir)/lgmpy
 lgmpy_PYTHON = $(srcdir)/lgmpy/*.py
+if HAVE_PYTHON
 nodist_lgmpy_PYTHON = Lgm_Wrap.py
 HDF5FLAGS = `pkg-config hdf5 --cflags --libs 2>/dev/null`
 
@@ -28,3 +30,4 @@ FORCE:
 
 mostlyclean-local-check:
 	-rm -f Lgm_Wrap.py Lgm_Wrap_gen.py ctypesgen.log
+endif
