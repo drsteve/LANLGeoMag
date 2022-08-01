@@ -368,17 +368,15 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
     Lgm_Vector DP, DM, Parr, Marr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
     Lgm_Vector TCM, TCP;
     Lgm_Vector CTarr, CParr, STarr, SParr;
-    double diptilt, PS, cPS, sPS, tPS, CM, CP;
+    double cPS, sPS, tPS, CM, CP;
     double Pdyn, SymV, Xind, ByIMF, FPD;
     double ACP, ACT, AP, ASP,AST, AT, sDT, cDTM1;
     double DCMXY, DCMXZ, DCMYZ, DCPXY, DCPXZ, DCPYZ, DELTA_ZR, DTHETA;
-    double D=4.0;
-    int x=1, y=2, z=3;
+    double D2=16.0;
 
-    diptilt = ctrans->psi;
-    cPS = cos(diptilt);  // cos(dipole tilt)
-    sPS = sin(diptilt);  // sin(dipole tilt)
-    tPS = sPS/cPS;  // tan(dipole tilt)
+    cPS = ctrans->cos_psi;  // cos(dipole tilt)
+    sPS = ctrans->sin_psi;  // sin(dipole tilt)
+    tPS = ctrans->tan_psi;  // tan(dipole tilt)
   
     posSM.x = posGSM->x*cPS - posGSM->z*sPS;  //  RBF EXPANSIONS ARE IN SM COORDINATES
     posSM.y = posGSM->y;                      //  ->  CONVERT X,Y,Z FROM GSW TO SM 
@@ -412,10 +410,10 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
     
       CP = sqrt(pow(posSM.x-Parr.x-DP.x, 2) +
                 pow(posSM.y-Parr.y-DP.y, 2) +
-                pow(posSM.z-Parr.z-DP.z, 2) + D*D);    // RBF Ch_i+
+                pow(posSM.z-Parr.z-DP.z, 2) + D2);    // RBF Ch_i+
       CM = sqrt(pow(posSM.x-Marr.x-DM.x, 2) +
                 pow(posSM.y-Marr.y-DM.y, 2) +
-                pow(posSM.z-Marr.z-DM.z, 2) + D*D);    // RBF Ch_i-
+                pow(posSM.z-Marr.z-DM.z, 2) + D2);    // RBF Ch_i-
 
       Lgm_VecSub(&DCP, &posSM, &Parr);
       Lgm_VecSub(&DCP, &DCP, &DP);
