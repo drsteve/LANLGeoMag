@@ -45,15 +45,18 @@ void Lgm_Init_TA16(LgmTA16_Info *ta, int verbose){
                               // FALSE to estimate from QD data
     ta->lenA = 23329;  //23328 parameter values, 1-based indexing
     ta->lenL = 1297;  // max val of L in fortran code is 1296
+    ta->cache_psi = 99.0;  //init as impossible dipole tilt (radians)
     LGM_ARRAY_1D( ta->A,   ta->lenA, double );
-    LGM_ARRAY_1D( ta->XX,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->YY,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->ZZ,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->ST,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->RHO,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->ZSP,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->ZCP,   ta->lenL, double );
-    LGM_ARRAY_1D( ta->RHBR,   ta->lenL, double );
+    LGM_ARRAY_1D( ta->XX,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->YY,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->ZZ,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->ST,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->RHO,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->ZSP,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->ZCP,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->RHBR, ta->lenL, double );
+    LGM_ARRAY_1D( ta->sDT,  ta->lenL, double );
+    LGM_ARRAY_1D( ta->cDTM1, ta->lenL, double );
     ta->ArraysAlloced = TRUE;
     Lgm_GetData_TA16(ta);
     TA2016_SetGrid(ta);
@@ -72,6 +75,8 @@ void Lgm_DeAllocate_TA16( LgmTA16_Info *t ){
         LGM_ARRAY_1D_FREE( t->ZSP );
         LGM_ARRAY_1D_FREE( t->ZCP );
         LGM_ARRAY_1D_FREE( t->RHBR );
+        LGM_ARRAY_1D_FREE( t->sDT );
+        LGM_ARRAY_1D_FREE( t->cDTM1 );
         t->ArraysAlloced = FALSE;
     }
 }
@@ -83,15 +88,17 @@ int Lgm_Copy_TA16_Info(LgmTA16_Info *targ, LgmTA16_Info *src) {
         return(-1);
     }
     memcpy(targ, src, sizeof(LgmTA16_Info));
-    LGM_ARRAY_1D( targ->A,   targ->lenA, double );
-    LGM_ARRAY_1D( targ->XX,  targ->lenL, double );
-    LGM_ARRAY_1D( targ->YY,  targ->lenL, double );
-    LGM_ARRAY_1D( targ->ZZ,  targ->lenL, double );
-    LGM_ARRAY_1D( targ->ST,  targ->lenL, double );
-    LGM_ARRAY_1D( targ->RHO, targ->lenL, double );
-    LGM_ARRAY_1D( targ->ZSP, targ->lenL, double );
-    LGM_ARRAY_1D( targ->ZCP, targ->lenL, double );
-    LGM_ARRAY_1D( targ->RHBR,targ->lenL, double );
+    LGM_ARRAY_1D( targ->A,    targ->lenA, double );
+    LGM_ARRAY_1D( targ->XX,   targ->lenL, double );
+    LGM_ARRAY_1D( targ->YY,   targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZZ,   targ->lenL, double );
+    LGM_ARRAY_1D( targ->ST,   targ->lenL, double );
+    LGM_ARRAY_1D( targ->RHO,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZSP,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->ZCP,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->RHBR, targ->lenL, double );
+    LGM_ARRAY_1D( targ->sDT,  targ->lenL, double );
+    LGM_ARRAY_1D( targ->cDTM1,targ->lenL, double );
     targ->ArraysAlloced = TRUE;
     for (i=0; i<targ->lenA+1; i++) {
       targ->A[i] = src->A[i];
@@ -105,6 +112,8 @@ int Lgm_Copy_TA16_Info(LgmTA16_Info *targ, LgmTA16_Info *src) {
       targ->ZSP[i] = src->ZSP[i];
       targ->ZCP[i] = src->ZCP[i];
       targ->RHBR[i] = src->RHBR[i];
+      targ->sDT[i] = src->sDT[i];
+      targ->cDTM1[i] = src->cDTM1[i];
     }
     return(1);
 }
@@ -123,6 +132,18 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
     }
     fclose(fp);
     return(1);
+}
+
+
+void Lgm_Precalc_TA16(LgmTA16_Info *ta, double tan_psi) {
+    double DELTA_ZR, DTHETA;
+    int I;
+    for (I=1; I<=1296; I++) {
+        DELTA_ZR = ta->RHBR[I]*tan_psi;
+        DTHETA = -asin(DELTA_ZR)*ta->ST[I];
+        ta->sDT[I] = sin(DTHETA);
+        ta->cDTM1[I] = cos(DTHETA)-1.0;
+    }
 }
 
 
@@ -153,7 +174,6 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
     ta->SymHc_avg = 0.8 * symh - 13*sqrt(ta->Pdyn);
     ta->Xind_avg = 1.;  //Avg. of coupling param based on Newell, over previous 30 minutes
     ta->By_avg = 3.;  // Avg. over previous 30 minutes of By
-    // TODO: read model parameters from file.
 
     // If flag set, calculate from Qin-Denton...
     if ( !(ta->readTAparams) ){
@@ -371,7 +391,7 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
     double cPS, sPS, tPS, CM, CP;
     double Pdyn, SymV, Xind, ByIMF, FPD;
     double ACP, ACT, AP, ASP,AST, AT, sDT, cDTM1;
-    double DCMXY, DCMXZ, DCMYZ, DCPXY, DCPXZ, DCPYZ, DELTA_ZR, DTHETA;
+    double DCMXY, DCMXZ, DCMYZ, DCPXY, DCPXZ, DCPYZ;
     double D2=16.0;
 
     cPS = ctrans->cos_psi;  // cos(dipole tilt)
@@ -389,6 +409,15 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
     FPD = sqrt(Pdyn/2.0)-1.0;
   
     BvecSM.x = 0.0; BvecSM.y = 0.0; BvecSM.z = 0.0;
+    if ( !(fabs(Info->cache_psi - ctrans->psi) <= 1.0e-6) ) {
+      // If the tilt angle hasn't changed since last call,
+      // we're probably doing something with thousands to
+      // millions of repeated calls (like tracing) and
+      // will benefit from using precalculated sDT and cDTM1
+      // variables. 1e-6 radians = 5.7e-5 degrees.
+      Lgm_Precalc_TA16(Info, tPS);
+      Info->cache_psi = ctrans->psi;
+    }
     for (I=1; I<=1296; I++) {
       Parr.x = Info->XX[I];
       Parr.y = Info->YY[I];
@@ -397,10 +426,8 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       Marr.y = Parr.y;
       Marr.z = -Parr.z;
     
-      DELTA_ZR = Info->RHBR[I]*tPS;
-      DTHETA = -asin(DELTA_ZR)*Info->ST[I];
-      sDT = sin(DTHETA);
-      cDTM1 = cos(DTHETA)-1.0;
+      sDT = Info->sDT[I];      // these are precalculated in a separate routine so
+      cDTM1 = Info->cDTM1[I];  // that when tracing we don't have to keep calculating them
       DP.x = Parr.x*cDTM1+sDT*Info->ZCP[I];
       DP.y = Parr.y*cDTM1+sDT*Info->ZSP[I];
       DP.z = Parr.z*cDTM1-Info->RHO[I]*sDT;
