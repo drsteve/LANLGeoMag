@@ -15,6 +15,7 @@ typedef struct LgmTA16_Info {
     int     readTAparams;
     int     lenA;
     int     lenL;
+    double  cache_psi;
     double  *A;
     double  *XX;
     double  *YY;
@@ -24,6 +25,8 @@ typedef struct LgmTA16_Info {
     double  *ZSP;
     double  *ZCP;
     double  *RHBR;
+    double  *sDT;
+    double  *cDTM1;
 
     double Pdyn;
     double SymHc_avg;
