@@ -46,6 +46,7 @@ void Lgm_Init_TA16(LgmTA16_Info *ta, int verbose){
     ta->lenA = 23329;  //23328 parameter values, 1-based indexing
     ta->lenL = 1297;  // max val of L in fortran code is 1296
     ta->cache_psi = 99.0;  //init as impossible dipole tilt (radians)
+    // grid variables
     LGM_ARRAY_1D( ta->A,   ta->lenA, double );
     LGM_ARRAY_1D( ta->XX,  ta->lenL, double );
     LGM_ARRAY_1D( ta->YY,  ta->lenL, double );
@@ -55,8 +56,13 @@ void Lgm_Init_TA16(LgmTA16_Info *ta, int verbose){
     LGM_ARRAY_1D( ta->ZSP,  ta->lenL, double );
     LGM_ARRAY_1D( ta->ZCP,  ta->lenL, double );
     LGM_ARRAY_1D( ta->RHBR, ta->lenL, double );
-    LGM_ARRAY_1D( ta->sDT,  ta->lenL, double );
-    LGM_ARRAY_1D( ta->cDTM1, ta->lenL, double );
+    // cache variables
+    LGM_ARRAY_1D( ta->DPx, ta->lenL, double );
+    LGM_ARRAY_1D( ta->DPy, ta->lenL, double );
+    LGM_ARRAY_1D( ta->DPz, ta->lenL, double );
+    LGM_ARRAY_1D( ta->DMx, ta->lenL, double );
+    LGM_ARRAY_1D( ta->DMy, ta->lenL, double );
+    LGM_ARRAY_1D( ta->DMz, ta->lenL, double );
     ta->ArraysAlloced = TRUE;
     Lgm_GetData_TA16(ta);
     TA2016_SetGrid(ta);
@@ -75,8 +81,12 @@ void Lgm_DeAllocate_TA16( LgmTA16_Info *t ){
         LGM_ARRAY_1D_FREE( t->ZSP );
         LGM_ARRAY_1D_FREE( t->ZCP );
         LGM_ARRAY_1D_FREE( t->RHBR );
-        LGM_ARRAY_1D_FREE( t->sDT );
-        LGM_ARRAY_1D_FREE( t->cDTM1 );
+        LGM_ARRAY_1D_FREE( t->DPx );
+        LGM_ARRAY_1D_FREE( t->DPy );
+        LGM_ARRAY_1D_FREE( t->DPz );
+        LGM_ARRAY_1D_FREE( t->DMx );
+        LGM_ARRAY_1D_FREE( t->DMy );
+        LGM_ARRAY_1D_FREE( t->DMz );
         t->ArraysAlloced = FALSE;
     }
 }
@@ -97,8 +107,12 @@ int Lgm_Copy_TA16_Info(LgmTA16_Info *targ, LgmTA16_Info *src) {
     LGM_ARRAY_1D( targ->ZSP,  targ->lenL, double );
     LGM_ARRAY_1D( targ->ZCP,  targ->lenL, double );
     LGM_ARRAY_1D( targ->RHBR, targ->lenL, double );
-    LGM_ARRAY_1D( targ->sDT,  targ->lenL, double );
-    LGM_ARRAY_1D( targ->cDTM1,targ->lenL, double );
+    LGM_ARRAY_1D( targ->DPx, targ->lenL, double );
+    LGM_ARRAY_1D( targ->DPy, targ->lenL, double );
+    LGM_ARRAY_1D( targ->DPz, targ->lenL, double );
+    LGM_ARRAY_1D( targ->DMx, targ->lenL, double );
+    LGM_ARRAY_1D( targ->DMy, targ->lenL, double );
+    LGM_ARRAY_1D( targ->DMz, targ->lenL, double );
     targ->ArraysAlloced = TRUE;
     for (i=0; i<targ->lenA+1; i++) {
       targ->A[i] = src->A[i];
@@ -112,8 +126,12 @@ int Lgm_Copy_TA16_Info(LgmTA16_Info *targ, LgmTA16_Info *src) {
       targ->ZSP[i] = src->ZSP[i];
       targ->ZCP[i] = src->ZCP[i];
       targ->RHBR[i] = src->RHBR[i];
-      targ->sDT[i] = src->sDT[i];
-      targ->cDTM1[i] = src->cDTM1[i];
+      targ->DPx[i] = src->DPx[i];
+      targ->DPy[i] = src->DPy[i];
+      targ->DPz[i] = src->DPz[i];
+      targ->DMx[i] = src->DMx[i];
+      targ->DMy[i] = src->DMy[i];
+      targ->DMz[i] = src->DMz[i];
     }
     return(1);
 }
@@ -136,13 +154,26 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
 
 
 void Lgm_Precalc_TA16(LgmTA16_Info *ta, double tan_psi) {
-    double DELTA_ZR, DTHETA;
+    double DELTA_ZR, DTHETA, cDTM1, sDT, XX, YY, ZZ;
+    double sdt_zcp, sdt_zsp, sdt_rho;
     int I;
     for (I=1; I<=1296; I++) {
         DELTA_ZR = ta->RHBR[I]*tan_psi;
         DTHETA = -asin(DELTA_ZR)*ta->ST[I];
-        ta->sDT[I] = sin(DTHETA);
-        ta->cDTM1[I] = cos(DTHETA)-1.0;
+        sDT = sin(DTHETA);
+        cDTM1 = cos(DTHETA)-1.0;
+        sdt_zcp = sDT*ta->ZCP[I];
+        sdt_zsp = sDT*ta->ZSP[I];
+        sdt_rho = sDT*ta->RHO[I];
+        XX = ta->XX[I];
+        YY = ta->YY[I];
+        ZZ = ta->ZZ[I];
+        ta->DPx[I] = XX*cDTM1 + sdt_zcp;
+        ta->DPy[I] = YY*cDTM1 + sdt_zsp;
+        ta->DPz[I] = ZZ*cDTM1 - sdt_rho;
+        ta->DMx[I] = XX*cDTM1 - sdt_zcp;
+        ta->DMy[I] = YY*cDTM1 - sdt_zsp;
+        ta->DMz[I] = -ZZ*cDTM1 - sdt_rho;
     }
 }
 
@@ -385,12 +416,13 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
 int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *BvecGSM, LgmTA16_Info *Info) {
     int I;
     Lgm_Vector posSM, BvecSM;
-    Lgm_Vector DP, DM, Parr, Marr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
+    Lgm_Vector Parr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
     Lgm_Vector TCM, TCP;
     Lgm_Vector CTarr, CParr, STarr, SParr;
     double cPS, sPS, tPS, CM, CP;
     double Pdyn, SymV, Xind, ByIMF, FPD;
-    double ACP, ACT, AP, ASP,AST, AT, sDT, cDTM1;
+    double dcpdenx, dcpdeny, dcpdenz, dcmdenx, dcmdeny, dcmdenz;
+    double ACP, ACT, AP, ASP,AST, AT;
     double DCMXY, DCMXZ, DCMYZ, DCPXY, DCPXZ, DCPYZ;
     double D2=16.0;
 
@@ -422,42 +454,38 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       Parr.x = Info->XX[I];
       Parr.y = Info->YY[I];
       Parr.z = Info->ZZ[I];
-      Marr.x = Parr.x;
-      Marr.y = Parr.y;
-      Marr.z = -Parr.z;
-    
-      sDT = Info->sDT[I];      // these are precalculated in a separate routine so
-      cDTM1 = Info->cDTM1[I];  // that when tracing we don't have to keep calculating them
-      DP.x = Parr.x*cDTM1+sDT*Info->ZCP[I];
-      DP.y = Parr.y*cDTM1+sDT*Info->ZSP[I];
-      DP.z = Parr.z*cDTM1-Info->RHO[I]*sDT;
-      DM.x = Marr.x*cDTM1-sDT*Info->ZCP[I];
-      DM.y = Marr.y*cDTM1-sDT*Info->ZSP[I];
-      DM.z = Marr.z*cDTM1-Info->RHO[I]*sDT;
-    
-      CP = sqrt(pow(posSM.x-Parr.x-DP.x, 2) +
-                pow(posSM.y-Parr.y-DP.y, 2) +
-                pow(posSM.z-Parr.z-DP.z, 2) + D2);    // RBF Ch_i+
-      CM = sqrt(pow(posSM.x-Marr.x-DM.x, 2) +
-                pow(posSM.y-Marr.y-DM.y, 2) +
-                pow(posSM.z-Marr.z-DM.z, 2) + D2);    // RBF Ch_i-
 
-      Lgm_VecSub(&DCP, &posSM, &Parr);
-      Lgm_VecSub(&DCP, &DCP, &DP);
-      Lgm_VecDivideScalar(&DCP, CP);
-      Lgm_VecSub(&DCM, &posSM, &Marr);
-      Lgm_VecSub(&DCM, &DCM, &DM);
-      Lgm_VecDivideScalar(&DCM, CM);
-      Lgm_VecMult(&DCPsq, &DCP, &DCP);
-      Lgm_VecDivideScalar(&DCPsq, CP);
-      DCPsq.x = 1.0/CP - DCPsq.x;
-      DCPsq.y = 1.0/CP - DCPsq.y;
-      DCPsq.z = 1.0/CP - DCPsq.z;
-      Lgm_VecMult(&DCMsq, &DCM, &DCM);
-      Lgm_VecDivideScalar(&DCMsq, CM);
-      DCMsq.x = 1.0/CM - DCMsq.x;
-      DCMsq.y = 1.0/CM - DCMsq.y;
-      DCMsq.z = 1.0/CM - DCMsq.z;
+      dcpdenx = posSM.x-Parr.x-Info->DPx[I];
+      dcpdeny = posSM.y-Parr.y-Info->DPy[I];
+      dcpdenz = posSM.z-Parr.z-Info->DPz[I];
+      dcmdenx = posSM.x-Parr.x-Info->DMx[I];
+      dcmdeny = posSM.y-Parr.y-Info->DMy[I];
+      dcmdenz = posSM.z+Parr.z-Info->DMz[I];
+      CP = sqrt(dcpdenx*dcpdenx +
+                dcpdeny*dcpdeny +
+                dcpdenz*dcpdenz + D2);    // RBF Ch_i+
+      CM = sqrt(dcmdenx*dcmdenx +
+                dcmdeny*dcmdeny +
+                dcmdenz*dcmdenz + D2);    // RBF Ch_i-
+
+      DCP.x = dcpdenx/CP;
+      DCP.y = dcpdeny/CP;
+      DCP.z = dcpdenz/CP;
+      DCM.x = dcmdenx/CM;
+      DCM.y = dcmdeny/CM;
+      DCM.z = dcmdenz/CM;
+      DCPsq.x = DCP.x * DCP.x;
+      DCPsq.y = DCP.y * DCP.y;
+      DCPsq.z = DCP.z * DCP.z;
+      DCPsq.x = (1.0 - DCPsq.x)/CP;
+      DCPsq.y = (1.0 - DCPsq.y)/CP;
+      DCPsq.z = (1.0 - DCPsq.z)/CP;
+      DCMsq.x = DCM.x * DCM.x;
+      DCMsq.y = DCM.y * DCM.y;
+      DCMsq.z = DCM.z * DCM.z;
+      DCMsq.x = (1.0 - DCMsq.x)/CM;
+      DCMsq.y = (1.0 - DCMsq.y)/CM;
+      DCMsq.z = (1.0 - DCMsq.z)/CM;
       DCPXY = -DCP.x*DCP.y/CP;
       DCPXZ = -DCP.x*DCP.z/CP;
       DCPYZ = -DCP.y*DCP.z/CP;
@@ -479,14 +507,18 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       PCM.y = 2.0*DCM.y-posSM.y*(DCMsq.x+DCMsq.z)+posSM.z*DCMYZ+posSM.x*DCMXY;
       PCM.z = 2.0*DCM.z-posSM.z*(DCMsq.x+DCMsq.y)+posSM.x*DCMXZ+posSM.y*DCMYZ;
 
-      Lgm_VecAdd(&CTarr, &TCP, &TCM); 
-      Lgm_VecMultiplyScalar(&CTarr, cPS);
-      Lgm_VecSub(&STarr, &TCP, &TCM); 
-      Lgm_VecMultiplyScalar(&STarr, sPS);
-      Lgm_VecSub(&CParr, &PCP, &PCM); 
-      Lgm_VecMultiplyScalar(&CParr, cPS);
-      Lgm_VecAdd(&SParr, &PCP, &PCM); 
-      Lgm_VecMultiplyScalar(&SParr, sPS);
+      CTarr.x = (TCP.x + TCM.x)*cPS;
+      CTarr.y = (TCP.y + TCM.y)*cPS;
+      CTarr.z = (TCP.z + TCM.z)*cPS;
+      STarr.x = (TCP.x - TCM.x)*sPS;
+      STarr.y = (TCP.y - TCM.y)*sPS;
+      STarr.z = (TCP.z - TCM.z)*sPS;
+      CParr.x = (PCP.x - PCM.x)*cPS;
+      CParr.y = (PCP.y - PCM.y)*cPS;
+      CParr.z = (PCP.z - PCM.z)*cPS;
+      SParr.x = (PCP.x + PCM.x)*sPS;
+      SParr.y = (PCP.y + PCM.y)*sPS;
+      SParr.z = (PCP.z + PCM.z)*sPS;
     
     // -----------------   TOTAL FIELD:    -----------------------------------
       ACT = Info->A[I]+Info->A[I+5184]*FPD+Info->A[I+10368]*SymV+Info->A[I+15552]*Xind;
@@ -495,9 +527,9 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       ACP = Info->A[I+2592]+Info->A[I+7776]*FPD+Info->A[I+12960]*SymV+Info->A[I+18144]*Xind;
       ASP = Info->A[I+3888]+Info->A[I+9072]*FPD+Info->A[I+14256]*SymV+Info->A[I+19440]*Xind;
       AP  = Info->A[I+22032]*ByIMF;
-      BvecSM.x = BvecSM.x + CTarr.x*ACT + STarr.x*AST + (TCP.x-TCM.x)*AT + CParr.x*ACP + SParr.x*ASP + (PCP.x+PCM.x)*AP;
-      BvecSM.y = BvecSM.y + CTarr.y*ACT + STarr.y*AST + (TCP.y-TCM.y)*AT + CParr.y*ACP + SParr.y*ASP + (PCP.y+PCM.y)*AP;
-      BvecSM.z = BvecSM.z + CTarr.z*ACT + STarr.z*AST + (TCP.z-TCM.z)*AT + CParr.z*ACP + SParr.z*ASP + (PCP.z+PCM.z)*AP;
+      BvecSM.x += CTarr.x*ACT + STarr.x*AST + (TCP.x-TCM.x)*AT + CParr.x*ACP + SParr.x*ASP + (PCP.x+PCM.x)*AP;
+      BvecSM.y += CTarr.y*ACT + STarr.y*AST + (TCP.y-TCM.y)*AT + CParr.y*ACP + SParr.y*ASP + (PCP.y+PCM.y)*AP;
+      BvecSM.z += CTarr.z*ACT + STarr.z*AST + (TCP.z-TCM.z)*AT + CParr.z*ACP + SParr.z*ASP + (PCP.z+PCM.z)*AP;
     }
     Lgm_Convert_Coords(&BvecSM, BvecGSM, SM_TO_GSM, ctrans);
     return(1);
