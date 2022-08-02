@@ -25,8 +25,12 @@ typedef struct LgmTA16_Info {
     double  *ZSP;
     double  *ZCP;
     double  *RHBR;
-    double  *sDT;
-    double  *cDTM1;
+    double  *DPx;
+    double  *DPy;
+    double  *DPz;
+    double  *DMx;
+    double  *DMy;
+    double  *DMz;
 
     double Pdyn;
     double SymHc_avg;
