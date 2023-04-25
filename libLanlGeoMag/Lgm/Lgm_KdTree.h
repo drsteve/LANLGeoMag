@@ -123,8 +123,11 @@ void                Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *k
 
 /*! Store given N-dimensional data into a D-dimensional KD-tree data structure. */
 Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long int N, int D ) ;
+Lgm_KdTree         *Lgm_KdTree_CopyLite( Lgm_KdTree *ks );
+void                Lgm_KdTree_FreeLite( Lgm_KdTree *kt );
 
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
+void                Lgm_FreeKdTreeNode( Lgm_KdTreeNode *Node );
 double              Lgm_KdTree_MinDist( Lgm_KdTreeNode *Node, double *q );
 int                 Lgm_KdTree_DoSearch( Lgm_KdTreeNode *Node, double *q, double md2 );
 double              Lgm_KdTree_InsertNode( Lgm_KdTreeNode *Node, double *q, Lgm_pQueue *PQ, double MaxDist2 );
