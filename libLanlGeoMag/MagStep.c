@@ -349,7 +349,7 @@ int Lgm_MagStep_BS( Lgm_Vector *u, Lgm_Vector *u_scale,
     rtol = Info->Lgm_MagStep_BS_rtol;
 
 
-        if ( ( eps != Info->Lgm_MagStep_BS_eps_old ) || ( *reset ) ){
+    if ( ( eps != Info->Lgm_MagStep_BS_eps_old ) || ( *reset ) ) {
 
         Info->Lgm_nMagEvals = 0;
         Info->Lgm_MagStep_BS_eps_old = eps;
