@@ -400,17 +400,17 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     double 	    RA, DEC;
     double 	    gclat, glon, psi;
     double	    g[14][14], h[14][14], Tmp[3][3];
-    double  	    varep90, varpi90;
-    double  	    Zeta, Theta, Zee;
-    double  	    SinZee, CosZee, SinZeta, CosZeta, SinTheta, CosTheta;
-    Lgm_Vector 	    S, K, Y, Z, D, Dmod, Dgsm, u_mod, u_tod, u_gei, Zgeo, X;
-    double          RA_tod, DEC_tod;
-    double          RA_gei, DEC_gei;
+    double  	varep90, varpi90;
+    double  	Zeta, Theta, Zee;
+    double  	SinZee, CosZee, SinZeta, CosZeta, SinTheta, CosTheta;
+    Lgm_Vector 	S, K, Y, Z, D, Dmod, Dgsm, u_mod, u_tod, u_gei, Zgeo, X;
+    double      RA_tod, DEC_tod;
+    double      RA_gei, DEC_gei;
     double	    sxp, cxp, syp, cyp;
-    double          sdp, cdp, se, ce, set, cet;
-    double          T_UT1, T2_UT1, T3_UT1, T_TT, T2_TT, T3_TT, T4_TT, T5_TT;
-    double          cos_epsilon, sin_epsilon, sin_lambnew, sin_b, cos_b, sin_l, tmp;
-    int 	    i, j, N;
+    double      sdp, cdp, se, ce, set, cet;
+    double      T_UT1, T2_UT1, T3_UT1, T_TT, T2_TT, T3_TT, T4_TT, T5_TT;
+    double      cos_epsilon, sin_epsilon, sin_lambnew, sin_b, cos_b, sin_l, tmp;
+    int 	    i, j, N, sgn;
 
 
     /*
@@ -427,7 +427,8 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
     c->UTC.Dow    = Lgm_DayOfWeek( year, month, day, c->UTC.DowStr );
     c->UTC.JD     = Lgm_JD( c->UTC.Year, c->UTC.Month, c->UTC.Day, c->UTC.Time, LGM_TIME_SYS_UTC, c );
     c->UTC.T      = (c->UTC.JD - 2451545.0)/36525.0;
-    c->UTC.fYear = (double)c->UTC.Year + ((double)c->UTC.Doy - 1.0 + c->UTC.Time/24.0)/(365.0 + (double)Lgm_LeapYear(c->UTC.Year));
+    c->UTC.fYear  = (double)c->UTC.Year + ((double)c->UTC.Doy - 1.0 + c->UTC.Time/24.0)/(365.0 + (double)Lgm_LeapYear(c->UTC.Year));
+    Lgm_UT_to_HMSd( UTC, &sgn, &(c->UTC.Hour), &(c->UTC.Minute), &(c->UTC.Second) );
 
     // set DAT
     c->DAT        = Lgm_GetLeapSeconds( c->UTC.JD, c );
@@ -2347,4 +2348,123 @@ char *Lgm_StrToUpper( char *str, int nmax ) {
 	    ++n;
 	}
     return( str );
+}
+
+/*
+ *  Compute the Geocentric Geographic Latitude/Longitude of the Day/Night Terminator.
+ *  
+ *  Uses the following formula:
+ *
+ *      sin(alpha) = sin(delta) sin(phi) + cos(delta)cos(phi)cos(omega)
+ *
+ *  where:
+ *      
+ *      alpha = elevation angle of Sun. (sunset/rise = 0, civil twilight = -6, nautical twilight = -12, astronominal twilight = -18)
+ *      delta = declinatioon of Sun
+ *      phi   = latitude of observer
+ *      omega = local hour angle = L + GST - RA
+ *      L     = longitude of observer
+ *      GST   = Greenwhich Sidereal Time
+ *      RA    = Right Ascention of Sun
+ *
+ *  To compute, we give it GLAT and solve for GLON. To solve for GLON,
+ *  substitue sin(phi) = sqrt(1-cos(phi)^2). The we have;
+ *
+ *      sin(alpha) = sin(delta)sqrt(1-cos(phi)^2) + cos(delta)cos(phi)cos(omega)
+ *      sin(delta)sqrt(1-cos(phi)^2) = sin(alpha) - cos(delta)cos(phi)cos(omega)
+ *
+ *  Let u = cos(phi), then squaring both sides:
+ *
+ *      sin^2(delta)(1-u^2)  = sin^2(alpha) - 2sin(alpha)cos(delta)cos(omega) u + cos^2(delta) cos^2(omega) u^2
+ *
+ *      sin^2(alpha) - sin^2(delta) + sin^2(delta) u^2 - 2sin(alpha)cos(delta)cos(omega) u + cos^2(delta) cos^2(omega) u^2 = 0
+ *      {sin^2(alpha) - sin^2(delta)} - {2sin(alpha)cos(delta)cos(omega)} u + {sin^2(delta) + cos^2(delta) cos^2(omega)} u^2 = 0
+ *
+ *
+ *  Let A = {sin^2(delta) + cos^2(delta) cos^2(omega)}
+ *      B = {-2sin(alpha)cos(delta)cos(omega)}
+ *      C = {sin^2(alpha) - sin^2(delta)}
+ *
+ *      A u^2 + B u + C  = 0
+ *
+ *  Solve for u with Quad Formula.
+ *
+ */
+void Lgm_Terminator( double GLON, double *GLAT, int *nRoots, double alpha, Lgm_CTrans *c ) {
+
+    double  sd, cd, sa, co, sd2, A, B, C, A2;
+    double  disc, s, u1, u2, phi1, phi2, phi3, phi4;
+    double  delta, omega, L, GST, RA;
+
+    omega = (GLON - c->RA_sun + c->gmst*15.0)*RadPerDeg;
+    delta = c->DEC_sun*RadPerDeg;
+    
+
+    sd = sin(delta); cd = cos(delta);
+    sa = sin(alpha*RadPerDeg);
+    co = cos(omega);
+    
+    sd2 = sd*sd;
+    
+    A = sd2 + cd*cd * co*co; A2 = 2.0*A;
+    B = -2.0*sa*cd*co;
+    C = sa*sa - sd2;
+
+    disc = B*B - 4.0*A*C;
+    if ( disc >= 0.0 ){
+        s = sqrt( disc );
+        u1 = (-B + s)/A2;
+        u2 = (-B - s)/A2;
+    }
+
+    /*
+     * We cannot get the right value of phi from just cos(phi) alone. We also need sin(phi).
+     *  sin(alpha) = sin(delta) sin(phi) + cos(delta)cos(phi)cos(omega)
+     */
+    double SinPhi;
+    SinPhi = (sa - cd*u1*co)/sd;
+    phi1 = (fabs(SinPhi) <= 1.0) ? DegPerRad*atan2( SinPhi, u1 ) : LGM_FILL_VALUE;
+    SinPhi = (sa - cd*u2*co)/sd;
+    phi2 = (fabs(SinPhi) <= 1.0) ? DegPerRad*atan2( SinPhi, u2 ) : LGM_FILL_VALUE;
+
+    if ( (phi1 > 90.0) || (phi1 < -90.0) ) { phi1 = LGM_FILL_VALUE; }
+    if ( (phi2 > 90.0) || (phi2 < -90.0) ) { phi2 = LGM_FILL_VALUE; }
+
+    //printf("A. SinPhi = %g CosPhi = %g    B, disc, A2, s = %g %g %g %g   u1, u2 = %g %g  phi1, phi2 = %lf %lf\n", SinPhi, u1, B, disc, A2, s, u1, u2, phi1, phi2);
+
+
+
+    /*
+     * return min sort order
+     */
+    if ( (phi1 > -1e20) && (phi2 > -1e20) ) {
+        // Two valid roots. 
+        *nRoots = 2;
+        if ( phi1 < phi2 ) {
+            GLAT[0] = phi1;
+            GLAT[1] = phi2;
+        } else {
+            GLAT[0] = phi2;
+            GLAT[1] = phi1;
+        }
+    } else if ( (phi1 > -1e20) ) {
+        // only phi1 is a valid root
+        *nRoots = 1;
+        GLAT[0] = phi1;
+        GLAT[1] = LGM_FILL_VALUE;
+    } else if ( (phi2 > -1e20) ) {
+        // only phi2 is a valid root
+        *nRoots = 1;
+        GLAT[0] = phi2;
+        GLAT[1] = LGM_FILL_VALUE;
+    } else {
+        // no valid roots
+        *nRoots = 0;
+        GLAT[0] = LGM_FILL_VALUE;
+        GLAT[1] = LGM_FILL_VALUE;
+    }
+
+    
+    return;
+
 }
