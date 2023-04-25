@@ -6,7 +6,7 @@
 #define NSTACK 2001
 
 /*
- * These routines assume the retarded NR index starts at 1 thing.
+ * These routines assume the silly NR index starts at 1 thing.
  */
 void quicksort( unsigned long n, double *arr ) {
 
@@ -15,6 +15,8 @@ void quicksort( unsigned long n, double *arr ) {
     int 		jstack=0, istack[NSTACK];
     double		a, temp;
 
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
 
     for (;;) {
         if (ir-l < M) {
@@ -81,6 +83,8 @@ void quicksort_uli( unsigned long n, unsigned long *arr ) {
     int 		    jstack=0, istack[NSTACK];
     unsigned long	a, temp;
 
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
 
     for (;;) {
         if (ir-l < M) {
@@ -148,6 +152,8 @@ void quicksort2(  unsigned long n, double *arr, double *brr ) {
     int 		jstack=0, istack[NSTACK];
     double		a, b, temp;
 
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
 
     for (;;) {
         if (ir-l < M) {
@@ -225,6 +231,8 @@ void quicksort2uli(  unsigned long n, double *arr, unsigned long int *brr ) {
     int         b;
     double		a, temp;
 
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
 
     for (;;) {
         if (ir-l < M) {
@@ -301,6 +309,8 @@ void quicksort3(  unsigned long n, double *arr, double *brr, double *crr ) {
     int 		    jstack=0, istack[NSTACK];
     double		    a, b, c, temp;
 
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
 
     for (;;) {
         if (ir-l < M) {
@@ -386,18 +396,18 @@ void quicksort3(  unsigned long n, double *arr, double *brr, double *crr ) {
  * An implementation of bubbleSort in case a user wants bubbleSort instead of quicksort
  * BAL - 20Apr2011
  */
-void bubbleSort(unsigned long n, double *arr)
-{
-  long i, j, temp;
+void bubbleSort(unsigned long n, double *arr) {
 
-  for (i=(n-1); i>0; i--) /* loop over first element */
-  {
-    for (j=1; j<=i; j++) /* loop over second element */
-    {
-      if (arr[j-1] > arr[j])
-      {
-        SWAP(arr[j-1],arr[j])
-      }
+    long i, j, temp;
+
+    // This should really cause a 0 on return -- change function type to int?
+    if ( n <= 0 ) return;
+
+    for (i=(n-1); i>0; i--) {/* loop over first element */
+        for (j=1; j<=i; j++) {/* loop over second element */
+            if (arr[j-1] > arr[j]) {
+                SWAP(arr[j-1],arr[j])
+            }
+        }
     }
-  }
 }
