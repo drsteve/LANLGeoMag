@@ -120,7 +120,7 @@
  * Macros for dynamically allocating/freeing 1D arrays of any type
  */
 #define LGM_ARRAY_1D( prow, col, type ) {\
-    register type *pdata;\
+    type *pdata;\
     if ( col < 1 ) { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (col = %d)\n", (int)(col) ); exit(1); }\
     pdata = (type *)calloc( (col), sizeof( type ) );\
     if ( pdata == (type *)NULL ) {\
@@ -170,7 +170,7 @@
  * Macros for dynamically allocating/freeing 3D arrays of any type
  */
 #define LGM_ARRAY_3D( pgrid, grid, row, col, type ) {\
-    register type **prow, *pdata;\
+    type **prow, *pdata;\
     int      i;\
     if ( row < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (row = %d)\n", (int)(row) ); exit(1); }\
     if ( col < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (col = %d)\n", (int)(col) ); exit(1); }\
@@ -215,7 +215,7 @@
  */
 #define LGM_ARRAY_4D( pn4, n4, n3, n2, n1, type ) {\
     long int i;\
-    register type ***pn3, **pn2, *pdata;\
+    type ***pn3, **pn2, *pdata;\
     if ( n1 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n1 = %d)\n", (int)(n1) ); exit(1); }\
     if ( n2 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n2 = %d)\n", (int)(n2) ); exit(1); }\
     if ( n3 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n3 = %d)\n", (int)(n3) ); exit(1); }\
@@ -271,7 +271,7 @@
  */
 #define LGM_ARRAY_5D( pn5, n5, n4, n3, n2, n1, type ) {\
     long int i;\
-    register type ****pn4, ***pn3, **pn2, *pdata;\
+    type ****pn4, ***pn3, **pn2, *pdata;\
     if ( n1 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n1 = %d)\n", (int)(n1) ); exit(1); }\
     if ( n2 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n2 = %d)\n", (int)(n2) ); exit(1); }\
     if ( n3 < 1 )  { fprintf( stderr, "LGM_ARRAY_1D Macro: Trying to allocate less than one element (n3 = %d)\n", (int)(n3) ); exit(1); }\
@@ -383,7 +383,7 @@
  * Macros for dynamically allocating/freeing 3D arrays of any type
  */
 #define LGM_ARRAY_FROM_DATA_3D( pgrid, pdata, grid, row, col, type ) {\
-    register type **prow;\
+    type **prow;\
     int      i;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
@@ -424,7 +424,7 @@
  */
 #define LGM_ARRAY_FROM_DATA_4D( pn4, pdata, n4, n3, n2, n1, type ) {\
     long int i;\
-    register type ***pn3, **pn2;\
+    type ***pn3, **pn2;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_4D Macro: pdata is NULL\n");\
@@ -475,7 +475,7 @@
  */
 #define LGM_ARRAY_FROM_DATA_5D( pn5, pdata, n5, n4, n3, n2, n1, type ) {\
     long int i;\
-    register type ****pn4, ***pn3, **pn2;\
+    type ****pn4, ***pn3, **pn2;\
     type     *pdata_tmp;\
     if ( pdata == (type *)NULL ) {\
         fprintf(stderr, "LGM_ARRAY_FROM_DATA_5D Macro: pdata is NULL\n");\
