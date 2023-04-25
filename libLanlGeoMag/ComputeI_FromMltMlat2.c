@@ -6,7 +6,7 @@
 /*
  * This version traces FLs from the Earth at the given MLT/mlat instead of trying to find the Bm radially out first.
  */
-double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
+double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo ) {
 
     int         reset=1, reset2, TraceFlag;
 
@@ -15,6 +15,8 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
     double      stmp, Btmp;
 
 
+    // Assume its good to start
+    *ErrorStatus = 1;
 
 
 
@@ -28,6 +30,18 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
 
     Lgm_Convert_Coords( &w, &u, SM_TO_GSM, LstarInfo->mInfo->c );
     TraceFlag = Lgm_Trace( &u, &v1, &v2, &v3, LstarInfo->mInfo->Lgm_LossConeHeight, TRACE_TOL, TRACE_TOL, LstarInfo->mInfo );
+LstarInfo->mInfo->Pmin = v3;
+//LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
+//printf("u  = %g %g %g    |B| = %g\n", u.x, u.y, u.z, Lgm_Magnitude( &Bvec ) );
+//
+//LstarInfo->mInfo->Bfield( &v1, &Bvec, LstarInfo->mInfo );
+//printf("v1 = %g %g %g    |B| = %g\n", v1.x, v1.y, v1.z, Lgm_Magnitude( &Bvec ) );
+//
+//LstarInfo->mInfo->Bfield( &v2, &Bvec, LstarInfo->mInfo );
+//printf("v2 = %g %g %g    |B| = %g\n", v2.x, v2.y, v2.z, Lgm_Magnitude( &Bvec ) );
+//
+//LstarInfo->mInfo->Bfield( &v3, &Bvec, LstarInfo->mInfo );
+//printf("v3 = %g %g %g    |B| = %g\n", v3.x, v3.y, v3.z, Lgm_Magnitude( &Bvec ) );
 
     LstarInfo->mInfo->Bfield( &v3, &Bvec, LstarInfo->mInfo );
     Bmin = Lgm_Magnitude( &Bvec );
@@ -39,6 +53,8 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
         if (LstarInfo->VerbosityLevel > 1) {
             printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Field Line not closed%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
         }
+
+        *ErrorStatus = -1; // FL open. I undefined.
         return( I );
 
     } else if ( Bmin <= Bm ) {
@@ -62,12 +78,12 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
                 //printf("Pmirror2 = %g %g %g\n", Pmirror2.x, Pmirror2.y, Pmirror2.z);
 
             } else {
-                return( 9e99 );
                 I = 9e99;
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find southern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
                 }
-            return( I );
+                *ErrorStatus = -3; // No valid mirror point in the south
+                return( I );
             }
 
             // total distance between mirror point.
@@ -79,6 +95,7 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Distance between mirror points is < 1e-7Re, Assuming I=0%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
                 }
+                *ErrorStatus = 2; // Flag that we did this
                 return( I );
             }
 
@@ -87,11 +104,12 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
             if (LstarInfo->VerbosityLevel > 1) {
                 printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find northern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
             }
+            *ErrorStatus = -2; // No valid mirror point in the north
             return( I );
         }
 
         /*
-         * OK, we have both mirror points. LEts compute I
+         * OK, we have both mirror points. Lets compute I
          */
         I = 9e99;
         LstarInfo->mInfo->Hmax = 0.1;
@@ -138,15 +156,23 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
 
         } else {
             I = 9e99;
-             if (LstarInfo->VerbosityLevel > 1) {
+            if (LstarInfo->VerbosityLevel > 1) {
                 printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   Couldnt initialize spline%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
-             }
+            }
         }
 
 
     } else {
 
-        if (LstarInfo->VerbosityLevel > 1){ printf( "\t\t\t> Field line min-B is greater than Bm. Bm = %g Bmin = %g\n", Bm, Bmin ); }
+//This seems problematic.
+//I see the brackets being affected by this, but often in the wrong mdirection!
+
+        if (LstarInfo->VerbosityLevel > 1){ printf( "\t\t\t> Field line min-B is greater than Bm. mlat = %g MLT = %g  Bm = %g Bmin = %g (u = %g %g %g   v1 = %g %g %g  v2 = %g %g %g  v3 = %g %g %g)\n", mlat, MLT, Bm, Bmin, u.x, u.y, u.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z ); }
+
+        *ErrorStatus = -10; // We didnt even try to compute I because we Field line min-B is greater than Bm.
+        if (LstarInfo->VerbosityLevel > 1) {
+            printf("\t\t%s  mlat: %13.6g   I: undefined   I0: %13.6g   I undefined. min-B is greater than Bm.%s\n",  LstarInfo->PreStr, mlat, I0, LstarInfo->PostStr );
+        }
         return( 9e99 );
 
     }
