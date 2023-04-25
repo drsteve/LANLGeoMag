@@ -109,9 +109,21 @@ typedef struct Lgm_FluxToPsd {
 
     double       *A;                //!< Array of pitch angle values in Flux array.
 
+    double       *Aeq;              //!< Array of equatorial pitch angle values corresponding to the A values.
+
+    double       Beq;               //!< Value of |B| on the current field line.
+
     double       **FLUX_EA;         //!< Array of differential flux versus Energy and PitchAngle, Flux[E][A].
 
+    double       **dFLUX_EA;        //!< Array of uncertainties in differential flux versus Energy and PitchAngle, Flux[E][A].
+
     double       **PSD_EA;          //!< Array of PSD versus Energy and PitchAngle, PSD[E][A].
+
+    double       **dPSD_EA;         //!< Array of uncertainties in PSD versus Energy and PitchAngle, PSD[E][A].
+
+    double       **PSD_EAeq;        //!< Array of PSD versus Energy and Eq. PitchAngle, PSD[E][Aeq].
+
+    double       **dPSD_EAeq;       //!< Array of uncertainties in PSD versus Energy and Eq. PitchAngle, PSD[E][Aeq].
 
     int          Alloced1;          //!< If true, the arrays are alloced.
 
@@ -125,6 +137,8 @@ typedef struct Lgm_FluxToPsd {
     Lgm_Vector   Position;         //!< Position of measurment.
 
     double       *AofK;            //!< Array of Alpha values that are implied by the k values. Size is nK.
+
+    double       *AEqofK;          //!< Array of Eq. Alpha values that are implied by the k values. Size is nK.
 
     double       **EofMu;          //!< Array of Energy values that are implied by the Mu, Alpha and B values. Size is nMu.
 
@@ -145,6 +159,8 @@ typedef struct Lgm_FluxToPsd {
 
 
     double       **PSD_MK;          //!< Array of PSD versus Mu and K,  PSD[Mu][K].
+
+    double       **dPSD_MK;         //!< Array of uncertainties in PSD versus Mu and K,  PSD[Mu][K].
 
     int          Alloced2;          //!< If true, the arrays are alloced.
 
@@ -253,11 +269,12 @@ typedef struct Lgm_PsdToFlux {
 // Flux -> PSD routines
 Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics );
 void           Lgm_F2P_FreeFluxToPsd( Lgm_FluxToPsd *f );
-void           Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
+void           Lgm_F2P_SetFlux( double **J, double **dJ, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetDateTimeAndPos( Lgm_DateTime *d, Lgm_Vector *u, Lgm_FluxToPsd *f );
 void           Lgm_F2P_SetObservedB( double B_obs, Lgm_FluxToPsd *f );
 void           Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f );
-double         Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f );
+double         Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, double *dPsd, Lgm_FluxToPsd *f );
+double         Lgm_F2P_GetPsdAtEandAlpha2( int iMu, double E, int iAEq, double *dPsd, Lgm_FluxToPsd *f );
 
 
 // PSD -> Flux routines
@@ -285,6 +302,8 @@ int     Lgm_GeometricSeq( double a, double b, int n, double *G );
 int     Lgm_InterpArr( double *xa, double *ya, int n, double x, double *y );
 double  Model( double *x, int n, double E );
 
+
+double  Lgm_DiffFluxToPsd2( double j, double m, double E );
 
 
 
