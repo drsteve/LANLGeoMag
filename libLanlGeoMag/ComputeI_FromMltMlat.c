@@ -9,15 +9,15 @@
  *  2. The new method seacrhes for Bm along a FL launched traced from the surface at the given MLT/MLAT.
  *
  */
-double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
+double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo ) {
 
     if ( LstarInfo->ISearchMethod == 1 ) {
 
-        return( ComputeI_FromMltMlat1( Bm, MLT, mlat, r, I0, LstarInfo ) );
+        return( ComputeI_FromMltMlat1( Bm, MLT, mlat, r, I0, ErrorStatus, LstarInfo ) );
 
     } else if ( LstarInfo->ISearchMethod == 2 ) {
 
-        return( ComputeI_FromMltMlat2( Bm, MLT, mlat, r, I0, LstarInfo ) );
+        return( ComputeI_FromMltMlat2( Bm, MLT, mlat, r, I0, ErrorStatus, LstarInfo ) );
 
     } else {
 
@@ -30,7 +30,7 @@ double ComputeI_FromMltMlat( double Bm, double MLT, double mlat, double *r, doub
 
 
 
-double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo ) {
+double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo ) {
 
     int         reset=1, reset2;
 
