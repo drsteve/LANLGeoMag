@@ -979,6 +979,7 @@ void    Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 void    _Lgm_JensenCain1960( Lgm_Vector *v, Lgm_Vector *B, Lgm_CTrans *c );
 
 
+void Lgm_Terminator( double GLON, double *GLAT_N, int *nRoots, double alpha, Lgm_CTrans *c );
 
 
 #endif
