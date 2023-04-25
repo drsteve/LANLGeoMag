@@ -182,11 +182,15 @@ void Tsyg_TS04( int IOPT, double *PARMOD, double PS, double SINPS, double COSPS,
     ZZ  = Z;
 
 
+//printf("About to call TS04_EXTERN(). PDYN, DST_AST, BXIMF, BYIMF, BZIMF, W1, W2, W3, W4, W5, W6, PSS, XX, YY, ZZ = %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", PDYN, DST_AST, BXIMF, BYIMF, BZIMF, W1, W2, W3, W4, W5, W6, PSS, XX, YY, ZZ);
+
+
     TS04_EXTERN( IOPGEN, IOPTT, IOPB, IOPR, A, 69, PDYN, DST_AST, BXIMF, BYIMF,
         BZIMF, W1, W2, W3, W4, W5, W6, PSS, XX, YY, ZZ, &BXCF, &BYCF, &BZCF, &BXT1, &BYT1,
         &BZT1, &BXT2, &BYT2, &BZT2, &BXSRC, &BYSRC, &BZSRC, &BXPRC, &BYPRC, &BZPRC,  &BXR11,
         &BYR11, &BZR11, &BXR12, &BYR12, &BZR12, &BXR21, &BYR21, &BZR21, &BXR22, &BYR22,
         &BZR22, &HXIMF, &HYIMF, &HZIMF, &BBX, &BBY, &BBZ, tInfo );
+//printf("Done calling TS04_EXTERN()\n");
 
 /*
 printf("BXCF, BYCF, BZCF   = %.10g %.10g %.10g\n", BXCF, BYCF, BZCF );
@@ -256,6 +260,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
     double    A0_A=34.586, A0_S0=1.1960, A0_X0=3.4397;     // SHUE ET AL. PARAMETERS
     double    DSIG=0.005, RH2=-5.2;
 
+//printf("X, Y, Z = %g %g %g\n", X, Y, Z);
 
     tInfo->CB_G.G     = 35.0;    // TAIL WARPING PARAMETER
     tInfo->CB_RH0.RH0 = 7.5;    // TAIL HINGING DISTANCE
@@ -306,6 +311,7 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
      *  BEGIN ITERATIVE SEARCH OF UNWARPED COORDS (TO FIND SIGMA)
      */
     done = FALSE;
+//printf("About to enter a while loop\n");
     while ( !done ) {
 
         XSOLD = XSS;
@@ -324,10 +330,12 @@ void TS04_EXTERN( int IOPGEN, int IOPT, int IOPB, int IOPR, double *A, int NTOT,
         ZSS = X*SINPSAS + Z*COSPSAS;
         XSS = X*COSPSAS - Z*SINPSAS;
         DD  = fabs( XSS-XSOLD ) + fabs( ZSS-ZSOLD );
+//printf("XSOLD, ZSOLD, R, ZSSoR2, RH, RoRH, SINPSAS, COSPSAS, ZSS, XSS, DD = %g %g %g %g %g %g %g %g %g %g %g\n", XSOLD, ZSOLD, R, ZSSoR2, RH, RoRH, SINPSAS, COSPSAS, ZSS, XSS, DD);
 
         if ( DD <= 1e-6 ) done = TRUE;
 
     }
+//printf("Exited while loop\n");
 
 
     RHO2 = Y*Y + ZSS*ZSS;
