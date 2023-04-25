@@ -36,9 +36,10 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     int     i, iMin, Type, iMax, done, Verbosity, nBounceRegions;
     double  Min, Max, Curr, Prev;
 
-    double  Diff, OldDiff, Minima[ LGM_LSTARINFO_MAX_FL ], Maxima[ LGM_LSTARINFO_MAX_FL ];
-    int     nMinima, iMinima[ LGM_LSTARINFO_MAX_FL ];
-    int     nMaxima, iMaxima[ LGM_LSTARINFO_MAX_FL ];
+    double  Diff, OldDiff, b1, b2;
+    double  Minima[ LGM_LSTARINFO_MAX_MINIMA ], Maxima[ LGM_LSTARINFO_MAX_MINIMA ];
+    int     nMinima, iMinima[ LGM_LSTARINFO_MAX_MINIMA ];
+    int     nMaxima, iMaxima[ LGM_LSTARINFO_MAX_MINIMA ];
 
     Verbosity = LstarInfo->VerbosityLevel;
     m = LstarInfo->mInfo;
@@ -65,28 +66,30 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
      */
     nMinima = 0;
     nMaxima = 0;
-    nBounceRegions=0;
+    nBounceRegions = 0;
     Diff = LGM_FILL_VALUE;
     for ( i=1; i<m->nPnts; i++ ){
         
         OldDiff = Diff;
         Diff    = m->Bmag[i] - m->Bmag[i-1];
 
-        if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima <  LGM_LSTARINFO_MAX_MINIMA )  ) {
-            iMinima[nMinima] = i-1;
-            Minima[nMinima] = m->Bmag[i-1];
-            ++nMinima;
-        }
+        if ( i>1 ) {
+            if ( (Diff > 0.0) && (OldDiff < 0.0) && (nMinima <  LGM_LSTARINFO_MAX_MINIMA )  ) {
+                iMinima[nMinima] = i-1;
+                Minima[nMinima] = m->Bmag[i-1];
+                ++nMinima;
+            }
 
-        if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima <  LGM_LSTARINFO_MAX_MINIMA ) ) {
-            iMaxima[nMaxima] = i-1;
-            Maxima[nMaxima] = m->Bmag[i-1];
-//printf("m->Bmag[i-1], m->Bmag[i] = %g %g\n", m->Bmag[i-1], m->Bmag[i]);
-            ++nMaxima;
+            if ( (Diff < 0.0) && (OldDiff > 0.0) && (nMaxima <  LGM_LSTARINFO_MAX_MINIMA ) ) {
+                iMaxima[nMaxima] = i-1;
+                Maxima[nMaxima] = m->Bmag[i-1];
+    printf("m->Bmag[i-1], m->Bmag[i] = %g %g\n", m->Bmag[i-1], m->Bmag[i]);
+                ++nMaxima;
+            }
         }
 
     }
-//Verbosity = 3;
+Verbosity = 3;
     if ( Verbosity > 1 ) {
 
         if ( nMinima > 1 ) {
@@ -103,11 +106,11 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 
         }
 
-        if ( nMaxima > 1 ) {
+        if ( nMaxima > 0 ) {
             if ( nMinima >= LGM_LSTARINFO_MAX_MINIMA-1 ) {
                 printf("\t\tThis Field line has multiple maxima (at least %d maxima detected). Probably on a bizarre field line (TS04 model?)\n", nMaxima );
             } else {
-                printf("\t\tThis Field line has multiple maxima (%d minima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
+                printf("\t\tThis Field line has multiple maxima (%d maxima detected excluding endpoints). Probably on Shabansky orbit!\n", nMaxima );
             }
             if ( Verbosity > 2 ) {
                 for ( i=0; i<nMaxima; i++ ){
@@ -127,17 +130,23 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
     LstarInfo->nMinima[k] = nMinima;
     LstarInfo->nMaxima[k] = nMaxima;
 
+printf("nMinima, nMaxima = %d %d\n", nMinima, nMaxima );
+printf("iMaxima[0] = %g\n", iMaxima[0]);
     if ( nMinima == 0 ) { // can this ever happen???
 
         Type = -9;
 
     } else if ( nMinima == 1 ) {
 
-        Type = 0;
+        // normal FL
+        Type = 0; 
+
+        // can only bounce in 1 region.
+        nBounceRegions = 1;
 
     } else if ( (nMinima == 2) && (nMaxima == 1) && (iMinima[0] < iMaxima[0]) && (iMinima[1] > iMaxima[0]) ) { // typical expected case for Shab.
 
-        if ( Maxima[0] < m->Bm ) {
+        if ( Maxima[0] <= m->Bm ) {
 
             // can only bounce in 1 region.
             nBounceRegions = 1;
@@ -145,8 +154,10 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
         } else {
 
             // can potentially bounce in 2 regions.
+            // this checks for sure that Bm will allow it. Seems like an exotic case -- ignore for now...
             if ( Minima[0] <= m->Bm ) ++nBounceRegions;
             if ( Minima[1] <= m->Bm ) ++nBounceRegions;
+            //nBounceRegions = 2;
 
         }
 
@@ -168,14 +179,31 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
          *     2) minima that drop below Bm on either side.
          *  The number of mirroring regions should be this number plus one.
          */
-        nBounceRegions = 1; // there should be at least one region....
-        for ( i=0; i<nMaxima; i++ ) {
-            if ( (Minima[i] <= m->Bm) && (Maxima[i] > m->Bm) && (Minima[i+1] <= m->Bm) ) {
+        nBounceRegions = 0;
+        for ( i=0; i<nMinima; i++ ) {
+
+            if ( i == nMinima-1){
+                // for final maxima, take a very high value for b2 (i.e. the
+                // "next" maxima is the ionosphere |B|
+                b1 = Minima[i]; 
+                b2 = 1e20;
+            } else {
+                b1 = Minima[i];
+                b2 = Maxima[i];
+            }
+
+            if ( (b1 <= m->Bm) && (b2 > m->Bm) ) {
+                // From this min to the max, we cross the Bm value -- this min
+                // supports mirroring.
                 ++nBounceRegions;
             }
+            
         }
 
-    Type = nBounceRegions;
+        // add 10  so we know we had this case
+printf("nMinima = %d\n", nMinima);
+        Type = 10+nBounceRegions;
+nBounceRegions = 1000;
 
     }
 
@@ -189,6 +217,8 @@ int ClassifyFL( int k, Lgm_LstarInfo *LstarInfo ) {
 //    fclose(fp);
 //}
 
+    
+    LstarInfo->nBounceRegions[k] = nBounceRegions;
     
 
     return( Type );
@@ -221,8 +251,8 @@ void Lgm_SetLstarTolerances( int Quality, int nFLsInDriftShell, Lgm_LstarInfo *s
         s->LstarQuality = Quality;
     }
 
-    if ( ( nFLsInDriftShell < 6 ) || ( nFLsInDriftShell > 240 ) ) {
-        printf("%sLgm_SetLstarTolerances: nFLsInDriftShell value (of %d) not in range [6, 240]. Setting to 24.%s\n", s->PreStr, nFLsInDriftShell, s->PostStr );
+    if ( ( nFLsInDriftShell < 6 ) || ( nFLsInDriftShell >= LGM_LSTARINFO_MAX_FL ) ) {
+        printf("%sLgm_SetLstarTolerances: nFLsInDriftShell value (of %d) not in range [6, %d]. Setting to 24.%s\n", s->PreStr, nFLsInDriftShell, LGM_LSTARINFO_MAX_FL, s->PostStr );
         s->nFLsInDriftShell = 24;
     } else {
         s->nFLsInDriftShell = nFLsInDriftShell;
@@ -462,11 +492,11 @@ void Lgm_InitLstarInfoDefaults( Lgm_LstarInfo	*LstarInfo ) {
     /*
      *  Default Settings
      */
-    LstarInfo->VerbosityLevel = 2;
-    LstarInfo->LSimpleMax     = 10.0;
-    LstarInfo->ISearchMethod  = 1;
+    LstarInfo->VerbosityLevel    = 2;
+    LstarInfo->LSimpleMax        = 10.0;
+    LstarInfo->ISearchMethod     = 1;
     LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
-    LstarInfo->LstarMoment    = LGM_LSTAR_MOMENT_CDIP_2010;
+    LstarInfo->LstarMoment       = LGM_LSTAR_MOMENT_CDIP_2010;
 
     LstarInfo->PreStr[0]  = '\0';
     LstarInfo->PostStr[0] = '\0';
@@ -634,7 +664,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         LstarInfo->mInfo->Bm = LstarInfo->mInfo->Blocal/sa2; // set Bmirror for supplied location, pitch angle, field model, etc.
 
 	if (LstarInfo->VerbosityLevel > 1) {
-            printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
+        printf("\n\t\t%sMin-B  Point Location, Pmin (Re):      < %g, %g, %g >%s\n", PreStr, LstarInfo->mInfo->Pmin.x, LstarInfo->mInfo->Pmin.y, LstarInfo->mInfo->Pmin.z, PostStr);
 	    LstarInfo->mInfo->Bfield( &u, &Bvec, LstarInfo->mInfo );
 	    B = Lgm_Magnitude( &Bvec );
             printf("\t\t%sMag. Field Strength, B at Pmin (nT):    %g%s\n", PreStr, B, PostStr);
@@ -643,11 +673,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         if (LstarInfo->VerbosityLevel > 0) {
             printf("\n\n\t\t%s        Computing L* for, Date: %ld, UT: %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, LstarInfo->mInfo->c->UTC.Time, PostStr );
             printf(    "\t\t%s=========================================================================%s\n", PreStr, PostStr );
-            printf(    "\t\t%sDate (yyyymmdd):                         %ld%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, PostStr );
-            printf(    "\t\t%sUTC (hours):                             %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Time, PostStr );
-            printf(    "\t\t%sPitch Angle (deg.):                      %g%s\n", PreStr, LstarInfo->PitchAngle, PostStr );
-            printf(    "\t\t%sInitial Position, vin (Re):              < %g, %g, %g >%s\n", PreStr, vin->x, vin->y, vin->z, PostStr);
-            printf(    "\t\t%sMirror Mag. Field Strength, Bm (nT):     %g%s\n", PreStr, LstarInfo->mInfo->Bm, PostStr );
+            printf(    "\t\t%sDate (yyyymmdd):                           %ld%s\n", PreStr, LstarInfo->mInfo->c->UTC.Date, PostStr );
+            printf(    "\t\t%sUTC (hours):                               %g%s\n", PreStr, LstarInfo->mInfo->c->UTC.Time, PostStr );
+            printf(    "\t\t%sPitch Angle (deg.):                        %g%s\n", PreStr, LstarInfo->PitchAngle, PostStr );
+            printf(    "\t\t%sInitial Position, vin (Re):                < %g, %g, %g >%s\n", PreStr, vin->x, vin->y, vin->z, PostStr);
+            printf(    "\t\t%sMirror Mag. Field Strength, Bm (nT):       %g%s\n", PreStr, LstarInfo->mInfo->Bm, PostStr );
         }
         /*
          *  If we are here, we know the field line is closed.  
@@ -739,7 +769,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                          */
                         I = Iinv_interped( LstarInfo->mInfo  );
                         if (LstarInfo->VerbosityLevel > 1) {
-                            printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                            printf("\t\t  %sIntegral Invariant, I (interped):        %g%s\n",  PreStr, I, PostStr );
                         }
 
                         /*
@@ -754,7 +784,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                             LstarInfo->SbIntegral0 = SbIntegral_interped( LstarInfo->mInfo  );
                             if (LstarInfo->VerbosityLevel > 1) {
                                 printf("\t\t  %sSb Integral Equatorially Mirroring:      %g%s\n",  PreStr, LstarInfo->Sb0, PostStr );
-                                printf("\t\t  %sSb Integral, (interped):      %g%s\n",  PreStr, LstarInfo->SbIntegral0, PostStr );
+                                printf("\t\t  %sSb Integral, (interped):                 %g%s\n",  PreStr, LstarInfo->SbIntegral0, PostStr );
                             }
                         }
                         FreeSpline( LstarInfo->mInfo );
@@ -776,13 +806,13 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 Ifound = I;
 
                 if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
-                    printf("\t\t%sCurrent Dipole Moment, M_cd:             %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
-                    printf("\t\t%sReference Dipole Moment, M_cd_McIlwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIlwain, PostStr);
-                    printf("\t\t%sReference Dipole Moment, M_cd_2010:      %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
-                    printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, LstarInfo->Mused, PostStr);
-                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
-                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
+                    printf("\t\t  %sLgm_n_I_integrand_Calls:                 %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
+                    printf("\t\t%sCurrent Dipole Moment, M_cd:               %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd, PostStr);
+                    printf("\t\t%sReference Dipole Moment, M_cd_McIlwain:    %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIlwain, PostStr);
+                    printf("\t\t%sReference Dipole Moment, M_cd_2010:        %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
+                    printf("\t\t%sDipole Moment Used, Mused:                 %g%s\n", PreStr, LstarInfo->Mused, PostStr);
+                    printf("\t\t%sMcIlwain L (Hilton):                       %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
+                    printf("\t\t%sMcIlwain L (McIlwain):                     %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
                 }
 
             } else {
@@ -822,7 +852,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
    
     } else if ( LstarInfo->ISearchMethod  == 2 ) {
 
-        // this method uses the mlat as the mlat of the footpoint.
+        // this method uses the mlat as the mlat of the footpoint. 
         Lgm_Convert_Coords( &v2, &u, GSM_TO_SM, LstarInfo->mInfo->c );
 
     } else {
@@ -897,8 +927,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
          *  mlat. If this doesnt work, we expand the size of the range.
          *
          */
-	done2 = FALSE; FoundShellLine = FALSE; Count = 0;
+	    done2 = FALSE; FoundShellLine = FALSE; Count = 0;
         LstarInfo->nImI0 = 0;
+//Iinitial = I;
 	    while ( !done2 && (k > 0) ) {
 
 	        if ( Count == 0 ) {
@@ -1033,24 +1064,43 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     
                 // Check for multiple minima and bounce regions -- but only if we have a valid FL with correct (I,Bm)
                 Type = ClassifyFL( k, LstarInfo );
-                LstarInfo->nBounceRegions[k] = Type;
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
                 }
     
-                if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
+                if ( (Type == 2) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
+
+                    /*
+                     *  This is likely a biffurcated drift orbit region. Re-do
+                     *  it by finding I0/2.  Note that I/2 is not necessarily
+                     *  the correct partitioning. From debugging sessions, it
+                     *  seems that there are times when I/2 cannot be found
+                     *  exactly (but that for example I/2.1 could have been
+                     *  found.) These case tend to happne for multiple minima
+                     *  FLs. The error we may get back in this case is
+                     *  "Converged to something but not I".
+                     */
+                    mlat0 -= 1.0;
+                    mlat1 += 1.0;
+
                     if (LstarInfo->VerbosityLevel > 0) {
-                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
                     }
+                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
     
                     FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
-                    //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
-                    PredMinusActualMlat = pred_mlat - mlat;
-                    if (LstarInfo->VerbosityLevel > 1) {
-                        printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
-                        printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                    if ( FoundShellLine > 0 ) { // I0/2 worked
+                        //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
+                        PredMinusActualMlat = pred_mlat - mlat;
+                        if (LstarInfo->VerbosityLevel > 1) {
+                            printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                            printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                            printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                        }
+                    }  else { // redo old unpartitioned one (set RelaxTolerance to 2. This will force acceptance of anything that is a "converged but not to I value."
+if (LstarInfo->VerbosityLevel > 1) printf("1. HERE\n");
+                        FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 2, LstarInfo );
                     }
+
     
                 } else {
                     if (Type > 1) {
@@ -1065,6 +1115,65 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     }
                 }
 
+
+            } else if ( FoundShellLine == -4 ) { 
+done2 = TRUE;
+                // This is the "Converged to something, but not I error. It is possible that this is a shabansky and we should be searching for I0/2 (and that we coundt find any I0 vals in the search).
+                v = LstarInfo->mInfo->Pm_North;
+                LstarInfo->mInfo->Hmax = 0.1;
+                retEarthTrace = Lgm_TraceToSphericalEarth( &v, &w, LstarInfo->mInfo->Lgm_LossConeHeight, 1, 1e-9, LstarInfo->mInfo );
+                if ( !retEarthTrace ){
+                    for ( i=0; i<LstarInfo->nPnts; ++i ) if ( LstarInfo->nMinima[i] > 1 ) LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
+                    break;//return(-4);    
+                }
+    
+    
+                LstarInfo->Spherical_Footprint_Pn[k] = w;
+                LstarInfo->mInfo->Hmax = 0.05;
+    
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%sTracing Full FL so that we can classify it. Starting at Spherical_Footprint_Pn[%d] = %g %g %g%s\n", PreStr, k, LstarInfo->Spherical_Footprint_Pn[k].x, LstarInfo->Spherical_Footprint_Pn[k].y, LstarInfo->Spherical_Footprint_Pn[k].z, PostStr );
+                }
+                Lgm_TraceLine( &LstarInfo->Spherical_Footprint_Pn[k], &v2, LstarInfo->mInfo->Lgm_LossConeHeight, -1.0, 1e-8, FALSE, LstarInfo->mInfo );
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%sTraced Full FL so that we can classify it. Step size along FL: %g. Number of points: %d.%s\n", PreStr, LstarInfo->mInfo->Hmax, LstarInfo->mInfo->nPnts, PostStr );
+                }
+                LstarInfo->Spherical_Footprint_Ps[k] = v2;
+    
+                // Check for multiple minima and bounce regions -- but only if we have a valid FL with correct (I,Bm)
+                Type = ClassifyFL( k, LstarInfo );
+                if (LstarInfo->VerbosityLevel > 1) {
+                    printf("\t\t%sClassifying FL: Type = %d. %s\n", PreStr, Type, PostStr );
+                }
+
+                if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
+mlat0 -= 1.0;
+mlat1 += 1.0;
+                    if (LstarInfo->VerbosityLevel > 0) {
+                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
+printf("mlat0, mlat1 = %g %g\n", mlat0, mlat1);
+                    }
+    
+                    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
+                    if (FoundShellLine > 0) {
+printf("2a. HERE\n");
+                        //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
+                        PredMinusActualMlat = pred_mlat - mlat;
+                        if (LstarInfo->VerbosityLevel > 1) {
+                            printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
+                            printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                            printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
+                        }
+
+                    }  else { // redo old unpartitioned one (set RelaxTolerance to 2. This will force acceptance of anything that is a "converged but not to I value."
+printf("2b. HERE\n");
+                        FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 2, LstarInfo );
+                    }
+    
+                } 
+            
+
+
             } else if ( Count > 2 ) {
                 // Tried to find valid FL more than three times
                 done2 =  TRUE;
@@ -1076,6 +1185,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             }
 	} //end of while loop
 
+
+
+
         /*
          *  Test for open drift path and exit gracefully if required
          */
@@ -1086,7 +1198,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             // After initial FL, found I,Bm in bifurcated drift orbit. Desired behavior is bailing out.
             doExit = TRUE;
         }
-        if (doExit) {
+        if ( doExit ) {
+
+            
             for ( i=0; i<LstarInfo->nPnts; ++i ) {
                  if  ( LstarInfo->nMinima[i] > 1 ) {
                      if ( LstarInfo->nBounceRegions[i] > 1 ) {
@@ -1097,9 +1211,11 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                  }
             }
 
-            if (nShabII > 0) {
+
+
+            if ( nShabII > 0 ) {
                 LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II;
-            } else if (nShabI > 0) {
+            } else if ( nShabI > 0 ) {
                 LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I;
             } else {
                 LstarInfo->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
@@ -1206,12 +1322,15 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
          * footpoint, we start there and trace to south. So lets pack them in
          * the saved arrays backwards so that they go from south to north.
          */
+// see what it is first
+LstarInfo->Pmin[k] = LstarInfo->mInfo->Pmin;
 LstarInfo->FindShellPmin = TRUE;
+//But this is probably not the Pmin for Shabnsky regions
         if ( LstarInfo->FindShellPmin || LstarInfo->ComputeVgc ) {
             //Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             Lgm_TraceToMinBSurf( &LstarInfo->Spherical_Footprint_Pn[k], &v2, 0.1, 1e-8, LstarInfo->mInfo );
             LstarInfo->mInfo->Bfield( &v2, &LstarInfo->Bmin[k], LstarInfo->mInfo );
-            LstarInfo->Pmin[k] = v2;
+//LstarInfo->Pmin[k] = v2;
         }
 
         /*
