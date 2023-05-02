@@ -78,7 +78,7 @@
 #define LGM_IGRF        2
 #define LGM_DUNGEY      3
 
-#define LGM_MAX_INTERP_PNTS 10000
+#define LGM_MAX_INTERP_PNTS 50000
 
 #define LGM_RELATIVE_JUMP_METHOD 0
 #define LGM_ABSOLUTE_JUMP_METHOD 1
@@ -102,6 +102,7 @@
 #define LGM_EXTMODEL_TU82               14
 #define LGM_EXTMODEL_OP88               15
 
+#define LGM_EXTMODEL_SCATTERED_DATA6    23
 
 
 // Derivative schemes
@@ -375,6 +376,7 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_I_Integrator_epsrel;        // Quadpack epsrel tolerance for I_integrator
     double      Lgm_I_Integrator_epsabs;        // Quadpack epsabs tolerance for I_integrator
 
+
     /*
      *  These variables are needed to make Sb_integrand() reentrant/thread-safe.
      *  They basically used to be static declarations.
@@ -390,6 +392,15 @@ typedef struct Lgm_MagModelInfo {
     double      Lgm_Sb_Integrator_epsabs;       // Quadpack epsabs tolerance for Sb_integrator
 
 
+
+    /*
+     * Variables to control FluxTubeVolume integration
+     */
+    int         Lgm_n_V_integrand_Calls;
+    int         Lgm_V_Integrator;
+
+    double      Lgm_V_Integrator_epsrel;        // Quadpack epsrel tolerance for V_integrator
+    double      Lgm_V_Integrator_epsabs;        // Quadpack epsabs tolerance for V_integrator
 
 
     /*
@@ -443,12 +454,19 @@ typedef struct Lgm_MagModelInfo {
     double          KdTree_kNN_MaxDist2;
     Lgm_KdTreeData *KdTree_kNN;
     int             KdTree_kNN_Alloced; // number of elements allocated. (0 if unallocated).
+    int             KdTreeCopy;         // If set, then we assume the pointer
+                                        // to the tree data is a copy and we
+                                        // should not free it when calling
+                                        // Lgm_FreeMagInfo().
 
 
     /*
      *  hash table, etc.  used in Lgm_B_FromScatteredData*()
      */
     Lgm_DFI_RBF_Info   *rbf_ht;             // hash table (uthash)
+    double             dfi_rbf_ht_size;     // hash table size in MB
+    double             dfi_rbf_ht_maxsize;  // hash table max size in MB
+    CircularBuffer     RBF_DFI_CB;
 
     Lgm_Vec_RBF_Info   *vec_rbf_ht;         // hash table (uthash)
     double             vec_rbf_ht_size;     // hash table size in MB
@@ -529,11 +547,23 @@ typedef struct Lgm_MagModelInfo {
     //long int       FP_nHashFinds;       // Number of HASH_FIND()'s performed.
     //long int       FP_nHashAdds;        // Number of HASH_ADD_KEYPTR()'s performed.
 
+    /*
+     * Transformation matrix from GSM to PQB and (reverse) 
+     */
+    double Agsm_to_pqb[3][3];
+    double Apqb_to_gsm[3][3];
+    int    Agsm_to_pqb_set;
+
 
     void        *Data;
 
 
 } Lgm_MagModelInfo;
+void Lgm_GSM_TO_PQB( Lgm_Vector *u_gsm, Lgm_Vector *u_pqb, Lgm_MagModelInfo *m );
+void Lgm_Set_GSM_TO_PQB( Lgm_Vector *Position, Lgm_MagModelInfo *m );
+void Lgm_PQB_TO_GSM( Lgm_Vector *u_pqb, Lgm_Vector *u_gsm, Lgm_MagModelInfo *m );
+
+
 
 typedef struct BrentFuncInfoP {
 
@@ -759,12 +789,15 @@ int Lgm_B_FromScatteredData2( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
 int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 int Lgm_B_FromScatteredData4( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
+int Lgm_B_FromScatteredData6( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData_TearDown( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData4_TearDown( Lgm_MagModelInfo *Info ); // unify the structs to avoid having this
 
 void Lgm_B_FromScatteredData5_SetUp( Lgm_MagModelInfo *Info );
 void Lgm_B_FromScatteredData5_TearDown( Lgm_MagModelInfo *Info ); // I dont like this proliferation of routines here..
+void Lgm_B_FromScatteredData6_SetUp( Lgm_MagModelInfo *Info );
+void Lgm_B_FromScatteredData6_TearDown( Lgm_MagModelInfo *Info ); // I dont like this proliferation of routines here..
 
 
 /*
@@ -782,6 +815,8 @@ int Lgm_B_Dungey(Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info);
 /*
  * routines/functions for field integrals, invariants, etc.
  */
+double      FluxTubeVolume( Lgm_MagModelInfo *fInfo );
+double      V_integrand( double s, _qpInfo *qpInfo );
 double      Iinv( Lgm_MagModelInfo *fInfo );
 double      I_integrand( double s, _qpInfo *qpInfo );
 double      Iinv_interped( Lgm_MagModelInfo *fInfo );
@@ -872,14 +907,55 @@ int  Lgm_CGM_TO_GEOD( double CgmLat, double CgmLon, double CgmRadi, double *geoL
  * Various B-related routines
  */
 void    Lgm_GradB( Lgm_Vector *u0, Lgm_Vector *GradB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Grad_Divb( Lgm_Vector *u0, Lgm_Vector *Grad_Divb, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_GradB2( Lgm_Vector *u0, Lgm_Vector *GradB, Lgm_Vector *GradB_para, Lgm_Vector *GradB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_GradBvec( Lgm_Vector *u0, double GradBvec[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_GradBvec2( int j, Lgm_Vector *u0, double GradBvec[4][4], int DerivScheme, double h, int n, double dt, Lgm_MagModelInfo **m );
 void    Lgm_CurlB( Lgm_Vector *u0, Lgm_Vector *CurlB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Curlb( Lgm_Vector *u0, Lgm_Vector *Curlb, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_CurlB2( Lgm_Vector *u0, Lgm_Vector *CurlB, Lgm_Vector *CurlB_para, Lgm_Vector *CurlB_perp, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_B_Cross_GradB_Over_B( Lgm_Vector *u0, Lgm_Vector *A, int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_DivB( Lgm_Vector *u0, double *DivB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Divb( Lgm_Vector *u0, double *Divb, int DerivScheme, double h, Lgm_MagModelInfo *m );
 int     Lgm_GradAndCurvDriftVel( Lgm_Vector *u0, Lgm_Vector *Vel, Lgm_MagModelInfo *m );
+void    Lgm_dBdcomp( Lgm_Vector *u0, int comp, double *dBdcomp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dBdx( Lgm_Vector *u0, double *dBx, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dBdy( Lgm_Vector *u0, double *dBy, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dBdz( Lgm_Vector *u0, double *dBz, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_LaplacianB( Lgm_Vector *u0, double *LaplacianB, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dDivbdcomp( Lgm_Vector *u0, int comp, double *dDivbdcomp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Curvature( Lgm_Vector *q, Lgm_Vector *Rc, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Curvature2( Lgm_Vector *q, Lgm_Vector *Rc, int DerivScheme, double h, Lgm_MagModelInfo *m );
+int     Lgm_Vdrift_GradB_Curv( Lgm_Vector *u0, Lgm_Vector *v_full, double Mass, double Charge, Lgm_Vector *v_GradB, Lgm_Vector *v_CurvB, Lgm_Vector *Rc_vec, Lgm_MagModelInfo *m );
+
 
 void quicksort_uli( unsigned long n, unsigned long *arr );
+
+
+/*
+ * Rotuines for computing the first invariant up to second order
+ */
+double  Lgm_DoubleDot( double A[3][3], double B[3][3] );
+void    Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, double Energy, double Phi, double Delta, 
+                Lgm_Vector *a, Lgm_Vector *c, Lgm_Vector *b, Lgm_Vector *v, Lgm_MagModelInfo *mInfo );
+void    Lgm_Grad_Cb( Lgm_Vector *u0, double Grad_Cb[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Grad_b( Lgm_Vector *u0, double Grad_b[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Grad_GradB( Lgm_Vector *u0, double Grad_GradB[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dbdotvdcomp( Lgm_Vector *u0, Lgm_Vector *v, int comp, double *dbdotvdcomp, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dbdotvdx( Lgm_Vector *u0, Lgm_Vector *v, double *dbdotvdx, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dbdotvdy( Lgm_Vector *u0, Lgm_Vector *v, double *dbdotvdy, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_dbdotvdz( Lgm_Vector *u0, Lgm_Vector *v, double *dbdotvdz, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Laplacian_bdotv( Lgm_Vector *u0, Lgm_Vector *v, double *Laplacian_bdotv, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Grad_bdotv( Lgm_Vector *u0, Lgm_Vector *v, Lgm_Vector *Grad_bdotv, int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Grad_Grad_bdotv( Lgm_Vector *u0, Lgm_Vector *v, double Grad_Grad_bdotv[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
+void    Lgm_Dyad( Lgm_Vector *a, Lgm_Vector *b, double r[3][3] );
+void    Lgm_VectorDotTensor( Lgm_Vector *v, double T[3][3], Lgm_Vector *Result );
+void    Lgm_TensorDotVector( double T[3][3], Lgm_Vector *v, Lgm_Vector *Result );
+void    Lgm_TensorDotTensor( double A[3][3], double B[3][3], double R[3][3] );
+double  Lgm_TraceTensor( double T[3][3] );
+void    Lgm_TensorTranspose( double T[3][3], double T_transpose[3][3] );
+double  Lgm_DoubleDot( double A[3][3], double B[3][3] );
+double  Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo );
 
 
 /*
