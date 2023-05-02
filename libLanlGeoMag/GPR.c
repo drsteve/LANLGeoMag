@@ -1,10 +1,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <Lgm_DynamicMemory.h>
-#include <Lgm_ElapsedTime.h>
-#include <Lgm_CTrans.h>
-#include <Lgm_FluxToPsd.h>
+#include "DynamicMemory.h"
+#include "Lgm/Lgm_ElapsedTime.h"
+#include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_FluxToPsd.h"
 
 
 
