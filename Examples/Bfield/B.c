@@ -35,13 +35,14 @@ int main(){
      * Or there is a setter routine ...
      */
     //Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_T89, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_EDIP, LGM_EXTMODEL_TS04, mInfo );
 
 
 
     /*
      * For TS07, the coeffs need to be initialized for each new time...
      */
-    Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
+    //Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
 
 
 
@@ -83,7 +84,7 @@ int main(){
 
     for (i=0; i<=5; i++) {
         mInfo->Kp = i;
-        u.x = -6.6; u.y =  0.0;  u.z =  0.0;
+        u.x = -5.8; u.y =  0.0;  u.z =  0.0;
         //Lgm_Convert_Coords( &u, &ugsm, GEO_TO_GSM, mInfo->c );
         Lgm_Convert_Coords( &u, &ugsm, SM_TO_GSM, mInfo->c );
         mInfo->Bfield( &ugsm, &B, mInfo );
@@ -111,6 +112,35 @@ int main(){
     }
 
 
+
+    double Tilt, Phi, Theta, MLT, R;
+    R = 6.6;
+    FILE *fp1 = fopen( "Tilt1.txt", "w" );
+    FILE *fp2 = fopen( "Tilt2.txt", "w" );
+    for (MLT = 18.0; MLT <= 30.0; MLT += 0.1 ) {
+
+        Phi   = 180.0 + (MLT-18.0)*15.0;
+        Theta = 0.0;
+
+        u.x = R * cos( Phi*RadPerDeg ) * cos( Theta *RadPerDeg );
+        u.y = R * sin( Phi*RadPerDeg ) * cos( Theta *RadPerDeg );
+        u.z = R * sin( Theta *RadPerDeg );
+printf("u = %g %g %g\n", u.x, u.y, u.z);
+
+        Lgm_Convert_Coords( &u, &ugsm, SM_TO_GSM, mInfo->c );
+
+        mInfo->Bfield( &ugsm, &B, mInfo );
+
+        Tilt = DegPerRad * atan2( B.z, sqrt(B.x*B.x + B.y*B.y) );
+        fprintf( fp1, "%g %g\n", MLT, Tilt );
+        
+        
+        Tilt = DegPerRad * asin( B.z/sqrt(B.x*B.x + B.y*B.y + B.z*B.z) );
+        fprintf( fp2, "%g %g\n", MLT, Tilt );
+
+    }
+    fclose(fp1);
+    fclose(fp2);
 
 
 
