@@ -52,7 +52,7 @@ int main( ) {
         if ( fabs(UTc-UTa) < 1e-8 ) done = 1;
 
     }
-    printf("Final result:\n");
+    printf("Final result for Date=%8ld :\n", Date );
     printf("UTa, PSia = %.10lf %.10lf\n", UTa, Psia );
     printf("UTb, PSib = %.10lf %.10lf\n", UTb, Psib );
     printf("UTc, PSic = %.10lf %.10lf\n", UTc, Psic );
