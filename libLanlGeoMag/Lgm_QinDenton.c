@@ -787,7 +787,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate G1
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->G1[i] > 0.0) && (q->G2[i] > 0.0) && (q->G3[i] > 0.0) ){
+            if ( (q->G1[i] >= 0.0) && (q->G2[i] >= 0.0) && (q->G3[i] >= 0.0) ){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->G1[i]; 
                 ++nGood;
@@ -797,6 +797,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood ); 
             p->G1 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->G1 < 0.0 ) p->G1 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->G1 = Gdefaults[0];
@@ -805,7 +806,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate G2
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->G1[i] > 0.0) && (q->G2[i] > 0.0) && (q->G3[i] > 0.0) ){
+            if ( (q->G1[i] >= 0.0) && (q->G2[i] >= 0.0) && (q->G3[i] >= 0.0) ){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->G2[i]; 
                 ++nGood;
@@ -815,6 +816,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood ); 
             p->G2 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->G2 < 0.0 ) p->G2 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->G2 = Gdefaults[1];
@@ -823,7 +825,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate G3
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->G1[i] > 0.0) && (q->G2[i] > 0.0) && (q->G3[i] > 0.0) ){
+            if ( (q->G1[i] >= 0.0) && (q->G2[i] >= 0.0) && (q->G3[i] >= 0.0) ){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->G3[i]; 
                 ++nGood;
@@ -833,6 +835,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood ); 
             p->G3 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->G3 < 0.0 ) p->G3 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->G3 = Gdefaults[2];
@@ -1007,7 +1010,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W1
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W1[i]; 
                 ++nGood;
@@ -1017,6 +1020,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W1 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W1 < 0.0 ) p->W1 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W1 = Wdefaults[0];
@@ -1027,7 +1031,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W2
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W2[i]; 
                 ++nGood;
@@ -1037,6 +1041,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W2 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W2 < 0.0 ) p->W2 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W2 = Wdefaults[1];
@@ -1045,7 +1050,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W3
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W3[i]; 
                 ++nGood;
@@ -1055,6 +1060,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W3 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W3 < 0.0 ) p->W3 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W3 = Wdefaults[2];
@@ -1063,7 +1069,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W4
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W4[i]; 
                 ++nGood;
@@ -1073,6 +1079,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W4 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W4 < 0.0 ) p->W4 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W4 = Wdefaults[3];
@@ -1081,7 +1088,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W5
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W5[i]; 
                 ++nGood;
@@ -1091,6 +1098,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W5 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W5 < 0.0 ) p->W5 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W5 = Wdefaults[4];
@@ -1099,7 +1107,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         // interpolate W6
         for ( nGood=0, i=0; i<nq; i++ ){
-            if ( (q->W1[i] > 0.0) && (q->W2[i] > 0.0) && (q->W3[i] > 0.0) && (q->W4[i] > 0.0) && (q->W5[i] > 0.0) && (q->W6[i] > 0.0)){
+            if ( (q->W1[i] >= 0.0) && (q->W2[i] >= 0.0) && (q->W3[i] >= 0.0) && (q->W4[i] >= 0.0) && (q->W5[i] >= 0.0) && (q->W6[i] >= 0.0)){
                 x[nGood] = q->MJD[i]; 
                 y[nGood] = q->W6[i]; 
                 ++nGood;
@@ -1109,6 +1117,7 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             spline = ( nGood < 5 ) ? gsl_spline_alloc( gsl_interp_linear, nGood ) : gsl_spline_alloc( gsl_interp_akima, nGood );
             gsl_spline_init( spline, x, y, nGood );
             p->W6 = gsl_spline_eval( spline, MJD, acc );
+            if ( p->W6 < 0.0 ) p->W6 = 0.0;
             gsl_spline_free (spline);
         } else {
             p->W6 = Wdefaults[5];

@@ -64,8 +64,8 @@ double eeFunc( Lgm_Vector *P, double TargetHeight, Lgm_MagModelInfo *Info ){
  *      \param[in]       u           Input position vector in GSM coordinates.
  *      \param[out]      v           The final point. This will be the desired footpoint if the FL is closed. Otherwise it is where we detected the FL was open.
  *      \param[in]      TargetHeight The altitude (in km) above the WGS84 ellispoid (i.e. geodetic height) used to define what we mean by the footpoint altitude.
- *      \param[in]      TOL1         Tolerance for converging on footpoint location.
  *      \param[in]      sgn          Direction for trace. +1.0 is with the field, -1.0 is against the field.
+ *      \param[in]      tol          Tolerance for converging on footpoint location.
  *      \param[in,out]  Info         Properly initialized/configured Lgm_MagModelInfo structure.
  *  
  *  \return 

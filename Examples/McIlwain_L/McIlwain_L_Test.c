@@ -30,9 +30,9 @@ int main(){
     mInfo->W[5]   = 1.0461333333333334;
 
     //vals = magcoords.Lvalue([-4, 0, 1], datetime.datetime(2009,1,1))
-    Date = 19960106;
-    UTC  = 1.2444444444444445;
-Date = 20130101;
+    Date = 20090101;
+ //   UTC  = 1.2444444444444445;
+//Date = 20130101;
 UTC = 0.0;
 Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
 JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );    // Compute JD
@@ -42,8 +42,9 @@ Lgm_get_QinDenton_at_JD( JD, &p, 0, 0 );
 Lgm_set_QinDenton( &p, mInfo );
 
 
-mInfo->Bfield = Lgm_B_T89;
-mInfo->Kp = 3;
+//mInfo->Bfield = Lgm_B_T89;
+//m+Info->Kp = 3;
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, mInfo );
 
 
 
@@ -59,12 +60,24 @@ mInfo->Kp = 3;
 //u.x = 0.3503119221132272;
 //u.y = 0.185820103265288;
 //u.z = -1.0028377093930358;
+u.x = -7.0; u.y = 0.0; u.z = 0.0;
     printf("u_gsm = %.15lf %.15lf %.15lf\n", u.x, u.y, u.z);
 //    Lgm_Convert_Coords( &u, &v, GSM_TO_WGS84, c );
 //    printf("v_wgs84 = %.15lf %.15lf %.15lf\n", v.x, v.y, v.z);
     a = 90.0;
 
-    L = Lgm_McIlwain_L( Date, UTC, &u, a, 1, &I, &Bm, &M, mInfo );
+Lgm_Convert_Coords( &u, &v, SM_TO_GSM, mInfo->c );
+
+/*
+mInfo->Lgm_I_Integrator_epsrel = 0.0;
+mInfo->Lgm_I_Integrator_epsabs = 1e-8;
+mInfo->Lgm_MagStep_BS_atol = 1e-6;
+mInfo->Lgm_MagStep_BS_rtol = 0.0;
+*/
+mInfo->Lgm_MagStep_BS_Eps         = 1e-7;
+mInfo->Lgm_MagStep_BS_atol        = 1e-6;
+mInfo->Lgm_MagStep_BS_rtol        = 0.0;
+    L = Lgm_McIlwain_L( Date, UTC, &v, a, 1, &I, &Bm, &M, mInfo );
     printf("Pitch Angle: %g    McIlwain L  = %.15g   ( I, Bm, M = %.15g %g %g )\n", a, L, I, Bm, M);
 
 

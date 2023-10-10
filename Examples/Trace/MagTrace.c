@@ -5,13 +5,14 @@
 #include <Lgm_QinDenton.h>
 #include <Lgm_ElapsedTime.h>
 #include <Lgm_FluxToPsd.h>
+#include <Lgm/Lgm_FluxToPsd.h>
 #include <omp.h>
 
 
 void DumpImage( char *FilenameBase, int W, int H, double **Image ){
 
     double           Val, Val2, Min, Max, dVal;
-    int              w, h;
+    int              w, h, i;
     unsigned char   *uImage, *Red, *Grn, *Blu, uVal;
     char            Filename[1024];
     FILE            *fp_gif, *fp_info;
@@ -22,6 +23,9 @@ void DumpImage( char *FilenameBase, int W, int H, double **Image ){
     Red = (unsigned char *)calloc( 256, sizeof(unsigned char) );
     Grn = (unsigned char *)calloc( 256, sizeof(unsigned char) );
     Blu = (unsigned char *)calloc( 256, sizeof(unsigned char) );
+
+    for (i=0; i<256; i++ ) { Red[i] = Rainbow2_Red[i]; Grn[i] = Rainbow2_Grn[i]; Blu[i] = Rainbow2_Blu[i]; }
+
     Red[1] =   0; Grn[1] =  105;  Blu[1] =   27;
     Red[2] = 152/2; Grn[2] =  152/2;  Blu[2] =  122/2;
     Red[3] =  98/2; Grn[3] =   98/2;  Blu[3] =   77/2;
@@ -170,6 +174,33 @@ int ClassifyFL_Enhanced2( int Flag, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *
 
 }
 
+void i_j_to_MLAT_MLT( int i, int j,  double *MLAT, double *MLT, double LX_MIN, double LX_MAX, double LY_MIN, double LY_MAX, int NX, int NY) {
+
+    double x, y;
+
+    x = (LX_MAX-LX_MIN) * i / ((double)(NX-1)) + LX_MIN;
+    y = (LY_MAX-LY_MIN) * j / ((double)(NY-1)) + LY_MIN;
+    *MLAT = 90.0 - sqrt( x*x + y*y );
+    *MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
+
+}
+
+
+
+void MLAT_MLT_to_i_j( double MLAT, double MLT, int *i, int *j,  double LX_MIN, double LX_MAX, double LY_MIN, double LY_MAX, int NX, int NY) {
+
+    double  psi, rr, x, y;
+
+    psi = 15.0*(MLT-12.0);
+    rr  = 90.0-MLAT;
+    x   = rr*cos( psi*RadPerDeg );
+    y   = rr*sin( psi*RadPerDeg );
+
+    *i = (x - LX_MIN)*((double)NX-1.0)/(LX_MAX - LX_MIN );
+    *j = NY - (y - LY_MIN)*((double)NY-1.0)/(LY_MAX - LY_MIN );
+
+}
+
 int main(){
 
     int                 NX, NY, i, j;
@@ -199,8 +230,8 @@ int main(){
     Lgm_MagModelInfo    *mInfo = Lgm_InitMagInfo();
     
 
-    NX     = 100; LX_MIN = -30.0; LX_MAX =  30.0;
-    NY     = 100; LY_MIN = -30.0; LY_MAX =  30.0;
+    NX     = 500; LX_MIN = -30.0; LX_MAX =  30.0;
+    NY     = 500; LY_MIN = -30.0; LY_MAX =  30.0;
 
 
 
@@ -217,10 +248,9 @@ int main(){
 
     GeodHeight = 100.0;  //km
 
-    Date = 20120814;
-    UTC  = 2.0 + 3.0/60.0 + 30.0/3600.0;
-    Date = 20120910;
-    UTC  = 3.0 + 0.0/60.0 + 0.0/3600.0;
+    Date = 20180524;
+    UTC  = 23.562;
+
     JD = Lgm_Date_to_JD( Date, UTC, mInfo->c );
     Lgm_Set_Coord_Transforms( Date, UTC, mInfo->c );
     printf("Tilt = %g\n", mInfo->c->psi*DegPerRad );
@@ -228,22 +258,30 @@ int main(){
     Lgm_get_QinDenton_at_JD( JD, &p, 1, 1 );
     Lgm_set_QinDenton( &p, mInfo );
 
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
-
-Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
+/*
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T02, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP77, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T87, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_OP88, mInfo );
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TU82, mInfo );
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
-    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
 
     Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89, mInfo );
-Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
-Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
-Lgm_SetTabulatedBessel_TS07( TRUE, &mInfo->TS07_Info );
 
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89c, mInfo );
+    mInfo->Kp = 0;
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T96, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS07, mInfo );
+    Lgm_SetCoeffs_TS07( Date, UTC, &mInfo->TS07_Info );
+    Lgm_SetTabulatedBessel_TS07( TRUE, &mInfo->TS07_Info );
 
+*/
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_TS04, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T89c, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T01S, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_IGRF, LGM_EXTMODEL_T87, mInfo );
+    Lgm_MagModelInfo_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, mInfo );
+    //mInfo->Kp = 0;
 
 
 
@@ -268,30 +306,30 @@ printf( "s4 = %s\n", s4 );
 //mInfo->SavePoints = FALSE;
 
     { // BEGIN PARALLEL EXECUTION
-        #pragma omp parallel private(ii,jj,x,y,j,GeodLat,GeodLong,u,v,v1,v2,v3,ww,ww2,Flag,mInfo2)
+        #pragma omp parallel private(ii,jj,x,y,j,R,MLAT,MLT,GeodLat,GeodLong,u,v,v1,v11,v2,v22,v3,ww,ww2,Flag,mInfo2)
         #pragma omp for schedule(dynamic, 1)
         for ( i=0; i<NX; i++ ) {
-            x = (LX_MAX-LX_MIN) * i / ((double)(NX-1)) + LX_MIN;
+        //for ( i=18; i<=18; i++ ) {
+            //x = (LX_MAX-LX_MIN) * i / ((double)(NX-1)) + LX_MIN;
 
 
             mInfo2 = Lgm_CopyMagInfo( mInfo );
 
             printf("i=%d\n", i);
             
-            //for ( j=0; j<NY; j++ ) {
-            for ( j=0; j<NY/2; j++ ) {
-            //for ( j=NY/2; j<=NY/2; j++ ) {
-                y = (LY_MAX-LY_MIN) * j / ((double)(NY-1)) + LY_MIN;
+            for ( j=0; j<NY; j++ ) {
+            //for ( j=92; j<=92; j++ ) {
+                //y = (LY_MAX-LY_MIN) * j / ((double)(NY-1)) + LY_MIN;
 
-
+                i_j_to_MLAT_MLT( i, j,  &MLAT, &MLT, LX_MIN, LX_MAX, LY_MIN, LY_MAX, NX, NY);
 
 
                 /*
                  * Trace From the North
                  */
                 R    = 120.0/Re + 1.0;
-                MLAT = 90.0 - sqrt( x*x + y*y );
-                MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
+//                MLAT = 90.0 - sqrt( x*x + y*y );
+//                MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
                 Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo2->c );
                 Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo2->c );
 
@@ -413,9 +451,10 @@ v22 = v2;
                  * Trace From the South
                  */
                 R    = 120.0/Re + 1.0;
-                MLAT = 90.0 - sqrt( x*x + y*y );
+                i_j_to_MLAT_MLT( i, j,  &MLAT, &MLT, LX_MIN, LX_MAX, LY_MIN, LY_MAX, NX, NY);
+                //MLAT = 90.0 - sqrt( x*x + y*y );
                 MLAT *= -1.0;
-                MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
+                //MLT  = atan2( y, x )*DegPerRad/15.0+12.0;
                 Lgm_R_MLAT_MLT_to_CDMAG( R, MLAT, MLT, &v, mInfo2->c );
                 Lgm_Convert_Coords( &v, &u, CDMAG_TO_GSM, mInfo2->c );
 
@@ -536,6 +575,58 @@ printf( "u = %g %g %g   Type: %d\n", u.x, u.y, u.z, EnhancedFlag );
 
         }
     } // END PARALLEL EXECUTION
+
+for (i=1; i<NX-1; i++){
+for (j=1; j<NY-1; j++){
+if ( ( Image[i][j] == LGM_OPEN_IMF )
+        && ( Image[i-1][j-1] == LGM_CLOSED )
+        && ( Image[i-1][j] == LGM_CLOSED )
+        && ( Image[i-1][j+1] == LGM_CLOSED )
+        && ( Image[i][j-1] == LGM_CLOSED )
+        && ( Image[i][j+1] == LGM_CLOSED )
+        && ( Image[i+1][j-1] == LGM_CLOSED )
+        && ( Image[i+1][j] == LGM_CLOSED )
+        && ( Image[i+1][j+1] == LGM_CLOSED ) ){
+
+        printf("AHA i,j=%d %d\n", i, j );
+    }
+}
+}
+
+for (i=1; i<NX-1; i++){
+for (j=1; j<NY-1; j++){
+if ( 
+        ( Image[i-1][j-1] != Image[i][j] )
+        && ( Image[i-1][j] != Image[i][j] )
+        && ( Image[i-1][j+1] != Image[i][j] )
+        && ( Image[i][j-1] != Image[i][j] )
+        && ( Image[i][j+1] != Image[i][j] )
+        && ( Image[i+1][j-1] != Image[i][j] )
+        && ( Image[i+1][j] != Image[i][j] )
+        && ( Image[i+1][j+1] != Image[i][j] ) ){
+
+        printf("AHA i,j=%d %d\n", i, j );
+    }
+}
+}
+
+    /*
+     * Overplot drift shells
+     */
+    FILE *fpds = fopen("DriftShells2.dat", "r");
+    double PitchAngle, MLON, OldPitchAngle;
+    int np;
+    OldPitchAngle = -1.0; np = 0;
+    while ( fscanf( fpds, "%lf %lf %lf %lf", &PitchAngle, &u.x, &u.y, &u.z ) != EOF ) {
+        if (PitchAngle != OldPitchAngle) ++np;
+        Lgm_Convert_Coords( &u, &v, GSM_TO_CDMAG, mInfo->c );
+        Lgm_CDMAG_to_R_MLAT_MLON_MLT( &v, &R, &MLAT, &MLON, &MLT, mInfo->c );
+        MLAT_MLT_to_i_j( MLAT, MLT, &i, &j,  LX_MIN, LX_MAX, LY_MIN, LY_MAX, NX, NY);
+        Image[i][j] = 0+20*np;
+
+        OldPitchAngle = PitchAngle;
+    }
+    fclose( fpds );
 
 
 

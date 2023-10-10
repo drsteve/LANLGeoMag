@@ -9,15 +9,28 @@ int main( ) {
     long int    Date;
     double      UTC, Lat, Lon, r;
     
-    Date = 20170101;    // Jan 1, 2000
+/*
+Date: 2014-08-29 15:32:13.811285
+GMST: 3.67943418927
+ITRF: [-13710.99888512  -3465.32964842  10000.        ]
+TEME: [ 10000.  10000.  10000.]
+*/
+
+
+    //Date = 20170101;    // Jan 1, 2000
+    Date = 20140829;    // Jan 1, 2000
     //Date = 20000101;    // Jan 1, 2000
-    UTC  = 12.0+0.0/60.0;         // Universal Time Coordinated (in decimal hours)
+    //UTC  = 12.0+0.0/60.0;         // Universal Time Coordinated (in decimal hours)
+    UTC  = 15.0+32.0/60.0+13.811285/3600.0;
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 
     // Set up all the necessary variables to do transformations for this Date and UTC
     /* Options for setting Sun/Moon pos are:  */
-    //Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
-    Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
+    Lgm_Set_CTrans_Options(LGM_EPH_HIGH_ACCURACY, LGM_PN_IAU76, c); /* Uses LGM high accuracy analytic solution */
+    //Lgm_Set_CTrans_Options(LGM_EPH_DE, LGM_PN_IAU76, c); /* Uses JPL Development Ephemeris */
+    //Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Uses Basic Ephemeris Calcs*/
+
+
     //Lgm_Set_CTrans_Options(LGM_EPH_LOW_ACCURACY, LGM_PN_IAU76, c); /* Same as NOT calling Set_CTrans_Options */
     Lgm_Set_Coord_Transforms( Date, UTC, c );
 

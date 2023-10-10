@@ -57,6 +57,7 @@ int  Lgm_Setup_AlphaOfK( Lgm_DateTime *d, Lgm_Vector *u, Lgm_MagModelInfo *m ) {
      * Set local B-field magnitude
      */
     m->Bfield( u, &Bvec, m );
+
     m->Blocal = Lgm_Magnitude( &Bvec );
 
     /*

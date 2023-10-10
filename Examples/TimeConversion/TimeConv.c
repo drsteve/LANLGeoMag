@@ -10,7 +10,8 @@ int main( ) {
 
 
 
-    printf("JD( 1985, 6, 30, 12.3456, c  ) = %lf\n", Lgm_JD( 1985, 6, 30, 12.3456, LGM_TIME_SYS_UTC, c ) );
+    printf("JD( 2014, 8, 29, 15.0+32.0/60.0+13.811285/3600.0, c  ) = %lf\n", Lgm_JD( 2014, 8, 29, 15.0+32.0/60.0+13.811285/3600.0, LGM_TIME_SYS_UTC, c ) );
+    //printf("JD( 1985, 6, 30, 12.3456, c  ) = %lf\n", Lgm_JD( 1985, 6, 30, 12.3456, LGM_TIME_SYS_UTC, c ) );
 
 
 

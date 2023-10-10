@@ -146,6 +146,8 @@ typedef struct Lgm_FluxToPsd {
 
     double       **PSD_MK;          //!< Array of PSD versus Mu and K,  PSD[Mu][K].
 
+    double       **dPSD_MK;          //!< Uncertainties in Array of PSD versus Mu and K,  PSD[Mu][K].
+
     int          Alloced2;          //!< If true, the arrays are alloced.
 
 

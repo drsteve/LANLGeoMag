@@ -14,7 +14,7 @@ int main(){
     double              UTC, JD;
     long int            Date;
     int                 Flag;
-    double              V, r, mlat, MLT, cl, sl, Phi;
+    double              V, r, mlat, MLT, cl, sl, Phi, Sb;
 
 
     double              Hdid, Hnext, s, Inc;
@@ -64,13 +64,13 @@ int main(){
     MLT = 0.0;
     r = 1.0 + 200.0/Re;
     GeodHeight = 200.0;
-    Inc = 0.001;
+    Inc = 0.1;
     Ni = (80.0-60.0)/Inc;
 mInfo->Lgm_MagStep_BS_atol = 1e-6;
 mInfo->Lgm_MagStep_BS_rtol = 0.0;
 mInfo->VerbosityLevel = 0;
 
-    #pragma omp parallel private(Status,mlat,Phi,cl,sl,u_sm,u,v1,v2,v3,mInfo2,Flag,nDivs,V)
+    #pragma omp parallel private(Status,mlat,Phi,cl,sl,u_sm,u,v1,v2,v3,mInfo2,Flag,nDivs,V,Sb)
     #pragma omp for schedule(dynamic, 20)
     for ( i=0; i<=Ni; i++ ) {
 
@@ -81,7 +81,7 @@ mInfo->VerbosityLevel = 0;
         /*
          * Trace from given SM position
          */
-        //printf("mlat, MLT = %g %g     ", mlat, MLT);
+        printf("mlat, MLT = %g %g     ", mlat, MLT);
         Phi = 15.0*(MLT-12.0)*RadPerDeg;
         cl = cos( mlat * RadPerDeg ); sl = sin( mlat * RadPerDeg );
         u_sm.x = r*cl*cos(Phi); u_sm.y = r*cl*sin(Phi); u_sm.z = r*sl;
@@ -90,6 +90,7 @@ mInfo->VerbosityLevel = 0;
         //printf("u     = %g %g %g\n", u.x, u.y, u.z );
 
         Flag = Lgm_Trace( &u, &v1, &v2, &v3, GeodHeight, 1e-7, 1e-7, mInfo2 );
+mInfo2->Bm = mInfo2->Ellipsoid_Footprint_Bn;
 
 
         if ( Flag == LGM_CLOSED ) {
@@ -104,8 +105,9 @@ mInfo->VerbosityLevel = 0;
                 exit(1);
             } else {
 
-                V = FluxTubeVolume( mInfo2 );
-                printf( "mlat, MLT, FluxTubeVolume = %g %g %g\n", mlat, MLT, V );
+                V = Lgm_FluxTubeVolume( mInfo2 );
+                Sb = SbIntegral_interped2( mInfo2, 0.0, mInfo2->Stotal );
+                printf( "south, north = %g %g , mlat, MLT, FluxTubeVolume, Sb = %g %g %g %g\n", mInfo2->Ssouth, mInfo2->Snorth, mlat, MLT, V, Sb );
                 fprintf( fpout, "%g %g\n", mlat, V );
                 fflush( fpout );
                 FreeSpline( mInfo2 );

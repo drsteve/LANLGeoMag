@@ -30,8 +30,8 @@ int main( ) {
     /*
      * Read in Dst data from 1976 -> 2011
      */
-    Date = 19760101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
-    Date = 20110101; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
+    Date = 19570101; UTC = 12.0; JDs = Lgm_Date_to_JD( Date, UTC, c );
+    Date = 20190630; UTC = 12.0; JDe = Lgm_Date_to_JD( Date, UTC, c );
     n = 0;
     for ( JD=JDs; JD<=JDe; JD += 1.0 ) {
         Date = Lgm_JD_to_Date( JD, &ny, &nm, &nd, &UTC );
@@ -79,7 +79,8 @@ printf("nj = %ld\n", nj);
      */
     LGM_ARRAY_1D( q, D, double );
     for ( d=0; d<D; d++ ) {
-        q[d] = u[d][227016];
+        q[d] = u[d][227017];
+        //q[d] = u[d][226990];
     }
     
 
@@ -140,7 +141,7 @@ printf("nj = %ld\n", nj);
     printf(" )\n");
 
     fp_out = fopen("DstNNs.dat", "w");
-if (nKeepList > 4) nKeepList = 4;
+if (nKeepList > 10) nKeepList = 10;
     for ( jj=0; jj<nKeepList; jj++ ) {
         j = KeepList[jj];
         fprintf( fp_out, "%d %g 3\n", 0, kNN[j].Position[0] );

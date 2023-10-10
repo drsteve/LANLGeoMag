@@ -19,10 +19,16 @@
 #define FMAX(a,b)  (((a)>(b))?(a):(b))
 #define FMIN(a,b)  (((a)<(b))?(a):(b))
 
-int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale,
-    double Htry, double *Hdid, double *Hnext,
-    double sgn, double *s, int *reset,
-    int (*Mag)(Lgm_Vector *, Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
+/* 
+ * NOTE: Two very influential parameters are the tolerances atol, rtol used in
+ *       these routines.  rtol seems less useful than atol, so it is typically
+ *       set to zero. Long ago, atol was set to a fairly small value (e.g. 1e-9
+ *       or 1e-10, These days the default seems to be 1e-5 -- which isnt that
+ *       accurate.)
+ */
+int Lgm_MagStep( Lgm_Vector *u, Lgm_Vector *u_scale, double Htry, double *Hdid,
+double *Hnext, double sgn, double *s, int *reset, int (*Mag)(Lgm_Vector *,
+Lgm_Vector *, Lgm_MagModelInfo *), Lgm_MagModelInfo *Info ){
 
     Lgm_Vector u0;
     double  eps;

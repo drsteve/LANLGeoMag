@@ -414,7 +414,9 @@ if (1==1){
      *  Perhaps it would be better to force user to do this elesewhere.
      */
     if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+        if (Info->VerbosityLevel > 1) {
+            printf("1) ADDING NEW POINT\n");
+        }
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
@@ -951,8 +953,8 @@ int InitSpline( Lgm_MagModelInfo *Info ) {
         Info->splinePy = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
         Info->splinePz = gsl_spline_alloc( gsl_interp_linear, Info->nPnts );
     }
-//    gsl_spline_init( Info->spline, Info->s, Info->Bmag, Info->nPnts );
-    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
+    gsl_spline_init( Info->spline, Info->s, Info->Bmag, Info->nPnts );
+//    gsl_spline_init( Info->spline,   Info->s, Info->BminusBcdip, Info->nPnts );
     gsl_spline_init( Info->splinePx, Info->s, Info->Px, Info->nPnts );
     gsl_spline_init( Info->splinePy, Info->s, Info->Py, Info->nPnts );
     gsl_spline_init( Info->splinePz, Info->s, Info->Pz, Info->nPnts );
@@ -1009,6 +1011,7 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
 
 
 
+if (0==1){
     /*
      * Use GSL to compute BminusBcdip(s)
      */
@@ -1023,10 +1026,11 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
     Lgm_B_cdip( &P, &Bvec, Info );
     Bcdip = Lgm_Magnitude( &Bvec );
     B = BminusBcdip + Bcdip;
+}
 
 
 
-//    B = gsl_spline_eval( Info->spline, s, Info->acc );
+    B = gsl_spline_eval( Info->spline, s, Info->acc );
     return( B );
 
 
@@ -1442,7 +1446,9 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
      *  Perhaps it would be better to force user to do this elesewhere.
      */
     if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+        if (Info->VerbosityLevel > 1) {
+            printf("1) ADDING NEW POINT\n");
+        }
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
@@ -1731,7 +1737,9 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
      *  Perhaps it would be better to force user to do this elesewhere.
      */
     if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+        if (Info->VerbosityLevel > 1) {
+            printf("1) ADDING NEW POINT\n");
+        }
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }

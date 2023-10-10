@@ -63,7 +63,7 @@
  *
  *
  */
-double FluxTubeVolume( Lgm_MagModelInfo *mInfo ) {
+double Lgm_FluxTubeVolume( Lgm_MagModelInfo *mInfo ) {
 
     double	a, b;
     double	epsabs, epsrel, result, abserr, resabs, resasc;

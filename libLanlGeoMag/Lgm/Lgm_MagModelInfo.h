@@ -590,6 +590,7 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s );
 
 int  Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, double Height, double TOL1, double TOL2, Lgm_MagModelInfo *Info );
 int  Lgm_TraceToMinBSurf( Lgm_Vector *, Lgm_Vector *, double, double, Lgm_MagModelInfo * );
+int  Lgm_TraceToMinBSurf2( Lgm_Vector *, Lgm_Vector *, int, int, double, Lgm_Vector *, double *, double, double, Lgm_MagModelInfo * );
 int  Lgm_TraceToSMEquat(  Lgm_Vector *, Lgm_Vector *, double, Lgm_MagModelInfo * );
 int  Lgm_TraceToEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
 int  Lgm_TraceToSphericalEarth(  Lgm_Vector *, Lgm_Vector *, double, double, double, Lgm_MagModelInfo * );
@@ -818,6 +819,8 @@ double      Sb_integrand( double s, _qpInfo *qpInfo );
 double      SbIntegral_interped( Lgm_MagModelInfo *fInfo );
 double      SbIntegral_interped2( Lgm_MagModelInfo *fInfo, double a , double b );
 double      Sb_integrand_interped( double s, _qpInfo *qpInfo );
+int         SbIntegral_interped_Setup( Lgm_Vector *u, double a_eq, Lgm_MagModelInfo *mInfo );
+void        SbIntegral_interped_Teardown( Lgm_MagModelInfo *mInfo );
 void        ratint( double *xa, double *ya, int n, double x, double *y, double *dy );
 void        polint(double *xa, double *ya, int n, double x, double *y, double *dy);
 void        Interp( double xa[],  double ya[], long int n, double x, double *y);

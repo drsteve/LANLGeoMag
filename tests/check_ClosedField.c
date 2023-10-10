@@ -35,6 +35,9 @@ START_TEST(test_ClosedField_01) {
 
     int makeNew = 1;
 
+//mInfo->Lgm_MagStep_BS_Eps         = 1e-7;
+//mInfo->Lgm_MagStep_BS_atol        = 1e-9;
+//mInfo->Lgm_MagStep_BS_rtol        = 0.0;
     /* read test file */
     testfile = fopen("check_ClosedField_01.expected","r");
     if (makeNew) outfile = fopen("check_ClosedField_01.got", "w");
@@ -47,46 +50,42 @@ START_TEST(test_ClosedField_01) {
     while( fgets(buff,260,testfile) != NULL) {
         if (buff[0]!='#') {
 	    SubtestPassed = TRUE;
-            // read line
-            sscanf(buff,
+        // read line
+        sscanf(buff,
 		   "%s %s %s %lf "
 		   "%lf %lf %lf %s "
 		   "%lf %lf %lf "
 		   "%lf %lf %lf "
 		   "%lf %lf %lf",
 		   IsoDate, extModel, intModel, &Kp, 
-                   &Pos.x, &Pos.y, &Pos.z, Resultexpect,
-		   &NFPexpect.x, &NFPexpect.y, &NFPexpect.z,
-		   &SFPexpect.x, &SFPexpect.y, &SFPexpect.z,
-		   &MinBexpect.x, &MinBexpect.y, &MinBexpect.z);
+           &Pos.x, &Pos.y, &Pos.z, Resultexpect,
+		   &NFPexpect.x,  &NFPexpect.y,  &NFPexpect.z,
+		   &SFPexpect.x,  &SFPexpect.y,  &SFPexpect.z,
+		   &MinBexpect.x, &MinBexpect.y, &MinBexpect.z );
 	    Lgm_InitMagInfoDefaults( mInfo );
-            IsoTimeStringToDateTime( IsoDate, &d, mInfo->c );
-            Lgm_Set_Coord_Transforms( d.Date, d.Time, mInfo->c );
-            nTests++;
+        IsoTimeStringToDateTime( IsoDate, &d, mInfo->c );
+        Lgm_Set_Coord_Transforms( d.Date, d.Time, mInfo->c );
+        nTests++;
 	    if (!strncmp(intModel, "IGRF", 10)) {
 	        Lgm_Set_Lgm_B_IGRF_InternalModel( mInfo );
-	    }
-	    else if (!strncmp(intModel, "CDIP", 10)) {
+	    } else if (!strncmp(intModel, "CDIP", 10)) {
 	        Lgm_Set_Lgm_B_cdip_InternalModel( mInfo );
-	    }
-	    else if (!strncmp(intModel, "EDIP", 10)) {
+	    } else if (!strncmp(intModel, "EDIP", 10)) {
 	        Lgm_Set_Lgm_B_edip_InternalModel( mInfo );
-	    }
-	    else {
+	    } else {
 	        nFail++;
 	        printf("Test %d bad internal model %s\n", nTests, intModel);
-		continue;
+		    continue;
 	    }
+
 	    if (!strncmp(extModel, "T89", 10)) {
 	        Lgm_Set_Lgm_B_T89(mInfo);
-	    }
-	    else if (!strncmp(extModel, "OP77", 10)) {
+	    } else if (!strncmp(extModel, "OP77", 10)) {
 	        Lgm_Set_Lgm_B_OP77(mInfo);
-	    }
-	    else {
+	    } else {
 	        nFail++;
 	        printf("Test %d bad external model %s\n", nTests, extModel);
-		continue;
+		    continue;
 	    }
 	    mInfo->Kp = Kp;
 	    retVal = Lgm_Trace(&Pos, &SFPtest, &NFPtest, &MinBtest,
@@ -99,68 +98,73 @@ START_TEST(test_ClosedField_01) {
 	        default:
 		    Resulttest = "UNKNOWN";
 	    }	    
+
 	    if (strncmp(Resultexpect, Resulttest, 19)) {
 	        SubtestPassed = FALSE;
-		printf("Test %d result %s, expected %s\n",
-		       nTests, Resulttest, Resultexpect);
+		    printf("Test %d result %s, expected %s\n", nTests, Resulttest, Resultexpect);
 	    }
-            Udiff.x = NFPtest.x - NFPexpect.x;
-            Udiff.y = NFPtest.y - NFPexpect.y;
-            Udiff.z = NFPtest.z - NFPexpect.z;
-            del = Lgm_Magnitude(&Udiff);
-            if (fabs(del) > 1.0e-5) {
+
+        Udiff.x = NFPtest.x - NFPexpect.x;
+        Udiff.y = NFPtest.y - NFPexpect.y;
+        Udiff.z = NFPtest.z - NFPexpect.z;
+        del = Lgm_Magnitude(&Udiff);
+        if (fabs(del) > 1.0e-5) {
 	        SubtestPassed = FALSE;
-                printf("*****  warning : NFP difference >= 1.0e-5 km  *****\n");
-                printf("Test %d failed (diff: %g %g %g   %g)\n",
-		       nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
-            }
-            Udiff.x = SFPtest.x - SFPexpect.x;
-            Udiff.y = SFPtest.y - SFPexpect.y;
-            Udiff.z = SFPtest.z - SFPexpect.z;
-            del = Lgm_Magnitude(&Udiff);
-            if (fabs(del) > 1.0e-5) {
+            printf("*****  warning : NFP difference >= 1.0e-5 km  *****\n");
+            printf("Test %d failed (diff: %g %g %g   %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
+            printf("\tNFP (expected): %.10lf %.10lf %.10lf %.10lf\n", NFPexpect.x, NFPexpect.y, NFPexpect.z, Lgm_Magnitude( &NFPexpect) );
+            printf("\tNFP      (got): %.10lf %.10lf %.10lf %.10lf\n\n", NFPtest.x, NFPtest.y, NFPtest.z, Lgm_Magnitude( &NFPtest) );
+        }
+        Udiff.x = SFPtest.x - SFPexpect.x;
+        Udiff.y = SFPtest.y - SFPexpect.y;
+        Udiff.z = SFPtest.z - SFPexpect.z;
+        del = Lgm_Magnitude(&Udiff);
+        if (fabs(del) > 1.0e-5) {
 	        SubtestPassed = FALSE;
-                printf("*****  warning : SFP difference >= 1.0e-5 km  *****\n");
-                printf("Test %d failed (diff: %g %g %g   %g)\n",
-		       nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
-            }
-            Udiff.x = MinBtest.x - MinBexpect.x;
-            Udiff.y = MinBtest.y - MinBexpect.y;
-            Udiff.z = MinBtest.z - MinBexpect.z;
-            del = Lgm_Magnitude(&Udiff);
-            if (fabs(del) > 1.0e-5) {
+            printf("*****  warning : SFP difference >= 1.0e-5 km  *****\n");
+            printf("Test %d failed (diff: %g %g %g   %g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
+            printf("\tSFP (expected): %.10lf %.10lf %.10lf %.10lf\n", SFPexpect.x, SFPexpect.y, SFPexpect.z, Lgm_Magnitude( &SFPexpect) );
+            printf("\tSFP      (got): %.10lf %.10lf %.10lf %.10lf\n\n", SFPtest.x, SFPtest.y, SFPtest.z, Lgm_Magnitude( &SFPtest) );
+        }
+        Udiff.x = MinBtest.x - MinBexpect.x;
+        Udiff.y = MinBtest.y - MinBexpect.y;
+        Udiff.z = MinBtest.z - MinBexpect.z;
+        del = Lgm_Magnitude(&Udiff);
+        if (fabs(del) > 1.0e-5) {
 	        SubtestPassed = FALSE;
-                printf("*****  warning : MinB difference >= 1.0e-5 nT  *****\n");
-                printf("Test %d failed (diff: %g %g %g   %g)\n",
-		       nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
-            }
+            printf("*****  warning : MinB difference >= 1.0e-5 nT  *****\n");
+            printf("Test %d failed (MinB_expected - MinB_got): %.10g %.10g %.10g   |MinB_expected - MinB_got| = %.10g)\n", nTests, Udiff.x, Udiff.y, Udiff.z, fabs(del));
+            printf("\tMinB (expected): %.10lf %.10lf %.10lf %.10lf\n", MinBexpect.x, MinBexpect.y, MinBexpect.z, Lgm_Magnitude( &MinBexpect) );
+            printf("\tMinB      (got): %.10lf %.10lf %.10lf %.10lf\n\n", MinBtest.x, MinBtest.y, MinBtest.z, Lgm_Magnitude( &MinBtest) );
+        }
 	    if (SubtestPassed) {
 	        nPass++;
-                printf("Test %d passed\n", nTests);
-            }
-	    else {
-	        nFail++;
+            printf("Test %d passed\n", nTests);
+        } else {
+	        ++nFail;
 	    }
-            if (makeNew) fprintf(
-		   outfile,
+        if (makeNew) fprintf( outfile,
 		   "%s %s %s %lf "
-		   "%lf %lf %lf %s "
-		   "%lf %lf %lf "
-		   "%lf %lf %lf "
-		   "%lf %lf %lf\n",
+		   "%.10lf %.10lf %.10lf %s "
+		   "%.10lf %.10lf %.10lf "
+		   "%.10lf %.10lf %.10lf "
+		   "%.10lf %.10lf %.10lf\n",
 		   IsoDate, extModel, intModel, Kp,
 		   Pos.x, Pos.y, Pos.z, Resulttest,
 		   NFPtest.x, NFPtest.y, NFPtest.z,
 		   SFPtest.x, SFPtest.y, SFPtest.z,
 		   MinBtest.x, MinBtest.y, MinBtest.z);
-            }
-        else {
+        } else {
             if (makeNew) fprintf(outfile, "%s", buff);
-            }
         }
+    }
+
     if (nFail>0) Passed = FALSE;
+
     fclose(testfile);
+
     if (makeNew) fclose(outfile);
+
     printf("Result: %d tests pass; %d tests fail (Precision=1.0e-5 nT)\n", nPass, nFail);
     fflush(stdout);
 

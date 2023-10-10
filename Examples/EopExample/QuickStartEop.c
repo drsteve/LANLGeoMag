@@ -10,6 +10,9 @@ int main( ) {
     
     Date = 20040812;                  // August 12, 2004
     UTC  = 12.34567;                  // Universal Time Coordinated (in decimal hours)
+Date = 20140829;    // Jan 1, 2000
+UTC  = 15.0+32.0/60.0+13.811285/3600.0;
+
     JD = Lgm_Date_to_JD( Date, UTC, c ); // Compute JD
     Ugsm.x = -6.6; Ugsm.y = 3.4; Ugsm.z = -2.3; // Set a vector in GSM coordinates
 

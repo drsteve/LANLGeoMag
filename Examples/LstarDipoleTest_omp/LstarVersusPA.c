@@ -23,12 +23,11 @@ int main( int argc, char *argv[] ){
 
 
     // Create array of Pitch Angles to compute
-    for (nAlpha=0,a=1.0; a<=90.0; a+=5.0, ++nAlpha) {
+    for (nAlpha=0,a=1.0; a<=90.0; a+=20.0, ++nAlpha) {
         Alpha[nAlpha] = a ;
     }
-// Override with wahtever you want here.
-//nAlpha = 1;
-//Alpha[0] = 83.0;
+    nAlpha = 1;
+    Alpha[0] = 70.0;
 
     if ( nAlpha > 0 ){
         MagEphemInfo = Lgm_InitMagEphemInfo(0, nAlpha);
@@ -41,13 +40,15 @@ int main( int argc, char *argv[] ){
 
     // Date and UTC -- pick a time and date when tilt angle, psi ~ 0
     Date       = 20180524;
+    UTC        = 23.462;
     UTC        = 23.562;
+//    UTC        = 13.462;
     JD = Lgm_Date_to_JD( Date, UTC, MagEphemInfo->LstarInfo->mInfo->c );
     Lgm_Set_Coord_Transforms( Date, UTC, MagEphemInfo->LstarInfo->mInfo->c );
     printf("Geo-Dipole Tile Angle: = %g Degrees\n", MagEphemInfo->LstarInfo->mInfo->c->psi*DegPerRad);
 
     // Position in SM
-    Psm.x = -6.00; Psm.y = 0.0; Psm.z = 0.0;
+    Psm.x = -8.43; Psm.y = 0.0; Psm.z = 0.0;
     Lgm_Convert_Coords( &Psm, &P, SM_TO_GSM, MagEphemInfo->LstarInfo->mInfo->c );
 
 
@@ -58,24 +59,20 @@ int main( int argc, char *argv[] ){
     //USER INPUT STUFF
     Lgm_SetMagEphemLstarQuality( 3, 96, MagEphemInfo );
     MagEphemInfo->SaveShellLines = TRUE;
-    MagEphemInfo->LstarInfo->VerbosityLevel = 2;
-    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 2;
+    MagEphemInfo->LstarInfo->VerbosityLevel = 0;
+    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
     MagEphemInfo->LstarInfo->LstarMoment = LGM_LSTAR_MOMENT_CDIP;
 
     Kp = 1;
     MagEphemInfo->LstarInfo->mInfo->Kp = ( Kp >= 0 ) ? Kp : KP_DEFAULT;
     if ( MagEphemInfo->LstarInfo->mInfo->Kp > 5 ) MagEphemInfo->LstarInfo->mInfo->Kp = 5;
-    MagEphemInfo->LstarInfo->mInfo->Kp = 0;
-    
-    // If you want T89 instead of dipole
-    //Lgm_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, MagEphemInfo->LstarInfo->mInfo );
-
-    // Test CDIP
+MagEphemInfo->LstarInfo->mInfo->Kp = 0;
     Lgm_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_NULL, MagEphemInfo->LstarInfo->mInfo );
+    Lgm_Set_MagModel( LGM_CDIP, LGM_EXTMODEL_T89, MagEphemInfo->LstarInfo->mInfo );
+    Lgm_Set_LossConeHeight( MagEphemInfo->LstarInfo->mInfo, 100.0 );
 
-
-    Lgm_Set_LossConeHeight( MagEphemInfo->LstarInfo->mInfo, 3.0 );
     MagEphemInfo->LstarInfo->ISearchMethod = 2;
+
     Lgm_get_QinDenton_at_JD( JD, &p, 1, 1 );
     Lgm_set_QinDenton( &p, MagEphemInfo->LstarInfo->mInfo );
 
@@ -84,12 +81,10 @@ int main( int argc, char *argv[] ){
      * These quantities are stored in the MagEphemInfo Structure
      */
     Colorize = TRUE;
-    MagEphemInfo->LstarInfo->LSimpleMax = 15.0; // Extends threshold for doing the calucation
-    MagEphemInfo->LstarInfo->VerbosityLevel = 1;
-    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 0;
-    //MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_atol = 1e-5;
-    //MagEphemInfo->LstarInfo->mInfo->Lgm_MagStep_BS_rtol = 0.0;
-    //MagEphemInfo->LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
+    MagEphemInfo->LstarInfo->LSimpleMax = 15.0;
+    MagEphemInfo->LstarInfo->VerbosityLevel = 2;
+    MagEphemInfo->LstarInfo->mInfo->VerbosityLevel = 2;
+    MagEphemInfo->LstarInfo->ShabanskyHandling = LGM_SHABANSKY_IGNORE;
     MagEphemInfo->LstarInfo->ShabanskyHandling = LGM_SHABANSKY_HALVE_I;
     Lgm_ComputeLstarVersusPA( Date, UTC, &P, nAlpha, Alpha, Colorize, MagEphemInfo );
 
@@ -133,6 +128,7 @@ int main( int argc, char *argv[] ){
                 B0_eq = MagEphemInfo->Bmin; // Initial Bmin
                 Beq   = Lgm_Magnitude( &MagEphemInfo->Shell_Bmin[i][j] );
                 Sin2_AlphaEq =  Beq2/B0_eq * sa2;
+printf("Beq, Beq2 = %g %g\n", Beq, Beq2);
 
                 fprintf(fpout, "%d %g %g %g %.9lf %.9lf %.9lf %.9lf\n", j, Beq, Beq2, MagEphemInfo->Alpha[i], DegPerRad*asin( sqrt( Sin2_AlphaEq ) ), MagEphemInfo->ShellSphericalFootprint_Pn[i][j].x, 
                                                                            MagEphemInfo->ShellSphericalFootprint_Pn[i][j].y, 

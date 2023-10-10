@@ -5,7 +5,7 @@
  *
  *
  *  \author M.G. Henderson
- *  \date   1999
+ *  \date   1999-2019
  *
  *
  *
@@ -13,7 +13,7 @@
 
 
 /* 
- * Trace, Copyright (c) 1999 Michael G. Henderson <mghenderson@lanl.gov>
+ * Trace, Copyright (c) 1999-2019 Michael G. Henderson <mghenderson@lanl.gov>
  *
  *
  *
@@ -54,8 +54,8 @@
  *      \param[out]     v2     Northern footpoint (where field line crosses the given geodetic height in the north) in GSM coordinates.
  *      \param[out]     v3     Minimum B point along the field line in GSM coordinates.
  *      \param[in]      Height The altitude (in km) above the WGS84 ellispoid (i.e. geodetic height) used to define what we mean by the footpoint altitude.
- *      \param[in]      TOL1   Tolerance for tracing to the Earth.
- *      \param[in]      TOL2   Tolerance for tracing to the Min-B point.
+ *      \param[in]      TOL1   Convergence tolerance for tracing to the Earth.
+ *      \param[in]      TOL2   Convergence tolerance for tracing to the Min-B point.
  *      \param[in,out]  Info   Properly initialized/configured Lgm_MagModelInfo structure.
  *  
  *      \return 
@@ -88,11 +88,19 @@
  *
  *
  *  \author         M. Henderson
- *  \date           1999-2011
+ *  \date           1999-2019
  *
  *
  *
  *  Changes:
+ *      - Sept 23, 2019
+ *          - Cleaned up code. 
+ *          - Change call to Lgm_TraceToMinBSurf(). Now calls a new (but very
+ *            similar) rotuine that uses knowledge of v1 and/or v2 positions. The
+ *            change was made in order to findm the global minimimum on a FL
+ *            instead of just the nearest one. Needed for FLs that have mutiple
+ *            minima (e.g. as found in Shabansky drift shells.)
+ *          
  *      - April 1, 2011
  *          Added doxygen documenation.
  *      - June 13, 2008
@@ -108,13 +116,13 @@ int Lgm_Trace( Lgm_Vector *u, Lgm_Vector *v1, Lgm_Vector *v2, Lgm_Vector *v3, do
     int		    i, reset, flag1, flag2, InitiallyBelowTargetHeight, done;
     double	    sgn=1.0, R, Rtarget, Rinitial, Rplus, H, Hinitial;
     Lgm_Vector	w, Bvec;
-    double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, Hdid, Hnext, Htry;
+    double      h, h_inv, h2_inv, F[7], Px[7], Py[7], Pz[7], s, s3, Hdid, Hnext, Htry;
     double      d2Px_ds2, d2Py_ds2, d2Pz_ds2;
     double      GeodLat, GeodLong, GeodHeight;
     Lgm_Vector  u_scale, P, gpp;
 
 
-u_scale.x =  u_scale.y = u_scale.z = 1.0;
+    u_scale.x =  u_scale.y = u_scale.z = 1.0;
 
     /*
      * Determine our initial geocentric radius in km. (u is assumed to be in
@@ -122,8 +130,6 @@ u_scale.x =  u_scale.y = u_scale.z = 1.0;
      */
     Rinitial = WGS84_A*Lgm_Magnitude( u ); // km
 
-//Info->Bfield( u, &Bvec, Info );
-//printf("u = %g %g %g B = %.15lf\n", u->x, u->y, u->z, Lgm_Magnitude(&Bvec));
 
     /*
      * The Earth is a spheroid. It is more flattened at the poles than at the
@@ -185,7 +191,7 @@ u_scale.x =  u_scale.y = u_scale.z = 1.0;
         reset = TRUE;
         P = *u;
         if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, 1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
-        Rplus = Lgm_Magnitude( &P );
+        Rplus = WGS84_A*Lgm_Magnitude( &P );
         if (Rplus > Rinitial ) {
             sgn =  1.0;
         } else {
@@ -219,104 +225,42 @@ u_scale.x =  u_scale.y = u_scale.z = 1.0;
 
 
 
-
-
     /*
      * Try to get to the Earth by tracing along the field in either direction.
      */
     sgn = -1.0;
+    //Info->Hmax = 0.50;
+    Info->Hmax = 0.10;
     Info->Hmax = 10.0;
-Info->Hmax = 0.50;
-Info->Hmax = 0.10;
 
     
     flag2 = Lgm_TraceToEarth(  u, v2, Height, -sgn, TOL1, Info );
-if (Info->VerbosityLevel == -100){
-printf("u = %g %g %g    v2, Height, sgn, TOL1 = %g %g %g, %g, %g, %g\n", u->x, u->y, u->z, v2->x, v2->y, v2->z, Height, sgn, TOL1);
-}
-    Info->Snorth = Info->Trace_s;     // save distance from u to northern footpoint location.
-double MIKEA = Info->Trace_s;
+    Info->Snorth = Info->Trace_s;     // save distance from input position, u to northern footpoint location.
     Info->v2_final = *v2;
 
 
     flag1 = Lgm_TraceToEarth(  u, v1, Height,  sgn, TOL1, Info );
-double MIKEB = Info->Trace_s;
-    Info->Ssouth = Info->Trace_s;     // save distance from u to southern footpoint location.
+    Info->Ssouth = Info->Trace_s;     // save distance from  input position, u to southern footpoint location.
     Info->v1_final = *v1;
 
     Info->Stotal = LGM_FILL_VALUE;
     Info->Smin   = LGM_FILL_VALUE;
     
 
-//printf("HERE ************************   flag1 = %d flag2 = %d\n", flag1, flag2);
-
-
     if ( flag1 && flag2 ) {
 
- /*
-  *    Pre-trace the FL to find the true global Bmin. This is necessary for FLs
-  *    that have multiple minima on the -- probably wasteful otherwise.
-  *    We could also add code to detect number of minima here.
-  *    
-  *    1. Copy the Info structure so we dont mess anything up.
-  *    2. Start from the southern footpoint (v1) and tracev up to north (we know the distance.)
-  *    3. save the various info as well as how far we are in s.
-  */
-  double tSS, tBmin, s_approx;
-  Lgm_Vector u_approx;
-  int        ii, iBmin;
-  Lgm_MagModelInfo *Info2 = Lgm_CopyMagInfo( Info );
-
-//printf("Info2->s[%d] = %g\n", iBmin, Info2->s[iBmin]);
-  tSS = Info->Snorth + Info->Ssouth;
-  Lgm_TraceLine3( v1, tSS, 500, 1.0, 1e-7, FALSE, Info2 );
-  tBmin = 9e99;
-  iBmin = -1;
-  for (ii=0; ii<Info2->nPnts; ii++){
-    if (Info2->Bmag[ii] <= tBmin) {
-        tBmin = Info2->Bmag[ii];
-        iBmin = ii;
-    }
-  }
-  if ( (iBmin >= 0) && (iBmin < Info2->nPnts) ){
-    u_approx.x = Info2->Px[iBmin];
-    u_approx.y = Info2->Py[iBmin];
-    u_approx.z = Info2->Pz[iBmin];
-    s_approx   = Info2->s[iBmin];  // distancev along FL from v1 to approximate global Bmin.
-  } else {
-    u_approx = *u;
-    s_approx = 0.0;
-  }
-//printf("u_approx = %g %g %g\n", u_approx.x, u_approx.y, u_approx.z);
-//printf("Info2->s[%d] = %g\n", iBmin, Info2->s[iBmin]);
-//printf("Info2->Bmag[%d] = %g\n", iBmin-1, Info2->Bmag[iBmin-1]);
-//printf("Info2->Bmag[%d] = %g\n", iBmin, Info2->Bmag[iBmin]);
-//printf("Info2->Bmag[%d] = %g\n", iBmin+1, Info2->Bmag[iBmin+1]);
-  Lgm_FreeMagInfo( Info2 );
-
-  // We should probably put in a test here to see if the final point from
-  // TraceLine3() is different than what the other routines gives.
-  // This could be the basis for dynamically setting the tolerances.
-
-
-
-  
 
 	    /*
 	     *  Closed FL -- attempt to trace to Eq Plane.
 	     */
         //Lgm_TraceToMinBSurf( u, v3, 0.1, TOL2, Info );
-        Lgm_TraceToMinBSurf( &u_approx, v3, 0.1, TOL2, Info );
-        Info->v3_final = *v3;
-        Info->Pmin = *v3;
-        //Info->Smin = Info->Trace_s;     // save location of Bmin. NOTE:  Smin is measured from the southern footpoint.
+        //Lgm_TraceToMinBSurf( &u_approx, v3, 0.1, TOL2, Info );
+        Lgm_TraceToMinBSurf2( v1, v2, flag1, flag2, Info->Ssouth+Info->Snorth, v3, &s3, 0.1, TOL2, Info );
         Info->Bfield( v3, &Bvec, Info );
-        Info->Bvecmin = Bvec;
-        Info->Bmin = Lgm_Magnitude( &Bvec );
-//        printf("Bmin = %.15lf\n",  Info->Bmin );
-//        printf("Info->Trace_s = %.15lf\n",  Info->Trace_s );
-//printf("s_approx - Info->Trace_s = %g\n", s_approx - Info->Trace_s);
-//exit(0);
+        Info->v3_final = *v3;
+        Info->Pmin     = *v3;
+        Info->Bvecmin  = Bvec;
+        Info->Bmin     = Lgm_Magnitude( &Bvec );
 
         /*
          * Various FL arc lengths...
@@ -327,9 +271,8 @@ double MIKEB = Info->Trace_s;
          */
         Info->Stotal = Info->Snorth + Info->Ssouth;   // Total FL length
         //Info->Smin   = Info->Ssouth - Info->Trace_s;  // length from south foot to Pmin
-Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
+        Info->Smin   = s3;  // length from south foot to Pmin
         Info->Trace_s = Info->Stotal;
-//printf("Info->Ssouth, Info->Trace_s = %g %g\n", Info->Ssouth, Info->Trace_s);
         
 
         Info->Ellipsoid_Footprint_Pn = *v2;
@@ -358,15 +301,16 @@ Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
          * It is not a closed FL, but it may still have a min-B
          * Try to find it.
          */
-        if ( Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info ) ) {
+        //if ( Lgm_TraceToMinBSurf( v1, v3, 0.1, TOL2, Info ) ) {
+        if ( Lgm_TraceToMinBSurf2( v1, v2, flag1, flag2, Info->Trace_s, v3, &s3, 0.1, TOL2, Info ) >= 0 ) {
             Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
-            Info->v3_final = *v3;
-            v3->x = v3->y = v3->z = -1e31;
+            //Info->v3_final = *v3;
+            //v3->x = v3->y = v3->z = -1e31;
         }
 
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );
@@ -388,15 +332,16 @@ Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
          * It is not a closed FL, but it may stilkl have a min-B
          * Try to find it.
          */
-        if ( Lgm_TraceToMinBSurf( v2, v3, 0.1, TOL2, Info ) ) {
+        //if ( Lgm_TraceToMinBSurf( v2, v3, 0.1, TOL2, Info ) ) {
+        if ( Lgm_TraceToMinBSurf2( v1, v2, flag1, flag2, Info->Trace_s, v3, &s3, 0.1, TOL2, Info ) >= 0 ) {
             Info->v3_final = *v3;
             Info->Pmin = *v3;
             Info->Bfield( v3, &Bvec, Info );
             Info->Bvecmin = Bvec;
             Info->Bmin = Lgm_Magnitude( &Bvec );
         } else {
-            Info->v3_final = *v3;
-            v3->x = v3->y = v3->z = -1e31;
+            //Info->v3_final = *v3;
+            //v3->x = v3->y = v3->z = -1e31;
         }
 
 	    return( (w.z > 0.0) ? LGM_OPEN_N_LOBE : LGM_OPEN_S_LOBE );
@@ -445,9 +390,9 @@ Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
 
     if ( Info->ComputeSb0 ) {
 
-        h      = 0.01;     // Re
-        h_inv  = 1000.0;   // Re^(-1)
-        h2_inv = 10000.0;  // Re^(-2)
+        h      = 0.001;     // Re
+        h_inv  = 1.0/h;   // Re^(-1)
+        h2_inv = h_inv*h_inv;  // Re^(-2)
         F[3]  = Info->Bmin;
         Px[3] = Info->Pmin.x;
         Py[3] = Info->Pmin.y;
@@ -460,7 +405,7 @@ Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
                 if ( Lgm_MagStep( &P, &u_scale, s, &Hdid, &Hnext, -1.0, &s, &reset, Info->Bfield, Info ) < 0 ) return(LGM_BAD_TRACE);
                 Info->Bfield( &P, &Bvec, Info );
                 F[i+3] = Lgm_Magnitude( &Bvec );
-                //printf("F[%d] = %g Hdid = %g\n", i, F[i+3], Hdid);
+                //printf("Bvec = %g %g %G   F[%d] = %g Hdid = %g\n", Bvec.x, Bvec.y, Bvec.z, i, F[i+3], Hdid);
 
                 Px[i+3] = P.x;
                 Py[i+3] = P.y;
@@ -470,7 +415,7 @@ Info->Smin   = s_approx - Info->Trace_s;  // length from south foot to Pmin
             }
         }
         Info->d2B_ds2 = h2_inv/180.0 * ( 2.0*F[0] - 27.0*F[1] + 270.0*F[2] - 490.0*F[3] + 270.0*F[4] - 27.0*F[5] + 2.0*F[6] );
-        //printf("d2B_ds2 = %g\n", d2B_ds2);
+        //printf("d2B_ds2 = %g\n", Info->d2B_ds2);
 
         Info->Sb0 = M_PI*M_SQRT2*sqrt( Info->Bmin/Info->d2B_ds2 );
         //printf("Sb0 = %g\n", Info->Sb0);

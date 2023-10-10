@@ -221,7 +221,9 @@ double Iinv_interped( Lgm_MagModelInfo *mInfo ) {
          *  Use DQAGS
          */
         limit = 500; lenw = 4*limit; key = 6;
+//printf("A. epsabs, epsrel, abserr = %.10lf %.10lf %.10lf\n", epsabs, epsrel, abserr);
         dqags(I_integrand_interped, qpInfo, a, b, epsabs, epsrel, &result, &abserr, &neval, &ier, limit, lenw, &last, iwork, work, mInfo->VerbosityLevel );
+//printf("B. epsabs, epsrel, abserr = %.10lf %.10lf %.10lf\n", epsabs, epsrel, abserr);
 
     } else if ( mInfo->Lgm_I_Integrator == DQK21 ) {
 
@@ -487,7 +489,6 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                         } else {
                             // Eqn 2.66b in Roederer
                             I = SS*sqrt(1.0 - rat);
-printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
                         }
                     } else {
                         I = Iinv_interped( mInfo  );
