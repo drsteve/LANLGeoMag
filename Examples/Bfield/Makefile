@@ -2,7 +2,7 @@ HDF5FLAGS = `pkg-config hdf5 --cflags --libs 2>/dev/null`
 LGMFLAGS = `pkg-config lgm --cflags --libs`
 
 
-all: B B2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+all: B B2 GradBvec GradBvec2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
 
 
 B: B.c
@@ -10,6 +10,12 @@ B: B.c
 
 B2: B2.c
 	gcc B2.c $(LGMFLAGS) $(HDF5FLAGS) -o B2 -Wall
+
+GradBvec: GradBvec.c
+	gcc GradBvec.c $(LGMFLAGS) $(HDF5FLAGS) -o GradBvec -Wall
+
+GradBvec2: GradBvec2.c
+	gcc GradBvec2.c $(LGMFLAGS) $(HDF5FLAGS) -o GradBvec2 -Wall
 
 GradB: GradB.c
 	gcc GradB.c $(LGMFLAGS) $(HDF5FLAGS) -o GradB -Wall
@@ -31,4 +37,4 @@ DivB: DivB.c
 
 
 clean:
-	rm *~ *.o B B2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
+	rm *~ *.o B B2 GradBvec GradBvec2 GradB GradB2 B_Cross_GradB_Over_B CurlB CurlB2 DivB
