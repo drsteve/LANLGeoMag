@@ -16,6 +16,7 @@
 #define USE_CACHEING 0
 
 
+// TODO: replace mysincos with individual calls to sin, cos
 void mysincos(double val, double *sin_val, double *cos_val);
 
 void Lgm_SetTabulatedBessel_TS07( int Flag, LgmTsyg2007_Info *t ){
@@ -112,7 +113,7 @@ int SinN_CosN_Arr( int n, double phi, double *SinArr, double *CosArr ) {
     CosArr[0] = 1.0;
     if ( n == 0 ) return( 1 );
 
-    sincos( phi, &SinArr[1], &CosArr[1] );
+    mysincos( phi, &SinArr[1], &CosArr[1] );
     if ( n == 1 ) return( 1 );
 
     g = 2.0*CosArr[1];
@@ -733,9 +734,9 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
 
 
     //ST1 = sin( PS*T1 ); CT1 = cos( PS*T1 );
-    sincos( PS*T1, &ST1, &CT1 );
+    mysincos( PS*T1, &ST1, &CT1 );
     //ST2 = sin( PS*T2 ); CT2 = cos( PS*T2 );
-    sincos( PS*T2, &ST2, &CT2 );
+    mysincos( PS*T2, &ST2, &CT2 );
 
     X1 = X*CT1 - Z*ST1; Z1 = X*ST1 + Z*CT1;
     X2 = X*CT2 - Z*ST2; Z2 = X*ST2 + Z*CT2;
@@ -782,18 +783,18 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
 
 
     //COSZ1oR1 = cos(Z1oR1); SINZ1oR1 = sin(Z1oR1);
-    sincos( Z1oR1, &SINZ1oR1, &COSZ1oR1 );
+    mysincos( Z1oR1, &SINZ1oR1, &COSZ1oR1 );
     //COSZ1oR2 = cos(Z1oR2); SINZ1oR2 = sin(Z1oR2);
-    sincos( Z1oR2, &SINZ1oR2, &COSZ1oR2 );
+    mysincos( Z1oR2, &SINZ1oR2, &COSZ1oR2 );
     //COSZ1oR3 = cos(Z1oR3); SINZ1oR3 = sin(Z1oR3);
-    sincos( Z1oR3, &SINZ1oR3, &COSZ1oR3 );
+    mysincos( Z1oR3, &SINZ1oR3, &COSZ1oR3 );
 
     //COSYoP1 = cos(YoP1); SINYoP1 = sin(YoP1);
-    sincos( YoP1, &SINYoP1, &COSYoP1 );
+    mysincos( YoP1, &SINYoP1, &COSYoP1 );
     //COSYoP2 = cos(YoP2); SINYoP2 = sin(YoP2);
-    sincos( YoP2, &SINYoP2, &COSYoP2 );
+    mysincos( YoP2, &SINYoP2, &COSYoP2 );
     //COSYoP3 = cos(YoP3); SINYoP3 = sin(YoP3);
-    sincos( YoP3, &SINYoP3, &COSYoP3 );
+    mysincos( YoP3, &SINYoP3, &COSYoP3 );
 
 
     // I = 1
@@ -912,18 +913,18 @@ void    TS07D_SHLCAR3X3( double X, double Y, double Z, double PS, double *BX, do
     Z2oS3 = Z2*ooS3;
 
     //COSZ2oS1 = cos(Z2oS1); SINZ2oS1 = sin(Z2oS1);
-    sincos( Z2oS1, &SINZ2oS1, &COSZ2oS1 );
+    mysincos( Z2oS1, &SINZ2oS1, &COSZ2oS1 );
     //COSZ2oS2 = cos(Z2oS2); SINZ2oS2 = sin(Z2oS2);
-    sincos( Z2oS2, &SINZ2oS2, &COSZ2oS2 );
+    mysincos( Z2oS2, &SINZ2oS2, &COSZ2oS2 );
     //COSZ2oS3 = cos(Z2oS3); SINZ2oS3 = sin(Z2oS3);
-    sincos( Z2oS3, &SINZ2oS3, &COSZ2oS3 );
+    mysincos( Z2oS3, &SINZ2oS3, &COSZ2oS3 );
 
     //COSYoQ1 = cos(YoQ1); SINYoQ1 = sin(YoQ1);
-    sincos( YoQ1, &SINYoQ1, &COSYoQ1 );
+    mysincos( YoQ1, &SINYoQ1, &COSYoQ1 );
     //COSYoQ2 = cos(YoQ2); SINYoQ2 = sin(YoQ2);
-    sincos( YoQ2, &SINYoQ2, &COSYoQ2 );
+    mysincos( YoQ2, &SINYoQ2, &COSYoQ2 );
     //COSYoQ3 = cos(YoQ3); SINYoQ3 = sin(YoQ3);
-    sincos( YoQ3, &SINYoQ3, &COSYoQ3 );
+    mysincos( YoQ3, &SINYoQ3, &COSYoQ3 );
 
     // I = 1
     SQQS =  sqrtQ1S1; EXQS =  exp(SQQS*X2);
@@ -3414,11 +3415,11 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
 
             //tInfo->S_SYQI[J][I] = sin(tInfo->S_YooQ[J][I]);
             //tInfo->S_CYQI[J][I] = cos(tInfo->S_YooQ[J][I]);
-            sincos( tInfo->S_YooQ[J][I], &(tInfo->S_SYQI[J][I]), &(tInfo->S_CYQI[J][I]) );
+            mysincos( tInfo->S_YooQ[J][I], &(tInfo->S_SYQI[J][I]), &(tInfo->S_CYQI[J][I]) );
 
             //tInfo->S_SYPI[J][I] = sin(tInfo->S_YooP[J][I]);
             //tInfo->S_CYPI[J][I] = cos(tInfo->S_YooP[J][I]);
-            sincos( tInfo->S_YooP[J][I], &(tInfo->S_SYPI[J][I]), &(tInfo->S_CYPI[J][I]) );
+            mysincos( tInfo->S_YooP[J][I], &(tInfo->S_SYPI[J][I]), &(tInfo->S_CYPI[J][I]) );
         }
     }
 
@@ -3429,11 +3430,11 @@ void    TS07D_BIRSH_SY( int J, int PSChanged, int XChanged, int YChanged, int ZC
 
             //tInfo->S_SZRK[J][K] = sin(tInfo->S_Z1ooR[J][K]);
             //tInfo->S_CZRK[J][K] = cos(tInfo->S_Z1ooR[J][K]);
-            sincos( tInfo->S_Z1ooR[J][K], &(tInfo->S_SZRK[J][K]), &(tInfo->S_CZRK[J][K]) );
+            mysincos( tInfo->S_Z1ooR[J][K], &(tInfo->S_SZRK[J][K]), &(tInfo->S_CZRK[J][K]) );
 
             //tInfo->S_SZSK[J][K] = sin(tInfo->S_Z2ooS[J][K]);
             //tInfo->S_CZSK[J][K] = cos(tInfo->S_Z2ooS[J][K]);
-            sincos( tInfo->S_Z2ooS[J][K], &(tInfo->S_SZSK[J][K]), &(tInfo->S_CZSK[J][K]) );
+            mysincos( tInfo->S_Z2ooS[J][K], &(tInfo->S_SZSK[J][K]), &(tInfo->S_CZSK[J][K]) );
         }
     }
 
