@@ -270,11 +270,15 @@ HDF5_CFLAGS=`pkg-config --cflags hdf5 2>/dev/null`
 CHECK_LIBS=`pkg-config --libs check 2>/dev/null`
 CHECK_CFLAGS=`pkg-config --cflags check 2>/dev/null`
 
+GSL_LIBS=`pkg-config --libs gsl 2>/dev/null`
+GSL_CFLAGS=`pkg-config --cflags gsl 2>/dev/null`
+
+
 OLD_CFLAGS=${CFLAGS}
 OLD_LDFLAGS=${LDFLAGS}
 OLD_LIBS=${LIBS}
-CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}\ ${HDF5_CFLAGS}
-LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}\ ${HDF5_LDFLAGS}
+CFLAGS=${CFLAGS}\ ${PERL_CFLAGS}\ ${HDF5_CFLAGS}\ ${GSL_CFLAGS}
+LDFLAGS=${LDFLAGS}\ ${PERL_LDFLAGS}\ ${HDF5_LDFLAGS}\ ${GSL_LIBS}
 
 # Check for the perl library after setting PERL_LDFLAGS
 if test x"${HAVE_PERL}" == x"true"; then
