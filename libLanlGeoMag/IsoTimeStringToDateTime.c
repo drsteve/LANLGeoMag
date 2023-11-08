@@ -16,6 +16,7 @@
 #include <perl.h>
 #endif /* ENABLE_PERL */
 
+#define _XOPEN_SOURCE 500  /* strptime is posix extension */
 #include "Lgm/Lgm_CTrans.h"
 #include "time.h"
 
