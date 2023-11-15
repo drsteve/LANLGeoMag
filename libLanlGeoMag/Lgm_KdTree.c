@@ -17,6 +17,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+// We are missing the Lgm_KdTree_Free() routine???
+
 
 
 /** 
@@ -27,18 +29,20 @@
  *      Given arrays of positions and data, this routine recursively partitions
  *      the data into a kdtree data structure. 
  *
- *   \param[in]      Points      An array of position vectors in D-dimensional space. ObjectPoints[d][n] is the dth component of the nth point.
+ *   \param[in]      Points      An array of position vectors in D-dimensional
+ *                               space. ObjectPoints[d][n] is the dth component of the nth point.
  *
- *   \param[in]      Objects     An array of objects in D-dimensional space. Objects[n] is the nth pointer to an object.
- *                               This is an array of 'void *' pointers. This allows the user to use any object type here, so long as they are properly
- *                               typecast.
+ *   \param[in]      Objects     An array of objects in D-dimensional space.
+ *                               Objects[n] is the nth pointer to an object.  This is an array of 'void *'
+ *                               pointers. This allows the user to use any object type here, so long as
+ *                               they are properly typecast.
  *
  *   \param[in]      N           Number of points.
  *
  *   \param[in]      D           Number of dimensions.
  *
  *   \returns        returns a pointer to the a KdTree structure. User is
- *                      responsible to freeing this with Lgm_FreeKdTree( )
+ *                   responsible to freeing this with Lgm_KdTree_Free( )
  *
  *   \author         Mike Henderson
  *   \date           2013
@@ -102,6 +106,80 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
 
 }
 
+/*
+ * Frees a Lgm_KdTree
+NOT FINISHED!!!!!
+NEED TO TRAVERSE TREE AND DEALLOCATE EVERYTHING.
+ */
+void Lgm_KdTree_Free( Lgm_KdTree *kt ) {
+
+
+    if ( kt == NULL ) return;
+    if ( kt->Root != NULL ) {
+        Lgm_FreeKdTreeNode( kt->Root );
+    }
+
+    Lgm_pQueue_Destroy( kt->PQN );
+    Lgm_pQueue_Destroy( kt->PQP );
+
+    free( kt );
+
+}
+
+
+
+
+/*
+ * Copy a KdTree structure. 
+ *
+ * This is NOT a full copy.  Here we do not copy the actual tree. Instead, we
+ * copy the other items like PQN, PQP, etc...  The idea is that we want to be
+ * able to use a tree for lookups in parallel threads. In this mode, the tree
+ * and the data in the tree are not modified.
+ *
+ */
+Lgm_KdTree *Lgm_KdTree_CopyLite( Lgm_KdTree *ks ) {
+
+    Lgm_KdTree *kt;
+
+    // alloc mem for target 
+    kt = (Lgm_KdTree *) calloc( 1, sizeof( Lgm_KdTree) );
+
+    kt->kNN_Lookups   = 0;
+    kt->SplitStrategy = ks->SplitStrategy;
+    
+    /* copy pointer to the actual root nood of tree.
+     * Do not free this.
+     */
+    kt->Root = ks->Root;
+
+    /*
+     * When done, these will need to be properly free'd, without freeing the tree
+     * (the master copy should only free it once.)
+     */
+    kt->PQN = Lgm_pQueue_Create( 5000 );
+    kt->PQP = Lgm_pQueue_Create( 5000 );
+
+    return( kt );
+    
+
+}
+
+/*
+ * Frees just the extra bits alloced by Lgm_KdTree_CopyLite(). Leaves initial
+ * tree unfreed.
+ */
+void Lgm_KdTree_FreeLite( Lgm_KdTree *kt ) {
+
+    if ( kt == NULL ) return;
+
+    if ( kt->PQN != NULL ) Lgm_pQueue_Destroy( kt->PQN );
+    if ( kt->PQP != NULL ) Lgm_pQueue_Destroy( kt->PQP );
+
+    free( kt );
+
+}
+
 
 
 /**
@@ -115,7 +193,7 @@ Lgm_KdTree *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long i
  *
  *   \param[in]      D      Integer dimension of the KdTree.
  *
- *   \returns        void
+ *   \returns        pointer to Lgm_KdTreeNode
  *
  *   \author         Mike Henderson
  *   \date           2013
@@ -149,6 +227,60 @@ Lgm_KdTreeNode *Lgm_CreateKdTreeRoot( int D ) {
     return( Node );
 
 }
+
+
+/**
+ *  \brief
+ *      Recursively free the binary KdTree created int Lgm_KdTree_Init()
+ *
+ *  \details
+ *      Recursive de-allocation of all memory used.
+ *
+ *   \param[in]      *Node      Pointer to Root Node.
+ *
+ *   \returns        void
+ *
+ *   \author         Mike Henderson
+ *   \date           2017
+ *
+ */
+void Lgm_FreeKdTreeNode( Lgm_KdTreeNode *Node ) {
+
+    int j;
+
+    if ( Node == NULL ) return;
+
+    if ( Node->nData > 0 ) {
+
+        /*
+         * Its a leaf node that stores data -- free it. (Should not have Left
+         * or Right set).
+         */
+        if ( Node->Data != NULL ) {
+            for (j=0; j<Node->nData; j++) {
+                if ( Node->Data[j].Position != NULL ) {
+                    free( Node->Data[j].Position );
+                }
+            }
+            free( Node->Data );
+        }
+
+    } else {
+
+        if ( Node->Left  != NULL ) Lgm_FreeKdTreeNode( Node->Left  );
+        if ( Node->Right != NULL ) Lgm_FreeKdTreeNode( Node->Right );
+
+    }
+
+    if ( Node->Min  != NULL ) free( Node->Min  );
+    if ( Node->Max  != NULL ) free( Node->Max  );
+    if ( Node->Diff != NULL ) free( Node->Diff );
+    free( Node );
+
+    return;
+
+}
+
 
 
 
@@ -368,6 +500,9 @@ void Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *kt ) {
      */
     for (j=0; j<t->nData; j++) free( t->Data[j].Position );
     free( t->Data ); t->Data = NULL;
+//free( t->Min ); 
+//free( t->Max ); 
+//free( t->Diff ); 
     t->nDataBelow = t->nData;
     t->nData = 0;
 
@@ -449,7 +584,8 @@ int Lgm_KdTree_kNN( double *q, int D, Lgm_KdTree *KdTree, int K, int *Kgot, doub
     }
 
     //Lgm_KdTree_PrintPQ( &PQ ); //only for debugging
-    ++(KdTree->kNN_Lookups);
+// not thread safe ?
+//    ++(KdTree->kNN_Lookups);
 
     /*
      *  return success
@@ -969,6 +1105,7 @@ int Lgm_KdTree_kNN2( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, 
 
     //Lgm_KdTree_PrintPQ( &PQ ); //only for debugging
 
+// Not thread safe?
     ++(KdTree->kNN_Lookups);
 
 
@@ -978,10 +1115,9 @@ int Lgm_KdTree_kNN2( double *q_in, int D, Lgm_KdTree *KdTree, int K, int *Kgot, 
     free( q );
     if (k==K) {
         return( KDTREE_KNN_SUCCESS );
-        }
-    else {
+    } else {
         return( KDTREE_KNN_TOO_FEW_NNS );
-        }
+    }
 
 }
 #pragma GCC pop_options
