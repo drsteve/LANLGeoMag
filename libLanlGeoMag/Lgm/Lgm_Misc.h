@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-void Lgm_ReplaceSubString( char *NewStr, char *OrigStr, char *SubStr, char *RepStr );
 
+void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *RepStr );
+void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepStr );
 
 #endif
