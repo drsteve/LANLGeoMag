@@ -33,7 +33,7 @@
 #define LGM_LSTAR_MOMENT_CDIP_2010  1
 #define LGM_LSTAR_MOMENT_MCILWAIN   2
 
-#define LGM_LSTARINFO_MAX_FL        300
+#define LGM_LSTARINFO_MAX_FL        400
 #define LGM_LSTARINFO_MAX_MINIMA    300
 
 
@@ -116,7 +116,6 @@ typedef struct Lgm_LstarInfo {
     int                 nMinMax;                // Number of valid FLs represented in nMinima[] and nMaxima[] (we may have bailed early)
     int                 nMinima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of minima on FL
     int                 nMaxima[ LGM_LSTARINFO_MAX_MINIMA ];           // # of maxima on FL (not including endpoints)
-    int                 nBounceRegions[ LGM_LSTARINFO_MAX_MINIMA ];    // # of bounce regions on FL (as particle may not be confined in a minimum)
 
     int                 nSplnPnts;
     double              xa [ 3*LGM_LSTARINFO_MAX_FL ], ya[ 3*LGM_LSTARINFO_MAX_FL ], y2[ 3*LGM_LSTARINFO_MAX_FL ];
@@ -154,6 +153,8 @@ typedef struct Lgm_LstarInfo {
     double  Earr[ 3*LGM_LSTARINFO_MAX_FL ];    // nominally the error on I-I0 (typically set to const).
     int     nImI0;        // number of vals stored.
 
+    int     nBounceRegions[ LGM_LSTARINFO_MAX_FL ];  // # of bounce regions on FL 
+
 
 
     /*
@@ -177,10 +178,10 @@ Lgm_LstarInfo *Lgm_CopyLstarInfo( Lgm_LstarInfo *s );
 int         Grad_I( Lgm_Vector *vin, Lgm_Vector *GradI, Lgm_LstarInfo *LstarInfo );
 int         ComputeVcg( Lgm_Vector *vin, Lgm_Vector *Vcg, Lgm_LstarInfo *LstarInfo );
 int 	    FindBmRadius( double Bm, double MLT, double mlat, double *r, double tol, Lgm_LstarInfo *LstarInfo );
-int 	    FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, Lgm_LstarInfo *LstarInfo );
-double      ComputeI_FromMltMlat(  double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
-double      ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
-double      ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, double I0, Lgm_LstarInfo *LstarInfo );
+int 	    FindShellLine( double I0, double *Ifound, double Bm, double MLT, double *mlat, double *rad, double mlat0, double mlat1, double mlat2, int *Iterations, int RelaxTolerance, Lgm_LstarInfo *LstarInfo );
+double      ComputeI_FromMltMlat(  double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo );
+double      ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo );
+double      ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, double I0, int *ErrorStatus, Lgm_LstarInfo *LstarInfo );
 void 	    spline( double *x, double *y, int n, double yp1, double ypn, double *y2);
 void 	    splint( double *xa, double *ya, double *y2a, int n, double x, double *y);
 void 	    quicksort( unsigned long n, double *arr );
