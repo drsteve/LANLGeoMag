@@ -1,30 +1,57 @@
 #include "Lgm/Lgm_MagModelInfo.h"                                                                                                                                                   
 
-/*
- * Get the a, c, and b unit vectors, given q, phi and mInfo. q is the position
- * of the particle, phi is the gyrophase (defined in terms of the two
- * coordinate systems constructed here.)
+/**
+ *  \brief
+ *      Set up a coordinate system to represent full orbit particle velosities
+ *      with pitch angle an gyrophase angles.
  *
- * Set up the coordinate system that described the particle position
+ *  \details
+ *      Get the a, c, and b unit vectors, given q, phi and mInfo. q is the
+ *      position of the particle, phi is the gyrophase (defined in terms of
+ *      the two coordinate systems constructed here.)
  *
- * We need to define a coordinate system that is perpendicular to the
- * B-field. See Figure 1 of Weyssow and Balescu, (1986), Hamiltonian theory
- * of guiding center motion revisited, J. Plasma Physics, 35, 449-471.
+ *      Set up the coordinate system that described the particle position
+ *
+ *      We need to define a coordinate system that is perpendicular to the
+ *      B-field. See Figure 1 of Weyssow and Balescu, (1986), Hamiltonian
+ *      theory of guiding center motion revisited, J. Plasma Physics, 35,
+ *      449-471. However, we want the phi angle to go the other way around.
+ *      I.e. when looking down from +b-hat side, we want phi to increase CCW from the +e1 axi
+
  *
  *      q: position of the particle
  *      b: magnetic field direction at q
  *
  *       r: outward radial unit vector
- *      e1: westward unit vector that is perp to both r and b. I.e. r x b = e1
- *      e2: completes RHS system e1 and b. I.e. b x e1 = e2
+ *      e2: is an eastward-point unit vector that is perpenmdilcular to both b and r.
+ *      e1: completes RHS
  *
  *
- *  NOTE: In general we would need to take care of the case where the radius is
- *  +/- b-hat...
+ *      \raisewarning{In general we would need to take care of the case
+ *      where the radius is +/- b-hat: Maybe by defing the r vector as the
+ *      local radius of curvature vector or somthing.}
+
+ *
+ *
+ *      \param[in]      q           Position (in GSM) to use.
+ *      \param[in]      Mass        Mass of particle.
+ *      \param[in]      RestEnergy  RestEnergy of particle.
+ *      \param[in]      Energy      Kinetic Energy of particle.
+ *      \param[in]      Delta       Particle pitch angle.
+ *      \param[in]      Phi         Particle gyro-phase angle.
+ *      \param[out]     a           The a-hat vector of the moving particle frame
+ *      \param[out]     c           The c-hat vector of the moving particle frame.
+ *      \param[out]     b           The b-hat vector of the moving particle frame. This is direction along magnetic field vector.
+ *      \param[out]     v           The velocity vector in GSM. km/s
+ *      \param[in,out]  m           A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *
+ *      \author         Mike Henderson
+ *      \date           2023
  *
  *
  */
-void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, double Energy, double Phi, double Delta, Lgm_Vector *a, Lgm_Vector *c, Lgm_Vector *b, Lgm_Vector *v, Lgm_MagModelInfo *mInfo ) {
+void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, double Energy, double Delta, double Phi, Lgm_Vector *a, Lgm_Vector *c, Lgm_Vector *b, Lgm_Vector *v, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector  r, e1, e2; 
     //double      m;
@@ -37,11 +64,12 @@ void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, dou
     mInfo->Bfield( q, b, mInfo ); 
     Lgm_NormalizeVector( b );  //b-hat
 
-    Lgm_CrossProduct( &r, b, &e1 ); 
-    Lgm_NormalizeVector( &e1 ); // e1-hat
-
-    Lgm_CrossProduct( b, &e1, &e2 ); 
+    //Lgm_CrossProduct( &r, b, &e1 ); 
+    Lgm_CrossProduct( b, &r, &e2 );      // Weyssow and Belescu, Burby definition
     Lgm_NormalizeVector( &e2 ); // e2-hat
+
+    Lgm_CrossProduct( &e2, b, &e1 );       // Weyssow and Belescu, Burby definition
+    Lgm_NormalizeVector( &e1 ); // e2-hat
 
 
     /*
@@ -50,16 +78,19 @@ void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, dou
      *
      *      c-hat = -sin(phi) e1-hat - cos(phi) e2_hat
      *      a-hat =  cos(phi) e1-hat - sin(phi) e2_hat
+
+     *      a-hat = -sin(phi) e1-hat - cos(phi) e2_hat // Weyssow and Belescu, Burby definition
+     *      c-hat =  cos(phi) e1-hat - sin(phi) e2_hat // Weyssow and Belescu, Burby definition
      *
      */
     CosPhi = cos(Phi*RadPerDeg); SinPhi = sin(Phi*RadPerDeg); // these are computed over and over again needlessly.
 
-    // c-hat
+    // a-hat
     a->x = -SinPhi*e1.x - CosPhi*e2.x;
     a->y = -SinPhi*e1.y - CosPhi*e2.y;
     a->z = -SinPhi*e1.z - CosPhi*e2.z;
 
-    // a-hat
+    // c-hat
     c->x = CosPhi*e1.x - SinPhi*e2.x;
     c->y = CosPhi*e1.y - SinPhi*e2.y;
     c->z = CosPhi*e1.z - SinPhi*e2.z;
@@ -71,9 +102,13 @@ void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, dou
     u = vel*cos(Delta*RadPerDeg); // v_par, m/s
 
     // Construct velocity vector
-    v->x = u*b->x + w*c->x; // m/s
-    v->y = u*b->y + w*c->y; // m/s
-    v->z = u*b->z + w*c->z; // m/s
+//    v->x = u*b->x + w*c->x; // m/s
+//    v->y = u*b->y + w*c->y; // m/s
+//    v->z = u*b->z + w*c->z; // m/s
+
+    v->x = u*b->x + w*a->x; // m/s
+    v->y = u*b->y + w*a->y; // m/s
+    v->z = u*b->z + w*a->z; // m/s
 
 
     return;
@@ -86,7 +121,7 @@ void Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, dou
  *      Compute the gradient of Curl_b at a given point. Note - this is a tensor (and b is b-hat).
  *
  *  \details
- *      Computes \f$ \nabla(\nabla\crossb)\f$.
+ *      Computes \f$ \nabla(\nabla\times \hat{b})\f$.
  *
  *
  *      \param[in]      u0          Position (in GSM) to use.
@@ -819,9 +854,129 @@ double Lgm_DoubleDot( double A[3][3], double B[3][3] ) {
     return( sum );
 }
 
+double Lgm_dBdr( Lgm_Vector *q, Lgm_MagModelInfo *mInfo ){
+
+    int         N, i;
+    double      h, H, fr[7], dBdr;
+    double      r, r0, B, Phi, Theta, SinTheta, CosTheta, SinPhi, CosPhi;
+    Lgm_Vector  u, Bvec;
+
+    N = 3;
+    h = 1e-4;
+
+    r0 = Lgm_Magnitude( q );   // Re
+    SinTheta = q->z/r0;
+    Theta    = asin( SinTheta );
+    CosTheta = cos( Theta );
+    Phi = atan2( q->y, q->x );
+    SinPhi = sin( Phi );
+    CosPhi = cos( Phi );
+
+    /*
+     *  dB/dr
+     */
+    for (i=-N; i<=N; ++i){
+        if ( N != 0 ) {
+            r = r0; H = (double)i*h; r += H;
+            u.x = r*CosPhi*CosTheta;
+            u.y = r*SinPhi*CosTheta;
+            u.z = r*SinTheta;
+
+            mInfo->Bfield( &u, &Bvec, mInfo );
+            B  = Lgm_Magnitude( &Bvec ); // Teslas
+
+            fr[i+N] = B; // Teslas
+        }
+    }
+    dBdr = (fr[6] - 9.0*fr[5] + 45.0*fr[4] - 45.0*fr[2] + 9.0*fr[1] - fr[0])/(60.0*h); // T/Re
+
+    return( dBdr );
+}
 
 
-double Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo ){
+double Lgm_d2Bdr2( Lgm_Vector *q, Lgm_MagModelInfo *mInfo ){
+
+    int         N, i;
+    double      h, H, fr[7], d2Bdr2;
+    double      r, r0, Phi, Theta, SinTheta, CosTheta, SinPhi, CosPhi;
+    Lgm_Vector  u;
+
+    N = 3;
+    h = 1e-4;
+
+    r0 = Lgm_Magnitude( q );
+    SinTheta = q->z/r0;
+    Theta    = asin( SinTheta );
+    CosTheta = cos( Theta );
+    Phi = atan2( q->y, q->x );
+    SinPhi = sin( Phi );
+    CosPhi = cos( Phi );
+
+    /*
+     *  dB/dr
+     */
+    for (i=-N; i<=N; ++i){
+        if ( N != 0 ) {
+            r = r0; H = (double)i*h; r += H;
+            u.x = r*CosPhi*CosTheta;
+            u.y = r*SinPhi*CosTheta;
+            u.z = r*SinTheta;
+
+            fr[i+N] = Lgm_dBdr( &u, mInfo ); // dB/dr in T/m
+        }
+    }
+    d2Bdr2 = (fr[6] - 9.0*fr[5] + 45.0*fr[4] - 45.0*fr[2] + 9.0*fr[1] - fr[0])/(60.0*h); // T/m^2
+
+    return( d2Bdr2 );
+}
+
+
+
+/**
+ *  \brief
+ *      Compute the first adiabatic invariant up to second order terms
+ *
+ *  \details
+ *      Computes \f$ {\mu = \mu_0 + \epsilon\mu_1 + \epsilon^2\mu_2} \f$ using
+ *      the formulae of Burby et al. (2013). Accurate to \f$
+ *      {\mathcal{O}(\epsilon^3)} \f$:
+ *
+ *          J. W. Burby, J. Squire, H. Qin; Automation of the guiding center
+ *          expansion. Physics of Plasmas 1 July 2013; 20 (7): 072105.
+ *          https://doi.org/10.1063/1.4813247
+ *        
+ *      See equations 29 and F1 for the first and second order terms.  Also,
+ *      note that this is the correct formula for general fields. (We have not
+ *      yet provided a convenient means to hook up the electric field though.)
+ *
+ *      Also note that to my knowledge this is the only general formula ever
+ *      published that does not have errors in it. The Weyssow and Balescu
+ *      formulas (see Weyssow, B. & Balescu, R. 1986 Hamiltonian theory of
+ *      guiding centre motion revisited. J.  Plasma Phys. 35, 449.) have typos
+ *      in them. (As pointed out by Burby et al., in W&B, equation (81), the
+ *      3rd and 4th lines of a_13 have two terms that probably are a typo as
+ *      they could have been combined trivially as written. In addition, I have
+ *      found an error in 5th line of a_04: the 4B^-2 should be 5B^-2. There
+ *      appear to be other errors also however, and I was never able to get W&B 
+ *      to work.) 
+ *
+ *      The Burby et al results were tested extensively against the Gardnder
+ *      special case formula and the results match.
+ *
+ *      \param[in]      q          Position (in GSM) to use. Re
+ *      \param[in]      v          Velocity vector.  m/s
+ *      \param[in]      Gamma      The relativistic factor unitless
+ *      \param[in]      Mass       The mass of the particle, kg
+ *      \param[in]      Charge     The charge of the particle, C
+ *      \param[out]     mu0_out    mu0 MeV/G
+ *      \param[out]     mu1_out    eps*mu_1 (where eps = Gamma*m/e) MeV/G
+ *      \param[out]     mu2_out    eps^2*mu_2 (where eps = Gamma*m/e) MeV/G
+ *
+ *
+ *      \author         Mike Henderson \date           2023
+ *
+ */
+double Lgm_Mu_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo ){
 
 
     Lgm_Vector  b;              // b-hat(q)
@@ -879,7 +1034,7 @@ double Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, doubl
     // Compute N (Burby's "eta" vector)
     Lgm_TensorDotVector( Grad_b, v, &N );  // This is a tensor dotted vector = vector
 
-    // Compute K (Burby's "kappa" vector = b dot Grad(b-hat}
+    // Compute K (Burby's "kappa" vector = b dot Grad(b-hat)
     Lgm_VectorDotTensor( &b, Grad_b, &K );  // This is a vector dotted with a tensor = vector
 
 
@@ -902,7 +1057,7 @@ double Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, doubl
 
 
     //printf("BURBY: mu1 = %g\n", mu1);
-//    printf("BURBY: mu1 = %.10g MeV/G\n", eps*mu1 * 6.242e12 / 1.0e4);
+    //printf("BURBY: mu1 = %.10g MeV/G\n", eps*mu1 * 6.242e12 / 1.0e4);
 
 
 
@@ -1017,12 +1172,9 @@ double Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, doubl
     mu2 += 11.0*M*M/(64.0*B)*Trace_Gradb_dot_GradbT;
     mu2 += -5.0*M*M/(64.0*B)*Trace_Gradb_dot_Gradb;
     
-    //mu2 *= 0.5*Gamma*m;
     mu2 *= Gamma*m;
-
-//    printf("BURBY: mu2 = %g MeV/G\n", eps2*mu2 * 6.242e12 / 1.0e4);
-
-//    printf("BURBY: mu  = %g MeV/G\n", (mu0 + eps*mu1 + eps2*mu2) * 6.242e12 / 1.0e4);
+    //printf("BURBY: mu2 = %g MeV/G\n", eps2*mu2 * 6.242e12 / 1.0e4);
+    //printf("BURBY: mu  = %g MeV/G\n", (mu0 + eps*mu1 + eps2*mu2) * 6.242e12 / 1.0e4);
 
 
     mu = (mu0 + eps*mu1 + eps2*mu2) * 6.242e12 / 1.0e4;
@@ -1033,5 +1185,109 @@ double Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, doubl
 
     return( mu );
     
+}
+
+
+/**
+ *  \brief
+ *      Compute the gradient of (b-hat dot v) at a given point. Note: This
+ *      routine is designed to implement the Burby 1st invariant calculation
+ *      and in those formulea, the v is to be taken as a constant with respect
+ *      to derivatives. This could also be implemented using existing routines
+ *      via some vector/tensor identities, but here I am just sticking literally
+ *      to the Burby terms.
+ *
+ *  \details
+ *      Computes \f$ \nabla( \hat{B}\cdot\vec{v} ) \f$.
+ *
+ *
+ *      \param[in]      u0          Position (in GSM) to use.
+ *      \param[in]      v           Velocity vector.
+ *      \param[out]     Grad_bdotv  The computed gradient of bdotv at position u0.
+ *      \param[in]      DerivScheme Derivative scheme to use (can be one of LGM_DERIV_SIX_POINT, LGM_DERIV_FOUR_POINT, or LGM_DERIV_TWO_POINT).
+ *      \param[in]      h           The delta (in Re) to use for grid spacing in the derivative scheme.
+ *      \param[in,out]  m           A properly initialized and configured Lgm_MagModelInfo structure.
+ *
+ *
+ *      \author         Mike Henderson
+ *      \date           2023
+ *
+ */
+double   Lgm_Mu_Gardner( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo ){
+
+    //double      Omega;
+    double      vel, v2, w, w2, w4, u, u2, eps, eps2, g;
+    double      B, B2, B3, B4, B5, mu0, mu1, mu2;
+    double      dBdr, d2Bdr2, r;
+    double      vtheta, vtheta2, Delta, SinDelta, CosDelta, SinPhi, CosPhi;
+    Lgm_Vector  Bvec, bhat, rhat, e1, e2, a, c;
+
+    g = 1e-9/(Re*1e3);
+    dBdr   = g*Lgm_dBdr( q, mInfo ); // dB/dr  T/m
+
+    g = 1e-9/(Re*Re*1e6);
+    d2Bdr2 = g*Lgm_d2Bdr2( q, mInfo ); // dB/dr  T/m^2
+
+    r = Lgm_Magnitude( q )*Re*1e3;
+    rhat = *q; Lgm_NormalizeVector( &rhat );
+
+
+    mInfo->Bfield( q, &Bvec, mInfo );
+    B  = 1e-9*Lgm_Magnitude( &Bvec ); // Teslas
+    B2 = B*B; B3 = B2*B; B4 = B3*B; B5 = B3*B2;
+    bhat = Bvec; Lgm_NormalizeVector( &bhat );
+
+
+    /*
+     * Get vector in the theta direction
+     */
+    Lgm_CrossProduct( &bhat, &rhat, &e2 );      // Weyssow and Belescu, Burby definition
+    Lgm_NormalizeVector( &e2 ); // e2-hat
+
+    vel = Lgm_Magnitude( v ); v2 = vel*vel;
+    u = Lgm_DotProduct( v, &bhat ); // v_par
+    w = sqrt( v2 - u*u );
+    w2 = w*w;
+    w4 = w2*w2;
+    u2 = u*u;
+
+    eps = Gamma*Mass/Charge;
+    eps2 = eps*eps;
+
+
+    /*
+     *  mu0 
+     */
+    mu0 = Gamma*Mass*w2/(2.0*B); // J/T
+    //printf("\nGARDNER: mu0 = %g MeV/G\n", mu0 * 6.242e12 / 1.0e4 );
+
+    //vtheta = vel*SinDelta*SinPhi;
+    vtheta = Lgm_DotProduct( v, &e2);
+    vtheta2 = vtheta*vtheta;
+
+
+    /*
+     *  mu1 
+     */
+    mu1 = -Gamma*Mass*dBdr*( v2 + u2 ) * vtheta /B3;
+mu1 *= 0.5;
+    //mu1 = -dBdr*(  v*v + u*u ) * vtheta /(2.0*B3);
+    //printf("GARDNER: mu1 = %g\n", mu1 );
+    //printf("GARDNER: mu1 = %.10g MeV/G\n", eps*mu1 * 6.242e12 / 1.0e4 );
+
+
+    /*
+     *  mu2 
+     */
+    mu2  = -d2Bdr2/(2.0*B4)*( vtheta2*u2 + (vtheta2+0.25*w2)*(v2+u2) );
+    mu2 += dBdr*dBdr/B5 * ( 0.5*(3.0*vtheta2+u2)*(v2+u2) + 3.0/8.0*w4);
+    mu2 += dBdr/(2.0*r*B4) * (vtheta2*v2 - w2*u2 - 1.25*w2*(v2+u2) + 2.0*vtheta2*u2);
+    mu2 *= 0.5*Gamma*Mass;
+//mu2 *= 0.5;
+    //printf("GARDNER: mu2 = %.10g MeV/G\n", eps2*mu2 * 6.242e12 / 1.0e4 );
+    //printf("GARDNER: mu  = %g MeV/G\n", (mu0 + eps*mu1 + eps2*mu2 ) * 6.242e12 / 1.0e4);
+
+    return( (mu0 + eps*mu1 + eps2*mu2 ) * 6.242e12 / 1.0e4 );
+
 }
 
