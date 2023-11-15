@@ -84,7 +84,7 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_MagStep_BS_reject      = FALSE;
     MagInfo->Lgm_MagStep_BS_prev_reject = FALSE;
     MagInfo->Lgm_MagStep_BS_atol        = 1e-5;
-    MagInfo->Lgm_MagStep_BS_rtol        = 1e-5;
+    MagInfo->Lgm_MagStep_BS_rtol        = 0.0;
 
     /*
      *  Some inits for MagStep_RK5
@@ -123,6 +123,11 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->Lgm_TraceToEarth_Tol = 1e-7;
     MagInfo->Lgm_TraceToBmin_Tol  = 1e-7;
     MagInfo->Lgm_TraceLine_Tol    = 1e-7;
+
+    MagInfo->Lgm_n_V_integrand_Calls = 0;
+    MagInfo->Lgm_V_Integrator_epsrel = 0.0;
+    MagInfo->Lgm_V_Integrator_epsabs = 1e-3;
+    MagInfo->Lgm_V_Integrator = DQAGS;
 
 
 
@@ -188,6 +193,16 @@ void Lgm_InitMagInfoDefaults( Lgm_MagModelInfo  *MagInfo ) {
     MagInfo->RBF_Type            = LGM_RBF_MULTIQUADRIC;
     MagInfo->RBF_Eps             = 1.0/(4.0*4.0);
     
+    MagInfo->KdTree              = NULL;
+    MagInfo->KdTree_Alloced      = FALSE;
+    MagInfo->KdTree_kNN_InterpMethod = 0;
+    MagInfo->KdTree_kNN_k        = 12;
+    MagInfo->KdTree_kNN_MaxDist2 = 1e6;
+
+    MagInfo->KdTree_kNN          = NULL;
+    MagInfo->KdTree_kNN_Alloced  = FALSE;
+
+    MagInfo->KdTreeCopy          = FALSE;
 
 
     /*
@@ -207,6 +222,20 @@ void Lgm_FreeMagInfo_children( Lgm_MagModelInfo  *Info ) {
     Lgm_DeAllocate_TA16( &(Info->TA16_Info) );
     Lgm_free_ctrans( Info->c );
 
+    if ( Info->KdTree_Alloced ) {
+
+        if ( Info->KdTreeCopy ) {
+            Lgm_KdTree_FreeLite( Info->KdTree );
+        } else {
+            Lgm_KdTree_Free( Info->KdTree );
+        }
+        Info->KdTree_Alloced = FALSE;
+
+    }
+
+    if ( Info->KdTree_kNN_Alloced ) {
+        LGM_ARRAY_1D_FREE( Info->KdTree_kNN );
+    }
 
 
 //    Lgm_FreeFastPow( Info->f );
@@ -265,7 +294,6 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
     //t->spline = (gsl_spline *)NULL;
 
     // octree stuff is also not copied correctly...
-
     if ( s->Octree_Alloced ) {
         //t->Octree         = Lgm_CopyOctree( s->Octree );
         t->Octree         = s->Octree;
@@ -274,6 +302,31 @@ Lgm_MagModelInfo *Lgm_CopyMagInfo( Lgm_MagModelInfo *s ) {
         t->Octree         = NULL;
         t->Octree_Alloced = FALSE;
     }
+
+
+
+    /* Do a "CopyLite" on the KdTree if its alloced -- this make a new independent copy with the exception of the tree data. The tree data is 
+     * not copied, we just copy the pointer. To guard against freein this, we flag that this is a copy.
+     */
+//printf("s->KdTree_Alloced = %d\n", s->KdTree_Alloced);
+//printf("s->KdTree = %s\n", s->KdTree);
+    if ( s->KdTree_Alloced ) {
+        t->KdTree         = Lgm_KdTree_CopyLite( s->KdTree );
+        t->KdTree_Alloced = TRUE;
+        t->KdTreeCopy     = TRUE;
+    } else {
+        t->KdTree         = NULL;
+        t->KdTree_Alloced = FALSE;
+        t->KdTreeCopy     = FALSE;
+    }
+
+    // dont copy the pointerj here.
+    t->KdTree_kNN         = NULL;
+    t->KdTree_kNN_Alloced = 0;
+
+    // Make sure the RBF hash tables are reset.
+    t->rbf_ht_alloced = FALSE;
+
 
 
     /*
@@ -543,6 +596,15 @@ m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
                                 strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
                                 strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
                                 break;
+        case LGM_EXTMODEL_SCATTERED_DATA6:
+                                m->Bfield = Lgm_B_FromScatteredData6;
+                                m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_RK5;
+m->Lgm_MagStep_Integrator = LGM_MAGSTEP_ODE_BS;
+                                strcpy( m->ExtMagModelStr1, "ScatteredData6" );
+                                strcpy( m->ExtMagModelStr2, "ScatteredData6" );
+                                strcpy( m->ExtMagModelStr3, "Reference: Uses KDTree and nearest neighbor algorithm to interpolate from unstructured data clouds.");
+                                strcpy( m->ExtMagModelStr4, "Comments: Any 3D collection of B-field data points can be used." );
+                                break;
 
 
         default:
@@ -697,4 +759,70 @@ void Lgm_Set_Lgm_B_edip_InternalModel(Lgm_MagModelInfo *MagInfo) {
 void Lgm_Set_Lgm_B_IGRF_InternalModel(Lgm_MagModelInfo *MagInfo) {
     MagInfo->InternalModel = LGM_IGRF;
 }
+
+/*
+ *  Set transformation matrix to go from GSM to PQB coords.
+ *  
+ *      B: z-like coordinate pointing in direction of local b.
+ *      Q: y-like coordinate that is perp to both radial direction and b-hat
+ *      P: x-like coordinate completes right handed system.
+ */
+void Lgm_Set_GSM_TO_PQB( Lgm_Vector *Position, Lgm_MagModelInfo *m ){
+
+    Lgm_Vector P, Q, B, R;
+
+
+    /*
+     * Get B in GSM coords.
+     */
+    m->Bfield( Position, &B, m ); Lgm_NormalizeVector( &B ); // B in GSM coords
+
+    /*
+     *  The radial direction is just -Position
+     */
+    R.x = -Position->x; R.y = -Position->y; R.z = -Position->z; 
+
+    /*
+     * Compute  Q = R x B
+     */
+    Lgm_CrossProduct( &R, &B, &Q ); Lgm_NormalizeVector( &Q );   // Q in GSM coords
+    
+    /*
+     * Compute  P = B x Q
+     */
+    Lgm_CrossProduct( &Q, &B, &P ); Lgm_NormalizeVector( &P );   // P in GSM coords
+
+    m->Agsm_to_pqb[0][0] = P.x, m->Agsm_to_pqb[1][0] = P.y, m->Agsm_to_pqb[2][0] = P.z;
+    m->Agsm_to_pqb[0][1] = Q.x, m->Agsm_to_pqb[1][1] = Q.y, m->Agsm_to_pqb[2][1] = Q.z;
+    m->Agsm_to_pqb[0][2] = B.x, m->Agsm_to_pqb[1][2] = B.y, m->Agsm_to_pqb[2][2] = B.z;
+
+    m->Apqb_to_gsm[0][0] = P.x, m->Apqb_to_gsm[1][0] = Q.x, m->Apqb_to_gsm[2][0] = B.x;
+    m->Apqb_to_gsm[0][1] = P.y, m->Apqb_to_gsm[1][1] = Q.y, m->Apqb_to_gsm[2][1] = B.y;
+    m->Apqb_to_gsm[0][2] = P.z, m->Apqb_to_gsm[1][2] = Q.z, m->Apqb_to_gsm[2][2] = B.z;
+
+    m->Agsm_to_pqb_set = TRUE;
+
+}
+
+void Lgm_GSM_TO_PQB( Lgm_Vector *u_gsm, Lgm_Vector *u_pqb, Lgm_MagModelInfo *m ){
+
+    if ( m->Agsm_to_pqb_set  == FALSE ){
+        printf( "You need to set the transformations matrices first using Lgm_Set_GSM_TO_PQB()\n");
+    } else {
+        Lgm_MatTimesVec( m->Agsm_to_pqb, u_gsm, u_pqb );
+    }
+
+}
+
+
+void Lgm_PQB_TO_GSM( Lgm_Vector *u_pqb, Lgm_Vector *u_gsm, Lgm_MagModelInfo *m ){
+
+    if ( m->Agsm_to_pqb_set  == FALSE ){
+        printf( "You need to set the transformations matrices first using Lgm_Set_GSM_TO_PQB()\n");
+    } else {
+        Lgm_MatTimesVec( m->Apqb_to_gsm, u_gsm, u_pqb );
+    }
+
+}
+
 
