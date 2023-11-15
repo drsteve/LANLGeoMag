@@ -7,23 +7,43 @@
  *      Compute the gradient of B-vec at a given point.
  *
  *  \details
- *      Computes \f$ \nabla B \f$.
+ *      Similar to Lgm_GradBvec(), except this routine also computes time
+ *      derivatives of \f$ \vec{B} \f$.  Computes \f$ {\nabla} \vec{B}, which
+ *      is a tensor.\f$. To make the indices consistent with the Lgm_GradBvec()
+ *      version, the time derivs are put in at the highest index.
+ *
+ *      Each element of the m array holds a Lgm_MagModelInfo structure that is
+ *      initialized with the value of the desired discrete time array.  E.g.,
+ *      if you wanted to run for a whole day at dt = 10s, then you need an
+ *      array that is 8640 elements, and preinitialize the Lgm_MagModelInfo
+ *      structure, for that index with that time. The derivatives are done with
+ *      finite differences by using the mInfo structures that range over the
+ *      appropriate indices. E.g., if j = 362 and you choose a six-point
+ *      scheme, then time derivs will be based on indices 362-3 -> 362+3. Some
+ *      things to make sure of that may or may not be checked: (1) Make sure
+ *      the j-N > 0 and j+N < n; (2) Make sure the delta-Ts are the same and
+ *      are the same as given in the dt argument. 
+ *    
  *
  *
+ *
+ *      \param[in]      j           The current time index into the array of times that is implied by the m array.
  *      \param[in]      u0          Position (in GSM) to use.
- *      \param[out]     GradBvec    The computed gradient of Bvec at position u0 -- note: this is a 4x4 space-time tensor
+ *      \param[out]     GradBvec    The computed gradient of Bvec at position u0, as well as the dB/dt vector
  *      \param[in]      DerivScheme Derivative scheme to use (can be one of LGM_DERIV_SIX_POINT, LGM_DERIV_FOUR_POINT, or LGM_DERIV_TWO_POINT).
  *      \param[in]      h           The delta (in Re) to use for grid spacing in the derivative scheme.
- *      \param[in,out]  m           A properly initialized and configured Lgm_MagModelInfo structure.
+ *      \param[in]      n           The number of elements in the m array.
+ *      \param[in]      dt          The Delta-time value used in the m array.
+ *      \param[in,out]  m           An array of properly initialized and configured Lgm_MagModelInfo structures. 
  *
  *
  *      \author         Mike Henderson
  *      \date           2011
  *
  */
-void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivScheme, double h, Lgm_MagModelInfo *m ) {
+void Lgm_GradBvec2( int j, Lgm_Vector *u0, double GradBvec[4][4], int DerivScheme, double h, int n, double dt, Lgm_MagModelInfo **m ) {
 
-    double      H, s;
+    double      H, s, d, dd[7], D;
     double      ft[7], fx[7], fy[7], fz[7];
     double      gt[7], gx[7], gy[7], gz[7];
     double      qt[7], qx[7], qy[7], qz[7];
@@ -32,8 +52,6 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
     double      dby_dt, dby_dx, dby_dy, dby_dz;
     double      dbz_dt, dbz_dx, dbz_dy, dbz_dz;
     Lgm_Vector  u, Bvec;
-
-
 
 
     /*
@@ -53,6 +71,23 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
             break;
     }
 
+    if ( ( j-N < 0 ) || ( j+N > n-1 ) ){
+        printf( "Lgm_GradBvec2: Error, requested time index not in range. j = %d, N = %d, n = %d, j-N = %d\n", j, N, n, j-N);
+        exit(0);
+    }
+
+    for (i=-N; i<=N; ++i) dd[i] = m[j+i]->c->TT.Time;
+    for (i=-N; i<N; ++i) {
+        D = (dd[i+1] - dd[i])*3600;
+        if ( fabs( D-dt ) > 1e-12 ) {
+            printf( "Lgm_GradBvec2: Error, times are inconsistent. D, dt = %.14lf %.14lf fabs(D-dt) = %g\n", D, dt, fabs(D-dt));
+            exit(0);
+        }
+    }
+
+
+
+
 
     /*
      *  Compute all first order derivatives of magnetic field components.
@@ -61,35 +96,35 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
      *     by_t, by_x, by_y, by_z
      *     bz_t, bz_x, bz_y, bz_z
      */
-    if (m->VerbosityLevel > 0) printf("\t\tLgm_GradB: Computing GradB with DerivScheme = %d,  h = %g", DerivScheme, h);
+    if (m[j]->VerbosityLevel > 0) printf("\t\tLgm_GradB: Computing GradB with DerivScheme = %d,  h = %g", DerivScheme, h);
 
     /*
      *  Bx Components
      */
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
-            m->Bfield( u0, &Bvec, m[i+N] );     // variatioon in Time
-            fx[i+N] = Bvec.x;
+            m[j+i]->Bfield( u0, &Bvec, m[j+i] );     // variation in Time
+            ft[i+N] = Bvec.x;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.x += H; // variation in X-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             fx[i+N] = Bvec.x;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.y += H; // variation in Y-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             fy[i+N] = Bvec.x;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.z += H; // variation in Z-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             fz[i+N] = Bvec.x;
         }
     }
@@ -99,28 +134,28 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
      */
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
-            m->Bfield( u0, &Bvec, m[i+N] );     // Variation in TIME
+            m[j+i]->Bfield( u0, &Bvec, m[j+i] );     // Variation in TIME
             gt[i+N] = Bvec.y;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.x += H; // variation in X-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             gx[i+N] = Bvec.y;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.y += H; // variation in Y-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             gy[i+N] = Bvec.y;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.z += H; // variation in Z-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             gz[i+N] = Bvec.y;
         }
     }
@@ -131,30 +166,28 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
      */
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
-            m->Bfield( u0, &Bvec, m[i+N] );     // variatioon in Time
-            qx[i+N] = Bvec.z;
+            m[j+i]->Bfield( u0, &Bvec, m[j+i] );     // variation in Time
+            qt[i+N] = Bvec.z;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.x += H; // variation in X-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             qx[i+N] = Bvec.z;
         }
     }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.y += H; // variation in Y-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             qy[i+N] = Bvec.z;
         }
-    }printf("             = (%8g %8g %8g)\n", dbx_dx, dbx_dy, dbx_dz );
-        printf("   Grad Bvec = (%8g %8g %8g)\n", dby_dx, dby_dy, dby_dz );
-        printf("             = (%8g %8g %8g)\n", dbz_dx, dbz_dy, dbz_dz );
+    }
     for (i=-N; i<=N; ++i){
         if ( N != 0 ) {
             u = *u0; H = (double)i*h; u.z += H; // variation in Z-COMP
-            m->Bfield( &u, &Bvec, m );
+            m[j]->Bfield( &u, &Bvec, m[j] );
             qz[i+N] = Bvec.z;
         }
     }
@@ -222,7 +255,7 @@ void Lgm_GradBvec2( double t, Lgm_Vector *u0, double GradBvec[4][4], int DerivSc
         dbz_dz = (qz[2] - qz[0])*s;
 
     }
-    if (m->VerbosityLevel > 0) {
+    if (m[j]->VerbosityLevel > 0) {
         printf("             = (%8g %8g %8g)\n", dbx_dx, dbx_dy, dbx_dz );
         printf("   Grad Bvec = (%8g %8g %8g)\n", dby_dx, dby_dy, dby_dz );
         printf("             = (%8g %8g %8g)\n", dbz_dx, dbz_dy, dbz_dz );
