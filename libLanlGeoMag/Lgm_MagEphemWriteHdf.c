@@ -215,6 +215,30 @@ void Lgm_WriteMagEphemHeaderHdf( hid_t file, char *CodeVersion, char *ExtModel, 
     status  = H5Dclose( DataSet );
 
 
+    // Create SunAngle Dataset
+    DataSet = CreateExtendableRank1DataSet( file, "SunAngle", H5T_NATIVE_DOUBLE, &space );
+    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "SunAngle" );
+    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+    Lgm_WriteStringAttr( DataSet, "UNITS",      "degrees" );
+    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+    status  = H5Sclose( space );
+    status  = H5Dclose( DataSet );
+
+
+    // Create Eclipse Flag Dataset
+    DataSet = CreateExtendableRank1DataSet( file, "Eclipse", H5T_NATIVE_INT, &space );
+    Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Eclipse Flag" );
+    Lgm_WriteStringAttr( DataSet, "DEPEND_0",   "IsoTime" );
+    Lgm_WriteStringAttr( DataSet, "UNITS",      "dimless" );
+    Lgm_WriteStringAttr( DataSet, "SCALETYP",   "linear" );
+    Lgm_WriteStringAttr( DataSet, "FILLVAL",    "-1E31" );
+    Lgm_WriteStringAttr( DataSet, "VAR_TYPE",   "data" );
+    status  = H5Sclose( space );
+    status  = H5Dclose( DataSet );
+
+
     // Create Rgeo Dataset
     DataSet = CreateExtendableRank2DataSet( file, "Rgeo", 3, H5T_NATIVE_DOUBLE, &space );
     Lgm_WriteStringAttr( DataSet, "DESCRIPTION", "Geocentric Geographic position vector of S/C." );
@@ -1126,6 +1150,31 @@ void Lgm_WriteMagEphemDataHdf( hid_t file, int iRow, int i, Lgm_MagEphemData *me
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "DipoleTiltAngle",   iRow,                  H5T_NATIVE_DOUBLE, &med->H5_TiltAngle[i] );           // Write DipoleTiltAngle
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "InOut",             iRow,                  H5T_NATIVE_INT,    &med->H5_InOut[i] );               // Write InOut
     LGM_HDF5_EXTEND_RANK1_DATASET( file, "OrbitNumber",       iRow,                  H5T_NATIVE_INT,    &med->H5_OrbitNumber[i] );         // Write OrbitNumber
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "SunAngle",          iRow,                  H5T_NATIVE_DOUBLE, &med->H5_SunAngle[i] );            // Write SunAngle
+
+    /*
+     * Kludge....
+     * Add in Eclipse Flag
+     */
+    Lgm_Vector u_gei, u_mod;
+    Lgm_CTrans *c = Lgm_init_ctrans(0);
+// c->ephModel = LGM_EPH_DE;
+// TODO:  make the PN model selectable
+c->ephModel = LGM_EPH_LOW_ACCURACY;
+    int Eclipse_Flag;
+    Lgm_Set_Coord_Transforms( med->H5_Date[i], med->H5_UTC[i], c );
+    u_gei.x = med->H5_Rgei[i][0]; u_gei.y = med->H5_Rgei[i][1]; u_gei.z = med->H5_Rgei[i][2];
+    Lgm_Convert_Coords( &u_gei, &u_mod, GEI2000_TO_MOD, c );
+    Eclipse_Flag = Lgm_EarthEclipse( &u_mod, c );
+// printf("med->H5_Date[i], med->H5_UTC[i] = %8ld %g\n", med->H5_Date[i], med->H5_UTC[i] );
+// printf("u_gei = %g %g %g\n", u_gei.x, u_gei.y, u_gei.z);
+// printf("u_mod = %g %g %g\n", u_mod.x, u_mod.y, u_mod.z);
+// printf("Eclipse_Flag = %d\n", Eclipse_Flag );
+// //double radius = Lgm_Magnitude( &u_gei );
+// //if ( (radius > 2.0)&&(Eclipse_Flag>0) ) exit(0);
+    Lgm_free_ctrans( c );
+    LGM_HDF5_EXTEND_RANK1_DATASET( file, "Eclipse",           iRow, H5T_NATIVE_INT, &Eclipse_Flag );                // Write Eclipse_Flag
+
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgsm",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgsm[i][0] );             // Write Rgsm
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rgeo",              iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rgeo[i][0] );             // Write Rgeo
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Rsm",               iRow, 3,               H5T_NATIVE_DOUBLE, &med->H5_Rsm[i][0] );              // Write Rsm
@@ -1198,7 +1247,5 @@ void Lgm_WriteMagEphemDataHdf( hid_t file, int iRow, int i, Lgm_MagEphemData *me
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bm",                iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Bm[i][0] );               // Write Bm
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "I",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_I[i][0] );                // Write I
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "K",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_K[i][0] );                // Write K
-
-
 
 }
