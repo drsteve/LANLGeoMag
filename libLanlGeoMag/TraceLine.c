@@ -1003,8 +1003,7 @@ double  BofS( double s, Lgm_MagModelInfo *Info ) {
      */
     if ( (s < Info->s[0]) || (s > Info->s[Info->nPnts-1]) ) {
         printf("BofS: ( Line %d in file %s ). Trying to evaluate BofS( s, Info ) for an s that is outside of the bounds of the interpolating arrays.\n\tInfo->nPnts = %d, Info->s[0] = %.8g, Info->s[%d] = %.8g, s = %.8g\n", __LINE__, __FILE__, Info->nPnts, Info->s[0], Info->nPnts-1, Info->s[Info->nPnts-1], s);
-raise(6);
-//        exit(-1);
+        raise(6);
     }
 
 
@@ -1319,12 +1318,17 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
             }
 
             Hsum += Hdid;
-            if ( fabs(Hdid-Htry) < 1e-7 ) {
+//if ( nSubSteps > 100 ){
+//printf("R = %lf km ( %lf Re)   P = %g %g %g   Hdid, Htry, Hnext  = %g %g %g AHA Problem in TraceLine3(). File: %s, Line %d. Too many substeps.  nSubSteps = %d\n", Re*Lgm_Magnitude(&P), Lgm_Magnitude(&P), P.x, P.y, P.z, Hdid, Htry, Hnext, __FILE__, __LINE__, nSubSteps ); 
+//}
+            //if ( fabs(Hdid-Htry) < 1e-7 ) {
+            if ( fabs(Hsum-Htry0) < 1e-7 ) {
                 // we got what we asked for.
                 DoneStep = TRUE;
-            } else if ( nSubSteps > 100 ) {
+            //} else if ( nSubSteps > 100 ) {
+            } else if ( nSubSteps > 1000 ) {
                 DoneStep = TRUE;
-                printf("Problem in TraceLine3(). File: %s, Line %d. Too many substeps.\n", __FILE__, __LINE__ ); 
+                printf("Problem in TraceLine3(). File: %s, Line %d. Too many substeps.  nSubSteps = %d\n", __FILE__, __LINE__, nSubSteps ); 
                 return(-1);
             } else {
                 // we did not get what we asked for. Try to step the remainder.
@@ -1392,7 +1396,20 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
      * than the S that was requested. This can happen (for example) if S is
      * already very small, and the tolerances arent small enough to get there
      * precisely enough (maybe related to getting near machine precision +
-     * round off errors etc.).
+     * round off errors etc.). 
+     *
+     * Another usual suspect here is that the atol, rtol tolerance for MagStep
+     * are too low. The default values of;
+     *
+     *      Info->Lgm_MagStep_BS_atol = 1e-5
+     *      Info->Lgm_MagStep_BS_rtol = 0.0
+     *
+     * can often lead to mismatches in tracing between Lgm_Trace and
+     * Lgm_TraceLineX() routines. Return with a unique error code (-2) to
+     * indicate that maybe the user should increase the tols.
+     *
+     *
+     *
      *
      * At any rate, we must guard against this, because BofS() will abort if
      * you try to evaluate it outside of the defined range of s's.
@@ -1409,22 +1426,11 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
          *  ss is the total distance traced so far
          *  If we get here we've determined that we're done tracing, for whatever reason...
          */
-        if (Info->VerbosityLevel > 1) printf("Trace did not get to requested endpoint:    Target (S), Actual (ss), S-ss = %g %g %g\n", S, ss, S-ss);
-        return(-1);
+        if (Info->VerbosityLevel > 1) {
+            printf("Trace did not get to requested endpoint:    Target (S), Actual (ss), S-ss = %g %g %g\n", S, ss, S-ss);
+        }
+        return(-2);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
