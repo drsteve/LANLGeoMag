@@ -165,7 +165,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
     /*
      * Save initial point if we need to
      */
-    if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 3\n", u->x, u->y, u->z);
+    if (Info->SavePoints) fprintf(Info->fp, "%.12lf \t%.12lf\t %.12f\t 3\n", u->x, u->y, u->z);
 
 
 
@@ -304,7 +304,7 @@ int Lgm_TraceToEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight, double 
         Lgm_Convert_Coords( &P, &w, GSM_TO_WGS84, Info->c );
         Lgm_WGS84_to_GeodHeight( &w, &Height );
 	    F =  Height - TargetHeight;
-	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", P.x, P.y, P.z);
+	    if ((F > 0.0) && (Info->SavePoints)) fprintf(Info->fp, "%.12lf \t%.12lf\t %.12lf\t 2\n", P.x, P.y, P.z);
 
         if (   (P.x > Info->OpenLimit_xMax) || (P.x < Info->OpenLimit_xMin) || (P.y > Info->OpenLimit_yMax) || (P.y < Info->OpenLimit_yMin)
                 || (P.z > Info->OpenLimit_zMax) || (P.z < Info->OpenLimit_zMin) || ( s > 1000.0 ) ) {
@@ -444,7 +444,7 @@ Fc = eeFunc( &Pc, TargetHeight, Info);
 
 
 
-    if (Info->SavePoints) fprintf(Info->fp, "%f \t%f\t %f\t 2\n", v->x, v->y, v->z);
+    if (Info->SavePoints) fprintf(Info->fp, "%.12lf \t%.12lf\t %.12lf\t 2\n", v->x, v->y, v->z);
 
     if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceToEarth(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
