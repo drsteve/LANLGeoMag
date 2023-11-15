@@ -1,6 +1,6 @@
 /*! \file Lgm_Elcipse.c
  *
- *  \brief Determine if a position is in unmral or penumbral elicpse.
+ *  \brief Determine if a position is in umbral or penumbral elicpse.
  *
  *  \details
  *      See discussion at Celestrak: http://www.celestrak.com/columns/v03n01/
@@ -25,7 +25,7 @@
  */
 int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
 
-    Lgm_Vector  Rsun, Psun, Psc;
+    Lgm_Vector  Rsun, Psun, Psc, Pe;
     double      Rsun_mag, Psun_mag, Psc_mag;
     double      Theta, ThetaE, ThetaS;
     int         Type;
@@ -34,6 +34,11 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     Psc.y = Re*u->y; //km
     Psc.z = Re*u->z; //km
     Psc_mag = Lgm_Magnitude( &Psc ); // km
+
+    // vector pointing from sc to earth
+    Pe.x = -Psc.x;
+    Pe.y = -Psc.y;
+    Pe.z = -Psc.z;
 
     /*
      * We need (all in MOD);
@@ -46,6 +51,7 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     Rsun     = c->Sun;                  
     Lgm_ScaleVector( &Rsun, Rsun_mag ); // km
 
+    // vector pointing from sc to sun
     Psun.x = Rsun.x - Psc.x;  //km
     Psun.y = Rsun.y - Psc.y;  //km
     Psun.z = Rsun.z - Psc.z;  //km
@@ -60,16 +66,16 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     /*
      * Compute angle between Psun and Psc
      */
-    Theta = acos( Lgm_DotProduct( &Psun, &Psc )/(Psun_mag*Psc_mag) );
+    Theta = acos( Lgm_DotProduct( &Psun, &Pe )/(Psun_mag*Psc_mag) );
 
 
     /*
      * Compute anglular radius of Earth and Sun as seen at S/C
      */
-    //printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
+    printf("Re/Psc_mag, Re, Psc_mag = %g %g %g\n", Re/Psc_mag, Re, Psc_mag );
     ThetaE = asin( Re/Psc_mag );
     ThetaS = asin( SOLAR_RADIUS/Psun_mag );
-    //printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
+    printf("Theta, ThetaE, ThetaS = %g %g %g\n", Theta, ThetaE, ThetaS );
 
 
     /*
@@ -82,14 +88,17 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     if ( ( ThetaE > ThetaS ) && ( Theta < (ThetaE - ThetaS) ) ){
 
         Type = LGM_UMBRAL_ECLIPSE;
+//printf("1. here\n");
 
     } else if ( (Theta < (ThetaE + ThetaS)) && ( Theta > fabs(ThetaE - ThetaS))) {
 
         Type = LGM_PENUMBRAL_ECLIPSE;
+//printf("2. here\n");
 
     } else {
 
         Type = LGM_NO_ECLIPSE;
+//printf("3. here\n");
 
     }
 
