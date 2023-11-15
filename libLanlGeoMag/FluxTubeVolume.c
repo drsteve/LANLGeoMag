@@ -37,9 +37,7 @@
  *
  *      \f[
  *          V = \int_{sf_{south}}^{sf_{north}}
- *              \left\{
- *                  1\over B(s)}
- *              \right\} ds
+ *              \left\{ 1\over B(s) \right\} ds
  *      \f]
  *
  *
