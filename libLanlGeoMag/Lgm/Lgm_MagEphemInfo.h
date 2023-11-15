@@ -40,6 +40,7 @@ typedef struct Lgm_MagEphemInfo {
 
     int             InOut;          //!< Flag indicating whether we are inbound (-1) or outbound (+1)
     int             OrbitNumber;    //!< Orbit Number
+    double          SunAngle;       //!< Sun Angle (for RBSP its angle between Sun and Z axis in ZYZ frame)
 
     double          Lat;            //!< Geographic Latitude
     double          Lon;            //!< Geographic Longitude
@@ -132,6 +133,8 @@ typedef struct Lgm_MagEphemInfo {
 
     double      **ShellI;         //!< [ PitchAngleIndex ][ FieldLineIndex ]   Individual I values computed for each FL
 
+   int          **nBounceRegions; //!< # of bounce regions on FL 
+
     /*
      * these are like the variables in the LstarInfo structure. Except they have an extra
      * dimension to hold pitch angle as well.
@@ -197,6 +200,7 @@ typedef struct Lgm_MagEphemData {
     double      *H5_TiltAngle;
     int         *H5_InOut;
     int         *H5_OrbitNumber;
+    double      *H5_SunAngle;
 
     double      **H5_Rgeo;
     double      **H5_Rgeod;
