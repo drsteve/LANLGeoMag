@@ -13,6 +13,8 @@
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/GPR.h"
+//int FLAGFLAG=0;
 
 
 void praxis( int n, double *x, int *data, double (*funct)(double *, void *data), double *in, double *out);
@@ -29,6 +31,7 @@ typedef struct _FitData {
     int     n;
     double  *E;
     double  *g;
+    double  *dg;
 
 
 } _FitData;
@@ -121,7 +124,7 @@ double  Lgm_Mu_to_Ek( double Mu, double a, double B, double E0 ) {
     if ( sa2 < 1e-12 ) {
         return( 9e99 );
     } else {
-        Ek = sqrt( 2*E0*B*Mu/(sa2*nT_Per_Gauss) + E0*E0) - E0;
+        Ek = sqrt( 2.0*E0*B*Mu/(sa2*nT_Per_Gauss) + E0*E0) - E0;
         return( Ek );
     }
 
@@ -281,6 +284,42 @@ double Lgm_DiffFluxToPsd( double j, double p2c2 ){
 }
 
 
+/**
+ *  \brief
+ *      Convert differential flux to (non relativistic velocity space) phase space density.
+ *  \details
+ *      The basic relationship is;
+ *          \f[
+ *          f = {(m^2\over 2E)} j 
+ *          \f]
+ *
+ *      \param[in]      j               Differential Flux in units of   <b>#/cm^2/s/sr/eV</b>
+ *      \param[in]      m               non-relativistic mass           <b>kg</b>
+ *      \param[in]      E               non-relativistic Energy         <b>eV</b>
+ *
+ *      \return         f, Phase space density in units of              <b>s^3/cm^6</b>
+ *
+ *      \author         Mike Henderson
+ *      \date           2021
+ *
+ */
+double Lgm_DiffFluxToPsd2( double j, double m, double E ){
+
+    double eVPerJoule, g, K, f;
+
+    // f = (m^2/(2E)) * j
+    // convert mass fro kg to eV^2 s^4/cm^4
+    // 1J = 1kg m^2/s^2 = 6.242e18 eV
+    eVPerJoule = 6.241509e18; // eV/J
+    g = m * eVPerJoule;
+    K = 0.5*g*g; // ev^2 s^4/m^4
+    K /= 1.0e8; // ev^2 s^4/cm^4
+
+    f = K * j/E;
+
+    return( f ); // f in units of s^3/cm^6
+}
+
 
 
 /**
@@ -346,6 +385,7 @@ Lgm_FluxToPsd *Lgm_F2P_CreateFluxToPsd( int DumpDiagnostics ) {
     f->Extrapolate = TRUE;
     f->nMaxwellians = 2;
     f->FitType = LGM_F2P_SPLINE;
+    f->FitType = LGM_F2P_MAXWELLIAN;
 
     f->Alloced1 = FALSE;
     f->Alloced2 = FALSE;
@@ -438,7 +478,12 @@ void Lgm_F2P_SetObservedB( double B_obs, Lgm_FluxToPsd *f ) {
 
 /**
  *  \brief
- *      Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing J[Energy][Alpha],  Energy[], Alpha[]
+ *      Adds (to a Lgm_FluxToPsd structure) the user-supplied arrays containing
+ *      J[Energy][Alpha],  Energy[], Alpha[]. Also computes the PSD (i.e. f as a
+ *      function of energy and Alpha). Note that f=j/p^2, so this is not very
+ *      much work. The hard work following these steps is to compute f at the
+ *      given fixed mu's and K's and that requires interpolation/extrapolation,
+ *      etc.
  *  \details
  *
  *      \param[in]      J                 2D array containing the differential flux values as a function of energy and pitch angle.
@@ -452,11 +497,11 @@ void Lgm_F2P_SetObservedB( double B_obs, Lgm_FluxToPsd *f ) {
  *      \date           2010-2011
  *
  */
-void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
+void Lgm_F2P_SetFlux( double **J, double **dJ, double *E, int nE, double *A, int nA, Lgm_FluxToPsd *f ) {
 
 
     int     i, j;
-    double  flux, p2c2, fp, Min, Max;
+    double  flux, dflux, p2c2, fp, dfp, Min, Max;
 
 
     /*
@@ -465,70 +510,68 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
     if ( f->Alloced1 ) {
         LGM_ARRAY_1D_FREE( f->E );
         LGM_ARRAY_1D_FREE( f->A );
+        LGM_ARRAY_1D_FREE( f->Aeq );
         LGM_ARRAY_2D_FREE( f->FLUX_EA );
+        LGM_ARRAY_2D_FREE( f->dFLUX_EA );
         LGM_ARRAY_2D_FREE( f->PSD_EA );
+        LGM_ARRAY_2D_FREE( f->dPSD_EA );
     }
 
 
     /*
      * Add Flux array to f structure. Alloc arrays appropriately.
      */
-    f->nE = nE;
-    f->nA = nA;
-    LGM_ARRAY_1D( f->E, f->nE, double );
-    LGM_ARRAY_1D( f->A, f->nA, double );
-    LGM_ARRAY_2D( f->FLUX_EA, f->nE, f->nA, double );
+    f->nE = nE; // Number of Energies
+    f->nA = nA; // Number of Pitch Angles
+
+    LGM_ARRAY_1D( f->E, f->nE, double );               // Values for the Energies
+    LGM_ARRAY_1D( f->A, f->nA, double );               // Values for the Pitch Angles
+    LGM_ARRAY_1D( f->Aeq, f->nA, double );             // Values for the Eq. Pitch Angles
+    LGM_ARRAY_2D( f->FLUX_EA,  f->nE, f->nA, double ); // Differential Flux as a function of Energy and Pitch Angle.
+    LGM_ARRAY_2D( f->dFLUX_EA, f->nE, f->nA, double ); // Unc. in Differential Flux as a function of Energy and Pitch Angle.
+    LGM_ARRAY_2D( f->PSD_EA,  f->nE, f->nA, double );  // PSD as a function of Energy and Pitch Angle.
+    LGM_ARRAY_2D( f->dPSD_EA, f->nE, f->nA, double );  // Unc. in PSD as a function of Energy and Pitch Angle.
+    f->Alloced1 = TRUE;                                // Flag that we have alloced this mem.
+
     for (i=0; i<f->nE; i++) f->E[i] = E[i];
     for (i=0; i<f->nA; i++) f->A[i] = A[i];
+
     for (i=0; i<f->nE; i++) {
         for (j=0; j<f->nA; j++) {
-            f->FLUX_EA[i][j] = J[i][j]; // FLUX_EA is "Flux versus Energy and Pitch Angle".
+            f->FLUX_EA[i][j]  =  J[i][j]; // FLUX_EA is "Differential Flux versus Energy and Pitch Angle".
+            f->dFLUX_EA[i][j] = dJ[i][j]; // uncertainty in FLUX_EA 
         }
     }
 
-    /*
-     * Fill in gaps in the array.
-     */
-    // for each energy, find bad points and fill them.
-/*
-    for (i=0; i<f->nE; i++) {
-        for (j=1; j<f->nA-1; j++) {
-            // if there is a value on each side, average it.
-            if ( f->FLUX_EA[i][j] < 0.0 ) {
-                
-            }
-        }
-    }
-*/
 
-
-
-
-    if ( f->DumpDiagnostics ) {
-        DumpGif( "Lgm_FluxToPsd_FLUX_EA", f->nA, f->nE, f->FLUX_EA );
-    }
+    if ( f->DumpDiagnostics ) { DumpGif( "Lgm_FluxToPsd_FLUX_EA", f->nA, f->nE, f->FLUX_EA ); }
 
 
     /*
-     * Alloc mem for the PSD array.
      * Convert Flux array into to PSD array.
      * Note, the result here is not PSD at constant Mu and K, it is PSD at the
      * same Es and Alphas we started with.
      */
-    LGM_ARRAY_2D( f->PSD_EA, f->nE, f->nA, double );
     for (j=0; j<f->nA; j++) {
         for (i=0; i<f->nE; i++) {
+
             flux   = f->FLUX_EA[i][j];
+            dflux  = f->dFLUX_EA[i][j];
+
             p2c2   = (f->E[i] >= 0.0 ) ? Lgm_p2c2( f->E[i], LGM_Ee0 ) : LGM_FILL_VALUE;
-            fp     = Lgm_DiffFluxToPsd( flux, p2c2 );
+
+            fp = Lgm_DiffFluxToPsd( flux, p2c2 );
             f->PSD_EA[i][j] = fp; // PSD_EA is "PSD versus Energy and Pitch Angle".
+
+            dfp = Lgm_DiffFluxToPsd( dflux, p2c2 );
+            f->dPSD_EA[i][j] = dfp; // dPSD_EA is Uncertainty in PSD_EA
+
         }
     }
     if ( f->DumpDiagnostics ) {
         DumpGif( "Lgm_FluxToPsd_PSD_EA", f->nA, f->nE, f->PSD_EA );
     }
 
-    f->Alloced1 = TRUE;
 
     return;
 
@@ -543,7 +586,7 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  *      and K.
  *
  *  \details
- *      This routine ( Lgm_FluxPsd_GetPsdAtConstMusAndKs() ) must operate on a
+ *      This routine ( Lgm_F2P_GetPsdAtConstMusAndKs() ) must operate on a
  *      pre-initialized Lgm_FluxToPsd structure.  The routine Lgm_FluxToPsd_SetFlux()
  *      is used to add differential flux data/info to an Lgm_FluxToPsd structure
  *      and it also converts the differential flux to Phase Space Density at
@@ -584,9 +627,17 @@ void Lgm_F2P_SetFlux( double **J, double *E, int nE, double *A, int nA, Lgm_Flux
  */
 void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_MagModelInfo *mInfo, Lgm_FluxToPsd *f ) {
 
-    int                 k, m, DoIt;
-    double              AlphaEq, SinA;
-    Lgm_MagModelInfo    *mInfo2;
+    int     i, j, k, m, DoIt, nGood, nGood2;
+    double  AlphaEq, SqrtBrat, SinA, SinAeq, dPsd;
+
+    int     n, n_star, ngy_sum;
+    double  xin[3000], yin[3000], dyin[3000];
+    double  x_star[300];
+    int     x_star_index[300];
+    double  gsig, gymax, gymin, gy_hat, gdy, gy_sum, gy_avg;
+    GprInfo *Info;
+
+    Lgm_MagModelInfo    *mInfo2; // This is used to hold thread-safe copies of mInfo.
 
 
     /*
@@ -596,19 +647,30 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
         LGM_ARRAY_1D_FREE( f->Mu );
         LGM_ARRAY_1D_FREE( f->K );
         LGM_ARRAY_1D_FREE( f->AofK );
+        LGM_ARRAY_1D_FREE( f->AEqofK );
         LGM_ARRAY_2D_FREE( f->EofMu );
+        LGM_ARRAY_2D_FREE( f->PSD_EAeq );
+        LGM_ARRAY_2D_FREE( f->dPSD_EAeq );
         LGM_ARRAY_2D_FREE( f->PSD_MK );
+        LGM_ARRAY_2D_FREE( f->dPSD_MK );
     }
 
     /*
-     * Alloc arrays
+     * Alloc arrays, and flag that we have done this.
      */
-    f->nMu = nMu;
-    f->nK  = nK;
-    LGM_ARRAY_1D( f->Mu,    f->nMu, double );
-    LGM_ARRAY_1D( f->K,     f->nK,  double );
-    LGM_ARRAY_1D( f->AofK,  f->nK,  double );
-    LGM_ARRAY_2D( f->EofMu, f->nMu,  f->nK,  double );
+    f->nMu = nMu;   // Number of Mu values -- specified by user
+    f->nK  = nK;    // Number of K values -- specified by user
+    LGM_ARRAY_1D( f->Mu,        f->nMu, double ); // Values for the Mu's -- user specified
+    LGM_ARRAY_1D( f->K,         f->nK,  double ); // Values for the K's -- user specified
+    LGM_ARRAY_1D( f->AofK,      f->nK,  double ); // Array to hold the Local Pitch Angle corresponding to the K's
+    LGM_ARRAY_1D( f->AEqofK,    f->nK,  double ); // Array to hold the Equatorial Pitch Angle corresponding to the K's
+    LGM_ARRAY_2D( f->EofMu,     f->nMu, f->nK,  double ); // 2D array holding the Energy that corresponds to a Mu,K pair
+    LGM_ARRAY_2D( f->PSD_EAeq,  f->nE,  f->nK,  double ); // Phase Space Density as a function of E and Aeq
+    LGM_ARRAY_2D( f->dPSD_EAeq, f->nE,  f->nK,  double ); // Unc. in Phase Space Density as a function of E and Aeq
+    LGM_ARRAY_2D( f->PSD_MK,    f->nMu, f->nK,  double ); // Phase Space Density as a function of Mu and K
+    LGM_ARRAY_2D( f->dPSD_MK,   f->nMu, f->nK,  double ); // Unc. in Phase Space Density as a function of Mu and K
+    f->Alloced2 = TRUE; // Flag that e have alloced this mem.
+
 
 
     /*
@@ -619,9 +681,10 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
     if ( Lgm_Setup_AlphaOfK( &(f->DateTime), &(f->Position), mInfo ) > 0 ) {
 
 
-        f->B = mInfo->Blocal;
+        f->B   = mInfo->Blocal;
+        f->Beq = mInfo->Bmin;
 
-        { // start parallel
+        { // start openmp parallel execution 
 
 #if USE_OPENMP
             #pragma omp parallel private(mInfo2,AlphaEq,SinA)
@@ -634,6 +697,11 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
                 f->K[k]    = K[k];
                 //printf("\n\nK[%d] = %g   f->DateTime.UTC = %g f->Position = %g %g %g\n", k, K[k], f->DateTime.Time, f->Position.x, f->Position.y, f->Position.z);
                 AlphaEq    = Lgm_AlphaOfK( f->K[k], mInfo2 ); // Lgm_AlphaOfK() returns equatorial pitch angle.
+
+                // Save the AlphaEq values
+                f->AEqofK[k] = AlphaEq; //These are the a_eq vals that correspond to our desired K values.
+
+
                 SinA       = sqrt( mInfo2->Blocal/mInfo2->Bmin ) * sin( RadPerDeg*AlphaEq );
                 if ( AlphaEq > 0.0 ) {
                     if ( SinA <= 1.0 ) {
@@ -657,19 +725,226 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
 
 
 
+
         Lgm_TearDown_AlphaOfK( mInfo );
 
     } else {
 
         // Blocal will have been set in Lgm_Setup_AlphaOfK() even if it returned a value <= 0.
         f->B = mInfo->Blocal;
-        for ( k=0; k<nK; k++ ) f->AofK[k] = LGM_FILL_VALUE;
+        for ( k=0; k<nK; k++ ) {
+            f->AEqofK[k] = LGM_FILL_VALUE;
+            f->AofK[k]   = LGM_FILL_VALUE;
+        }
 
+    }
+
+    // how many good values did we get?
+    for ( nGood=0, k=0; k<nK; k++ ){
+        if ( f->AEqofK[k] > 0.0 ) ++nGood;
     }
 
     if (  !(f->UseModelB)  ) {
         printf("Bmodel, Bobs = %g %g\n", f->B, f->B_obs );
     }
+
+
+
+
+    /*
+     * Create the Flux[E][a_eq] array using GPR interpolation.
+     *
+     * This was added Oct, 2020.
+     * The original algorithm was:
+     *      1) for each Mu and K, we figure out what E and Alpha_local we need.
+     *      2) Then the problem is just one of interpolating the PSD_EA array
+     *         to get the PSD at the impplied E.Alpha_local.
+     *
+     * This works, but obviously, if the S/C is not at the Bmin point, it
+     * cannot see the lower K values (i.e. near 90-deg eq. pitch angles). In
+     * other words, if you just take the local PAD and re-label the pitch
+     * angles to their corresponding eq. pitch angles, a gap will open up
+     * around 90-deg. This is a PITA because even if the gap is small, this
+     * method is not ameniable to using interpolation, since the Alpha
+     * implied by a given K will be undefined (because Blocal>Bmin).
+     *
+     * This new algorithm changes this:
+     *      1) For each energy, the f( Alpha_local )  PAD is relabeled as f(
+     *         Alpha_eq ) which typically opens a gap around 90.
+     *      2) Then feed this data into our Gaussian Process Regression Routine
+     *         to interp to points at the AlphaEq implied by each K (i.e. instead
+     *         of the Alpha_local's which may be undefined.)
+     */
+
+
+    // For each local pitch angle, compute the equatorial pitch angle.
+    SqrtBrat = sqrt( mInfo->Bmin/mInfo->Blocal );
+    for ( nGood2=0, j=0; j<f->nA; j++ ) { 
+        SinAeq = SqrtBrat * sin( RadPerDeg*f->A[j] );
+        //if ( SinA <= 1.0 ) {
+        if ( SinAeq <= 1.0 ) {
+            f->Aeq[j] = DegPerRad*asin( SinAeq );
+            ++nGood2;
+        } else {
+            f->Aeq[j] = LGM_FILL_VALUE;
+        }
+    }
+
+
+//FILE *fp_pad, *fp_gpr;
+//fp_pad=fopen("PAD.dat","w");
+//fp_gpr=fopen("GPR.dat","w");
+    for ( i=0; i<f->nE; i++ ) { // for each energy
+
+         // for each PAD
+         n = 0; gymax = -9e99; gymin = 9e99;
+         ngy_sum = 0; gy_sum = 0.0;
+
+        /*
+         * Try adding mirror of first half of PAD. We are adding the main PAD
+         * in -90->90. But also adding:
+         *      1) the mirror of the first half is placed -180->-90
+         *      2) the mirror of the last half is placed 90->180
+         *      3) f=0 is forced at -90 and 90. With unc. of the 90-deg. val.
+         *         CHECK ON THIS -- we may want to scan to find largest unc.
+         *         available (90deg may be undefined.?) Note that GPR wont force the curve through zero!
+         */
+        for ( j=f->nA/2; j>=0; j-- ) { 
+            // add in mirror of first half of PAD
+            if ( !isnan(f->Aeq[j]) && (f->PSD_EA[i][j] > 0.0 ) && (f->PSD_EA[i][j] < 1e20 ) && (f->dPSD_EA[i][j] > 0.0) ){
+                xin[n]  = -f->Aeq[j] - 90.0;
+                yin[n]  = f->PSD_EA[i][j];
+                dyin[n] = f->dPSD_EA[i][j];
+                ++n;
+            }
+        }
+
+//        xin[n]  = -90.0;
+//        yin[n]  = 0.0;
+//        dyin[n] = f->dPSD_EA[i][f->nA/2]; // take unc. from 90deg PA.
+//        ++n;
+
+        for ( j=0; j<f->nA; j++ ) { // pitch angle bin
+            if ( !isnan(f->Aeq[j]) && (f->PSD_EA[i][j] > 0.0 ) && (f->PSD_EA[i][j] < 1e20 ) && (f->dPSD_EA[i][j] > 0.0) ){
+                xin[n]  = f->Aeq[j]-90.0; // Give it values -90 to 90
+                yin[n]  = f->PSD_EA[i][j];
+                dyin[n] = f->dPSD_EA[i][j];
+                if ( yin[n] > gymax )      gymax = yin[n];
+                else if ( yin[n] < gymin ) gymin = yin[n];
+                ++n;
+            }
+        }
+        for ( j=f->nA-1; j>=0; j-- ) { // pitch angle bin
+            if ( !isnan(f->Aeq[j]) && (f->PSD_EA[i][j] > 0.0 ) && (f->PSD_EA[i][j] < 1e20 ) && (f->dPSD_EA[i][j] > 0.0) ){
+                xin[n]  = 90.0-f->Aeq[j]; // Give it values 90 to 180
+                yin[n]  = f->PSD_EA[i][j];
+                dyin[n] = f->dPSD_EA[i][j];
+                if ( yin[n] > gymax )      gymax = yin[n];
+                else if ( yin[n] < gymin ) gymin = yin[n];
+                ++n;
+            }
+        }
+
+//        xin[n]  = 90.0;
+//        yin[n]  = 0.0;
+//        dyin[n] = f->dPSD_EA[i][f->nA/2]; // take unc. from 90deg PA.
+//        ++n;
+
+        // Try adding mirror of last half of PAD
+        for ( j=0; j<=f->nA/2; j++ ) { // pitch angle bin
+            if ( !isnan(f->Aeq[j]) && (f->PSD_EA[i][j] > 0.0 ) && (f->PSD_EA[i][j] < 1e20 ) && (f->dPSD_EA[i][j] > 0.0) ){
+                xin[n]  = 90.0+f->Aeq[j]; // Give it values 180 to 270
+                yin[n]  = f->PSD_EA[i][j];
+                dyin[n] = f->dPSD_EA[i][j];
+                ++n;
+            }
+        }
+/*
+for (j=0; j<n; j++){
+//fprintf(fp_pad, "%g %g %g\n", xin[j], yin[j], dyin[j]);
+if ( dyin[j]/yin[j]*100.0 < 1.0){
+printf("i,j=%d,%d: Energy: %g  xin, yin, dyin, rel error = %g %g %g %g %\n", i, j, f->E[i],  xin[j], yin[j], dyin[j], dyin[j]/yin[j]*100.0);
+}
+}
+*/
+//fflush(fp_pad);
+
+//printf("E. Lgm_F2P_GetPsdAtConstMusAndKs %d %d\n", n, nGood);
+//printf("n, nGood=%d %d\n", n, nGood);
+//exit(0);
+
+        // its possible that some of the AEqofK may not have computed correctly...
+        // so only use good values. But also remember what indices they are coming from 
+        n_star = 0;
+        for (j=0; j<f->nK; j++){
+            if ( f->AEqofK[j] > 0.0 ) {
+                x_star[n_star] = f->AEqofK[j]-90.0;
+                x_star_index[n_star] = j; // remember what index this is from...
+                ++n_star;
+            }
+        }
+
+        if ( (n>4)&&(nGood>2) ) {
+            /*
+             * OK, now we need to define the array of points at which we want to
+             * evaluate the function at.  For visualization purposes, we could do
+             * this over a lot of regularly spaced points. But we really only need
+             * them at the f->AEqofK[k] points we calculated above.
+             */
+
+
+            // Initialize the Info structure.
+            Info = InitGprInfo( n, n_star, 1 ); // The "1" means force symmetryo
+            for ( j=0; j<n_star; j++ ) { 
+                gsl_vector_set( Info->x_star, j, x_star[j] );
+            }
+
+            for (j=0; j<n; j++ ) {
+                gsl_vector_set( Info->x, j, xin[j] );
+                gsl_vector_set( Info->y, j, yin[j]/gymax - 0.5 );
+                gsig = dyin[j]/gymax;
+                //printf("xin, yin = %g %g gsig = %g   gymax = %g\n", xin[j], yin[j], gsig, gymax);
+                gsl_vector_set( Info->sigma_n_vec, j, gsig );
+                gsl_vector_set( Info->sigma_n_2_vec, j, gsig*gsig );
+            }
+
+            // Do regression
+            //printf("i=%d n=%d\n", i, n);
+            GPR( Info );
+            
+
+            /*
+             * Save results. The FLUX_EAeq array should be interpolated to all of
+             * the required AlphaEq (corresponding to the Ks we want).
+             */
+            for ( j=0; j<f->nK; j++ ) f->PSD_EAeq[i][j] = LGM_FILL_VALUE; // Initialize to FILLs
+            for ( j=0; j<n_star; j++ ) { 
+                gy_hat = (gsl_vector_get( Info->y_hat, j ) +0.5)*gymax;
+                gdy    = (gsl_vector_get( Info->y_cred_hi, j )+0.5)*gymax - gy_hat;
+//printf("here   gy_hat = %g   gdy = %g\n", gy_hat, gdy);
+                f->PSD_EAeq[i][ x_star_index[j] ]  = gy_hat;
+                f->dPSD_EAeq[i][ x_star_index[j] ] = gdy;
+            }
+        
+
+            // Clean up memory
+            FreeGprInfo( Info );
+
+        } else {
+            for ( j=0; j<n_star; j++ ) { 
+                f->PSD_EAeq[i][j]  = LGM_FILL_VALUE;
+                f->dPSD_EAeq[i][j] = LGM_FILL_VALUE;
+            }
+        }
+//printf("F. Lgm_F2P_GetPsdAtConstMusAndKs %d %d\n", n, nGood);
+//exit(0);
+
+
+    } // end energy loop
+//fclose(fp_pad);
+//fclose(fp_gpr);
+//exit(0);
+
 
 
     /*
@@ -679,27 +954,39 @@ void Lgm_F2P_GetPsdAtConstMusAndKs( double *Mu, int nMu, double *K, int nK, Lgm_
      * Note that since this conversion involves Mu and Alpha, the result is 2D.
 assumes electrons -- generalize this...
      */
+
     for ( m=0; m<nMu; m++ ){
         f->Mu[m] = Mu[m];
         for ( k=0; k<nK; k++ ){
             if ( f->UseModelB ) {
-                f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
+                //f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B, LGM_Ee0 );
+                f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AEqofK[k], f->Beq, LGM_Ee0 );
+
             } else {
                 f->EofMu[m][k] = Lgm_Mu_to_Ek( f->Mu[m], f->AofK[k], f->B_obs, LGM_Ee0 );
             }
-            //printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
+            //printf("f->Mu[%d], f->K[%d], f->AofK[%d], f->B, f->EofMu[%d][%d] = %g %g %g %g %g\n", 
+            //       m, k, k, m, k, f->Mu[m], f->K[k], f->AofK[k], f->B, f->EofMu[m][k]);
         }
     }
 
+
+
     /*
-     * Now, from the PSD[E][a] array, get PSD at the E's and Alpha's we just computed.
-     * The result will be the same as PSD at the given Mu's and K's
+     * OLD ALGORITHM: 
+     *      Now, from the PSD[E][a] array, get PSD at the E's and Alpha's we just computed.
+     *      The result will be the same as PSD at the given Mu's and K's
+     * 
+     *  NEW ALGORITHM:
+     *      Grab the PSD from the PSD_EAeq array instead (that we just computed above).
      */
-    LGM_ARRAY_2D( f->PSD_MK, f->nMu,  f->nK,  double );
     for ( m=0; m<nMu; m++ ){
         for ( k=0; k<nK; k++ ){
             DoIt = FALSE;
-//printf("f->EofMu[m][k] %g, f->E[0] %g \n", f->EofMu[m][k], f->E[0]);
+            //printf("f->EofMu[m][k] %g, f->E[0] %g \n", f->EofMu[m][k], f->E[0]);
+f->Extrapolate=1;
+f->Extrapolate=0;
+f->Extrapolate=2;
             if ( f->Extrapolate > 2 ){ // extrapolate above and below
 
                 DoIt = TRUE;
@@ -720,24 +1007,32 @@ assumes electrons -- generalize this...
             }
 
             if (DoIt) {
-                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( m, k, f->EofMu[m][k], f->AofK[k], f );
+
+                // This call is where the OLD interpolation would get done.
+                // Note that the one on pitch angle will no longer be needed....
+                // The routine Lgm_F2P_GetPsdAtEandAlpha2() was added for this NEW way.
+                //f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha( m, k, f->EofMu[m][k], f->AofK[k], &dPsd, f );
+                f->PSD_MK[m][k] =  Lgm_F2P_GetPsdAtEandAlpha2( m, f->EofMu[m][k], k, &dPsd, f );
+                f->dPSD_MK[m][k] = dPsd;
+
             } else {
-                f->PSD_MK[m][k] = LGM_FILL_VALUE;
+
+                f->PSD_MK[m][k]  = LGM_FILL_VALUE;
+                f->dPSD_MK[m][k] = LGM_FILL_VALUE;
+
             }
 
         }
     }
 
-    if ( f->DumpDiagnostics ) {
-        DumpGif( "Lgm_FluxToPsd_PSD_MK", f->nK, f->nMu, f->PSD_MK );
-    }
-
-
-    f->Alloced2 = TRUE;
+    if ( f->DumpDiagnostics ) { DumpGif( "Lgm_FluxToPsd_PSD_MK", f->nK, f->nMu, f->PSD_MK ); }
 
     return;
 
 }
+
+
+
 
 double  Model( double *x, int n, double E ) {
 
@@ -807,9 +1102,11 @@ if (isnan(sum)) {
 
 /**
  * The f structure should have an initialized PSD[E][a] array in it.
- * This routine computes psd given a value of E and a.
+ * This routine computes psd given a value of E and a. dPsd is the uncertainty in Psd (return value).
  */
-double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_FluxToPsd *f ) {
+double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, double *dpsd, Lgm_FluxToPsd *f ) {
+
+//NEED to get dPsd computed!!!
 
     int         j, i, i0, i1, nn;
     double      a0, a1, y0, y1, slp, psd, g;
@@ -821,6 +1118,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
     FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
     FitData->nMaxwellians = f->nMaxwellians;
 
+//FROM HERE 
     /*
      * Since pitch angle, a is bounded (here its constrained to be between 0
      * and 90), we will interpolate on that first to produce a 1D array of
@@ -845,6 +1143,7 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
     /************************
      *  interpolate PA 
+     *  For each energy, we interpolate the PA profile to get f at the user-specified alpha.
      ************************/
     LGM_ARRAY_1D( FitData->E, f->nE, double );
     LGM_ARRAY_1D( FitData->g, f->nE, double );
@@ -869,9 +1168,19 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
 
     }
+// TO HERE 
+//The above could just be replaced by picking out the right index to the f->PSD_EAeq[][] array now...
+// Basically the g value is just read out of the array -- the indices are already at the right alpha val.
+// E.g.
+// g = f->PSD_EAeq[j][i] where i is given to us. I.e. we dont need all the crap to do the interp above...
 
 
 
+
+
+    /*
+     * Now we have f versus E (at the specified alpha).
+     */
 
     if ( f->FitType == LGM_F2P_SPLINE ) {
 
@@ -885,7 +1194,8 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
 
         // determine number of points
         for (n=0, j=0; j<FitData->n; ++j){ 
-            if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+            //if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+            if ( (f->E[j] > 0.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
                 //printf("E[%d] = %g\n", j, f->E[j] );
                 ++n;
             }
@@ -929,11 +1239,12 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
             // set up data arrays.
             for ( nn=0, j=0; j<FitData->n; j++ ){
 
-                if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
-                    xi = log10( FitData->E[j] );
-                    yi = log10( FitData->g[j] );
+                //if ( (f->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+                if ( (FitData->E[j] > 0.0/1000.0) && ( FitData->g[j] > 0.0 ) && ( FitData->dg[j] > 0.0 )) {
+                    xi    = log10( FitData->E[j] );
+                    yi    = log10( FitData->g[j] );
+                    sigma = .434*( FitData->dg[j]/FitData->g[j] );
 
-                    sigma = 0.2*yi; // FIX -- i.e. need real values...
                     gsl_vector_set( bs_x, nn, xi );
                     gsl_vector_set( bs_y, nn, yi );
                     gsl_vector_set( bs_w, nn, 1.0/(sigma*sigma) );
@@ -987,9 +1298,11 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
             if ( (xi >= gsl_vector_get( bs_x, 0 )) && (xi <= gsl_vector_get( bs_x, n-1 )) ) {
                 gsl_bspline_eval( xi, bs_B, bs_bw );
                 gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
-                psd = pow( 10.0, yi );
+                psd  = pow( 10.0, yi );
+                *dpsd = 2.303*psd*yierr;
             } else {
-                psd = LGM_FILL_VALUE;
+                psd  = LGM_FILL_VALUE;
+                *dpsd = LGM_FILL_VALUE;
             }
 
             gsl_bspline_free( bs_bw );
@@ -1007,10 +1320,17 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
         } else {
 
             psd = LGM_FILL_VALUE;
+            *dpsd = LGM_FILL_VALUE;
 
         }
 
+        // spline fit to energy spectra is done.
+
+
     } else if ( f->FitType == LGM_F2P_MAXWELLIAN ) {
+//Uncertainties are not propery set for thej maxwellian fits.
+// Currently we use praxis -- a line minimization method, but we really should go to a differentm one
+// in order to be able to get unc as well.
         if ( FitData->n > 2 ) {
 
 
@@ -1064,22 +1384,322 @@ double  Lgm_F2P_GetPsdAtEandAlpha( int iMu, int iK, double E, double a, Lgm_Flux
             //x[2] = 200.0;
             //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
             psd = Model( x,  FitData->nMaxwellians, E );
+*dpsd = 0.0;
+//dpsd = ?;
             //psd = (double)a;
 
             //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
         } else {
 
-            psd = LGM_FILL_VALUE;
+            psd  = LGM_FILL_VALUE;
+            *dpsd = LGM_FILL_VALUE;
 
         }
 
     } else {
         //FitType not valid...
-        psd = LGM_FILL_VALUE;
+        psd  = LGM_FILL_VALUE;
+        *dpsd = LGM_FILL_VALUE;
     }
 
     LGM_ARRAY_1D_FREE( FitData->E );
     LGM_ARRAY_1D_FREE( FitData->g );
+    free( FitData );
+
+
+    return( psd );
+
+}
+
+
+/**
+ * This version uses the GP-interped array
+ * Here we just need to know what index to grab from the AlphaEq slot...
+ * The f structure should have an initialized PSD[E][a] array in it.
+ * This routine computes psd given a value of E and a. dPsd is the uncertainty in Psd (return value).
+ *
+ */
+double  Lgm_F2P_GetPsdAtEandAlpha2( int iMu, double E, int iAEq, double *dpsd, Lgm_FluxToPsd *f ) {
+
+
+    int         j, i, nn;
+    double      psd, g, dg;
+    _FitData    *FitData;
+    double MinEnergy, MaxEnergy;
+
+    FitData = (_FitData *) calloc( 1, sizeof( _FitData ) );
+    FitData->nMaxwellians = f->nMaxwellians;
+
+    MinEnergy = 0.0/1000.0/1000.0; // 5eV in units of MeV
+MinEnergy = 1.0;
+    MaxEnergy = 20.0; // MeV
+
+    /************************
+     *  Grab the energy spectra at the given PA index
+     ************************/
+    LGM_ARRAY_1D( FitData->E, f->nE, double );
+    LGM_ARRAY_1D( FitData->g, f->nE, double );
+    LGM_ARRAY_1D( FitData->dg, f->nE, double );
+    FitData->n = 0;
+    for (j=0; j<f->nE; ++j){
+        if ( (f->E[j] > MinEnergy) && (f->E[j] <= MaxEnergy) && ( f->PSD_EAeq[j][iAEq] > 0.0 ) && (f->dPSD_EAeq[j][iAEq] > 0.0) ) {
+            g  = f->PSD_EAeq[j][iAEq];
+            dg = f->dPSD_EAeq[j][iAEq];
+//            if ( g > 1e-40 ) { // dont use if it looks bogus
+                FitData->g[ FitData->n ]  = g;
+                FitData->dg[ FitData->n ] = dg;
+                FitData->E[ FitData->n ] = f->E[j];
+                ++(FitData->n);
+//printf("A. %g %g %g\n", g, dg, f->E[j]);
+ //           }
+        }
+    }
+
+
+
+    /*
+     * Now we have f versus E (at the specified alpha).
+     */
+
+    if ( f->FitType == LGM_F2P_SPLINE ) {
+
+        /*
+         * Use smoothing spline.
+         */
+        int n;
+        //int ncoeffs = 12;
+        int ncoeffs = 8;
+        int nbreak  = ncoeffs - 2;
+
+        // determine number of points
+        for (n=0, j=0; j<FitData->n; ++j){ 
+            if ( (FitData->E[j] > MinEnergy) && (f->E[j] <= MaxEnergy) && ( FitData->g[j] > 0.0 ) && ( FitData->dg[j] > 0.0 )) {
+                //printf("E[%d] = %g  g[%d] = %g\n", j, f->E[j], j, FitData->g[j] );
+                ++n;
+            }
+        }
+
+        if ( n > 20 ) {
+            ncoeffs = 12;
+        } else if ( n > 5 ) {
+            ncoeffs = 4;
+        } else {
+            ncoeffs = n/2;
+        }
+        nbreak  = ncoeffs-2;
+        
+//if ((iK==4)&&(iMu==7)) printf("n, ncoeffs, nbreak = %d %d %d\n", n, ncoeffs, nbreak );
+
+        if ( (n >= 4) && (nbreak>=2) ) {
+
+            // allocate a cubic bspline workspace (k = 4)
+            gsl_bspline_workspace *bs_bw;
+            gsl_vector            *bs_B;
+            bs_bw = gsl_bspline_alloc( 4, nbreak );
+            bs_B  = gsl_vector_alloc( ncoeffs );
+
+
+
+            gsl_vector *bs_x, *bs_y, *bs_c, *bs_w;
+            gsl_matrix *bs_X, *bs_cov;
+            gsl_multifit_linear_workspace *bs_mw;
+            double  bs_chisq, xi, yi, yierr, sigma;
+            
+            
+            bs_x = gsl_vector_alloc( n );
+            bs_y = gsl_vector_alloc( n );
+            bs_X = gsl_matrix_alloc( n, ncoeffs );
+            bs_c = gsl_vector_alloc( ncoeffs );
+            bs_w = gsl_vector_alloc( n );
+            bs_cov = gsl_matrix_alloc( ncoeffs, ncoeffs );
+            bs_mw = gsl_multifit_linear_alloc( n, ncoeffs );
+
+            // set up data arrays.
+            for ( nn=0, j=0; j<FitData->n; j++ ){
+
+                if ( (FitData->E[j] > MinEnergy) && (f->E[j] <= MaxEnergy) && ( FitData->g[j] > 0.0 ) && ( FitData->dg[j] > 0.0 )) {
+                    xi    = log10( FitData->E[j] );
+                    yi    = log10( FitData->g[j] );
+if (FitData->dg[j]/FitData->g[j]*100.0 < 10.0){
+                    sigma = .0434;
+} else {
+                    sigma = .434*( FitData->dg[j]/FitData->g[j] );
+}
+                    //sigma = 0.2*yi;
+//printf("xi, yi, 0.2*yi, .434*( FitData->dg[j]/FitData->g[j] ) = %g %g %g %g   g, dg = %g %g\n", xi, yi, 0.2*yi, .434*( FitData->dg[j]/FitData->g[j] ), FitData->g[j], FitData->dg[j]);
+//printf("%g %g %g       %g %g %g\n", xi, yi, sigma, FitData->E[j], FitData->g[j], FitData->dg[j]/FitData->g[j]);
+
+                    gsl_vector_set( bs_x, nn, xi );
+                    gsl_vector_set( bs_y, nn, yi );
+                    gsl_vector_set( bs_w, nn, 1.0/(sigma*sigma) );
+
+                    ++nn;
+                }
+
+            }
+
+            // use uniform breakpoints on defined data interval
+            //printf("gsl_vector_get( bs_x, 0 ), gsl_vector_get( bs_x, n-1 ) = %g %g\n", gsl_vector_get( bs_x, 0 ), gsl_vector_get( bs_x, n-1 ));
+            gsl_bspline_knots_uniform( gsl_vector_get( bs_x, 0 ), gsl_vector_get( bs_x, n-1 ), bs_bw );
+            //printf("B. here\n");
+
+            // construct the fit matrix X
+//printf("n=%d nn=%d   ", n, nn);
+//printf("n, ncoeffs, nbreak = %d %d %d\n", n, ncoeffs, nbreak );
+//if (nn==92) FLAGFLAG = 1;
+//if ((nn==93)&&(FLAGFLAG==1))exit(0);
+            for ( i=0; i<n; i++ ) {
+                xi = gsl_vector_get( bs_x, i );
+
+                // compute B_j(xi) for all j
+                gsl_bspline_eval( xi, bs_B, bs_bw );
+
+                // fill in row i of X
+                for ( j=0; j<ncoeffs; j++ ) {
+                    double Bj = gsl_vector_get( bs_B, j );
+//printf("Bj = %g\n", Bj);
+                    gsl_matrix_set( bs_X, i, j, Bj );
+                }
+            }
+
+            /* do the fit */
+            gsl_multifit_wlinear( bs_X, bs_w, bs_y, bs_c, bs_cov, &bs_chisq, bs_mw );
+//printf("bs_chisq = %g\n", bs_chisq);
+
+
+
+            /*
+            FILE    *fp;
+            printf("E = %g\n", E);
+            fp = fopen("data.txt", "w");
+            for (j=0; j<FitData->n; ++j){
+                fprintf(fp, "%g %g\n", log10(f->E[j]), log10(FitData->g[j]));
+            }
+            fclose(fp);
+            fp = fopen("fit.txt", "w");
+            for (xi = gsl_vector_get( bs_x, 0 ); xi < gsl_vector_get( bs_x, n-1 ); xi += 0.01) {
+                gsl_bspline_eval( xi, bs_B, bs_bw );
+                gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
+                fprintf(fp, "%g %g\n", xi, yi );
+            }
+            fclose(fp);
+            exit(0);
+            */
+
+            xi = log10( E );
+
+            if ( (xi >= gsl_vector_get( bs_x, 0 )) && (xi <= gsl_vector_get( bs_x, n-1 )) ) {
+                gsl_bspline_eval( xi, bs_B, bs_bw );
+                gsl_multifit_linear_est( bs_B, bs_c, bs_cov, &yi, &yierr );
+                psd  = pow( 10.0, yi );
+                *dpsd = 2.303*psd*yierr;
+
+printf("E = %g  xi = %g   yi, yierr = %g %g   psd, dpsd = %g %g\n", E, xi, yi, yierr, psd, *dpsd);
+            } else {
+                psd  = LGM_FILL_VALUE;
+                *dpsd = LGM_FILL_VALUE;
+            }
+
+            gsl_bspline_free( bs_bw );
+            gsl_vector_free( bs_B );
+            gsl_vector_free( bs_x );
+            gsl_vector_free( bs_y );
+            gsl_matrix_free( bs_X );
+            gsl_vector_free( bs_c );
+            gsl_vector_free( bs_w );
+            gsl_matrix_free( bs_cov );
+            gsl_multifit_linear_free( bs_mw );
+
+
+
+        } else {
+
+            psd = LGM_FILL_VALUE;
+            *dpsd = LGM_FILL_VALUE;
+
+        }
+
+        // spline fit to energy spectra is done.
+
+
+    } else if ( f->FitType == LGM_F2P_MAXWELLIAN ) {
+//Uncertainties are not propery set for thej maxwellian fits.
+// Currently we use praxis -- a line minimization method, but we really should go to a differentm one
+// in order to be able to get unc as well.
+        if ( FitData->n > 2 ) {
+
+
+            // interpolate/fit E
+            // for now just do a linear interp.
+            // no lets try a fit...
+            double  in[10], out[7], x[10];
+            in[0] = 1e-8;
+            in[1] = in[2] = 1e-9; //Info->Praxis_Tolerance;
+            in[5] = 30000.0; //(double)Info->Praxis_Max_Function_Evals;
+            in[6] = 10.0; //Info->Praxis_Maximum_Step_Size;
+            in[7] = 10.0; //Info->Praxis_Bad_Scale_Paramater;
+            in[8] = 4.0; //(double)Info->Praxis_Max_Its_Without_Improvement;
+            in[9] = 1.0; //(double)Info->Praxis_Ill_Conditioned_Problem;
+            x[0] = 0.0;
+            x[1] = -1.0;
+            x[2] = 25.0;
+            x[3] = -2.0;
+            x[4] = 200.0;
+            praxis( 2*FitData->nMaxwellians, x, (void *)FitData, Cost, in, out);
+            /*
+            printf("out[0] = %g\n", out[0]);
+            printf("out[1] = %g\n", out[1]);
+            printf("out[2] = %g\n", out[2]);
+            printf("out[3] = %g\n", out[3]);
+            printf("out[4] = %g\n", out[4]);
+            printf("out[5] = %g\n", out[5]);
+            printf("out[6] = %g\n", out[6]);
+            */
+            //printf("x[1] = %g   x[2] = %g   Cost = %g\n", x[1], x[2], out[6]);
+ //           FILE *fp;
+ //           printf("E = %g\n", E);
+ //           fp = fopen("data.txt", "w");
+ //           for (j=0; j<FitData->n; ++j){
+ //               fprintf(fp, "%g %g\n", log10(f->E[j]), log10(FitData->g[j]));
+ //           }
+ //           fclose(fp);
+
+ //           fp = fopen("fit.txt", "w");
+ //           for (j=0; j<FitData->n; ++j){
+ //               psd = Model( x,  FitData->nMaxwellians, f->E[j] );
+ //               fprintf(fp, "%g %g\n", log10(f->E[j]), log10( psd ) );
+ //           }
+ //           fclose(fp);
+
+//            exit(0);
+            /*
+            */
+
+
+            //x[2] = 200.0;
+            //printf("x - %g %g %g %g\n", x[1], x[2], x[3], x[4]);
+            psd = Model( x,  FitData->nMaxwellians, E );
+*dpsd = 0.2*psd;
+//dpsd = ?;
+            //psd = (double)a;
+
+            //printf("E, a = %g %g  x = %g %g psd = %g\n", E, a, x[1], x[2], psd);
+        } else {
+
+            psd  = LGM_FILL_VALUE;
+            *dpsd = LGM_FILL_VALUE;
+
+        }
+
+    } else {
+        //FitType not valid...
+        psd  = LGM_FILL_VALUE;
+        *dpsd = LGM_FILL_VALUE;
+    }
+
+    LGM_ARRAY_1D_FREE( FitData->E );
+    LGM_ARRAY_1D_FREE( FitData->g );
+    LGM_ARRAY_1D_FREE( FitData->dg );
     free( FitData );
 
 
@@ -1540,8 +2160,9 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
     }
 
     // interpolate K
-    LGM_ARRAY_1D( FitData->E, p->nMu, double );
-    LGM_ARRAY_1D( FitData->g, p->nMu, double );
+    LGM_ARRAY_1D( FitData->E,  p->nMu, double );
+    LGM_ARRAY_1D( FitData->g,  p->nMu, double );
+    LGM_ARRAY_1D( FitData->dg, p->nMu, double );
     FitData->n = 0;
     for (j=0; j<p->nMu; ++j){
         K0   = p->K[i0];
@@ -1570,7 +2191,8 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
 
         // determine number of points
         for (n=0, j=0; j<FitData->n; ++j){
-            if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+            //if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+            if ( (FitData->E[j] > 0.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
                 ++n;
             }
         }
@@ -1608,11 +2230,12 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
             // set up data arrays.
             for ( nn=0, j=0; j<FitData->n; j++ ){
 
-                if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
-                    xi = log10( FitData->E[j] );
-                    yi = log10( FitData->g[j] );
+                //if ( (FitData->E[j] > 1.0/1000.0) && ( FitData->g[j] > 0.0 ) ) {
+                if ( (FitData->E[j] > 0.0/1000.0) && ( FitData->g[j] > 0.0 ) && ( FitData->dg[j] > 0.0 )) {
+                    xi    = log10( FitData->E[j] );
+                    yi    = log10( FitData->g[j] );
+                    sigma = .434*( FitData->dg[j]/FitData->g[j] );
 
-                    sigma = 0.2*yi; // FIX -- i.e. need real values...
                     gsl_vector_set( bs_x, nn, xi );
                     gsl_vector_set( bs_y, nn, yi );
                     gsl_vector_set( bs_w, nn, 1.0/(sigma*sigma) );
@@ -1715,6 +2338,7 @@ double  Lgm_P2F_GetPsdAtMuAndK( double Mu, double K, double A, Lgm_PsdToFlux *p 
 
     LGM_ARRAY_1D_FREE( FitData->E );
     LGM_ARRAY_1D_FREE( FitData->g );
+    LGM_ARRAY_1D_FREE( FitData->dg );
     free( FitData );
 
 
