@@ -33,7 +33,7 @@ typedef struct Lgm_Msis00Info {
     double  TN1[6], TN2[5], TN3[6], TGN1[3], TGN2[3], TGN3[3];
 
     // PARMB COMMON BLOCK VARS
-    double  GSURF, RE;
+    double  GSURF, Rref;
 
     // CSW COMMON BLOCK VARS
     double *SW, ISW, *SWC;
