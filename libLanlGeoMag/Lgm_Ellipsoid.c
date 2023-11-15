@@ -42,10 +42,14 @@ int Lgm_EllipsoidIntersect( EllipsoidType *Ellipsoid, RayType *Ray, double *tmin
     D = sqrt(D);
 
     // compute Q
-    Q = 0.5*( (B<0.0) ?  -B - D : -B + D );
+    //Q = 0.5*( (B<0.0) ?  -B - D : -B + D );
+    //
+    //t0 = Q/A;
+    //t1 = C/Q;
 
-    t0 = Q/A;
-    t1 = C/Q;
+    Q = 0.5/A;
+    t0 = (-B - D)*Q;
+    t1 = (-B + D)*Q;
 
 
     if ( t0 < t1 ){
