@@ -3,7 +3,7 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
 
     Lgm_Vector       B2;
     int		         iopt;
-    double	         parmod[11], ps, Bmag, X, Y, Z, Bx, By, Bz;
+    double	         parmod[11], ps, Bmag, X, Y, Z, R2, Bx, By, Bz;
     double           FEXT, FINT, BBX, BBY, BBZ, OIMFX, OIMFY, OIMFZ;
 
 
@@ -82,6 +82,12 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
      *            access to our dipole model.
      *
      */
+    R2 = X*X + Y*Y + Z*Z;
+    if ( R2 < 0.5 ) {
+        printf("Inside Earth? X, Y, Z = %g %g %g\n", X, Y, Z);
+        return(-1);
+    }
+
     Tsyg_TS04( iopt, parmod, ps, Info->c->sin_psi, Info->c->cos_psi, X, Y, Z, &Bx, &By, &Bz, &Info->TS04_Info );
 
     switch ( Info->InternalModel ){
