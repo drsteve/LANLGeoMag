@@ -36,7 +36,7 @@ endif
 #libdir                   = @prefix@/lib
 lib_LTLIBRARIES          = libLanlGeoMag.la
 libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_Vec_RBF.c Lgm_B_FromScatteredData.c ComputeLstar.c DriftShell.c IntegralInvariant.c LFromIBmM.c \
-	                        Lgm_B_internal.c Lgm_CTrans.c Lgm_DateAndTime.c Lgm_Eop.c Lgm_IGRF.c Lgm_InitMagInfo.c \
+	                        Lgm_B_internal.c Lgm_CTrans.c Lgm_DateAndTime.c Lgm_Eop.c Lgm_IGRF.c Lgm_InitMagInfo.c FluxTubeVolume.c\
                             Lgm_MaxwellJuttner.c Lgm_Nutation.c Lgm_Octree.c Lgm_Quat.c Lgm_Sgp.c Lgm_SimplifiedMead.c  Lgm_SunPosition.c \
                             Lgm_Trace.c Lgm_TraceToEarth.c Lgm_TraceToSphericalEarth.c Lgm_Vec.c MagStep.c Lgm_QuadPack3.c \
                             Lgm_QuadPack.c Lgm_Cgm.c quicksort.c SbIntegral.c T87.c T89.c T89c.c TraceLine.c Lgm_TraceToMinBSurf.c  \
@@ -45,10 +45,10 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_Vec_RBF.c Lgm_B_Fro
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OP88.c OlsenPfitzerDynamic.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c Lgm_KdTree.c\
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c Lgm_MagEphemWriteHdf.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c ComputeI_FromMltMlat2.c \
-                            Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
+                            Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_GradBvec.c Lgm_GradBvec2.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
 			                Lgm_Metadata.c  Lgm_PriorityQueue.c TraceToYZPlane.c Lgm_InitNrlMsise00.c Lgm_NrlMsise00.c Lgm_Coulomb.c\
 			                Lgm_Ellipsoid.c Lgm_DipEquator.c \
-                            Lgm_JPLephem.c  Lgm_Eclipse.c Lgm_TabularBessel.c
+                            Lgm_JPLephem.c  Lgm_Eclipse.c Lgm_TabularBessel.c GPR_v3.c Lgm_FirstInvariant.c
 
 
 
