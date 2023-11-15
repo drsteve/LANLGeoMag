@@ -936,7 +936,7 @@ void quicksort_uli( unsigned long n, unsigned long *arr );
  * Rotuines for computing the first invariant up to second order
  */
 double  Lgm_DoubleDot( double A[3][3], double B[3][3] );
-void    Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, double Energy, double Phi, double Delta, 
+void    Lgm_Set_Particle_Frames( Lgm_Vector *q, double Mass, double RestEnergy, double Energy, double Delta, double Phi, 
                 Lgm_Vector *a, Lgm_Vector *c, Lgm_Vector *b, Lgm_Vector *v, Lgm_MagModelInfo *mInfo );
 void    Lgm_Grad_Cb( Lgm_Vector *u0, double Grad_Cb[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
 void    Lgm_Grad_b( Lgm_Vector *u0, double Grad_b[3][3], int DerivScheme, double h, Lgm_MagModelInfo *m );
@@ -955,7 +955,10 @@ void    Lgm_TensorDotTensor( double A[3][3], double B[3][3], double R[3][3] );
 double  Lgm_TraceTensor( double T[3][3] );
 void    Lgm_TensorTranspose( double T[3][3], double T_transpose[3][3] );
 double  Lgm_DoubleDot( double A[3][3], double B[3][3] );
-double  Lgm_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo );
+double  Lgm_dBdr( Lgm_Vector *q, Lgm_MagModelInfo *mInfo );
+double  Lgm_d2Bdr2( Lgm_Vector *q, Lgm_MagModelInfo *mInfo );
+double  Lgm_Mu_Gardner( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo );
+double  Lgm_Mu_Burby( Lgm_Vector *q, Lgm_Vector *v, double Gamma, double Mass, double Charge, double *mu0_out, double *mu1_out, double *mu2_out, Lgm_MagModelInfo *mInfo );
 
 
 /*
