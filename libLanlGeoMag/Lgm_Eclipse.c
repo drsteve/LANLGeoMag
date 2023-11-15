@@ -1,6 +1,6 @@
 /*! \file Lgm_Elcipse.c
  *
- *  \brief Determine if a position is in unmral or penumbral elicpse.
+ *  \brief Determine if a position is in umbral or penumbral elicpse.
  *
  *  \details
  *      See discussion at Celestrak: http://www.celestrak.com/columns/v03n01/
@@ -25,7 +25,7 @@
  */
 int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
 
-    Lgm_Vector  Rsun, Psun, Psc;
+    Lgm_Vector  Rsun, Psun, Psc, Pe;
     double      Rsun_mag, Psun_mag, Psc_mag;
     double      Theta, ThetaE, ThetaS;
     int         Type;
@@ -35,32 +35,34 @@ int Lgm_EarthEclipse( Lgm_Vector *u, Lgm_CTrans *c ) {
     Psc.z = Re*u->z; //km
     Psc_mag = Lgm_Magnitude( &Psc ); // km
 
+    // vector pointing from sc to earth
+    Pe.x = -Psc.x;
+    Pe.y = -Psc.y;
+    Pe.z = -Psc.z;
+
     /*
      * We need (all in MOD);
      *          Rsun - Earth to Sun Vector.
      *          Psun - Satellite to Sun Vector.
-     *          Psc  - Earth to Satellite Vector.
+     *          Pe   - Satellite to Earth Vector (=-Psc).
      *
      */
     Rsun_mag = c->earth_sun_dist*Re;    // km
     Rsun     = c->Sun;                  
     Lgm_ScaleVector( &Rsun, Rsun_mag ); // km
 
+    // vector pointing from sc to sun
     Psun.x = Rsun.x - Psc.x;  //km
     Psun.y = Rsun.y - Psc.y;  //km
     Psun.z = Rsun.z - Psc.z;  //km
     Psun_mag = Lgm_Magnitude( &Psun ); // km
-
-
-    
-
     //printf("Rsun_mag, Psun_mag, Psc_mag = %g %g %g\n", Rsun_mag, Psun_mag, Psc_mag );
 
 
     /*
      * Compute angle between Psun and Psc
      */
-    Theta = acos( Lgm_DotProduct( &Psun, &Psc )/(Psun_mag*Psc_mag) );
+    Theta = acos( Lgm_DotProduct( &Psun, &Pe )/(Psun_mag*Psc_mag) );
 
 
     /*
