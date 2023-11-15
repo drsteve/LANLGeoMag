@@ -524,11 +524,14 @@ Info->dlogp_dlog_sig *= -1.0;
      * We are done. The 3 quantities we are after are; logp, dlogp_dl, dlogo_dsig.
      */
 /*
+
 printf("l, sigma_f, sigma_b, sigma_nu, c  = %g %g %g %g %g logp, dlogp_dl, dlogp_dsig, dlogp_dlog_sigb, dlogp_dsig, dlogp_dc = %g %g %g %g %g %g\n", 
 l, sigma_f, sigma_b, sigma_nu, c, 
 Info->logp, 
 Info->dlogp_dlog_l, Info->dlogp_dlog_sig, 
 Info->dlogp_dlog_sigb, Info->dlogp_dlog_signu, Info->dlogp_dc );
+
+
 */
 
     return;
@@ -554,8 +557,8 @@ void HyperParam_FdF( const gsl_vector *x, void *Data, double *F, gsl_vector *dF 
      * Extract the hyper parameters for this call
      */
     log_sigma_f  = gsl_vector_get( x, 0 );
-log_l = log( 20.0 );
-//    log_l        = gsl_vector_get( x, 1 );
+//log_l = log( 1.0 );
+    log_l        = gsl_vector_get( x, 1 );
 //    log_sigma_b  = gsl_vector_get( x, 2 );
 //    log_sigma_nu = gsl_vector_get( x, 3 );
 //    c            = gsl_vector_get( x, 4 );
@@ -570,7 +573,7 @@ log_l = log( 20.0 );
 
     *F = g->logp;
     gsl_vector_set( dF, 0, g->dlogp_dlog_sig );
-//    gsl_vector_set( dF, 1, g->dlogp_dlog_l );
+    gsl_vector_set( dF, 1, g->dlogp_dlog_l );
 //    gsl_vector_set( dF, 2, g->dlogp_dlog_sigb );
 //    gsl_vector_set( dF, 3, g->dlogp_dlog_signu );
 //    gsl_vector_set( dF, 4, g->dlogp_dc );
@@ -591,7 +594,7 @@ double HyperParam_F( const gsl_vector *x, void *Data ) {
      * Extract the hyper parameters for this call
      */
     log_sigma_f  = gsl_vector_get( x, 0 );
-//    log_l        = gsl_vector_get( x, 1 );
+    log_l        = gsl_vector_get( x, 1 );
 //    log_sigma_b  = gsl_vector_get( x, 2 );
 //    log_sigma_nu = gsl_vector_get( x, 3 );
 //    c            = gsl_vector_get( x, 4 );
@@ -600,7 +603,7 @@ double HyperParam_F( const gsl_vector *x, void *Data ) {
 //        return( GSL_NAN );
 //    }
 
-log_l = log( 20.0 );
+//log_l = log( 20.0 );
     ComputeEvidenceAndDerivs( log_sigma_f, log_l, log_sigma_b, log_sigma_nu, c,   g );
     //printf("HyperParam_F: log_sigma_f, log_l = %g %g, F = %g\n", log_sigma_f, log_l, g->logp );
 
@@ -621,7 +624,7 @@ void HyperParam_dF( const gsl_vector *x, void *Data, gsl_vector *dF ) {
      * Extract the hyper parameters for this call
      */
     log_sigma_f  = gsl_vector_get( x, 0 );
-//    log_l        = gsl_vector_get( x, 1 );
+    log_l        = gsl_vector_get( x, 1 );
 //    log_sigma_b  = gsl_vector_get( x, 2 );
 //    log_sigma_nu = gsl_vector_get( x, 3 );
 //    c            = gsl_vector_get( x, 4 );
@@ -631,11 +634,11 @@ void HyperParam_dF( const gsl_vector *x, void *Data, gsl_vector *dF ) {
 //        gsl_vector_set( dF, 1, GSL_NAN );
 //    }
 
-log_l = log( 20.0 );
+//log_l = log( 20.0 );
     ComputeEvidenceAndDerivs( log_sigma_f, log_l, log_sigma_b, log_sigma_nu, c,   g );
 
     gsl_vector_set( dF, 0, g->dlogp_dlog_sig );
-//    gsl_vector_set( dF, 1, g->dlogp_dlog_l );
+    gsl_vector_set( dF, 1, g->dlogp_dlog_l );
 //    gsl_vector_set( dF, 2, g->dlogp_dlog_sigb );
 //    gsl_vector_set( dF, 3, g->dlogp_dlog_signu );
 //    gsl_vector_set( dF, 4, g->dlogp_dc );
@@ -726,16 +729,16 @@ void GPR( GprInfo *Info ){
      * Determine optimal hyper-parameteres: sigma_f, l.
      */
     gsl_multimin_function_fdf HyperParam_Func;
-    HyperParam_Func.n      = 1;
+    HyperParam_Func.n      = 2;
     HyperParam_Func.f      = &HyperParam_F;
     HyperParam_Func.df     = &HyperParam_dF;
     HyperParam_Func.fdf    = &HyperParam_FdF;
     HyperParam_Func.params = (void *)Info;
 
     // starting point
-    gsl_vector *hyper = gsl_vector_calloc( 1 );
+    gsl_vector *hyper = gsl_vector_calloc( 2 );
     gsl_vector_set( hyper, 0, log(0.05) ); // starting point for log_sigma_f
-//    gsl_vector_set( hyper, 1, log(20.0) ); // starting point for log_l
+    gsl_vector_set( hyper, 1, log(20.0) ); // starting point for log_l
 //    gsl_vector_set( hyper, 2, log(0.1) ); // starting point for log_sigb
 //    gsl_vector_set( hyper, 3, log(0.1) ); // starting point for log_signu
 //    gsl_vector_set( hyper, 4, 0.0 );      // starting point for c
@@ -744,19 +747,22 @@ void GPR( GprInfo *Info ){
     //const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_conjugate_pr;
     //const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs;
     const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
-    gsl_multimin_fdfminimizer            *s = gsl_multimin_fdfminimizer_alloc( T, 1 );
+    gsl_multimin_fdfminimizer            *s = gsl_multimin_fdfminimizer_alloc( T, 2 );
     gsl_multimin_fdfminimizer_set( s, &HyperParam_Func, hyper, 0.01, 1e-2 );
 
 
 if (0==1){
-    size_t  iter = 0;
+    int  iter = 0;
     int     status;
     do {
         iter++;
         status = gsl_multimin_fdfminimizer_iterate( s ); if (status) break;
-        status = gsl_multimin_test_gradient( s->gradient, 1e-2 ); if ((VERBOSE>0)&&(status == GSL_SUCCESS)) printf( "Minimum found at:\n" );
-        if (VERBOSE>0) printf( "%5d %.5f %.5f %10.5f\n", (int)iter, gsl_vector_get( s->x, 0 ), gsl_vector_get( s->x, 1 ), s->f );
-    } while ( (status == GSL_CONTINUE) && (iter < 100) );
+        status = gsl_multimin_test_gradient( s->gradient, 1e-4 ); if ((VERBOSE>0)&&(status == GSL_SUCCESS)) printf( "Minimum found at:\n" );
+        //if (VERBOSE>0) printf( "%5d %.5f %.5f %10.5f\n", (int)iter, gsl_vector_get( s->x, 0 ), gsl_vector_get( s->x, 1 ), s->f );
+        printf( "%5d %.5f %.5f %10.5f\n", (int)iter, gsl_vector_get( s->x, 0 ), gsl_vector_get( s->x, 1 ), s->f );
+    } while ( (status == GSL_CONTINUE) && (iter < 1000) );
+printf("iter = %d\n", iter);
+status = gsl_multimin_test_gradient( s->gradient, 1e-4 ); if ((VERBOSE>0)&&(status == GSL_SUCCESS)) printf( "Minimum found at:\n" );
 }
 
     gsl_vector *best_hyper;
@@ -764,19 +770,22 @@ if (0==1){
     Info->log_sigma_f  = gsl_vector_get( best_hyper, 0 );
 //    if ( Info->log_sigma_f > 20.0 ) Info->log_sigma_f = 20.0;
     
-//    Info->log_l        = gsl_vector_get( best_hyper, 1 );
- //   Info->log_sigma_b  = gsl_vector_get( best_hyper, 2 );
+    Info->log_l        = gsl_vector_get( best_hyper, 1 );
+//    Info->log_sigma_b  = gsl_vector_get( best_hyper, 2 );
 //    Info->log_sigma_nu = gsl_vector_get( best_hyper, 3 );
 //    Info->c            = gsl_vector_get( best_hyper, 4 );
 
     Info->sigma_f  = exp( Info->log_sigma_f );
     Info->l        = exp( Info->log_l );
-//Info->sigma_f  = 4.0;
-//Info->l        = 0.050;
+Info->sigma_f  = 2.0;
+Info->l        = 0.1;
+
+
+
 //Info->sigma_f  = 0.01;
-Info->l        = 20.0;
-if ( Info->sigma_f > 1.0 ) Info->sigma_f = 1.0;
-Info->sigma_f = 0.1;
+//Info->l        = 0.1;
+//if ( Info->sigma_f > 1.0 ) Info->sigma_f = 1.0;
+//Info->sigma_f = 0.1;
 //Info->l = 20.0;
 //Info->l = 45.0;
 //Info->l = 60.0;
@@ -790,7 +799,8 @@ Info->sigma_f = 0.1;
  Info->sigma_b  = 0.0;
  Info->sigma_nu  = 0.0;
  Info->c  = 0.0;
-    if (VERBOSE>0) printf("sigma_f, l, sigma_b, sigma_nu, c  = %g %g %g %g %g\n", Info->sigma_f, Info->l, Info->sigma_b, Info->sigma_nu, Info->c );
+    //if (VERBOSE>0) printf("sigma_f, l, sigma_b, sigma_nu, c  = %g %g %g %g %g\n", Info->sigma_f, Info->l, Info->sigma_b, Info->sigma_nu, Info->c );
+    printf("sigma_f, l, sigma_b, sigma_nu, c  = %g %g %g %g %g\n", Info->sigma_f, Info->l, Info->sigma_b, Info->sigma_nu, Info->c );
 //Info->sigma_f = 10.0;
 //Info->l = 30.0;
     gsl_multimin_fdfminimizer_free( s );
