@@ -48,9 +48,9 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_Vec_RBF.c Lgm_B_Fro
                             W.c Lgm_InitMagEphemInfo.c Lgm_AE8_AP8.c OP77.c OP88.c OlsenPfitzerDynamic.c OlsenPfitzerStatic.c IsoTimeStringToDateTime.c \
 			                size.c Lgm_FluxToPsd.c xvgifwr2.c praxis.c Lgm_SphHarm.c Lgm_McIlwain_L.c Lgm_ElapsedTime.c Lgm_KdTree.c\
 			                Lgm_ComputeLstarVersusPA.c Lgm_MagEphemWrite.c Lgm_MagEphemWriteHdf.c brent.c Lgm_CdipMirrorLat.c ComputeI_FromMltMlat.c ComputeI_FromMltMlat2.c \
-                            Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
+                            Lgm_QinDenton.c Lgm_DiffCoeff_param.c Lgm_AE_index.c Lgm_Misc.c Lgm_HDF5.c Lgm_GradB.c Lgm_GradBvec.c Lgm_GradBvec2.c Lgm_VelStep.c Lgm_Utils.c DynamicMemory.h \
 			                Lgm_Metadata.c  Lgm_PriorityQueue.c TraceToYZPlane.c Lgm_InitNrlMsise00.c Lgm_NrlMsise00.c Lgm_Coulomb.c\
-			                Lgm_Ellipsoid.c Lgm_DipEquator.c Lgm_GradBvec.c Lgm_FirstInvariant.c\
+			                Lgm_Ellipsoid.c Lgm_DipEquator.c Lgm_FirstInvariant.c\
                             Lgm_JPLephem.c  Lgm_Eclipse.c Lgm_TabularBessel.c TA16.c\
                             GPR.c FluxTubeVolume.c
 
