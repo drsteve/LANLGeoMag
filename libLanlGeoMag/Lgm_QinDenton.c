@@ -185,7 +185,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     int         Prev_Year, Prev_Month, Prev_Day, Next_Year, Next_Month, Next_Day;
     int         success1, success2, success3;
     char        *Line, *Filename;
-    static char *ftype[] = {"1min", "1hr" };
+    static char *ftype[] = {"1min", "5min", "hour"};
     char        *Path, QinDentonPath[2048];
     Lgm_CTrans  *c = Lgm_init_ctrans(0);
     char        IsoTimeStr[80];
@@ -214,8 +214,6 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     }
 
 
-    
-
     Lgm_Doy( Date, &Year, &Month, &Day, &Doy);
     MJD = Lgm_MJD( Year, Month, Day, 12.0, LGM_TIME_SYS_UTC, c );
 
@@ -227,17 +225,14 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     Lgm_mjd_to_ymdh( Next_MJD, &Next_Date, &Next_Year, &Next_Month, &Next_Day, &Next_UT );
 
 
-
-
     Filename = (char *)calloc( 512, sizeof(char) );
     Line = (char *)calloc( 2050, sizeof(char) );
     n = 0;
 
 
-
     // Read in Previous Date -- Try 1min first, 1hr next...
     tTime = -1e30;
-    j = 0; done = FALSE; success1 = FALSE;
+    j = 0; done = FALSE; success1 = FALSE;  //start by trying 1 minute QD files
     while ( !done ){
 
         sprintf( Filename, "%s/%4d/QinDenton_%8ld_%s.txt", QinDentonPath, Prev_Year, Prev_Date, ftype[j] );
@@ -248,7 +243,6 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
                                 IsoTimeStr, &tYear, &tMonth, &tDay, &tHour, &tMinute, &tSecond, &ByIMF, &BzIMF, &V_SW, &Den_P, &Pdyn, &G1, &G2, &G3,
                                 &ByIMF_status, &BzIMF_status, &V_SW_status, &Den_P_status, &Pdyn_status, &G1_status, &G2_status, &G3_status,
                                 &fKp, &akp3, &Dst, &Bz1, &Bz2, &Bz3, &Bz4, &Bz5, &Bz6, &W1, &W2, &W3, &W4, &W5, &W6, &W1_status, &W2_status, &W3_status, &W4_status, &W5_status, &W6_status );
-
 
                     if ( nMatches == 44 ) {
 
@@ -316,7 +310,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
             success1 = TRUE;
         } else {
             // only complain if this is our last try.
-            if (j==1) {
+            if (j==2) {
                 if ( Path == NULL ) { //i.e. QIN_DENTON_PATH environment variable not set.
                     printf( "Cannot open %s file. Try setting QIN_DENTON_PATH environment variable to path containing QinDenton files.\n", Filename );
                 } else {
@@ -325,7 +319,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
             }
         }
 
-        if (j == 1) {
+        if (j == 2) {
             done = TRUE;
         } else {
             ++j;
@@ -416,14 +410,16 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
             success2 = TRUE;
         } else {
             // only complain if this is our last try.
-            if ( Path == NULL ) { //i.e. QIN_DENTON_PATH environment variable not set.
-                printf( "Cannot open %s file. Try setting QIN_DENTON_PATH environment variable to path containing QinDenton files.\n", Filename );
-            } else {
-                printf( "Cannot open %s file.\n", Filename );
+            if (j == 2) {
+                if ( Path == NULL ) { //i.e. QIN_DENTON_PATH environment variable not set.
+                    printf( "Cannot open %s file. Try setting QIN_DENTON_PATH environment variable to path containing QinDenton files.\n", Filename );
+                } else {
+                    printf( "Cannot open %s file.\n", Filename );
+                }
             }
         }
 
-        if (j == 1) {
+        if (j == 2) {
             done = TRUE;
         } else {
             ++j;
@@ -511,14 +507,16 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
             success3 = TRUE;
         } else {
             // only complain if this is our last try.
-            if ( Path == NULL ) { //i.e. QIN_DENTON_PATH environment variable not set.
-                printf( "Cannot open %s file. Try setting QIN_DENTON_PATH environment variable to path containing QinDenton files.\n", Filename );
-            } else {
-                printf( "Cannot open %s file.\n", Filename );
+            if (j == 2) {
+                if ( Path == NULL ) { //i.e. QIN_DENTON_PATH environment variable not set.
+                    printf( "Cannot open %s file. Try setting QIN_DENTON_PATH environment variable to path containing QinDenton files.\n", Filename );
+                } else {
+                    printf( "Cannot open %s file.\n", Filename );
+                }
             }
         }
 
-        if (j == 1) {
+        if (j == 2) {
             done = TRUE;
         } else {
             ++j;
@@ -526,12 +524,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
 
     }
 
-
     q->nPnts = n;
-
-
-
-
 
 
     free(Filename);
