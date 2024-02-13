@@ -52,7 +52,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_Vec_RBF.c Lgm_B_Fro
 			                Lgm_Metadata.c  Lgm_PriorityQueue.c TraceToYZPlane.c Lgm_InitNrlMsise00.c Lgm_NrlMsise00.c Lgm_Coulomb.c\
 			                Lgm_Ellipsoid.c Lgm_DipEquator.c Lgm_GradBvec.c\
                             Lgm_JPLephem.c  Lgm_Eclipse.c Lgm_TabularBessel.c TA16.c\
-                            GPR.c
+                            GPR.c FluxTubeVolume.c
 
 
 
