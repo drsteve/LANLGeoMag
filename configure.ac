@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 
-AC_INIT([LanlGeoMag], [1.5.16], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag], [2.0.0-alpha], [mghenderson@lanl.gov])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -237,11 +237,11 @@ AC_ARG_WITH([pythondir],
 AC_SUBST(pythondir)
 
 # Make PERL dependency optional
-AC_ARG_ENABLE([perl], [AS_HELP_STRING([--disable-perl],\
-    [Disables additional PERL functionality in LanlGeoMag])])
-AS_IF([test "x$enableval" != "xno"],
-    [ENABLE_PERL=1],
-    [ENABLE_PERL=0]
+AC_ARG_ENABLE([perl], [AS_HELP_STRING([--enable-perl],\
+    [Enables additional PERL functionality in LanlGeoMag])])
+AS_IF([test "x$enableval" != "xyes"],
+    [ENABLE_PERL=0],
+    [ENABLE_PERL=1]
 )
 
 # Check for PERL if --with-perl specified
