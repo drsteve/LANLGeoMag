@@ -27,7 +27,7 @@ jobs:
     - name: compile_test
       run: |
         autoreconf -i
-        ./configure --disable-perl
+        ./configure
         make
         sudo make install
     - name: unit_tests
