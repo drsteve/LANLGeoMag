@@ -125,6 +125,7 @@ void                Lgm_KdTree_SubDivideVolume( Lgm_KdTreeNode *t, Lgm_KdTree *k
 Lgm_KdTree         *Lgm_KdTree_Init( double **Positions, void **Objects, unsigned long int N, int D ) ;
 Lgm_KdTree         *Lgm_KdTree_CopyLite( Lgm_KdTree *ks );
 void                Lgm_KdTree_FreeLite( Lgm_KdTree *kt );
+void                Lgm_KdTree_Free( Lgm_KdTree *kt );
 
 Lgm_KdTreeNode     *Lgm_CreateKdTreeRoot( int D );
 void                Lgm_FreeKdTreeNode( Lgm_KdTreeNode *Node );
