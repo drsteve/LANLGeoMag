@@ -9,7 +9,6 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include "Lgm_DynamicMemory.h"
-#define H5_NO_DEPRECATED_SYMBOLS
 #include <hdf5.h>
 
 

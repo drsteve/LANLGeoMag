@@ -2783,7 +2783,7 @@ int Lgm_SummersFindCutoffs2( double  (*f)( double, _qpInfo *), _qpInfo *qpInfo, 
  *  	Other paramters are ignored because my Glauert and Horne code only works for electrons, e.g. Sig and Omega_Sig; need to extend the code
  *  	to handle protons in addition to electrons.
  */
-
+/*
 double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAlpha2, double E, double dBoverB2, double BoverBeq, 
         double Omega_e, double Omega_Sig, double Rho, double Sig, double wxl, double wxh, double wxm, double wdx, double xmin, double xmax, 
         int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, 
@@ -2801,7 +2801,7 @@ double Lgm_GlauertAndHorneHighFrequencyDiffusionCoefficients_Local( double SinAl
 //printf("                       :number of wave normal angle distributions to sum together is %d, with the following parameters (xm, dx, weight)\n", numberOfWaveNormalAngleDistributions);
 //for (i=0; i<numberOfWaveNormalAngleDistributions; i++) {printf("                      %g %g %g\n", xmArray[i], dxArray[i], weightsOnWaveNormalAngleDistributions[i]);}
 
-/*	Convert from 'Summers' parameters to 'Glauert and Horne' parameters  */
+//	Convert from 'Summers' parameters to 'Glauert and Horne' parameters  
 	if ((SinAlpha2>=0.0) && (SinAlpha2<=1.0)) {alpha = asin(sqrt(SinAlpha2));}//FIXME: this means we can only handle particles with parallel momentum in the same direction as the field
 	if (Lambda == -1) {KE = E*LGM_Ee0; s=-1;}				  // Lambda is set to -1 for electrons in Lgm_SummersDxxBounceAvg
 	if (Lambda == LGM_EPS) {KE = E*LGM_Ep0; s=1;} 				  // Lambda is set to LGM_ESP for protons in Lgm_SummersDxxBounceAvg
@@ -2818,8 +2818,8 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 	if (indexIntoNormalizer>nPlasmaParameters-1) {indexIntoNormalizer=nPlasmaParameters-1;}
 	Nw=Nwglobal+(nNw*indexIntoNormalizer);
  
-/*	Need to insert Jay's test here and expand it to include the other ranges of wn (not just wn<wlc, which is what I have now).  May need to change how integration is done. */
-/*	Perform the integration over theta: currently done naively, need to port to GSL? */
+//	Need to insert Jay's test here and expand it to include the other ranges of wn (not just wn<wlc, which is what I have now).  May need to change how integration is done. 
+//	Perform the integration over theta: currently done naively, need to port to GSL? 
 	struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams p2;
 	p2.tensorFlag=(int) tensorFlag; p2.s=(int) s; p2.KE=(double) KE; p2.aStar=(double) aStar; p2.wce=(double) wce; 
 	p2.wm=(double) wm; p2.dw=(double) dw; p2.wlc=(double) wlc; p2.wuc=(double) wuc; p2.xmin=(double) xmin; p2.xmax=(double) xmax; 
@@ -2836,14 +2836,14 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 
  		p2.nCyclotronLow=(int) i; p2.nCyclotronHigh=(int) i; 
 //printf("iCyclotron number=%d\n", i);
-/*		
- *		wn	doppler shift, s*n*wce/gamma, normalized by the gyrofrequency, wce, to give s*n/gamma
- *		wlc	lower cutoff frequency normalized by the gyrofrequency
- *		wuc	uppper cutoff frequency normalized by the gyrofrequency
- *		aStar	the squared ratio of the electron gyrofrequency to the plasma frequency, wpe
- *		mode	FIXME: should be =1 for R-mode, =-1 for L-mode but p2.x is -1, which is opposite what it should be. need to iron this out.
- *		vpar	the parallel velocity divided by the speed of light
- */
+//		
+//		wn	doppler shift, s*n*wce/gamma, normalized by the gyrofrequency, wce, to give s*n/gamma
+//		wlc	lower cutoff frequency normalized by the gyrofrequency
+//		wuc	uppper cutoff frequency normalized by the gyrofrequency
+//		aStar	the squared ratio of the electron gyrofrequency to the plasma frequency, wpe
+//		mode	FIXME: should be =1 for R-mode, =-1 for L-mode but p2.x is -1, which is opposite what it should be. need to iron this out.
+//		vpar	the parallel velocity divided by the speed of light
+///
 		double wn;
 
 		wn = (p2.s)*i/gamma;
@@ -2873,6 +2873,7 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
     }
 	return(totalDaa);
 }
+*/
 
 // these long names are pretty excessive -- it makes the code structure less readable
 double localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta( double tanTheta, struct localDiffusionCoefficientAtSpecificThetaGlauertAndHorneFunctionParams *p2 ) {
@@ -3976,6 +3977,8 @@ int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double 
 	*result = sum;
 */
 
+	
+
 /* 	Approach #2: use GSL's implementation of the simple quadpack routine qng (non-adaptive Gauss-Kronrod quadrature) to do the integral 
 	gsl_function F;
 	F.function = f;
@@ -3988,7 +3991,7 @@ int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double 
 	nSubIntervals = 20;  
 	gsl_integration_workspace * w =gsl_integration_workspace_alloc( nSubIntervals );
 	gsl_function F;
-	F.function = f;
+	F.function = (double (*)(double,void *)) f;
 	F.params = args;
 	*result=0.0;
 /*	Turn GSL's default error handling (which aborts upon seeing an error) off so that I can handle the error by dumping out the values */
