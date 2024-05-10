@@ -116,7 +116,8 @@ void Lgm_ReadJPLephem( Lgm_JPLephemInfo *jpl ) {
 
     InFileExists = ( (StatError = stat( JPLephemFile, &StatBuf )) != -1 ) ? TRUE : FALSE;
 
-    if ( ( InFileExists ) && ( H5Fis_hdf5( JPLephemFile ) )) {
+    if ( ( InFileExists ) && ( H5Fis_hdf5( JPLephemFile ) )) {  //TODO: H5Fis_hdf5 deprecated in v1.12
+	                                                        //Replacement is H5Fis_accessible, requires 1.12
 
         // Read HDF5 file here
         file = H5Fopen( JPLephemFile, H5F_ACC_RDONLY, H5P_DEFAULT );
