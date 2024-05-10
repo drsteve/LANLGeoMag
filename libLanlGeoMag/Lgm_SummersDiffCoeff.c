@@ -2858,12 +2858,12 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 				tempxmax = tan(thetaEnd[0]); if (tempxmax > xmax) { tempxmax = xmax; }
 
 				if (tempxmax>tempxmin) {
-					j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, &tempDaa, (int) 0);
+					j = Lgm_SimpleRiemannSum( (double (*)(double, int*))localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, &tempDaa, (int) 0);
 			    }
 
 	        } else {
 
-				j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta, (_qpInfo *) &p2,(double) xmin,(double) xmax, &tempDaa, (int) 0);
+				j = Lgm_SimpleRiemannSum( (double (*)(double, int*))localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta, (_qpInfo *) &p2,(double) xmin,(double) xmax, &tempDaa, (int) 0);
 
             }
 
@@ -3988,7 +3988,7 @@ int Lgm_SimpleRiemannSum( double (*f)(double, _qpInfo *), _qpInfo *args, double 
 	nSubIntervals = 20;  
 	gsl_integration_workspace * w =gsl_integration_workspace_alloc( nSubIntervals );
 	gsl_function F;
-	F.function = f;
+	F.function = (double (*)(double, void*)) f;
 	F.params = args;
 	*result=0.0;
 /*	Turn GSL's default error handling (which aborts upon seeing an error) off so that I can handle the error by dumping out the values */
