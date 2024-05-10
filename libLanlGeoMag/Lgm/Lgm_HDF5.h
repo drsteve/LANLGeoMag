@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include "Lgm_DynamicMemory.h"
-#define H5_NO_DEPRECATED_SYMBOLS
+//#define H5_NO_DEPRECATED_SYMBOLS
 #include <hdf5.h>
 
 
@@ -29,7 +29,7 @@
     SlabSize[0] = 1;\
     \
     DataSet   = H5Dopen( File, DataSetName, H5P_DEFAULT );\
-    status    = H5Dextend( DataSet, &NewSize[0] );\
+    status    = H5Dset_extent( DataSet, &NewSize[0] );\
     \
     DataSpace = H5Dget_space( DataSet );\
     status    = H5Sselect_hyperslab( DataSpace, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );\
@@ -56,7 +56,7 @@
     SlabSize[0] = 1;       SlabSize[1] = nCol;\
     \
     DataSet   = H5Dopen( File, DataSetName, H5P_DEFAULT );\
-    status    = H5Dextend( DataSet, &NewSize[0] );\
+    status    = H5Dset_extent( DataSet, &NewSize[0] );\
     \
     DataSpace = H5Dget_space( DataSet );\
     status    = H5Sselect_hyperslab( DataSpace, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );\
@@ -84,7 +84,7 @@
     SlabSize[0] = 1;       SlabSize[1] = nCol;      SlabSize[2] = nDepth;\
     \
     DataSet   = H5Dopen( File, DataSetName, H5P_DEFAULT );\
-    status    = H5Dextend( DataSet, &NewSize[0] );\
+    status    = H5Dset_extent( DataSet, &NewSize[0] );\
     \
     DataSpace = H5Dget_space( DataSet );\
     status    = H5Sselect_hyperslab( DataSpace, H5S_SELECT_SET, Offset, NULL, SlabSize, NULL );\
