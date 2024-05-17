@@ -409,7 +409,8 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
       R = R*(Nlat-0.5+M_PI/4.0)/(Nlat-0.5-M_PI/4.0);  // Increment R by a fixed factor
       if (R > RHighGrid) break;                       // RBF centers only inside R=RHIGH
     }  // End loop over J
-  Info->SetupDone = TRUE ;
+    Info->SetupDone = TRUE ;
+    return(1);
 }
 
 
