@@ -51,6 +51,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     double          sa, sa2, Blocal;
     double          Lam, CosLam, LSimple;
     int             i, k, LS_Flag, nn, tk, TraceFlag;
+    int             nShabII, nShabI;
     char            *PreStr, *PostStr;
 
     LstarInfo = MagEphemInfo->LstarInfo;
@@ -149,7 +150,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
              *  set private here -- the threads must not interfere with each other.
              */
 #if USE_OPENMP
-            #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk,PreStr,PostStr)
+            #pragma omp parallel private(LstarInfo2,LstarInfo3,sa,sa2,LS_Flag,nn,tk,PreStr,PostStr,nShabII,nShabI)
             #pragma omp for schedule(dynamic, 1)
 #endif
             for ( i=0; i<MagEphemInfo->nAlpha; i++ ){  // LOOP OVER PITCH ANGLES
@@ -202,19 +203,48 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     MagEphemInfo->I[i]  = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
                     MagEphemInfo->K[i]  = LstarInfo2->I[0]*sqrt(MagEphemInfo->Bm[i]*1e-5); // Second invariant
                     MagEphemInfo->Sb[i] = LstarInfo2->SbIntegral0; // SbIntegral0 is Sb for the FL that the sat is on.
+
+
                     /*
                      *  Determine the type of the orbit
                      */
+                    nShabII = nShabI = 0;
                     if ( LS_Flag >= 0 )  {
+
                         LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
-                        for ( k=0; k<LstarInfo2->nMinMax; ++k ) {
-                            if ( LstarInfo2->nMinima[k] > 1 ) LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY;
+                        for ( nn=0; nn<LstarInfo2->nPnts; ++nn ) {
+                            if  ( LstarInfo2->nMinima[nn] > 1 ) {
+                                if ( LstarInfo2->nBounceRegions[nn] > 1 ) {
+                                    nShabII++;
+                                } else {
+                                    nShabI++;
+                                }
+                            }
                         }
+                        if (nShabII > 0) {
+                            LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_II;
+                        } else if (nShabI > 0) {
+                            LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED_SHABANSKY_I;
+                        }
+
                     } else {
-                        LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN;
-                        for ( k=0; k<LstarInfo2->nMinMax; ++k ) {
-                            if ( LstarInfo2->nMinima[k] > 1 ) LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY;
+
+                        LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;
+                        for ( nn=0; nn<LstarInfo2->nPnts; ++nn ) {
+                            if  ( LstarInfo2->nMinima[nn] > 1 ) {
+                                if ( LstarInfo2->nBounceRegions[nn] > 1 ) {
+                                    nShabII++;
+                                } else {
+                                    nShabI++;
+                                }
+                            }
                         }
+                        if (nShabII > 0) {
+                            LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_II;
+                        } else if (nShabI > 0) {
+                            LstarInfo2->DriftOrbitType = LGM_DRIFT_ORBIT_OPEN_SHABANSKY_I;
+                        }
+
                     }
                     MagEphemInfo->DriftOrbitType[i] = LstarInfo2->DriftOrbitType;
 
@@ -232,12 +262,18 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                      */
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
+
+                        // This Pmin does not seem to be the right one when we have Shabansky
                         MagEphemInfo->Shell_Pmin[i][nn]  = LstarInfo2->Pmin[nn];
+
                         MagEphemInfo->Shell_Bmin[i][nn]  = LstarInfo2->Bmin[nn];
                         MagEphemInfo->Shell_GradI[i][nn] = LstarInfo2->GradI[nn];
                         MagEphemInfo->Shell_Vgc[i][nn]   = LstarInfo2->Vgc[nn];
 
-                        MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
+
+// This does really capture the I/2 bit?
+MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
+MagEphemInfo->nBounceRegions[i][nn] = LstarInfo2->nBounceRegions[nn];
 
                         MagEphemInfo->ShellSphericalFootprint_Pn[i][nn] = LstarInfo2->Spherical_Footprint_Pn[nn];
                         MagEphemInfo->ShellSphericalFootprint_Sn[i][nn] = LstarInfo2->Spherical_Footprint_Sn[nn];
