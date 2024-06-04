@@ -1,32 +1,3 @@
-2020-04-25  Mark Galassi  <markgalassi@lanl.gov>
-
-	* libLanlGeoMag/Makefile.am (pkgconfigdir): chaged from
-	$(prefix)/lib/pkgconfig to $(prefix)/share/pkgconfig.
-
-	* Makefile.am (DEBIAN_EXTRA_DIST, EXTRA_DIST): added debian
-	distribution files.
-
-2020-03-30  Mark Galassi  <mark@galassi.org>
-
-	* libLanlGeoMag/Makefile.am (pkgconfigdir): changed to be
-	$(prefix)/lib/pkgconfig since libdir is sometimes set (for example
-	during debian builds) to $(prefix)/lib/x86_64_bla_bla/ and this is
-	not OK for the pkgconfig file lgm.pc
-
-	* Makefile.am (EXTRA_DIST): added README.md -- with this last
-	touch "make distcheck" works!
-
-	* libLanlGeoMag/Makefile.am (uninstall-hook): fixed permissions so
-	that we can correctly remove these files.
-
-	* configure.ac: made the default to disable perl so that one can
-	use make distcheck.
-
-	* configure.ac, Makefile.am: adjusted the way doxygen is handled
-	so that "make dist" works (it was broken before).  Also added a
-	rule to make README from README.md so that the GNU coding
-	standards are satisfied.
-
 2019-11-05  Mark Galassi  <mark@galassi.org>
 
 	* libLanlGeoMag/Makefile.am: took out again the Images/ directory
@@ -63,35 +34,6 @@
 	* libLanlGeoMag/Makefile.am (EXTRA_DIST): took the Images
 	directory out of this list because it makes the tarball
 	distribution too big.
-
-2018-03-09  Steve Morley <smorley@lanl.gov>
-        * Release: v1.5.16
-
-        * tests: revised and expanded test suite, github repo set to use Travis
-        CI
-
-        * Lgm_QinDenton: updated defaults, changed handling of missing data
-        files
-
-        * Lgm_Ellipsoid: added shapes, intersections, etc.
-
-        * Tools: Command line utils for Magnetic Ephemeris files and Last 
-        Closed Drift Shell calculation
-
-        * ViewDriftShell: Updates to improve portability and UI
-
-        * ComputeLstar: Behavior in Shabansky orbits now set by flag in 
-        LstarInfo struct
-
-        * Lgm_CTrans: Added JPL DE421 to obtain Sun vector (now have DE, high 
-        accuracy and low accuracy)
-
-        * TS07: TS07 magnetic field model fully enabled. Requires coefficient
-        files in same location/format as IRBEMlib.
-
-        * Other: More changes since this file was last updated than can be 
-        encapsulated here. OSS release and GitHub hosting means that commit 
-        history is now publicly available.
 
 2011-07-08  Mike Henderson <mghenderson@lanl.gov>
 	* configure.ac: added LGM_INDEX_DATA_DIR to locate where to find

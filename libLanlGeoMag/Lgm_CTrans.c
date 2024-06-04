@@ -944,7 +944,7 @@ void Lgm_Set_Coord_Transforms( long int date, double UTC, Lgm_CTrans *c ) {
 	printf("\n");
 	printf("IGRF-derived quantities:\n");
         printf("    M_cd              = %.10lf nT\n", c->M_cd);
-        printf("    M_cd_McIlwain    = %.10lf nT\n", c->M_cd_McIlwain);
+        printf("    M_cd_McIllwain    = %.10lf nT\n", c->M_cd_McIllwain);
         printf("    M_cd_2010         = %.10lf nT\n", c->M_cd_2010);
         printf("    CD_gcolat         = %lf (deg.)  ( ", c->CD_gcolat); Lgm_Print_DMSd( c->CD_gcolat ); printf(" )\n");
         printf("    CD_glon           = %lf (deg.)  ( ", c->CD_glon);   Lgm_Print_DMSd( c->CD_glon ); printf(" )\n");

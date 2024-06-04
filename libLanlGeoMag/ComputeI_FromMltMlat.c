@@ -52,7 +52,7 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
          *  Couldnt get a valid Bm. (The bracket is pretty huge,so
          *  we probably ought to believe there really isnt a valid one.)
          */
-        if (LstarInfo->VerbosityLevel > 1) printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
+        if (LstarInfo->VerbosityLevel > 0) printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
         I = 9e99;
 
     } else {
@@ -136,6 +136,7 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
                 sgn = 1.0;
             } else {
                 // we are probably very close to Pmin. So I=0.
+//printf("DFSsssssssssssssssssssssssS\n");
                 LstarInfo->mInfo->Pm_North = Pmirror1;
                 LstarInfo->mInfo->Pm_South = Pmirror1;
                 return( 0.0 );

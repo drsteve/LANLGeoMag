@@ -1,4 +1,7 @@
 %define debug_package %{nil}
+%global __python /usr/bin/python3
+%global clamp_mtime_to_source_date_epoch 0
+%global source_date_epoch_from_changelog 0
 
 %define name		@PACKAGE@
 %define version 	@VERSION@
@@ -16,22 +19,11 @@ Provides:               lanlgeomag
 #Requires:               perl
 Requires:               check
 Requires:               gsl
-Requires:               hdf5
 Source: 		%{name}-%{version}.tar.gz
 Group: 			Applications/Science
 Provides:		lanlgeomag
 Buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
 buildroot: %{_topdir}/BUILDROOT/%{name}-%{version}-%{release}.%{_arch}
-
-# # python main version
-# %define py_ver         %(echo `python -c "import sys; sys.stdout.write(sys.version[:3])"`)
-
-# # directories
-# %define py_prefix      %(echo `python -c "import sys; sys.stdout.write(sys.prefix)"`)
-# %define py_libdir      %{py_prefix}/lib/python%{py_ver}
-# # %define py_incdir      /usr/include/python%{py_ver}
-# # %define py_sitedir     %{py_libdir}/site-packages
-# # %define py_dyndir      %{py_libdir}/lib-dynload
 
 %description
 LANLGeoMag is a C-based library of magnetic-field models and tools for \
@@ -75,12 +67,18 @@ Python bindings for lanlgeomag
 # Image files for lanlgeomag
 
 %prep
+mkdir -p %{_topdir}/BUILD %{_topdir}/BUILDROOT
+echo "name is" "%{name}"
+echo "version is" "%{version}"
+echo "_isa is" "%{_isa}"
+echo "_arch is" "%{_arch}"
+echo "__isa_name is" "%{__isa_name}"
+echo "__isa_bits is" "%{__isa_bits}"
 %setup -q
 
 %build
 echo "python_sitelib:"
 echo %{python_sitelib}
-#configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl --without-python
 %configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
 make %{?_smp_mflags}
 
@@ -97,10 +95,7 @@ make %{?_smp_mflags}
 %{_libdir}/*.so.*
 %{_libdir}/pkgconfig/lgm.pc
 
-<<<<<<< HEAD
-=======
 
->>>>>>> edf9e734890fa771335b29f4e91321c0a80d3655
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*
@@ -110,21 +105,6 @@ make %{?_smp_mflags}
 
 %files data
 %defattr(-,root,root,-)
-<<<<<<< HEAD
-/usr/share/LanlGeoMag/EopData/*
-/usr/share/LanlGeoMag/Data/*
-
-%files python
-%defattr(-,root,root,-)
-
-/usr/lib/python%{py_ver}/*
-
-
-# %files images
-# %defattr(-,root,root,-)
-# /usr/share/LanlGeoMag/Images/*
-# /usr/share/LanlGeoMag/Stars/*
-=======
 %{_datadir}/*
 # /usr/share/LanlGeoMag/EopData/*
 # /usr/share/LanlGeoMag/Data/*
@@ -144,4 +124,3 @@ make %{?_smp_mflags}
 #{_libdir}/pkgconfig/lgm.pc
 #/usr/lib/python2.6/site-packages/lgmpy/*
 #{_datadir}/*
->>>>>>> edf9e734890fa771335b29f4e91321c0a80d3655

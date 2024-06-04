@@ -18,13 +18,13 @@ class Bfield_dictTests(unittest.TestCase):
 
     def test_length(self):
         """the _Bfield_dict dist should have known length"""
-        self.assertEqual(len(_Bfield_dict.Bfield_dict), 8)
+        self.assertEqual(len(_Bfield_dict.Bfield_dict), 7)
 
     def test_keys(self):
         """the _Bfield_dict dist should have known keys"""
-        keys = ['Lgm_B_OP77', 'Lgm_B_edip', 'Lgm_B_T89', 'Lgm_B_T89c', 'Lgm_B_cdip', 'Lgm_B_T96', 'Lgm_B_Dungey', 'Lgm_B_T01S']
-        self.assertEqual(
-            sorted(keys), sorted(_Bfield_dict.Bfield_dict.keys()))
+        keys = ['Lgm_B_OP77', 'Lgm_B_edip', 'Lgm_B_T89', 'Lgm_B_T89c', 'Lgm_B_cdip', 'Lgm_B_T96', 'Lgm_B_Dungey']
+        for val in keys:
+            self.assertTrue(val in _Bfield_dict.Bfield_dict)
 
 
 if __name__ == '__main__':

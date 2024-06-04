@@ -1,14 +1,14 @@
 '''Wrapper for demolib.h
 
 Generated with:
-../run.py -o pydemolib.py -l demolib.so demolib.h
+../ctypesgen.py -o pydemolib.py -l demolib.so demolib.h
 
 Do not modify this file.
 '''
 
 __docformat__ =  'restructuredtext'
 
-# Begin preamble for Python v(3, 6)
+# Begin preamble
 
 import ctypes, os, sys
 from ctypes import *
@@ -25,21 +25,41 @@ for t in _int_types:
 del t
 del _int_types
 
+class c_void(Structure):
+    # c_void_p is a buggy return type, converting to int, so
+    # POINTER(None) == c_void_p is actually written as
+    # POINTER(c_void), so it can be treated as a real pointer.
+    _fields_ = [('dummy', c_int)]
+
+def POINTER(obj):
+    p = ctypes.POINTER(obj)
+
+    # Convert None to a real NULL pointer to work around bugs
+    # in how ctypes handles None on 64-bit platforms
+    if not isinstance(p.from_param, classmethod):
+        def from_param(cls, x):
+            if x is None:
+                return cls()
+            else:
+                return x
+        p.from_param = classmethod(from_param)
+
+    return p
+
 class UserString:
     def __init__(self, seq):
-        if isinstance(seq, bytes):
+        if isinstance(seq, basestring):
             self.data = seq
         elif isinstance(seq, UserString):
             self.data = seq.data[:]
         else:
-            self.data = str(seq).encode()
-    def __bytes__(self): return self.data
-    def __str__(self): return self.data.decode()
+            self.data = str(seq)
+    def __str__(self): return str(self.data)
     def __repr__(self): return repr(self.data)
-    def __int__(self): return int(self.data.decode())
-    def __long__(self): return int(self.data.decode())
-    def __float__(self): return float(self.data.decode())
-    def __complex__(self): return complex(self.data.decode())
+    def __int__(self): return int(self.data)
+    def __long__(self): return long(self.data)
+    def __float__(self): return float(self.data)
+    def __complex__(self): return complex(self.data)
     def __hash__(self): return hash(self.data)
 
     def __cmp__(self, string):
@@ -47,37 +67,6 @@ class UserString:
             return cmp(self.data, string.data)
         else:
             return cmp(self.data, string)
-    def __le__(self, string):
-        if isinstance(string, UserString):
-            return self.data <= string.data
-        else:
-            return self.data <= string
-    def __lt__(self, string):
-        if isinstance(string, UserString):
-            return self.data < string.data
-        else:
-            return self.data < string
-    def __ge__(self, string):
-        if isinstance(string, UserString):
-            return self.data >= string.data
-        else:
-            return self.data >= string
-    def __gt__(self, string):
-        if isinstance(string, UserString):
-            return self.data > string.data
-        else:
-            return self.data > string
-    def __eq__(self, string):
-        if isinstance(string, UserString):
-            return self.data == string.data
-        else:
-            return self.data == string
-    def __ne__(self, string):
-        if isinstance(string, UserString):
-            return self.data != string.data
-        else:
-            return self.data != string
-
     def __contains__(self, char):
         return char in self.data
 
@@ -90,15 +79,15 @@ class UserString:
     def __add__(self, other):
         if isinstance(other, UserString):
             return self.__class__(self.data + other.data)
-        elif isinstance(other, bytes):
+        elif isinstance(other, basestring):
             return self.__class__(self.data + other)
         else:
-            return self.__class__(self.data + str(other).encode())
+            return self.__class__(self.data + str(other))
     def __radd__(self, other):
-        if isinstance(other, bytes):
+        if isinstance(other, basestring):
             return self.__class__(other + self.data)
         else:
-            return self.__class__(str(other).encode() + self.data)
+            return self.__class__(str(other) + self.data)
     def __mul__(self, n):
         return self.__class__(self.data*n)
     __rmul__ = __mul__
@@ -109,7 +98,7 @@ class UserString:
     def capitalize(self): return self.__class__(self.data.capitalize())
     def center(self, width, *args):
         return self.__class__(self.data.center(width, *args))
-    def count(self, sub, start=0, end=sys.maxsize):
+    def count(self, sub, start=0, end=sys.maxint):
         return self.data.count(sub, start, end)
     def decode(self, encoding=None, errors=None): # XXX improve this?
         if encoding:
@@ -127,13 +116,13 @@ class UserString:
                 return self.__class__(self.data.encode(encoding))
         else:
             return self.__class__(self.data.encode())
-    def endswith(self, suffix, start=0, end=sys.maxsize):
+    def endswith(self, suffix, start=0, end=sys.maxint):
         return self.data.endswith(suffix, start, end)
     def expandtabs(self, tabsize=8):
         return self.__class__(self.data.expandtabs(tabsize))
-    def find(self, sub, start=0, end=sys.maxsize):
+    def find(self, sub, start=0, end=sys.maxint):
         return self.data.find(sub, start, end)
-    def index(self, sub, start=0, end=sys.maxsize):
+    def index(self, sub, start=0, end=sys.maxint):
         return self.data.index(sub, start, end)
     def isalpha(self): return self.data.isalpha()
     def isalnum(self): return self.data.isalnum()
@@ -153,9 +142,9 @@ class UserString:
         return self.data.partition(sep)
     def replace(self, old, new, maxsplit=-1):
         return self.__class__(self.data.replace(old, new, maxsplit))
-    def rfind(self, sub, start=0, end=sys.maxsize):
+    def rfind(self, sub, start=0, end=sys.maxint):
         return self.data.rfind(sub, start, end)
-    def rindex(self, sub, start=0, end=sys.maxsize):
+    def rindex(self, sub, start=0, end=sys.maxint):
         return self.data.rindex(sub, start, end)
     def rjust(self, width, *args):
         return self.__class__(self.data.rjust(width, *args))
@@ -167,7 +156,7 @@ class UserString:
     def rsplit(self, sep=None, maxsplit=-1):
         return self.data.rsplit(sep, maxsplit)
     def splitlines(self, keepends=0): return self.data.splitlines(keepends)
-    def startswith(self, prefix, start=0, end=sys.maxsize):
+    def startswith(self, prefix, start=0, end=sys.maxint):
         return self.data.startswith(prefix, start, end)
     def strip(self, chars=None): return self.__class__(self.data.strip(chars))
     def swapcase(self): return self.__class__(self.data.swapcase())
@@ -210,10 +199,10 @@ class MutableString(UserString):
         start = max(start, 0); end = max(end, 0)
         if isinstance(sub, UserString):
             self.data = self.data[:start]+sub.data+self.data[end:]
-        elif isinstance(sub, bytes):
+        elif isinstance(sub, basestring):
             self.data = self.data[:start]+sub+self.data[end:]
         else:
-            self.data =  self.data[:start]+str(sub).encode()+self.data[end:]
+            self.data =  self.data[:start]+str(sub)+self.data[end:]
     def __delslice__(self, start, end):
         start = max(start, 0); end = max(end, 0)
         self.data = self.data[:start] + self.data[end:]
@@ -222,10 +211,10 @@ class MutableString(UserString):
     def __iadd__(self, other):
         if isinstance(other, UserString):
             self.data += other.data
-        elif isinstance(other, bytes):
+        elif isinstance(other, basestring):
             self.data += other
         else:
-            self.data += str(other).encode()
+            self.data += str(other)
         return self
     def __imul__(self, n):
         self.data *= n
@@ -237,8 +226,8 @@ class String(MutableString, Union):
                 ('data', c_char_p)]
 
     def __init__(self, obj=""):
-        if isinstance(obj, (bytes, UserString)):
-            self.data = bytes(obj)
+        if isinstance(obj, (str, unicode, UserString)):
+            self.data = str(obj)
         else:
             self.raw = obj
 
@@ -254,13 +243,9 @@ class String(MutableString, Union):
         elif isinstance(obj, String):
             return obj
 
-        # Convert from bytes
-        elif isinstance(obj, bytes):
-            return cls(obj)
-
         # Convert from str
         elif isinstance(obj, str):
-            return cls(obj.encode())
+            return cls(obj)
 
         # Convert from c_char_p
         elif isinstance(obj, c_char_p):
@@ -273,10 +258,6 @@ class String(MutableString, Union):
         # Convert from raw pointer
         elif isinstance(obj, int):
             return cls(cast(obj, POINTER(c_char)))
-
-        # Convert from c_char array
-        elif isinstance(obj, c_char*len(obj)):
-            return obj
 
         # Convert from object
         else:
@@ -294,7 +275,7 @@ def ReturnString(obj, func=None, arguments=None):
 # Non-primitive return values wrapped with UNCHECKED won't be
 # typechecked, and will be converted to c_void_p.
 def UNCHECKED(type):
-    if (hasattr(type, "_type_") and isinstance(type._type_, bytes)
+    if (hasattr(type, "_type_") and isinstance(type._type_, str)
         and type._type_ != "P"):
         return type
     else:
@@ -303,12 +284,10 @@ def UNCHECKED(type):
 # ctypes doesn't have direct support for variadic functions, so we have to write
 # our own wrapper class
 class _variadic_function(object):
-    def __init__(self,func,restype,argtypes,errcheck):
+    def __init__(self,func,restype,argtypes):
         self.func=func
         self.func.restype=restype
         self.argtypes=argtypes
-        if errcheck:
-          self.func.errcheck = errcheck
     def _as_parameter_(self):
         # So we can pass this variadic function as a function pointer
         return self.func
@@ -363,7 +342,6 @@ _libdirs = []
 # ----------------------------------------------------------------------------
 
 import os.path, re, sys, glob
-import platform
 import ctypes
 import ctypes.util
 
@@ -398,7 +376,7 @@ class LibraryLoader(object):
                 return ctypes.CDLL(path, ctypes.RTLD_GLOBAL)
             else:
                 return ctypes.cdll.LoadLibrary(path)
-        except OSError as e:
+        except OSError,e:
             raise ImportError(e)
 
     def getpaths(self,libname):
@@ -495,26 +473,10 @@ class PosixLibraryLoader(LibraryLoader):
         directories.append(".")
         directories.append(os.path.dirname(__file__))
 
-        try:
-            with open('/etc/ld.so.conf') as f:
-                directories.extend([dir.strip() for dir in f])
+        try: directories.extend([dir.strip() for dir in open('/etc/ld.so.conf')])
         except IOError: pass
 
-        unix_lib_dirs_list = ['/lib', '/usr/lib', '/lib64', '/usr/lib64']
-        if sys.platform.startswith('linux'):
-            # Try and support multiarch work in Ubuntu
-            # https://wiki.ubuntu.com/MultiarchSpec
-            bitage = platform.architecture()[0]
-            if bitage.startswith('32'):
-                # Assume Intel/AMD x86 compat
-                unix_lib_dirs_list += ['/lib/i386-linux-gnu', '/usr/lib/i386-linux-gnu']
-            elif bitage.startswith('64'):
-                # Assume Intel/AMD x86 compat
-                unix_lib_dirs_list += ['/lib/x86_64-linux-gnu', '/usr/lib/x86_64-linux-gnu']
-            else:
-                # guess...
-                unix_lib_dirs_list += glob.glob('/lib/*linux-gnu')
-        directories.extend(unix_lib_dirs_list)
+        directories.extend(['/lib', '/usr/lib', '/lib64', '/usr/lib64'])
 
         cache = {}
         lib_re = re.compile(r'lib(.*)\.s[ol]')
@@ -615,16 +577,7 @@ loaderclass = {
 loader = loaderclass.get(sys.platform, PosixLibraryLoader)()
 
 def add_library_search_dirs(other_dirs):
-    """
-    Add libraries to search paths.
-    If library paths are relative, convert them to absolute with respect to this
-    file's directory
-    """
-    THIS_DIR = os.path.dirname(__file__)
-    for F in other_dirs:
-        if not os.path.isabs(F):
-            F = os.path.abspath(os.path.join(THIS_DIR,F))
-        loader.other_dirs.append(F)
+    loader.other_dirs = other_dirs
 
 load_library = loader.load_library
 
@@ -635,6 +588,7 @@ del loaderclass
 add_library_search_dirs([])
 
 # Begin libraries
+
 _libs["demolib.so"] = load_library("demolib.so")
 
 # 1 libraries
@@ -642,7 +596,7 @@ _libs["demolib.so"] = load_library("demolib.so")
 
 # No modules
 
-# /home/olsonse/src/ctypesgen/demo/demolib.h: 6
+# /home/clach04/dev/python/ctypesgen/demo/demolib.h: 6
 if hasattr(_libs['demolib.so'], 'trivial_add'):
     trivial_add = _libs['demolib.so'].trivial_add
     trivial_add.argtypes = [c_int, c_int]

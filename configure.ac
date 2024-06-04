@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([LanlGeoMag], [1.5.16], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag], [1.5.17], [mghenderson@lanl.gov])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -17,7 +17,7 @@ AC_PROG_MKDIR_P
 AC_PROG_LIBTOOL
 #LT_INIT
 
-PKG_INSTALLDIR
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.h math.h])
@@ -36,7 +36,7 @@ AC_LANG([C])
 AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory where Eop data can be found])
 AC_DEFINE([LGM_INDEX_DATA_DIR],[(DATADIR "/LanlGeoMag/Data")],[Define directory where Geophysical Index Data (e.g. Kp, AE, Dst, etc. data can be found])
 AC_DEFINE([LGM_TS07_DATA_DIR],[(DATADIR "/LanlGeoMag/Data/TS07D_FILES")],[Define directory where TS07 data files are located])
-#AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE
 
 
 
@@ -49,14 +49,10 @@ DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(OFF)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(OFF)
+DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(LanlGeoMag, Doxyfile, Doc)
 
-dnl we need an overall test of whether doxyen was enabled in the first
-dnl place
-AC_DEFUN([DX_TEST_OVERALL], [test "DX_DOXYGEN_FEATURE" = 1])
-AM_CONDITIONAL(DX_OVERALL, DX_TEST_OVERALL])
 
 AM_CONDITIONAL(LINUX, [test -n "`echo ${host_os} | grep -i linux`"])
 AM_CONDITIONAL(APPLE, [test -n "`echo ${host_os} | grep -i apple`"])
@@ -240,11 +236,11 @@ AC_ARG_WITH([pythondir],
 AC_SUBST(pythondir)
 
 # Make PERL dependency optional
-AC_ARG_ENABLE([perl], [AS_HELP_STRING([--enable-perl],\
-    [Enables additional PERL functionality in LanlGeoMag])])
-AS_IF([test "x$enableval" != "xyes"],
-    [ENABLE_PERL=0],
-    [ENABLE_PERL=1]
+AC_ARG_ENABLE([perl], [AS_HELP_STRING([--disable-perl],\
+    [Disables additional PERL functionality in LanlGeoMag])])
+AS_IF([test "x$enableval" != "xno"],
+    [ENABLE_PERL=1],
+    [ENABLE_PERL=0]
 )
 
 # Check for PERL if --with-perl specified
@@ -267,8 +263,8 @@ if test x"${HAVE_PERL}" == x"true"; then
    PERL_RPATH=`echo ${PERL_LDFLAGS} | ${SED} 's;.*\(\-Wl,\-rpath[[^ ]]*\).*;\1;'`
 fi
 
-HDF5_LDFLAGS=`pkg-config --libs hdf5 2>/dev/null`
-HDF5_CFLAGS=`pkg-config --cflags hdf5 2>/dev/null`
+HDF5_LDFLAGS=`pkg-config --libs dio_hdf5 2>/dev/null`
+HDF5_CFLAGS=`pkg-config --cflags dio_hdf5 2>/dev/null`
 
 CHECK_LIBS=`pkg-config --libs check 2>/dev/null`
 CHECK_CFLAGS=`pkg-config --cflags check 2>/dev/null`

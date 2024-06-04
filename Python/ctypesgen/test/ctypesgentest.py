@@ -1,18 +1,12 @@
 import os
 import sys
-import io
+import StringIO
 import optparse
 import glob
 
-try:
-    # should succeed for py3
-    from importlib import reload as reload_module
-except:
-    reload_module = reload
-
 sys.path.append(".")  # Allow tests to be called from parent directory with Python 2.6
 sys.path.append("..")
-import ctypesgen
+import ctypesgencore
 
 """ctypesgentest is a simple module for testing ctypesgen on various C constructs. It consists of a
 single function, test(). test() takes a string that represents a C header file, along with some
@@ -26,26 +20,25 @@ redirect_stdout = True
 def test(header, **more_options):
 
     assert isinstance(header, str)
-    with open("temp.h", "w") as f:
-      f.write(header)
+    file("temp.h", "w").write(header)
 
-    options = ctypesgen.options.get_default_options()
+    options = ctypesgencore.options.get_default_options()
     options.headers = ["temp.h"]
     for opt in more_options:
         setattr(options, opt, more_options[opt])
 
     if redirect_stdout:
         # Redirect output
-        sys.stdout = io.StringIO()
+        sys.stdout = StringIO.StringIO()
 
     # Step 1: Parse
-    descriptions = ctypesgen.parser.parse(options.headers, options)
+    descriptions = ctypesgencore.parser.parse(options.headers, options)
 
     # Step 2: Process
-    ctypesgen.processor.process(descriptions, options)
+    ctypesgencore.processor.process(descriptions, options)
 
     # Step 3: Print
-    ctypesgen.printer.WrapperPrinter("temp.py", options, descriptions)
+    ctypesgencore.printer.WrapperPrinter("temp.py", options, descriptions)
 
     if redirect_stdout:
         # Un-redirect output
@@ -57,7 +50,7 @@ def test(header, **more_options):
 
     # Load the module we have just produced
     module = __import__("temp")
-    reload_module(module)  # import twice, this hack ensure that "temp" is force loaded (there *must* be a better way to do this)
+    reload(module)  # import twice, this hack ensure that "temp" is force loaded (there *must* be a better way to do this)
 
     return module, output
 

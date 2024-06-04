@@ -1,21 +1,23 @@
-#CFLAGS    = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
-CDF_LIBS   = -lcdf -L/usr/local/cdf/lib
-CDF_INC    = -I/usr/local/cdf/include
+#CFLAGS       = -Wall -O3 -march=opteron -msse2 -mfpmath=sse,387 -ffast-math
+FFLAGS     =  -fno-automatic 
+SPICE_LIBS = '/home/mgh/SPICE/cspice/lib/cspice.a'
+SPICE_INC  = '-I/home/mgh/SPICE/cspice/include'
+#HDF5_LIBS  = '-L/packages/lib/hdf5-1.8.7'
+#HDF5_INC   = '-I/packages/include/hdf5-1.8'
+LIBS       = `pkg-config --libs lgm`
+CFLAGS     = `pkg-config --cflags lgm` $(SPICE_INC)
+CC           = gcc
 
-LIBS      := `pkg-config --libs lgm` $(CDF_LIBS) `pkg-config --libs hdf5 2> /dev/null`
-CFLAGS    := `pkg-config --cflags lgm` $(CDF_INC) -g `pkg-config --cflags hdf5 2> /dev/null`
-CC        = gcc -Wno-unused-variable
-FILES     = MagEphemFromFile
 
-all: $(FILES) DreamAssim FluxToPSD
+all   : MagEphemFromSpiceKernel
 
--include extra_flags
+MagEphemFromFile : Makefile  MagEphemFromFile.o
+	$(CC) $(FILES1) MagEphemFromFile.o $(HDF5_LIBS) $(LIBS) $(CFLAGS) -o MagEphemFromFile
 
-extra_flags:
-	if [[ "${MACHTYPE}" =~ "*darwin*" ]]; then echo "LIBS := -largp -I/opt/local/include -L/opt/local/lib" > extra_flags; echo "CFLAGS := -I/opt/local/include -L/opt/local/lib -largp" >> extra_flags; else echo > extra_flags; fi
+MagEphemFromSpiceKernel : Makefile  MagEphemFromSpiceKernel.o
+	$(CC) $(FILES1) MagEphemFromSpiceKernel.o $(HDF5_LIBS) $(LIBS) $(CFLAGS) $(SPICE_LIBS) -o MagEphemFromSpiceKernel
 
-$(FILES): %: %.c Makefile
-	$(CC) $< $(LIBS) $(CFLAGS) -o $@
+
 
 clean :
-	rm MagEphemFromFile *.o
+	rm MagEphemFromFile MagEphemFromSpiceKernel *.o

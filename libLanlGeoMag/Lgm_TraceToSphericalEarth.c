@@ -89,19 +89,22 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      *
      */
     if ( Rinitial < WGS84_B ) {
+
         // must be inside the Earth, which is no good -- bail with
         // LGM_INSIDE_EARTH error code
-        return( LGM_INSIDE_EARTH );  //LGM_INSIDE_EARTH = -1
+        return( LGM_INSIDE_EARTH );
 
     } else {
+
         // We are at least at or above WGS84_B. We could still be in trouble in
         // terms of being inside the Earth, so we have to check more
         // thouroughly now.  Determine Geodetic Height
         Lgm_WGS84_to_GeodHeight( u, &Height );
 
         if ( Height < 0.0 )  {
+
             // inside the Earth, which is no good -- bail with error
-            return( LGM_INSIDE_EARTH ); //LGM_INSIDE_EARTH = -1
+            return( LGM_INSIDE_EARTH );
 
         }
 
@@ -127,11 +130,13 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Pc.x = Pc.y = Pc.z = 0.0;
     P = *u;
     Hmax = Info->Hmax;
+Hmax = 1.0;
+    Hmin = 0.001;
     Hmin = 1e-8;
     u_scale.x = u_scale.y = u_scale.z = 1.0;
     Height = Height_a = Height_b = Height_c = 0.0;
     F = Fa = Fb = Fc = 0.0;
-//printf("\nHmax = %g\n", Hmax);
+    //printf("\nHmax = %g\n", Hmax);
 
 
 
@@ -157,6 +162,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
      */
     StartHeight = Height;
     if ( !AboveTargetHeight ){
+
 
         /*
          *  Determine which direction along the field line will take us higher.
@@ -193,11 +199,12 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
                 done = TRUE;
             } else if ( Height < StartHeight ) {
                 // We are going back down again -- Target Height unreachable? -- Bail out
-                return( LGM_TARGET_HEIGHT_UNREACHABLE ); //LGM_TARGET_HEIGHT_UNREACHABLE=-2
+                return( LGM_TARGET_HEIGHT_UNREACHABLE );
             }
         }
 
     }
+
 
 
 
@@ -234,7 +241,6 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     Htry = 0.9*Height_a;	    // This computes Htry as 90% of the distance to the Earth's surface (could be small if we are already close!)
     if (Htry > Hmax) Htry = Hmax; // If its bigger than Hmax reset it to Hmax -- to be safe.
 
-//printf("1. PPPPPPPPPP = %g %g %g; Height_a = %g; Fa = %g; Htry = %g\n", P.x, P.y, P.z, Height_a, Fa, Htry);
 
 
     /*
@@ -296,7 +302,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
 //printf("C. Htry = %g\n", Htry);
 
         if ( Count > 1000) {
-            if (Info->VerbosityLevel > 0) printf("File: %s Lgm_TraceToSphericalEarth(), Line: %d; Too many iterations trying to reach target height (are we in a weird field region?) Returning with -1.\n", __FILE__, __LINE__ );
+            printf("File: %s Lgm_TraceToSphericalEarth(), Line: %d; Too many iterations trying to reach target height (are we in a weird field region?) Returning with -1.\n", __FILE__, __LINE__ );
 //exit(0);
             return(-1);
         }
@@ -305,7 +311,7 @@ int Lgm_TraceToSphericalEarth( Lgm_Vector *u, Lgm_Vector *v, double TargetHeight
     }
 
     if ( ((Fc > 0.0) && (Fa > 0.0)) || ((Fc < 0.0) && (Fa < 0.0)) ) {
-        // No bracket -- can't reach target height somehow??
+        // No bracket
         return(0);
     }
 
@@ -344,6 +350,7 @@ if (1==1){
                 Htry = 0.5*fabs(d); // LGM_1M_1O_GOLD is 0.381966...
 //            }
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) return(-1);
+//printf("3. PPPPPPPPPP = %g %g %g           HTRY = %g\n", P.x, P.y, P.z, Htry);
             Height = WGS84_A*(Lgm_Magnitude( &P )-1.0);
 	        F =  Height - TargetHeight;
             if ( F >= 0.0 ) {

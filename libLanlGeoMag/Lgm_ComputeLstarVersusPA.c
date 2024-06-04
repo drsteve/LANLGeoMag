@@ -53,6 +53,11 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     int             i, k, LS_Flag, nn, tk, TraceFlag;
     char            *PreStr, *PostStr;
 
+    /* These should be set by the user in the setup up MagEphemInfo no in here */
+    //MagEphemInfo->LstarInfo->SaveShellLines = FALSE;
+    //MagEphemInfo->LstarInfo->FindShellPmin  = FALSE;
+    //MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
+    //MagEphemInfo->LstarInfo->ComputeVgc     = FALSE;
     LstarInfo = MagEphemInfo->LstarInfo;
 
     // Save Date, UTC to MagEphemInfo structure
@@ -82,7 +87,9 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
     for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
         sa = sin( MagEphemInfo->Alpha[i]*RadPerDeg ); sa2 = sa*sa;
         MagEphemInfo->Bm[i] = Blocal/sa2;
+//printf("Bm[%d] = %g\n", i, MagEphemInfo->Bm[i] );
     }
+
 
 
 
@@ -105,7 +112,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
         MagEphemInfo->Smin          = LstarInfo->mInfo->Smin;
         MagEphemInfo->Bmin          = LstarInfo->mInfo->Bmin;
 //printf("P = %g %g %g   Blocal = %lf Bmin = %lf \n",  u->x, u->y, u->z, Blocal, MagEphemInfo->Bmin );
-        //MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIlwain;
+        //MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_McIllwain;
         MagEphemInfo->Mref          = LstarInfo->mInfo->c->M_cd_2010;
         MagEphemInfo->Mcurr         = LstarInfo->mInfo->c->M_cd;
         MagEphemInfo->Mused         = MagEphemInfo->Mref;
@@ -190,7 +197,10 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
 //////////////////////////////NOTE
 //////////////////////////////NOTE   We are giving Lstar the Min B point ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //////////////////////////////NOTE
+//////////////////////////////NOTE
+//////////////////////////////NOTE
 
+//printf("LstarInfo2->mInfo->Bm = %g\n", LstarInfo2->mInfo->Bm);
                     LS_Flag = Lstar( &v3, LstarInfo2);
 
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
