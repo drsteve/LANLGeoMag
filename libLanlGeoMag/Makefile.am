@@ -53,7 +53,7 @@ libLanlGeoMag_la_SOURCES =  Lgm_AlphaOfK.c Lgm_DFI_RBF.c Lgm_Vec_RBF.c Lgm_B_Fro
 
 
 libLanlGeoMag_la_LDFLAGS = $(AM_LDFLAGS) @PERL_LDFLAGS@ @OPENMP_CFLAGS@ 
-libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@ 
+libLanlGeoMag_la_CFLAGS = $(AM_CFLAGS) @PERL_CFLAGS@ @OPENMP_CFLAGS@ -Wno-incompatible-pointer-types
 libLanlGeoMag_la_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR=\"$(datadir)\" -DHASH_FUNCTION=HASH_SFH -DHASH_BLOOM=32 @PERL_CPPFLAGS@
 
 #EXTRA_DIST = TS07D_FILES DE_FILES Images Stars

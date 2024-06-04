@@ -25,7 +25,7 @@ AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.
 
 
 AC_PREREQ([2.59])
-THE_PKG_RELEASE=7 dnl this affects the RPM package release #
+THE_PKG_RELEASE=8dio dnl this affects the RPM package release #
 PKG_RELEASE=$THE_PKG_RELEASE
 AC_SUBST([PKG_RELEASE])
 

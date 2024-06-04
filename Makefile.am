@@ -59,7 +59,7 @@ EXTRA_DIST = README.md lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
 	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed
 
 ACLOCAL_AMFLAGS = -I m4 
-AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -Wno-incompatible-pointer-types
 
 README: README.md
 	pandoc -f markdown -t plain --wrap=none $< -o $@
