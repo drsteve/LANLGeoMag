@@ -7,7 +7,8 @@ endif
 if HAVE_PYTHON
     MAYBE_PY = Python
 endif
-SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
+#SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
+SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) Python
 
 if DX_OVERALL
     if DX_COND_pdf
@@ -70,7 +71,7 @@ EXTRA_DIST = README.md lanlgeomag.spec $(ALL_EXAMPLE_FILES) $(ALL_DOC_FILES) \
 	Python HACKING $(DX_CONFIG) $(MAYBE_HTML) fix_doxygen.sed  $(DEBIAN_EXTRA_DIST)
 
 ACLOCAL_AMFLAGS = -I m4 
-AM_CPPFLAGS = -DDATADIR='"$(datadir)"'
+AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -Wno-incompatible-pointer-types
 
 README: README.md
 	pandoc -f markdown -t plain --wrap=none $< -o $@

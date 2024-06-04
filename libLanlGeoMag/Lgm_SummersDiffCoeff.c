@@ -2858,7 +2858,7 @@ if ((aStar<aStarMin)||(aStar>aStarMax)) {printf("aStar=%g, aStarMin=%g, aStarMax
 				tempxmax = tan(thetaEnd[0]); if (tempxmax > xmax) { tempxmax = xmax; }
 
 				if (tempxmax>tempxmin) {
-					j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, &tempDaa, (int) 0);
+                                  j = Lgm_SimpleRiemannSum( localDiffusionCoefficientAtSpecificThetaGlauertAndHorneWeightedByTanTheta,(_qpInfo *) &p2,(double) tempxmin,(double) tempxmax, (double *) &tempDaa, (int) 0);
 			    }
 
 	        } else {
