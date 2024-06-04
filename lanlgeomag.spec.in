@@ -80,7 +80,8 @@ echo "__isa_bits is" "%{__isa_bits}"
 echo "python_sitelib:"
 echo %{python_sitelib}
 %configure --enable-doxygen-doc --enable-doxygen-pdf --disable-perl
-make %{?_smp_mflags}
+make %{?_smp_mflags} || true
+make
 
 %install
 %makeinstall
@@ -90,7 +91,7 @@ make %{?_smp_mflags}
 
 %files
 %defattr(-,root,root)
-%doc README HACKING NEWS COPYING
+%doc README.md HACKING NEWS COPYING
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_libdir}/pkgconfig/lgm.pc

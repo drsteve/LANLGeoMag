@@ -9,10 +9,10 @@ if HAVE_PYTHON
 endif
 SUBDIRS = libLanlGeoMag . $(MAYBE_TOOLS) $(MAYBE_TESTS) $(MAYBE_PY)
 
-if DX_COND_pdf
-    MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@.pdf
-    uninst_pdf = $(pdfdir)
-endif
+# if DX_COND_pdf
+#     MAYBE_PDF = @DX_DOCDIR@/@DX_PROJECT@_Documentation.pdf
+#     uninst_pdf = $(pdfdir)
+# endif
 if DX_COND_ps
     MAYBE_PS = @DX_DOCDIR@/@DX_PROJECT@.ps
     uninst_ps = $(psdir)
