@@ -36,7 +36,7 @@ AC_LANG([C])
 AC_DEFINE([LGM_EOP_DATA_DIR],[(DATADIR "/LanlGeoMag/EopData")],[Define directory where Eop data can be found])
 AC_DEFINE([LGM_INDEX_DATA_DIR],[(DATADIR "/LanlGeoMag/Data")],[Define directory where Geophysical Index Data (e.g. Kp, AE, Dst, etc. data can be found])
 AC_DEFINE([LGM_TS07_DATA_DIR],[(DATADIR "/LanlGeoMag/Data/TS07D_FILES")],[Define directory where TS07 data files are located])
-AM_INIT_AUTOMAKE
+#AM_INIT_AUTOMAKE
 
 
 
