@@ -8,5 +8,7 @@
 
 void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *RepStr );
 void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepStr );
+char *Lgm_StrToLower( char *str, int nmax );
+char *Lgm_StrToUpper( char *str, int nmax );
 
 #endif
