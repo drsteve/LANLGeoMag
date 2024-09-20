@@ -15,12 +15,9 @@ void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *Re
     char    *p, *Str, *Str2, *p_remaining, *NewStr;
     int     q;
 
-
     // get sizes of strings 
     nSubStr = strlen( SubStr );
     nRepStr = strlen( RepStr );
-
-
 
     // Make a copy of the original string
     nStr = strlen( OrigStr );
@@ -28,14 +25,11 @@ void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *Re
     strcpy( Str, OrigStr );
     printf("Str = %s n = %d\n", Str, nStr);
 
-
     // Allocate space for the NewStr -- initially we only need enough space for the null terminator
     q = 1;
     NewStr  = (char *)calloc( q, sizeof(char) );
     NewStr[q-1] = '\0'; // terminate it.
     nNewStr = strlen( NewStr );
-
-
 
     /*
      * Set pointer to look at the part of Str the we have left to
@@ -44,13 +38,11 @@ void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *Re
     p_remaining = Str;
     done = 0;
     while ( !done ) {
-
         /*
          *  Using the string pointed to by p_remaining, attempt to locate an
          *  occurrence of SubStr
          */
         if ( !(p = strstr( p_remaining, SubStr )) ) {
-
             /*
              *   We didn't find an occurrence of SubStr in the String pointed to
              *   by p_remaining. So we are done.
@@ -66,9 +58,7 @@ void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *Re
             nNewStr = strlen( NewStr );
 
             done = 1;
-
         } else {
-
             /*
              * We have found an occurrence of the substring. The pointer p
              * is pointing at it in the string p_remaining
@@ -107,16 +97,11 @@ void Lgm_ReplaceSubString2( char **OutStr, char *OrigStr, char *SubStr, char *Re
             p_remaining = p + nSubStr;
 
         }
-
     }
-
     free( Str );
 
-
     *OutStr = NewStr;
-
     return;
-
 }
 
 
@@ -136,12 +121,9 @@ void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepS
     char    *p, *Str, *Str2, *p_remaining, *NewStr;
     int     q;
 
-
     // get sizes of strings 
     nSubStr = strlen( SubStr );
     nRepStr = strlen( RepStr );
-
-
 
     // Make a copy of the original string
     nStr = strlen( OrigStr );
@@ -149,14 +131,11 @@ void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepS
     strcpy( Str, OrigStr );
     printf("Str = %s n = %d\n", Str, nStr);
 
-
     // Allocate space for the NewStr -- initially we only need enough space for the null terminator
     q = 1;
     NewStr  = (char *)calloc( q, sizeof(char) );
     NewStr[q-1] = '\0'; // terminate it.
     nNewStr = strlen( NewStr );
-
-
 
     /*
      * Set pointer to look at the part of Str the we have left to
@@ -165,13 +144,11 @@ void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepS
     p_remaining = Str;
     done = 0;
     while ( !done ) {
-
         /*
          *  Using the string pointed to by p_remaining, attempt to locate an
          *  occurrence of SubStr
          */
         if ( !(p = strstr( p_remaining, SubStr )) ) {
-
             /*
              *   We didn't find an occurrence of SubStr in the String pointed to
              *   by p_remaining. So we are done.
@@ -187,9 +164,7 @@ void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepS
             nNewStr = strlen( NewStr );
 
             done = 1;
-
         } else {
-
             /*
              * We have found an occurrence of the substring. The pointer p
              * is pointing at it in the string p_remaining
@@ -226,20 +201,12 @@ void Lgm_ReplaceSubString( char *OutStr, char *OrigStr, char *SubStr, char *RepS
             nNewStr = strlen(NewStr);
 
             p_remaining = p + nSubStr;
-
         }
-
     }
-
     free( Str );
-
 
     strcpy( OutStr, NewStr );
     free( NewStr);
-
     return;
 
 }
-
-
-
