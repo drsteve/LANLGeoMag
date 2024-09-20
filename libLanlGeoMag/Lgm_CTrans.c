@@ -58,6 +58,7 @@
  */
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Quat.h"
+#include "Lgm/Lgm_Misc.h"
 #include "config.h"
 
 #include <ctype.h>

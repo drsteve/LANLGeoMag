@@ -855,8 +855,6 @@ void        Lgm_GEOD_to_WGS84( double GeodLat, double GeodLong, double GeodHiegh
 void        Lgm_Nutation( double T_TT, double nTerms, double *dPSi, double *dEps );
 int         IsoTimeStringToDateTime( char *TimeString, Lgm_DateTime *d, Lgm_CTrans *c );
 int         MonthStrToNum( char *str );
-char       *Lgm_StrToLower( char *str, int nmax );
-char       *Lgm_StrToUpper( char *str, int nmax );
 
 /*
  * Leap Second Related  Routines
