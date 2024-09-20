@@ -2331,7 +2331,7 @@ int MonthStrToNum( char *str ) {
 char *Lgm_StrToLower( char *str, int nmax ) {
     int  n = 0;
     char *p = str;
-    while ( (p != '\0' ) && (n<nmax) ){
+    while ( (*p != '\0' ) && (n<nmax) ){
 	    *p = (unsigned char)tolower(*p);
 	    ++p;
 	    ++n;
@@ -2342,7 +2342,7 @@ char *Lgm_StrToLower( char *str, int nmax ) {
 char *Lgm_StrToUpper( char *str, int nmax ) {
     int  n = 0;
     char *p = str;
-    while ( (p != '\0' ) && (n<nmax) ){
+    while ( (*p != '\0' ) && (n<nmax) ){
 	    *p = (unsigned char)toupper(*p);
 	    ++p;
 	    ++n;
