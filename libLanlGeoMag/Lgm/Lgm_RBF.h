@@ -1,15 +1,15 @@
 #ifndef LGM_RBF
 #define LGM_RBF
 
-#include "Lgm_Vec.h"
 #include "Lgm_RBF.h"
-#include "Lgm_DynamicMemory.h"
-#include "uthash.h"
-#include <stdlib.h>
-#include <math.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+#include <math.h>
+#include <stdlib.h>
+#include "Lgm_DynamicMemory.h"
+#include "Lgm_Vec.h"
+#include "uthash.h"
 
 #define LGM_CHOLESKY_DECOMP 0
 #define LGM_PLU_DECOMP      1    

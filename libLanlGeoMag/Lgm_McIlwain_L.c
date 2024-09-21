@@ -12,12 +12,12 @@
  */
 
 #include "Lgm/Lgm_MagModelInfo.h"                                                                                                                                                                                
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 /*

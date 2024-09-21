@@ -1,9 +1,9 @@
 #ifndef LGM_TA2016_H
 #define LGM_TA2016_H
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Define a structure to hold all of the info needed in TA16

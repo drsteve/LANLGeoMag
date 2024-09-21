@@ -8,11 +8,11 @@
  *
  */
 
-#include <time.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <gsl/gsl_statistics_double.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "Lgm/Lgm_AE_index.h"
 
 /**

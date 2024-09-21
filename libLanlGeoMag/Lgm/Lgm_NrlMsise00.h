@@ -1,10 +1,10 @@
 #ifndef LGM_NRLMSISE00_H
 #define LGM_NRLMSISE00_H
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #define AMOD(A,P) ( (A-((int)((double)A/(double)P)*P)) )
 #define AMIN1(A,B) ( ((A<B)?(A):(B)) )

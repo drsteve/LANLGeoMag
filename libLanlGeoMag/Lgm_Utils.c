@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdint.h>
 #include "Lgm/Lgm_Utils.h"
 
 
@@ -10,7 +11,7 @@ void Lgm_LogSpace( double start, double stop, long num, double *array ){
    *   y=linspace(log10(start), log10(stop), num) 
    *  then pow(10, y)  
    */
-  unsigned long i;
+  uint_fast64_t i;
   Lgm_LinSpace(log10(start), log10(stop), num, array);
   for (i=0; i<num; i++)
     array[i] = pow(10.,array[i]);
@@ -21,7 +22,7 @@ void Lgm_LogSpace( double start, double stop, long num, double *array ){
  */
 void Lgm_LinSpace(double start, double stop, long num, double *array) {
   double delta, linmin, accDelta = 0;
-  long i;
+  uint_fast64_t i;
   linmin = start;
   delta = (stop-start)/((double)(num-1));
   for (i=0; i<num; i++) {
@@ -34,7 +35,7 @@ void Lgm_LinSpace(double start, double stop, long num, double *array) {
  * given a sorted array, data, find the index where value should be inserted to maintain order
  */
 long Lgm_Bisect(double *data, double value, long len) {
-  long mid, hi=len, lo = 0;
+  uint_fast64_t mid, hi=len, lo = 0;
   while (lo <hi) {
     mid = (lo+hi) / 2;  // integer division
     if (value < data[mid])
@@ -49,7 +50,7 @@ long Lgm_Bisect(double *data, double value, long len) {
  * given an array return the the minimum and maximum of the array 
  */
 void    Lgm_MinMax(double *inval, long len, double *min, double *max) {
-  long i;
+  uint_fast64_t i;
   *min = inval[0];
   *max = inval[0];
   for (i=1;i<len;i++){

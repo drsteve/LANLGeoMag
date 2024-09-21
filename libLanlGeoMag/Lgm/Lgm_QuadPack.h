@@ -1,9 +1,9 @@
 #ifndef LGM_QUADPACK_H
 #define LGM_QUADPACK_H 1
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  *    QuadPack.h

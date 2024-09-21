@@ -15,14 +15,14 @@
 #include <config.h>
 #endif
 
+#include <gsl/gsl_errno.h>
 #include <stdio.h>
-#include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gsl/gsl_errno.h>
+#include <sys/stat.h>
 #include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_QinDenton.h"
 
 

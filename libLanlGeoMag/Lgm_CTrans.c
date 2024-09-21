@@ -56,13 +56,13 @@
  *
  *           6) This schem works in general and is pretty easy to implement on a case-by-case basis....
  */
-#include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_Quat.h"
-#include "Lgm/Lgm_Misc.h"
-#include "config.h"
 
 #include <ctype.h>
 #include <time.h>
+#include "config.h"
+#include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_Misc.h"
+#include "Lgm/Lgm_Quat.h"
 
 /*
 #ifndef LGM_EOP_DATA_DIR

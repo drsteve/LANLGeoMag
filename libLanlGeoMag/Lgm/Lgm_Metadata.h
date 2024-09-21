@@ -1,13 +1,17 @@
 
-
 #ifndef LGM_JSONHEADER_H
 #define LGM_JSONHEADER_H
-
-#include <stdarg.h>
 
 #define Lgm_metadata_SUCCESS 1
 #define Lgm_metadata_FAILURE 0
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/Lgm_Metadata.h"
 
 typedef struct Lgm_metadata_attr {
   int array;  // boolean for if this is an array of metadata
@@ -25,14 +29,6 @@ typedef struct Lgm_metadata_variable {
   Lgm_metadata_attr *attributes;
 } Lgm_metadata_variable;
 
-
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include "Lgm/Lgm_Metadata.h"
-#include "Lgm/Lgm_DynamicMemory.h"
 
 #define Lgm_metadata_MAXHEADERLEN 100000
 #define Lgm_metadata_MAXSINGLEVARHEADER 10000

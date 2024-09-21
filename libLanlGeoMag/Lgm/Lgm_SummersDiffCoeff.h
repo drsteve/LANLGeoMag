@@ -1,12 +1,12 @@
 #ifndef LGM_SUMMERS_DIFF_COEFF_H
 #define LGM_SUMMERS_DIFF_COEFF_H
-#include <math.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_poly.h>
-#include "Lgm_CTrans.h"
-#include "Lgm_QuadPack.h"
-#include "Lgm_PolyRoots.h"
+#include <math.h>
 #include "Lgm_Constants.h"
+#include "Lgm_CTrans.h"
+#include "Lgm_PolyRoots.h"
+#include "Lgm_QuadPack.h"
 
 
 #ifndef M_CDIP

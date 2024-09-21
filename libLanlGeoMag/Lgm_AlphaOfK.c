@@ -10,13 +10,13 @@
  *
  *
  */
-#include <stdio.h>
-#include <math.h>
-#include "Lgm/Lgm_QuadPack.h"
-#include "Lgm/Lgm_MagModelInfo.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+#include <math.h>
+#include <stdio.h>
 #include <string.h>
+#include "Lgm/Lgm_MagModelInfo.h"
+#include "Lgm/Lgm_QuadPack.h"
 
 #define TRACE_TOL   1e-7
 #define GOLD        0.38197

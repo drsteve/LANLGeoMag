@@ -12,10 +12,10 @@
  */
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include "Lgm/Lgm_Vec.h"
+#include <stdlib.h>
 #include "Lgm/Lgm_CTrans.h"
+#include "Lgm/Lgm_Vec.h"
 
 /*
  * Create an Lgm_Vector

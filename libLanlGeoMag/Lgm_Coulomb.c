@@ -1,14 +1,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #if USE_OPENMP
 #include <omp.h>
 #endif
-#include "Lgm/Lgm_Coulomb.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "Lgm/Lgm_Constants.h"
+#include "Lgm/Lgm_Coulomb.h"
 
 
 
