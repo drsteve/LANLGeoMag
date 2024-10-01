@@ -3,26 +3,26 @@ CHECK ME FOR MEMORY LEAKS.....
 THIS ALSO eeds some argument changes...
 e.g. The Mu's K's instead of pitch angles...
 */
-#include "CDFUtils.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <ctype.h>
 #include <argp.h>
-#include <time.h>
+#include <ctype.h>
+#include <fcntl.h>
 #include <libgen.h>
-#include <Lgm/Lgm_CTrans.h>
-#include <Lgm/Lgm_Sgp.h>
-#include <Lgm/Lgm_DynamicMemory.h>
-#include <Lgm/Lgm_MagModelInfo.h>
-#include <Lgm/Lgm_FluxToPsd.h>
-#include <Lgm/Lgm_Eop.h>
-#include <Lgm/Lgm_QinDenton.h>
-#include <Lgm/Lgm_Misc.h>
-#include <Lgm/Lgm_HDF5.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#include <Lgm_CTrans.h>
+#include <Lgm_DynamicMemory.h>
+#include <Lgm_Eop.h>
+#include <Lgm_FluxToPsd.h>
+#include <Lgm_HDF5.h>
+#include <Lgm_MagModelInfo.h>
+#include <Lgm_Misc.h>
+#include <Lgm_QinDenton.h>
+#include <Lgm_Sgp.h>
+#include "CDFUtils.h"
 
 
 

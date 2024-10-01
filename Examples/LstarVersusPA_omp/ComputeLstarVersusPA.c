@@ -1,13 +1,13 @@
-#include <Lgm_MagModelInfo.h>
-#include <Lgm_LstarInfo.h>
-#include <Lgm_MagEphemInfo.h>
+#include <fcntl.h>
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <Lgm_LstarInfo.h>
+#include <Lgm_MagEphemInfo.h>
+#include <Lgm_MagModelInfo.h>
 
 #define TRACE_TOL   1e-7
 #define KP_DEFAULT  1
