@@ -225,7 +225,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     Lgm_mjd_to_ymdh( Next_MJD, &Next_Date, &Next_Year, &Next_Month, &Next_Day, &Next_UT );
 
 
-    Filename = (char *)calloc( 512, sizeof(char) );
+    Filename = (char *)calloc(2575, sizeof(char) );
     Line = (char *)calloc( 2050, sizeof(char) );
     n = 0;
 
