@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Macros for dynamically allocating/freeing 1D arrays of any type
