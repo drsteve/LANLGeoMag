@@ -358,7 +358,7 @@ def get_Lstar(pos, date, alpha = 90.,
     MagEphemInfo.B = Bvec.magnitude()
 
     # check and see if the field line is closed before doing much work
-    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(MagEphemInfo, extended_out=True)
+    trace, northern, southern, minB, Lsimple = Closed_Field(MagEphemInfo, extended_out=True)
 
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
@@ -793,7 +793,7 @@ def get_Lstar_General(pos, date, alpha = 90.,
     MagEphemInfo.B = Bvec.magnitude()
 
     # check and see if the field line is closed before doing much work
-    trace, northern, southern, minB, Lsimple = Closed_Field.Closed_Field(MagEphemInfo, extended_out=True)
+    trace, northern, southern, minB, Lsimple = Closed_Field(MagEphemInfo, extended_out=True)
 
     # presetup the ans[Angle] so that it can be filled correctly
     for pa in Alpha:
