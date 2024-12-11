@@ -1,12 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <dirent.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <time.h>
 #include <argp.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 #include <Lgm_CTrans.h>
 #include <Lgm_DynamicMemory.h>
 

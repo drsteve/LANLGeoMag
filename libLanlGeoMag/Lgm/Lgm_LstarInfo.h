@@ -1,11 +1,11 @@
 #ifndef LGM_LSTAR_INFO_H
 #define LGM_LSTAR_INFO_H
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
 #include <math.h>
 #include "Lgm_QuadPack.h"
 #include "Lgm_MagModelInfo.h"
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 
 #define ELECTRON_MASS   (9.10938188e-31)    /* Electron Mass , kg */
 #define AMU             (1.660538e-27)      /* kg */

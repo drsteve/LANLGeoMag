@@ -1,9 +1,9 @@
 #ifndef LGM_TSYG2001_H
 #define LGM_TSYG2001_H
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  *    Lgm_Tsyg2001.h

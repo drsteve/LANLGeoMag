@@ -1,8 +1,8 @@
 #ifndef MAGEPHEMINFO_H
 #define MAGEPHEMINFO_H
 
-#include <Lgm/Lgm_MagModelInfo.h>
-#include <Lgm/Lgm_LstarInfo.h>
+#include <Lgm_LstarInfo.h>
+#include <Lgm_MagModelInfo.h>
 
 #define MAX_PITCH_ANGLES 900
 
