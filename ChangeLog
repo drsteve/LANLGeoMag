@@ -1,3 +1,19 @@
+2025-01-10  Steve Morley <smorley@lanl.gov>
+    * Release: v2.1.0
+
+    * Update to IGRF14/DGRF13
+
+    * Moved Lgm_StrToUpper and Lgm_StrToLower to Lgm_Misc and added unit tests
+
+    * Minor bugfix in Python wrappers
+
+2024-05-20  Steve Morley <smorley@lanl.gov>
+    * Release: v2.0.0
+
+    * Incorporates all v2.0.0-alpha changegs
+
+    * Minor bug fixes and squashing compiler warnings
+
 2024-02-29  Steve Morley <smorley@lanl.gov>
     * Release: v2.0.0-alpha
 
