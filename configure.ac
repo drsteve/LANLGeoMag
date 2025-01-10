@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 
-AC_INIT([LanlGeoMag], [2.0.0-alpha], [mghenderson@lanl.gov])
+AC_INIT([LanlGeoMag],[2.1.0],[mghenderson@lanl.gov])
 AC_CONFIG_SRCDIR([libLanlGeoMag/quicksort.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -25,7 +25,7 @@ AC_CHECK_HEADERS([fcntl.h float.h limits.h stdlib.h string.h sys/timeb.h unistd.
 
 
 
-AC_PREREQ([2.59])
+AC_PREREQ([2.69])
 THE_PKG_RELEASE=1
 PKG_RELEASE=$THE_PKG_RELEASE
 AC_SUBST([PKG_RELEASE])
