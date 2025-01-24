@@ -1,16 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
 #include <string.h>
 #include <ctype.h>
 
 
-
 int NumberOfColumns( char *String ){
-
-
     int n;
-
-
     /*
      *  strip off trailing non-alpha-numeric characters...
      */
@@ -22,29 +18,21 @@ int NumberOfColumns( char *String ){
 	    }
     }
 
-
     n = 0;
     
     if ( strtok( String, " \t" ) == NULL ) return(0);
     else ++n;
-
     
     while ( strtok( NULL, " \t" ) != NULL ){
 	    ++n;
     }
 
     return( n );
-
 }
 
 
 
-
-
-main(){
-
-
-
+int main(){
     char	Line[4098], GaussType, ModelName[50][128];
     double	ModelYear[50];
     char	h1[2048], h2, h3;
@@ -52,7 +40,6 @@ main(){
     double	val[50], del;
     double	g[50][14][14], h[50][14][14];
     FILE	*fpin, *fpout;
-
 
     for (i=0; i<50; ++i){
         for(n=0; n<13; ++n){
@@ -62,19 +49,19 @@ main(){
 	    }
     }
 
-
-
     // open txt file containing coefficients
 //    fpin = fopen("igrf12coeffs.txt", "r");
     fpin = fopen("igrf14coeffs.txt", "r");
 
-    // read off header
-    fgets(Line, 4096, fpin);
-    printf("Line = %s\n", Line);
+    // read off header (two comment lines, two header lines)
+    for (int hl=0; hl<4; hl++) {
+        fgets(Line, 4096, fpin);
+        printf("Line = %s\n", Line);
+    }
 
     // read in a line of data (as opposed to the header -- better indicator of whats really here
     fgets(Line, 4096, fpin);
-    printf("Line = %s\n", Line);
+    printf("Data Line = %s\n", Line);
     nColumns = NumberOfColumns( Line );
     printf("Columns = %d\n", nColumns);
 
@@ -82,8 +69,12 @@ main(){
     nModels = nColumns - 4; // there are 3 colums at start defining coeff, plus SV at the end. 
     printf("nModels = %d\n", nModels);
 
-
-    rewind(fpin);
+    rewind(fpin);  // rewind to start of filee
+    // read off header
+    for (int hl=0; hl<3; hl++) {
+        fgets(Line, 4096, fpin);
+        printf("Line = %s\n", Line);
+    }
 
     fscanf(fpin, "%s %c %c", h1, &h2, &h3);
     for (i=0; i<nModels; ++i){
@@ -91,11 +82,6 @@ main(){
 	    printf("ModelYear = %f\n", ModelYear[i]);
     }
     fgets(Line, 128, fpin); /* read off the rest of the line (icluding newline) */
-
-
-
-
-
 
 
     /*
@@ -113,10 +99,6 @@ main(){
 
 	    printf("Got: %c_%d_%d\n", GaussType, n, m);
 
-
-
-
-
 	    /*
 	     *  dump values to the proper g and h arrays..
 	     */
@@ -128,14 +110,11 @@ main(){
 	            h[i][n][m] = val[i];
 	        }
 
-
 	    }
 
     }
 
     fclose(fpin);
-
-
 
     /*
      *   Now dump out the coefficients as C static arrays...
@@ -181,8 +160,6 @@ main(){
     fprintf(fpout, " };\n\n");
 
 
-    fprintf(fpout, "static int   IGRF_MaxN[%d]  = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 13, 13, 13 };\n", nModels+1);
-    fprintf(fpout, "\n");
     fprintf(fpout, "static double  IGRF_Re                    = 6371.2; // km This is the so-called \"magnetic reference spherical radius\" that is adopted in IGRF modeling\n");
     fprintf(fpout, "static char    IGRF_Model[]               = \"IGRF14\";\n");
     fprintf(fpout, "static char    IGRF_Model_Description[]   = \"14th Generation International Geomagnetic Reference Field\";\n");
@@ -246,9 +223,6 @@ main(){
 	}
     fprintf(fpout, "  };\n");
 
-
-
-
     for (i=0; i<nModels; ++i){
     	if (i==0) {
             fprintf(fpout, "\n\nstatic double IGRF_h[%d][14][14] = {\n", nModels+1);
@@ -310,7 +284,5 @@ main(){
     fprintf(fpout, "\n\n#endif\n");
 
    fclose(fpout);
-
-
 
 }

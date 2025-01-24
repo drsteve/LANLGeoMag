@@ -29,8 +29,6 @@ static int    IGRF_nModels = 26;
 static double IGRF_epoch[27] = { 1900.0, 1905.0, 1910.0, 1915.0, 1920.0, 1925.0, 1930.0, 1935.0, 1940.0, 1945.0,
                                 1950.0, 1955.0, 1960.0, 1965.0, 1970.0, 1975.0, 1980.0, 1985.0, 1990.0, 1995.0, 2000.0, 2005.0, 2010.0, 2015.0, 2020.0, 2025.0 };
 
-static int   IGRF_MaxN[27]  = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 13, 13, 13 };
-
 static double  IGRF_Re                    = 6371.2; // km This is the so-called "magnetic reference spherical radius" that is adopted in IGRF modeling
 static char    IGRF_Model[]               = "IGRF14";
 static char    IGRF_Model_Description[]   = "14th Generation International Geomagnetic Reference Field";
