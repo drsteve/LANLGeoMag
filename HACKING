@@ -24,7 +24,8 @@ git commit
 git pull
 git push
 
-Then send a pull request with your changes.
+Then send a pull request with your changes, read WORKFLOW.md
+for additional notes on collaborative work in this repo.
 
 
 Prerequisites
@@ -37,11 +38,12 @@ package managers are not installed by default: MacPorts and HomeBrew are
 popular options.
 
 git
-autoconf >=2.62 (earlier versions do not have the AC_OPENMP)
-libtool >=2.4.2 (earlier versions filter openmp flags - see http://lists.gnu.org/archive/html/bug-libtool/2011-03/msg00024.html)
-libperl-dev
-gsl
-hdf5 >= 1.8 (API changed at this release)
+automake (If Python >=3.12 is used, autotools >= 1.17 is required)
+autoconf >=2.69
+libtool >=2.4.2
+libperl-dev (optional)
+gsl >= 2.6
+hdf5 >= 1.10
 
 On Mac, the following should also be installed through the package manager:
 argp-standalone
@@ -55,19 +57,24 @@ Just once (or just occasionally):
 autoreconf -i
 ./configure
 
-NB (Oct 2015): Recent updates to HDF5 include non-standard locations and use of
+Recent updates to HDF5 include non-standard locations and use of
 pkg-config. If you have problems with HDF5 when running configure, try:
 
 ./configure CFLAGS=`pkg-config hdf5 --cflags` LIBS=`pkg-config hdf5 --libs|grep -o '^\S*'`
 
+This may also help some users with non-standard install locations for
+other dependencies.
 
 Every time:
 
-make
+make  (or make -j)
 
 
 Installing
 ==========
+make install
+
+If doing a system install (i.e., not setting prefix on configure)
 sudo make install
 
 Note: This will run the script GetEopFiles. If you are behind a proxy, you may
@@ -88,49 +95,46 @@ Developer actions
 
 The developer takes these steps:
 
-* Commit all final changes and sure that the code passes "make
-  distcheck"
+* Commit all final changes and sure that the code passes continuous integration
 
-* Set the new version in configure.ac with AC_INIT(... , [1.5.12] , ...)
+* Set the new version in configure.ac with AC_INIT(... , [2.1.0] , ...)
 
-* Update the NEWS file with a list of user-visible or API changes
+* Update the Changelog with a list of user-visible or API changes
 
 * Tag the repository with
 
-git tag -a v1.5.12
-git commit -m "tagged release v1.5.12"
+git tag -a v2.1.0
+git commit -m "tagged release v2.1.0"
 git push --tags
 
-* Then move to the "development" version v1.5.12+ by editing
-  configure.ac and NEWS and putting AC_INIT(... , [1.5.12] , ...)
 
 Release engineer actions
 ........................
 
 Start with a fresh clone followed by a checkout of the release tag:
 
-git clone ssh://YOUR_SCHEME_LOGIN@svn.isr.lanl.gov/n/projects/lanl/LanlGeoMag.git LanlGeoMag-v1.5.12
-cd LanlGeoMag-v1.5.12
-git checkout v1.5.12
+git clone https://github.com/drsteve/LANLGeoMag.git LanlGeoMag-v2.1.0
+cd LanlGeoMag-v2.1.0
+git checkout v2.1.0
 
 autoreconf -i
 ./configure
 make distcheck
 
-And you've got a well-tracked tarball called lanlgeomag-1.5.12.tar.gz
+And you've got a well-tracked tarball called lanlgeomag-2.1.0.tar.gz
 
 Finally, you can try running
 
-rpmbuild -ta lanlgeomag-1.5.12.tar.gz
+rpmbuild -ta lanlgeomag-2.1.0.tar.gz
 
 to build RPMs.  RPMs are not yet working because we still have
-/usr/lanl hard-coded in a lot of places, but we are getting closer.
+some paths hard-coded in a lot of places, but we are getting closer.
 
 
 Ctypesgen
 =========
 The Python wrappers require ctypesgen. For simplicity, we bundle our own
-version from https://github.com/olsonse/ctypesgen
+version from https://github.com/ctypesgen/ctypesgen
 
 There's a nice discussion at
 https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
@@ -139,7 +143,7 @@ If you aren't hacking on the ctypes code itself, there's no need to read
 any of this. But if you need to update the bundled ctypes, first set up
 the repositories:
 
-git remote add ctypesgen https://github.com/olsonse/ctypesgen.git
+git remote add ctypesgen https://github.com/ctypesgen/ctypesgen.git
 
 To start this process from scratch (i.e. before we had anything pulled in):
 git fetch ctypesgen

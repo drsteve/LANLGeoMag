@@ -28,7 +28,7 @@ Ubuntu package: libperl-dev
 
 GNU Scientific Library
 ----------------------
-Again, the development package is required.
+Again, the development package is required. Version >=2.6 is recommended.
 Ubuntu packge: libgsl0-dev
 
 HDF5 1.10
