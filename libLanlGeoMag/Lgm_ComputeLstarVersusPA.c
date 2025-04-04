@@ -4,21 +4,21 @@
  *
  *  
  */
-#include "Lgm/Lgm_MagModelInfo.h"
-#include "Lgm/Lgm_LstarInfo.h"
-#include "Lgm/Lgm_MagEphemInfo.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 #if USE_OPENMP
 #include <omp.h>
 #endif
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include "Lgm/Lgm_LstarInfo.h"
+#include "Lgm/Lgm_MagEphemInfo.h"
+#include "Lgm/Lgm_MagModelInfo.h"
 
 #define TRACE_TOL   1e-7
 #define TRACE_TOL2   1e-10

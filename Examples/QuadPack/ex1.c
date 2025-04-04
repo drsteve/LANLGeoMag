@@ -1,8 +1,8 @@
 /*
  * Examples showing how to use the Quadpack routines to do simple integrals.
  */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <Lgm_QuadPack.h>
 
 typedef struct MyInfo {
