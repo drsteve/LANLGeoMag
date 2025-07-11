@@ -142,11 +142,13 @@ typedef struct CircularBuffer {
 
 } CircularBuffer;
 
-typedef struct Lgm_MagModelInfo {
+typedef struct Lgm_MagModelInfo Lgm_MagModelInfo;
+
+struct Lgm_MagModelInfo {
 
     Lgm_CTrans  *c;                 /* This contains all time info and a bunch more stuff */
     long int	nFunc;
-    int 		(*Bfield)();
+    int 		(*Bfield)(Lgm_Vector*, Lgm_Vector*, Lgm_MagModelInfo*);
     int			SavePoints;
     double		Hmax;
     FILE	    *fp;
@@ -566,7 +568,7 @@ typedef struct Lgm_MagModelInfo {
     void        *Data;
 
 
-} Lgm_MagModelInfo;
+} ;
 void Lgm_GSM_TO_PQB( Lgm_Vector *u_gsm, Lgm_Vector *u_pqb, Lgm_MagModelInfo *m );
 void Lgm_Set_GSM_TO_PQB( Lgm_Vector *Position, Lgm_MagModelInfo *m );
 void Lgm_PQB_TO_GSM( Lgm_Vector *u_pqb, Lgm_Vector *u_gsm, Lgm_MagModelInfo *m );

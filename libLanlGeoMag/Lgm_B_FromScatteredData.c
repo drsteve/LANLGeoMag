@@ -500,7 +500,7 @@ int Lgm_B_FromScatteredData3( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     unsigned long int  *I_data;
     unsigned long int  *LookUpKey;                // key comprised of an array of unsigned long int Id's
     int                 KeyLength;                // length (in bytes) of LookUpKey
-    int                 (*Dipole)();         // tmp Pointer to Bfield function
+    int                 (*Dipole)(Lgm_Vector*, Lgm_Vector*, Lgm_MagModelInfo*);         // tmp Pointer to Bfield function
 
 
     /*
@@ -899,7 +899,7 @@ int Lgm_B_FromScatteredData4( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     unsigned long int  *I_data;
     unsigned long int  *LookUpKey;                // key comprised of an array of unsigned long int Id's
     int                 KeyLength;                // length (in bytes) of LookUpKey
-    int                 (*Dipole)();         // tmp Pointer to Bfield function
+    int                 (*Dipole)(Lgm_Vector*, Lgm_Vector*, Lgm_MagModelInfo*);         // tmp Pointer to Bfield function
 
 
     /*
@@ -1305,7 +1305,7 @@ int Lgm_B_FromScatteredData5( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     unsigned long int  *I_data;
     unsigned long int  *LookUpKey;                // key comprised of an array of unsigned long int Id's
     int                 KeyLength;                // length (in bytes) of LookUpKey
-    int                 (*Dipole)();              // tmp Pointer to Bfield function
+    int                 (*Dipole)(Lgm_Vector*, Lgm_Vector*, Lgm_MagModelInfo*);              // tmp Pointer to Bfield function
 
 
 //if (Info->KdTree_kNN_MaxDist2 < 1e8) printf("AHA Info->KdTree_kNN_MaxDist2 = %g\n", Info->KdTree_kNN_MaxDist2 );
@@ -2229,7 +2229,7 @@ int Lgm_B_FromScatteredData6( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *In
     unsigned long int  *I_data;
     unsigned long int  *LookUpKey;                // key comprised of an array of unsigned long int Id's
     int                 KeyLength;                // length (in bytes) of LookUpKey
-    int                 (*Dipole)();         // tmp Pointer to Bfield function
+    int                 (*Dipole)(Lgm_Vector*, Lgm_Vector*, Lgm_MagModelInfo*);         // tmp Pointer to Bfield function
 
 
     /*
