@@ -12,13 +12,13 @@ on:
 
 jobs:
   basic-suite:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
         sudo apt-get install -y make gcc g++ autotools-dev autoconf check
-        sudo apt-get install -y libgsl-dev libgsl23 gsl-bin libgsl-dbg
+        sudo apt-get install -y libgsl-dev libgslcblas0 gsl-bin libgsl-dbg
         sudo apt-get install -y libhdf5-dev libperl-dev
         gcc --version
         gsl-config --version
