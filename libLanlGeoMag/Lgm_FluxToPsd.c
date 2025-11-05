@@ -1,18 +1,18 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
+#include <math.h>
 #if USE_OPENMP
 #include <omp.h>
 #endif
-#include "Lgm/Lgm_FluxToPsd.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/Lgm_FluxToPsd.h"
+#include "Lgm/Lgm_MagModelInfo.h"
 
 
 void praxis( int n, double *x, int *data, double (*funct)(double *, void *data), double *in, double *out);

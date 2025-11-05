@@ -14,8 +14,8 @@
  *
  */
 
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_Vec.h"
 

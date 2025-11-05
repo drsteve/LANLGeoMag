@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <Lgm_AE8_AP8.h>
 int main( ) {
 

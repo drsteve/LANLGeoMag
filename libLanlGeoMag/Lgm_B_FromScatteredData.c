@@ -5,9 +5,9 @@
  *
  */
 
+#include "Lgm/Lgm_KdTree.h"
 #include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_Octree.h"
-#include "Lgm/Lgm_KdTree.h"
 #include "Lgm/Lgm_RBF.h"
 #include "Lgm/qsort.h"
 

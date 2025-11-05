@@ -1,10 +1,10 @@
 #ifndef LGM_POLY_ROOTS_H
 #define LGM_POLY_ROOTS_H
-#include <math.h>
-#include <complex.h>
 #include <float.h>
-#include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <complex.h>
 
 #define LGM_POLYROOTS_MAXITER 500
 

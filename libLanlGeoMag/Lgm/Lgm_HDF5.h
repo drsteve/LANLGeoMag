@@ -1,16 +1,16 @@
 #ifndef LGM_HDF5_H
 #define LGM_HDF5_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <ctype.h>
-#include "Lgm_DynamicMemory.h"
+#include <fcntl.h>
 //#define H5_NO_DEPRECATED_SYMBOLS
 #include <hdf5.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include "Lgm_DynamicMemory.h"
 
 
 

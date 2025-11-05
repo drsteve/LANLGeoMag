@@ -2,13 +2,13 @@
 #include <config.h>
 #endif
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include "Lgm/Lgm_Vec.h"
 #include "Lgm/Lgm_HDF5.h"
 #include "Lgm/Lgm_JPLeph.h"
+#include "Lgm/Lgm_Vec.h"
 
 #ifndef LGM_INDEX_DATA_DIR
 #warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"

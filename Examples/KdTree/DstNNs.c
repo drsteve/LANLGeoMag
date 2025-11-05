@@ -1,11 +1,11 @@
-#include <stdlib.h>
 #include <math.h>
-#include <Lgm_DynamicMemory.h>
-#include <Lgm_ElapsedTime.h>
-#include <Lgm_CTrans.h>
-#include <Lgm_KdTree.h>
 #include <quicksort.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <Lgm_DynamicMemory.h>
+#include <Lgm_CTrans.h>
+#include <Lgm_ElapsedTime.h>
+#include <Lgm_KdTree.h>
 int main( ) {
     Lgm_ElapsedTimeInfo t;
     double              *q, **u, **B, *Dst, DstIndex, dum1, dum2, dum3;
