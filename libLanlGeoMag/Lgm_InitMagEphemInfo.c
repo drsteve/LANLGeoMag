@@ -373,9 +373,9 @@ void ReadMagEphemInfoStruct( char *Filename, int *nPitchAngles, Lgm_MagEphemInfo
     dum = read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( double ) );
     LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->ShellI, ddata, n, LGM_LSTARINFO_MAX_FL, double );
 
-    ddata = (int *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(int) );
-    dum = read( fd, ddata, n*LGM_LSTARINFO_MAX_FL*sizeof( int ) );
-    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->nBounceRegions, ddata, n, LGM_LSTARINFO_MAX_FL, int );
+    idata = (int *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(int) );
+    dum = read( fd, idata, n*LGM_LSTARINFO_MAX_FL*sizeof( int ) );
+    LGM_ARRAY_FROM_DATA_2D( MagEphemInfo->nBounceRegions, idata, n, LGM_LSTARINFO_MAX_FL, int );
 
     vdata = (Lgm_Vector *)calloc( n*LGM_LSTARINFO_MAX_FL, sizeof(Lgm_Vector) );
     dum = read( fd, vdata, n*LGM_LSTARINFO_MAX_FL*sizeof( Lgm_Vector ) );
