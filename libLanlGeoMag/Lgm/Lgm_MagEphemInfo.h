@@ -89,7 +89,7 @@ typedef struct Lgm_MagEphemInfo {
     Lgm_Vector  *Pmn_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pmn_gsm[ PitchAngleIndex ]  position of northern |Bmirror|
     Lgm_Vector  *Pms_gsm;   //!< 1D array (dynamically allocated). Access as follows: Pms_gsm[ PitchAngleIndex ]  position of southern |Bmirror|
     double      *Bm;        //!< 1D array (dynamically allocated). Access as follows: Bm[ PitchAngleIndex ]       Value of |Bm| (i.e. Bmirror)
-    double      *I;         //!< 1D array (dynamically allocated). Access as follows: I[ PitchAngleIndex ]
+    double      *I_data;         //!< 1D array (dynamically allocated). Access as follows: I[ PitchAngleIndex ]
     double      *Sb;        //!< 1D array (dynamically allocated). Access as follows: Sb[ PitchAngleIndex ]
     double      *Tb;        //!< 1D array (dynamically allocated). Access as follows: Tb[ PitchAngleIndex ]       we calculate this for a 1Mev electron but could do more...
     double      *K;         //!< 1D array (dynamically allocated). Access as follows: K[ PitchAngleIndex ]

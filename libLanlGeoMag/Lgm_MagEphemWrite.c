@@ -2405,7 +2405,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     // McIlwain L (computed from I, Bm, M)
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { 
-        L = ( m->I[i] >= 0.0 ) ? LFromIBmM_McIlwain(m->I[i], m->Bm[i], m->Mused ) : LGM_FILL_VALUE;
+        L = ( m->I_data[i] >= 0.0 ) ? LFromIBmM_McIlwain(m->I_data[i], m->Bm[i], m->Mused ) : LGM_FILL_VALUE;
         fprintf(fp, " %12g", L);
     }
 
@@ -2415,13 +2415,13 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     // I's
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->I[i] ); }
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->I_data[i] ); }
 
     // K's
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { 
-        if ( (m->I[i] > 0.0) && (m->Bm[i] > 0.0) ) {
-            fprintf(fp, " %12g", m->I[i]*sqrt(m->Bm[i]*1e-5) ); 
+        if ( (m->I_data[i] > 0.0) && (m->Bm[i] > 0.0) ) {
+            fprintf(fp, " %12g", m->I_data[i]*sqrt(m->Bm[i]*1e-5) ); 
         } else {
             fprintf(fp, " %12g", LGM_FILL_VALUE ); 
         }

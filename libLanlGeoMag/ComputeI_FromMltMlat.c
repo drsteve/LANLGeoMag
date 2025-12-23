@@ -34,7 +34,7 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
 
     int         reset=1, reset2;
 
-    double      I, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
+    double      I1, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
     Lgm_Vector  w, u, Pmirror1, Pmirror2, v1, v2, v3, Bvec, P, Ps, u_scale, Bvectmp, Ptmp;
     double      stmp, Btmp;
 
@@ -52,8 +52,8 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
          *  Couldnt get a valid Bm. (The bracket is pretty huge,so
          *  we probably ought to believe there really isnt a valid one.)
          */
-        if (LstarInfo->VerbosityLevel > 1) printf("\t%sNo Bm found: setting I to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
-        I = 9e99;
+        if (LstarInfo->VerbosityLevel > 1) printf("\t%sNo Bm found: setting I1 to 9e99%s\n", LstarInfo->PreStr, LstarInfo->PostStr);
+        I1 = 9e99;
 
     } else {
 
@@ -195,7 +195,7 @@ double ComputeI_FromMltMlat1( double Bm, double MLT, double mlat, double *r, dou
              *
              *     Trace from Pm_North to Pm_South
              */
-            I = 9e99;
+            I1 = 9e99;
             //LstarInfo->mInfo->Hmax = 10.0;
             //LstarInfo->mInfo->Hmax = 0.1;
             LstarInfo->mInfo->Hmax = 0.1;
@@ -307,17 +307,17 @@ if (0==1){
                      *  Do I integral with interped integrand.
                      */
 //printf("I = %g\n", I);
-                    I = Iinv_interped( LstarInfo->mInfo );
+                    I1 = Iinv_interped( LstarInfo->mInfo );
 //printf("I = %g     Sm_South, Sm_North = %g %g\n", I, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North);
 //                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     if (LstarInfo->VerbosityLevel > 1) {
-                        printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I, I0, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                        printf("\t\t%s  mlat: %13.6g   I1: %13.6g   I0: %13.6g   I1-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I1, I0, I1-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     }
                     FreeSpline( LstarInfo->mInfo );
 
                 } else {
 
-                    I = 9e99;
+                    I1 = 9e99;
 
                 }
 
@@ -332,12 +332,12 @@ if (0==1){
                 /*
                  *  Do full blown I integral.
                  */
-                I = Iinv( LstarInfo->mInfo  );
-                if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (full integral): %15.8g    I-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                I1 = Iinv( LstarInfo->mInfo  );
+                if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I1 (full integral): %15.8g    I1-I0:    %15.8g    mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I1, I1-I0, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
             }
 
         } else {
-            I = 9e99;
+            I1 = 9e99;
         }
 
     }
@@ -345,6 +345,6 @@ if (0==1){
 
 
 
-    return( I );
+    return( I1 );
 
 }

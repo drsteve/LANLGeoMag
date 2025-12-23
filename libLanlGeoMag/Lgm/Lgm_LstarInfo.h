@@ -101,7 +101,7 @@ typedef struct Lgm_LstarInfo {
     double              RofC;       // radius of curvature at Bmin point.
 
     double              I0;
-    double              I[ LGM_LSTARINFO_MAX_FL ];
+    double              I_data[ LGM_LSTARINFO_MAX_FL ];
 
     int                 ComputeSbIntegral;
     double              SbIntegral0; // Sb Integral on initial FL (i.e. one with Sat through it.)
