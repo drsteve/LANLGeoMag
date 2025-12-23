@@ -306,10 +306,10 @@ if (0==1){
                     /*
                      *  Do I integral with interped integrand.
                      */
-//printf("I = %g\n", I);
+//printf("I = %g\n", I1);
                     I1 = Iinv_interped( LstarInfo->mInfo );
-//printf("I = %g     Sm_South, Sm_North = %g %g\n", I, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North);
-//                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+//printf("I = %g     Sm_South, Sm_North = %g %g\n", I1, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North);
+//                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t%s  Integral Invariant, I (interped):      %15.8g    I-I0:    %15.8g    [a,b]: %.15g  %.15g  mlat:   %12.8lf  (nCalls = %d)%s\n",  LstarInfo->PreStr, I1, I1-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, mlat, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     if (LstarInfo->VerbosityLevel > 1) {
                         printf("\t\t%s  mlat: %13.6g   I1: %13.6g   I0: %13.6g   I1-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I1, I0, I1-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
                     }
