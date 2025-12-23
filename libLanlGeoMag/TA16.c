@@ -156,24 +156,24 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
 void Lgm_Precalc_TA16(LgmTA16_Info *ta, double tan_psi) {
     double DELTA_ZR, DTHETA, cDTM1, sDT, XX, YY, ZZ;
     double sdt_zcp, sdt_zsp, sdt_rho;
-    int IDX;
-    for (IDX=1; IDX<=1296; IDX++) {
-        DELTA_ZR = ta->RHBR[IDX]*tan_psi;
-        DTHETA = -asin(DELTA_ZR)*ta->ST[IDX];
+    int idx;
+    for (idx=1; idx<=1296; idx++) {
+        DELTA_ZR = ta->RHBR[idx]*tan_psi;
+        DTHETA = -asin(DELTA_ZR)*ta->ST[idx];
         sDT = sin(DTHETA);
         cDTM1 = cos(DTHETA)-1.0;
-        sdt_zcp = sDT*ta->ZCP[IDX];
-        sdt_zsp = sDT*ta->ZSP[IDX];
-        sdt_rho = sDT*ta->RHO[IDX];
-        XX = ta->XX[IDX];
-        YY = ta->YY[IDX];
-        ZZ = ta->ZZ[IDX];
-        ta->DPx[IDX] = XX*cDTM1 + sdt_zcp;
-        ta->DPy[IDX] = YY*cDTM1 + sdt_zsp;
-        ta->DPz[IDX] = ZZ*cDTM1 - sdt_rho;
-        ta->DMx[IDX] = XX*cDTM1 - sdt_zcp;
-        ta->DMy[IDX] = YY*cDTM1 - sdt_zsp;
-        ta->DMz[IDX] = -ZZ*cDTM1 - sdt_rho;
+        sdt_zcp = sDT*ta->ZCP[idx];
+        sdt_zsp = sDT*ta->ZSP[idx];
+        sdt_rho = sDT*ta->RHO[idx];
+        XX = ta->XX[idx];
+        YY = ta->YY[idx];
+        ZZ = ta->ZZ[idx];
+        ta->DPx[idx] = XX*cDTM1 + sdt_zcp;
+        ta->DPy[idx] = YY*cDTM1 + sdt_zsp;
+        ta->DPz[idx] = ZZ*cDTM1 - sdt_rho;
+        ta->DMx[idx] = XX*cDTM1 - sdt_zcp;
+        ta->DMy[idx] = YY*cDTM1 - sdt_zsp;
+        ta->DMz[idx] = -ZZ*cDTM1 - sdt_rho;
     }
 }
 
@@ -302,7 +302,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
 
 int TA2016_SetGrid(LgmTA16_Info *Info) {
     // initialize the TA2016 coefficient set, grid, etc.
-    int Klat, Nlat, Nlon, IDX, J, K, L=0;
+    int Klat, Nlat, Nlon, idx, J, K, L=0;
     double D=4.0;
     double Alpha, XXXX, YYYY, ZZZZ, RHighGrid, RLowGrid, X4sq, Y4sq, Z4sq;
     double Xlon, XlonD, Xcolat, XcolatD, sinXco, sinXlo, cosXlo;
@@ -332,10 +332,10 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
   
     for (J=1; J<=100; J++) {   // J COUNTS THE NUMBER OF SPHERES WITH RBF CENTERS
                  // (WHICH IS ACTUALLY MUCH LESS THAN 100)
-      for (IDX=1; IDX<=Nlat; IDX++) {     // IDX COUNTS THE LATITUDE CIRCLES (FROM NORTH POLE DOWN TO EQUATOR)
-        XcolatD = (90.0/(Nlat-0.5))*((double)(IDX)-1.0);  //  COLATITUDE OF THE Ith CIRCLE (in degs)
-        Nlon=4*(IDX-1);                       //  NUMBER OF RBF CENTERS ON THE ItH CIRCLE
-        if (IDX != 1) {
+      for (idx=1; idx<=Nlat; idx++) {     // idx COUNTS THE LATITUDE CIRCLES (FROM NORTH POLE DOWN TO EQUATOR)
+        XcolatD = (90.0/(Nlat-0.5))*((double)(idx)-1.0);  //  COLATITUDE OF THE Ith CIRCLE (in degs)
+        Nlon=4*(idx-1);                       //  NUMBER OF RBF CENTERS ON THE ItH CIRCLE
+        if (idx != 1) {
           dLonDeg = 360.0/Nlon;            //  LONGITUDE INTERVAL BETWEEN CENTERS (degs)
         } else {
           Nlon = 1;                         //  NUMBER OF RBF CENTERS ON THE NORTH POLE
@@ -403,7 +403,7 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
             Info->RHBR[L] = RH/R*(1.0 - pow(1.0 + pow(R/RH, Alpha), 1.0/Alpha));
           }
         }  // End loop over K
-      }  // End loop over IDX
+      }  // End loop over idx
   
       RLAST = R;
       R = R*(Nlat-0.5+M_PI/4.0)/(Nlat-0.5-M_PI/4.0);  // Increment R by a fixed factor
@@ -415,7 +415,7 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
 
 
 int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *BvecGSM, LgmTA16_Info *Info) {
-    int IDX;
+    int idx;
     Lgm_Vector posSM, BvecSM;
     Lgm_Vector Parr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
     Lgm_Vector TCM, TCP;
@@ -451,17 +451,17 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       Lgm_Precalc_TA16(Info, tPS);
       Info->cache_psi = ctrans->psi;
     }
-    for (IDX=1; IDX<=1296; IDX++) {
-      Parr.x = Info->XX[IDX];
-      Parr.y = Info->YY[IDX];
-      Parr.z = Info->ZZ[IDX];
+    for (idx=1; idx<=1296; idx++) {
+      Parr.x = Info->XX[idx];
+      Parr.y = Info->YY[idx];
+      Parr.z = Info->ZZ[idx];
 
-      dcpdenx = posSM.x-Parr.x-Info->DPx[IDX];
-      dcpdeny = posSM.y-Parr.y-Info->DPy[IDX];
-      dcpdenz = posSM.z-Parr.z-Info->DPz[IDX];
-      dcmdenx = posSM.x-Parr.x-Info->DMx[IDX];
-      dcmdeny = posSM.y-Parr.y-Info->DMy[IDX];
-      dcmdenz = posSM.z+Parr.z-Info->DMz[IDX];
+      dcpdenx = posSM.x-Parr.x-Info->DPx[idx];
+      dcpdeny = posSM.y-Parr.y-Info->DPy[idx];
+      dcpdenz = posSM.z-Parr.z-Info->DPz[idx];
+      dcmdenx = posSM.x-Parr.x-Info->DMx[idx];
+      dcmdeny = posSM.y-Parr.y-Info->DMy[idx];
+      dcmdenz = posSM.z+Parr.z-Info->DMz[idx];
       CP = sqrt(dcpdenx*dcpdenx +
                 dcpdeny*dcpdeny +
                 dcpdenz*dcpdenz + D2);    // RBF Ch_i+
@@ -522,12 +522,12 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       SParr.z = (PCP.z + PCM.z)*sPS;
     
     // -----------------   TOTAL FIELD:    -----------------------------------
-      ACT = Info->A[IDX]+Info->A[IDX+5184]*FPD+Info->A[IDX+10368]*SymV+Info->A[IDX+15552]*Xind;
-      AST = Info->A[IDX+1296]+Info->A[IDX+6480]*FPD+Info->A[IDX+11664]*SymV+Info->A[IDX+16848]*Xind;
-      AT  = Info->A[IDX+20736]*ByIMF;
-      ACP = Info->A[IDX+2592]+Info->A[IDX+7776]*FPD+Info->A[IDX+12960]*SymV+Info->A[IDX+18144]*Xind;
-      ASP = Info->A[IDX+3888]+Info->A[IDX+9072]*FPD+Info->A[IDX+14256]*SymV+Info->A[IDX+19440]*Xind;
-      AP  = Info->A[IDX+22032]*ByIMF;
+      ACT = Info->A[idx]+Info->A[idx+5184]*FPD+Info->A[idx+10368]*SymV+Info->A[idx+15552]*Xind;
+      AST = Info->A[idx+1296]+Info->A[idx+6480]*FPD+Info->A[idx+11664]*SymV+Info->A[idx+16848]*Xind;
+      AT  = Info->A[idx+20736]*ByIMF;
+      ACP = Info->A[idx+2592]+Info->A[idx+7776]*FPD+Info->A[idx+12960]*SymV+Info->A[idx+18144]*Xind;
+      ASP = Info->A[idx+3888]+Info->A[idx+9072]*FPD+Info->A[idx+14256]*SymV+Info->A[idx+19440]*Xind;
+      AP  = Info->A[idx+22032]*ByIMF;
       BvecSM.x += CTarr.x*ACT + STarr.x*AST + (TCP.x-TCM.x)*AT + CParr.x*ACP + SParr.x*ASP + (PCP.x+PCM.x)*AP;
       BvecSM.y += CTarr.y*ACT + STarr.y*AST + (TCP.y-TCM.y)*AT + CParr.y*ACP + SParr.y*ASP + (PCP.y+PCM.y)*AP;
       BvecSM.z += CTarr.z*ACT + STarr.z*AST + (TCP.z-TCM.z)*AT + CParr.z*ACP + SParr.z*ASP + (PCP.z+PCM.z)*AP;
