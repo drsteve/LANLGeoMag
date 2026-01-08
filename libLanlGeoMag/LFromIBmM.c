@@ -4,19 +4,19 @@
 /*
  *  Hilton's approximation to compute McIlwain's L-shell parameter:
  *   
- *   		L^3 Bm / M = F( I^3 Bm / M )
+ *   		L^3 Bm / M = F( I_data^3 Bm / M )
  *
  *  This routine uses the F() function as described in 
  *  Hilton, JGR 76, No 28, 6952-6954, October 1, 1971.
  *
  */
-double	LFromIBmM_Hilton( double I, double Bm, double M ) {
+double	LFromIBmM_Hilton( double I_data, double Bm, double M ) {
 
     double	p, a1, a2, a3, X, X13, X23, F;
 
 
     p = 1.0/3.0;
-    X   = I*I*I*Bm/M;
+    X   = I_data*I_data*I_data*Bm/M;
     X13 = pow( X, p );
     X23 = X13*X13;
 
@@ -38,7 +38,7 @@ double	LFromIBmM_Hilton( double I, double Bm, double M ) {
 double	IFromLBmM_Hilton( double L, double Bm, double M ) {
 
     int		done;
-    double	LHS, RHS, p, a1, a2, a3, X13, X23, X, a, b, c, d, I;
+    double	LHS, RHS, p, a1, a2, a3, X13, X23, X, a, b, c, d, I_data;
 
     /*
      *  we have;
@@ -102,8 +102,8 @@ double	IFromLBmM_Hilton( double L, double Bm, double M ) {
     /*
      *  Take average of endpoints as final answer
      */
-    X = 0.5*(a+c); I = pow( X*M/Bm, p );
-    return( I );
+    X = 0.5*(a+c); I_data = pow( X*M/Bm, p );
+    return( I_data );
 
 }
 
@@ -117,17 +117,17 @@ double	IFromLBmM_Hilton( double L, double Bm, double M ) {
 /*
  *  McIlwain's original approximation to compute his L-shell parameter:
  *   
- *   		L^3 Bm / M = F( I^3 Bm / M )
+ *   		L^3 Bm / M = F( I_data^3 Bm / M )
  *
  *  This routine uses the F() function as described in 
  *  Roederer's 1970 book, Appendix VI, page 155.
  *
  */
-double	LFromIBmM_McIlwain( double I, double Bm, double M ) {
+double	LFromIBmM_McIlwain( double I_data, double Bm, double M ) {
 
     double	X, X2, X3, X4, X5, X6, X7, X8, X9, Y, G;
 
-    X  = log(I*I*I*Bm/M);
+    X  = 3*log(I_data) + log(Bm/M);
 
     if        ( X < -22.0 ) { 	/* X < -22.0 */
 

@@ -141,7 +141,7 @@
 
 void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo *m ) {
 
-    int     I, J, K, Jp1, II, JJ, KK, IJK;
+    int     i, J, K, Jp1, II, JJ, KK, IJK;
     double  X, Y, Z, X2, Y2, Z2, R2, MYFAC;
     double  BX, BY, BZ, CON, EXPR, XB, YEXB, ZEYEXB;
 
@@ -301,25 +301,25 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
         /*
          * SET UP THE X AND Z COMPONENT TILT INDEPENDENT COEFFICIENTS
          */
-        for ( I=1; I<=32; I++ ) {
-            J = 2*I-1;
+        for ( i=1; i<=32; i++ ) {
+            J = 2*i-1;
             Jp1 = J+1;
-            K = ITA[I];
-            m->OP77_A[I] = AA[J]*m->OP77_TT[K] + AA[Jp1]*m->OP77_TT[K+2];
-            m->OP77_B[I] = BB[J]*m->OP77_TT[K] + BB[Jp1]*m->OP77_TT[K+2];
-            K = ITC[I];
-            m->OP77_E[I] = EE[J]*m->OP77_TT[K] + EE[Jp1]*m->OP77_TT[K+2];
-            m->OP77_F[I] = FF[J]*m->OP77_TT[K] + FF[Jp1]*m->OP77_TT[K+2];
+            K = ITA[i];
+            m->OP77_A[i] = AA[J]*m->OP77_TT[K] + AA[Jp1]*m->OP77_TT[K+2];
+            m->OP77_B[i] = BB[J]*m->OP77_TT[K] + BB[Jp1]*m->OP77_TT[K+2];
+            K = ITC[i];
+            m->OP77_E[i] = EE[J]*m->OP77_TT[K] + EE[Jp1]*m->OP77_TT[K+2];
+            m->OP77_F[i] = FF[J]*m->OP77_TT[K] + FF[Jp1]*m->OP77_TT[K+2];
         }
 
         /*
          * SET UP THE Y COMPONENT TILT INDEPENDENT COEFFICIENTS
          */
-        for ( I=1; I<=22; I++ ) {
-            J = 2*I-1;
-            K = ITB[I];
-            m->OP77_C[I] = CC[J]*m->OP77_TT[K] + CC[J+1]*m->OP77_TT[K+2];
-            m->OP77_D[I] = DD[J]*m->OP77_TT[K] + DD[J+1]*m->OP77_TT[K+2];
+        for ( i=1; i<=22; i++ ) {
+            J = 2*i-1;
+            K = ITB[i];
+            m->OP77_C[i] = CC[J]*m->OP77_TT[K] + CC[J+1]*m->OP77_TT[K+2];
+            m->OP77_D[i] = DD[J]*m->OP77_TT[K] + DD[J+1]*m->OP77_TT[K+2];
         }
 
     }
@@ -340,7 +340,7 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
     /* 
      * BEGIN SUM OVER X
      */
-    for ( I=1; I<=5; I++ ) {
+    for ( i=1; i<=5; i++ ) {
 
         YEXB = XB;
 
@@ -349,9 +349,9 @@ void OlsenPfitzerStatic( double XX[], double BF[], double TILT, Lgm_MagModelInfo
          */
         for ( J=1; J<=3; J++ ) {
     
-            if (I+2*J >  8) break;
+            if (i+2*J >  8) break;
             ZEYEXB = YEXB;
-            IJK = I + 2*J + 1;
+            IJK = i + 2*J + 1;
             K = 1;
 
             /* 
