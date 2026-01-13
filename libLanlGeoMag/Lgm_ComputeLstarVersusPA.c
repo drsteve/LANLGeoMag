@@ -116,7 +116,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
          */
         for ( i=0; i<MagEphemInfo->nAlpha; i++ ){
             MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
-            MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+            MagEphemInfo->I_data[i]     = LGM_FILL_VALUE;
             MagEphemInfo->K[i]     = LGM_FILL_VALUE;
             MagEphemInfo->Sb[i]    = LGM_FILL_VALUE;
         }
@@ -185,7 +185,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
                         printf("\n\n\t\t%sComputing L* for: UTC = %g  (Local) PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
-                        //printf("    \t\t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
+                        //printf("    \t\t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I_data[i], i, MagEphemInfo->Alpha[i], PostStr );
                     }
 //////////////////////////////NOTE
 //////////////////////////////NOTE   We are giving Lstar the Min B point ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -199,8 +199,8 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                         printf("\t\t%sUTC, LSimple     = %g %g%s\n\n\n", PreStr, UTC, LSimple, PostStr );
                     }
                     MagEphemInfo->Lstar[i] = ( LS_Flag >= 0 ) ? LstarInfo2->LS : LGM_FILL_VALUE;
-                    MagEphemInfo->I[i]  = LstarInfo2->I[0]; // I[0] is I for the FL that the sat is on.
-                    MagEphemInfo->K[i]  = LstarInfo2->I[0]*sqrt(MagEphemInfo->Bm[i]*1e-5); // Second invariant
+                    MagEphemInfo->I_data[i]  = LstarInfo2->I_data[0]; // I_data[0] is I for the FL that the sat is on.
+                    MagEphemInfo->K[i]  = LstarInfo2->I_data[0]*sqrt(MagEphemInfo->Bm[i]*1e-5); // Second invariant
                     MagEphemInfo->Sb[i] = LstarInfo2->SbIntegral0; // SbIntegral0 is Sb for the FL that the sat is on.
                     /*
                      *  Determine the type of the orbit
@@ -237,7 +237,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                         MagEphemInfo->Shell_GradI[i][nn] = LstarInfo2->GradI[nn];
                         MagEphemInfo->Shell_Vgc[i][nn]   = LstarInfo2->Vgc[nn];
 
-                        MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
+                        MagEphemInfo->ShellI[i][nn] = LstarInfo2->I_data[nn];
 
                         MagEphemInfo->ShellSphericalFootprint_Pn[i][nn] = LstarInfo2->Spherical_Footprint_Pn[nn];
                         MagEphemInfo->ShellSphericalFootprint_Sn[i][nn] = LstarInfo2->Spherical_Footprint_Sn[nn];
@@ -287,7 +287,7 @@ void Lgm_ComputeLstarVersusPA( long int Date, double UTC, Lgm_Vector *u, int nAl
                     printf(" Lsimple >= %g  ( Not doing L* calculation )\n", LstarInfo3->LSimpleMax );
                     MagEphemInfo->Lstar[i] = LGM_FILL_VALUE;
 //printf("Bm = %g\n", MagEphemInfo->Bm[i]);
-                    MagEphemInfo->I[i]     = LGM_FILL_VALUE;
+                    MagEphemInfo->I_data[i]     = LGM_FILL_VALUE;
                     MagEphemInfo->K[i]     = LGM_FILL_VALUE;
                     MagEphemInfo->nShellPoints[i] = 0;
 

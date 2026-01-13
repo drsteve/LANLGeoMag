@@ -82,7 +82,7 @@ typedef struct _Lgm_Vec_RBF_Info {
 } Lgm_Vec_RBF_Info;
 
 
-Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I, Lgm_Vector *v, Lgm_Vector *B, int n, double eps, int RadialBasisFunction );
+Lgm_DFI_RBF_Info *Lgm_DFI_RBF_Init( unsigned long int *I_data, Lgm_Vector *v, Lgm_Vector *B, int n, double eps, int RadialBasisFunction );
 void    Lgm_DFI_RBF_Free( Lgm_DFI_RBF_Info *rbf );
 void    Lgm_DFI_RBF_Phi( Lgm_Vector *v, Lgm_Vector *v0, double Phi[3][3], Lgm_DFI_RBF_Info *rbf );
 void    Lgm_DFI_RBF_Eval( Lgm_Vector *v, Lgm_Vector *B, Lgm_DFI_RBF_Info *rbf );
