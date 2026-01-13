@@ -291,7 +291,7 @@ typedef struct Lgm_MagEphemData {
     int         **H5_DriftShellType;
     double      **H5_L;
     double      **H5_Bm;
-    double      **H5_I;
+    double      **H5_I_data;
     double      **H5_K;
 
 } Lgm_MagEphemData;
