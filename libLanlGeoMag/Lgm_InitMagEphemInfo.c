@@ -577,7 +577,7 @@ Lgm_MagEphemData *Lgm_InitMagEphemData( int nRows, int nPA ) {
     LGM_ARRAY_2D( MagEphemData->H5_DriftShellType,    nRows, nPA,     int    );
     LGM_ARRAY_2D( MagEphemData->H5_L,                 nRows, nPA,     double );
     LGM_ARRAY_2D( MagEphemData->H5_Bm,                nRows, nPA,     double );
-    LGM_ARRAY_2D( MagEphemData->H5_I,                 nRows, nPA,     double );
+    LGM_ARRAY_2D( MagEphemData->H5_I_data,                 nRows, nPA,     double );
     LGM_ARRAY_2D( MagEphemData->H5_K,                 nRows, nPA,     double );
 
     return( MagEphemData );
@@ -705,7 +705,7 @@ void Lgm_FreeMagEphemData( Lgm_MagEphemData *MagEphemData ) {
     LGM_ARRAY_2D_FREE( MagEphemData->H5_DriftShellType );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_L );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_Bm );
-    LGM_ARRAY_2D_FREE( MagEphemData->H5_I );
+    LGM_ARRAY_2D_FREE( MagEphemData->H5_I_data );
     LGM_ARRAY_2D_FREE( MagEphemData->H5_K );
 
     free( MagEphemData );
