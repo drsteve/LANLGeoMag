@@ -1,8 +1,8 @@
 #ifndef LGM_EOP_H
 #define LGM_EOP_H
-#include <math.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+#include <math.h>
 
 
 #ifndef M_2PI

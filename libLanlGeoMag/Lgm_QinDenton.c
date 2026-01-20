@@ -15,14 +15,14 @@
 #include <config.h>
 #endif
 
+#include <gsl/gsl_errno.h>
 #include <stdio.h>
-#include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gsl/gsl_errno.h>
+#include <sys/stat.h>
 #include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_DynamicMemory.h"
+#include "Lgm/Lgm_MagModelInfo.h"
 #include "Lgm/Lgm_QinDenton.h"
 
 
@@ -225,7 +225,7 @@ void Lgm_read_QinDenton( long int Date, Lgm_QinDenton *q ) {
     Lgm_mjd_to_ymdh( Next_MJD, &Next_Date, &Next_Year, &Next_Month, &Next_Day, &Next_UT );
 
 
-    Filename = (char *)calloc( 512, sizeof(char) );
+    Filename = (char *)calloc(2575, sizeof(char) );
     Line = (char *)calloc( 2050, sizeof(char) );
     n = 0;
 

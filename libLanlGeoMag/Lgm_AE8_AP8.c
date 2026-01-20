@@ -12,13 +12,13 @@
  *
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include "Lgm/Lgm_AE8_AP8.h"
 #include "Lgm/Lgm_CTrans.h"
 #include "Lgm/Lgm_MagModelInfo.h"
-#include "Lgm/Lgm_AE8_AP8.h"
 
 static int AE8MIN_IHEAD[] = { 0,      8,      4,   1964,   6400,   2100,   1024,   1024,  13168 };
 static int AE8MIN_MAP[] = { 0,

@@ -10,13 +10,13 @@
 #endif
 
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include "Lgm_JPLeph.h"
 #include "Lgm_Vec.h"
 #include "Lgm_WGS84.h"
-#include "Lgm_JPLeph.h"
 
 #define DegPerRad       57.295779513082320876798154814105
 #define RadPerDeg        0.017453292519943295769236907568

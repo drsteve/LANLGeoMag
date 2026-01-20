@@ -16,6 +16,8 @@
  * The nutations and librations are stored in units of radians.
  */
 
+#include "Lgm_Vec.h"
+
 #ifndef TRUE
 #define TRUE 1
 #endif

@@ -2,14 +2,14 @@
 #define MAGEPHEMINFO_H
 
 #include "Lgm_MagModelInfo.h"
-#include "Lgm_LstarInfo.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "Lgm_HDF5.h"
+#include "Lgm_LstarInfo.h"
 
 
 #define MAX_PITCH_ANGLES 90

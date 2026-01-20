@@ -2,8 +2,8 @@
 #include <config.h>
 #endif
 #include "Lgm/Lgm_CTrans.h"
-#include "Lgm/Lgm_MagEphemInfo.h"
 #include "Lgm/Lgm_IGRF.h"
+#include "Lgm/Lgm_MagEphemInfo.h"
 
 #ifndef LGM_INDEX_DATA_DIR
 #warning "hard-coding LGM_INDEX_DATA_DIR because it was not in config.h"

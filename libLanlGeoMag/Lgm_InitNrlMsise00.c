@@ -1,6 +1,6 @@
+#include "Lgm/Lgm_DynamicMemory.h"
 #include "Lgm/Lgm_NrlMsise00.h"
 #include "Lgm/Lgm_NrlMsise00_Data.h"
-#include "Lgm/Lgm_DynamicMemory.h"
 
 
 Lgm_Msis00Info *InitMsis00( ) {
