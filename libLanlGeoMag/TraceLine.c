@@ -402,30 +402,21 @@ if (1==1){
     Info->ds        = Info->Hmax;              // spacing in s for the array -- will help to know this
                                                // when trying to interpolate.
 
-
-
-
-
-
-
     /*
      *  Add the Smin, Bmin point. Only do this if AddBminPoint is TRUE
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      */
-    if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+    if (AddBminPoint) {
+        if (Info->VerbosityLevel > 1) printf("1) ADDING NEW POINT\n");
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
-
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
+    if (Info->VerbosityLevel > 2) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
-
-
 }
 
 
@@ -773,13 +764,13 @@ if (0==1){
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      */
-    if ( AddBminPoint ) {
-        AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
+    if (AddBminPoint) {
+        AddNewPoint(Info->Smin, Info->Bmin, &Info->Pmin, Info);
 //printf("2) ADDING NEW POINT\n");
 //printf("n, nPnts = %d %d\n", n, Info->nPnts);
     }
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine2(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
+    if (Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine2(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
 
@@ -1441,8 +1432,8 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      */
-    if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+    if (AddBminPoint) {
+        if (Info->VerbosityLevel >  1) printf("1) ADDING NEW POINT\n");
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
@@ -1452,7 +1443,6 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
-
 
 }
 
@@ -1730,17 +1720,16 @@ int Lgm_TraceLine4( Lgm_Vector *Pm_s, Lgm_Vector *Pm_n, double dSa, double dSb, 
      *  This will only make sense if these values are legitimate for this FL.
      *  Perhaps it would be better to force user to do this elesewhere.
      */
-    if ( AddBminPoint ) {
-        printf("1) ADDING NEW POINT\n");
+    if (AddBminPoint) {
+        if (Info->VerbosityLevel > 1) printf("1) ADDING NEW POINT\n");
         // MUST ADD Bcdip for this too!
         AddNewPoint( Info->Smin, Info->Bmin, &Info->Pmin, Info );
     }
     //printf("1) F >>>>>>>>> Info->nPnts = %d <<<<<<<<<<\n", Info->nPnts);
 
 
-    if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
+    if (Info->VerbosityLevel > 2) printf("Lgm_TraceLine(): Number of Bfield evaluations = %ld\n", Info->Lgm_nMagEvals );
 
     return( 1 );
-
 
 }
