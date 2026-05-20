@@ -1258,8 +1258,6 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
     P = *u;
     if ( Info->VerbosityLevel > 2 ) printf("Lgm_TraceLine3(): P = %g %g %g (first point)\n", P.x, P.y, P.z );
     while ( !done ) {
-
-
         /*
          * Attempt to make a step of Htry0. Note that Lgm_MagStep() is adaptive,
          * so we arent guaranteed to actually get Htry0.  We need to examine
@@ -1272,21 +1270,17 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
         nSubSteps = 0;
 
         while ( !DoneStep ) {
-
             if ( Lgm_MagStep( &P, &u_scale, Htry, &Hdid, &Hnext, sgn, &s, &reset, Info->Bfield, Info ) < 0 ) { 
                 printf("Problem in Lgm_MagStep(). File: %s, Line %d. BAILING 1\n", __FILE__, __LINE__ ); 
                 return(-1);
             }
-
             Hsum += Hdid;
 //if ( nSubSteps > 100 ){
 //printf("R = %lf km ( %lf Re)   P = %g %g %g   Hdid, Htry, Hnext  = %g %g %g AHA Problem in TraceLine3(). File: %s, Line %d. Too many substeps.  nSubSteps = %d\n", Re*Lgm_Magnitude(&P), Lgm_Magnitude(&P), P.x, P.y, P.z, Hdid, Htry, Hnext, __FILE__, __LINE__, nSubSteps ); 
 //}
-            //if ( fabs(Hdid-Htry) < 1e-7 ) {
             if ( fabs(Hsum-Htry0) < 1e-7 ) {
                 // we got what we asked for.
                 DoneStep = TRUE;
-            //} else if ( nSubSteps > 100 ) {
             } else if ( nSubSteps > 1000 ) {
                 DoneStep = TRUE;
                 printf("Problem in TraceLine3(). File: %s, Line %d. Too many substeps.  nSubSteps = %d\n", __FILE__, __LINE__, nSubSteps ); 
@@ -1302,8 +1296,6 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
 
         ss += Hsum;  
         R  = Lgm_Magnitude( &P );
-
-
 
         if ( Info->VerbosityLevel > 2 ) {
             printf("Lgm_TraceLine3(): P = %g %g %g    R, s = %g %g    S = %g   Step n = %d of N = %d (Nsubsteps = %d)\n", P.x, P.y, P.z, R, ss, S, n, N, nSubSteps );
@@ -1337,9 +1329,10 @@ int Lgm_TraceLine3( Lgm_Vector *u, double S, int N, double sgn, double tol, int 
             /*
              *  Guard against cramming too many points into interpolation arrays
              */
-        if ( Info->VerbosityLevel > 0 ) printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
+            if ( Info->VerbosityLevel > 0 ) {
+                printf("%s, Line %d. Warning: n > LGM_MAX_INTERP_PNTS (%d)\n", __FILE__, __LINE__, LGM_MAX_INTERP_PNTS);
+            }
             return(-1);
-        //} else if ( fabs( S-ss ) < 2.0*tol ) {
         } else if ( fabs( S-ss ) < tol ) {
             done = TRUE;
         }
