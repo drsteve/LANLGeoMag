@@ -1,11 +1,11 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <Lgm_CTrans.h>
-#include <Lgm_QinDenton.h>
 #include <Lgm_ElapsedTime.h>
 #include <Lgm_FluxToPsd.h>
-#include <omp.h>
+#include <Lgm_QinDenton.h>
 
 
 void DumpImage( char *FilenameBase, int W, int H, double **Image ){

@@ -110,11 +110,11 @@
  */
 
 
-#include <stdlib.h>
-#include <stdio.h>
 #if !defined(__APPLE__)
 #include <malloc.h>
 #endif
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Macros for dynamically allocating/freeing 1D arrays of any type

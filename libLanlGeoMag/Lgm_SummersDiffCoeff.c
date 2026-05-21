@@ -1,10 +1,10 @@
 #include "Lgm/Lgm_SummersDiffCoeff.h"
 
-#include <gsl/gsl_poly.h>
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_poly.h>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_errno.h>
 
 struct inequalityParameters {double D; double E1; double E2; double F1; double F2;};
 struct normalizerForWavePowerSpectrumFunctionParams {double x; double aStar; int numberOfWaveNormalAngleDistributions; double *xmArray; double *dxArray; double *weightsOnWaveNormalAngleDistributions; double xmin; double xmax;};

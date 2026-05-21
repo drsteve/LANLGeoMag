@@ -1,14 +1,15 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <math.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <ctype.h>
 #include <argp.h>
-#include <time.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <Lgm/qsort.h>
 #include <libgen.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 #include <Lgm_CTrans.h>
 #include <Lgm_Sgp.h>
 #include <Lgm_MagEphemInfo.h>
@@ -18,9 +19,8 @@
 #include <Lgm_Misc.h>
 #include <Lgm_HDF5.h>
 #include <Lgm_ElapsedTime.h>
-#include "SpiceUsr.h"
-#include <Lgm/qsort.h>
 #include <Lgm_Octree.h>
+#include "SpiceUsr.h"
 
 #define EARTH_ID     399
 #define MOON_ID      301

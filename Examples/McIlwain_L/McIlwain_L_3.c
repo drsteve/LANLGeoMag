@@ -1,10 +1,10 @@
-#include <Lgm_MagModelInfo.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <Lgm_MagModelInfo.h>
 
 static double  glat[] = { 0.0, 20.0, 40.0, 60.0, 80.0 };
 static double  glon[] = { 0.0, 135.0, 225.0 };

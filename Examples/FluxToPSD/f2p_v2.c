@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <Lgm_MagModelInfo.h>
 #include <Lgm_FluxToPsd.h>
 void DumpSvg( int,  char * );

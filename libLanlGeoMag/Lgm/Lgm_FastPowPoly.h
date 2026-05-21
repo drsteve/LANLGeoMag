@@ -1,10 +1,9 @@
 #ifndef LGM_FASTPOWPOLY_H
 #define LGM_FASTPOWPOLY_H
 
-
-#include <stdio.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <xmmintrin.h>
 
 #define EXP_POLY_DEGREE 3

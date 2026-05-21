@@ -8,14 +8,14 @@
 #pragma GCC optimize ("O3")
 
 #include "Lgm/Lgm_KdTree.h"
-#include "Lgm/quicksort.h"
+#include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <sys/stat.h>
 #include <sys/timeb.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include "Lgm/quicksort.h"
 
 // We are missing the Lgm_KdTree_Free() routine???
 

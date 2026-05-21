@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #define TRUE 1
 #define FALSE 0
 typedef unsigned char byte; // needed for gif writer

@@ -1,6 +1,6 @@
 #include "Lgm/Lgm_CTrans.h"
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
 static int a[106][5] = {
     { 0,  0,  0,  0,  1}, //   1

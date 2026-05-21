@@ -1,13 +1,13 @@
-#include "CDFUtils.h"
-#include <math.h>
 #include <argp.h>
 #include <cdf.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <gsl/gsl_spline.h>
-#include <Lgm/Lgm_DynamicMemory.h>
 #include <Lgm/Lgm_CTrans.h>
+#include <Lgm/Lgm_DynamicMemory.h>
 #include <Lgm/Lgm_Quat.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "CDFUtils.h"
 
 
 /*

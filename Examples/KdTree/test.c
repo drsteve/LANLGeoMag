@@ -1,9 +1,9 @@
-#include <stdlib.h>
 #include <math.h>
+#include <quicksort.h>
+#include <stdlib.h>
 #include <Lgm_DynamicMemory.h>
 #include <Lgm_ElapsedTime.h>
 #include <Lgm_KdTree.h>
-#include <quicksort.h>
 int main( ) {
     Lgm_ElapsedTimeInfo t;
     double              **q, **u, **B;

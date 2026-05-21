@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #define INCLUDE_PERTURBATIONS 1
 
 double Frac( double x ) {
