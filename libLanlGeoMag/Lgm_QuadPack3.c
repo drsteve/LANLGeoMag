@@ -522,7 +522,7 @@ int	*last;
 
 
     double 	area, abseps, area1, area12, area2, a1;
-    double  a2, b1, b2, correc=0.0, defabs, defab1, defab2, d1mach();
+    double  a2, b1, b2, correc=0.0, defabs, defab1, defab2;
     double  dres, epmach, erlarg=0.0, erlast, errbnd, errmax;
     double  error1, error2, erro12, errsum, ertest=0.0, oflow, resabs, reseps; 
     double  res3la[4], rlist2[53], uflow;
