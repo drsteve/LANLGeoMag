@@ -192,15 +192,15 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
     if ( (fp = fopen( Filename, "r" )) != NULL ) {
 
         for ( k=1; k<=101; k++ ) {
-            fgets( &tmpstr, 512, fp);
-            sscanf( &tmpstr, "%lf", &t->A[k] );
+            fgets( tmpstr, 512, fp);
+            sscanf( tmpstr, "%lf", &t->A[k] );
             //fscanf( fp, "%lf%*[\n]\n", &t->A[k] );
             //printf("t->A[%d] = %g\n", k, t->A[k]);
         }
         while ((!foundP) && (!feof(fp))) {
-            fgets( &tmpstr, 512, fp);
-            if ( strstr( &tmpstr, p_str) != NULL ) { //check line for Pdyn, if present read value
-                sscanf( &tmpstr, "%*s %lf", &t->Pdyn);
+            fgets( tmpstr, 512, fp);
+            if ( strstr( tmpstr, p_str) != NULL ) { //check line for Pdyn, if present read value
+                sscanf( tmpstr, "%*s %lf", &t->Pdyn);
                 foundP = TRUE;
             }
         }
