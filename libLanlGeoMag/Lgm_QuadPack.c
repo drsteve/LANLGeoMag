@@ -429,7 +429,7 @@ int	*last;
 
 
     double 	area, abseps, area1, area12, area2, a1;
-    double     	a2, b1, b2, correc=0.0, defabs, defab1, defab2, d1mach();
+    double     	a2, b1, b2, correc=0.0, defabs, defab1, defab2;
     double     	dres, epmach, erlarg=0.0, erlast, errbnd, errmax;
     double     	error1, error2, erro12, errsum, ertest=0.0, oflow, resabs, reseps;
     double     	res3la[4], rlist2[53], small=0.0, uflow;
@@ -928,7 +928,7 @@ int dqelg(int n, double epstab[], double *result, double *abserr, double res3la[
 
 
 
-    double 	delta1, delta2, delta3, d1mach();
+    double 	delta1, delta2, delta3;
     double	epmach, epsinf, error, err1, err2, err3, e0, e1, e1abs, e2, e3;
     double	oflow, res, ss, tol1, tol2, tol3;
     int 	i, ib, ib2, ie, indx, k1, k2, k3, limexp, newelm, num;
@@ -1203,7 +1203,7 @@ double  *resasc;        	  /*  */
 
 
 
-    double 	absc, centr, dhlgth, d1mach();
+    double 	absc, centr, dhlgth;
     double	epmach, fc, fsum, fval1, fval2, fv1[11], fv2[11], hlgth;
     double 	resg, resk, reskh, uflow;
     int 	j, jtw, jtwm1;
