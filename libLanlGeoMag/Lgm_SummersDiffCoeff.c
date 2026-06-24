@@ -172,7 +172,7 @@ double  Lgm_GyroFreq( double q, double B, double m ) {
  *      \date           2011
  *
  */
-int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(double, void *), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
     double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
     double           epsabs, epsrel, abserr, work[2002], points[10];
@@ -434,7 +434,7 @@ int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L, 
  *   	 						spread in wave normal angles for that component
  */
  
-int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int WaveMode, int Species, double MaxWaveLat, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nw, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
+int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(double, void *), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xmArray, double *dxArray, double *weightsOnWaveNormalAngleDistributions, int WaveMode, int Species, double MaxWaveLat, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nw, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba) {
 
 
     double           T, a, b, E0, Omega_eEq, Omega_SigEq, Beq, Rho;
@@ -684,7 +684,7 @@ printf("done finding integral\n");
  *      \date           2011
  *
  */
-int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap) {
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(double, void *), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap) {
 
     double  a, h, H, faa[7], fap[7], Daa_ba, Dap_ba, Dpp_ba;
     int     i, N;
