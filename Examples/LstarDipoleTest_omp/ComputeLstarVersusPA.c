@@ -135,8 +135,8 @@ fpout = fopen(Filename, "w");
 
                     LstarInfo2->mInfo->Bm = LstarInfo3->mInfo->Bm;
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
-                        printf("\n\n\t%sComputing L* for: UTC = %g PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
-                        printf("    \t%s                  I   = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I[i], i, MagEphemInfo->Alpha[i], PostStr );
+                        printf("\n\n\t%sComputing L* for: UTC    = %g PA = %d  (%g)%s\n", PreStr, UTC, i, MagEphemInfo->Alpha[i], PostStr );
+                        printf("    \t%s                  I_data = %g PA = %d  (%g)%s\n", PreStr, MagEphemInfo->I_data[i], i, MagEphemInfo->Alpha[i], PostStr );
                     }
                     LS_Flag = Lstar( &v3, LstarInfo2);
                     if (LstarInfo3->VerbosityLevel >= 2 ) {
@@ -152,7 +152,7 @@ fpout = fopen(Filename, "w");
                      */
                     MagEphemInfo->nShellPoints[i] = LstarInfo2->nPnts;
                     for (nn=0; nn<LstarInfo2->nPnts; nn++ ){
-                        MagEphemInfo->ShellI[i][nn] = LstarInfo2->I[nn];
+                        MagEphemInfo->ShellI[i][nn] = LstarInfo2->I_data[nn];
                         MagEphemInfo->ShellFootprint_Pn[i][nn] = LstarInfo2->Footprint_Pn[nn];
                         MagEphemInfo->ShellFootprint_Ps[i][nn] = LstarInfo2->Footprint_Ps[nn];
                         MagEphemInfo->ShellMirror_Pn[i][nn]    = LstarInfo2->Mirror_Pn[nn];

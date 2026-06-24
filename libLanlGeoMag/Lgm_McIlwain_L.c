@@ -33,7 +33,7 @@
  *            \param[in]        u           Position (in GSM) to compute L-shell.
  *            \param[in]        Alpha       Pitch angle to compute L for. In degrees.
  *            \param[in]        Type        Flag to indicate which alogorithm to use (0=original McIlwain; else use Hilton's formula).
- *            \param[out]       I           The integral invariant, I that was computed along the way.
+ *            \param[out]       I0           The integral invariant, I that was computed along the way.
  *            \param[out]       Bm          The mirror magnetic field value, Bm that was computed along the way.
  *            \param[out]       M           The dipole magnetic moment used to compute L = f(I, Bm, M)
  *            \param[in,out]    mInfo       Properly initialized Lgm_MagModelInfo structure. (A number of otherm usefull things will have been set in mInfo).
@@ -41,7 +41,7 @@
  *            \return           L           McIlwain L-shell parameter (a dimensioless number).
  *
  */
-double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo ) {
+double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I0, double *Bm, double *M, Lgm_MagModelInfo *mInfo ) {
 
     int             reset;
     Lgm_Vector      v1, v2, v3, Bvec, Bvectmp, Ptmp, u_scale;
@@ -51,7 +51,7 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
 
     u_scale.x = u_scale.y = u_scale.z = 1.0;
 
-    *I  = LGM_FILL_VALUE;
+    *I0  = LGM_FILL_VALUE;
     *Bm = LGM_FILL_VALUE;
     *M  = LGM_FILL_VALUE;
     L   = LGM_FILL_VALUE;
@@ -95,10 +95,10 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
             // if FL length is small, use an approx expression for I
             rat = mInfo->Bmin/mInfo->Bm;
             if ((1.0-rat) < 0.0) {
-                *I = 0.0;
+                *I0 = 0.0;
             } else {
                 // Eqn 2.66b in Roederer
-                *I = SS*sqrt(1.0 - rat);
+                *I0 = SS*sqrt(1.0 - rat);
             }
 
         } else {
@@ -148,10 +148,10 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                         // if FL length is small, use an approx expression for I
                         rat = mInfo->Bmin/mInfo->Bm;
                         if ((1.0-rat) < 0.0) {
-                            *I = 0.0;
+                            *I0 = 0.0;
                         } else {
                             // Eqn 2.66b in Roederer
-                            *I = SS*sqrt(1.0 - rat);
+                            *I0 = SS*sqrt(1.0 - rat);
                         }
 
                     } else if ( mInfo->UseInterpRoutines ) {
@@ -190,13 +190,13 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                             /*
                              *  Do interped I integral.
                              */
-                            *I = Iinv_interped( mInfo  );
-                            if (mInfo->VerbosityLevel > 0) printf("Lgm_McIlwain_L: Integral Invariant, I (interped):      %g\n",  *I );
+                            *I0 = Iinv_interped( mInfo  );
+                            if (mInfo->VerbosityLevel > 0) printf("Lgm_McIlwain_L: Integral Invariant, I (interped):      %g\n",  *I0 );
                             FreeSpline( mInfo );
 
                         } else {
 
-                            *I = LGM_FILL_VALUE;
+                            *I0 = LGM_FILL_VALUE;
 
                         }
 
@@ -205,8 +205,8 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
                         /*
                          *  Do full blown I integral. (Integrand is evaluated by tracing to required s-values.)
                          */
-                        *I = Iinv( mInfo  );
-                        if (mInfo->VerbosityLevel > 0) printf("Lgm_McIlwain_L: Integral Invariant, I (full integral): %g\n",  *I );
+                        *I0 = Iinv( mInfo  );
+                        if (mInfo->VerbosityLevel > 0) printf("Lgm_McIlwain_L: Integral Invariant, I (full integral): %g\n",  *I0 );
 
                     }
 
@@ -236,12 +236,12 @@ double Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, i
         /*
          *  McIlwain L, via McIlwain's original tables or via Hilton approx.
          */
-        if ( *I < 0.0 ){
+        if ( *I0 < 0.0 ){
             L = LGM_FILL_VALUE;
         } else if ( Type == 0 ) {
-            L = LFromIBmM_McIlwain( *I, *Bm, *M );
+            L = LFromIBmM_McIlwain( *I0, *Bm, *M );
         } else {
-            L = LFromIBmM_Hilton( *I, *Bm, *M );
+            L = LFromIBmM_Hilton( *I0, *Bm, *M );
         }
 
 

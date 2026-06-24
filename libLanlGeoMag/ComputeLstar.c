@@ -571,7 +571,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     int		done2, Count, FoundShellLine, nIts, Type, retEarthTrace;
     int         nShabI  = 0, nShabII = 0;
     double	rat, B, dSa, dSb, smax, SS, L, Hmax, epsabs, epsrel;
-    double	I=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r, sa, sa2;
+    double	I1=-999.9, Ifound, M, MLT0, MLT, DeltaMLT, mlat, r, sa, sa2;
     double	Phi, Phi1, Phi2, sl, cl, MirrorMLT[3*LGM_LSTARINFO_MAX_FL], MirrorMlat[3*LGM_LSTARINFO_MAX_FL], pred_mlat, mlat_try, pred_delta_mlat=0.0, mlat0, mlat1, delta;
     double	MirrorMLT_Old[3*LGM_LSTARINFO_MAX_FL], MirrorMlat_Old[3*LGM_LSTARINFO_MAX_FL], res;
     char    *PreStr, *PostStr;
@@ -608,7 +608,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     if ((LstarInfo->PitchAngle < 0.0)||(LstarInfo->PitchAngle>90.0)) return(-1);
 
     for (k=0; k<LGM_LSTARINFO_MAX_FL; k++){
-        LstarInfo->I[k] = LGM_FILL_VALUE;
+        LstarInfo->I_data[k] = LGM_FILL_VALUE;
     }
 
 
@@ -716,10 +716,10 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     // if FL length is small, use an approx expression for I
                     rat = LstarInfo->mInfo->Bmin/LstarInfo->mInfo->Bm;
                     if ((1.0-rat) < 0.0) {
-                        I = 0.0;
+                        I1 = 0.0;
                     } else {
                         // Eqn 2.66b in Roederer
-                        I = SS*sqrt(1.0 - rat);
+                        I1 = SS*sqrt(1.0 - rat);
                     }
 
                 } else if ( LstarInfo->mInfo->UseInterpRoutines ) {
@@ -737,9 +737,9 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         /*
                          *  Do interped I integral.
                          */
-                        I = Iinv_interped( LstarInfo->mInfo  );
+                        I1 = Iinv_interped( LstarInfo->mInfo  );
                         if (LstarInfo->VerbosityLevel > 1) {
-                            printf("\t\t  %sIntegral Invariant, I (interped):      %g%s\n",  PreStr, I, PostStr );
+                            printf("\t\t  %sIntegral Invariant, I1 (interped):      %g%s\n",  PreStr, I1, PostStr );
                         }
 
                         /*
@@ -759,7 +759,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                         }
                         FreeSpline( LstarInfo->mInfo );
                     } else {
-                        I = LGM_FILL_VALUE;
+                        I1 = LGM_FILL_VALUE;
                     }
 
                 } else {
@@ -768,12 +768,12 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                      *  Do full blown I integral. (Integrand is evaluated by tracing to required s-values.)
                      *  (This strategy isnt used very much anymore - 20120524, MGH)
                      */
-                    I = Iinv( LstarInfo->mInfo  );
-                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t  %sIntegral Invariant, I (full integral): %g%s\n",  PreStr, I, PostStr );
+                    I1 = Iinv( LstarInfo->mInfo  );
+                    if (LstarInfo->VerbosityLevel > 1) printf("\t\t  %sIntegral Invariant, I1 (full integral): %g%s\n",  PreStr, I1, PostStr );
 
                 }
-                LstarInfo->I0 = I; // save initial I in LstarInfo structure.
-                Ifound = I;
+                LstarInfo->I0 = I1; // save initial I in LstarInfo structure.
+                Ifound = I1;
 
                 if (LstarInfo->VerbosityLevel > 1) {
                     printf("\t\t  %sLgm_n_I_integrand_Calls:               %d%s\n\n", PreStr, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, PostStr );
@@ -781,8 +781,8 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     printf("\t\t%sReference Dipole Moment, M_cd_McIlwain: %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_McIlwain, PostStr);
                     printf("\t\t%sReference Dipole Moment, M_cd_2010:      %g%s\n", PreStr, LstarInfo->mInfo->c->M_cd_2010, PostStr);
                     printf("\t\t%sDipole Moment Used, Mused:               %g%s\n", PreStr, LstarInfo->Mused, PostStr);
-                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
-                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
+                    printf("\t\t%sMcIlwain L (Hilton):                     %.15g%s\n", PreStr, L = LFromIBmM_Hilton( I1, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
+                    printf("\t\t%sMcIlwain L (McIlwain):                   %.15g%s\n", PreStr, L = LFromIBmM_McIlwain( I1, LstarInfo->mInfo->Bm, LstarInfo->Mused ), PostStr );
                 }
 
             } else {
@@ -1005,7 +1005,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                 printf("\t\t%s________________________________________________________________________________________________________________________________%s\n", PreStr, PostStr );
             }
 
-            FoundShellLine = FindShellLine( I, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
+            FoundShellLine = FindShellLine( I1, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
             if (FoundShellLine > 0) {
                 // Found valid FL for drift shell
                 done2 = TRUE;
@@ -1040,15 +1040,15 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
     
                 if ( (Type > 1) && (LstarInfo->ShabanskyHandling==LGM_SHABANSKY_HALVE_I) ){
                     if (LstarInfo->VerbosityLevel > 0) {
-                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I adjusted to: %g . (Original is: %g) %s\n", PreStr, I/2.0, I, PostStr );
+                        printf("\t\t\t%sShabansky orbit. Re-doing FL. Target I1 adjusted to: %g . (Original is: %g) %s\n", PreStr, I1/2.0, I1, PostStr );
                     }
     
-                    FoundShellLine = FindShellLine( I/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
+                    FoundShellLine = FindShellLine( I1/2.0, &Ifound, LstarInfo->mInfo->Bm, MLT, &mlat, &r, mlat0, mlat_try, mlat1, &nIts, 1, LstarInfo );
                     //TODO: Do we need to test to make sure that the adjusted I is being found on a field line with multiple minima??
                     PredMinusActualMlat = pred_mlat - mlat;
                     if (LstarInfo->VerbosityLevel > 1) {
                         printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I/2.0, PostStr );
+                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I1: %g I1-I0/2: %g (SHABANSKY)%s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I1, Ifound, Ifound-I1/2.0, PostStr );
                         printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
                     }
     
@@ -1060,7 +1060,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
                     PredMinusActualMlat = pred_mlat - mlat;
                     if (LstarInfo->VerbosityLevel > 1) {
                         printf("\t\t%s________________________________________________________________________________________________________________________________%s\n\n", PreStr, PostStr );
-                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I: %g I-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I, Ifound, Ifound-I, PostStr );
+                        printf("\t\t%s  >>  Pred/Actual/Diff mlat:  %g/%g/%g  MLT/MLAT: %g %g  I0: %g I1: %g I1-I0: %g %s\n", PreStr, pred_mlat, mlat, PredMinusActualMlat, MLT, mlat, I1, Ifound, Ifound-I1, PostStr );
                         printf("\t\t%s________________________________________________________________________________________________________________________________ %s\n\n\n", PreStr, PostStr );
                     }
                 }
@@ -1068,7 +1068,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
             } else if ( Count > 2 ) {
                 // Tried to find valid FL more than three times
                 done2 =  TRUE;
-                if (LstarInfo->VerbosityLevel >0) { printf(" \t%sNo valid I - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
+                if (LstarInfo->VerbosityLevel >0) { printf(" \t%sNo valid I1 - Drift Shell not closed: L* = undefined  (FoundShellLine = %d)%s\n", PreStr, FoundShellLine, PostStr); fflush(stdout); }
                 FoundShellLine = 0;
                 break;//return(-3);
             } else {
@@ -1147,7 +1147,7 @@ int Lstar( Lgm_Vector *vin, Lgm_LstarInfo *LstarInfo ){
         /*
          * Save individual I values
          */
-        LstarInfo->I[k] = Ifound;
+        LstarInfo->I_data[k] = Ifound;
 
 
         MirrorMLT[k]  = MLT;
@@ -2089,7 +2089,7 @@ int Lgm_LCDS( long int Date, double UTC, double brac1, double brac2, double Kin,
                 Pinner = Ptest;
                 LCDSv3 = v3;
                 LCDS = LstarInfo_test->LS;
-                *K = (LstarInfo_test->I[0])*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
+                *K = (LstarInfo_test->I_data[0])*sqrt(LstarInfo_test->mInfo->Bm*nTtoG);
 
                 //Determine the type of the orbit
                 LstarInfo_test->DriftOrbitType = LGM_DRIFT_ORBIT_CLOSED;

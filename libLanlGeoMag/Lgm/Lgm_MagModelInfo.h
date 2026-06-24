@@ -845,11 +845,11 @@ void        ratint( double *xa, double *ya, int n, double x, double *y, double *
 void        polint(double *xa, double *ya, int n, double x, double *y, double *dy);
 void        Interp( double xa[],  double ya[], long int n, double x, double *y);
 void        Interp2( double xa[],  double ya[], long int n, double x, double *y);
-double      LFromIBmM_Hilton( double I, double Bm, double M );
+double      LFromIBmM_Hilton( double I_data, double Bm, double M );
 double      IFromLBmM_Hilton( double L, double Bm, double M );
-double      LFromIBmM_McIlwain( double I, double Bm, double M );
+double      LFromIBmM_McIlwain( double I_data, double Bm, double M );
 double      IFromLBmM_McIlwain( double L, double Bm, double M );
-double      Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I, double *Bm, double *M, Lgm_MagModelInfo *mInfo );
+double      Lgm_McIlwain_L( long int Date, double UTC, Lgm_Vector *u, double Alpha, int Type, double *I_data, double *Bm, double *M, Lgm_MagModelInfo *mInfo );
 
 
 double      BofS( double s, Lgm_MagModelInfo *Info );

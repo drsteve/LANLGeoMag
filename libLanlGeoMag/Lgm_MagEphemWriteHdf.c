@@ -1245,7 +1245,7 @@ c->ephModel = LGM_EPH_LOW_ACCURACY;
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "DriftShellType",    iRow, med->H5_nAlpha,  H5T_NATIVE_INT,    &med->H5_DriftShellType[i][0] );   // Write DriftShellType
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "L",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_L[i][0] );                // Write L
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "Bm",                iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_Bm[i][0] );               // Write Bm
-    LGM_HDF5_EXTEND_RANK2_DATASET( file, "I",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_I[i][0] );                // Write I
+    LGM_HDF5_EXTEND_RANK2_DATASET( file, "I",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_I_data[i][0] );           // Write I
     LGM_HDF5_EXTEND_RANK2_DATASET( file, "K",                 iRow, med->H5_nAlpha,  H5T_NATIVE_DOUBLE, &med->H5_K[i][0] );                // Write K
 
 }

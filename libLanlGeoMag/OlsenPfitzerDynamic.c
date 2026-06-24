@@ -72,7 +72,7 @@ void Lgm_OP88_BDYN( double DEN, double VEL, double DST, double X, double Y, doub
 void Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double STAIL ) {
 
     double  SCL, STRMAG, STRRIN, STRTAI, XXX[4], XXXX[4], BM[4], BR[4], BT[4];
-    int     I;
+    int     i;
 
     // CALCULATE MAGNETOPAUSE SCALE FACTOR.
     SCL = 10.5/SOFFD;
@@ -85,9 +85,9 @@ void Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double
     STRTAI = STAIL*STRMAG;
 
     // CALCULATE SCALED DISTANCES
-    for ( I=1; I<=3; I++ ) {
-        XXX[I]  = XX[I]*SCL;
-        XXXX[I] = XX[I];
+    for ( i=1; i<=3; i++ ) {
+        XXX[i]  = XX[i]*SCL;
+        XXXX[i] = XX[i];
     }
 
     // CALL THE QUIET TIME SUBROUTINE.
@@ -99,7 +99,7 @@ void Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double
      *   COMBINE THE COMPONENTS OF THE MAGNETIC FIELD ACCORDING TO THEIR
      *   RELATIVE STRENGTHS.
      */
-    for ( I=1; I<=3; I++ ) BB[I] = STRMAG*BM[I] + STRRIN*BR[I] + STRTAI*BT[I];
+    for ( i=1; i<=3; i++ ) BB[i] = STRMAG*BM[i] + STRRIN*BR[i] + STRTAI*BT[i];
 
     return;
 
@@ -149,7 +149,7 @@ void Lgm_OP88_BDYNAM( double *XX, double *BB, double SOFFD, double SRING, double
 void Lgm_OP88_BFMAGP( double *XX, double *BB ) {
 
     double  XN, YN, ZN, X[6], Y[6], Z[6], g, g2, FX1, XF1, XF2;
-    int     I;
+    int     i;
 
 
     static double A[] = {   -9e99,  0.113275039e+01,  0.354408138e-01, -0.152252289e-02,
@@ -238,10 +238,10 @@ C is both put together via thej equiv statement.
 
 
     XN = XX[1]; YN = XX[2]; ZN = XX[3];
-    for ( I=1; I<=5; I++ ) {
-        X[I] = XN;
-        Y[I] = YN;
-        Z[I] = ZN;
+    for ( i=1; i<=5; i++ ) {
+        X[i] = XN;
+        Y[i] = YN;
+        Z[i] = ZN;
         XN *= XX[1];
         YN *= XX[2];
         ZN *= XX[3];
@@ -325,7 +325,7 @@ C is both put together via thej equiv statement.
 void Lgm_OP88_BFTAIL( double *XX,  double *BB ) {
 
     double  XN, YN, ZN, R2, R, X[6], Y[6], Z[6], g, g2, R22, EXPC, TANZR, EXPR;
-    int     I;
+    int     i;
 
     static double A[] = { -9e99,  -.118386794e-12,  .260137167e+01,  .408016277e-12, -.306063863e+00,
                                    .852659791e-13,  .848404600e-14, -.568097241e-02, -.601368497e-14,
@@ -365,13 +365,13 @@ void Lgm_OP88_BFTAIL( double *XX,  double *BB ) {
     XN = XX[1]; YN = XX[2]; ZN = XX[3];
     R2 = XN*XN + YN*YN + ZN*ZN;
     R = sqrt( R2 );
-    for (I=1; I<=5; I++ ) {
-        X[I] = XN;
-        Y[I] = YN;
-        Z[I] = ZN;
-        XN *= XX[I];
-        YN *= XX[I];
-        ZN *= XX[I];
+    for (i=1; i<=5; i++ ) {
+        X[i] = XN;
+        Y[i] = YN;
+        Z[i] = ZN;
+        XN *= XX[i];
+        YN *= XX[i];
+        ZN *= XX[i];
     }
     g = 22.0-X[1]; g2 = g*g;
     R22   = sqrt( g2 + Y[2] + Z[2] );
@@ -437,7 +437,7 @@ void Lgm_OP88_BFTAIL( double *XX,  double *BB ) {
 void Lgm_OP88_BFRING( double *XX,  double *BB ) {
 
     double  XN, YN, ZN, R2, R, X[6], Y[6], Z[6], EXPC, EXPR;
-    int     I;
+    int     i;
 
     static double A[] = { -9e99,   .937029737e+00, -.734269078e+00, -.125896726e-01, -.843388063e-02,
                                    .756104711e-04,  .294507011e-02, -.719118601e-03, -.177154663e-01,
@@ -469,8 +469,8 @@ void Lgm_OP88_BFRING( double *XX,  double *BB ) {
     XN = XX[1]; YN = XX[2]; ZN = XX[3];
     R2 = XN*XN + YN*YN + ZN*ZN;
     R = sqrt(R2);
-    for ( I=1; I<=5; I++ ){
-        X[I] = XN; Y[I] = YN; Z[I] = ZN;
+    for ( i=1; i<=5; i++ ){
+        X[i] = XN; Y[i] = YN; Z[i] = ZN;
         XN *= XX[1];
         YN *= XX[2];
         ZN *= XX[3];

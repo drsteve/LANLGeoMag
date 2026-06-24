@@ -404,7 +404,7 @@ double I_integrand( double s, _qpInfo *qpInfo ) {
 int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
 
     Lgm_Vector  u, Pa, Pb;
-    double  rat, H, h, a, b, SS, Sa, Sb, I, f[6], r;
+    double  rat, H, h, a, b, SS, Sa, Sb, I0, f[6], r;
     int     i, N;
     
 
@@ -483,17 +483,17 @@ int Lgm_Grad_I( Lgm_Vector *v0, Lgm_Vector *GradI, Lgm_MagModelInfo *mInfo ) {
                         // if FL length is small, use an approx expression for I
                         rat = mInfo->Bmin/mInfo->Bm;
                         if ((1.0-rat) < 0.0) {
-                            I = 0.0;
+                            I0 = 0.0;
                         } else {
                             // Eqn 2.66b in Roederer
-                            I = SS*sqrt(1.0 - rat);
+                            I0 = SS*sqrt(1.0 - rat);
 printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
                         }
                     } else {
-                        I = Iinv_interped( mInfo  );
+                        I0 = Iinv_interped( mInfo  );
                     }
 
-                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I0, mInfo->Lgm_n_I_integrand_Calls );
 
                     FreeSpline( mInfo );
 
@@ -510,7 +510,7 @@ printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
             }
 
 
-            f[i+N] = I;
+            f[i+N] = I0;
 
         }
 
@@ -561,16 +561,16 @@ printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
                         // if FL length is small, use an approx expression for I
                         rat = mInfo->Bmin/mInfo->Bm;
                         if ((1.0-rat) < 0.0) {
-                            I = 0.0;
+                            I0 = 0.0;
                         } else {
                             // Eqn 2.66b in Roederer
-                            I = SS*sqrt(1.0 - rat);
+                            I0 = SS*sqrt(1.0 - rat);
                         }
                     } else {
-                        I = Iinv_interped( mInfo  );
+                        I0 = Iinv_interped( mInfo  );
                     }
 
-                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I0, mInfo->Lgm_n_I_integrand_Calls );
                     FreeSpline( mInfo );
 
                 } else {
@@ -584,7 +584,7 @@ printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
             }
 
 
-            f[i+N] = I;
+            f[i+N] = I0;
 
         }
 
@@ -634,16 +634,16 @@ printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
                         // if FL length is small, use an approx expression for I
                         rat = mInfo->Bmin/mInfo->Bm;
                         if ((1.0-rat) < 0.0) {
-                            I = 0.0;
+                            I0 = 0.0;
                         } else {
                             // Eqn 2.66b in Roederer
-                            I = SS*sqrt(1.0 - rat);
+                            I0 = SS*sqrt(1.0 - rat);
                         }
                     } else {
-                        I = Iinv_interped( mInfo  );
+                        I0 = Iinv_interped( mInfo  );
                     }
 
-                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I, mInfo->Lgm_n_I_integrand_Calls );
+                    if (mInfo->VerbosityLevel > 2) printf("I = %g Lgm_n_I_integrand_Calls = %d\n", I0, mInfo->Lgm_n_I_integrand_Calls );
                     FreeSpline( mInfo );
 
                 } else {
@@ -657,7 +657,7 @@ printf("HEREEEEEEEEEEEEEEEEEEEEEEe\n");
             }
 
 
-            f[i+N] = I;
+            f[i+N] = I0;
 
         }
 
