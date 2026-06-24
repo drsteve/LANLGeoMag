@@ -43,10 +43,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-/*
-#define PARM(a) a
-*/
-#define PARM(a) ()
 #define CONV24_8BIT  0
 #define CONV24_24BIT 1
 #define PIC8  CONV24_8BIT
@@ -59,7 +55,7 @@ typedef long int        count_int;
 typedef unsigned long  u_long;
 */
 
-void xvbzero                PARM((char *, size_t));
+void xvbzero(char *, size_t);
 
 static int  Width, Height;
 static int  curx, cury;
@@ -67,14 +63,14 @@ static long CountDown;
 static int  Interlace;
 /* static byte bw[2] = {0, 0xff}; */
 
-static void putword     PARM((int, FILE *));
-static void compress    PARM((int, FILE *, unsigned char *, int));
-static void output      PARM((int));
-static void cl_block    PARM((void));
-static void cl_hash     PARM((count_int));
-static void char_init   PARM((void));
-static void char_out    PARM((int));
-static void flush_char  PARM((void));
+static void putword(int, FILE *);
+static void compress(int, FILE *, unsigned char *, int);
+static void output(int);
+static void cl_block(void);
+static void cl_hash(count_int);
+static void char_init(void);
+static void char_out(int);
+static void flush_char(void);
 
 
 static unsigned char pc2nc[256],r1[256],g1[256],b1[256];
