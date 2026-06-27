@@ -419,8 +419,9 @@ void praxismin(int j, int nits, double *d2, double *x1, double *f1, int fk,
     *fx = sf1;
     *x1 = sx1;
   }
-  if (j > 0)
+  if (j > 0) {
     elmveccol(1, n, j, x, v, *x1);
+  }
 }
 
 double praxisflin(double l, int j, int n, double *x, double **v, double *qa,
@@ -429,12 +430,9 @@ double praxisflin(double l, int j, int n, double *x, double **v, double *qa,
                   int *data) {
   /* this function is internally used by PRAXISMIN */
 
-  int i;
-  double *t, result;
-
-  t = allocate_real_vector(1, n);
+  double* t = allocate_real_vector(1, n);
   if (j > 0) {
-    for (i = 1; i <= n; i++) {
+    for (int i = 1; i <= n; i++) {
       t[i] = x[i] + l * v[i][j];
     }
   } else {
@@ -442,12 +440,12 @@ double praxisflin(double l, int j, int n, double *x, double **v, double *qa,
     *qa = l * (l - qd1) / (qd0 * (qd0 + qd1));
     *qb = (l + qd0) * (qd1 - l) / (qd0 * qd1);
     *qc = l * (l + qd0) / (qd1 * (qd0 + qd1));
-    for (i = 1; i <= n; i++) {
+    for (int i = 1; i <= n; i++) {
       t[i] = (*qa) * q0[i] + (*qb) * x[i] + (*qc) * q1[i];
     }
   }
   (*nf)++;
-  result = (*f)(t, data);
+  double result = (*f)(t, data);
   free_real_vector(t, 1);
   return result;
 }
@@ -638,19 +636,19 @@ int qrisngvaldecbid(double *d, double *b, int m, int n, double **u, double **v,
   em[7] = rnk;
   return n;
 }
-void free_real_vector(double *v, int l) { free((char *)(v + l)); }
+
+void free_real_vector(double *v, int l) {
+  free((char *)(v + l));
+}
 
 void free_real_matrix(double **m, int lr, int ur, int lc) {
-  int i;
-  for (i = ur; i >= lr; i--)
+  for (int i = ur; i >= lr; i--)
     free((char *)(m[i] + lc));
   free((char *)(m + lr));
 }
 
 double *allocate_real_vector(int l, int u) {
-  double *p;
-
-  p = (double *)malloc((unsigned)(u - l + 1) * sizeof(double));
+  double* p = (double *)malloc((unsigned)(u - l + 1) * sizeof(double));
   if (!p) {
     fprintf(stderr, "Memory allocation failure in allocate_real_vector\n");
     exit(1);
@@ -681,10 +679,9 @@ double **allocate_real_matrix(int lr, int ur, int lc, int uc) {
 }
 
 void rotcol(int l, int u, int i, int j, double **a, double c, double s) {
-  double x, y;
   for (; l <= u; l++) {
-    x = a[l][i];
-    y = a[l][j];
+    double x = a[l][i];
+    double y = a[l][j];
     a[l][i] = x * c + y * s;
     a[l][j] = y * c - x * s;
   }
@@ -712,67 +709,71 @@ void psttfmmat(double **a, int n, double **v, double *b) {
 }
 
 void pretfmmat(double **a, int m, int n, double *d) {
-  int i, i1, j;
-  double g, h;
 
-  for (i = n; i >= 1; i--) {
-    i1 = i + 1;
-    g = d[i];
-    h = g * a[i][i];
-    for (j = i1; j <= n; j++)
+  for (int i = n; i >= 1; i--) {
+    int i1 = i + 1;
+    double g = d[i];
+    double h = g * a[i][i];
+    for (int j = i1; j <= n; j++) {
       a[i][j] = 0.0;
+    }
     if (h < 0.0) {
-      for (j = i1; j <= n; j++)
+      for (int j = i1; j <= n; j++) {
         elmcol(i, m, j, i, a, a, tammat(i1, m, i, j, a, a) / h);
-      for (j = i; j <= m; j++)
+      }
+      for (int j = i; j <= m; j++) {
         a[j][i] /= g;
-    } else
-      for (j = i; j <= m; j++)
+      }
+    } else {
+      for (int j = i; j <= m; j++) {
         a[j][i] = 0.0;
+      }
+    }
     a[i][i] += 1.0;
   }
 }
 
 void hshreabid(double **a, int m, int n, double *d, double *b, double *em) {
-  int i, j, i1;
-  double norm, machtol, w, s, f, g, h;
-
-  norm = 0.0;
-  for (i = 1; i <= m; i++) {
-    w = 0.0;
-    for (j = 1; j <= n; j++)
+  double norm = 0;
+  for (int i = 1; i <= m; i++) {
+    double w = 0.0;
+    for (int j = 1; j <= n; j++)
       w += fabs(a[i][j]);
     if (w > norm)
       norm = w;
   }
-  machtol = em[0] * norm;
+  double machtol = em[0] * norm;
   em[1] = norm;
-  for (i = 1; i <= n; i++) {
-    i1 = i + 1;
-    s = tammat(i1, m, i, i, a, a);
-    if (s < machtol)
+  for (int i = 1; i <= n; i++) {
+    int i1 = i + 1;
+    double s = tammat(i1, m, i, i, a, a);
+    if (s < machtol) {
       d[i] = a[i][i];
-    else {
-      f = a[i][i];
+    } else {
+      double f = a[i][i];
       s += f * f;
-      d[i] = g = (f < 0.0) ? sqrt(s) : -sqrt(s);
-      h = f * g - s;
+      double g = (f < 0.0) ? sqrt(s) : -sqrt(s);
+      d[i] = g;
+      double h = f * g - s;
       a[i][i] = f - g;
-      for (j = i1; j <= n; j++)
+      for (int j = i1; j <= n; j++) {
         elmcol(i, m, j, i, a, a, tammat(i, m, i, j, a, a) / h);
+      }
     }
     if (i < n) {
       s = mattam(i1 + 1, n, i, i, a, a);
-      if (s < machtol)
+      if (s < machtol) {
         b[i] = a[i][i1];
-      else {
-        f = a[i][i1];
+      } else {
+        double f = a[i][i1];
         s += f * f;
-        b[i] = g = (f < 0.0) ? sqrt(s) : -sqrt(s);
-        h = f * g - s;
+        double g = (f < 0.0) ? sqrt(s) : -sqrt(s);
+        b[i] = g;
+        double h = f * g - s;
         a[i][i1] = f - g;
-        for (j = i1; j <= m; j++)
+        for (int j = i1; j <= m; j++) {
           elmrow(i1, n, j, i, a, a, mattam(i1, n, i, j, a, a) / h);
+        }
       }
     }
   }
