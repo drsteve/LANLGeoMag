@@ -563,7 +563,7 @@ double **a;
 
 
 
-void inimat(lr, ur, lc, uc, a, x)
+void inimat(int lr, int ur, int lc, int uc, double** a, double x)
 int lr;
 int ur;
 int lc;
