@@ -3,27 +3,12 @@
 /*
  *      QUADPACK DQAGP Routine converted to C 
  */
-int dqagp(f, qpInfo, a, b, npts2, points, epsabs, epsrel, result, abserr, neval, ier, leniw, lenw, last, iwork, work, verbosity )
-double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate    	 */
-_qpInfo *qpInfo;        	  /*  Auxilliary information to pass to function (to avoid making globals) */
-double   a;             	  /*  Lower Limit of integration.                                 	 */
-double   b;             	  /*  Upper limit of integration.                                 	 */
-int      npts2;
-double   *points;
-double   epsabs;        	  /*  Absolute accuracy requested.                                	 */
-double   epsrel;        	  /*  Relative accuracy requested.                                	 */
-double  *result;        	  /*  The desired result. I.e. integral of f() from a to b        	 */
-double  *abserr;        	  /*  Estimate of the modulus of the absolute error in the result 	 */
-int     *neval;         	  /*  The number of integrand evaluations performed.              	 */
-int     *ier;           	  /*  Error flag. An error occurred if ier > 0. See below.        	 */
-int	     leniw;
-int	     lenw;
-int	    *last;
-int	    *iwork;
-double	*work;
-int	    verbosity;
-{
 
+
+int dqagp(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b,
+    int npts2, double   *points, double epsabs, double epsrel, double *result,
+    double *abserr, int *neval, int *ier, int leniw, int lenw, int *last,
+    int *iwork, double *work, int verbosity) {
 
     /*    BEGIN PROLOGUE  DQAGP
 	 *    PURPOSE  The routine calculates an approximation result to a given
@@ -292,31 +277,13 @@ int	    verbosity;
 /*
  *      QUADPACK DQAGPE Routine converted to C
  */
-int dqagpe(f, qpInfo, a, b, npts2, points, epsabs, epsrel, limit, result, abserr, neval, ier, alist, blist, rlist, elist, pts, iord, level, ndin, last)
-double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate           */
-_qpInfo *qpInfo;                  /*  Auxilliary information to pass to function (to avoid making globals) */
-double   a;             	  /*  Lower Limit of integration.                                 */
-double   b;             	  /*  Upper limit of integration.                                 */
-int      npts2;
-double  *points;
-double   epsabs;        	  /*  Absolute accuracy requested.                                */
-double   epsrel;        	  /*  Relative accuracy requested.                                */
-int      limit;
-double  *result;        	  /*  The desired result. I.e. integral of f() from a to b        */
-double  *abserr;        	  /*  Estimate of the modulus of the absolute error in the result */
-int     *neval;         	  /*  The number of integrand evaluations performed.              */
-int     *ier;           	  /*  Error flag. An error occurred if ier > 0. See below.        */
-double   *alist;
-double   *blist;
-double   *rlist;
-double   *elist;
-double   *pts;
-int	 *iord;
-int	 *level;
-int	 *ndin;
-int	*last;
-{
 
+
+int dqagpe(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b,
+    int npts2, double  *points, double epsabs, double epsrel, int limit,
+    double *result, double *abserr, int *neval, int *ier, double *alist,
+    double *blist, double *rlist, double *elist, double *pts, int *iord,
+    int  *level, int  *ndin, int *last) {
 
 	/*   BEGIN PROLOGUE  DQAGPE
 	 *   PURPOSE  Approximate a given definite integral I = Integral of F
