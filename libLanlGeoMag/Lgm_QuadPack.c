@@ -3,26 +3,12 @@
 /*
  *      QUADPACK DQAGS Routine converted to C
  */
-int dqags(f, qpInfo, a, b, epsabs, epsrel, result, abserr, neval, ier, limit, lenw, last, iwork, work, verbosity )
-double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate    	 */
-_qpInfo *qpInfo;        	  /*  Auxilliary information to pass to function (to avoid making globals) */
-double   a;             	  /*  Lower Limit of integration.                                 	 */
-double   b;             	  /*  Upper limit of integration.                                 	 */
-double   epsabs;        	  /*  Absolute accuracy requested.                                	 */
-double   epsrel;        	  /*  Relative accuracy requested.                                	 */
-double  *result;        	  /*  The desired result. I.e. integral of f() from a to b        	 */
-double  *abserr;        	  /*  Estimate of the modulus of the absolute error in the result 	 */
-int     *neval;         	  /*  The number of integrand evaluations performed.              	 */
-int     *ier;           	  /*  Error flag. An error occurred if ier > 0. See below.        	 */
-int	 limit;
-int	 lenw;
-int	*last;
-int	*iwork;
-double	*work;
-int	verbosity;
-{
 
 
+
+int dqags(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b,
+	double epsabs, double epsrel, double *result, double *abserr, int *neval,
+	int *ier, int limit, int lenw, int *last, int *iwork, double *work, int verbosity ) {
 
     /*
      *
@@ -248,34 +234,13 @@ int TMPiwork[600];
 
 }
 
-
-
-
 /*
  *      QUADPACK DQAGSE Routine converted to C
  */
-int dqagse(f, qpInfo, a, b, epsabs, epsrel, limit, result, abserr, neval, ier, alist, blist, rlist, elist, iord, last)
-double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate           */
-_qpInfo *qpInfo;                  /*  Auxilliary information to pass to function (to avoid making globals) */
-double   a;             	  /*  Lower Limit of integration.                                 */
-double   b;             	  /*  Upper limit of integration.                                 */
-double   epsabs;        	  /*  Absolute accuracy requested.                                */
-double   epsrel;        	  /*  Relative accuracy requested.                                */
-int      limit;
-double  *result;        	  /*  The desired result. I.e. integral of f() from a to b        */
-double  *abserr;        	  /*  Estimate of the modulus of the absolute error in the result */
-int     *neval;         	  /*  The number of integrand evaluations performed.              */
-int     *ier;           	  /*  Error flag. An error occurred if ier > 0. See below.        */
-double   *alist;
-double   *blist;
-double   *rlist;
-double   *elist;
-int	 *iord;
-int	*last;
-{
-
-
-
+int dqagse(double (*f)( double, _qpInfo *), _qpInfo *qpInfo, double a, double b,
+	double epsabs, double epsrel, int limit, double *result, double *abserr,
+	int *neval, int *ier, double *alist, double *blist, double *rlist,
+	double *elist, int *iord, int *last) {
 
     /*
      *
@@ -863,10 +828,6 @@ L130:
 
 }
 
-
-
-
-
 /*
  *      QUADPACK DQELG Routine converted to C
  */
@@ -1125,26 +1086,11 @@ int dqelg(int n, double epstab[], double *result, double *abserr, double res3la[
 
 }
 
-
-
-
-
 /*
  *      QUADPACK DQK21 Routine converted to C
  */
-int dqk21(f, qpInfo, a, b, result, abserr, resabs, resasc)
-double  (*f)( double, _qpInfo *); /*  The integrand function -- I.e. the function to integrate           */
-_qpInfo *qpInfo;                  /*  Auxilliary information to pass to function (to avoid making globals) */
-double   a;             	  /*  Lower Limit of integration.                                 */
-double   b;             	  /*  Upper limit of integration.                                 */
-double  *result;        	  /*  The desired result. I.e. integral of f() from a to b        */
-double  *abserr;        	  /*  Estimate of the modulus of the absolute error in the result */
-double  *resabs;        	  /*  */
-double  *resasc;        	  /*  */
-{
-
-
-
+int dqk21(double  (*f)( double, _qpInfo *), _qpInfo* qpInfo, double a, double b,
+    double* result, double* abserr, double* resabs, double* resasc) {
 
     /*
      *
@@ -1200,17 +1146,10 @@ double  *resasc;        	  /*  */
      *      end prologue  dqk21
      */
 
-
-
-
     double 	absc, centr, dhlgth;
     double	epmach, fc, fsum, fval1, fval2, fv1[11], fv2[11], hlgth;
     double 	resg, resk, reskh, uflow;
     int 	j, jtw, jtwm1;
-
-
-
-
 
     /*
      *           the abscissae and weights are given for the interval (-1,1).
@@ -1232,8 +1171,6 @@ double  *resasc;        	  /*  */
      * as evaluated with 80 decimal digit arithmetic by l. w. fullerton,
      * bell labs, nov. 1981.
      */
-
-
 
     double wg[] = { 	0.0,
 		0.066671344308688137593568809893332,
@@ -1268,8 +1205,6 @@ double  *resasc;        	  /*  */
 		0.147739104901338491374841515972068,
 		0.149445554002916905664936468389821 };
 
-
-
     /*
      *
      *           list of major variables
@@ -1292,9 +1227,6 @@ double  *resasc;        	  /*  */
      *           uflow is the smallest positive magnitude.
      */
 
-
-
-
     /*
      *   first executable statement  dqk21
      */
@@ -1304,7 +1236,6 @@ double  *resasc;        	  /*  */
     centr = 0.5*(a+b);
     hlgth = 0.5*(b-a);
     dhlgth = fabs(hlgth);
-
 
     /*
      *           compute the 21-point kronrod approximation to
@@ -1328,8 +1259,6 @@ double  *resasc;        	  /*  */
         *resabs += wgk[jtw]*(fabs(fval1)+fabs(fval2));
     }
 
-
-
     for (j = 1; j<=5; ++j) {
         jtwm1 = 2*j-1;
         absc = hlgth*xgk[jtwm1];
@@ -1341,8 +1270,6 @@ double  *resasc;        	  /*  */
         resk += wgk[jtwm1]*fsum;
         *resabs += wgk[jtwm1]*(fabs(fval1)+fabs(fval2));
     }
-
-
 
     reskh = resk*0.5;
     *resasc = wgk[11]*fabs(fc-reskh);
@@ -1358,14 +1285,7 @@ double  *resasc;        	  /*  */
 
     if ( *resabs > uflow/(50.0*epmach) ) *abserr = dmax1( (epmach*50.0)*(*resabs), *abserr );
 
-
-
-
     return(1);
-
-
-
-
 }
 
 
