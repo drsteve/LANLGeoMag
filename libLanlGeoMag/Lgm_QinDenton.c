@@ -617,7 +617,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
 
         if (p->Persistence == 1) {
             UsePersistence = TRUE;
-            printf("No Qin Denton data in range -- using persistence. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
             p->Dst   =    q->Dst[q->nPnts-1];  // km/s
             p->fKp   =    q->fKp[q->nPnts-1];  // km/s
             p->V_SW  =    q->V_SW[q->nPnts-1];  // km/s
@@ -643,7 +642,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             p->Bz6   =    q->Bz6[q->nPnts-1]; // nT
 
         } else {
-            printf("No Qin Denton data in range -- would require extrapolation. Setting defaults. Data MJD range: [%lf, %lf], requested MJD: %lf\n", q->MJD[0], q->MJD[q->nPnts-1], MJD);
             p->Dst = -5.0;
             p->fKp = 2.0;
             p->V_SW  =  400.0;  // km/s
@@ -692,7 +690,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->ByIMF = 0.0;
-            printf("No Good Qin Denton data in range for ByIMF. Setting ByIMF to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->ByIMF, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate BzIMF
@@ -710,7 +707,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->BzIMF = 0.0;
-            printf("No Good Qin Denton data in range for BzIMF. Setting BzIMF to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->BzIMF, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             retval += 8;
         }
 
@@ -729,7 +725,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->V_SW = 400.0;
-            printf("No Good Qin Denton data in range for V_SW. Setting V_SW to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->V_SW, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             retval += 16;
         }
 
@@ -752,7 +747,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free( spline );
         } else {
             p->Den_P = 1.0;
-            printf("No Good Qin Denton data in range for Den_P. Setting Den_P to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Den_P, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             retval += 32;
         }
 
@@ -774,7 +768,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free( spline );
         } else {
             p->Pdyn = 2.3;
-            printf("No Good Qin Denton data in range for Pdyn. Setting Pdyn to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Pdyn, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
 
@@ -793,7 +786,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->G1 = Gdefaults[0];
-            printf("No Good Qin Denton data in range for G1. Setting G1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate G2
@@ -811,7 +803,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->G2 = Gdefaults[1];
-            printf("No Good Qin Denton data in range for G2. Setting G2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate G3
@@ -829,7 +820,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->G3 = Gdefaults[2];
-            printf("No Good Qin Denton data in range for G3. Setting G3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->G3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Kp
@@ -846,13 +836,11 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             p->fKp = gsl_spline_eval( spline, MJD, acc );
             if (isnan(p->fKp)) {
                 p->fKp = 2.0;
-                printf("No Good Qin Denton data in range for Kp. Setting Kp to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->fKp, q->MJD[0], q->MJD[q->nPnts-1], MJD);
                 retval += 2;
             }
             gsl_spline_free (spline);
         } else {
             p->fKp = 2.0;
-            printf("No Good Qin Denton data in range for Kp. Setting Kp to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->fKp, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             retval += 2;
         }
 
@@ -870,12 +858,10 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             p->akp3 = gsl_spline_eval( spline, MJD, acc );
             if (isnan(p->akp3)) {
                 p->akp3 = 2.0;
-                printf("No Good Qin Denton data in range for akp3. Setting akp3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->akp3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             }
             gsl_spline_free (spline);
         } else {
             p->akp3 = 2.0;
-            printf("No Good Qin Denton data in range for akp3. Setting akp3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->akp3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Dst
@@ -892,13 +878,11 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             p->Dst = gsl_spline_eval( spline, MJD, acc );
             if (isnan(p->Dst)) {
                 p->Dst = 0.0;
-                printf("No Good Qin Denton data in range for Dst. Setting Dst to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Dst, q->MJD[0], q->MJD[q->nPnts-1], MJD);
                 retval += 4;
             }
             gsl_spline_free (spline);
         } else {
             p->Dst = 0.0;
-            printf("No Good Qin Denton data in range for Dst. Setting Dst to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Dst, q->MJD[0], q->MJD[q->nPnts-1], MJD);
             retval += 4;
         }
 
@@ -915,7 +899,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz1 = 0.0;
-            printf("No Good Qin Denton data in range for Bz1. Setting Bz1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Bz2 -- are these even used?
@@ -931,7 +914,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz2 = 0.0;
-            printf("No Good Qin Denton data in range for Bz2. Setting Bz2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Bz3 -- are these even used?
@@ -947,7 +929,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz3 = 0.0;
-            printf("No Good Qin Denton data in range for Bz3. Setting Bz3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Bz4 -- are these even used?
@@ -963,7 +944,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz4 = 0.0;
-            printf("No Good Qin Denton data in range for Bz4. Setting Bz4 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz4, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Bz5 -- are these even used?
@@ -979,7 +959,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz5 = 0.0;
-            printf("No Good Qin Denton data in range for Bz5. Setting Bz5 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz5, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate Bz6 -- are these even used?
@@ -995,7 +974,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->Bz6 = 0.0;
-            printf("No Good Qin Denton data in range for Bz6. Setting Bz6 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->Bz6, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W1
@@ -1015,7 +993,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             p->W1 = Wdefaults[0];
             retval += 64;
             fillW = 1;
-            printf("No Good Qin Denton data in range for W1. Setting W1 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W1, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W2
@@ -1033,7 +1010,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->W2 = Wdefaults[1];
-            printf("No Good Qin Denton data in range for W2. Setting W2 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W2, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W3
@@ -1051,7 +1027,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->W3 = Wdefaults[2];
-            printf("No Good Qin Denton data in range for W3. Setting W3 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W3, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W4
@@ -1069,7 +1044,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->W4 = Wdefaults[3];
-            printf("No Good Qin Denton data in range for W4. Setting W4 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W4, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W5
@@ -1087,7 +1061,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->W5 = Wdefaults[4];
-            printf("No Good Qin Denton data in range for W5. Setting W5 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W5, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         // interpolate W6
@@ -1105,7 +1078,6 @@ int Lgm_get_QinDenton_at_JD( double JD, Lgm_QinDentonOne *p, int Verbose, int Pe
             gsl_spline_free (spline);
         } else {
             p->W6 = Wdefaults[5];
-            printf("No Good Qin Denton data in range for W6. Setting W6 to %g. Data MJD range: [%lf, %lf], requested MJD: %lf\n", p->W6, q->MJD[0], q->MJD[q->nPnts-1], MJD);
         }
 
         free(x);
