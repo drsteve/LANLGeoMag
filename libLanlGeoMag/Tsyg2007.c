@@ -205,7 +205,7 @@ void Lgm_SetCoeffs_TS07( long int Date, double UTC, LgmTsyg2007_Info *t ){
             }
         }
         //printf("t->Pdyn = %g\n", t->Pdyn);
-        
+
         fclose(fp);
 
     } else {
