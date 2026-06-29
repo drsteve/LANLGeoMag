@@ -6,7 +6,7 @@ MagTrace: MagTrace.c
 	gcc MagTrace.c `pkg-config --cflags --libs lgm` -fopenmp -o MagTrace
 
 MagTrace2: MagTrace2.c
-	gcc MagTrace2.c `pkg-config --cflags --libs lgm` -fopenmp -o MagTrace2
+	gcc MagTrace2.c `pkg-config --cflags --libs lgm` -fopenmp -lm -o MagTrace2
 
 clean:
 	rm MagTrace MAgTrace2
