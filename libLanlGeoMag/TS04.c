@@ -84,7 +84,7 @@ int Lgm_B_TS04( Lgm_Vector *v, Lgm_Vector *B, Lgm_MagModelInfo *Info ) {
      */
     R2 = X*X + Y*Y + Z*Z;
     if ( R2 < 0.5 ) {
-        printf("Inside Earth? X, Y, Z = %g %g %g\n", X, Y, Z);
+        //printf("Inside Earth? X, Y, Z = %g %g %g\n", X, Y, Z);
         return(-1);
     }
 
