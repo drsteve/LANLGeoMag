@@ -62,7 +62,7 @@ typedef struct Lgm_SummersInfo {
     double  aStarEq;        //!< Summer's \f$ \alpha^* \f$ value which is \f$ \Omega_e/\omega^2_{pe} \f$.
 //    double  dB;           //!< Value of wave amplitude [nT].
     void   *BwFuncData;     //!< Pointer to data that may be needed by BwFunc()
-    double (*BwFunc)();     //!< Function to return Bw as a function of latitude.
+    double (*BwFunc)(double, void *);     //!< Function to return Bw as a function of latitude.
     double  Omega_eEq;      //!< Equatorial gyrofrequency of electrons [Hz].
     double  Omega_SigEq;    //!< Equatorial gyrofrequency of species [Hz].
     double  w1;             //!< Lower frequency cutoff [Hz].
@@ -93,7 +93,7 @@ typedef struct Lgm_SummersInfo {
 int Lgm_SummersDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
 //int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xm, double *dx, double *weightsOnWaveNormalAngleDistributions,int WaveMode, int Species, double MaxWaveLat, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
 int Lgm_GlauertAndHorneDxxBounceAvg( int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)( double, void * ), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, double x1, double x2, int numberOfWaveNormalAngleDistributions, double *xm, double *dx, double *weightsOnWaveNormalAngleDistributions,int WaveMode, int Species, double MaxWaveLat, int nNw, int nPlasmaParameters, double aStarMin, double aStarMax, double *Nw, double *Daa_ba,  double *Dap_ba,  double *Dpp_ba);
-int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
+int Lgm_SummersDxxDerivsBounceAvg( int DerivScheme, double ha, int Version, double Alpha0,  double Ek,  double L,  void *BwFuncData, double (*BwFunc)(double, void *), double n1, double n2, double n3, double aStarEq,  int Directions, double w1, double w2, double wm, double dw, int WaveMode, int Species, double MaxWaveLat, double *dDaa,  double *dDap);
 double Lgm_ePlasmaFreq( double Density );
 double  Lgm_GyroFreq( double q, double B, double m );
 double CdipIntegrand_Sb( double Lat, _qpInfo *qpInfo );

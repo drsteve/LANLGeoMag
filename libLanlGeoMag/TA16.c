@@ -272,7 +272,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
       if ( (fp = fopen( datafile, "r" )) != NULL ) {
         // to start with, just loop over... should we actually
         // be interpolating linearly between values?
-        while ( fgets( &tmpstr, 1300, fp ) != NULL ) {
+        while ( fgets( tmpstr, 1300, fp ) != NULL ) {
             ncols = sscanf( tmpstr, "%d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %lf %lf %lf %lf %lf",
                             &year, &doy, &hour, &minute, &bx_av, &by_av, &bz_av,
                             &vx, &vy, &vz, &nden, &temp, &symh, &IMFflag, &SWflag,

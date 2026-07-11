@@ -11,8 +11,6 @@
  *
  */
 
-
-
 /*****************************************************************
  * Portions of this code Copyright (C) 1989 by Michael Mauldin.
  * Permission is granted to use this file in whole or in
@@ -43,10 +41,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-/*
-#define PARM(a) a
-*/
-#define PARM(a) ()
 #define CONV24_8BIT  0
 #define CONV24_24BIT 1
 #define PIC8  CONV24_8BIT
@@ -59,7 +53,7 @@ typedef long int        count_int;
 typedef unsigned long  u_long;
 */
 
-void xvbzero                PARM((char *, size_t));
+void xvbzero(char *, size_t);
 
 static int  Width, Height;
 static int  curx, cury;
@@ -67,19 +61,17 @@ static long CountDown;
 static int  Interlace;
 /* static byte bw[2] = {0, 0xff}; */
 
-static void putword     PARM((int, FILE *));
-static void compress    PARM((int, FILE *, unsigned char *, int));
-static void output      PARM((int));
-static void cl_block    PARM((void));
-static void cl_hash     PARM((count_int));
-static void char_init   PARM((void));
-static void char_out    PARM((int));
-static void flush_char  PARM((void));
+static void putword(int, FILE *);
+static void compress(int, FILE *, unsigned char *, int);
+static void output(int);
+static void cl_block(void);
+static void cl_hash(count_int);
+static void char_init(void);
+static void char_out(int);
+static void flush_char(void);
 
 
 static unsigned char pc2nc[256],r1[256],g1[256],b1[256];
-
-
 
 /*
  *  Added by MGH Jan 29, 2006
@@ -108,26 +100,14 @@ void SwapIntBytes( int *a ){
     memcpy( a, c, si);
 }
 
-
-
-
-
-
-
 /*************************************************************/
-int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
-	     comment)
-     FILE *fp;
-     unsigned char *pic;
-     int   ptype, w,h;
-     unsigned char *rmap, *gmap, *bmap;
-     int   numcols, colorstyle;
-     char *comment;
-{
+int WriteGIF(FILE *fp, unsigned char *pic, int ptype, int w, int h,
+     unsigned char *rmap, unsigned char *gmap, unsigned char *bmap,
+     int numcols, int colorstyle, char *comment) {
 //  int   DEBUG=1;
   int   RWidth, RHeight;
   int   LeftOfs, TopOfs;
-  int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
+  int   ColorMapSize, Background, BitsPerPixel;
   int   i,j,nc;
   unsigned char *pic8;
 
@@ -141,17 +121,14 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
   }
   else pic8 = pic;
 
-
   /*
    * If we are bigendian, we need to swap order of multi-byte words
    * Added by MGH Jan 29, 2006.
    */
   SwapBytes = BigEndian();
 
-
   Interlace = 0;
   Background = 0;
-
 
   for (i=0; i<256; i++) { pc2nc[i] = r1[i] = g1[i] = b1[i] = 0; }
 
@@ -190,8 +167,7 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
 
   CountDown = w * h;    /* # of pixels we'll be doing */
 
-  if (BitsPerPixel <= 1) InitCodeSize = 2;
-                    else InitCodeSize = BitsPerPixel;
+  int InitCodeSize = (BitsPerPixel <= 1) ? 2 : BitsPerPixel;
 
   curx = cury = 0;
 
@@ -235,7 +211,6 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
 
   fputc(0, fp);                  /* future expansion byte */
 
-
   if (colorstyle == 1) {         /* greyscale */
     for (i=0; i<ColorMapSize; i++) {
       /*j = MONO(r1[i], g1[i], b1[i]);*/
@@ -268,7 +243,6 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
     fputc(0, fp);    /* zero-length data subblock to end extension */
   }
 
-
   fputc( ',', fp );              /* image separator */
 
   /* Write the Image header */
@@ -291,14 +265,8 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
   return (0);
 }
 
-
-
-
 /******************************/
-static void putword(w, fp)
-int w;
-FILE *fp;
-{
+static void putword(int w, FILE* fp) {
   int v = w;
   if (SwapBytes) SwapIntBytes( &v );
   /* writes a 16-bit integer in GIF order (LSB first) */
@@ -306,17 +274,10 @@ FILE *fp;
   fputc((v>>8)&0xff, fp);
 }
 
-
-
-
 /***********************************************************************/
-
 
 static unsigned long cur_accum = 0;
 static int           cur_bits = 0;
-
-
-
 
 #define min(a,b)        ((a>b) ? b : a)
 
@@ -326,7 +287,6 @@ static int           cur_bits = 0;
 #define HSIZE  5003            /* 80% occupancy */
 
 typedef unsigned char   char_type;
-
 
 static int n_bits;                    /* number of bits/code */
 static int maxbits = XV_BITS;         /* user settable max # bits/code */
@@ -390,12 +350,8 @@ static int EOFCode;
 
 
 /********************************************************/
-static void compress(init_bits, outfile, data, len)
-int   init_bits;
-FILE *outfile;
-unsigned char *data;
-int   len;
-{
+static void compress(int init_bits, FILE* outfile, unsigned char* data,
+    int len) {
   register long fcode;
   register int i = 0;
   register int c;
@@ -524,9 +480,7 @@ unsigned long masks[] = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
                                   0x01FF, 0x03FF, 0x07FF, 0x0FFF,
                                   0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
-static void output(code)
-int code;
-{
+static void output(int code) {
   cur_accum &= masks[cur_bits];
 
   if (cur_bits > 0)
@@ -583,8 +537,7 @@ int code;
 
 
 /********************************/
-static void cl_block ()             /* table clear for block compress */
-{
+static void cl_block () {            /* table clear for block compress */ 
   /* Clear out the hash table */
 
   cl_hash ( (count_int) hsize );
@@ -596,9 +549,7 @@ static void cl_block ()             /* table clear for block compress */
 
 
 /********************************/
-static void cl_hash(hsize)          /* reset code table */
-register count_int hsize;
-{
+static void cl_hash(register count_int hsize) {         /* reset code table */
   register count_int *htab_p = htab+hsize;
   register long i;
   register long m1 = -1;
@@ -657,9 +608,7 @@ static char accum[ 256 ];
  * Add a character to the end of the current packet, and if it is 254
  * characters, flush the packet to disk.
  */
-static void char_out(c)
-int c;
-{
+static void char_out(int c) {
   accum[ a_count++ ] = c;
   if( a_count >= 254 )
     flush_char();
@@ -668,17 +617,14 @@ int c;
 /*
  * Flush the packet to disk, and reset the accumulator
  */
-static void flush_char()
-{
+static void flush_char() {
   if( a_count > 0 ) {
     fputc(a_count, g_outfile );
     fwrite(accum, (size_t) 1, (size_t) a_count, g_outfile );
     a_count = 0;
   }
 }
-void xvbzero(s, len)
-     char   *s;
-     size_t  len;
-{
+
+void xvbzero(char* s, size_t len) {
   for ( ; len>0; len--) *s++ = 0;
 }

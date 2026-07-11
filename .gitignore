@@ -29,12 +29,14 @@ libLanlGeoMag/.deps/
 *.o
 *.lo
 *.png
+*.gcno
 /Makefile
 Tools/Makefile
 tests/Makefile
 libLanlGeoMag/Makefile
 libLanlGeoMag/Lgm/Makefile
 libLanlGeoMag/EopData/Makefile
+libLanlGeoMag/*.gcno
 /build-aux/
 /autom4te.cache/
 configure
@@ -63,3 +65,4 @@ Python/Makefile
 /tests/check_*.log
 /tests/check_*.trs
 /tests/test-suite.log
+_build*
