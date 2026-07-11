@@ -93,12 +93,14 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
   out[3] = qf1 = fx = (*funct)(x, data);
   abstol = t2 = small + fabs(abstol);
   dmin = small;
-  if (h < abstol * 100.0)
+  if (h < abstol * 100.0) {
     h = abstol * 100;
+  }
   ldt = h;
   inimat(1, n, 1, n, v, 0.0);
-  for (i = 1; i <= n; i++)
+  for (i = 1; i <= n; i++) {
     v[i][i] = 1.0;
+  }
   d[1] = qd0 = qd1 = 0.0;
   dupvec(1, n, 0, q1, x);
   inivec(1, n, q0, 0.0);
@@ -110,10 +112,12 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
     praxismin(1, 2, &(d[1]), &s, &fx, 0, n, x, v, &qa, &qb, &qc, qd0, qd1, q0,
               q1, &nf, &nl, &fx, m2, m4, dmin, ldt, reltol, abstol, small, h,
               funct, data);
-    if (s <= 0.0)
+    if (s <= 0.0) {
       mulcol(1, n, 1, 1, v, v, -1.0);
-    if (sf <= 0.9 * d[1] || 0.9 * sf >= d[1])
+    }
+    if (sf <= 0.9 * d[1] || 0.9 * sf >= d[1]) {
       inivec(2, n, d, 0.0);
+    }
     for (k = 2; k <= n; k++) {
       dupvec(1, n, 0, y, x);
       sf = fx;
@@ -147,10 +151,11 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
             kl = k2;
           }
         }
-        if (!illc && df < fabs(100.0 * macheps * fx))
+        if (!illc && df < fabs(100.0 * macheps * fx)) {
           illc = 1;
-        else
+        } else {
           break;
+        }
       }
       for (k2 = 1; k2 <= k - 1; k2++) {
         s = 0.0;
@@ -170,8 +175,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
       lds = sqrt(lds);
       if (lds > small) {
         for (i = kl - 1; i >= k; i--) {
-          for (j = 1; j <= n; j++)
+          for (j = 1; j <= n; j++) {
             v[j][i + 1] = v[j][i];
+          }
           d[i + 1] = d[i];
         }
         d[k] = 0.0;
@@ -186,8 +192,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
         }
       }
       ldt *= ldfac;
-      if (ldt < lds)
+      if (ldt < lds) {
         ldt = lds;
+      }
       t2 = m2 * sqrt(vecvec(1, n, 0, x, x)) + abstol;
       kt = (ldt > 0.5 * t2) ? 0 : kt + 1;
       if (kt > ktm) {
@@ -195,8 +202,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
         emergency = 1;
       }
     }
-    if (emergency)
+    if (emergency) {
       break;
+    }
     /* quad */
     s = fx;
     fx = qf1;
@@ -232,8 +240,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
     dn = 0.0;
     for (i = 1; i <= n; i++) {
       d[i] = 1.0 / sqrt(d[i]);
-      if (dn < d[i])
+      if (dn < d[i]) {
         dn = d[i];
+      }
     }
     for (j = 1; j <= n; j++) {
       s = d[j] / dn;
@@ -243,10 +252,12 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
       s = vlarge;
       for (i = 1; i <= n; i++) {
         sl = z[i] = sqrt(mattam(1, n, i, i, v, v));
-        if (sl < m4)
+        if (sl < m4) {
           z[i] = m4;
-        if (s > sl)
+        }
+        if (s > sl) {
           s = sl;
+        }
       }
       for (i = 1; i <= n; i++) {
         sl = s / z[i];
@@ -258,8 +269,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
         mulrow(1, n, i, i, v, v, sl);
       }
     }
-    for (i = 1; i <= n; i++)
+    for (i = 1; i <= n; i++) {
       ichrowcol(i + 1, n, i, i, v);
+    }
     em[0] = em[2] = macheps;
     em[4] = 10 * n;
     em[6] = vsmall;
@@ -268,11 +280,13 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
       out[1] = 2.0;
       emergency = 1;
     }
-    if (emergency)
+    if (emergency) {
       break;
+    }
     if (scbd > 1.0) {
-      for (i = 1; i <= n; i++)
+      for (i = 1; i <= n; i++) {
         mulrow(1, n, i, i, v, v, z[i]);
+      }
       for (i = 1; i <= n; i++) {
         s = sqrt(tammat(1, n, i, i, v, v));
         d[i] *= s;
@@ -288,11 +302,12 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
     for (i = 1; i <= n - 1; i++) {
       k = i;
       s = d[i];
-      for (j = i + 1; j <= n; j++)
+      for (j = i + 1; j <= n; j++) {
         if (d[j] > s) {
           k = j;
           s = d[j];
         }
+      }
       if (k > i) {
         d[k] = d[i];
         d[i] = s;
@@ -305,8 +320,9 @@ void praxis(int n, double *x, int *data, double (*funct)(double *, void *data),
     }
     /* end of sort */
     dmin = d[n];
-    if (dmin < small)
+    if (dmin < small) {
       dmin = small;
+    }
     illc = (m2 * d[1]) > dmin;
     if (nf >= maxf) {
       out[1] = 1.0;
@@ -348,12 +364,15 @@ void praxismin(int j, int nits, double *d2, double *x1, double *f1, int fk,
   s = sqrt(vecvec(1, n, 0, x, x));
   t2 = m4 * sqrt(fabs(*fx) / (dz ? dmin : *d2) + s * ldt) + m2 * ldt;
   s = s * m4 + abstol;
-  if (dz && (t2 > s))
+  if (dz && (t2 > s)) {
     t2 = s;
-  if (t2 < small)
+  }
+  if (t2 < small) {
     t2 = small;
-  if (t2 > 0.01 * h)
+  }
+  if (t2 > 0.01 * h) {
     t2 = 0.01 * h;
+  }
   if (fk && (*f1 <= fm)) {
     xm = *x1;
     fm = *f1;
@@ -370,12 +389,12 @@ void praxismin(int j, int nits, double *d2, double *x1, double *f1, int fk,
   loop = 1;
   while (loop) {
     if (dz) {
-      /* evaluate praxisflin at another point and
+      /* evaluat e praxisflin at another point and
         estimate the second derivative */
       x2 = (f0 < *f1) ? -(*x1) : (*x1) * 2.0;
       f2 = praxisflin(x2, j, n, x, v, qa, qb, qc, qd0, qd1, q0, q1, nf, funct,
                       data);
-      if (f2 <= fm) {
+      if (f2 <= fm) { 
         xm = x2;
         fm = f2;
       }
@@ -386,15 +405,17 @@ void praxismin(int j, int nits, double *d2, double *x1, double *f1, int fk,
     d1 = ((*f1) - f0) / (*x1) - (*x1) * (*d2);
     dz = 1;
     x2 = (*d2 <= small) ? ((d1 < 0.0) ? h : -h) : -0.5 * d1 / (*d2);
-    if (fabs(x2) > h)
+    if (fabs(x2) > h) {
       x2 = (x2 > 0.0) ? h : -h;
-    while (1) {
+    }
+    while (1) { 
       f2 = praxisflin(x2, j, n, x, v, qa, qb, qc, qd0, qd1, q0, q1, nf, funct,
                       data);
-      if (k < nits && f2 > f0) {
+       if (k < nits && f2 > f0) {
         k++;
-        if (f0 < *f1 && (*x1) * x2 > 0.0)
+        if (f0 < *f1 && (*x1) * x2 > 0.0) {
           break;
+        }
         x2 = 0.5 * x2;
       } else {
         loop = 0;
@@ -403,16 +424,18 @@ void praxismin(int j, int nits, double *d2, double *x1, double *f1, int fk,
     }
   }
   (*nl)++;
-  if (f2 > fm)
+  if (f2 > fm) {
     x2 = xm;
-  else
+  } else {
     fm = f2;
+  }
   *d2 = (fabs(x2 * (x2 - (*x1))) > small)
             ? ((x2 * ((*f1) - f0) - (*x1) * (fm - f0)) /
                ((*x1) * x2 * ((*x1) - x2)))
             : ((k > 0) ? 0.0 : *d2);
-  if (*d2 <= small)
+  if (*d2 <= small) {
     *d2 = small;
+  }
   *x1 = x2;
   *fx = fm;
   if (sf1 < *fx) {
@@ -451,14 +474,17 @@ double praxisflin(double l, int j, int n, double *x, double **v, double *qa,
 }
 
 void dupcolvec(int l, int u, int j, double **a, double *b) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[l][j] = b[l];
+  }
 }
 
 void dupmat(int l, int u, int i, int j, double **a, double **b) {
-  for (; l <= u; l++)
-    for (int k = i; k <= j; k++)
+  for (; l <= u; l++) {
+    for (int k = i; k <= j; k++) {
       a[l][k] = b[l][k];
+    }
+  }
 }
 
 void dupvec(int l, int u, int shift, double *a, double *b) {
@@ -468,8 +494,9 @@ void dupvec(int l, int u, int shift, double *a, double *b) {
 }
 
 void elmveccol(int l, int u, int i, double *a, double **b, double x) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[l] += b[l][i] * x;
+  }
 }
 
 void ichrowcol(int l, int u, int i, int j, double **a) {
@@ -484,14 +511,17 @@ void ichrowcol(int l, int u, int i, int j, double **a) {
 void inimat(int lr, int ur, int lc, int uc, double **a, double x) {
   int j;
 
-  for (; lr <= ur; lr++)
-    for (j = lc; j <= uc; j++)
+  for (; lr <= ur; lr++) {
+    for (j = lc; j <= uc; j++) {
       a[lr][j] = x;
+    }
+  }
 }
 
 void inivec(int l, int u, double *a, double x) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[l] = x;
+  }
 }
 
 double mattam(int l, int u, int i, int j, double **a, double **b) {
@@ -503,13 +533,15 @@ double mattam(int l, int u, int i, int j, double **a, double **b) {
 }
 
 void mulcol(int l, int u, int i, int j, double **a, double **b, double x) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[l][i] = b[l][j] * x;
+  }
 }
 
 void mulrow(int l, int u, int i, int j, double **a, double **b, double x) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[i][l] = b[j][l] * x;
+  }
 }
 
 double tammat(int l, int u, int i, int j, double **a, double **b) {
@@ -565,8 +597,9 @@ int qrisngvaldecbid(double *d, double *b, int m, int n, double **u, double **v,
             f = s * b[i];
             b[i] *= c;
             i1 = i + 1;
-            if (fabs(f) < tol)
+            if (fabs(f) < tol) {
               break;
+            }
             g = d[i1];
             d[i1] = h = sqrt(f * f + g * g);
             c = g / h;
@@ -576,24 +609,28 @@ int qrisngvaldecbid(double *d, double *b, int m, int n, double **u, double **v,
           break;
         }
       } else {
-        if (fabs(b[k]) > bmax)
+        if (fabs(b[k]) > bmax) {
           bmax = fabs(b[k]);
+        }
         break;
       }
     }
     if (k == n1) {
       if (d[n] < 0.0) {
         d[n] = -d[n];
-        for (i = 1; i <= n0; i++)
+        for (i = 1; i <= n0; i++) {
           v[i][n] = -v[i][n];
+        }
       }
-      if (d[n] <= min)
+      if (d[n] <= min) {
         rnk--;
+      }
       n = n1;
     } else {
       count++;
-      if (count > max)
+      if (count > max) {
         break;
+      }
       k1 = k + 1;
       z = d[n];
       x = d[k1];
@@ -613,8 +650,9 @@ int qrisngvaldecbid(double *d, double *b, int m, int n, double **u, double **v,
         z = sqrt(f * f + h * h);
         c = f / z;
         s = h / z;
-        if (i1 != k1)
+        if (i1 != k1) {
           b[i1 - 1] = z;
+        }
         f = x * c + g * s;
         g = g * c - x * s;
         h = y * s;
@@ -642,8 +680,9 @@ void free_real_vector(double *v, int l) {
 }
 
 void free_real_matrix(double **m, int lr, int ur, int lc) {
-  for (int i = ur; i >= lr; i--)
+  for (int i = ur; i >= lr; i--) {
     free((char *)(m[i] + lc));
+  }
   free((char *)(m + lr));
 }
 
@@ -696,13 +735,16 @@ void psttfmmat(double **a, int n, double **v, double *b) {
   for (i = n - 1; i >= 1; i--) {
     h = b[i] * a[i][i1];
     if (h < 0.0) {
-      for (j = i1; j <= n; j++)
+      for (j = i1; j <= n; j++) {
         v[j][i] = a[i][j] / h;
-      for (j = i1; j <= n; j++)
+      }
+      for (j = i1; j <= n; j++) {
         elmcol(i1, n, j, i, v, v, matmat(i1, n, i, j, a, v));
+      }
     }
-    for (j = i1; j <= n; j++)
+    for (j = i1; j <= n; j++) {
       v[i][j] = v[j][i] = 0.0;
+    }
     v[i][i] = 1.0;
     i1 = i;
   }
@@ -737,10 +779,12 @@ void hshreabid(double **a, int m, int n, double *d, double *b, double *em) {
   double norm = 0;
   for (int i = 1; i <= m; i++) {
     double w = 0.0;
-    for (int j = 1; j <= n; j++)
+    for (int j = 1; j <= n; j++) {
       w += fabs(a[i][j]);
-    if (w > norm)
+    }
+    if (w > norm) {
       norm = w;
+    }
   }
   double machtol = em[0] * norm;
   em[1] = norm;
@@ -786,8 +830,9 @@ void elmcol(int l, int u, int i, int j, double **a, double **b, double x) {
 }
 
 void elmrow(int l, int u, int i, int j, double **a, double **b, double x) {
-  for (; l <= u; l++)
+  for (; l <= u; l++) {
     a[i][l] += b[j][l] * x;
+  }
 }
 
 double matmat(int l, int u, int i, int j, double **a, double **b) {
