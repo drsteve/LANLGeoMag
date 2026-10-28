@@ -1677,7 +1677,7 @@ int tiii = 0;
                                 med->H5_Lstar[ med->H5_nT ][i]          = MagEphemInfo->Lstar[i];
                                 med->H5_DriftShellType[ med->H5_nT ][i] = MagEphemInfo->DriftOrbitType[i];
                                 med->H5_Sb[ med->H5_nT ][i]             = MagEphemInfo->Sb[i];
-                                med->H5_I[ med->H5_nT ][i]              = MagEphemInfo->I[i];
+                                med->H5_I[ med->H5_nT ][i]              = MagEphemInfo->Idata[i];
                                 med->H5_Bm[ med->H5_nT ][i]             = MagEphemInfo->Bm[i];
 
                                 Ek    = 1.0; // MeV
@@ -1696,13 +1696,13 @@ int tiii = 0;
                                 med->H5_Kappa[ med->H5_nT ][i]          = sqrt( MagEphemInfo->RofC*Re*1e3/rg );
 
 
-                                if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->I[i]>=0.0) ) {
-                                    med->H5_K[ med->H5_nT ][i] = 3.16227766e-3*MagEphemInfo->I[i]*sqrt(MagEphemInfo->Bm[i]);
+                                if ( (MagEphemInfo->Bm[i]>0.0)&&(MagEphemInfo->Idata[i]>=0.0) ) {
+                                    med->H5_K[ med->H5_nT ][i] = 3.16227766e-3*MagEphemInfo->Idata[i]*sqrt(MagEphemInfo->Bm[i]);
                                 } else {
                                     med->H5_K[ med->H5_nT ][i] = LGM_FILL_VALUE;
                                 }
-                                if (MagEphemInfo->I[i]>=0.0) {
-                                    med->H5_L[ med->H5_nT ][i] = LFromIBmM_McIlwain(MagEphemInfo->I[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
+                                if (MagEphemInfo->Idata[i]>=0.0) {
+                                    med->H5_L[ med->H5_nT ][i] = LFromIBmM_McIlwain(MagEphemInfo->Idata[i], MagEphemInfo->Bm[i], MagEphemInfo->Mused );
                                 } else {
                                     med->H5_L[ med->H5_nT ][i] = LGM_FILL_VALUE;
                                 }

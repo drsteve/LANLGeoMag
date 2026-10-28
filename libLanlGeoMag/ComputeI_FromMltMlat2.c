@@ -10,7 +10,7 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
 
     int         reset=1, reset2, TraceFlag;
 
-    double      Bmin, I, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
+    double      Bmin, Idata, Phi, cl, sl, rat, SS1, SS2, SS, Sn, Ss, Htry, Hdid, Hnext, Bs, Be, s, sgn;
     Lgm_Vector  w, u, Pmirror1, Pmirror2, v1, v2, v3, Bvec, P, Ps, u_scale, Bvectmp, Ptmp;
     double      stmp, Btmp;
 
@@ -38,13 +38,13 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
 
     if ( TraceFlag != LGM_CLOSED ) {
 
-        I = 9e99;
+        Idata = 9e99;
         if (LstarInfo->VerbosityLevel > 1) {
-            printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Field Line not closed%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+            printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Field Line not closed%s\n",  LstarInfo->PreStr, mlat, Idata, I0, LstarInfo->PostStr );
         }
 
         *ErrorStatus = -1; // FL open. I undefined.
-        return( I );
+        return( Idata );
 
     } else if ( Bmin <= Bm ) {
 
@@ -67,12 +67,12 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
                 //printf("Pmirror2 = %g %g %g\n", Pmirror2.x, Pmirror2.y, Pmirror2.z);
 
             } else {
-                I = 9e99;
+                Idata = 9e99;
                 if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find southern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find southern mirror point%s\n",  LstarInfo->PreStr, mlat, Idata, I0, LstarInfo->PostStr );
                 }
                 *ErrorStatus = -3; // No valid mirror point in the south
-                return( I );
+                return( Idata );
             }
 
             // total distance between mirror point.
@@ -80,27 +80,27 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
             
             // If its really small, just return 0.0 for I
             if ( fabs(SS) < 1e-7) {
-                I = 0.0;
+                Idata = 0.0;
                 if (LstarInfo->VerbosityLevel > 1) {
-                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Distance between mirror points is < 1e-7Re, Assuming I=0%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                    printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Distance between mirror points is < 1e-7Re, Assuming I=0%s\n",  LstarInfo->PreStr, mlat, Idata, I0, LstarInfo->PostStr );
                 }
                 *ErrorStatus = 2; // Flag that we did this
-                return( I );
+                return( Idata );
             }
 
         } else {
-            I = 9e99;
+            Idata = 9e99;
             if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find northern mirror point%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   > Unable to find northern mirror point%s\n",  LstarInfo->PreStr, mlat, Idata, I0, LstarInfo->PostStr );
             }
             *ErrorStatus = -2; // No valid mirror point in the north
-            return( I );
+            return( Idata );
         }
 
         /*
          * OK, we have both mirror points. Lets compute I
          */
-        I = 9e99;
+        Idata = 9e99;
         LstarInfo->mInfo->Hmax = 0.1;
         LstarInfo->mInfo->Hmax = SS/(double)LstarInfo->mInfo->nDivs;
 
@@ -137,16 +137,16 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
             /*
              *  Do I integral with interped integrand.
              */
-             I = Iinv_interped( LstarInfo->mInfo );
+             Idata = Iinv_interped( LstarInfo->mInfo );
              if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, I, I0, I-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
+                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   I-I0: %13.6g    [Sa,Sb]: %.8g  %.8g  (nCalls = %d)%s\n",  LstarInfo->PreStr, mlat, Idata, I0, Idata-I0, LstarInfo->mInfo->Sm_South, LstarInfo->mInfo->Sm_North, LstarInfo->mInfo->Lgm_n_I_integrand_Calls, LstarInfo->PostStr );
              }
              FreeSpline( LstarInfo->mInfo );
 
         } else {
-            I = 9e99;
+            Idata = 9e99;
             if (LstarInfo->VerbosityLevel > 1) {
-                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   Couldnt initialize spline%s\n",  LstarInfo->PreStr, mlat, I, I0, LstarInfo->PostStr );
+                printf("\t\t%s  mlat: %13.6g   I: %13.6g   I0: %13.6g   Couldnt initialize spline%s\n",  LstarInfo->PreStr, mlat, Idata, I0, LstarInfo->PostStr );
             }
         }
 
@@ -167,7 +167,7 @@ double ComputeI_FromMltMlat2( double Bm, double MLT, double mlat, double *r, dou
     }
 
 
-    return( I );
+    return( Idata );
     
 
 }
