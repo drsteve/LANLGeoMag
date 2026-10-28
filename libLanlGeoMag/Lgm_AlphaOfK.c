@@ -277,7 +277,7 @@ printf("%s: no alpha value found for K=%g!\n", __func__, K);
  */
 double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
 
-    double  rat, sa, sa2, Sma, Smb, I, K;
+    double  rat, sa, sa2, Sma, Smb, Idata, K;
 
     m->PitchAngle = Alpha;
     sa = sin( Alpha*RadPerDeg ); sa2 = sa*sa;
@@ -335,13 +335,13 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
             } else if ( Smb <= 1e-5 ) {
 
                 /*
-                 * if FL length is small, use an approx expression for I
+                 * if FL length is small, use an approx expression for N
                  */
                 rat = m->Bmin/m->Bm;
                 if ((1.0-rat) < 0.0) {
-                    I = 0.0;
+                    Idata = 0.0;
                 } else {
-                    I = Smb*sqrt(1.0 - m->Bmin/m->Bm); // Eqn 2.66b in Roederer
+                    Idata = Smb*sqrt(1.0 - m->Bmin/m->Bm); // Eqn 2.66b in Roederer
                 }
 
             } else if (  m->UseInterpRoutines ) {
@@ -349,9 +349,9 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
                 /*
                  *  Do interped I integral. K in units of G^1/2 Re.
                  */
-                I = Iinv_interped( m );
-                K = 3.16227766e-3*I*sqrt(m->Bm);
-                if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Interped Integral) = %g   K = %g\n",  I, K );
+                Idata = Iinv_interped( m );
+                K = 3.16227766e-3*Idata*sqrt(m->Bm);
+                if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Interped Integral) = %g   K = %g\n",  Idata, K );
 
             } else {
 
@@ -361,9 +361,9 @@ double Lgm_KofAlpha( double Alpha, Lgm_MagModelInfo *m ) {
                  */
                 m->Sm_South = 0.0;
                 m->Sm_North = Smb;
-                I = Iinv( m );
-                K = 3.16227766e-3*I*sqrt(m->Bm);
-                if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Full Integral) = %g   K = %g\n",  I, K );
+                Idata = Iinv( m );
+                K = 3.16227766e-3*Idata*sqrt(m->Bm);
+                if (m->VerbosityLevel >= 2) printf("Lgm_AlphaOfK(): Iinv (Full Integral) = %g   K = %g\n",  Idata, K );
 
             }
 

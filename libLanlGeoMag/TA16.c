@@ -156,24 +156,23 @@ int Lgm_GetData_TA16(LgmTA16_Info *ta) {
 void Lgm_Precalc_TA16(LgmTA16_Info *ta, double tan_psi) {
     double DELTA_ZR, DTHETA, cDTM1, sDT, XX, YY, ZZ;
     double sdt_zcp, sdt_zsp, sdt_rho;
-    int I;
-    for (I=1; I<=1296; I++) {
-        DELTA_ZR = ta->RHBR[I]*tan_psi;
-        DTHETA = -asin(DELTA_ZR)*ta->ST[I];
+    for (int i=1; i<=1296; i++) {
+        DELTA_ZR = ta->RHBR[i]*tan_psi;
+        DTHETA = -asin(DELTA_ZR)*ta->ST[i];
         sDT = sin(DTHETA);
         cDTM1 = cos(DTHETA)-1.0;
-        sdt_zcp = sDT*ta->ZCP[I];
-        sdt_zsp = sDT*ta->ZSP[I];
-        sdt_rho = sDT*ta->RHO[I];
-        XX = ta->XX[I];
-        YY = ta->YY[I];
-        ZZ = ta->ZZ[I];
-        ta->DPx[I] = XX*cDTM1 + sdt_zcp;
-        ta->DPy[I] = YY*cDTM1 + sdt_zsp;
-        ta->DPz[I] = ZZ*cDTM1 - sdt_rho;
-        ta->DMx[I] = XX*cDTM1 - sdt_zcp;
-        ta->DMy[I] = YY*cDTM1 - sdt_zsp;
-        ta->DMz[I] = -ZZ*cDTM1 - sdt_rho;
+        sdt_zcp = sDT*ta->ZCP[i];
+        sdt_zsp = sDT*ta->ZSP[i];
+        sdt_rho = sDT*ta->RHO[i];
+        XX = ta->XX[i];
+        YY = ta->YY[i];
+        ZZ = ta->ZZ[i];
+        ta->DPx[i] = XX*cDTM1 + sdt_zcp;
+        ta->DPy[i] = YY*cDTM1 + sdt_zsp;
+        ta->DPz[i] = ZZ*cDTM1 - sdt_rho;
+        ta->DMx[i] = XX*cDTM1 - sdt_zcp;
+        ta->DMy[i] = YY*cDTM1 - sdt_zsp;
+        ta->DMz[i] = -ZZ*cDTM1 - sdt_rho;
     }
 }
 
@@ -302,7 +301,7 @@ int Lgm_SetCoeffs_TA16(long int Date, double UTC, LgmTA16_Info *ta) {
 
 int TA2016_SetGrid(LgmTA16_Info *Info) {
     // initialize the TA2016 coefficient set, grid, etc.
-    int Klat, Nlat, Nlon, I, J, K, L=0;
+    int Klat, Nlat, Nlon, J, K, L=0;
     double D=4.0;
     double Alpha, XXXX, YYYY, ZZZZ, RHighGrid, RLowGrid, X4sq, Y4sq, Z4sq;
     double Xlon, XlonD, Xcolat, XcolatD, sinXco, sinXlo, cosXlo;
@@ -332,10 +331,10 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
   
     for (J=1; J<=100; J++) {   // J COUNTS THE NUMBER OF SPHERES WITH RBF CENTERS
                  // (WHICH IS ACTUALLY MUCH LESS THAN 100)
-      for (I=1; I<=Nlat; I++) {     // I COUNTS THE LATITUDE CIRCLES (FROM NORTH POLE DOWN TO EQUATOR)
-        XcolatD = (90.0/(Nlat-0.5))*((double)(I)-1.0);  //  COLATITUDE OF THE Ith CIRCLE (in degs)
-        Nlon=4*(I-1);                       //  NUMBER OF RBF CENTERS ON THE ItH CIRCLE
-        if (I != 1) {
+      for (int iLat=1; iLat<=Nlat; iLat++) {     // I COUNTS THE LATITUDE CIRCLES (FROM NORTH POLE DOWN TO EQUATOR)
+        XcolatD = (90.0/(Nlat-0.5))*((double)(iLat)-1.0);  //  COLATITUDE OF THE Ith CIRCLE (in degs)
+        Nlon=4*(iLat-1);                       //  NUMBER OF RBF CENTERS ON THE ItH CIRCLE
+        if (iLat != 1) {
           dLonDeg = 360.0/Nlon;            //  LONGITUDE INTERVAL BETWEEN CENTERS (degs)
         } else {
           Nlon = 1;                         //  NUMBER OF RBF CENTERS ON THE NORTH POLE
@@ -403,7 +402,7 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
             Info->RHBR[L] = RH/R*(1.0 - pow(1.0 + pow(R/RH, Alpha), 1.0/Alpha));
           }
         }  // End loop over K
-      }  // End loop over I
+      }  // End loop over iLat
   
       RLAST = R;
       R = R*(Nlat-0.5+M_PI/4.0)/(Nlat-0.5-M_PI/4.0);  // Increment R by a fixed factor
@@ -415,7 +414,6 @@ int TA2016_SetGrid(LgmTA16_Info *Info) {
 
 
 int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *BvecGSM, LgmTA16_Info *Info) {
-    int I;
     Lgm_Vector posSM, BvecSM;
     Lgm_Vector Parr, PCP, PCM, DCM, DCP, DCMsq, DCPsq;
     Lgm_Vector TCM, TCP;
@@ -451,17 +449,17 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       Lgm_Precalc_TA16(Info, tPS);
       Info->cache_psi = ctrans->psi;
     }
-    for (I=1; I<=1296; I++) {
-      Parr.x = Info->XX[I];
-      Parr.y = Info->YY[I];
-      Parr.z = Info->ZZ[I];
+    for (int i=1; i<=1296; i++) {
+      Parr.x = Info->XX[i];
+      Parr.y = Info->YY[i];
+      Parr.z = Info->ZZ[i];
 
-      dcpdenx = posSM.x-Parr.x-Info->DPx[I];
-      dcpdeny = posSM.y-Parr.y-Info->DPy[I];
-      dcpdenz = posSM.z-Parr.z-Info->DPz[I];
-      dcmdenx = posSM.x-Parr.x-Info->DMx[I];
-      dcmdeny = posSM.y-Parr.y-Info->DMy[I];
-      dcmdenz = posSM.z+Parr.z-Info->DMz[I];
+      dcpdenx = posSM.x-Parr.x-Info->DPx[i];
+      dcpdeny = posSM.y-Parr.y-Info->DPy[i];
+      dcpdenz = posSM.z-Parr.z-Info->DPz[i];
+      dcmdenx = posSM.x-Parr.x-Info->DMx[i];
+      dcmdeny = posSM.y-Parr.y-Info->DMy[i];
+      dcmdenz = posSM.z+Parr.z-Info->DMz[i];
       CP = sqrt(dcpdenx*dcpdenx +
                 dcpdeny*dcpdeny +
                 dcpdenz*dcpdenz + D2);    // RBF Ch_i+
@@ -522,12 +520,12 @@ int TA2016(Lgm_Vector *posGSM, double *PARMOD, Lgm_CTrans *ctrans, Lgm_Vector *B
       SParr.z = (PCP.z + PCM.z)*sPS;
     
     // -----------------   TOTAL FIELD:    -----------------------------------
-      ACT = Info->A[I]+Info->A[I+5184]*FPD+Info->A[I+10368]*SymV+Info->A[I+15552]*Xind;
-      AST = Info->A[I+1296]+Info->A[I+6480]*FPD+Info->A[I+11664]*SymV+Info->A[I+16848]*Xind;
-      AT  = Info->A[I+20736]*ByIMF;
-      ACP = Info->A[I+2592]+Info->A[I+7776]*FPD+Info->A[I+12960]*SymV+Info->A[I+18144]*Xind;
-      ASP = Info->A[I+3888]+Info->A[I+9072]*FPD+Info->A[I+14256]*SymV+Info->A[I+19440]*Xind;
-      AP  = Info->A[I+22032]*ByIMF;
+      ACT = Info->A[i]+Info->A[i+5184]*FPD+Info->A[i+10368]*SymV+Info->A[i+15552]*Xind;
+      AST = Info->A[i+1296]+Info->A[i+6480]*FPD+Info->A[i+11664]*SymV+Info->A[i+16848]*Xind;
+      AT  = Info->A[i+20736]*ByIMF;
+      ACP = Info->A[i+2592]+Info->A[i+7776]*FPD+Info->A[i+12960]*SymV+Info->A[i+18144]*Xind;
+      ASP = Info->A[i+3888]+Info->A[i+9072]*FPD+Info->A[i+14256]*SymV+Info->A[i+19440]*Xind;
+      AP  = Info->A[i+22032]*ByIMF;
       BvecSM.x += CTarr.x*ACT + STarr.x*AST + (TCP.x-TCM.x)*AT + CParr.x*ACP + SParr.x*ASP + (PCP.x+PCM.x)*AP;
       BvecSM.y += CTarr.y*ACT + STarr.y*AST + (TCP.y-TCM.y)*AT + CParr.y*ACP + SParr.y*ASP + (PCP.y+PCM.y)*AP;
       BvecSM.z += CTarr.z*ACT + STarr.z*AST + (TCP.z-TCM.z)*AT + CParr.z*ACP + SParr.z*ASP + (PCP.z+PCM.z)*AP;
