@@ -1161,7 +1161,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
     // McIlwain L (computed from I, Bm, M)
     fprintf(fp, "    ");
     for (i=0; i<m->nAlpha; i++) { 
-        L = ( m->I[i] > 0.0 ) ? LFromIBmM_McIlwain(m->I[i], m->Bm[i], m->Mused ) : 0.0;
+        L = ( m->Idata[i] > 0.0 ) ? LFromIBmM_McIlwain(m->Idata[i], m->Bm[i], m->Mused ) : 0.0;
         fprintf(fp, " %12g", L);
     }
 
@@ -1171,7 +1171,7 @@ void Lgm_WriteMagEphemData( FILE *fp, char *IntModel, char *ExtModel, double Kp,
 
     // I's
     fprintf(fp, "    ");
-    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->I[i] ); }
+    for (i=0; i<m->nAlpha; i++) { fprintf(fp, " %12g", m->Idata[i] ); }
 
 
     fprintf(fp, "\n");
